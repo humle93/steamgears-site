@@ -1,0 +1,969 @@
+<!-- wp:group {"align":"full","className":"is-style-ext-preset\u002d\u002dgroup\u002d\u002dnatural-1\u002d\u002dheader-1","style":{"spacing":{"padding":{"bottom":"var:preset|spacing|30","top":"var:preset|spacing|30"}}},"layout":{"inherit":true,"type":"constrained"}} -->
+<div
+	class="wp-block-group alignfull is-style-ext-preset--group--natural-1--header-1"
+	style="
+		padding-top: var(--wp--preset--spacing--30);
+		padding-bottom: var(--wp--preset--spacing--30);
+	"
+>
+	<!-- wp:group {"align":"wide","layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"space-between"}} -->
+	<div class="wp-block-group alignwide">
+		<!-- wp:group {"className":"ext-animate\u002d\u002don","style":{"spacing":{"blockGap":"var:preset|spacing|20"}},"layout":{"type":"flex","flexWrap":"nowrap"}} -->
+		<div class="wp-block-group ext-animate--on">
+<!-- wp:html -->
+<a class="sg-logo" href="https://steamgears.eu/" aria-label="Steamgears home">
+<img src="https://steamgears.juno.page/steamgears-cdn/logo-mark.png" alt="Steamgears gear logo" width="54" height="54">
+<span class="sg-word">STEAM<b>GEARS</b></span>
+</a>
+<link rel="icon" type="image/png" href="https://steamgears.juno.page/steamgears-cdn/logo-mark.png">
+<!-- /wp:html -->
+<!-- /wp:group -->
+		</div>
+		<!-- /wp:group -->
+		<!-- wp:group {"className":"ext-animate\u002d\u002don","layout":{"type":"flex","flexWrap":"nowrap"}} -->
+		<div class="wp-block-group ext-animate--on">
+			<!-- wp:navigation {"icon":"menu","overlayBackgroundColor":"background","overlayTextColor":"foreground","layout":{"type":"flex","setCascadingProperties":true,"justifyContent":"right"},"metadata":{"ignoredHookedBlocks":["woocommerce/customer-account"]}} -->
+			<!-- wp:navigation-link {"label":"Shop","url":"https://steamgears.eu/shop/","kind":"custom","isTopLevelLink":true} /-->
+			<!-- wp:navigation-link {"label":"Gallery","url":"https://steamgears.eu/steampunk-cosplay-gallery/","kind":"custom","isTopLevelLink":true} /-->
+			<!-- wp:navigation-link {"label":"Guides","url":"https://steamgears.eu/journal/","kind":"custom","isTopLevelLink":true} /-->
+			<!-- wp:navigation-link {"label":"About","url":"https://steamgears.eu/about/","kind":"custom","isTopLevelLink":true} /-->
+			<!-- wp:navigation-link {"label":"Contact","url":"https://steamgears.eu/contact/","kind":"custom","isTopLevelLink":true} /-->
+			<!-- /wp:navigation --><!-- wp:woocommerce/customer-account {"displayStyle":"icon_only","iconStyle":"line","iconClass":"wc-block-customer-account__account-icon","style":{"typography":{"fontSize":"var(\u002d\u002dwp\u002d\u002dpreset\u002d\u002dfont-size\u002d\u002dsmall)"}}} /--><!-- wp:woocommerce/mini-cart {"style":{"typography":{"fontSize":"var(\u002d\u002dwp\u002d\u002dpreset\u002d\u002dfont-size\u002d\u002dsmall)"}}} /-->
+		</div>
+		<!-- /wp:group -->
+	</div>
+	<!-- /wp:group -->
+</div>
+<!-- /wp:template-part -->
+<!-- wp:html -->
+<style>
+/* =========================================================
+   STEAMGEARS — DARK CLOCKWORK THEATRE v3 (Henning Amundsen, 2026-10-18)
+   Deployed site-wide by Juno · replaces Steampunk Skin v2
+   ========================================================= */
+
+/* =========================================================
+   1. FARVER OG GRUNDINDSTILLINGER
+   ========================================================= */
+
+:root {
+  --sg-black: #0e0b0c;
+  --sg-black-soft: #151012;
+  --sg-charcoal: #1e1719;
+  --sg-panel: #2f1d21;
+  --sg-panel-light: #40272b;
+
+  --sg-burgundy: #551d25;
+  --sg-burgundy-light: #742b35;
+  --sg-red: #96363d;
+
+  --sg-gold: #c6a04d;
+  --sg-gold-light: #f0d27c;
+  --sg-gold-dark: #806126;
+
+  --sg-ivory: #eee3cd;
+  --sg-muted: #b9aa93;
+  --sg-border: rgba(198, 160, 77, 0.7);
+
+  --sg-shadow: rgba(0, 0, 0, 0.55);
+}
+
+/* =========================================================
+   2. BODY OG GENEREL TYPOGRAFI
+   ========================================================= */
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background:
+    radial-gradient(
+      ellipse at top,
+      rgba(143, 48, 52, 0.18),
+      transparent 48%
+    ),
+    linear-gradient(
+      135deg,
+      #0e0b0c 0%,
+      #171012 50%,
+      #0b0809 100%
+    ) !important;
+  background-attachment: fixed;
+  color: var(--sg-ivory) !important;
+  font-family: Georgia, "Times New Roman", serif !important;
+  line-height: 1.7;
+}
+
+p,
+li {
+  color: var(--sg-ivory);
+  line-height: 1.8;
+}
+
+strong,
+b {
+  color: var(--sg-gold-light);
+}
+
+small {
+  color: var(--sg-muted);
+}
+
+::selection {
+  background: var(--sg-gold);
+  color: var(--sg-black);
+}
+
+/* =========================================================
+   3. LINKS
+   ========================================================= */
+
+a {
+  color: var(--sg-gold-light);
+  text-decoration-color: rgba(240, 210, 124, 0.45);
+  transition:
+    color 0.2s ease,
+    text-decoration-color 0.2s ease;
+}
+
+a:hover,
+a:focus {
+  color: #fff3bc;
+  text-decoration-color: var(--sg-gold-light);
+}
+
+/* =========================================================
+   4. HEADER OG NAVIGATION
+   ========================================================= */
+
+.site-header,
+header,
+.wp-block-template-part,
+.is-style-ext-preset--group--natural-1--header-1 {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(38, 24, 27, 0.98),
+      rgba(14, 11, 12, 0.98)
+    ) !important;
+  border-bottom: 2px solid var(--sg-gold) !important;
+  box-shadow: 0 8px 25px var(--sg-shadow);
+  position: relative;
+  z-index: 10;
+}
+
+.site-header::after,
+header::after,
+.is-style-ext-preset--group--natural-1--header-1::after {
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      var(--sg-gold),
+      transparent
+    );
+  content: "";
+  display: block;
+  height: 1px;
+  opacity: 0.45;
+  width: 100%;
+}
+
+.site-title,
+.wp-block-site-title,
+.logo,
+.custom-logo-link {
+  color: var(--sg-gold-light);
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-shadow: 2px 2px 0 #291316;
+  text-transform: uppercase;
+}
+
+.site-title a,
+.wp-block-site-title a {
+  color: var(--sg-gold-light);
+  text-decoration: none;
+}
+
+.main-navigation a,
+.wp-block-navigation a,
+nav a {
+  color: var(--sg-ivory);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.main-navigation a:hover,
+.wp-block-navigation a:hover,
+nav a:hover {
+  color: var(--sg-gold-light) !important;
+}
+
+/* =========================================================
+   5. OVERSKRIFTER
+   ========================================================= */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--sg-gold-light);
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  line-height: 1.2;
+  text-shadow: 1px 2px 0 rgba(0, 0, 0, 0.5);
+}
+
+h1,
+h2 {
+  border-bottom: 1px solid var(--sg-border);
+  padding-bottom: 0.4em;
+  text-transform: uppercase;
+}
+
+h1 {
+  font-size: clamp(2.2rem, 5vw, 4.6rem);
+}
+
+h2 {
+  font-size: clamp(1.8rem, 3vw, 3rem);
+}
+
+h3 {
+  color: var(--sg-gold);
+  font-size: clamp(1.35rem, 2vw, 2rem);
+}
+
+h1::after,
+h2::after {
+  background: linear-gradient(
+    90deg,
+    var(--sg-gold),
+    transparent
+  );
+  content: "";
+  display: block;
+  height: 3px;
+  margin-top: 0.45em;
+  max-width: 135px;
+}
+
+/* =========================================================
+   6. HERO-SEKTIONER
+   ========================================================= */
+
+.hero,
+.wp-block-cover,
+.wp-block-cover-image,
+.front-page-hero {
+  background-color: var(--sg-black-soft);
+  border-bottom: 1px solid var(--sg-border);
+  position: relative;
+}
+
+.wp-block-cover::after,
+.wp-block-cover-image::after,
+.hero::after,
+.front-page-hero::after {
+  background:
+    linear-gradient(
+      135deg,
+      rgba(14, 11, 12, 0.2),
+      rgba(14, 11, 12, 0.72)
+    );
+  content: "";
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+.wp-block-cover > *,
+.wp-block-cover-image > *,
+.hero > *,
+.front-page-hero > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* =========================================================
+   7. PANELER OG SEKTIONER
+   ========================================================= */
+
+.wp-block-group,
+.wp-block-column,
+.wp-block-media-text,
+.card,
+.panel,
+.content-card {
+  background:
+    linear-gradient(
+      145deg,
+      rgba(48, 30, 32, 0.96),
+      rgba(20, 14, 16, 0.98)
+    );
+  border: 1px solid var(--sg-border);
+  box-shadow:
+    0 0 0 4px rgba(198, 160, 77, 0.06),
+    0 18px 35px var(--sg-shadow);
+}
+
+.wp-block-group {
+  padding: 1.5rem;
+}
+
+.steampunk-panel,
+.wp-block-group.is-style-steampunk-panel {
+  position: relative;
+}
+
+.steampunk-panel::before,
+.wp-block-group.is-style-steampunk-panel::before {
+  border-left: 2px solid var(--sg-gold);
+  border-top: 2px solid var(--sg-gold);
+  content: "";
+  height: 18px;
+  left: 8px;
+  opacity: 0.8;
+  position: absolute;
+  top: 8px;
+  width: 18px;
+}
+
+.steampunk-panel::after,
+.wp-block-group.is-style-steampunk-panel::after {
+  border-bottom: 2px solid var(--sg-gold);
+  border-right: 2px solid var(--sg-gold);
+  bottom: 8px;
+  content: "";
+  height: 18px;
+  opacity: 0.8;
+  position: absolute;
+  right: 8px;
+  width: 18px;
+}
+
+/* =========================================================
+   8. KNAPPER
+   ========================================================= */
+
+button,
+.wp-block-button__link,
+.wp-element-button,
+.woocommerce a.button,
+.woocommerce button.button,
+.woocommerce input.button,
+.woocommerce #respond input#submit,
+input[type="submit"] {
+  background:
+    linear-gradient(
+      180deg,
+      var(--sg-gold),
+      var(--sg-gold-dark)
+    ) !important;
+  border: 1px solid var(--sg-gold-light) !important;
+  border-radius: 0 !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.25),
+    0 4px 0 #422b16,
+    0 8px 18px rgba(0, 0, 0, 0.35) !important;
+  color: #18100b !important;
+  cursor: pointer;
+  display: inline-block;
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 0.85em 1.35em;
+  text-decoration: none !important;
+  text-transform: uppercase;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+button:hover,
+.wp-block-button__link:hover,
+.wp-element-button:hover,
+.woocommerce a.button:hover,
+.woocommerce button.button:hover,
+.woocommerce input.button:hover,
+.woocommerce #respond input#submit:hover,
+input[type="submit"]:hover {
+  background:
+    linear-gradient(
+      180deg,
+      var(--sg-gold-light),
+      #a98031
+    ) !important;
+  color: #110b09 !important;
+  transform: translateY(-2px);
+}
+
+.wp-block-button.is-style-outline .wp-block-button__link,
+.button-outline,
+.btn-outline {
+  background: transparent !important;
+  border: 1px solid var(--sg-gold) !important;
+  box-shadow: none !important;
+  color: var(--sg-gold-light) !important;
+}
+
+.wp-block-button.is-style-outline .wp-block-button__link:hover,
+.button-outline:hover,
+.btn-outline:hover {
+  background: var(--sg-gold) !important;
+  color: var(--sg-black) !important;
+}
+
+/* =========================================================
+   9. WOOCOMMERCE PRODUKTKORT
+   ========================================================= */
+
+.woocommerce ul.products {
+  gap: 2rem;
+}
+
+.woocommerce ul.products li.product {
+  background:
+    linear-gradient(
+      145deg,
+      rgba(48, 30, 32, 0.96),
+      rgba(20, 14, 16, 0.98)
+    );
+  border: 1px solid var(--sg-border);
+  box-shadow:
+    0 0 0 4px rgba(198, 160, 77, 0.05),
+    0 14px 28px rgba(0, 0, 0, 0.45);
+  padding: 1rem;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.woocommerce ul.products li.product:hover {
+  box-shadow:
+    0 0 0 4px rgba(198, 160, 77, 0.12),
+    0 20px 35px rgba(0, 0, 0, 0.6);
+  transform: translateY(-5px);
+}
+
+.woocommerce ul.products li.product img {
+  border: 1px solid var(--sg-gold);
+  filter: sepia(0.12) contrast(1.08);
+  margin-bottom: 1rem;
+  padding: 5px;
+}
+
+.woocommerce ul.products li.product .woocommerce-loop-product__title {
+  color: var(--sg-gold-light);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.2rem;
+  letter-spacing: 0.03em;
+}
+
+.woocommerce ul.products li.product .price,
+.woocommerce div.product p.price,
+.woocommerce div.product span.price {
+  color: var(--sg-ivory);
+  font-weight: 700;
+}
+
+.woocommerce ul.products li.product .price ins,
+.woocommerce div.product p.price ins {
+  color: var(--sg-gold-light);
+  text-decoration-color: var(--sg-gold);
+}
+
+.woocommerce span.onsale {
+  background: var(--sg-burgundy);
+  border: 1px solid var(--sg-gold);
+  border-radius: 0;
+  color: var(--sg-gold-light);
+  font-weight: 800;
+}
+
+/* =========================================================
+   10. WOOCOMMERCE PRODUKTSIDE
+   ========================================================= */
+
+.woocommerce div.product {
+  background:
+    linear-gradient(
+      145deg,
+      rgba(48, 30, 32, 0.96),
+      rgba(20, 14, 16, 0.98)
+    );
+  border: 1px solid var(--sg-border);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.42);
+  padding: 1.5rem;
+}
+
+.woocommerce div.product div.images img {
+  border: 1px solid var(--sg-gold);
+  padding: 6px;
+}
+
+.woocommerce div.product .product_title {
+  color: var(--sg-gold-light);
+  font-size: clamp(2rem, 4vw, 3.2rem);
+}
+
+.woocommerce div.product form.cart {
+  border-top: 1px solid rgba(198, 160, 77, 0.35);
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+}
+
+.woocommerce .quantity .qty {
+  background: var(--sg-black-soft);
+  border: 1px solid var(--sg-gold-dark);
+  color: var(--sg-ivory);
+  min-height: 44px;
+}
+
+/* =========================================================
+   11. INPUTS, SØGNING OG CHECKOUT
+   ========================================================= */
+
+input,
+textarea,
+select,
+.woocommerce form .form-row input.input-text,
+.woocommerce form .form-row textarea {
+  background: #120d0f;
+  border: 1px solid #714347;
+  border-radius: 0;
+  color: var(--sg-ivory);
+  min-height: 42px;
+  padding: 0.75em;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--sg-gold);
+  box-shadow: 0 0 0 2px rgba(198, 160, 77, 0.2);
+  outline: none;
+}
+
+.woocommerce-cart-form,
+.woocommerce-checkout-review-order,
+.woocommerce-checkout form,
+.woocommerce form.login,
+.woocommerce form.register {
+  background:
+    linear-gradient(
+      145deg,
+      rgba(48, 30, 32, 0.96),
+      rgba(20, 14, 16, 0.98)
+    );
+  border: 1px solid var(--sg-border);
+  padding: 1.5rem;
+}
+
+.woocommerce table.shop_table {
+  border-color: var(--sg-border);
+  color: var(--sg-ivory);
+}
+
+.woocommerce table.shop_table th {
+  color: var(--sg-gold-light);
+  text-transform: uppercase;
+}
+
+.woocommerce-info,
+.woocommerce-message,
+.woocommerce-error {
+  background: rgba(85, 29, 37, 0.35);
+  border-top-color: var(--sg-gold);
+  color: var(--sg-ivory);
+}
+
+/* =========================================================
+   12. BREADCRUMBS OG PAGINATION
+   ========================================================= */
+
+.woocommerce .woocommerce-breadcrumb {
+  color: var(--sg-muted);
+}
+
+.woocommerce .woocommerce-breadcrumb a {
+  color: var(--sg-gold-light);
+}
+
+.woocommerce nav.woocommerce-pagination ul {
+  border-color: var(--sg-border);
+}
+
+.woocommerce nav.woocommerce-pagination ul li {
+  border-color: var(--sg-border);
+}
+
+.woocommerce nav.woocommerce-pagination ul li a,
+.woocommerce nav.woocommerce-pagination ul li span {
+  background: var(--sg-black-soft);
+  color: var(--sg-gold-light);
+}
+
+.woocommerce nav.woocommerce-pagination ul li span.current,
+.woocommerce nav.woocommerce-pagination ul li a:hover {
+  background: var(--sg-gold);
+  color: var(--sg-black);
+}
+
+/* =========================================================
+   13. BLOCKQUOTES OG SEPARATORER
+   ========================================================= */
+
+blockquote {
+  background: rgba(85, 29, 37, 0.22);
+  border-left: 4px solid var(--sg-gold);
+  color: var(--sg-ivory);
+  font-style: italic;
+  margin: 1.5rem 0;
+  padding: 1.25rem;
+}
+
+hr,
+.wp-block-separator {
+  border-color: var(--sg-border);
+  opacity: 0.8;
+}
+
+/* =========================================================
+   14. FOOTER
+   ========================================================= */
+
+.site-footer,
+footer,
+.wp-block-template-part footer {
+  background:
+    linear-gradient(
+      180deg,
+      #151012,
+      #0b0809
+    ) !important;
+  border-top: 2px solid var(--sg-gold) !important;
+  color: var(--sg-muted);
+  margin-top: 3rem;
+  padding-top: 2rem;
+}
+
+.site-footer h2,
+.site-footer h3,
+footer h2,
+footer h3 {
+  color: var(--sg-gold);
+  font-size: 1.1rem;
+}
+
+.site-footer a,
+footer a {
+  color: var(--sg-muted);
+}
+
+.site-footer a:hover,
+footer a:hover {
+  color: var(--sg-gold-light);
+}
+
+/* =========================================================
+   15. MOBIL
+   ========================================================= */
+
+@media (max-width: 782px) {
+  body {
+    font-size: 16px;
+  }
+
+  h1 {
+    font-size: 2.25rem;
+  }
+
+  h2 {
+    font-size: 1.8rem;
+  }
+
+  .wp-block-group {
+    padding: 1rem;
+  }
+
+  .woocommerce div.product {
+    padding: 1rem;
+  }
+
+  .woocommerce ul.products {
+    gap: 1rem;
+  }
+
+  .woocommerce ul.products li.product {
+    margin-bottom: 1rem;
+  }
+
+  button,
+  .wp-block-button__link,
+  .wp-element-button,
+  .woocommerce a.button,
+  .woocommerce button.button,
+  .woocommerce input.button {
+    padding: 0.75em 1em;
+    width: 100%;
+  }
+}
+
+/* =========================================================
+   16. REDUCERET MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition: none !important;
+  }
+}
+
+/* =========================================================
+   17. SG-MODULE-KOMPATIBILITET (layout + theatre-farver)
+   ========================================================= */
+
+/* Logo */
+.sg-logo{display:inline-flex;align-items:center;gap:12px;text-decoration:none}
+.sg-logo img{width:54px;height:54px;filter:drop-shadow(0 2px 8px rgba(198,160,77,.4))}
+.sg-logo .sg-word{font-family:Georgia,"Times New Roman",serif;font-size:24px;line-height:1;color:#eee3cd;letter-spacing:.08em}
+.sg-logo .sg-word b{color:#c6a04d;font-weight:700}
+
+/* Hero */
+.sg-hero{position:relative;min-height:76vh;display:flex;align-items:center;justify-content:center;text-align:center;
+  background:linear-gradient(180deg,rgba(14,11,12,.5) 0%,rgba(14,11,12,.74) 55%,#0e0b0c 100%),
+  url('https://steamgears.juno.page/steamgears-cdn/hero.webp') center/cover no-repeat;
+  border-bottom:2px solid var(--sg-gold)}
+.sg-hero-inner{max-width:900px;padding:110px 24px 90px;margin:0 auto}
+.sg-hero .sg-eyebrow{color:var(--sg-gold);letter-spacing:.35em;text-transform:uppercase;font-size:13px;font-weight:700;margin-top:18px}
+.sg-hero .sg-logomark{width:118px;height:118px;border:0 !important;background:none !important;box-shadow:none !important;padding:0 !important;filter:drop-shadow(0 6px 18px rgba(198,160,77,.5))}
+.sg-hero h1{font-size:clamp(38px,6vw,66px);margin:18px 0 12px;color:var(--sg-gold-light) !important;border-bottom:0;padding-bottom:0;text-transform:none}
+.sg-hero h1::after{display:none}
+.sg-hero .sg-sub{font-size:19px;color:var(--sg-ivory);max-width:660px;margin:0 auto 30px}
+.sg-btnrow{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.sg-btn{display:inline-block;background:linear-gradient(180deg,var(--sg-gold),var(--sg-gold-dark)) !important;
+  color:#18100b !important;font-weight:800;text-transform:uppercase;letter-spacing:.08em;
+  border:1px solid var(--sg-gold-light) !important;border-radius:0 !important;cursor:pointer;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 4px 0 #422b16,0 8px 18px rgba(0,0,0,.35);
+  padding:.85em 1.35em;text-decoration:none !important;font-family:Georgia,serif}
+.sg-btn:hover{background:linear-gradient(180deg,var(--sg-gold-light),#a98031) !important;color:#110b09 !important;transform:translateY(-2px)}
+.sg-ghost{display:inline-flex;align-items:center;gap:8px;color:var(--sg-gold-light);font-weight:700;text-transform:uppercase;
+  letter-spacing:.08em;font-size:14px;border:1px solid rgba(240,210,124,.45);padding:14px 24px;border-radius:0;
+  background:rgba(14,11,12,.45);text-decoration:none}
+.sg-ghost:hover{background:var(--sg-gold);color:var(--sg-black)}
+@media (max-width:782px){.sg-btnrow .sg-btn,.sg-btnrow .sg-ghost{width:auto !important}}
+
+/* Tandhjuls-detalje (theatre-guld) */
+.sg-gears{display:flex;justify-content:center;align-items:center;gap:16px;padding:30px 0 6px}
+.sg-gears i{width:30px;height:30px;display:inline-block;opacity:.75;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Cg fill='%23C6A04D'%3E%3Crect x='52' y='14' width='16' height='22' rx='3'/%3E%3Crect x='52' y='14' width='16' height='22' rx='3' transform='rotate(60 60 60)'/%3E%3Crect x='52' y='14' width='16' height='22' rx='3' transform='rotate(120 60 60)'/%3E%3Crect x='52' y='14' width='16' height='22' rx='3' transform='rotate(180 60 60)'/%3E%3Crect x='52' y='14' width='16' height='22' rx='3' transform='rotate(240 60 60)'/%3E%3Crect x='52' y='14' width='16' height='22' rx='3' transform='rotate(300 60 60)'/%3E%3Ccircle cx='60' cy='60' r='32'/%3E%3Ccircle cx='60' cy='60' r='14' fill='%230e0b0c'/%3E%3C/g%3E%3C/svg%3E") center/contain no-repeat}
+.sg-gears i:nth-child(2){width:22px;height:22px;transform:rotate(18deg);opacity:.5}
+.sg-gears i:nth-child(3){width:38px;height:38px;transform:rotate(-10deg)}
+
+/* Sektioner og kort */
+.sg-section{max-width:1140px;margin:0 auto;padding:64px 24px}
+.sg-kicker{color:var(--sg-gold);letter-spacing:.3em;text-transform:uppercase;font-size:12px;font-weight:700;margin:0 0 8px}
+.sg-section h2{margin:0 0 10px;font-size:clamp(26px,3.4vw,38px)}
+.sg-lede{color:var(--sg-muted);max-width:640px;margin:0}
+
+.sg-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:26px;margin-top:34px}
+.sg-card{background:linear-gradient(145deg,rgba(48,30,32,.96),rgba(20,14,16,.98));border:1px solid var(--sg-border);border-radius:0;
+  overflow:hidden;box-shadow:0 14px 30px rgba(0,0,0,.45);display:flex;flex-direction:column;
+  transition:transform .2s,box-shadow .2s}
+.sg-card:hover{transform:translateY(-4px);box-shadow:0 20px 40px rgba(0,0,0,.55),0 0 0 1px var(--sg-gold)}
+.sg-card img{width:100%;height:230px;object-fit:cover;display:block;border:0 !important;box-shadow:none !important;filter:sepia(.12) contrast(1.06);
+  border-bottom:2px solid var(--sg-gold) !important}
+.sg-card-body{padding:20px 22px 26px;display:flex;flex-direction:column;gap:10px;flex:1}
+.sg-card h3{margin:0;font-size:21px}
+.sg-card p{color:var(--sg-muted);font-size:15px;margin:0;flex:1}
+.sg-card .sg-btn{align-self:flex-start;margin-top:8px}
+
+.sg-guides{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-top:30px}
+.sg-guide{display:flex;justify-content:space-between;align-items:center;gap:14px;background:var(--sg-black-soft);
+  border:1px solid var(--sg-border);border-left:4px solid var(--sg-gold);border-radius:0;padding:16px 18px;
+  color:var(--sg-ivory) !important;text-decoration:none;font-weight:700;transition:background .15s}
+.sg-guide:hover{background:var(--sg-panel);color:var(--sg-gold-light) !important}
+.sg-guide .sg-arrow{color:var(--sg-gold);font-size:18px}
+
+/* CTA-band */
+.sg-band{background:linear-gradient(90deg,rgba(85,29,37,.35) 0%,var(--sg-black) 60%),
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cg fill='none' stroke='%23C6A04D' stroke-opacity='.08' stroke-width='5'%3E%3Ccircle cx='60' cy='60' r='30'/%3E%3C/g%3E%3C/svg%3E");
+  border-top:2px solid var(--sg-gold);border-bottom:2px solid var(--sg-gold);text-align:center;padding:58px 24px}
+.sg-band h2{border:0;padding-bottom:0;font-size:clamp(26px,3.5vw,40px)}
+.sg-band h2::after{display:none}
+.sg-band p{color:var(--sg-muted);max-width:560px;margin:10px auto 26px}
+
+/* Køb-boks og produktliste i guides */
+.sg-buy{background:linear-gradient(145deg,rgba(48,30,32,.96),rgba(20,14,16,.98));border:1px solid var(--sg-border);border-left:4px solid var(--sg-gold);
+  padding:18px 20px;margin:26px 0;display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.sg-shoprow{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin:26px 0}
+.sg-shoprow a{display:block;background:linear-gradient(145deg,rgba(48,30,32,.96),rgba(20,14,16,.98));border:1px solid var(--sg-border);
+  padding:16px 18px;color:var(--sg-gold-light) !important;text-decoration:none;font-weight:700}
+.sg-shoprow a:hover{background:var(--sg-panel);transform:translateY(-2px)}
+
+/* Indholdsbilleder: guldramme */
+.wp-block-post-content img,.wp-block-image img,.entry-content img{
+  border:2px solid var(--sg-gold);border-radius:0;
+  box-shadow:0 0 0 5px rgba(198,160,77,.1),0 10px 24px rgba(0,0,0,.5)}
+.sg-logomark,.sg-card img,.sg-logo img{border:0 !important;box-shadow:none !important}
+.sg-buy img,.sg-shoprow img{border:0 !important;box-shadow:none !important}
+
+/* Tabeller */
+th{background:var(--sg-panel);color:var(--sg-gold-light)}
+th,td{border:1px solid rgba(198,160,77,.35) !important;padding:.6em .8em;text-align:left}
+tr:nth-child(even) td{background:var(--sg-black-soft)}
+
+/* Priser i guld */
+.woocommerce-Price-amount,.price{color:var(--sg-ivory) !important}
+.woocommerce ul.products li.product .price .woocommerce-Price-amount{color:var(--sg-ivory)}
+
+/* =========================================================
+   18. FUNKTIONELLE FIXES (fra v2, bibeholdt)
+   ========================================================= */
+
+/* Hide duplicate page title on the steampunk home page (id 42) */
+body.page-id-42 .wp-block-post-title,body.page-id-42 .wp-block-page-title{display:none}
+
+/* Full-bleed hero + band */
+body{overflow-x:hidden}
+.sg-hero,.sg-band{width:100vw;max-width:100vw;margin-left:calc(50% - 50vw)}
+
+/* Kill white content strip under header on all pages */
+main,.wp-site-blocks,.entry-content,.wp-block-post-content,.wp-block-post-content.is-layout-flow{background:transparent !important}
+
+/* Kill the light title-wrapper band on the home page */
+body.page-id-42 .has-tertiary-background-color{background:transparent !important;padding-top:0 !important;padding-bottom:0 !important}
+
+/* Mobile: stack footer columns */
+@media (max-width:781px){
+  footer.wp-block-template-part .wp-block-columns,footer.wp-block-template-part .wp-block-columns.is-layout-flex{display:flex !important;flex-direction:column !important;gap:22px}
+  footer.wp-block-template-part .wp-block-column{width:100% !important;max-width:100% !important}
+  .sg-band h2{max-width:94%;margin-left:auto;margin-right:auto}
+  .sg-band p{max-width:88%;margin-left:auto;margin-right:auto}
+}
+
+/* =========================================================
+   DARK CLOCKWORK THEATRE — EXTRA CLASSES (plan §13, 24/10 2026)
+   steampunk-hero · clockwork-feature · dark-workshop
+   ========================================================= */
+
+.steampunk-hero,
+.wp-block-group.is-style-steampunk-hero {
+  background: linear-gradient(180deg, var(--sg-charcoal) 0%, var(--sg-black) 72%);
+  border-bottom: 1px solid var(--sg-border);
+  text-align: center;
+  padding: 64px 20px 52px !important;
+  margin-left: calc(50% - 50vw) !important;
+  margin-right: calc(50% - 50vw) !important;
+  width: 100vw;
+  max-width: 100vw;
+}
+.steampunk-hero h1,
+.steampunk-hero h2 {
+  color: var(--sg-ivory) !important;
+  text-shadow: 0 2px 12px var(--sg-shadow);
+}
+.steampunk-hero .sg-kicker,
+.steampunk-hero .dt-eyebrow {
+  color: var(--sg-gold) !important;
+  letter-spacing: 4px;
+}
+.steampunk-hero p {
+  color: var(--sg-muted) !important;
+  max-width: 640px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.clockwork-feature,
+.wp-block-group.is-style-clockwork-feature {
+  background: linear-gradient(135deg, var(--sg-charcoal) 0%, var(--sg-burgundy) 100%);
+  border: 1px solid var(--sg-gold);
+  border-radius: 8px;
+  box-shadow: 0 12px 40px var(--sg-shadow);
+  padding: 36px !important;
+  margin: 32px 0 !important;
+}
+.clockwork-feature img {
+  border: 2px solid var(--sg-border);
+  border-radius: 6px;
+}
+.clockwork-feature h2,
+.clockwork-feature h3 {
+  color: var(--sg-gold-light) !important;
+}
+
+.dark-workshop,
+.wp-block-group.is-style-dark-workshop {
+  background: var(--sg-charcoal) !important;
+  border-top: 1px solid var(--sg-border);
+  border-bottom: 1px solid var(--sg-border);
+  padding: 40px 0 !important;
+  margin-left: calc(50% - 50vw) !important;
+  margin-right: calc(50% - 50vw) !important;
+  width: 100vw;
+  max-width: 100vw;
+}
+.dark-workshop h2,
+.dark-workshop h3 {
+  color: var(--sg-gold-light) !important;
+}
+
+</style>
+
+<!-- /wp:html -->
+
+
+<!-- wp:html -->
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Organization","name":"Steamgears","url":"https://steamgears.eu/","logo":"https://steamgears.juno.page/steamgears-cdn/logo-mark.png","sameAs":["https://dk.pinterest.com/cpaleadsis/","https://www.facebook.com/steamgears/","https://www.youtube.com/@hotsteampunk723","https://www.instagram.com/steamgears/"]}
+</script>
+<!-- /wp:html -->
+<!-- wp:html -->
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Organization","name":"Steamgears","url":"https://steamgears.eu/","logo":"https://steamgears.juno.page/steamgears-cdn/logo-mark.png","sameAs":["https://dk.pinterest.com/cpaleadsis/","https://www.facebook.com/steamgears/","https://www.youtube.com/@hotsteampunk723","https://www.instagram.com/steamgears/"]}
+</script>
+<!-- /wp:html -->
+
+
+
+<!-- wp:html -->
+<!-- og:image fallback (Rank Math global indstilling mangler) -->
+<meta property="og:image" content="https://steamgears.juno.page/steamgears-cdn/logo-mark.png" />
+<meta property="og:image:width" content="512" />
+<meta property="og:image:height" content="512" />
+<meta name="twitter:image" content="https://steamgears.juno.page/steamgears-cdn/logo-mark.png" />
+<!-- /wp:html -->
+
+
+
+<!-- GA4 e-commerce fallback (Juno) — FJERNES når GA4 Event-tag er published i GTM-54M3JCPM -->
+<script>
+(function(){
+  var MEAS='G-3MYLFKY8MY';
+  var EC={view_item:1,view_item_list:1,add_to_cart:1,remove_from_cart:1,view_cart:1,begin_checkout:1,add_shipping_info:1,add_payment_info:1,purchase:1,select_item:1,select_content:1,select_promotion:1,view_promotion:1,search:1};
+  var buf=[],seen=0;
+  function consented(){try{return (typeof wp_has_consent==='function')?!!wp_has_consent('statistics'):true;}catch(e){return true;}}
+  function fwd(ev,data){try{var p=Object.assign({},data||{});p.send_to=MEAS;window.gtag('event',ev,p);}catch(e){}}
+  function flush(){if(!consented())return;if(typeof window.gtag!=='function')return;while(buf.length){var b=buf.shift();fwd(b[0],b[1]);}}
+  function pick(a){if(a&&typeof a==='object'&&typeof a.event==='string'&&EC[a.event])recv(a.event,a.ecommerce);}
+  function recv(ev,data){if(buf.length>=14)return;buf.push([ev,data]);flush();}
+  try{new Image().src='/wp-content/juno-shim-check.js?cb='+Date.now();}catch(e){}
+  setInterval(function(){var dl=window.dataLayer||[];for(;seen<dl.length;seen++){try{pick(dl[seen]);}catch(e){}}flush();},400);
+  ['wp_consent_statistics','wp_consent_all','wp_consent_type_changed'].forEach(function(evt){document.addEventListener(evt,flush);});
+})();
+</script>
+<!-- /GA4 e-commerce fallback -->
+
