@@ -1,3 +1,42 @@
+<!-- wp:html -->
+<!-- Juno font-perf (25/10): swap-overrides + Inter preload -->
+<link rel="preload" href="https://steamgears.eu/wp-content/themes/extendable/assets/fonts/inter/inter-variable.woff2" as="font" type="font/woff2" crossorigin>
+<style id="juno-font-swap">
+@font-face{font-family:Archivo;font-style:normal;font-weight:100 900;font-display:swap;src:url('https://steamgears.eu/wp-content/themes/extendable/assets/fonts/archivo/archivo_wght.woff2') format('woff2');font-stretch:normal;}
+@font-face{font-family:Arsenal;font-style:normal;font-weight:400;font-display:swap;src:url('https://steamgears.eu/wp-content/themes/extendable/assets/fonts/arsenal/arsenal-regular.woff2') format('woff2');font-stretch:normal;}
+@font-face{font-family:Arsenal;font-style:normal;font-weight:700;font-display:swap;src:url('https://steamgears.eu/wp-content/themes/extendable/assets/fonts/arsenal/arsenal-bold.woff2') format('woff2');font-stretch:normal;}
+@font-face{font-family:"Baloo Tamma 2";font-style:normal;font-weight:400 800;font-display:swap;src:url('https://steamgears.eu/wp-content/themes/extendable/assets/fonts/baloo-tamma-2/baloo-tamma-2_wght.woff2') format('woff2');font-stretch:normal;}
+@font-face{font-family:Geom;font-style:normal;font-weight:300 900;font-display:swap;src:url('https://steamgears.eu/wp-content/themes/extendable/assets/fonts/geom/geom-variable.woff2') format('woff2');font-stretch:normal;}
+@font-face{font-family:Gotu;font-style:normal;font-weight:400;font-display:swap;src:url('https://steamgears.eu/wp-content/themes/extendable/assets/fonts/gotu/gotu-regular.woff2') format('woff2');font-stretch:normal;}
+@font-face{font-family:Heebo;font-style:normal;font-weight:100 900;font-display:swap;src:url('https://steamgears.eu/wp-content/themes/extendable/assets/fonts/heebo/heebo-variable-wght.woff2') format('woff2');font-stretch:normal;}
+@font-face{font-family:Hind;font-style:normal;font-weight:100 900;font-display:swap;src:url('https://steamgears.eu/wp-content/themes/extendable/assets/fonts/hind/hind-variable.woff2') format('woff2');font-stretch:normal;}
+@font-face{font-family:"IBM Plex Sans";font-style:normal;font-weight:100;font-display:swap;src:url('https://steamgears.eu/wp-content/themes/extendable/assets/fonts/ibm-plex-sans/ibm-plex-sans-thin.woff2') format('woff2');font-stretch:normal;}
+@font-face{font-family:"IBM Plex Sans";font-style:normal;font-weight:200;font-display:swap;src:url('https://steamgears.eu/wp-content/themes/extendable/assets/fonts/ibm-plex-sans/ibm-plex-sans-extra-light.woff2') format('woff2');font-stretch:normal;}
+@font-face{font-family:"IBM Plex Sans";font-style:normal;font-weight:300;font-display:swap;src:url('https://steamgears.eu/wp-content/themes/extendable/assets/fonts/ibm-plex-sans/ibm-plex-sans-light.woff2') format('woff2');font-stretch:normal;}
+@font-face{font-family:"IBM Plex Sans";font-style:normal;font-weight:400;font-display:swap;src:url('https://steamgears.eu/wp-content/themes/extendable/assets/fonts/ibm-plex-sans/ibm-plex-sans-regular.woff2') format('woff2');font-stretch:normal;}
+@font-face{font-family:"IBM Plex Sans";font-style:normal;font-weight:500;font-display:swap;src:url('https://steamgears.eu/wp-content/themes/extendable/assets/fonts/ibm-plex-sans/ibm-plex-sans-medium.woff2') format('woff2');font-stretch:normal;}
+@font-face{font-family:"IBM Plex Sans";font-style:normal;font-weight:600;font-display:swap;src:url('https://steamgears.eu/wp-content/themes/extendable/assets/fonts/ibm-plex-sans/ibm-plex-sans-semibold.woff2') format('woff2');font-stretch:normal;}
+@font-face{font-family:"IBM Plex Sans";font-style:normal;font-weight:700;font-display:swap;src:url('https://steamgears.eu/wp-content/themes/extendable/assets/fonts/ibm-plex-sans/ibm-plex-sans-bold.woff2') format('woff2');font-stretch:normal;}
+@font-face{font-family:Inconsolata;font-style:normal;font-weight:100 900;font-display:swap;src:url('https://steamgears.eu/wp-content/themes/extendable/assets/fonts/inconsolata/inconsolata-variable.woff2') format('woff2');font-stretch:normal;}
+@font-face{font-family:Inter;font-style:normal;font-weight:200 900;font-display:fallback;src:url('https://steamgears.eu/wp-content/themes/extendable/assets/fonts/inter/inter-variable.woff2') format('woff2');font-stretch:normal;}
+@font-face{font-family:Jost;font-style:normal;font-weight:100 800;font-display:swap;src:url('https://steamgears.eu/wp-content/themes/extendable/assets/fonts/jost/jost-variable.woff2') format('woff2');font-stretch:normal;}
+@font-face{font-family:Karla;font-style:normal;font-weight:100 900;font-display:swap;src:url('https://steamgears.eu/wp-content/themes/extendable/assets/fonts/karla/karla.woff2') format('woff2');font-stretch:normal;}
+@font-face{font-family:Koulen;font-style:normal;font-weight:400;font-display:swap;src:url('https://steamgears.eu/wp-content/themes/extendable/assets/fonts/koulen/koulen-regular.woff2') format('woff2');font-stretch:normal;}
+@font-face{font-family:Manrope;font-style:normal;font-weight:200 800;font-display:swap;src:url('https://steamgears.eu/wp-content/themes/extendable/assets/fonts/manrope/manrope.woff2') format('woff2');font-stretch:normal;}
+@font-face{font-family:Marcellus;font-style:normal;font-weight:400;font-display:swap;src:url('https://steamgears.eu/wp-content/themes/extendable/assets/fonts/marcellus/marcellus_wght.woff2') format('woff2');font-stretch:normal;}
+@font-face{font-family:Montserrat;font-style:normal;font-weight:100 900;font-display:swap;src:url('https://steamgears.eu/wp-content/themes/extendable/assets/fonts/montserrat/montserrat.woff2') format('woff2');font-stretch:normal;}
+@font-face{font-family:Mulish;font-style:normal;font-weight:100 800;font-display:swap;src:url('https://steamgears.eu/wp-content/themes/extendable/assets/fonts/mulish/mulish.woff2') format('woff2');font-stretch:normal;}
+@font-face{font-family:"Noto Serif Display";font-style:normal;font-weight:100 900;font-display:swap;src:url('https://steamgears.eu/wp-content/themes/extendable/assets/fonts/noto-serif-display/noto-serif-display.woff2') format('woff2');font-stretch:normal;}
+@font-face{font-family:Oswald;font-style:normal;font-weight:300 700;font-display:swap;src:url('https://steamgears.eu/wp-content/themes/extendable/assets/fonts/oswald/oswald.woff2') format('woff2');font-stretch:normal;}
+@font-face{font-family:"Radio Canada";font-style:normal;font-weight:300 700;font-display:swap;src:url('https://steamgears.eu/wp-content/themes/extendable/assets/fonts/radio-canada/radio-canada.woff2') format('woff2');font-stretch:normal;}
+@font-face{font-family:"Roboto Flex";font-style:normal;font-weight:100 900;font-display:swap;src:url('https://steamgears.eu/wp-content/themes/extendable/assets/fonts/roboto-flex/roboto-flex.woff2') format('woff2');font-stretch:normal;}
+@font-face{font-family:Rubik;font-style:normal;font-weight:300 900;font-display:swap;src:url('https://steamgears.eu/wp-content/themes/extendable/assets/fonts/rubik/rubik.woff2') format('woff2');font-stretch:normal;}
+@font-face{font-family:"Source Serif Pro";font-style:normal;font-weight:200 900;font-display:fallback;src:url('https://steamgears.eu/wp-content/themes/extendable/assets/fonts/source-serif-pro/source-serif-pro.woff2') format('woff2');font-stretch:normal;}
+@font-face{font-family:"Space Mono";font-style:normal;font-weight:400;font-display:fallback;src:url('https://steamgears.eu/wp-content/themes/extendable/assets/fonts/space-mono/space-mono-regular.woff2') format('woff2');}
+@font-face{font-family:"Space Mono";font-style:normal;font-weight:700;font-display:fallback;src:url('https://steamgears.eu/wp-content/themes/extendable/assets/fonts/space-mono/space-mono-bold.woff2') format('woff2');}
+@font-face{font-family:Hind;font-style:normal;font-weight:100 900;font-display:swap;src:url('https://steamgears.eu/wp-content/themes/extendable/assets/fonts/hind/hind-variable.woff2') format('woff2');font-stretch:normal;}
+</style>
+<!-- /wp:html -->
 <!-- wp:group {"align":"full","className":"is-style-ext-preset\u002d\u002dgroup\u002d\u002dnatural-1\u002d\u002dheader-1","style":{"spacing":{"padding":{"bottom":"var:preset|spacing|30","top":"var:preset|spacing|30"}}},"layout":{"inherit":true,"type":"constrained"}} -->
 <div
 	class="wp-block-group alignfull is-style-ext-preset--group--natural-1--header-1"
