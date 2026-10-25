@@ -923,93 +923,215 @@ body.page-id-42 .has-tertiary-background-color{background:transparent !important
 
 
 /* =========================================================
-   18. SAMLET STEAMPUNK-ARK (Henning, 25/10) — sidste lag, overstyrer ovenfor
-   Dark Clockwork Theatre + WooCommerce + Mobil + Tablet
+   18. SAMLET STEAMPUNK CSS — v2 (Henning, 25/10) — 1:1 erstatning for i gaar
    ========================================================= */
+
+/* 1. GLOBALT FUNDAMENT */
 *, *::before, *::after { box-sizing: border-box; }
 
-/* Custom scrollbar */
-::-webkit-scrollbar { width: 10px; }
-::-webkit-scrollbar-track { background: #14100c; }
-::-webkit-scrollbar-thumb { background: var(--sg-brass); border-radius: 5px; border: 2px solid #14100c; }
-::-webkit-scrollbar-thumb:hover { background: var(--sg-brass-light); }
+:root {
+  --sg-bg: #14100c;
+  --sg-panel: #1e1712;
+  --sg-panel-dark: #201913;
+  --sg-brass: #c9963f;
+  --sg-brass-light: #e8c377;
+  --sg-copper: #a9622f;
+  --sg-text: #f3ead9;
+  --sg-muted: #c9bda6;
+  --sg-border: rgba(201, 150, 63, .35);
+}
 
-/* Fokus-synlighed */
-a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible,
-textarea:focus-visible, [tabindex]:focus-visible {
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  background: var(--sg-bg);
+  color: var(--sg-text);
+  line-height: 1.65;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* 2. TYPOGRAFI */
+h1, h2, h3, h4 { color: var(--sg-brass-light); letter-spacing: .01em; }
+h1 { font-size: clamp(2rem, 5vw, 3.5rem); line-height: 1.12; }
+h2 { font-size: clamp(1.6rem, 4vw, 2.4rem); line-height: 1.2; }
+h3 { font-size: clamp(1.25rem, 3vw, 1.7rem); }
+p, li { color: var(--sg-text); }
+
+a {
+  color: var(--sg-brass-light);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+a:hover { color: #fff2cf; }
+
+/* 3. TILGAENGELIGHED: FOKUS */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
   outline: 2px solid var(--sg-brass-light);
   outline-offset: 3px;
   border-radius: 3px;
 }
 
-/* Knapper: damp/gloed ved hover */
-button::after,
-.wp-block-button__link::after,
-.woocommerce-button.button::after,
-input[type="submit"]::after {
+/* 4. KNAPPER */
+button,
+.wp-block-button__link,
+.woocommerce-button.button,
+input[type="submit"] {
+  background: linear-gradient(180deg, var(--sg-brass-light), var(--sg-brass));
+  color: #201608 !important;
+  border: 1px solid #7a5518;
+  border-radius: 4px;
+  font-weight: 700;
+  padding: 14px 24px;
+  min-height: 44px;
+  box-shadow: 0 3px 0 #5e3f10, 0 6px 18px rgba(0, 0, 0, .35);
+  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+}
+
+button:hover,
+.wp-block-button__link:hover,
+.woocommerce-button.button:hover,
+input[type="submit"]:hover {
+  filter: brightness(1.08);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 0 #5e3f10, 0 10px 24px rgba(0, 0, 0, .45);
+}
+
+/* 5. HERO */
+.hero,
+.wp-block-cover {
+  border-bottom: 3px solid var(--sg-brass);
+  box-shadow: inset 0 -80px 120px rgba(0, 0, 0, .55);
+}
+
+/* 6. PANELER — kun i indholdet, ikke header/footer (Juno-justering) */
+.entry-content > .wp-block-group {
+  position: relative;
+  background: var(--sg-panel);
+  border: 1px solid var(--sg-border);
+  border-radius: 10px;
+  padding: 28px;
+  box-shadow:
+    inset 0 0 0 1px rgba(232, 195, 119, .10),
+    0 10px 30px rgba(0, 0, 0, .35);
+}
+
+.entry-content > .wp-block-group::after {
   content: "";
   position: absolute;
-  top: -50%; left: -50%;
-  width: 200%; height: 200%;
-  background: radial-gradient(circle, rgba(255,242,207,0.3) 0%, transparent 70%);
-  opacity: 0;
-  transform: scale(0.5);
-  transition: opacity 0.3s ease, transform 0.5s ease;
+  inset: 6px;
+  border: 1px solid rgba(201, 150, 63, .16);
+  border-radius: 7px;
   pointer-events: none;
 }
-button:hover::after,
-.wp-block-button__link:hover::after,
-.woocommerce-button.button:hover::after,
-input[type="submit"]:hover::after { opacity: 1; transform: scale(1); }
 
-/* Salgs-badge i messing */
-.woocommerce span.onsale {
-  background: linear-gradient(135deg, var(--sg-copper, #a9622f), var(--sg-brass));
-  color: #fff2cf;
-  border: 1px solid var(--sg-brass-light);
-  border-radius: 50%;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
-  font-weight: 700;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-  padding: 8px;
-  min-height: 42px; min-width: 42px;
-  display: flex; align-items: center; justify-content: center;
-  top: 12px; right: 12px; left: auto;
+/* 7. KORT, GUIDES OG PRODUKTER */
+.wp-block-post-template li,
+.product,
+.type-product,
+.woocommerce ul.products li.product {
+  background: var(--sg-panel-dark);
+  border: 1px solid var(--sg-border);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
 }
 
-.woocommerce-message, .woocommerce-info, .woocommerce-error {
+.wp-block-post-template li:hover,
+.product:hover,
+.woocommerce ul.products li.product:hover {
+  transform: translateY(-4px);
+  border-color: var(--sg-brass);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, .45);
+}
+
+/* 8. BILLEDER */
+img { border-radius: 6px; max-width: 100%; height: auto; }
+
+.wp-block-image img,
+.woocommerce-product-gallery__image img {
+  border: 1px solid var(--sg-border);
+}
+
+/* 9. FORMULARER */
+input[type="text"],
+input[type="email"],
+input[type="search"],
+textarea,
+select {
+  background: #191410;
+  color: var(--sg-text);
+  border: 1px solid var(--sg-border);
+  border-radius: 5px;
+  padding: 12px;
+  font-size: 16px;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: 2px solid var(--sg-brass);
+  outline-offset: 2px;
+}
+
+/* 10. WOOCOMMERCE */
+.woocommerce ul.products li.product .woocommerce-loop-product__title {
+  color: var(--sg-brass-light);
+  font-weight: 700;
+}
+
+.woocommerce ul.products li.product .price {
+  color: var(--sg-muted);
+  font-weight: 600;
+}
+
+.woocommerce-message,
+.woocommerce-info,
+.woocommerce-error {
   border-left: 4px solid var(--sg-brass);
   background: #221a13;
-  color: #f3ead9;
-  border-radius: 4px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  color: var(--sg-text);
 }
-.woocommerce-error { border-left-color: #a93226; }
 
-.widget_shopping_cart, .woocommerce-mini-cart {
+/* Cart / mini-cart */
+.widget_shopping_cart,
+.woocommerce-mini-cart {
   background: #1b1510;
   border: 1px solid var(--sg-border);
   border-radius: 8px;
 }
-.woocommerce-mini-cart__total {
-  border-top: 1px solid var(--sg-border) !important;
-  color: var(--sg-brass-light) !important;
+
+/* 11. MENU OG HEADER */
+.site-header,
+header.wp-block-template-part {
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 
-/* Tandhjuls-animation */
-@keyframes sg-slow-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-.sg-gear { display: inline-block; transition: transform 0.3s ease; }
-.sg-gear:hover,
-.product:hover .sg-gear,
-.wp-block-post-template li:hover .sg-gear { animation: sg-slow-spin 8s linear infinite; }
-
-/* Maskin-separator */
-.sg-steampunk-divider { display: flex; align-items: center; text-align: center; margin: 40px 0; color: var(--sg-brass); }
-.sg-steampunk-divider::before, .sg-steampunk-divider::after {
-  content: ""; flex: 1; border-bottom: 1px solid var(--sg-border);
-  background: linear-gradient(90deg, transparent, var(--sg-brass), transparent);
+.wp-block-navigation__responsive-container-content {
+  background: #1b1510;
+  border: 1px solid var(--sg-border);
+  border-radius: 10px;
+  padding: 16px;
 }
-.sg-steampunk-divider span { padding: 0 15px; font-size: 1.2rem; letter-spacing: 2px; }
+
+.wp-block-navigation-item__content {
+  padding: 12px 8px;
+}
+
+/* 12. FOOTER */
+.site-footer,
+footer.wp-block-template-part {
+  padding: 28px 16px;
+  text-align: center;
+}
 
 /* MOBIL — op til 782 px */
 @media (max-width: 782px) {
@@ -1088,12 +1210,18 @@ input[type="submit"]:hover::after { opacity: 1; transform: scale(1); }
   .wp-block-post-template { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
 }
 
-/* Meget sma telefoner */
+/* Meget sma telefoner — op til 400 px */
 @media (max-width: 400px) {
   h1 { font-size: 1.7rem !important; }
   h2 { font-size: 1.35rem !important; }
   .wp-block-button__link, button, input[type="submit"] { padding: 14px 16px; }
 }
+
+/* REDUCER BEVAEGELSE */
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+
 
 /* 18b. Mobil-fixes efter visuelt tjek (25/10) */
 @media (max-width: 782px) {
