@@ -176,3 +176,34 @@ Seed list:
 1. **"Steampunk Boots & Spats: Complete Footwear Guide (Budget to Premium)"** — HC udvider med spats + heel boots SKUs, men ingen af de scannede konkurrenter har en dedikeret footwear-guide; vores AE-dropship har boots + vi kan binde sg-buy direkte.
 2. **"The Steampunk Starter Reading & Watch List (in the Order to Consume Them)"** — steampunkary's ordnede listicle-format vinder; vi har 0 stykker i genren og kan hybride: books + movies med "dress like X character"-links til vores Complete Looks.
 3. **"DIY Steampunk Goggles: 3 Builds from $0 to $25"** (gentaget, stadig åben) — DIY-SERP uændret 3 dage i træk (hobbyblogs, 2014-tutorials, ingen shop-kobling). Vores tiered-build-guide + AE-goggles upgrade-CTA er stadig den billigste SERP-erobring.
+
+## Scan 2026-10-26
+### Frontend-observationer (fetch ~01:05-01:25 UTC, UA SteamgearsSiteBuilder/1.0)
+- **my-steampunk-style.com** — NYT: blog opdateret 2026-10-22 (første nye post siden 16/10). Slug-liste viser **steampunk-halloween-costume-2026** med timestamp 2026-10-31T22:59Z (planlagt/skelet til Halloween-aften). Nye editorial-slugs: what-is-dieselpunk, what-is-solarpunk, atompunk, punk-aesthetics-guide, steampunk-pirate-outfit, what-to-wear-to-a-steampunk-wedding, ren-faire-costumes, the-20-best-steampunk-accessories (21 blog-URLs total).
+- **steampunkoutfits.com** — uændret (seneste dato-signal 2026-08-25). Samme H2-struktur som 25/10. 3. dag uden ændring.
+- **steampunkary.com** — struktur bekræftet via links (clothing/diy-crafts/entertainment/decor-kategorier); H2'er generiske. Ingen nye artikler vs. 25/10.
+- **halloweencostumes.com** (/steampunk-costumes.html, 200) — NYT vs. 25/10: steampunk-dragon-wings (6 forekomster) + steampunk-boots-update1. Boots fokus forstærket (10 steampunk-boots-referencer).
+- **vintagedancer.com** — apex 200 via curl i nat (403 i går = UA-blok, bekræftet). **Guide-URL /steampunk-costume-guide/ stadig 404** — hullet består (3. dag).
+- **airshipambassador.com** — statisk, 5. uforandret-dag.
+- **museumreplicas.com/steampunk** — uændret (Weapons/Jewelry/Gadgets/Last Chance).
+- **steampunkgoggles.com/blog** — død siden 2017 (bekræftet igen).
+
+### SERP top-3 (web_search gl=us, 26/10)
+- **"steampunk costume guide"**: 1) my-steampunk-style casual-outfits 2) psylofashion fashion guide 3) devilfashion-official "Complete Style Guide 2026" (tilbage i Google top-3 efter 25/10-frafald). Også vintagedancer /steampunk/ hub. Ustabil top-3 = ingen har låst slottet.
+- **"diy steampunk goggles"**: uændret 3. dag — 1) instructables trash-goggles 2) upcycledesignlab 3) rustichorseshoe. Ingen polished shop-koblet guide.
+- **"steampunk accessories"**: 1) my-steampunk-style kategori (tilbage på #1) 2) spirithalloween kategori 3) Pinterest. zurchers faldt til #4. EMD-cluster (styler) stadig til stede.
+- **Nye domæner: ingen.** Alle top-domæner allerede watchlist/observeret.
+
+### 3 indholdsmuligheder for steamgears.eu
+1. **"Steampunk Pirate Outfit: Complete Guide"** — my-steampunk-style har netop udgivet steampunk-pirate-outfit; kobler direkte til Henning's "pirat piger"-backlog + poster-hullet fra 24/10. Først-mover på query før deres post rangerer.
+2. **"Steampunk Halloween Costume 2026 (Last-Minute Builds)"** — MSS har planlagt Halloween-2026-post til 31/10; med vores hurtigere udgivelse + sg-buy CTA'er kan vi tage slottet før deres scheduled-drop.
+3. **"Steampunk Boots & Spats Guide"** — 3. dag i træk: HC udvider boots/spats, ingen konkurrent har dedikeret footwear-guide. AE-dropship boots + sg-buy = direkte konvertering.
+
+## Gennemført 26/10: /how-to-make-a-steampunk-costume/ opdateret (post ID 8)
+- **Ny titel/H1:** "How to Make a Steampunk Costume: Complete Guide for Beginners (2026)" (live `<title>` bekræftet: "How To Make A Steampunk Costume: Complete Guide For Beginners (2026) - Steamgears").
+- "Last updated"-linje → 26/10/2026; forældet AIOSEO-kommentarblok fjernet.
+- Intro-paragraf omskrevet med nøglefrasen "steampunk costume guide" + intern link til /steampunk-costume-ideas/.
+- Ny sektion før FAQ: "How Much Does a Steampunk Costume Cost? Three Budget Tiers" (~$20 thrift / ~$50 half-DIY / $100+ full kit) med interne links til /steampunk-cosplay-on-a-budget/, under-$100-guiden og /shop/.
+- CTA-sektion udvidet med links til /steampunk-cosplay-for-beginners/, /casual-steampunk-outfits/ og /steampunk-halloween-costume-women/; stray `</strong>` fixet.
+- Slug uændret (samme URL, ingen 301). PUT via REST 200 26/10 15:57; live-side verificeret via browser-fetch (alle nye elementer til stede).
+- Sitemap lastmod viste stadig 25/10 efter update (Rank Math sitemap-cache, ingen purge-route i REST) — opdaterer selv ved TTL. GSC URL-recrawl kan ikke udløses via API; sitemap er allerede indsendt.
