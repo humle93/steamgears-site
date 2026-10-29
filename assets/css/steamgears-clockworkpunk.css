@@ -1,0 +1,84 @@
+/* ==========================================================================
+   STEAMGEARS.EU — "CLOCKWORK PUNK" GLOBAL STYLESHEET
+   Dark brass-and-neon mashup: Victorian horology meets circuit-punk edge.
+   ========================================================================== */
+
+:root {
+  --cp-void: #0a0908;
+  --cp-dark: #141110;
+  --cp-panel: #1c1814;
+  --cp-card: #221d18;
+  --cp-edge: #3a2e1e;
+  --cp-brass: #c99a4a;
+  --cp-gold: #e7c77e;
+  --cp-ivory: #f3e8d0;
+  --cp-muted: #a99e8b;
+  
+  --cp-volt: #7bffb0; /* Acid-green glow */
+  --cp-volt-dim: #3fa374;
+  --cp-signal: #ff5c5c; /* Warning red */
+  
+  --cp-font-display: 'Cinzel', Georgia, serif;
+  --cp-font-body: 'Spectral', Georgia, serif;
+  --cp-font-mono: 'Share Tech Mono', monospace;
+  
+  --cp-radius: 2px;
+  --cp-ease: cubic-bezier(.16,.84,.44,1);
+  --cp-glow-brass: 0 0 24px rgba(201,154,74,.25);
+  --cp-glow-volt: 0 0 18px rgba(123,255,176,.35);
+}
+
+body {
+  background: var(--cp-dark);
+  color: var(--cp-ivory);
+  font-family: var(--cp-font-body);
+}
+
+a { color: var(--cp-gold); transition: color .2s var(--cp-ease); }
+a:hover { color: var(--cp-volt); }
+
+/* WooCommerce Product Cards & Grid Customization */
+.sga-card, .woocommerce ul.products li.product, .wc-block-grid__product {
+  background: var(--cp-card) !important;
+  border: 1px solid var(--cp-edge) !important;
+  border-top: 2px solid var(--cp-brass) !important;
+  border-radius: var(--cp-radius) !important;
+  transition: transform .3s var(--cp-ease), border-color .3s var(--cp-ease), box-shadow .3s var(--cp-ease) !important;
+}
+
+.sga-card:hover, .woocommerce ul.products li.product:hover {
+  border-top-color: var(--cp-volt) !important;
+  transform: translateY(-5px);
+  box-shadow: var(--cp-glow-volt), 0 14px 28px rgba(0,0,0,.45) !important;
+}
+
+.woocommerce ul.products li.product .price {
+  color: var(--cp-gold) !important;
+  font-family: var(--cp-font-mono) !important;
+}
+
+.woocommerce ul.products li.product h3, 
+.woocommerce ul.products li.product .woocommerce-loop-product__title {
+  color: var(--cp-ivory) !important;
+  font-family: var(--cp-font-display) !important;
+}
+
+/* Brass Core Buttons with Volt-Glow */
+.sga-btn, .wp-block-button__link, .woocommerce a.button, .woocommerce button.button, input[type="submit"] {
+  font-family: var(--cp-font-mono) !important;
+  font-size: 12px !important;
+  letter-spacing: .2em !important;
+  text-transform: uppercase !important;
+  border-radius: var(--cp-radius) !important;
+  padding: 15px 34px !important;
+  border: 1px solid var(--cp-gold) !important;
+  background: linear-gradient(160deg, var(--cp-gold), var(--cp-brass) 55%, #8f6a2c) !important;
+  color: #140f08 !important;
+  transition: all .25s var(--cp-ease) !important;
+}
+
+.sga-btn:hover, .wp-block-button__link:hover, .woocommerce a.button:hover, .woocommerce button.button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--cp-glow-volt), 0 8px 20px rgba(0,0,0,.4) !important;
+  border-color: var(--cp-volt) !important;
+}
