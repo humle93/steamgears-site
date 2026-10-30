@@ -1,6 +1,5 @@
 import sqlite3
 import os
-from datetime import datetime
 
 DB_PATH = "command_center.db"
 
@@ -11,7 +10,6 @@ def init_db_and_jobs():
     cursor.execute("PRAGMA journal_mode=WAL;")
     cursor.execute("PRAGMA synchronous=NORMAL;")
     cursor.execute("PRAGMA busy_timeout=5000;")
-    
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS job_queue (
             job_id TEXT PRIMARY KEY,

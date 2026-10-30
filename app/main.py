@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, Form, Depends, status, Response
+from fastapi import FastAPI, Request, Form, status, Response
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from app.jobs import init_db_and_jobs
@@ -8,10 +8,10 @@ import os
 import sqlite3
 from passlib.context import CryptContext
 
-VERSION = "v8.3"
+VERSION = "v8.4"
 APP_TITLE = f"Command Center {VERSION} - Standard Bruger & Autopilot"
 
-app = FastAPI(title=APP_TITLE, version="8.3")
+app = FastAPI(title=APP_TITLE, version="8.4")
 templates = Jinja2Templates(directory="app/templates")
 wp_bridge = WordPressBridge()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -29,40 +29,27 @@ def startup_event():
     print(f" ⚡ STARTER {APP_TITLE.upper()}")
     print("="*50)
     init_db_and_jobs()
-    print("[OK] Trådsikker SQLite WAL-jobkø initialiseret.")
     run_hot_backup()
-    print("[OK] Off-site hot-backup valideret.")
     
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT UNIQUE NOT NULL,
-            hashed_password TEXT NOT NULL
-        )
-    """)
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS socialqueue (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            platform TEXT NOT NULL,
-            title TEXT NOT NULL,
-            message TEXT NOT NULL,
-            media_url TEXT,
-            board_or_page_id TEXT,
-            status TEXT DEFAULT 'Klar i kø'
-        )
-    """)
+    cursor.execute("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE NOT NULL, hashed_password TEXT NOT NULL)")
+    cursor.execute("CREATE TABLE IF NOT EXISTS socialqueue (id INTEGER PRIMARY KEY AUTOINCREMENT, platform TEXT NOT NULL, title TEXT NOT NULL, message TEXT NOT NULL, media_url TEXT, board_or_page_id TEXT, status TEXT DEFAULT 'Klar i kø')")
     cursor.execute("SELECT COUNT(*) FROM users WHERE username = 'humle91'")
     if cursor.fetchone()[0] == 0:
         hashed_pw = pwd_context.hash("buster")
         cursor.execute("INSERT INTO users (username, hashed_password) VALUES (?, ?)", ("humle91", hashed_pw))
         conn.commit()
-        print("[INFO] Bruger 'humle91' (cpaleadsis@gmail.com) oprettet i databasen.")
     conn.close()
     
     print(f"\n 🌐 DASHBOARD URL: http://127.0.0.1:8000")
     print(f" [{VERSION}] Systemet er fuldt operationelt!\n" + "="*50 + "\n")
+
+@app.get("/health")
+def health_check(response: Response):
+    db_ok = os.path.exists("command_center.db")
+    wp_ok = wp_bridge.check_health()
+    return {"status": "healthy" if (db_ok and wp_ok) else "degraded", "version": VERSION}
 
 @app.get("/login", response_class=HTMLResponse)
 def login_page(request: Request):

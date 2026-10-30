@@ -12,7 +12,6 @@ def run_hot_backup():
         dst.close()
         src.close()
         if os.path.exists(backup_filename) and os.path.getsize(backup_filename) > 0:
-            print(f"[BACKUP] Succes: {backup_filename}")
             return True
     except Exception as e:
         print(f"[BACKUP FEJL]: {e}")
