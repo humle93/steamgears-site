@@ -1,10 +1,41 @@
 # Steamgears Autopilot (WordPress plugin)
 
-The WordPress side of the social autopilot. **Command Center** (Ultra.cc) generates
-and publishes the posts; this plugin holds the queue, the approval flow, click
-tracking and the ROI/learning numbers.
+The whole social autopilot runs inside WordPress (Command Center is retired):
 
-Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.2.0.zip` → Activate.
+1. **Write** – once a day an AI model (Claude by default) writes one post per
+   channel for 1–2 of the site's posts/products that have not been promoted in
+   the last `repost_cooldown_days`.
+2. **Approve** – posts wait under *Steamgears → AI Drafts* (Approve / Reject), or go
+   straight to the queue when **Full auto** is on.
+3. **Publish** – every 15 minutes the queue is sent to **Publer**, which posts to
+   the connected Facebook, Instagram, Pinterest, LinkedIn, X, Threads, Bluesky,
+   Mastodon, Telegram and Google Business accounts. Quiet hours, daily cap and
+   batch size apply; failures are retried up to 3 times with the reason shown on
+   the Queue page.
+4. **Measure** – every post links via `/go/<id>/`, so clicks (and WooCommerce
+   orders) are counted per channel.
+
+Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.3.0.zip` → Activate.
+
+## Setup
+
+1. **Publer** (Business plan): Settings → Access & Login → API Keys → create a key
+   with the scopes `workspaces`, `accounts`, `posts`, `media`.
+2. In WordPress: *Steamgears → Settings → Publer*: paste the API key, save, then
+   click **Test Publer** on the dashboard. It lists your workspaces (copy the id
+   into *Publer workspace id*, save) and then your connected accounts.
+3. *Channels*: e.g. `facebook, instagram, pinterest`. For Pinterest also set the
+   board id. Instagram and Pinterest need a featured image on the post.
+4. *AI content*: provider **Anthropic** with a Claude API key (model defaults to
+   `claude-opus-5-5`), or **OpenAI-compatible** (AIMLAPI by default) with a key
+   and a model name.
+5. *General*: switch **Autopilot** on. Leave **Full auto** off at first and approve
+   the drafts by hand until you like the tone.
+6. Use **Generate posts now** / **Publish queue now** on the dashboard to try it
+   without waiting for the cron.
+
+WP-Cron only runs when the site gets visits. For exact timing, add a real cron
+job on the host that calls `https://steamgears.eu/wp-cron.php` every 5 minutes.
 
 ## API keys
 
@@ -15,6 +46,7 @@ You can also keep them out of the database entirely by putting them in
 `wp-config.php`. The setting is then locked in the admin:
 
 ```php
+define('SGAP_PUBLER_API_KEY', '...');
 define('SGAP_AI_API_KEY', '...');
 define('SGAP_TELEGRAM_BOT_TOKEN', '...');
 // SGAP_PINTEREST_TOKEN, SGAP_INSTAGRAM_TOKEN, SGAP_TIKTOK_TOKEN, SGAP_YOUTUBE_TOKEN,
@@ -40,6 +72,9 @@ cookie is credited to the post: `sgap_cro` gets the order id and revenue and an
 Auth: an administrator's **application password** (Users → Profile → Application
 Passwords), sent as HTTP Basic auth.
 
+The publisher above uses the same queue. The API is for other tools that want to
+add posts or read the numbers.
+
 | Method | Path | Purpose |
 |---|---|---|
 | POST | `/queue` | Add a post. Required: `channel`, `title`, `destination_url`. Optional: `body`, `image_url`, `angle`, `content_type`, `format`, `post_id`, `scheduled_at`, `status` (`queued`/`draft`). Returns `id`, `tracking_url`, `utm_url`. Same channel + URL + title again → `409`. |
@@ -60,8 +95,8 @@ curl -u "juno:xxxx xxxx xxxx xxxx" -X POST https://steamgears.eu/wp-json/sgap/v1
 
 ## Maintenance
 
-A daily WP-Cron job (`sgap_daily_cleanup`) puts posts stuck in `sending` back in
-the queue and deletes raw events and unconverted clicks older than 180 days
+A daily WP-Cron job (`sgap_daily_cleanup`) puts posts claimed through the REST API
+but never reported back in the queue and deletes raw events and unconverted clicks older than 180 days
 (`sgap_event_retention_days` filter). Totals are kept in `sgap_learning`.
 
 Deleting the plugin (not just deactivating) removes all its tables and settings.

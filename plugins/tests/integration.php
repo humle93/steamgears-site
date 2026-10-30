@@ -130,6 +130,140 @@ update_option('sgap_quiet_start', 99);
 sgci_check('settings: hour clamped', (int) get_option('sgap_quiet_start') === 23);
 update_option('sgap_quiet_start', 0);
 
+/* --- AI generation + Publer publishing, with Anthropic and Publer mocked --- */
+$GLOBALS['sgci_http'] = [];
+$GLOBALS['sgci_job_state'] = 'working';
+$png = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==');
+add_filter('pre_http_request', function ($pre, $args, $url) use ($png) {
+    $GLOBALS['sgci_http'][] = ['url' => $url, 'args' => $args];
+    $reply = fn(int $code, $body, string $type = 'application/json') => [
+        'headers' => ['content-type' => $type],
+        'body' => is_string($body) ? $body : wp_json_encode($body),
+        'response' => ['code' => $code, 'message' => 'OK'],
+        'cookies' => [],
+        'filename' => null
+    ];
+    if (str_starts_with($url, 'https://api.anthropic.com/')) {
+        $request = json_decode($args['body'], true);
+        $channels = $request['output_config']['format']['schema']['properties']['posts']['items']['properties']['channel']['enum'];
+        $posts = array_map(fn($c) => ['channel' => $c, 'title' => "CI {$c}", 'text' => "CI text for {$c}", 'hashtags' => ['steampunk'], 'alt_text' => 'alt'], $channels);
+        return $reply(200, ['type' => 'message', 'stop_reason' => 'end_turn', 'content' => [
+            ['type' => 'thinking', 'thinking' => ''],
+            ['type' => 'text', 'text' => wp_json_encode(['posts' => $posts])]
+        ]]);
+    }
+    if ($url === 'https://app.publer.com/api/v1/accounts') {
+        return $reply(200, [
+            ['id' => 'acc_fb', 'provider' => 'facebook', 'name' => 'SG FB'],
+            ['id' => 'acc_ig', 'provider' => 'instagram', 'name' => 'SG IG'],
+            ['id' => 'acc_pin', 'provider' => 'pinterest', 'name' => 'SG Pin']
+        ]);
+    }
+    if ($url === 'https://app.publer.com/api/v1/media') {
+        return $reply(200, ['id' => 'media_1', 'type' => 'photo']);
+    }
+    if ($url === 'https://app.publer.com/api/v1/posts/schedule/publish') {
+        $GLOBALS['sgci_jobs'] = ($GLOBALS['sgci_jobs'] ?? 0) + 1;
+        return $reply(200, ['job_id' => 'job_' . $GLOBALS['sgci_jobs']]);
+    }
+    if (str_starts_with($url, 'https://app.publer.com/api/v1/job_status/')) {
+        return $reply(200, ['success' => true, 'data' => ['status' => $GLOBALS['sgci_job_state'], 'result' => ['payload' => ['failures' => []]]]]);
+    }
+    if (str_contains($url, '/ci-image')) {
+        return $reply(200, $png, 'image/png');
+    }
+    return $pre;
+}, 10, 3);
+$requests_to = fn(string $prefix) => array_values(array_filter($GLOBALS['sgci_http'], fn($r) => str_starts_with($r['url'], $prefix)));
+
+// Every existing post counts as recently promoted, so only the CI posts get picked.
+foreach (get_posts(['post_type' => 'any', 'posts_per_page' => -1, 'fields' => 'ids']) as $existing) {
+    update_post_meta($existing, SGAP_Generator::META, time());
+}
+$make_post = function (string $title) use ($png) {
+    $post_id = wp_insert_post(['post_title' => $title, 'post_content' => 'Brass goggles with leather straps. ' . str_repeat('Steam. ', 50), 'post_status' => 'publish']);
+    $upload = wp_upload_bits('ci-image.png', null, $png);
+    $attachment = wp_insert_attachment(['post_mime_type' => 'image/png', 'post_title' => 'ci', 'post_status' => 'inherit'], $upload['file'], $post_id);
+    set_post_thumbnail($post_id, $attachment);
+    return $post_id;
+};
+$post_a = $make_post('CI Brass Goggles Guide');
+
+update_option('sgap_ai_provider', 'anthropic');
+update_option('sgap_ai_api_key', 'ci-anthropic-key');
+update_option('sgap_ai_model', '');
+update_option('sgap_channels', 'facebook, instagram, pinterest, myspace');
+update_option('sgap_posts_per_day', 1);
+update_option('sgap_full_auto_enabled', 'no');
+update_option('sgap_publer_api_key', 'ci-publer-key');
+update_option('sgap_publer_workspace_id', 'ws_1');
+update_option('sgap_publer_pinterest_board', 'board_1');
+
+$report = SGAP_Generator::run();
+sgci_check('generate: 3 drafts for the picked post, none queued', $report['sources'] === 1 && $report['drafts'] === 3 && $report['queued'] === 0 && !$report['errors'], $report);
+$ai = $requests_to('https://api.anthropic.com/');
+$ai_body = json_decode($ai[0]['args']['body'] ?? '{}', true);
+sgci_check('generate: Anthropic request headers', ($ai[0]['args']['headers']['x-api-key'] ?? '') === 'ci-anthropic-key'
+    && ($ai[0]['args']['headers']['anthropic-version'] ?? '') === '2026-10-21', $ai[0]['args']['headers'] ?? null);
+sgci_check('generate: model, structured output, fallback', ($ai_body['model'] ?? '') === 'claude-opus-5-5'
+    && ($ai_body['output_config']['format']['type'] ?? '') === 'json_schema' && ($ai_body['fallbacks'] ?? '') === 'default', $ai_body);
+sgci_check('generate: prompt contains the post title', str_contains($ai_body['messages'][0]['content'] ?? '', 'CI Brass Goggles Guide'));
+$drafts = $wpdb->get_results($wpdb->prepare("SELECT id, channel, hashtags, status FROM {$wpdb->prefix}sgap_ai_drafts WHERE post_id = %d ORDER BY id", $post_a));
+sgci_check('generate: drafts pending with hashtags', count($drafts) === 3 && $drafts[0]->status === 'pending' && $drafts[0]->hashtags === '#steampunk', $drafts);
+sgci_check('generate: cooldown stops a second pick', SGAP_Generator::run()['sources'] === 0);
+
+$queued = SGAP_Queue::from_draft((int) $drafts[0]->id);
+$row = is_wp_error($queued) ? null : $wpdb->get_row($wpdb->prepare("SELECT * FROM {$wpdb->prefix}sgap_queue WHERE id = %d", $queued['id']));
+sgci_check('approve: draft becomes a queue item', $row && $row->destination_url === get_permalink($post_a)
+    && str_contains((string) $row->image_url, '/ci-image') && str_contains((string) $row->body, '#steampunk'), $row);
+sgci_check('approve: draft marked used', $wpdb->get_var($wpdb->prepare("SELECT status FROM {$wpdb->prefix}sgap_ai_drafts WHERE id = %d", $drafts[0]->id)) === 'used');
+SGAP_Queue::from_draft((int) $drafts[1]->id);
+SGAP_Queue::from_draft((int) $drafts[2]->id);
+
+$post_b = $make_post('CI Top Hat Product');
+update_option('sgap_full_auto_enabled', 'yes');
+$report = SGAP_Generator::run();
+sgci_check('full auto: posts go straight to the queue', $report['drafts'] === 3 && $report['queued'] === 3, $report);
+
+update_option('sgap_autopilot_enabled', 'yes');
+update_option('sgap_quiet_start', 0);
+update_option('sgap_quiet_end', 0);
+update_option('sgap_daily_cap', 50);
+update_option('sgap_batch_size', 10);
+SGAP_Publer::tick();
+$sending = $wpdb->get_results("SELECT id, channel, external_id FROM {$wpdb->prefix}sgap_queue WHERE status = 'sending'");
+sgci_check('publish: 6 posts handed to Publer', count($sending) === 6 && !in_array('', array_column($sending, 'external_id'), true), $sending);
+$sent = $requests_to('https://app.publer.com/api/v1/posts/schedule/publish');
+$first = $sent[0]['args']['headers'] ?? [];
+sgci_check('publish: Publer auth headers', ($first['Authorization'] ?? '') === 'Bearer-API ci-publer-key' && ($first['Publer-Workspace-Id'] ?? '') === 'ws_1', $first);
+$by_network = [];
+foreach ($sent as $request) {
+    $post = json_decode($request['args']['body'], true)['bulk']['posts'][0];
+    $by_network[array_key_first($post['networks'])] = $post;
+}
+$fb = $by_network['facebook'] ?? [];
+sgci_check('publish: facebook link post uses the /go/ link', ($fb['networks']['facebook']['type'] ?? '') === 'link'
+    && preg_match('#/go/\d+/$#', $fb['networks']['facebook']['link']['url'] ?? '') && ($fb['accounts'][0]['id'] ?? '') === 'acc_fb', $fb);
+$pin = $by_network['pinterest'] ?? [];
+sgci_check('publish: pinterest pin on the board with uploaded photo', ($pin['accounts'][0]['album_id'] ?? '') === 'board_1'
+    && ($pin['networks']['pinterest']['media'][0]['id'] ?? '') === 'media_1', $pin);
+sgci_check('publish: photos uploaded for instagram + pinterest only', count($requests_to('https://app.publer.com/api/v1/media')) === 4);
+$jobs_before = count($sent);
+SGAP_Publer::tick();
+sgci_check('publish: working jobs are not sent twice', count($requests_to('https://app.publer.com/api/v1/posts/schedule/publish')) === $jobs_before);
+$GLOBALS['sgci_job_state'] = 'complete';
+SGAP_Publer::tick();
+sgci_check('publish: completed jobs marked published', (int) $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}sgap_queue WHERE status = 'published' AND external_id LIKE 'job_%'") === 6);
+
+$no_photo = SGAP_Queue::add(['channel' => 'instagram', 'title' => 'CI no photo', 'destination_url' => home_url('/no-photo/'), 'body' => 'x']);
+SGAP_Publer::tick();
+$failed = $wpdb->get_row($wpdb->prepare("SELECT status, attempts, error FROM {$wpdb->prefix}sgap_queue WHERE id = %d", $no_photo['id']));
+sgci_check('publish: instagram without photo is retried with a clear error', $failed && $failed->status === 'queued'
+    && (int) $failed->attempts === 1 && str_contains((string) $failed->error, 'needs a photo'), $failed);
+$wpdb->delete($wpdb->prefix . 'sgap_queue', ['id' => $no_photo['id']]);
+update_option('sgap_autopilot_enabled', 'no');
+remove_all_filters('pre_http_request');
+
 if ($GLOBALS['sgci_failed']) {
     WP_CLI::error('Integration checks failed.');
 }

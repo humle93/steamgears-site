@@ -21,8 +21,10 @@ $wpdb->query(
         OR option_name LIKE '\\_transient\\_timeout\\_sgap\\_%'"
 );
 
+delete_post_meta_by_key('_sgap_promoted_at');
+
 foreach ([
-    'sgap_daily_cleanup', 'sgap_process_queue', 'sgap_etsy_sync', 'sgap_etsy_inventory',
+    'sgap_daily_cleanup', 'sgap_publish_tick', 'sgap_generate', 'sgap_process_queue', 'sgap_etsy_sync', 'sgap_etsy_inventory',
     'sgap_weekly_report', 'sgap_repost_check', 'sgap_suppression_check'
 ] as $hook) {
     wp_clear_scheduled_hook($hook);

@@ -18,6 +18,9 @@ class SGAP_Install {
     ];
 
     const CLEANUP_CRON = 'sgap_daily_cleanup';
+    const PUBLISH_CRON = 'sgap_publish_tick';
+    const GENERATE_CRON = 'sgap_generate';
+    const QUARTER_HOUR = 'sgap_quarter_hour';
 
     const TABLES = [
         'sgap_queue', 'sgap_events', 'sgap_cro', 'sgap_learning',
@@ -37,7 +40,10 @@ class SGAP_Install {
         'sgap_winner_min_clicks' => 25,
         'sgap_loser_min_clicks' => 100,
         'sgap_repost_cooldown_days' => 30,
-        'sgap_repost_max' => 3
+        'sgap_repost_max' => 3,
+        'sgap_posts_per_day' => 2,
+        'sgap_channels' => 'facebook,instagram,pinterest',
+        'sgap_ai_provider' => 'anthropic'
     ];
 
     public static function activate(): void {
@@ -46,15 +52,27 @@ class SGAP_Install {
 
     public static function deactivate(): void {
         self::clear_legacy_cron();
-        wp_clear_scheduled_hook(self::CLEANUP_CRON);
+        foreach ([self::CLEANUP_CRON, self::PUBLISH_CRON, self::GENERATE_CRON] as $hook) {
+            wp_clear_scheduled_hook($hook);
+        }
         delete_option('rewrite_rules'); // drop the /go/ rule; WP rebuilds on next request
     }
 
-    /** Runs on admin requests only; one autoloaded option read when nothing to do. */
+    /**
+     * Runs on every request (cron included, so an update uploaded over an older
+     * version gets its new columns before the publisher runs); costs one
+     * autoloaded option read when there is nothing to do.
+     */
     public static function maybe_upgrade(): void {
         if (get_option('sgap_version') !== SGAP_VERSION) {
             self::install();
         }
+    }
+
+    /** Adds the 15-minute interval the publisher runs on. */
+    public static function cron_schedules(array $schedules): array {
+        $schedules[self::QUARTER_HOUR] = ['interval' => 15 * MINUTE_IN_SECONDS, 'display' => 'Every 15 minutes (Steamgears)'];
+        return $schedules;
     }
 
     public static function clear_legacy_cron(): void {
@@ -86,6 +104,8 @@ class SGAP_Install {
         published_at DATETIME NULL,
         error TEXT NULL,
         fingerprint VARCHAR(64) NOT NULL DEFAULT '',
+        external_id VARCHAR(64) NOT NULL DEFAULT '',
+        sent_at DATETIME NULL,
         PRIMARY KEY  (id),
         KEY channel_status (channel,status),
         KEY post_channel (post_id,channel),
@@ -219,8 +239,14 @@ class SGAP_Install {
         // Old versions scheduled these; nothing handles them now, so they
         // would only keep waking WP-Cron for no reason.
         self::clear_legacy_cron();
-        if (!wp_next_scheduled(self::CLEANUP_CRON)) {
-            wp_schedule_event(time() + HOUR_IN_SECONDS, 'daily', self::CLEANUP_CRON);
+        foreach ([
+            self::CLEANUP_CRON => ['daily', HOUR_IN_SECONDS],
+            self::GENERATE_CRON => ['daily', 10 * MINUTE_IN_SECONDS],
+            self::PUBLISH_CRON => [self::QUARTER_HOUR, 5 * MINUTE_IN_SECONDS]
+        ] as $hook => [$recurrence, $delay]) {
+            if (!wp_next_scheduled($hook)) {
+                wp_schedule_event(time() + $delay, $recurrence, $hook);
+            }
         }
 
         SGAP_Tracking::add_rewrite_rule();
@@ -238,26 +264,44 @@ class SGAP_Settings {
     const HOUR_KEYS = ['quiet_start', 'quiet_end'];
     const INT_KEYS = [
         'daily_cap','batch_size','labor_rate','monthly_budget','target_roi',
-        'winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max'
+        'winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max','posts_per_day'
     ];
     /** Never echoed back to the browser; can be overridden by SGAP_<KEY> constants in wp-config.php. */
     const SECRET_KEYS = [
+        'publer_api_key','ai_api_key',
         'pinterest_token','instagram_token','telegram_bot_token','tiktok_token','youtube_token',
-        'etsy_oauth_token','etsy_refresh_token','ai_api_key','merchant_feed_secret'
+        'etsy_oauth_token','etsy_refresh_token','merchant_feed_secret'
     ];
     const TEXT_KEYS = [
+        'publer_workspace_id','publer_pinterest_board','channels','ai_model','ai_base_url',
         'telegram_chat_id','email_test_recipient','youtube_channel_id','reddit_username',
-        'reddit_subreddit','etsy_shop_id','etsy_shipping_profile_id','etsy_return_policy_id',
-        'ai_provider','ai_model','ai_mode'
+        'reddit_subreddit','etsy_shop_id','etsy_shipping_profile_id','etsy_return_policy_id','ai_mode'
+    ];
+    /** Settings with a fixed list of values, shown as a select. */
+    const CHOICE_KEYS = [
+        'ai_provider' => ['anthropic' => 'Anthropic (Claude)', 'openai_compatible' => 'OpenAI-compatible (AIMLAPI, OpenAI, ...)']
     ];
 
+    /** Shown in the settings page. Keys not listed here stay registered for older data but are unused. */
     const SECTIONS = [
         'General' => ['autopilot_enabled','full_auto_enabled','daily_cap','batch_size','quiet_start','quiet_end'],
+        'Publer' => ['publer_api_key','publer_workspace_id','publer_pinterest_board','channels'],
+        'AI content' => ['ai_provider','ai_api_key','ai_model','ai_base_url','posts_per_day'],
         'Economics' => ['labor_rate','monthly_budget','target_roi','winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max'],
-        'Channels' => ['pinterest_token','instagram_token','tiktok_token','youtube_token','youtube_channel_id','reddit_username','reddit_subreddit','telegram_bot_token','telegram_chat_id','email_test_recipient'],
         'Etsy' => ['etsy_shop_id','etsy_oauth_token','etsy_refresh_token','etsy_shipping_profile_id','etsy_return_policy_id'],
-        'AI' => ['ai_provider','ai_api_key','ai_model','ai_mode'],
         'Google Feed' => ['merchant_feed_secret']
+    ];
+
+    const HELP = [
+        'autopilot_enabled' => 'Master switch: generate posts daily and publish the queue via Publer.',
+        'full_auto_enabled' => 'On: AI posts go straight to the queue. Off: they wait under AI Drafts for your approval.',
+        'publer_api_key' => 'Publer → Settings → Access & Login → API Keys (Business plan). Scopes: posts, media, accounts.',
+        'publer_workspace_id' => 'Shown by "Test Publer" on the dashboard once the API key is saved.',
+        'publer_pinterest_board' => 'Pinterest board ID the pins go to (required for Pinterest).',
+        'channels' => 'Comma-separated. Supported: ' . 'facebook, instagram, pinterest, linkedin, twitter, threads, bluesky, mastodon, telegram, google',
+        'ai_model' => 'Empty = claude-opus-5-5 for Anthropic. Required for OpenAI-compatible.',
+        'ai_base_url' => 'OpenAI-compatible only. Empty = https://api.aimlapi.com/v1',
+        'posts_per_day' => 'How many site posts/products the AI writes social posts for each day.'
     ];
 
     public static function get(string $key, $default = '') {
@@ -303,6 +347,12 @@ class SGAP_Settings {
             register_setting('sgap_settings', 'sgap_' . $key, [
                 'type' => 'string',
                 'sanitize_callback' => 'sanitize_text_field'
+            ]);
+        }
+        foreach (self::CHOICE_KEYS as $key => $choices) {
+            register_setting('sgap_settings', 'sgap_' . $key, [
+                'type' => 'string',
+                'sanitize_callback' => fn($v) => array_key_exists((string) $v, $choices) ? (string) $v : (string) array_key_first($choices)
             ]);
         }
         foreach (self::SECRET_KEYS as $key) {
@@ -520,10 +570,168 @@ class SGAP_Tracking {
     }
 }
 
-/* ---------------- REST API (used by Command Center) ---------------- */
+/* ---------------- QUEUE ---------------- */
+class SGAP_Queue {
+    const MAX_ATTEMPTS = 3;
+
+    private static function table(): string {
+        global $wpdb;
+        return $wpdb->prefix . 'sgap_queue';
+    }
+
+    private static function key($value, string $default, int $max): string {
+        $value = sanitize_key((string) ($value ?? ''));
+        return $value === '' ? $default : substr($value, 0, $max);
+    }
+
+    public static function in_quiet_hours(int $hour, int $start, int $end): bool {
+        if ($start === $end) {
+            return false;
+        }
+        return $start > $end ? ($hour >= $start || $hour < $end) : ($hour >= $start && $hour < $end);
+    }
+
+    /**
+     * Adds a post to the queue. Returns ['id', 'tracking_url', 'utm_url'], or a
+     * WP_Error (400 invalid, 409 when the same channel + URL + title is queued).
+     */
+    public static function add(array $item) {
+        global $wpdb;
+        $channel = self::key($item['channel'] ?? '', '', 40);
+        $title = sanitize_text_field((string) ($item['title'] ?? ''));
+        $destination = esc_url_raw((string) ($item['destination_url'] ?? ''), ['http', 'https']);
+        if ($channel === '' || $title === '' || $destination === '') {
+            return new WP_Error('sgap_invalid', 'channel, title and destination_url are required.', ['status' => 400]);
+        }
+        $fingerprint = hash('sha256', $channel . '|' . $destination . '|' . $title);
+        $existing = $wpdb->get_var($wpdb->prepare(
+            'SELECT id FROM ' . self::table() . " WHERE fingerprint = %s AND status <> 'failed' LIMIT 1",
+            $fingerprint
+        ));
+        if ($existing) {
+            return new WP_Error('sgap_duplicate', 'Already queued.', ['status' => 409, 'id' => (int) $existing]);
+        }
+        $row = [
+            'post_id' => absint($item['post_id'] ?? 0),
+            'channel' => $channel,
+            'angle' => self::key($item['angle'] ?? '', 'angle_a', 20),
+            'content_type' => self::key($item['content_type'] ?? '', 'product', 40),
+            'format' => self::key($item['format'] ?? '', 'pin', 40),
+            'destination_url' => $destination,
+            'title' => $title,
+            'body' => sanitize_textarea_field((string) ($item['body'] ?? '')),
+            'image_url' => esc_url_raw((string) ($item['image_url'] ?? '')),
+            'status' => ($item['status'] ?? '') === 'draft' ? 'draft' : 'queued',
+            'scheduled_at' => ($item['scheduled_at'] ?? null) ?: current_time('mysql'),
+            'fingerprint' => $fingerprint
+        ];
+        $row['utm_url'] = SGAP_UTM::build($row);
+        if (!$wpdb->insert(self::table(), $row)) {
+            return new WP_Error('sgap_db', 'Could not save.', ['status' => 500]);
+        }
+        $id = (int) $wpdb->insert_id;
+        delete_transient('sgap_dashboard_stats');
+        return ['id' => $id, 'tracking_url' => SGAP_Tracking::url($id), 'utm_url' => $row['utm_url']];
+    }
+
+    /** Why nothing may be sent right now, or '' when sending is allowed. */
+    public static function blocked_reason(): string {
+        if (!SGAP_Settings::enabled('autopilot_enabled')) {
+            return 'autopilot_disabled';
+        }
+        if (self::in_quiet_hours((int) wp_date('G'), (int) SGAP_Settings::get('quiet_start', 23), (int) SGAP_Settings::get('quiet_end', 7))) {
+            return 'quiet_hours';
+        }
+        return self::capacity() <= 0 ? 'daily_cap_reached' : '';
+    }
+
+    /** How many posts may go out now: the batch size, capped by what is left of today's limit. */
+    public static function capacity(): int {
+        global $wpdb;
+        $in_flight_or_published = (int) $wpdb->get_var($wpdb->prepare(
+            'SELECT COUNT(*) FROM ' . self::table() . " WHERE published_at >= %s OR (status = 'sending' AND sent_at >= %s)",
+            wp_date('Y-m-d 00:00:00'), wp_date('Y-m-d 00:00:00')
+        ));
+        return max(0, min((int) SGAP_Settings::get('batch_size', 5), (int) SGAP_Settings::get('daily_cap', 8) - $in_flight_or_published));
+    }
+
+    /** Takes the next due items and marks them 'sending' so nobody else picks them up. */
+    public static function claim(int $limit, string $channel = ''): array {
+        global $wpdb;
+        if ($limit <= 0) {
+            return [];
+        }
+        $where = $channel !== '' ? $wpdb->prepare(' AND channel = %s', $channel) : '';
+        $items = $wpdb->get_results($wpdb->prepare(
+            'SELECT id, post_id, channel, angle, content_type, format, destination_url, title, body, image_url, utm_url, attempts, scheduled_at
+             FROM ' . self::table() . " WHERE status = 'queued' AND (scheduled_at IS NULL OR scheduled_at <= %s){$where}
+             ORDER BY scheduled_at ASC, id ASC LIMIT %d",
+            current_time('mysql'), $limit
+        ), ARRAY_A);
+        if ($items) {
+            $ids = implode(',', array_map('intval', array_column($items, 'id')));
+            $wpdb->query('UPDATE ' . self::table() . " SET status = 'sending', attempts = attempts + 1 WHERE id IN ({$ids})");
+        }
+        return $items;
+    }
+
+    /**
+     * Records the outcome of a send. A failure goes back in the queue until it has
+     * been tried MAX_ATTEMPTS times. Returns the new status, or null for an unknown id.
+     */
+    public static function mark(int $id, string $outcome, string $error = ''): ?string {
+        global $wpdb;
+        $item = $wpdb->get_row($wpdb->prepare('SELECT channel, angle, attempts FROM ' . self::table() . ' WHERE id = %d', $id));
+        if (!$item) {
+            return null;
+        }
+        if ($outcome === 'published') {
+            $data = ['status' => 'published', 'published_at' => current_time('mysql'), 'error' => null];
+        } else {
+            $data = [
+                'status' => (int) $item->attempts < self::MAX_ATTEMPTS ? 'queued' : 'failed',
+                'error' => sanitize_textarea_field($error),
+                'external_id' => ''
+            ];
+        }
+        $wpdb->update(self::table(), $data, ['id' => $id]);
+        if ($data['status'] === 'published') {
+            SGAP_ROI::record_event($id, $item->channel, $item->angle, 'publish');
+        }
+        delete_transient('sgap_dashboard_stats');
+        return $data['status'];
+    }
+
+    /** Turns an approved AI draft into a queue item for its source post, and marks the draft used. */
+    public static function from_draft(int $draft_id) {
+        global $wpdb;
+        $draft = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$wpdb->prefix}sgap_ai_drafts WHERE id = %d", $draft_id));
+        if (!$draft) {
+            return new WP_Error('sgap_not_found', 'Unknown draft.', ['status' => 404]);
+        }
+        $post_id = (int) $draft->post_id;
+        $body = trim((string) $draft->body . ($draft->hashtags ? "\n\n" . $draft->hashtags : ''));
+        $result = self::add([
+            'post_id' => $post_id,
+            'channel' => $draft->channel,
+            'angle' => $draft->angle,
+            'content_type' => $draft->content_type,
+            'format' => $draft->format,
+            'destination_url' => $post_id ? get_permalink($post_id) : home_url('/'),
+            'title' => $draft->title,
+            'body' => $body,
+            'image_url' => $post_id ? (string) get_the_post_thumbnail_url($post_id, 'large') : ''
+        ]);
+        if (!is_wp_error($result)) {
+            $wpdb->update($wpdb->prefix . 'sgap_ai_drafts', ['status' => 'used'], ['id' => $draft_id]);
+        }
+        return $result;
+    }
+}
+
+/* ---------------- REST API (for external tools) ---------------- */
 class SGAP_REST {
     const NS = 'sgap/v1';
-    const MAX_ATTEMPTS = 3;
 
     public static function init(): void {
         add_action('rest_api_init', [__CLASS__, 'routes']);
@@ -576,120 +784,52 @@ class SGAP_REST {
         return $ts ? wp_date('Y-m-d H:i:s', $ts) : null;
     }
 
-    public static function in_quiet_hours(int $hour, int $start, int $end): bool {
-        if ($start === $end) {
-            return false;
-        }
-        return $start > $end ? ($hour >= $start || $hour < $end) : ($hour >= $start && $hour < $end);
-    }
-
     public static function create_queue(WP_REST_Request $r) {
-        global $wpdb;
-        $channel = self::key($r, 'channel', '', 40);
-        $title = sanitize_text_field((string) $r->get_param('title'));
-        $destination = esc_url_raw((string) $r->get_param('destination_url'), ['http', 'https']);
-        if ($channel === '' || $title === '' || $destination === '') {
-            return new WP_Error('sgap_invalid', 'channel, title and destination_url are required.', ['status' => 400]);
-        }
-        $table = $wpdb->prefix . 'sgap_queue';
-        $fingerprint = hash('sha256', $channel . '|' . $destination . '|' . $title);
-        $existing = $wpdb->get_var($wpdb->prepare(
-            "SELECT id FROM {$table} WHERE fingerprint = %s AND status <> 'failed' LIMIT 1",
-            $fingerprint
-        ));
-        if ($existing) {
-            return new WP_Error('sgap_duplicate', 'Already queued.', ['status' => 409, 'id' => (int) $existing]);
-        }
-        $row = [
-            'post_id' => absint($r->get_param('post_id')),
-            'channel' => $channel,
-            'angle' => self::key($r, 'angle', 'angle_a', 20),
-            'content_type' => self::key($r, 'content_type', 'product', 40),
-            'format' => self::key($r, 'format', 'pin', 40),
-            'destination_url' => $destination,
-            'title' => $title,
+        $result = SGAP_Queue::add([
+            'post_id' => $r->get_param('post_id'),
+            'channel' => $r->get_param('channel'),
+            'angle' => $r->get_param('angle'),
+            'content_type' => $r->get_param('content_type'),
+            'format' => $r->get_param('format'),
+            'destination_url' => $r->get_param('destination_url'),
+            'title' => $r->get_param('title'),
             'body' => self::text($r->get_param('body')),
-            'image_url' => esc_url_raw((string) $r->get_param('image_url')),
-            'status' => $r->get_param('status') === 'draft' ? 'draft' : 'queued',
-            'scheduled_at' => self::datetime($r->get_param('scheduled_at')) ?? current_time('mysql'),
-            'fingerprint' => $fingerprint
-        ];
-        $row['utm_url'] = SGAP_UTM::build($row);
-        if (!$wpdb->insert($table, $row)) {
-            return new WP_Error('sgap_db', 'Could not save.', ['status' => 500]);
+            'image_url' => $r->get_param('image_url'),
+            'status' => $r->get_param('status'),
+            'scheduled_at' => self::datetime($r->get_param('scheduled_at'))
+        ]);
+        if (is_wp_error($result)) {
+            return $result;
         }
-        $id = (int) $wpdb->insert_id;
-        delete_transient('sgap_dashboard_stats');
-        return new WP_REST_Response([
-            'id' => $id,
-            'tracking_url' => SGAP_Tracking::url($id),
-            'utm_url' => $row['utm_url']
-        ], 201);
+        return new WP_REST_Response($result, 201);
     }
 
     /** Hands out the next items to publish, honouring on/off, quiet hours, daily cap and batch size. */
     public static function due(WP_REST_Request $r) {
-        global $wpdb;
-        if (!SGAP_Settings::enabled('autopilot_enabled')) {
-            return ['items' => [], 'reason' => 'autopilot_disabled'];
+        $reason = SGAP_Queue::blocked_reason();
+        if ($reason !== '') {
+            return ['items' => [], 'reason' => $reason];
         }
-        if (self::in_quiet_hours((int) wp_date('G'), (int) SGAP_Settings::get('quiet_start', 23), (int) SGAP_Settings::get('quiet_end', 7))) {
-            return ['items' => [], 'reason' => 'quiet_hours'];
+        $limit = SGAP_Queue::capacity();
+        $items = SGAP_Queue::claim($limit, sanitize_key((string) $r->get_param('channel')));
+        foreach ($items as &$item) {
+            $item['tracking_url'] = SGAP_Tracking::url((int) $item['id']);
         }
-        $table = $wpdb->prefix . 'sgap_queue';
-        $published_today = (int) $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(*) FROM {$table} WHERE published_at >= %s",
-            wp_date('Y-m-d 00:00:00')
-        ));
-        $limit = min((int) SGAP_Settings::get('batch_size', 5), (int) SGAP_Settings::get('daily_cap', 8) - $published_today);
-        if ($limit <= 0) {
-            return ['items' => [], 'reason' => 'daily_cap_reached'];
-        }
-        $channel = sanitize_key((string) $r->get_param('channel'));
-        $where = $channel !== '' ? $wpdb->prepare(' AND channel = %s', $channel) : '';
-        $items = $wpdb->get_results($wpdb->prepare(
-            "SELECT id, post_id, channel, angle, content_type, format, destination_url, title, body, image_url, utm_url, attempts, scheduled_at
-             FROM {$table} WHERE status = 'queued' AND (scheduled_at IS NULL OR scheduled_at <= %s){$where}
-             ORDER BY scheduled_at ASC, id ASC LIMIT %d",
-            current_time('mysql'), $limit
-        ), ARRAY_A);
-        if ($items) {
-            // Claim them so a second poll does not hand out the same posts.
-            $ids = implode(',', array_map('intval', array_column($items, 'id')));
-            $wpdb->query("UPDATE {$table} SET status = 'sending', attempts = attempts + 1 WHERE id IN ({$ids})");
-            foreach ($items as &$item) {
-                $item['tracking_url'] = SGAP_Tracking::url((int) $item['id']);
-            }
-            unset($item);
-        }
+        unset($item);
         return ['items' => $items, 'remaining_today' => max(0, $limit - count($items))];
     }
 
     public static function queue_status(WP_REST_Request $r) {
-        global $wpdb;
-        $table = $wpdb->prefix . 'sgap_queue';
-        $id = absint($r['id']);
-        $item = $wpdb->get_row($wpdb->prepare("SELECT channel, angle, attempts FROM {$table} WHERE id = %d", $id));
-        if (!$item) {
-            return new WP_Error('sgap_not_found', 'Unknown queue id.', ['status' => 404]);
-        }
         $status = (string) $r->get_param('status');
-        if ($status === 'published') {
-            $data = ['status' => 'published', 'published_at' => current_time('mysql'), 'error' => null];
-        } elseif ($status === 'failed') {
-            $data = [
-                'status' => (int) $item->attempts < self::MAX_ATTEMPTS ? 'queued' : 'failed',
-                'error' => sanitize_textarea_field((string) $r->get_param('error'))
-            ];
-        } else {
+        if (!in_array($status, ['published', 'failed'], true)) {
             return new WP_Error('sgap_invalid', 'status must be published or failed.', ['status' => 400]);
         }
-        $wpdb->update($table, $data, ['id' => $id]);
-        if ($data['status'] === 'published') {
-            SGAP_ROI::record_event($id, $item->channel, $item->angle, 'publish');
+        $id = absint($r['id']);
+        $new = SGAP_Queue::mark($id, $status, (string) $r->get_param('error'));
+        if ($new === null) {
+            return new WP_Error('sgap_not_found', 'Unknown queue id.', ['status' => 404]);
         }
-        delete_transient('sgap_dashboard_stats');
-        return ['id' => $id, 'status' => $data['status']];
+        return ['id' => $id, 'status' => $new];
     }
 
     public static function create_draft(WP_REST_Request $r) {
@@ -777,7 +917,8 @@ class SGAP_Maintenance {
     public static function daily(): void {
         global $wpdb;
         // Items claimed by /queue/due but never reported back go back in line.
-        $wpdb->query("UPDATE {$wpdb->prefix}sgap_queue SET status = 'queued' WHERE status = 'sending'");
+        // Items handed to Publer (external_id set) are followed up by SGAP_Publer instead.
+        $wpdb->query("UPDATE {$wpdb->prefix}sgap_queue SET status = 'queued' WHERE status = 'sending' AND external_id = ''");
 
         $days = (int) apply_filters('sgap_event_retention_days', 180);
         if ($days < 1) {
@@ -813,9 +954,9 @@ class SGAP_Admin {
     ];
 
     public static function init(): void {
-        add_action('admin_init', ['SGAP_Install', 'maybe_upgrade']);
         add_action('admin_menu', [__CLASS__, 'menu']);
         add_action('admin_post_sgap_approve_ai', [__CLASS__, 'approve_ai']);
+        add_action('admin_post_sgap_run', [__CLASS__, 'run_action']);
     }
 
     public static function menu(): void {
@@ -890,7 +1031,89 @@ class SGAP_Admin {
         echo '</tbody></table>';
         echo '<h2>Last 30 days per channel</h2>';
         self::render_rows($stats['channels'], ['channel', 'clicks', 'orders', 'revenue']);
+        self::run_panel();
         self::close();
+    }
+
+    private static function run_panel(): void {
+        $result = get_transient('sgap_run_result_' . get_current_user_id());
+        if ($result) {
+            delete_transient('sgap_run_result_' . get_current_user_id());
+            echo '<div class="notice notice-info"><pre style="white-space:pre-wrap">' . esc_html($result) . '</pre></div>';
+        }
+        echo '<h2>Run now</h2><p>';
+        foreach (['generate' => 'Generate posts now', 'publish' => 'Publish queue now', 'test_publer' => 'Test Publer'] as $task => $label) {
+            echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '" style="display:inline-block;margin-right:8px">'
+                . '<input type="hidden" name="action" value="sgap_run"><input type="hidden" name="task" value="' . esc_attr($task) . '">'
+                . wp_nonce_field('sgap_run_' . $task, '_wpnonce', true, false)
+                . '<button class="button">' . esc_html($label) . '</button></form>';
+        }
+        echo '</p>';
+        $last = get_option('sgap_last_generate');
+        if (is_array($last)) {
+            echo '<p class="description">Last generation: ' . esc_html($last['at'] . ' – ' . $last['drafts'] . ' drafts, ' . $last['queued'] . ' queued, ' . count($last['errors']) . ' errors') . '</p>';
+        }
+    }
+
+    public static function run_action(): void {
+        if (!current_user_can('manage_options')) {
+            wp_die('Forbidden', 403);
+        }
+        $task = isset($_POST['task']) ? sanitize_key($_POST['task']) : '';
+        check_admin_referer('sgap_run_' . $task);
+        if ($task === 'generate') {
+            $r = SGAP_Generator::run();
+            $out = "Generated from {$r['sources']} pages: {$r['drafts']} drafts, {$r['queued']} queued."
+                . ($r['errors'] ? "\nErrors:\n- " . implode("\n- ", $r['errors']) : '');
+        } elseif ($task === 'publish') {
+            if (!SGAP_Publer::configured()) {
+                $out = 'Save the Publer API key and workspace id first.';
+            } else {
+                $reason = SGAP_Queue::blocked_reason();
+                SGAP_Publer::tick();
+                $out = $reason === '' ? 'Publisher ran. See the Queue page for results.' : "Followed up on sent posts; nothing new sent ({$reason}).";
+            }
+        } elseif ($task === 'test_publer') {
+            $out = self::publer_report();
+        } else {
+            $out = 'Unknown action.';
+        }
+        set_transient('sgap_run_result_' . get_current_user_id(), $out, MINUTE_IN_SECONDS * 5);
+        wp_safe_redirect(admin_url('admin.php?page=steamgears-autopilot'));
+        exit;
+    }
+
+    private static function publer_report(): string {
+        if (SGAP_Settings::get('publer_api_key') === '') {
+            return 'Save the Publer API key in Settings first.';
+        }
+        $lines = [];
+        $workspaces = SGAP_Publer::workspaces();
+        if (is_wp_error($workspaces)) {
+            return 'Publer: ' . $workspaces->get_error_message();
+        }
+        $lines[] = 'Workspaces (put the id in Settings → Publer workspace id):';
+        foreach ($workspaces as $workspace) {
+            if (is_array($workspace)) {
+                $lines[] = '  ' . ($workspace['id'] ?? '?') . '  ' . ($workspace['name'] ?? '');
+            }
+        }
+        if (SGAP_Settings::get('publer_workspace_id') !== '') {
+            $accounts = SGAP_Publer::accounts(true);
+            if (is_wp_error($accounts)) {
+                $lines[] = 'Accounts: ' . $accounts->get_error_message();
+            } else {
+                $lines[] = 'Connected accounts:';
+                foreach ($accounts as $account) {
+                    $lines[] = "  {$account['provider']}: {$account['name']} ({$account['id']})";
+                }
+                $missing = array_diff(SGAP_Publer::channels(), array_column($accounts, 'provider'));
+                if ($missing) {
+                    $lines[] = 'Channels without a Publer account: ' . implode(', ', $missing);
+                }
+            }
+        }
+        return implode("\n", $lines);
     }
 
     public static function settings(): void {
@@ -902,6 +1125,9 @@ class SGAP_Admin {
             foreach ($keys as $key) {
                 echo '<tr><th scope="row"><label for="sgap_' . esc_attr($key) . '">' . esc_html(ucfirst(str_replace('_', ' ', $key))) . '</label></th><td>';
                 self::field($key);
+                if (isset(SGAP_Settings::HELP[$key])) {
+                    echo '<p class="description">' . esc_html(SGAP_Settings::HELP[$key]) . '</p>';
+                }
                 echo '</td></tr>';
             }
             echo '</tbody></table>';
@@ -919,6 +1145,15 @@ class SGAP_Admin {
                 '<select id="%1$s" name="%1$s"><option value="no"%2$s>Off</option><option value="yes"%3$s>On</option></select>',
                 esc_attr($id), selected(!$on, true, false), selected($on, true, false)
             );
+            return;
+        }
+        if (isset(SGAP_Settings::CHOICE_KEYS[$key])) {
+            $current = (string) SGAP_Settings::get($key);
+            echo '<select id="' . esc_attr($id) . '" name="' . esc_attr($id) . '">';
+            foreach (SGAP_Settings::CHOICE_KEYS[$key] as $value => $label) {
+                echo '<option value="' . esc_attr($value) . '"' . selected($current, $value, false) . '>' . esc_html($label) . '</option>';
+            }
+            echo '</select>';
             return;
         }
         if (in_array($key, SGAP_Settings::SECRET_KEYS, true)) {
@@ -962,7 +1197,7 @@ class SGAP_Admin {
         global $wpdb;
         self::open('AI Drafts');
         if (isset($_GET['done'])) {
-            echo '<div class="notice notice-success"><p>Draft ' . esc_html(sanitize_key($_GET['done'])) . '.</p></div>';
+            echo '<div class="notice notice-info"><p>Draft ' . esc_html(sanitize_text_field(wp_unslash($_GET['done']))) . '.</p></div>';
         }
         $table = $wpdb->prefix . 'sgap_ai_drafts';
         $rows = self::table_exists($table)
@@ -997,11 +1232,16 @@ class SGAP_Admin {
         $id = isset($_POST['draft_id']) ? absint($_POST['draft_id']) : 0;
         check_admin_referer('sgap_approve_ai_' . $id);
         $decision = (isset($_POST['decision']) && $_POST['decision'] === 'rejected') ? 'rejected' : 'approved';
-        if ($id) {
-            $wpdb->update($wpdb->prefix . 'sgap_ai_drafts', ['status' => $decision], ['id' => $id]);
-            delete_transient('sgap_dashboard_stats');
+        $done = $decision;
+        if ($id && $decision === 'approved') {
+            // An approved draft goes straight into the publishing queue.
+            $queued = SGAP_Queue::from_draft($id);
+            $done = is_wp_error($queued) ? 'error: ' . $queued->get_error_message() : 'approved and queued';
+        } elseif ($id) {
+            $wpdb->update($wpdb->prefix . 'sgap_ai_drafts', ['status' => 'rejected'], ['id' => $id]);
         }
-        wp_safe_redirect(add_query_arg(['page' => 'sgap-ai', 'done' => $decision], admin_url('admin.php')));
+        delete_transient('sgap_dashboard_stats');
+        wp_safe_redirect(add_query_arg(['page' => 'sgap-ai', 'done' => rawurlencode($done)], admin_url('admin.php')));
         exit;
     }
 
@@ -1037,6 +1277,9 @@ class SGAP_Admin {
         echo '</tbody></table>';
     }
 }
+
+add_filter('cron_schedules', ['SGAP_Install', 'cron_schedules']);
+add_action('init', ['SGAP_Install', 'maybe_upgrade'], 5);
 
 // Settings must register on every request (options.php saves go through admin),
 // but the admin UI is only loaded inside wp-admin, so the frontend pays nothing.

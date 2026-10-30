@@ -23,7 +23,7 @@ function sanitize_key($s){return preg_replace('/[^a-z0-9_\-]/','',strtolower((st
 function esc_url_raw($u,$p=null){return preg_match('#^https?://#',$u)?$u:'';} function wp_parse_url($u,$c=-1){return parse_url($u,$c);}
 function wp_parse_args($a,$d){return array_merge($d,$a);} function add_query_arg($a,$u){return $u.(str_contains($u,'?')?'&':'?').http_build_query($a,'','&',PHP_QUERY_RFC3986);}
 function current_time($t){return '2026-10-30 12:00:00';} function wp_date($f,$t=null){return date($f,$t??time());}
-function current_user_can($c){return true;}
+function current_user_can($c){return true;} function get_current_user_id(){return 1;} function delete_option($k){unset($GLOBALS["opts"][$k]);} function wp_json_encode($v){return json_encode($v);} function is_wp_error($v){return $v instanceof WP_Error;}
 class WP_Error{ function __construct(public $code,public $msg,public $data=[]){} }
 class WP_REST_Response{ function __construct(public $data,public $status=200){} }
 class WP_REST_Request implements ArrayAccess{ function __construct(public array $p){} function get_param($k){return $this->p[$k]??null;}
@@ -36,7 +36,7 @@ class W{ public $prefix='wp_'; function get_charset_collate(){return '';} public
 $wpdb=new W;
 require __DIR__.'/../steamgears-autopilot/steamgears-autopilot.php';
 function check($name,$ok){ echo ($ok?'PASS ':'FAIL ')."$name\n"; if(!$ok) $GLOBALS['fail']=1; }
-do_action('admin_init'); do_action('admin_menu');
+do_action('init'); do_action('admin_init'); do_action('admin_menu');
 check('install: 8 tables', count($GLOBALS['ddl']??[])===8); check('install: cleanup cron', in_array('sgap_daily_cleanup',$GLOBALS['cron']??[])); check('install: /go/ rule + flush', ($GLOBALS['rules'][0]??'')==='^go/([0-9]+)/?$' && !empty($GLOBALS['flushed'])); check('install: secrets not autoloaded', isset($GLOBALS['noauto']['sgap_ai_api_key'])); check('version stored', $opts['sgap_version']===SGAP_VERSION);
 foreach(['steamgears-autopilot','sgap-settings','sgap-queue','sgap-ai','sgap-campaigns','sgap-etsy','sgap-reports','sgap-fullauto','sgap-merchant'] as $p){ ob_start(); do_action('page_'.$p); $html=ob_get_clean(); check("page $p renders", strlen($html)>20); }
 // secrets never echoed
@@ -49,8 +49,8 @@ define('SGAP_TELEGRAM_BOT_TOKEN','fromconfig'); check('wp-config constant wins',
 check('hour clamp', $settings['sgap_quiet_start']['sanitize_callback']('99')===23);
 check('bool sanitize', $settings['sgap_autopilot_enabled']['sanitize_callback']('hack')==='no');
 // quiet hours
-check('quiet 23-7 at 2', SGAP_REST::in_quiet_hours(2,23,7)); check('quiet 23-7 at 12 open', !SGAP_REST::in_quiet_hours(12,23,7));
-check('quiet 23-7 at 7 open', !SGAP_REST::in_quiet_hours(7,23,7)); check('quiet 1-5 at 3', SGAP_REST::in_quiet_hours(3,1,5)); check('quiet equal = none', !SGAP_REST::in_quiet_hours(3,4,4));
+check('quiet 23-7 at 2', SGAP_Queue::in_quiet_hours(2,23,7)); check('quiet 23-7 at 12 open', !SGAP_Queue::in_quiet_hours(12,23,7));
+check('quiet 23-7 at 7 open', !SGAP_Queue::in_quiet_hours(7,23,7)); check('quiet 1-5 at 3', SGAP_Queue::in_quiet_hours(3,1,5)); check('quiet equal = none', !SGAP_Queue::in_quiet_hours(3,4,4));
 // bots
 check('bot pinterestbot', SGAP_Tracking::is_bot('Pinterestbot/1.0')); check('bot fb preview', SGAP_Tracking::is_bot('facebookexternalhit/1.1'));
 check('human iPhone pinterest app', !SGAP_Tracking::is_bot('Mozilla/5.0 (iPhone) AppleWebKit Mobile [Pinterest/iOS]')); check('empty ua = bot', SGAP_Tracking::is_bot(''));
@@ -72,5 +72,33 @@ $r=SGAP_REST::due(new WP_REST_Request([])); check('due cap reached', $r['reason'
 $wpdb->next=2; $r=SGAP_REST::due(new WP_REST_Request([])); check('due limit = min(batch5, 8-2)', str_contains(end($wpdb->log),'LIMIT 5'));
 $r=SGAP_REST::draft_status(new WP_REST_Request(['id'=>3,'status'=>'bogus'])); check('draft bad status 400', $r instanceof WP_Error);
 $r=SGAP_REST::queue_status(new WP_REST_Request(['id'=>3,'status'=>'published'])); check('queue status unknown id 404', $r instanceof WP_Error && $r->data['status']===404);
+
+// --- Publer payloads ---
+$row=['title'=>'Brass goggles','body'=>'Look sharp.','tracking_url'=>'https://steamgears.eu/go/5/','image_url'=>'https://steamgears.eu/img.jpg'];
+$fb=SGAP_Publer::network_payload('facebook',$row,'');
+check('publer: facebook is a link post with tracking url', $fb['type']==='link' && $fb['link']['url']==='https://steamgears.eu/go/5/' && $fb['link']['images']===['https://steamgears.eu/img.jpg']);
+check('publer: instagram without photo is an error', is_string(SGAP_Publer::network_payload('instagram',$row,'')));
+$ig=SGAP_Publer::network_payload('instagram',$row,'m1');
+check('publer: instagram photo post, no url in caption', $ig['type']==='photo' && $ig['media'][0]['id']==='m1' && !str_contains($ig['text'],'/go/'));
+$pin=SGAP_Publer::network_payload('pinterest',$row+['body'=>''],'m2');
+check('publer: pinterest pin has title, link and photo', $pin['type']==='photo' && $pin['url']==='https://steamgears.eu/go/5/' && $pin['title']==='Brass goggles' && $pin['media'][0]['id']==='m2');
+$x=SGAP_Publer::network_payload('twitter',['body'=>str_repeat('a',400)]+$row,'');
+check('publer: twitter fits 280 (links count as 23) with link appended', mb_strlen($x['text'])-mb_strlen('https://steamgears.eu/go/5/')+23<=280 && str_ends_with($x['text'],'https://steamgears.eu/go/5/'));
+check('publer: unknown channel is an error', is_string(SGAP_Publer::network_payload('myspace',$row,'')));
+check('publer: job working', SGAP_Publer::parse_job(['data'=>['status'=>'working']])['state']==='working');
+check('publer: job complete (data shape)', SGAP_Publer::parse_job(['success'=>true,'data'=>['status'=>'complete','result'=>['payload'=>['failures'=>[]]]]])['state']==='done');
+check('publer: job completed (flat shape)', SGAP_Publer::parse_job(['status'=>'completed','payload'=>[]])['state']==='done');
+check('publer: complete with failures = failed', SGAP_Publer::parse_job(['data'=>['status'=>'complete','result'=>['payload'=>['failures'=>['x'=>'token expired']]]]])['state']==='failed');
+check('publer: job failed', SGAP_Publer::parse_job(['status'=>'failed'])['state']==='failed');
+// --- AI parsing ---
+$json='{"posts":[{"channel":"facebook","title":"T","text":"Hello","hashtags":["#steampunk","cosplay"],"alt_text":"A"},{"channel":"facebook","title":"dup","text":"x","hashtags":[],"alt_text":""},{"channel":"tiktok","title":"T","text":"x","hashtags":[],"alt_text":""},{"channel":"instagram","title":"T","text":"","hashtags":[],"alt_text":""}]}';
+$posts=SGAP_AI::parse_posts($json,['facebook','instagram']);
+check('ai: keeps one valid post per requested channel', count($posts)===1 && $posts[0]['channel']==='facebook' && $posts[0]['hashtags']==='#steampunk #cosplay');
+check('ai: bad json gives no posts', SGAP_AI::parse_posts('nope',['facebook'])===[]);
+check('ai: anthropic text block found after thinking', SGAP_AI::anthropic_text(['stop_reason'=>'end_turn','content'=>[['type'=>'thinking','thinking'=>''],['type'=>'text','text'=>'{"posts":[]}']]])==='{"posts":[]}');
+check('ai: refusal is an error', SGAP_AI::anthropic_text(['stop_reason'=>'refusal','content'=>[]]) instanceof WP_Error);
+check('ai: truncation is an error', SGAP_AI::anthropic_text(['stop_reason'=>'max_tokens','content'=>[['type'=>'text','text'=>'{']]]) instanceof WP_Error);
+$schema=SGAP_AI::schema(['facebook']);
+check('ai: schema is strict', $schema['additionalProperties']===false && $schema['properties']['posts']['items']['additionalProperties']===false && $schema['properties']['posts']['items']['properties']['channel']['enum']===['facebook']);
 echo empty($GLOBALS['fail'])?"ALL PASS\n":"SOME FAILED\n";
 exit(empty($GLOBALS['fail'])?0:1);
