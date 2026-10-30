@@ -7,11 +7,19 @@ The whole social autopilot runs inside WordPress (Command Center is retired):
    the last `repost_cooldown_days`.
 2. **Approve** – posts wait under *Steamgears → AI Drafts* (Approve / Reject), or go
    straight to the queue when **Full auto** is on.
-3. **Publish** – every 15 minutes the queue is sent to **Publer**, which posts to
-   the connected Facebook, Instagram, Pinterest, LinkedIn, X, Threads, Bluesky,
-   Mastodon, Telegram and Google Business accounts. Quiet hours, daily cap and
-   batch size apply; failures are retried up to 3 times with the reason shown on
-   the Queue page.
+3. **Publish** – every 15 minutes the next due posts (quiet hours, daily cap and
+   batch size apply) go to **Publer**, which posts to the connected Facebook,
+   Instagram, Pinterest, LinkedIn, X, Threads, Bluesky, Mastodon, Telegram and
+   Google Business accounts. Two modes (*Settings → Publer → Publish mode*):
+   - **RSS feeds** (default, works on Publer **Professional**): posts are released
+     into one feed per channel, `https://steamgears.eu/sgap-feed/<channel>/`. In
+     Publer add each feed once (*Explore → RSS Feeds*), open its *Settings*, choose
+     **Auto-post**, tick "use link title/description as caption", pick *photo* for
+     Instagram/Pinterest/Google and *link* for the others, and select the account.
+     Pinterest needs a default board in Publer. The dashboard lists the feed URLs.
+   - **API** (Publer **Business**): posts are sent straight to Publer and the
+     plugin records whether each one was published; failures are retried up to 3
+     times with the reason shown on the Queue page.
 4. **Measure** – every post links via `/go/<id>/`, so clicks (and WooCommerce
    orders) are counted per channel.
 
@@ -49,8 +57,10 @@ Center and Pinterest Catalogs (*Google Feed*, needs a feed secret and WooCommerc
 
 ## Setup
 
-1. **Publer** (Business plan): Settings → Access & Login → API Keys → create a key
-   with the scopes `workspaces`, `accounts`, `posts`, `media`.
+1. **Publer**: on Professional keep *Publish mode = RSS feeds* and add the feeds
+   (see above); steps 2–3 are only for the API mode. On Business: Settings →
+   Access & Login → API Keys → create a key with the scopes `workspaces`,
+   `accounts`, `posts`, `media`.
 2. In WordPress: *Steamgears → Settings → Publer*: paste the API key, save, then
    click **Test Publer** on the dashboard. It lists your workspaces (copy the id
    into *Publer workspace id*, save) and then your connected accounts.

@@ -195,6 +195,7 @@ update_option('sgap_ai_model', '');
 update_option('sgap_channels', 'facebook, instagram, pinterest, myspace');
 update_option('sgap_posts_per_day', 1);
 update_option('sgap_full_auto_enabled', 'no');
+update_option('sgap_publish_mode', 'api');
 update_option('sgap_publer_api_key', 'ci-publer-key');
 update_option('sgap_publer_workspace_id', 'ws_1');
 update_option('sgap_publer_pinterest_board', 'board_1');
@@ -369,6 +370,34 @@ if (function_exists('wp_get_ability')) {
     sgci_check('keycheck: available as Claude tool', is_array($r) && isset($r['publer'], $r['ai']), $r);
 }
 remove_all_filters('pre_http_request');
+
+/* --- RSS mode for Publer Professional --- */
+update_option('sgap_publish_mode', 'rss');
+update_option('sgap_autopilot_enabled', 'yes');
+update_option('sgap_quiet_start', 0);
+update_option('sgap_quiet_end', 0);
+update_option('sgap_daily_cap', 50);
+update_option('sgap_batch_size', 10);
+update_option('sgap_channels', 'facebook, instagram');
+$rss_fb = SGAP_Queue::add(['channel' => 'facebook', 'title' => 'CI RSS post', 'body' => "Line one\nLine two #steampunk",
+    'destination_url' => home_url('/rss-post/'), 'image_url' => home_url('/wp-content/uploads/ci-rss.png')]);
+$rss_ig = SGAP_Queue::add(['channel' => 'instagram', 'title' => 'CI RSS no photo', 'body' => 'x', 'destination_url' => home_url('/rss-ig/')]);
+$r = SGAP_Publer::tick();
+sgci_check('rss: tick releases into the feed instead of calling Publer', ($r['mode'] ?? '') === 'rss'
+    && in_array((int) $rss_fb['id'], array_column($r['sent'], 'id'), true), $r);
+sgci_check('rss: instagram without photo fails with a reason', in_array((int) $rss_ig['id'], array_column($r['failed'], 'id'), true));
+$row = $wpdb->get_row($wpdb->prepare("SELECT status, external_id, published_at FROM {$wpdb->prefix}sgap_queue WHERE id = %d", $rss_fb['id']));
+sgci_check('rss: released post is published and marked rss', $row && $row->status === 'published' && $row->external_id === 'rss' && $row->published_at, $row);
+$xml = SGAP_RSS::xml('facebook');
+$parsed = simplexml_load_string($xml);
+sgci_check('rss: feed is valid XML with the item', $parsed !== false && count($parsed->channel->item) >= 1, $xml);
+sgci_check('rss: item links to the /go/ tracking link', str_contains($xml, '<link>' . SGAP_Tracking::url((int) $rss_fb['id']) . '</link>'));
+sgci_check('rss: line breaks as literal \n, image enclosure', str_contains($xml, 'Line one\nLine two #steampunk') && str_contains($xml, '<enclosure url="' . home_url('/wp-content/uploads/ci-rss.png')));
+sgci_check('rss: other channels stay empty', !str_contains(SGAP_RSS::xml('instagram'), 'CI RSS post'));
+sgci_check('rss: key check needs no Publer key', SGAP_KeyCheck::check_publer()['ok'] === null);
+update_option('sgap_ci_rss_id', (int) $rss_fb['id']);
+$wpdb->delete($wpdb->prefix . 'sgap_queue', ['id' => (int) $rss_ig['id']]);
+update_option('sgap_autopilot_enabled', 'no');
 
 if ($GLOBALS['sgci_failed']) {
     WP_CLI::error('Integration checks failed.');

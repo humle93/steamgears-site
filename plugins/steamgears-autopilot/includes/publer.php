@@ -252,6 +252,9 @@ class SGAP_Publer {
      * Returns what happened, for the dashboard button and the Claude tool.
      */
     public static function tick(): array {
+        if (SGAP_RSS::enabled()) {
+            return SGAP_RSS::release();
+        }
         $report = ['configured' => self::configured(), 'followed_up' => [], 'sent' => [], 'failed' => [], 'blocked' => ''];
         if (!$report['configured']) {
             return $report;

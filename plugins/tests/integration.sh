@@ -65,6 +65,16 @@ check "go: click row stored" "$(sql "SELECT COUNT(*) FROM {\$wpdb->prefix}sgap_c
 HEADERS="$(curl -s -o /dev/null -D - -A "$HUMAN" "$URL/go/999999/")"
 check "go: unknown id goes home" "$(echo "$HEADERS" | grep -i '^location:' | tr -d '\r' | awk '{print $2}')" "$URL/"
 
+RSS_ID="$(wpc option get sgap_ci_rss_id)"
+FEED="$(curl -s -D /tmp/feed-headers "$URL/sgap-feed/facebook/")"
+check "rss: feed served as RSS" "$(grep -ci '^content-type: application/rss+xml' /tmp/feed-headers)" "1"
+check "rss: feed contains the released post" "$(echo "$FEED" | grep -c "<link>$URL/go/$RSS_ID/</link>")" "1"
+check "rss: unknown channel is 404" "$(curl -s -o /dev/null -w '%{http_code}' "$URL/sgap-feed/myspace/")" "404"
+HEADERS="$(curl -s -o /dev/null -D - -A 'facebookplatform/1.0 (+http://developers.facebook.com)' "$URL/go/$RSS_ID/")"
+check "rss: Publer scraper follows /go/" "$(echo "$HEADERS" | head -1 | awk '{print $2}')" "302"
+check "rss: Publer scraper is not counted as a click" \
+    "$(sql "SELECT COUNT(*) FROM {\$wpdb->prefix}sgap_events WHERE event_type = 'click' AND queue_id = $RSS_ID")" "0"
+
 APP_PASS="$(wpc user application-password create admin ci --porcelain)"
 check "REST: app password works" "$(curl -s -o /dev/null -w '%{http_code}' -u "admin:$APP_PASS" "$URL/wp-json/sgap/v1/stats")" "200"
 check "REST: anonymous rejected" "$(curl -s -o /dev/null -w '%{http_code}' "$URL/wp-json/sgap/v1/stats")" "401"

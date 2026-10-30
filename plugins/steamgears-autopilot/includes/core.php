@@ -43,7 +43,8 @@ class SGAP_Install {
         'sgap_repost_max' => 3,
         'sgap_posts_per_day' => 2,
         'sgap_channels' => 'facebook,instagram,pinterest',
-        'sgap_ai_provider' => 'anthropic'
+        'sgap_ai_provider' => 'anthropic',
+        'sgap_publish_mode' => 'rss'
     ];
 
     public static function activate(): void {
@@ -250,6 +251,7 @@ class SGAP_Install {
         }
 
         SGAP_Tracking::add_rewrite_rule();
+        SGAP_RSS::add_rewrite_rule();
         flush_rewrite_rules(false);
 
         update_option('sgap_version', SGAP_VERSION);
@@ -279,13 +281,14 @@ class SGAP_Settings {
     ];
     /** Settings with a fixed list of values, shown as a select. */
     const CHOICE_KEYS = [
+        'publish_mode' => ['rss' => 'RSS feeds (Publer Professional)', 'api' => 'Publer API (Publer Business)'],
         'ai_provider' => ['anthropic' => 'Anthropic (Claude)', 'openai_compatible' => 'OpenAI-compatible (AIMLAPI, OpenAI, ...)']
     ];
 
     /** Shown in the settings page. Keys not listed here stay registered for older data but are unused. */
     const SECTIONS = [
         'General' => ['autopilot_enabled','full_auto_enabled','daily_cap','batch_size','quiet_start','quiet_end'],
-        'Publer' => ['publer_api_key','publer_workspace_id','publer_pinterest_board','channels'],
+        'Publer' => ['publish_mode','publer_api_key','publer_workspace_id','publer_pinterest_board','channels'],
         'AI content' => ['ai_provider','ai_api_key','ai_model','ai_base_url','posts_per_day'],
         'Economics' => ['labor_rate','monthly_budget','target_roi','winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max'],
         'Etsy' => ['etsy_shop_id','etsy_oauth_token','etsy_refresh_token','etsy_shipping_profile_id','etsy_return_policy_id'],
@@ -295,9 +298,10 @@ class SGAP_Settings {
     const HELP = [
         'autopilot_enabled' => 'Master switch: generate posts daily and publish the queue via Publer.',
         'full_auto_enabled' => 'On: AI posts go straight to the queue. Off: they wait under AI Drafts for your approval.',
-        'publer_api_key' => 'Publer → Settings → Access & Login → API Keys (Business plan). Scopes: posts, media, accounts.',
+        'publish_mode' => 'RSS: posts are released into one feed per channel; in Publer add each feed (Explore → RSS Feeds) and set it to Auto-post. API: posts are sent straight to Publer (needs a Business plan API key).',
+        'publer_api_key' => 'API mode only. Publer → Settings → Access & Login → API Keys (Business plan). Scopes: posts, media, accounts.',
         'publer_workspace_id' => 'Shown by "Test Publer" on the dashboard once the API key is saved.',
-        'publer_pinterest_board' => 'Pinterest board ID the pins go to (required for Pinterest).',
+        'publer_pinterest_board' => 'API mode: Pinterest board ID the pins go to. RSS mode: set a default board in Publer instead.',
         'channels' => 'Comma-separated. Supported: ' . 'facebook, instagram, pinterest, linkedin, twitter, threads, bluesky, mastodon, telegram, google',
         'ai_model' => 'Empty = claude-opus-5-5 for Anthropic. Required for OpenAI-compatible.',
         'ai_base_url' => 'OpenAI-compatible only. Empty = https://api.aimlapi.com/v1',
@@ -464,7 +468,7 @@ class SGAP_Tracking {
 
     public static function is_bot(string $ua): bool {
         return $ua === '' || (bool) preg_match(
-            '/bot|crawl|spider|slurp|facebookexternalhit|embedly|preview|whatsapp|curl|wget|python-requests|headless/i',
+            '/bot|crawl|spider|slurp|facebookexternalhit|facebookplatform|linkpreview|publer|embedly|preview|whatsapp|curl|wget|python-requests|headless/i',
             $ua
         );
     }
@@ -1205,6 +1209,15 @@ class SGAP_Admin {
                 . '<button class="button">' . esc_html($label) . '</button></form>';
         }
         echo '</p>';
+        if (SGAP_RSS::enabled()) {
+            echo '<h2>Publer RSS feeds</h2><p>In Publer: <em>Explore → RSS Feeds → add feed</em>, then the feed\'s <em>Settings → Auto-post</em>, '
+                . 'tick "use link title/description as caption", choose <em>photo</em> for Instagram/Pinterest/Google and <em>link</em> for the rest, '
+                . 'and select that channel\'s account. Pinterest needs a default board in Publer.</p><table class="widefat striped" style="max-width:760px"><tbody>';
+            foreach (SGAP_Publer::channels() as $channel) {
+                echo '<tr><td>' . esc_html($channel) . '</td><td><input type="text" readonly class="large-text code" value="' . esc_attr(SGAP_RSS::url($channel)) . '" onclick="this.select();"></td></tr>';
+            }
+            echo '</tbody></table>';
+        }
         $keys = get_option(SGAP_KeyCheck::RESULT);
         if (is_array($keys)) {
             foreach (['publer' => 'Publer', 'ai' => 'AI'] as $part => $label) {
@@ -1231,12 +1244,13 @@ class SGAP_Admin {
             $out = "Generated from {$r['sources']} pages: {$r['drafts']} drafts, {$r['queued']} queued."
                 . ($r['errors'] ? "\nErrors:\n- " . implode("\n- ", $r['errors']) : '');
         } elseif ($task === 'publish') {
-            if (!SGAP_Publer::configured()) {
-                $out = 'Save the Publer API key and workspace id first.';
+            if (!SGAP_RSS::enabled() && !SGAP_Publer::configured()) {
+                $out = 'Save the Publer API key and workspace id first (or switch Publish mode to RSS feeds).';
             } else {
-                $reason = SGAP_Queue::blocked_reason();
-                SGAP_Publer::tick();
-                $out = $reason === '' ? 'Publisher ran. See the Queue page for results.' : "Followed up on sent posts; nothing new sent ({$reason}).";
+                $r = SGAP_Publer::tick();
+                $out = $r['blocked'] !== ''
+                    ? "Nothing new sent ({$r['blocked']})."
+                    : count($r['sent']) . ' post(s) ' . (SGAP_RSS::enabled() ? 'released to the RSS feeds' : 'sent to Publer') . ', ' . count($r['failed']) . ' failed. See the Queue page.';
             }
         } elseif ($task === 'test_keys') {
             $r = SGAP_KeyCheck::run();

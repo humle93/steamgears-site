@@ -100,5 +100,7 @@ check('ai: refusal is an error', SGAP_AI::anthropic_text(['stop_reason'=>'refusa
 check('ai: truncation is an error', SGAP_AI::anthropic_text(['stop_reason'=>'max_tokens','content'=>[['type'=>'text','text'=>'{']]]) instanceof WP_Error);
 $schema=SGAP_AI::schema(['facebook']);
 check('ai: schema is strict', $schema['additionalProperties']===false && $schema['properties']['posts']['items']['additionalProperties']===false && $schema['properties']['posts']['items']['properties']['channel']['enum']===['facebook']);
+check('rss: newlines become a literal \\n for Publer', SGAP_RSS::description("Line one\r\nLine two\nThree")==='Line one\\nLine two\\nThree');
+check('bot: Publer link scraper is not a click', SGAP_Tracking::is_bot('facebookplatform/1.0 (+http://developers.facebook.com)'));
 echo empty($GLOBALS['fail'])?"ALL PASS\n":"SOME FAILED\n";
 exit(empty($GLOBALS['fail'])?0:1);

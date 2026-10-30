@@ -99,7 +99,7 @@ class SGAP_Abilities {
             ],
             'publish' => [
                 'Publish queue now',
-                'Runs the Publer publisher now (normally every 15 minutes): records the outcome of posts already sent, then sends due posts within quiet hours, the daily cap and batch size.',
+                'Runs the publisher now (normally every 15 minutes). RSS mode: releases due posts into the per-channel RSS feeds that Publer auto-posts from. API mode: records the outcome of posts already sent to Publer, then sends due posts. Quiet hours, daily cap and batch size apply.',
                 [], [], [__CLASS__, 'publish'], false, false
             ],
             'set-mode' => [
@@ -159,7 +159,9 @@ class SGAP_Abilities {
             'autopilot' => SGAP_Settings::enabled('autopilot_enabled'),
             'full_auto' => SGAP_Settings::enabled('full_auto_enabled'),
             'channels' => SGAP_Publer::channels(),
-            'publer_configured' => SGAP_Publer::configured(),
+            'publish_mode' => SGAP_RSS::enabled() ? 'rss (Publer RSS feeds)' : 'api (Publer API)',
+            'rss_feeds' => SGAP_RSS::enabled() ? array_map([SGAP_RSS::class, 'url'], SGAP_Publer::channels()) : null,
+            'publer_configured' => SGAP_RSS::enabled() || SGAP_Publer::configured(),
             'ai_configured' => SGAP_Settings::get('ai_api_key') !== '',
             'ai_provider' => (string) SGAP_Settings::get('ai_provider', 'anthropic'),
             'key_test' => get_option(SGAP_KeyCheck::RESULT) ?: null,
