@@ -60,6 +60,8 @@ def startup_event():
         conn.commit()
         print("[INFO] Bruger 'humle91' (cpaleadsis@gmail.com) oprettet i databasen.")
     conn.close()
+    
+    print(f"\n 🌐 DASHBOARD URL: http://127.0.0.1:8000")
     print(f" [{VERSION}] Systemet er fuldt operationelt!\n" + "="*50 + "\n")
 
 @app.get("/login", response_class=HTMLResponse)
