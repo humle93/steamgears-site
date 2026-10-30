@@ -285,9 +285,9 @@ wp_set_current_user((int) $admin[0]);
 
 /* --- Claude / MCP abilities (WordPress 6.9+ only) --- */
 if (function_exists('wp_get_ability')) {
-    $names = ['status', 'list-drafts', 'review-draft', 'list-queue', 'queue-post', 'generate', 'publish', 'set-mode', 'check-publer'];
+    $names = ['status', 'list-drafts', 'review-draft', 'list-queue', 'queue-post', 'generate', 'publish', 'set-mode', 'check-keys', 'check-publer'];
     $missing = array_values(array_filter($names, fn($n) => !wp_get_ability('steamgears-autopilot/' . $n)));
-    sgci_check('abilities: all 9 registered', !$missing, $missing);
+    sgci_check('abilities: all 10 registered', !$missing, $missing);
     $status_ability = wp_get_ability('steamgears-autopilot/status');
     $meta = $status_ability && method_exists($status_ability, 'get_meta') ? $status_ability->get_meta() : [];
     sgci_check('abilities: exposed to MCP, read-only status', ($meta['mcp']['public'] ?? false) === true && ($meta['annotations']['readonly'] ?? null) === true, $meta);
@@ -313,6 +313,62 @@ if (function_exists('wp_get_ability')) {
 } else {
     WP_CLI::line('SKIP abilities: this WordPress has no Abilities API');
 }
+
+/* --- API key test after saving (Publer + Anthropic mocked) --- */
+add_filter('pre_http_request', function ($pre, $args, $url) {
+    $auth = (string) ($args['headers']['Authorization'] ?? '');
+    $reply = fn(int $code, $body) => ['headers' => ['content-type' => 'application/json'], 'body' => wp_json_encode($body), 'response' => ['code' => $code, 'message' => ''], 'cookies' => [], 'filename' => null];
+    if (str_starts_with($url, 'https://app.publer.com/')) {
+        if (str_contains($auth, 'bad-key')) {
+            return $reply(401, ['errors' => ['Invalid API key']]);
+        }
+        if (str_ends_with($url, '/workspaces')) {
+            return $reply(200, [['id' => 'ws_only', 'name' => 'Steamgears']]);
+        }
+        if (str_ends_with($url, '/accounts')) {
+            return $reply(200, [['id' => 'a1', 'provider' => 'facebook', 'name' => 'FB'], ['id' => 'a2', 'provider' => 'instagram', 'name' => 'IG']]);
+        }
+    }
+    if (str_starts_with($url, 'https://api.anthropic.com/v1/models/')) {
+        if (($args['headers']['x-api-key'] ?? '') !== 'good-ai-key') {
+            return $reply(401, ['type' => 'error', 'error' => ['type' => 'authentication_error', 'message' => 'invalid x-api-key']]);
+        }
+        return str_ends_with($url, '/claude-opus-5-5') ? $reply(200, ['id' => 'claude-opus-5-5', 'type' => 'model']) : $reply(404, ['type' => 'error']);
+    }
+    return $pre;
+}, 10, 3);
+SGAP_Settings::register();
+delete_transient(SGAP_KeyCheck::PENDING);
+update_option('sgap_publer_workspace_id', '');
+update_option('sgap_channels', 'facebook, instagram');
+update_option('sgap_publer_api_key', 'good-key');
+sgci_check('keycheck: saving a key flags a test', (bool) get_transient(SGAP_KeyCheck::PENDING));
+update_option('sgap_ai_provider', 'anthropic');
+update_option('sgap_ai_model', '');
+update_option('sgap_ai_api_key', 'good-ai-key');
+$r = SGAP_KeyCheck::run();
+sgci_check('keycheck: good Publer key passes', $r['publer']['ok'] === true, $r['publer']);
+sgci_check('keycheck: single workspace filled in', get_option('sgap_publer_workspace_id') === 'ws_only');
+sgci_check('keycheck: good Claude key + default model passes', $r['ai']['ok'] === true && str_contains($r['ai']['message'], 'claude-opus-5-5'), $r['ai']);
+sgci_check('keycheck: result stored, flag cleared', is_array(get_option(SGAP_KeyCheck::RESULT)) && !get_transient(SGAP_KeyCheck::PENDING));
+update_option('sgap_channels', 'facebook, instagram, pinterest');
+$r = SGAP_KeyCheck::run();
+sgci_check('keycheck: channel without Publer account is reported', $r['publer']['ok'] === false && str_contains($r['publer']['message'], 'pinterest'), $r['publer']);
+update_option('sgap_publer_api_key', 'bad-key');
+$r = SGAP_KeyCheck::run();
+sgci_check('keycheck: invalid Publer key is reported', $r['publer']['ok'] === false && str_contains($r['publer']['message'], 'invalid'), $r['publer']);
+update_option('sgap_ai_model', 'claude-made-up');
+$r = SGAP_KeyCheck::run();
+sgci_check('keycheck: unknown model is reported', $r['ai']['ok'] === false && str_contains($r['ai']['message'], 'claude-made-up'), $r['ai']);
+update_option('sgap_ai_model', '');
+update_option('sgap_ai_api_key', 'wrong-ai-key');
+$r = SGAP_KeyCheck::run();
+sgci_check('keycheck: invalid Claude key is reported', $r['ai']['ok'] === false && str_contains($r['ai']['message'], 'refused'), $r['ai']);
+if (function_exists('wp_get_ability')) {
+    $r = wp_get_ability('steamgears-autopilot/check-keys')->execute();
+    sgci_check('keycheck: available as Claude tool', is_array($r) && isset($r['publer'], $r['ai']), $r);
+}
+remove_all_filters('pre_http_request');
 
 if ($GLOBALS['sgci_failed']) {
     WP_CLI::error('Integration checks failed.');

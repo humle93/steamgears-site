@@ -33,6 +33,7 @@ all admin-only, none of them deleting anything:
 | `steamgears-autopilot/generate` | Run the AI writer now |
 | `steamgears-autopilot/publish` | Run the Publer publisher now |
 | `steamgears-autopilot/set-mode` | Autopilot / Full Auto on or off |
+| `steamgears-autopilot/check-keys` | Test the Publer and AI keys (see below) |
 | `steamgears-autopilot/check-publer` | Workspaces, accounts, channels without an account |
 
 Example: "Write today's posts and show them to me" → `generate`, then
@@ -62,6 +63,14 @@ Center and Pinterest Catalogs (*Google Feed*, needs a feed secret and WooCommerc
    the drafts by hand until you like the tone.
 6. Use **Generate posts now** / **Publish queue now** on the dashboard to try it
    without waiting for the cron.
+
+**Key test.** Saving a Publer or AI key (or the workspace, channels, provider or
+model) tests it straight away; the result appears at the top of the page and on
+the dashboard (✓/✗), and *Test API keys* repeats it. Publer: key valid, scopes,
+workspace (filled in automatically when the key has only one), an account for
+every channel, Pinterest board set. Claude: key valid and model available via the
+Models API (no tokens used). OpenAI-compatible: key valid and model offered by
+`/models`.
 
 WP-Cron only runs when the site gets visits. For exact timing, add a real cron
 job on the host that calls `https://steamgears.eu/wp-cron.php` every 5 minutes.

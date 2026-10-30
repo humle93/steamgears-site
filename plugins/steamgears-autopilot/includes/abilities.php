@@ -110,6 +110,11 @@ class SGAP_Abilities {
                     'full_auto' => ['type' => 'boolean']
                 ], [], [__CLASS__, 'set_mode'], false, true
             ],
+            'check-keys' => [
+                'Test API keys',
+                'Tests the saved Publer and AI API keys (no AI tokens used): key valid, workspace, connected accounts per channel, model available. Fills in the Publer workspace id when the key has exactly one workspace.',
+                [], [], [__CLASS__, 'check_keys'], false, true
+            ],
             'check-publer' => [
                 'Check Publer connection',
                 'Tests the Publer API key: lists workspaces, connected social accounts, and configured channels that have no Publer account.',
@@ -157,6 +162,7 @@ class SGAP_Abilities {
             'publer_configured' => SGAP_Publer::configured(),
             'ai_configured' => SGAP_Settings::get('ai_api_key') !== '',
             'ai_provider' => (string) SGAP_Settings::get('ai_provider', 'anthropic'),
+            'key_test' => get_option(SGAP_KeyCheck::RESULT) ?: null,
             'sending_paused_because' => SGAP_Queue::blocked_reason() ?: null,
             'can_send_now' => SGAP_Queue::capacity(),
             'limits' => [
@@ -278,6 +284,10 @@ class SGAP_Abilities {
             'autopilot' => SGAP_Settings::enabled('autopilot_enabled'),
             'full_auto' => SGAP_Settings::enabled('full_auto_enabled')
         ];
+    }
+
+    public static function check_keys($input = null): array {
+        return SGAP_KeyCheck::run();
     }
 
     public static function check_publer($input = null) {

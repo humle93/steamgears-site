@@ -32,7 +32,9 @@ require_once __DIR__ . '/includes/core.php';
 require_once __DIR__ . '/includes/publer.php';
 require_once __DIR__ . '/includes/generator.php';
 require_once __DIR__ . '/includes/abilities.php';
+require_once __DIR__ . '/includes/keycheck.php';
 
 SGAP_Publer::init();
 SGAP_Generator::init();
 SGAP_Abilities::init();
+SGAP_KeyCheck::init();

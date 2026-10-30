@@ -955,12 +955,17 @@ class SGAP_REST {
         if ($channel === '') {
             return new WP_Error('sgap_invalid', 'channel is required.', ['status' => 400]);
         }
-        $wpdb->query($wpdb->prepare(
+        // No reactivation date must be stored as NULL: '' is rejected by MySQL in strict mode.
+        $reactivate_sql = $reactivate === null ? 'NULL' : $wpdb->prepare('%s', $reactivate);
+        $saved = $wpdb->query($wpdb->prepare(
             "INSERT INTO {$wpdb->prefix}sgap_suppression (channel, angle, content_type, format, level, reason, suppressed_at, reactivate_at)
-             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+             VALUES (%s, %s, %s, %s, %s, %s, %s, {$reactivate_sql})
              ON DUPLICATE KEY UPDATE level = IF(protected = 1, level, VALUES(level)), reason = VALUES(reason), reactivate_at = VALUES(reactivate_at)",
-            $channel, $angle, $content_type, $format, $level, $reason, current_time('mysql'), $reactivate
+            $channel, $angle, $content_type, $format, $level, $reason, current_time('mysql')
         ));
+        if ($saved === false) {
+            return new WP_Error('sgap_db', 'Could not save: ' . $wpdb->last_error, ['status' => 500]);
+        }
         return ['status' => 'ok', 'channel' => $channel, 'angle' => $angle, 'level' => $level];
     }
 
@@ -1193,13 +1198,22 @@ class SGAP_Admin {
             echo '<div class="notice notice-info"><pre style="white-space:pre-wrap">' . esc_html($result) . '</pre></div>';
         }
         echo '<h2>Run now</h2><p>';
-        foreach (['generate' => 'Generate posts now', 'publish' => 'Publish queue now', 'test_publer' => 'Test Publer'] as $task => $label) {
+        foreach (['generate' => 'Generate posts now', 'publish' => 'Publish queue now', 'test_keys' => 'Test API keys', 'test_publer' => 'List Publer accounts'] as $task => $label) {
             echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '" style="display:inline-block;margin-right:8px">'
                 . '<input type="hidden" name="action" value="sgap_run"><input type="hidden" name="task" value="' . esc_attr($task) . '">'
                 . wp_nonce_field('sgap_run_' . $task, '_wpnonce', true, false)
                 . '<button class="button">' . esc_html($label) . '</button></form>';
         }
         echo '</p>';
+        $keys = get_option(SGAP_KeyCheck::RESULT);
+        if (is_array($keys)) {
+            foreach (['publer' => 'Publer', 'ai' => 'AI'] as $part => $label) {
+                $check = $keys[$part] ?? ['ok' => null, 'message' => ''];
+                $mark = $check['ok'] === null ? '–' : ($check['ok'] ? '✓' : '✗');
+                echo '<p class="description"><strong>' . esc_html("{$label} key {$mark}") . '</strong> ' . esc_html($check['message']) . '</p>';
+            }
+            echo '<p class="description">Keys last tested: ' . esc_html($keys['checked_at']) . '</p>';
+        }
         $last = get_option('sgap_last_generate');
         if (is_array($last)) {
             echo '<p class="description">Last generation: ' . esc_html($last['at'] . ' – ' . $last['drafts'] . ' drafts, ' . $last['queued'] . ' queued, ' . count($last['errors']) . ' errors') . '</p>';
@@ -1224,6 +1238,9 @@ class SGAP_Admin {
                 SGAP_Publer::tick();
                 $out = $reason === '' ? 'Publisher ran. See the Queue page for results.' : "Followed up on sent posts; nothing new sent ({$reason}).";
             }
+        } elseif ($task === 'test_keys') {
+            $r = SGAP_KeyCheck::run();
+            $out = 'Publer: ' . $r['publer']['message'] . "\nAI: " . $r['ai']['message'];
         } elseif ($task === 'test_publer') {
             $out = self::publer_report();
         } else {
