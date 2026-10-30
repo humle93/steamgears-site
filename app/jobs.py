@@ -26,7 +26,6 @@ def init_db_and_jobs():
             finished_at TIMESTAMP
         )
     """)
-    # Nulstil zombie-jobs ved genstart
     cursor.execute("UPDATE job_queue SET status = 'queued' WHERE status = 'running'")
     conn.commit()
     conn.close()
