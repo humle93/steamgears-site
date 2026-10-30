@@ -18,6 +18,16 @@
 4. Dashboard → **Generate posts now** → godkend under *AI Drafts* (Approve & Queue) → **Publish queue now**.
 5. Skriv til Claude: "kør status på autopiloten" – så tjekker jeg det via sitets værktøjer.
 
+## Command Center ↔ Autopilot (snakker sammen)
+Branch `claude/cc-code-check` i `humle93/command-center` (v7.9.1, ikke merget til main endnu):
+- **Rettet**: CC fra GitHub kunne ikke starte (manglende `app/static` + `python-multipart`), dashboard gav 500
+  (`ORDER BY id` på keyword_difficulty + DB-læsning efter lukket forbindelse), `smoke_test.sh` returnerede fejl ved succes.
+- **Ny bro**: CC henter hver 30. min status fra pluginnet (kø, kladder, klik/ordrer pr. kanal) → panel under *Social*;
+  alarm + Telegram ved nye fejl/kladder eller hvis pluginnet ikke svarer; "→ Autopilot" sender et CC-opslag som kladde til pluginnet.
+- Bruger CC's eksisterende `WP_URL` / `WP_USER` / `WP_APP_PASSWORD` (brugeren skal være **administrator**).
+- **Aktivér**: merge branchen til `main` → tryk "Opdater" i CC (self-update henter install.sh fra main) → Moduler: "Autopilot-bro" er tændt som standard.
+- Kræver at plugin **7.5.0** er uploadet (ellers viser panelet "findes ikke (404)").
+
 ## Flowet
 1. Dagligt: Claude skriver ét opslag pr. kanal for 1–2 indlæg/produkter (ikke promoveret de sidste 30 dage).
 2. Kladder venter under *AI Drafts* (eller direkte i kø med Full auto).
