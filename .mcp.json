@@ -2,7 +2,10 @@
   "mcpServers": {
     "publer": {
       "type": "http",
-      "url": "https://mcp.publer.com/"
+      "url": "https://mcp.publer.com/",
+      "headers": {
+        "Authorization": "Bearer ${PUBLER_API_KEY}"
+      }
     }
   }
 }
