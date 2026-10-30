@@ -15,7 +15,36 @@ The whole social autopilot runs inside WordPress (Command Center is retired):
 4. **Measure** – every post links via `/go/<id>/`, so clicks (and WooCommerce
    orders) are counted per channel.
 
-Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.3.0.zip` → Activate.
+Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.5.0.zip` → Activate.
+
+## Run it from Claude
+
+The plugin registers WordPress *abilities* (WordPress 6.9+), exposed to MCP. A
+Claude connected to the site's MCP server (the "Steam" connector) gets these tools,
+all admin-only, none of them deleting anything:
+
+| Tool | What it does |
+|---|---|
+| `steamgears-autopilot/status` | Switches, channels, setup state, why sending is paused, queue counts, pending drafts, recent errors, 30-day results |
+| `steamgears-autopilot/list-drafts` | AI drafts (default: waiting for approval) with the page they promote |
+| `steamgears-autopilot/review-draft` | `queue` (approve + queue), `approve` or `reject` one draft |
+| `steamgears-autopilot/list-queue` | Queue items with status, attempts, errors, tracking links |
+| `steamgears-autopilot/queue-post` | Queue a post Claude (or you) wrote |
+| `steamgears-autopilot/generate` | Run the AI writer now |
+| `steamgears-autopilot/publish` | Run the Publer publisher now |
+| `steamgears-autopilot/set-mode` | Autopilot / Full Auto on or off |
+| `steamgears-autopilot/check-publer` | Workspaces, accounts, channels without an account |
+
+Example: "Write today's posts and show them to me" → `generate`, then
+`list-drafts`, then `review-draft` for the ones you like.
+
+## Also in the admin (from v7.4)
+
+Queue page with Re-queue / Delete, *Approve & Queue* / *Approve only* / *Reject*
+on drafts, Campaigns (learning matrix, winners and losers), Reports (30-day ROI and
+ROAS against the budget, attributed orders), Etsy orders and profit, Full Auto
+(suppressed combinations, reposts) and an XML product feed for Google Merchant
+Center and Pinterest Catalogs (*Google Feed*, needs a feed secret and WooCommerce).
 
 ## Setup
 
@@ -84,6 +113,10 @@ add posts or read the numbers.
 | GET | `/drafts?status=approved` | Drafts approved in WP, ready to queue. |
 | POST | `/drafts/<id>/status` | `pending` / `approved` / `rejected` / `used`. |
 | GET | `/stats?days=30` | Events per channel, learning table, queue status counts. |
+| GET/POST | `/suppression` | List, or block/reduce a channel+angle+type+format combination (Full Auto skips blocked ones). |
+| GET/POST | `/reposts` | List, or record a repost of a winner (max `repost_max`). |
+| POST | `/etsy/orders` | Import an Etsy order (`etsy_order_id`, `revenue`, `fees`, `shipping`, ...). |
+| GET | `/feed?key=<secret>` | XML product feed (public, protected by the feed secret). |
 
 Example:
 

@@ -252,7 +252,7 @@ class SGAP_Generator {
      * Writes posts for today's picks. Returns counts and any errors, so the admin
      * "Generate now" button can report what happened.
      */
-    public static function run(): array {
+    public static function run(?int $count = null): array {
         global $wpdb;
         $report = ['sources' => 0, 'drafts' => 0, 'queued' => 0, 'errors' => []];
         $channels = SGAP_Publer::channels();
@@ -261,7 +261,7 @@ class SGAP_Generator {
             return $report;
         }
         $full_auto = SGAP_Settings::enabled('full_auto_enabled');
-        foreach (self::pick((int) SGAP_Settings::get('posts_per_day', 2)) as $post) {
+        foreach (self::pick($count ?? (int) SGAP_Settings::get('posts_per_day', 2)) as $post) {
             $report['sources']++;
             $posts = SGAP_AI::generate(self::source($post), $channels);
             if (is_wp_error($posts)) {

@@ -247,28 +247,37 @@ class SGAP_Publer {
         return empty($result['job_id']) ? new WP_Error('sgap_publer', 'Publer returned no job id.') : (string) $result['job_id'];
     }
 
-    /** Cron: finish posts handed to Publer earlier, then send the next due posts. */
-    public static function tick(): void {
-        if (!self::configured()) {
-            return;
+    /**
+     * Cron: finish posts handed to Publer earlier, then send the next due posts.
+     * Returns what happened, for the dashboard button and the Claude tool.
+     */
+    public static function tick(): array {
+        $report = ['configured' => self::configured(), 'followed_up' => [], 'sent' => [], 'failed' => [], 'blocked' => ''];
+        if (!$report['configured']) {
+            return $report;
         }
-        self::follow_up();
-        if (SGAP_Queue::blocked_reason() !== '') {
-            return;
+        $report['followed_up'] = self::follow_up();
+        $report['blocked'] = SGAP_Queue::blocked_reason();
+        if ($report['blocked'] !== '') {
+            return $report;
         }
         global $wpdb;
         foreach (SGAP_Queue::claim(SGAP_Queue::capacity()) as $row) {
             $job = self::publish($row);
             if (is_wp_error($job)) {
                 SGAP_Queue::mark((int) $row['id'], 'failed', $job->get_error_message());
+                $report['failed'][] = ['id' => (int) $row['id'], 'channel' => $row['channel'], 'error' => $job->get_error_message()];
                 continue;
             }
             $wpdb->update($wpdb->prefix . 'sgap_queue', ['external_id' => $job, 'sent_at' => current_time('mysql')], ['id' => (int) $row['id']]);
+            $report['sent'][] = ['id' => (int) $row['id'], 'channel' => $row['channel'], 'job_id' => $job];
         }
+        return $report;
     }
 
-    /** Checks the Publer jobs of posts in 'sending' and records the outcome. */
-    public static function follow_up(): void {
+    /** Checks the Publer jobs of posts in 'sending' and records the outcome. Returns [id => new status]. */
+    public static function follow_up(): array {
+        $outcomes = [];
         global $wpdb;
         $rows = $wpdb->get_results(
             "SELECT id, external_id, sent_at FROM {$wpdb->prefix}sgap_queue WHERE status = 'sending' AND external_id <> '' ORDER BY id ASC LIMIT 50"
@@ -280,12 +289,13 @@ class SGAP_Publer {
             }
             $job = self::parse_job($body);
             if ($job['state'] === 'done') {
-                SGAP_Queue::mark((int) $row->id, 'published');
+                $outcomes[(int) $row->id] = SGAP_Queue::mark((int) $row->id, 'published');
             } elseif ($job['state'] === 'failed') {
-                SGAP_Queue::mark((int) $row->id, 'failed', $job['error']);
+                $outcomes[(int) $row->id] = SGAP_Queue::mark((int) $row->id, 'failed', $job['error']);
             } elseif ($row->sent_at && strtotime($row->sent_at) < current_time('timestamp') - self::JOB_TIMEOUT) {
-                SGAP_Queue::mark((int) $row->id, 'failed', 'Publer job still working after 2 hours.');
+                $outcomes[(int) $row->id] = SGAP_Queue::mark((int) $row->id, 'failed', 'Publer job still working after 2 hours.');
             }
         }
+        return $outcomes;
     }
 }

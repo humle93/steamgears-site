@@ -361,7 +361,7 @@ class SGAP_Settings {
                 // The form never shows the stored secret, so an empty field
                 // means "keep what is saved" unless "clear" was ticked.
                 'sanitize_callback' => function ($value) use ($key) {
-                    if (!empty($_POST['sgap_clear'][$key])) {
+                    if (isset($_POST['sgap_clear']) && is_array($_POST['sgap_clear']) && !empty($_POST['sgap_clear'][$key])) {
                         return '';
                     }
                     $value = sanitize_text_field((string) $value);
@@ -603,6 +603,12 @@ class SGAP_Queue {
         if ($channel === '' || $title === '' || $destination === '') {
             return new WP_Error('sgap_invalid', 'channel, title and destination_url are required.', ['status' => 400]);
         }
+        $angle = self::key($item['angle'] ?? '', 'angle_a', 20);
+        $content_type = self::key($item['content_type'] ?? '', 'product', 40);
+        $format = self::key($item['format'] ?? '', 'pin', 40);
+        if (SGAP_Settings::enabled('full_auto_enabled') && self::suppressed($channel, $angle, $content_type, $format)) {
+            return new WP_Error('sgap_suppressed', 'Combination is currently suppressed.', ['status' => 422]);
+        }
         $fingerprint = hash('sha256', $channel . '|' . $destination . '|' . $title);
         $existing = $wpdb->get_var($wpdb->prepare(
             'SELECT id FROM ' . self::table() . " WHERE fingerprint = %s AND status <> 'failed' LIMIT 1",
@@ -614,9 +620,9 @@ class SGAP_Queue {
         $row = [
             'post_id' => absint($item['post_id'] ?? 0),
             'channel' => $channel,
-            'angle' => self::key($item['angle'] ?? '', 'angle_a', 20),
-            'content_type' => self::key($item['content_type'] ?? '', 'product', 40),
-            'format' => self::key($item['format'] ?? '', 'pin', 40),
+            'angle' => $angle,
+            'content_type' => $content_type,
+            'format' => $format,
             'destination_url' => $destination,
             'title' => $title,
             'body' => sanitize_textarea_field((string) ($item['body'] ?? '')),
@@ -632,6 +638,18 @@ class SGAP_Queue {
         $id = (int) $wpdb->insert_id;
         delete_transient('sgap_dashboard_stats');
         return ['id' => $id, 'tracking_url' => SGAP_Tracking::url($id), 'utm_url' => $row['utm_url']];
+    }
+
+    /** True when Full Auto has blocked this channel/angle/type/format combination. */
+    public static function suppressed(string $channel, string $angle, string $content_type, string $format): bool {
+        global $wpdb;
+        return (bool) $wpdb->get_var($wpdb->prepare(
+            "SELECT level FROM {$wpdb->prefix}sgap_suppression
+             WHERE channel = %s AND angle = %s AND content_type = %s AND format = %s
+               AND level = 'blocked' AND protected = 0
+               AND (reactivate_at IS NULL OR reactivate_at > %s)",
+            $channel, $angle, $content_type, $format, current_time('mysql')
+        ));
     }
 
     /** Why nothing may be sent right now, or '' when sending is allowed. */
@@ -758,6 +776,20 @@ class SGAP_REST {
         ]);
         register_rest_route(self::NS, '/drafts/(?P<id>\d+)/status', [
             'methods' => 'POST', 'callback' => [__CLASS__, 'draft_status'], 'permission_callback' => $auth
+        ]);
+        register_rest_route(self::NS, '/suppression', [
+            ['methods' => 'GET', 'callback' => [__CLASS__, 'list_suppression'], 'permission_callback' => $auth],
+            ['methods' => 'POST', 'callback' => [__CLASS__, 'upsert_suppression'], 'permission_callback' => $auth]
+        ]);
+        register_rest_route(self::NS, '/reposts', [
+            ['methods' => 'GET', 'callback' => [__CLASS__, 'list_reposts'], 'permission_callback' => $auth],
+            ['methods' => 'POST', 'callback' => [__CLASS__, 'create_repost'], 'permission_callback' => $auth]
+        ]);
+        register_rest_route(self::NS, '/etsy/orders', [
+            'methods' => 'POST', 'callback' => [__CLASS__, 'import_etsy_order'], 'permission_callback' => $auth
+        ]);
+        register_rest_route(self::NS, '/feed', [
+            'methods' => 'GET', 'callback' => [__CLASS__, 'merchant_feed'], 'permission_callback' => '__return_true'
         ]);
         register_rest_route(self::NS, '/stats', [
             'methods' => 'GET', 'callback' => [__CLASS__, 'stats'], 'permission_callback' => $auth
@@ -906,6 +938,121 @@ class SGAP_REST {
             )
         ];
     }
+    public static function list_suppression(WP_REST_Request $r) {
+        global $wpdb;
+        return $wpdb->get_results("SELECT * FROM {$wpdb->prefix}sgap_suppression ORDER BY suppressed_at DESC LIMIT 100", ARRAY_A);
+    }
+
+    public static function upsert_suppression(WP_REST_Request $r) {
+        global $wpdb;
+        $channel = self::key($r, 'channel', '', 40);
+        $angle = self::key($r, 'angle', 'angle_a', 20);
+        $content_type = self::key($r, 'content_type', 'product', 40);
+        $format = self::key($r, 'format', 'pin', 40);
+        $level = in_array($r->get_param('level'), ['reduced', 'blocked', 'active'], true) ? $r->get_param('level') : 'reduced';
+        $reason = self::text($r->get_param('reason'));
+        $reactivate = self::datetime($r->get_param('reactivate_at'));
+        if ($channel === '') {
+            return new WP_Error('sgap_invalid', 'channel is required.', ['status' => 400]);
+        }
+        $wpdb->query($wpdb->prepare(
+            "INSERT INTO {$wpdb->prefix}sgap_suppression (channel, angle, content_type, format, level, reason, suppressed_at, reactivate_at)
+             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+             ON DUPLICATE KEY UPDATE level = IF(protected = 1, level, VALUES(level)), reason = VALUES(reason), reactivate_at = VALUES(reactivate_at)",
+            $channel, $angle, $content_type, $format, $level, $reason, current_time('mysql'), $reactivate
+        ));
+        return ['status' => 'ok', 'channel' => $channel, 'angle' => $angle, 'level' => $level];
+    }
+
+    public static function list_reposts(WP_REST_Request $r) {
+        global $wpdb;
+        return $wpdb->get_results("SELECT * FROM {$wpdb->prefix}sgap_reposts ORDER BY id DESC LIMIT 100", ARRAY_A);
+    }
+
+    public static function create_repost(WP_REST_Request $r) {
+        global $wpdb;
+        $orig_id = absint($r->get_param('original_queue_id'));
+        $repost_id = absint($r->get_param('repost_queue_id'));
+        if (!$orig_id || !$repost_id) {
+            return new WP_Error('sgap_invalid', 'original_queue_id and repost_queue_id required.', ['status' => 400]);
+        }
+        $count = (int) $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM {$wpdb->prefix}sgap_reposts WHERE original_queue_id = %d",
+            $orig_id
+        ));
+        if ($count >= (int) SGAP_Settings::get('repost_max', 3)) {
+            return new WP_Error('sgap_repost_cap', 'Max reposts reached for this item.', ['status' => 422]);
+        }
+        $wpdb->insert($wpdb->prefix . 'sgap_reposts', [
+            'original_queue_id' => $orig_id,
+            'repost_queue_id' => $repost_id,
+            'repost_number' => $count + 1,
+            'new_angle' => self::key($r, 'new_angle', 'angle_b', 20),
+            'new_hook' => self::text($r->get_param('new_hook')),
+            'created_at' => current_time('mysql')
+        ]);
+        return new WP_REST_Response(['id' => (int) $wpdb->insert_id, 'repost_number' => $count + 1], 201);
+    }
+
+    public static function import_etsy_order(WP_REST_Request $r) {
+        global $wpdb;
+        $order_id = absint($r->get_param('etsy_order_id'));
+        if (!$order_id) {
+            return new WP_Error('sgap_invalid', 'etsy_order_id is required.', ['status' => 400]);
+        }
+        $revenue = (float) $r->get_param('revenue');
+        $fees = (float) $r->get_param('fees');
+        $shipping = (float) $r->get_param('shipping');
+        $profit = $r->get_param('profit') !== null ? (float) $r->get_param('profit') : ($revenue - $fees - $shipping);
+        $wpdb->query($wpdb->prepare(
+            "INSERT INTO {$wpdb->prefix}sgap_etsy_orders (etsy_order_id, product_sku, quantity, revenue, fees, shipping, profit, country, imported_at)
+             VALUES (%d, %s, %d, %f, %f, %f, %f, %s, %s)
+             ON DUPLICATE KEY UPDATE revenue = VALUES(revenue), fees = VALUES(fees), shipping = VALUES(shipping), profit = VALUES(profit)",
+            $order_id,
+            substr(sanitize_text_field((string) $r->get_param('product_sku')), 0, 80),
+            max(1, absint($r->get_param('quantity') ?: 1)),
+            $revenue, $fees, $shipping, $profit,
+            substr(sanitize_text_field((string) $r->get_param('country')), 0, 10),
+            current_time('mysql')
+        ));
+        return ['etsy_order_id' => $order_id, 'profit' => $profit];
+    }
+
+    public static function merchant_feed(WP_REST_Request $r) {
+        $secret = (string) SGAP_Settings::get('merchant_feed_secret', '');
+        $provided = (string) $r->get_param('key');
+        if ($secret === '' || !hash_equals($secret, $provided)) {
+            return new WP_Error('sgap_forbidden', 'Invalid feed secret.', ['status' => 403]);
+        }
+        if (!function_exists('wc_get_products')) {
+            return new WP_Error('sgap_no_wc', 'WooCommerce is not active.', ['status' => 501]);
+        }
+        header('Content-Type: application/xml; charset=utf-8');
+        $products = wc_get_products(['status' => 'publish', 'limit' => 500]);
+        echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+        echo '<rss version="2.0" xmlns:g="http://base.google.com/ns/1.0"><channel>' . "\n";
+        echo '<title>' . esc_xml(get_bloginfo('name')) . '</title>' . "\n";
+        echo '<link>' . esc_url(home_url('/')) . '</link>' . "\n";
+        $currency = function_exists('get_woocommerce_currency') ? get_woocommerce_currency() : 'EUR';
+        foreach ($products as $p) {
+            $img = wp_get_attachment_url($p->get_image_id());
+            $price = $p->get_price();
+            if (!$price || !$img) continue;
+            echo "<item>\n";
+            echo '  <g:id>' . esc_xml((string) ($p->get_sku() ?: $p->get_id())) . "</g:id>\n";
+            echo '  <g:title>' . esc_xml($p->get_name()) . "</g:title>\n";
+            echo '  <g:description>' . esc_xml(wp_strip_all_tags($p->get_short_description() ?: $p->get_description())) . "</g:description>\n";
+            echo '  <g:link>' . esc_url($p->get_permalink()) . "</g:link>\n";
+            echo '  <g:image_link>' . esc_url($img) . "</g:image_link>\n";
+            echo '  <g:availability>' . ($p->is_in_stock() ? 'in_stock' : 'out_of_stock') . "</g:availability>\n";
+            echo '  <g:price>' . esc_xml(number_format((float) $price, 2, '.', '') . ' ' . $currency) . "</g:price>\n";
+            echo '  <g:condition>new</g:condition>' . "\n";
+            echo "</item>\n";
+        }
+        echo '</channel></rss>';
+        exit;
+    }
+
 }
 
 /* ---------------- MAINTENANCE ---------------- */
@@ -957,6 +1104,8 @@ class SGAP_Admin {
         add_action('admin_menu', [__CLASS__, 'menu']);
         add_action('admin_post_sgap_approve_ai', [__CLASS__, 'approve_ai']);
         add_action('admin_post_sgap_run', [__CLASS__, 'run_action']);
+        add_action('admin_post_sgap_queue_action', [__CLASS__, 'queue_action']);
+        add_action('admin_post_sgap_suppression_action', [__CLASS__, 'suppression_action']);
     }
 
     public static function menu(): void {
@@ -1009,6 +1158,7 @@ class SGAP_Admin {
             if ($stats['counts']['Events'] !== null) {
                 $stats['channels'] = $wpdb->get_results($wpdb->prepare(
                     "SELECT channel,
+                        SUM(event_type = 'publish') AS published,
                         SUM(event_type = 'click') AS clicks,
                         SUM(event_type = 'order') AS orders,
                         SUM(CASE WHEN event_type = 'order' THEN value ELSE 0 END) AS revenue
@@ -1021,6 +1171,7 @@ class SGAP_Admin {
         }
         echo '<p>Version ' . esc_html(SGAP_VERSION) . ' &middot; Autopilot: <strong>'
             . esc_html(SGAP_Settings::get('autopilot_enabled', 'no')) . '</strong>'
+            . ' &middot; Full Auto: <strong>' . esc_html(SGAP_Settings::get('full_auto_enabled', 'no')) . '</strong>'
             . ' &middot; REST: <code>' . esc_html(rest_url(SGAP_REST::NS)) . '</code></p>';
         echo '<table class="widefat striped" style="max-width:420px"><tbody>';
         foreach ($stats['counts'] as $label => $count) {
@@ -1030,7 +1181,7 @@ class SGAP_Admin {
         }
         echo '</tbody></table>';
         echo '<h2>Last 30 days per channel</h2>';
-        self::render_rows($stats['channels'], ['channel', 'clicks', 'orders', 'revenue']);
+        self::render_rows($stats['channels'], ['channel', 'published', 'clicks', 'orders', 'revenue']);
         self::run_panel();
         self::close();
     }
@@ -1123,7 +1274,13 @@ class SGAP_Admin {
         foreach (SGAP_Settings::SECTIONS as $section => $keys) {
             echo '<h2>' . esc_html($section) . '</h2><table class="form-table"><tbody>';
             foreach ($keys as $key) {
-                echo '<tr><th scope="row"><label for="sgap_' . esc_attr($key) . '">' . esc_html(ucfirst(str_replace('_', ' ', $key))) . '</label></th><td>';
+                $label = ucfirst(str_replace('_', ' ', $key));
+                $help_link = self::get_setting_help_link($key);
+                echo '<tr><th scope="row"><label for="sgap_' . esc_attr($key) . '">' . esc_html($label) . '</label>';
+                if ($help_link) {
+                    echo '<br><small><a href="' . esc_url($help_link['url']) . '" target="_blank" rel="noopener">' . esc_html($help_link['text']) . ' &rarr;</a></small>';
+                }
+                echo '</th><td>';
                 self::field($key);
                 if (isset(SGAP_Settings::HELP[$key])) {
                     echo '<p class="description">' . esc_html(SGAP_Settings::HELP[$key]) . '</p>';
@@ -1135,6 +1292,22 @@ class SGAP_Admin {
         submit_button();
         echo '</form>';
         self::close();
+    }
+
+    private static function get_setting_help_link(string $key): ?array {
+        $links = [
+            'pinterest_token' => ['url' => 'https://developers.pinterest.com/', 'text' => 'Pinterest Developers'],
+            'instagram_token' => ['url' => 'https://developers.facebook.com/', 'text' => 'Meta App Dashboard'],
+            'telegram_bot_token' => ['url' => 'https://t.me/BotFather', 'text' => 'Telegram BotFather'],
+            'tiktok_token' => ['url' => 'https://developers.tiktok.com/', 'text' => 'TikTok Developers'],
+            'youtube_token' => ['url' => 'https://console.cloud.google.com/', 'text' => 'Google Cloud Console'],
+            'youtube_channel_id' => ['url' => 'https://www.youtube.com/account_advanced', 'text' => 'Find Channel ID'],
+            'reddit_username' => ['url' => 'https://www.reddit.com/prefs/apps', 'text' => 'Reddit App Preferences'],
+            'etsy_shop_id' => ['url' => 'https://www.etsy.com/your/shops/me', 'text' => 'Etsy Shop Manager'],
+            'etsy_oauth_token' => ['url' => 'https://www.etsy.com/developers/your-apps', 'text' => 'Etsy Developer Portal'],
+            'publer_api_key' => ['url' => 'https://publer.com/help/en/article/how-to-access-the-publer-api-1w08edo/', 'text' => 'Publer API keys'],
+        ];
+        return $links[$key] ?? null;
     }
 
     private static function field(string $key): void {
@@ -1185,12 +1358,51 @@ class SGAP_Admin {
     public static function queue(): void {
         global $wpdb;
         self::open('Queue');
+        if (isset($_GET['updated'])) {
+            echo '<div class="notice notice-success"><p>Queue updated.</p></div>';
+        }
         $table = $wpdb->prefix . 'sgap_queue';
         $rows = self::table_exists($table)
-            ? $wpdb->get_results("SELECT id, channel, title, status, attempts, scheduled_at, published_at, error FROM {$table} ORDER BY id DESC LIMIT 50")
+            ? $wpdb->get_results("SELECT id, channel, angle, title, status, attempts, scheduled_at, published_at, error FROM {$table} ORDER BY id DESC LIMIT 50")
             : [];
-        self::render_rows($rows, ['id', 'channel', 'title', 'status', 'attempts', 'scheduled_at', 'published_at', 'error']);
+        if (!$rows) {
+            echo '<p>Nothing in queue yet.</p>';
+            self::close();
+            return;
+        }
+        echo '<table class="widefat striped"><thead><tr><th>ID</th><th>Channel</th><th>Angle</th><th>Title</th><th>Tracking URL</th><th>Status</th><th>Attempts</th><th>Scheduled</th><th>Published</th><th>Error</th><th>Actions</th></tr></thead><tbody>';
+        foreach ($rows as $r) {
+            echo '<tr><td>' . esc_html($r->id) . '</td><td>' . esc_html($r->channel) . '</td><td>' . esc_html($r->angle) . '</td><td>'
+                . esc_html($r->title) . '</td><td><code>' . esc_html(SGAP_Tracking::url((int) $r->id)) . '</code></td><td><strong>'
+                . esc_html($r->status) . '</strong></td><td>' . esc_html($r->attempts) . '</td><td>'
+                . esc_html((string) $r->scheduled_at) . '</td><td>' . esc_html((string) $r->published_at) . '</td><td>'
+                . esc_html((string) $r->error) . '</td><td>'
+                . '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '" style="display:inline">'
+                . '<input type="hidden" name="action" value="sgap_queue_action">'
+                . '<input type="hidden" name="queue_id" value="' . esc_attr($r->id) . '">'
+                . wp_nonce_field('sgap_queue_' . $r->id, '_wpnonce', true, false)
+                . '<button class="button button-small" name="cmd" value="retry">Re-queue</button> '
+                . '<button class="button button-small" name="cmd" value="delete">Delete</button></form></td></tr>';
+        }
+        echo '</tbody></table>';
         self::close();
+    }
+
+    public static function queue_action(): void {
+        global $wpdb;
+        if (!current_user_can('manage_options')) wp_die('Forbidden', 403);
+        $id = isset($_POST['queue_id']) ? absint($_POST['queue_id']) : 0;
+        check_admin_referer('sgap_queue_' . $id);
+        $cmd = isset($_POST['cmd']) ? sanitize_key($_POST['cmd']) : '';
+        $table = $wpdb->prefix . 'sgap_queue';
+        if ($id && $cmd === 'retry') {
+            $wpdb->update($table, ['status' => 'queued', 'attempts' => 0, 'error' => null, 'external_id' => ''], ['id' => $id]);
+        } elseif ($id && $cmd === 'delete') {
+            $wpdb->delete($table, ['id' => $id]);
+        }
+        delete_transient('sgap_dashboard_stats');
+        wp_safe_redirect(add_query_arg(['page' => 'sgap-queue', 'updated' => 1], admin_url('admin.php')));
+        exit;
     }
 
     public static function ai(): void {
@@ -1201,23 +1413,24 @@ class SGAP_Admin {
         }
         $table = $wpdb->prefix . 'sgap_ai_drafts';
         $rows = self::table_exists($table)
-            ? $wpdb->get_results("SELECT id, channel, title, body, status, created_at FROM {$table} WHERE status = 'pending' ORDER BY id DESC LIMIT 50")
+            ? $wpdb->get_results("SELECT id, post_id, channel, angle, title, body, hashtags, status, created_at FROM {$table} WHERE status = 'pending' ORDER BY id DESC LIMIT 50")
             : [];
         if (!$rows) {
             echo '<p>No pending drafts.</p>';
             self::close();
             return;
         }
-        echo '<table class="widefat striped"><thead><tr><th>ID</th><th>Channel</th><th>Title</th><th>Text</th><th>Created</th><th></th></tr></thead><tbody>';
+        echo '<table class="widefat striped"><thead><tr><th>ID</th><th>Channel</th><th>Angle</th><th>Title</th><th>Text</th><th>Created</th><th>Actions</th></tr></thead><tbody>';
         foreach ($rows as $row) {
-            echo '<tr><td>' . esc_html($row->id) . '</td><td>' . esc_html($row->channel) . '</td><td>'
-                . esc_html($row->title) . '</td><td>' . esc_html(wp_trim_words((string) $row->body, 30)) . '</td><td>'
+            echo '<tr><td>' . esc_html($row->id) . '</td><td>' . esc_html($row->channel) . '</td><td>' . esc_html($row->angle) . '</td><td>'
+                . esc_html($row->title) . '</td><td>' . esc_html(wp_trim_words(trim($row->body . ' ' . $row->hashtags), 40)) . '</td><td>'
                 . esc_html($row->created_at) . '</td><td>'
                 . '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '">'
                 . '<input type="hidden" name="action" value="sgap_approve_ai">'
                 . '<input type="hidden" name="draft_id" value="' . esc_attr($row->id) . '">'
                 . wp_nonce_field('sgap_approve_ai_' . $row->id, '_wpnonce', true, false)
-                . '<button class="button button-primary" name="decision" value="approved">Approve</button> '
+                . '<button class="button button-primary" name="decision" value="queue">Approve &amp; Queue</button> '
+                . '<button class="button" name="decision" value="approved">Approve Only</button> '
                 . '<button class="button" name="decision" value="rejected">Reject</button></form></td></tr>';
         }
         echo '</tbody></table>';
@@ -1231,29 +1444,169 @@ class SGAP_Admin {
         }
         $id = isset($_POST['draft_id']) ? absint($_POST['draft_id']) : 0;
         check_admin_referer('sgap_approve_ai_' . $id);
-        $decision = (isset($_POST['decision']) && $_POST['decision'] === 'rejected') ? 'rejected' : 'approved';
-        $done = $decision;
-        if ($id && $decision === 'approved') {
-            // An approved draft goes straight into the publishing queue.
+        $decision = isset($_POST['decision']) ? sanitize_key($_POST['decision']) : 'queue';
+        $done = 'invalid';
+        if ($id && $decision === 'queue') {
+            // Approve & Queue: straight into the publishing queue.
             $queued = SGAP_Queue::from_draft($id);
             $done = is_wp_error($queued) ? 'error: ' . $queued->get_error_message() : 'approved and queued';
         } elseif ($id) {
-            $wpdb->update($wpdb->prefix . 'sgap_ai_drafts', ['status' => 'rejected'], ['id' => $id]);
+            $done = $decision === 'rejected' ? 'rejected' : 'approved';
+            $wpdb->update($wpdb->prefix . 'sgap_ai_drafts', ['status' => $done], ['id' => $id]);
         }
         delete_transient('sgap_dashboard_stats');
         wp_safe_redirect(add_query_arg(['page' => 'sgap-ai', 'done' => rawurlencode($done)], admin_url('admin.php')));
         exit;
     }
 
-    public static function campaigns(): void { self::placeholder('Campaigns'); }
-    public static function etsy(): void { self::placeholder('Etsy'); }
-    public static function reports(): void { self::placeholder('Reports'); }
-    public static function fullauto(): void { self::placeholder('Full Auto'); }
-    public static function merchant(): void { self::placeholder('Google Feed'); }
 
-    private static function placeholder(string $title): void {
-        self::open($title);
-        echo '<p>This module is not included in this build.</p>';
+    public static function campaigns(): void {
+        global $wpdb;
+        self::open('Campaigns & Angle Performance');
+        $win_clicks = (int) SGAP_Settings::get('winner_min_clicks', 25);
+        $lose_clicks = (int) SGAP_Settings::get('loser_min_clicks', 100);
+
+        echo '<h2>Learning Matrix (Channels &amp; Angles)</h2>';
+        $learning = $wpdb->get_results("SELECT dimension, dimension_value, clicks, orders, revenue, updated_at FROM {$wpdb->prefix}sgap_learning ORDER BY dimension ASC, revenue DESC, clicks DESC");
+        self::render_rows($learning, ['dimension', 'dimension_value', 'clicks', 'orders', 'revenue', 'updated_at']);
+
+        echo '<h2>Top Winning Posts (&ge; ' . esc_html((string) $win_clicks) . ' clicks or &ge; 1 order)</h2>';
+        $winners = $wpdb->get_results($wpdb->prepare(
+            "SELECT q.id, q.channel, q.angle, q.title,
+                    COUNT(c.id) AS clicks,
+                    SUM(c.order_id > 0) AS orders,
+                    SUM(c.revenue) AS revenue
+             FROM {$wpdb->prefix}sgap_queue q
+             JOIN {$wpdb->prefix}sgap_cro c ON c.queue_id = q.id
+             GROUP BY q.id
+             HAVING clicks >= %d OR orders >= 1
+             ORDER BY revenue DESC, clicks DESC LIMIT 25",
+            $win_clicks
+        ));
+        self::render_rows($winners, ['id', 'channel', 'angle', 'title', 'clicks', 'orders', 'revenue']);
+
+        echo '<h2>Underperforming Posts (&ge; ' . esc_html((string) $lose_clicks) . ' clicks, 0 orders)</h2>';
+        $losers = $wpdb->get_results($wpdb->prepare(
+            "SELECT q.id, q.channel, q.angle, q.title, COUNT(c.id) AS clicks
+             FROM {$wpdb->prefix}sgap_queue q
+             JOIN {$wpdb->prefix}sgap_cro c ON c.queue_id = q.id
+             GROUP BY q.id
+             HAVING clicks >= %d AND SUM(c.order_id > 0) = 0
+             ORDER BY clicks DESC LIMIT 25",
+            $lose_clicks
+        ));
+        self::render_rows($losers, ['id', 'channel', 'angle', 'title', 'clicks']);
+        self::close();
+    }
+
+    public static function etsy(): void {
+        global $wpdb;
+        self::open('Etsy Orders & Profit');
+        $table = $wpdb->prefix . 'sgap_etsy_orders';
+        $totals = $wpdb->get_row("SELECT COUNT(*) AS orders, SUM(revenue) AS revenue, SUM(fees) AS fees, SUM(shipping) AS shipping, SUM(profit) AS profit FROM {$table}");
+        if ($totals && (int) $totals->orders > 0) {
+            echo '<p><strong>Orders:</strong> ' . esc_html((string) $totals->orders)
+                . ' &middot; <strong>Revenue:</strong> ' . esc_html(number_format((float) $totals->revenue, 2))
+                . ' &middot; <strong>Fees:</strong> ' . esc_html(number_format((float) $totals->fees, 2))
+                . ' &middot; <strong>Shipping:</strong> ' . esc_html(number_format((float) $totals->shipping, 2))
+                . ' &middot; <strong>Net Profit:</strong> ' . esc_html(number_format((float) $totals->profit, 2)) . '</p>';
+        }
+        $rows = $wpdb->get_results("SELECT etsy_order_id, product_sku, quantity, revenue, fees, shipping, profit, country, imported_at FROM {$table} ORDER BY id DESC LIMIT 50");
+        self::render_rows($rows, ['etsy_order_id', 'product_sku', 'quantity', 'revenue', 'fees', 'shipping', 'profit', 'country', 'imported_at']);
+        self::close();
+    }
+
+    public static function reports(): void {
+        global $wpdb;
+        self::open('ROI & Attribution Reports');
+        $budget = (float) SGAP_Settings::get('monthly_budget', 1000);
+        $target_roi = (float) SGAP_Settings::get('target_roi', 200);
+        $since = wp_date('Y-m-d H:i:s', time() - 30 * DAY_IN_SECONDS);
+
+        $rev_30d = (float) $wpdb->get_var($wpdb->prepare(
+            "SELECT SUM(value) FROM {$wpdb->prefix}sgap_events WHERE event_type = 'order' AND created_at >= %s",
+            $since
+        ));
+        $roi = SGAP_ROI::roi($rev_30d, $budget);
+        $roas = SGAP_ROI::roas($rev_30d, $budget);
+
+        echo '<p><strong>30-Day Attributed Revenue:</strong> ' . esc_html(number_format($rev_30d, 2))
+            . ' &middot; <strong>Monthly Budget:</strong> ' . esc_html(number_format($budget, 2))
+            . ' &middot; <strong>ROI:</strong> ' . esc_html((string) $roi) . '% (Target: ' . esc_html((string) $target_roi) . '%)'
+            . ' &middot; <strong>ROAS:</strong> ' . esc_html((string) $roas) . 'x</p>';
+
+        echo '<h2>Recent Attributed Conversions</h2>';
+        $conversions = $wpdb->get_results(
+            "SELECT c.order_id, q.channel, c.angle, q.title, c.revenue, c.clicked_at, c.converted_at
+             FROM {$wpdb->prefix}sgap_cro c
+             LEFT JOIN {$wpdb->prefix}sgap_queue q ON q.id = c.queue_id
+             WHERE c.order_id > 0
+             ORDER BY c.converted_at DESC LIMIT 50"
+        );
+        self::render_rows($conversions, ['order_id', 'channel', 'angle', 'title', 'revenue', 'clicked_at', 'converted_at']);
+        self::close();
+    }
+
+    public static function fullauto(): void {
+        global $wpdb;
+        self::open('Full Auto: Suppression & Reposts');
+        echo '<p>Full Auto Enabled: <strong>' . esc_html(SGAP_Settings::get('full_auto_enabled', 'no')) . '</strong>'
+            . ' &middot; Cooldown: <strong>' . esc_html((string) SGAP_Settings::get('repost_cooldown_days', 30)) . ' days</strong>'
+            . ' &middot; Max Reposts: <strong>' . esc_html((string) SGAP_Settings::get('repost_max', 3)) . '</strong></p>';
+
+        echo '<h2>Suppressed Combinations</h2>';
+        $sup = $wpdb->get_results("SELECT id, channel, angle, content_type, format, level, reason, suppressed_at, reactivate_at, protected FROM {$wpdb->prefix}sgap_suppression ORDER BY id DESC LIMIT 50");
+        if (!$sup) {
+            echo '<p>No suppressed combinations.</p>';
+        } else {
+            echo '<table class="widefat striped"><thead><tr><th>Channel</th><th>Angle</th><th>Type</th><th>Format</th><th>Level</th><th>Reason</th><th>Protected</th><th>Actions</th></tr></thead><tbody>';
+            foreach ($sup as $s) {
+                echo '<tr><td>' . esc_html($s->channel) . '</td><td>' . esc_html($s->angle) . '</td><td>'
+                    . esc_html($s->content_type) . '</td><td>' . esc_html($s->format) . '</td><td>'
+                    . esc_html($s->level) . '</td><td>' . esc_html((string) $s->reason) . '</td><td>'
+                    . ($s->protected ? 'Yes' : 'No') . '</td><td>'
+                    . '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '">'
+                    . '<input type="hidden" name="action" value="sgap_suppression_action">'
+                    . '<input type="hidden" name="sup_id" value="' . esc_attr($s->id) . '">'
+                    . wp_nonce_field('sgap_sup_' . $s->id, '_wpnonce', true, false)
+                    . '<button class="button button-small" name="cmd" value="protect">Toggle Protect</button> '
+                    . '<button class="button button-small" name="cmd" value="delete">Remove</button></form></td></tr>';
+            }
+            echo '</tbody></table>';
+        }
+
+        echo '<h2>Recent Winner Reposts</h2>';
+        $reposts = $wpdb->get_results("SELECT original_queue_id, repost_queue_id, repost_number, new_angle, new_hook, created_at FROM {$wpdb->prefix}sgap_reposts ORDER BY id DESC LIMIT 50");
+        self::render_rows($reposts, ['original_queue_id', 'repost_queue_id', 'repost_number', 'new_angle', 'new_hook', 'created_at']);
+        self::close();
+    }
+
+    public static function suppression_action(): void {
+        global $wpdb;
+        if (!current_user_can('manage_options')) wp_die('Forbidden', 403);
+        $id = isset($_POST['sup_id']) ? absint($_POST['sup_id']) : 0;
+        check_admin_referer('sgap_sup_' . $id);
+        $cmd = isset($_POST['cmd']) ? sanitize_key($_POST['cmd']) : '';
+        $table = $wpdb->prefix . 'sgap_suppression';
+        if ($id && $cmd === 'protect') {
+            $wpdb->query($wpdb->prepare("UPDATE {$table} SET protected = 1 - protected, level = IF(protected = 1, 'active', level) WHERE id = %d", $id));
+        } elseif ($id && $cmd === 'delete') {
+            $wpdb->delete($table, ['id' => $id]);
+        }
+        wp_safe_redirect(add_query_arg(['page' => 'sgap-fullauto'], admin_url('admin.php')));
+        exit;
+    }
+
+    public static function merchant(): void {
+        self::open('Google Merchant & Pinterest Catalog Feed');
+        $secret = (string) SGAP_Settings::get('merchant_feed_secret', '');
+        if ($secret === '') {
+            echo '<div class="notice notice-warning"><p>Please set a <strong>Merchant feed secret</strong> under <a href="' . esc_url(admin_url('admin.php?page=sgap-settings')) . '">Settings &rarr; Google Feed</a> to enable your XML product feed.</p></div>';
+        } else {
+            $feed_url = add_query_arg('key', rawurlencode($secret), rest_url(SGAP_REST::NS . '/feed'));
+            echo '<p>Use this XML feed URL in <strong>Pinterest Catalogs</strong> and <strong>Google Merchant Center</strong>:</p>';
+            echo '<p><input type="text" readonly class="large-text code" value="' . esc_attr($feed_url) . '" onclick="this.select();"></p>';
+        }
         self::close();
     }
 
@@ -1270,7 +1623,8 @@ class SGAP_Admin {
         foreach ($rows as $row) {
             echo '<tr>';
             foreach ($cols as $c) {
-                echo '<td>' . esc_html((string) ($row->$c ?? '')) . '</td>';
+                $val = is_object($row) ? ($row->$c ?? '') : ($row[$c] ?? '');
+                echo '<td>' . esc_html((string) $val) . '</td>';
             }
             echo '</tr>';
         }

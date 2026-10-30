@@ -264,6 +264,56 @@ $wpdb->delete($wpdb->prefix . 'sgap_queue', ['id' => $no_photo['id']]);
 update_option('sgap_autopilot_enabled', 'no');
 remove_all_filters('pre_http_request');
 
+/* --- v7.4 features: suppression, Etsy orders, product feed --- */
+$res = sgci_rest('POST', '/suppression', ['channel' => 'pinterest', 'angle' => 'angle_a', 'content_type' => 'product', 'format' => 'pin', 'level' => 'blocked', 'reason' => 'CI']);
+sgci_check('suppression: saved', $res->get_status() === 200 && ($res->get_data()['level'] ?? '') === 'blocked', $res->get_data());
+update_option('sgap_full_auto_enabled', 'yes');
+$blocked = SGAP_Queue::add(['channel' => 'pinterest', 'title' => 'CI suppressed', 'destination_url' => home_url('/s/')]);
+sgci_check('suppression: full auto refuses a blocked combination', is_wp_error($blocked) && $blocked->get_error_code() === 'sgap_suppressed');
+update_option('sgap_full_auto_enabled', 'no');
+$allowed = SGAP_Queue::add(['channel' => 'pinterest', 'title' => 'CI suppressed', 'destination_url' => home_url('/s/')]);
+sgci_check('suppression: manual mode still allows it', is_array($allowed));
+if (is_array($allowed)) {
+    $wpdb->delete($wpdb->prefix . 'sgap_queue', ['id' => $allowed['id']]);
+}
+$wpdb->query("DELETE FROM {$wpdb->prefix}sgap_suppression WHERE reason = 'CI'");
+$res = sgci_rest('POST', '/etsy/orders', ['etsy_order_id' => 123456, 'revenue' => 50, 'fees' => 5, 'shipping' => 7.5]);
+sgci_check('etsy: order imported with profit', $res->get_status() === 200 && (float) ($res->get_data()['profit'] ?? 0) === 37.5, $res->get_data());
+wp_set_current_user(0);
+sgci_check('feed: refused without the secret', sgci_rest('GET', '/feed')->get_status() === 403);
+wp_set_current_user((int) $admin[0]);
+
+/* --- Claude / MCP abilities (WordPress 6.9+ only) --- */
+if (function_exists('wp_get_ability')) {
+    $names = ['status', 'list-drafts', 'review-draft', 'list-queue', 'queue-post', 'generate', 'publish', 'set-mode', 'check-publer'];
+    $missing = array_values(array_filter($names, fn($n) => !wp_get_ability('steamgears-autopilot/' . $n)));
+    sgci_check('abilities: all 9 registered', !$missing, $missing);
+    $status_ability = wp_get_ability('steamgears-autopilot/status');
+    $meta = $status_ability && method_exists($status_ability, 'get_meta') ? $status_ability->get_meta() : [];
+    sgci_check('abilities: exposed to MCP, read-only status', ($meta['mcp']['public'] ?? false) === true && ($meta['annotations']['readonly'] ?? null) === true, $meta);
+    $status = $status_ability ? $status_ability->execute() : null;
+    sgci_check('abilities: status runs', is_array($status) && $status['version'] === SGAP_VERSION && isset($status['queue']['published']), $status);
+    $mode = wp_get_ability('steamgears-autopilot/set-mode')->execute(['autopilot' => true, 'full_auto' => false]);
+    sgci_check('abilities: set-mode switches autopilot', is_array($mode) && $mode['autopilot'] === true && $mode['full_auto'] === false
+        && get_option('sgap_autopilot_enabled') === 'yes', $mode);
+    wp_get_ability('steamgears-autopilot/set-mode')->execute(['autopilot' => false]);
+    $queued = wp_get_ability('steamgears-autopilot/queue-post')->execute([
+        'channel' => 'facebook', 'title' => 'CI from Claude', 'text' => 'Hello from the ability', 'destination_url' => home_url('/claude/')
+    ]);
+    sgci_check('abilities: queue-post adds to the queue', is_array($queued) && !empty($queued['id']) && str_contains($queued['tracking_url'], '/go/'), $queued);
+    $listed = wp_get_ability('steamgears-autopilot/list-queue')->execute(['status' => 'queued', 'limit' => 5]);
+    sgci_check('abilities: list-queue shows it', is_array($listed) && in_array((int) $queued['id'], array_map('intval', array_column($listed['items'], 'id')), true), $listed);
+    $drafts = wp_get_ability('steamgears-autopilot/list-drafts')->execute(['status' => 'used', 'limit' => 3]);
+    sgci_check('abilities: list-drafts shows the promoted page', is_array($drafts) && count($drafts['drafts']) === 3 && !empty($drafts['drafts'][0]['promotes']['url']), $drafts);
+    sgci_check('abilities: review of unknown draft is an error', is_wp_error(wp_get_ability('steamgears-autopilot/review-draft')->execute(['draft_id' => 999999, 'decision' => 'reject'])));
+    $wpdb->delete($wpdb->prefix . 'sgap_queue', ['id' => (int) $queued['id']]);
+    wp_set_current_user(0);
+    sgci_check('abilities: anonymous users are refused', is_wp_error(wp_get_ability('steamgears-autopilot/status')->execute()));
+    wp_set_current_user((int) $admin[0]);
+} else {
+    WP_CLI::line('SKIP abilities: this WordPress has no Abilities API');
+}
+
 if ($GLOBALS['sgci_failed']) {
     WP_CLI::error('Integration checks failed.');
 }
