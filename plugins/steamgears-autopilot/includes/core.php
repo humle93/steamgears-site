@@ -677,6 +677,19 @@ class SGAP_Queue {
         return self::capacity() <= 0 ? 'daily_cap_reached' : '';
     }
 
+    /** blocked_reason() in words, for the admin and the Claude tools. */
+    public static function blocked_message(string $reason = ''): string {
+        $reason = $reason !== '' ? $reason : self::blocked_reason();
+        if ($reason === 'quiet_hours') {
+            return sprintf('quiet hours %02d:00–%02d:00; queued posts are released from %02d:00 (site time is now %s). Set Quiet start and Quiet end to 0 in Settings to send at night',
+                (int) SGAP_Settings::get('quiet_start', 23), (int) SGAP_Settings::get('quiet_end', 7), (int) SGAP_Settings::get('quiet_end', 7), wp_date('H:i'));
+        }
+        return [
+            'autopilot_disabled' => 'the autopilot is off: Settings → General → Autopilot enabled',
+            'daily_cap_reached' => 'today\'s limit of ' . (int) SGAP_Settings::get('daily_cap', 8) . ' posts is reached; more go out tomorrow'
+        ][$reason] ?? $reason;
+    }
+
     /** How many posts may go out now: the batch size, capped by what is left of today's limit. */
     public static function capacity(): int {
         global $wpdb;
@@ -1159,6 +1172,25 @@ class SGAP_Admin {
 
     private static function open(string $title): void {
         echo '<div class="wrap"><h1>' . esc_html($title) . '</h1>';
+        // Result of the last button press, shown at the top where it is seen without scrolling.
+        $result = get_transient('sgap_run_result_' . get_current_user_id());
+        if (is_string($result) && $result !== '') {
+            delete_transient('sgap_run_result_' . get_current_user_id());
+            $type = stripos($result, 'error') !== false || stripos($result, 'failed:') !== false ? 'warning' : 'success';
+            echo '<div class="notice notice-' . $type . ' is-dismissible"><pre style="white-space:pre-wrap;font-size:13px">' . esc_html($result) . '</pre></div>';
+        }
+        // Buttons that call an AI or the network take a while: show that the click registered.
+        echo '<script>document.addEventListener("submit",function(e){var f=e.target;if((f.getAttribute("action")||"").indexOf("admin-post.php")<0)return;'
+            . 'var b=e.submitter||f.querySelector("button,input[type=submit]");if(!b)return;setTimeout(function(){b.disabled=true;'
+            . 'var t="Working… this can take a minute";if(b.tagName==="INPUT"){b.value=t;}else{b.textContent=t;}},0);});</script>';
+    }
+
+    /** Stores a message for open() on the next page and goes there. */
+    private static function done(string $message, string $page = 'steamgears-autopilot'): void {
+        delete_transient('sgap_dashboard_stats');
+        set_transient('sgap_run_result_' . get_current_user_id(), $message, 5 * MINUTE_IN_SECONDS);
+        wp_safe_redirect(admin_url('admin.php?page=' . $page));
+        exit;
     }
 
     private static function close(): void {
@@ -1210,11 +1242,6 @@ class SGAP_Admin {
     }
 
     private static function run_panel(): void {
-        $result = get_transient('sgap_run_result_' . get_current_user_id());
-        if ($result) {
-            delete_transient('sgap_run_result_' . get_current_user_id());
-            echo '<div class="notice notice-info"><pre style="white-space:pre-wrap">' . esc_html($result) . '</pre></div>';
-        }
         echo '<h2>Run now</h2><p>';
         foreach (['generate' => 'Generate posts now', 'publish' => 'Publish queue now', 'test_keys' => 'Test API keys', 'test_publer' => 'List Publer accounts'] as $task => $label) {
             echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '" style="display:inline-block;margin-right:8px">'
@@ -1223,14 +1250,46 @@ class SGAP_Admin {
                 . '<button class="button">' . esc_html($label) . '</button></form>';
         }
         echo '</p>';
+        // Progress bar for "Generate posts now": one request per page, so each step is visible.
+        echo '<div id="sgap-progress" style="display:none;max-width:560px;margin:8px 0 16px">'
+            . '<progress id="sgap-progress-bar" value="0" max="1" style="width:100%;height:18px"></progress>'
+            . '<p id="sgap-progress-text" class="description" style="margin:4px 0"></p></div>';
+        $gen = [
+            'ajax' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('sgap_generate'),
+            'back' => admin_url('admin.php?page=steamgears-autopilot')
+        ];
+        echo '<script>(function(){var C=' . wp_json_encode($gen) . ';'
+            . 'var f=document.querySelector(\'form input[name="task"][value="generate"]\');if(!f||!window.fetch)return;f=f.form;'
+            . 'var box=document.getElementById("sgap-progress"),bar=document.getElementById("sgap-progress-bar"),txt=document.getElementById("sgap-progress-text");'
+            . 'function call(action,data){var b=new URLSearchParams(data||{});b.append("action",action);b.append("nonce",C.nonce);'
+            . 'return fetch(C.ajax,{method:"POST",credentials:"same-origin",body:b}).then(function(r){return r.json();}).then(function(j){if(!j||!j.success)throw new Error((j&&j.data)||"request failed");return j.data;});}'
+            . 'f.addEventListener("submit",function(e){e.preventDefault();e.stopImmediatePropagation();var btn=f.querySelector("button");btn.disabled=true;'
+            . 'document.querySelectorAll(".wrap > .notice").forEach(function(n){n.remove();});box.style.display="block";bar.removeAttribute("value");txt.textContent="Choosing pages…";'
+            . 'var tot={sources:0,drafts:0,queued:0},errs=[];'
+            . 'call("sgap_gen_plan").then(function(plan){var pages=plan.pages,i=0;bar.max=Math.max(pages.length,1);bar.value=0;'
+            . 'if(!pages.length){txt.textContent="No page needs a post right now.";}'
+            . 'function next(){if(i>=pages.length){bar.value=bar.max;txt.textContent="Done: "+tot.drafts+" posts written. Saving…";'
+            . 'var d={sources:tot.sources,drafts:tot.drafts,queued:tot.queued};errs.forEach(function(x,k){d["errors["+k+"]"]=x;});'
+            . 'return call("sgap_gen_done",d).then(function(){location.href=C.back;});}'
+            . 'var p=pages[i];txt.textContent="Writing "+plan.channels.length+" posts for \u201c"+p.title+"\u201d ("+(i+1)+" of "+pages.length+")…";'
+            . 'return call("sgap_gen_one",{post_id:p.id}).then(function(r){tot.sources+=r.sources;tot.drafts+=r.drafts;tot.queued+=r.queued;errs=errs.concat(r.errors);},'
+            . 'function(err){tot.sources++;errs.push(p.title+": "+err.message);}).then(function(){i++;bar.value=i;return next();});}'
+            . 'return next();}).catch(function(err){txt.textContent="Stopped: "+err.message;btn.disabled=false;});},true);})();</script>';
         if (SGAP_RSS::enabled()) {
             echo '<h2>Publer RSS feeds</h2><p>In Publer: <em>Explore → RSS Feeds → add feed</em>, then the feed\'s <em>Settings → Auto-post</em>, '
                 . 'tick "use link title/description as caption", choose <em>photo</em> for Instagram/Pinterest/Google and <em>link</em> for the rest, '
                 . 'and select that channel\'s account. Pinterest needs a default board in Publer.</p><table class="widefat striped" style="max-width:760px"><tbody>';
             foreach (SGAP_Publer::channels() as $channel) {
-                echo '<tr><td>' . esc_html($channel) . '</td><td><input type="text" readonly class="large-text code" value="' . esc_attr(SGAP_RSS::url($channel)) . '" onclick="this.select();"></td></tr>';
+                echo '<tr><td>' . esc_html($channel) . '</td><td><input type="text" readonly class="large-text code" value="' . esc_attr(SGAP_RSS::url($channel)) . '" onclick="this.select();"></td>'
+                    . '<td style="white-space:nowrap"><button type="button" class="button sgap-copy" data-url="' . esc_attr(SGAP_RSS::url($channel)) . '">Copy</button> '
+                    . '<a class="button" href="' . esc_url(SGAP_RSS::url($channel)) . '" target="_blank" rel="noopener">Open</a></td></tr>';
             }
-            echo '</tbody></table>';
+            echo '</tbody></table><p><a class="button button-primary" href="https://app.publer.com/" target="_blank" rel="noopener">Open Publer &rarr;</a> '
+                . '<span class="description">Copy a feed, then in Publer: Explore → RSS Feeds → add feed → paste.</span></p>';
+            echo '<script>document.querySelectorAll(".sgap-copy").forEach(function(b){b.addEventListener("click",function(){var u=b.dataset.url,done=function(){b.textContent="Copied ✓";setTimeout(function(){b.textContent="Copy";},2000);};'
+                . 'var old=function(){var t=document.createElement("textarea");t.value=u;document.body.appendChild(t);t.select();try{document.execCommand("copy");}catch(e){}t.remove();done();};'
+                . 'if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(u).then(done,old);}else{old();}});});</script>';
         }
         $keys = get_option(SGAP_KeyCheck::RESULT);
         if (is_array($keys)) {
@@ -1254,16 +1313,14 @@ class SGAP_Admin {
         $task = isset($_POST['task']) ? sanitize_key($_POST['task']) : '';
         check_admin_referer('sgap_run_' . $task);
         if ($task === 'generate') {
-            $r = SGAP_Generator::run();
-            $out = "Generated from {$r['sources']} pages: {$r['drafts']} drafts, {$r['queued']} queued."
-                . ($r['errors'] ? "\nErrors:\n- " . implode("\n- ", $r['errors']) : '');
+            $out = SGAP_Generator::summary(SGAP_Generator::run());
         } elseif ($task === 'publish') {
             if (!SGAP_RSS::enabled() && !SGAP_Publer::configured()) {
                 $out = 'Save the Publer API key and workspace id first (or switch Publish mode to RSS feeds).';
             } else {
                 $r = SGAP_Publer::tick();
                 $out = $r['blocked'] !== ''
-                    ? "Nothing new sent ({$r['blocked']})."
+                    ? 'Nothing sent: ' . SGAP_Queue::blocked_message($r['blocked']) . '.'
                     : count($r['sent']) . ' post(s) ' . (SGAP_RSS::enabled() ? 'released to the RSS feeds' : 'sent to Publer') . ', ' . count($r['failed']) . ' failed. See the Queue page.';
             }
         } elseif ($task === 'test_keys') {
@@ -1274,12 +1331,13 @@ class SGAP_Admin {
         } else {
             $out = 'Unknown action.';
         }
-        set_transient('sgap_run_result_' . get_current_user_id(), $out, MINUTE_IN_SECONDS * 5);
-        wp_safe_redirect(admin_url('admin.php?page=steamgears-autopilot'));
-        exit;
+        self::done($out);
     }
 
     private static function publer_report(): string {
+        if (SGAP_RSS::enabled()) {
+            return 'RSS mode: Publer reads the feeds listed on the dashboard; no API key needed. Their accounts are chosen in Publer per feed.';
+        }
         if (SGAP_Settings::get('publer_api_key') === '') {
             return 'Save the Publer API key in Settings first.';
         }
@@ -1403,9 +1461,6 @@ class SGAP_Admin {
     public static function queue(): void {
         global $wpdb;
         self::open('Queue');
-        if (isset($_GET['updated'])) {
-            echo '<div class="notice notice-success"><p>Queue updated.</p></div>';
-        }
         $table = $wpdb->prefix . 'sgap_queue';
         $rows = self::table_exists($table)
             ? $wpdb->get_results("SELECT id, channel, angle, title, status, attempts, scheduled_at, published_at, error FROM {$table} ORDER BY id DESC LIMIT 50")
@@ -1440,22 +1495,21 @@ class SGAP_Admin {
         check_admin_referer('sgap_queue_' . $id);
         $cmd = isset($_POST['cmd']) ? sanitize_key($_POST['cmd']) : '';
         $table = $wpdb->prefix . 'sgap_queue';
+        $message = 'Nothing changed.';
         if ($id && $cmd === 'retry') {
             $wpdb->update($table, ['status' => 'queued', 'attempts' => 0, 'error' => null, 'external_id' => ''], ['id' => $id]);
+            $blocked = SGAP_Queue::blocked_reason();
+            $message = "Post #{$id} is queued again." . ($blocked !== '' ? ' It waits: ' . SGAP_Queue::blocked_message($blocked) . '.' : '');
         } elseif ($id && $cmd === 'delete') {
             $wpdb->delete($table, ['id' => $id]);
+            $message = "Post #{$id} deleted from the queue.";
         }
-        delete_transient('sgap_dashboard_stats');
-        wp_safe_redirect(add_query_arg(['page' => 'sgap-queue', 'updated' => 1], admin_url('admin.php')));
-        exit;
+        self::done($message, 'sgap-queue');
     }
 
     public static function ai(): void {
         global $wpdb;
         self::open('AI Drafts');
-        if (isset($_GET['done'])) {
-            echo '<div class="notice notice-info"><p>Draft ' . esc_html(sanitize_text_field(wp_unslash($_GET['done']))) . '.</p></div>';
-        }
         $table = $wpdb->prefix . 'sgap_ai_drafts';
         $rows = self::table_exists($table)
             ? $wpdb->get_results("SELECT id, post_id, channel, angle, title, body, hashtags, status, created_at FROM {$table} WHERE status = 'pending' ORDER BY id DESC LIMIT 50")
@@ -1490,18 +1544,25 @@ class SGAP_Admin {
         $id = isset($_POST['draft_id']) ? absint($_POST['draft_id']) : 0;
         check_admin_referer('sgap_approve_ai_' . $id);
         $decision = isset($_POST['decision']) ? sanitize_key($_POST['decision']) : 'queue';
-        $done = 'invalid';
+        $message = 'Unknown draft.';
         if ($id && $decision === 'queue') {
             // Approve & Queue: straight into the publishing queue.
             $queued = SGAP_Queue::from_draft($id);
-            $done = is_wp_error($queued) ? 'error: ' . $queued->get_error_message() : 'approved and queued';
+            if (is_wp_error($queued)) {
+                $message = "Draft #{$id} not queued, error: " . $queued->get_error_message();
+            } else {
+                $blocked = SGAP_Queue::blocked_reason();
+                $message = "Draft #{$id} approved and queued."
+                    . ($blocked !== '' ? ' It waits: ' . SGAP_Queue::blocked_message($blocked) . '.'
+                        : (SGAP_RSS::enabled() ? ' Press "Publish queue now" on the dashboard to release it to the RSS feed right away, or wait for the next 15-minute run.'
+                            : ' Press "Publish queue now" on the dashboard to send it right away, or wait for the next 15-minute run.'));
+            }
         } elseif ($id) {
-            $done = $decision === 'rejected' ? 'rejected' : 'approved';
-            $wpdb->update($wpdb->prefix . 'sgap_ai_drafts', ['status' => $done], ['id' => $id]);
+            $status = $decision === 'rejected' ? 'rejected' : 'approved';
+            $wpdb->update($wpdb->prefix . 'sgap_ai_drafts', ['status' => $status], ['id' => $id]);
+            $message = "Draft #{$id} {$status}.";
         }
-        delete_transient('sgap_dashboard_stats');
-        wp_safe_redirect(add_query_arg(['page' => 'sgap-ai', 'done' => rawurlencode($done)], admin_url('admin.php')));
-        exit;
+        self::done($message, 'sgap-ai');
     }
 
 
@@ -1633,13 +1694,15 @@ class SGAP_Admin {
         check_admin_referer('sgap_sup_' . $id);
         $cmd = isset($_POST['cmd']) ? sanitize_key($_POST['cmd']) : '';
         $table = $wpdb->prefix . 'sgap_suppression';
+        $message = 'Nothing changed.';
         if ($id && $cmd === 'protect') {
             $wpdb->query($wpdb->prepare("UPDATE {$table} SET protected = 1 - protected, level = IF(protected = 1, 'active', level) WHERE id = %d", $id));
+            $message = "Suppression #{$id}: protection toggled.";
         } elseif ($id && $cmd === 'delete') {
             $wpdb->delete($table, ['id' => $id]);
+            $message = "Suppression #{$id} removed.";
         }
-        wp_safe_redirect(add_query_arg(['page' => 'sgap-fullauto'], admin_url('admin.php')));
-        exit;
+        self::done($message, 'sgap-fullauto');
     }
 
     public static function merchant(): void {
