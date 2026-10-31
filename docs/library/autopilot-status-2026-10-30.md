@@ -1,7 +1,13 @@
 # Steamgears Autopilot – status 30/10 2026 (til i morgen)
 
+## Opdatering 31/10 – oprydning og merge
+- **Begge `main` er opdateret**: `steamgears-site/main` (plugin 7.5.0) og `command-center/main` (v7.9.1). PR'erne er merget.
+- **Fjernet fra steamgears-site**: Command Center v8.4-kopien (startede ikke, login kunne omgås med en cookie, indbygget adgangskode) og `.env`-filerne.
+- 🔴 **Mangler stadig (kun du kan)**: tilbagekald det WordPress Application Password der lå i `.env` (Brugere → Profil → Application Passwords), opret et nyt og sæt det i CC's `.env` på serveren; lav ny `JWT_SECRET` hvis v8.4 kører nogen steder – og stop v8.4 hvis den kører (port 8000, åben for alle).
+- `command-center` har stadig en gammel `master`-branch (v8.0-skelet, 8 filer) – kan slettes på GitHub under Branches.
+
 ## TL;DR
-- **v7.5.0 er klar til upload**: `plugins/steamgears-autopilot-v7.5.0.zip` (branch `claude/plugin-downtime-optimization-io2ypw`, PR #1).
+- **v7.5.0 er klar til upload**: `plugins/steamgears-autopilot-v7.5.0.zip` (på `main`).
 - Den indeholder **alt fra live 7.4.0** + AI-skribent + Publer-udsendelse + Claude-værktøjer + nøgletest.
 - Da I har **Publer Professional** (API kræver Business), kører udsendelsen som standard via **RSS-feeds**, som Publer auto-poster fra.
 - Intet er uploadet til steamgears.eu – det gør du selv.
@@ -19,13 +25,13 @@
 5. Skriv til Claude: "kør status på autopiloten" – så tjekker jeg det via sitets værktøjer.
 
 ## Command Center ↔ Autopilot (snakker sammen)
-Branch `claude/cc-code-check` i `humle93/command-center` (v7.9.1, ikke merget til main endnu):
+`humle93/command-center` **main** (v7.9.1, merget 31/10):
 - **Rettet**: CC fra GitHub kunne ikke starte (manglende `app/static` + `python-multipart`), dashboard gav 500
   (`ORDER BY id` på keyword_difficulty + DB-læsning efter lukket forbindelse), `smoke_test.sh` returnerede fejl ved succes.
 - **Ny bro**: CC henter hver 30. min status fra pluginnet (kø, kladder, klik/ordrer pr. kanal) → panel under *Social*;
   alarm + Telegram ved nye fejl/kladder eller hvis pluginnet ikke svarer; "→ Autopilot" sender et CC-opslag som kladde til pluginnet.
 - Bruger CC's eksisterende `WP_URL` / `WP_USER` / `WP_APP_PASSWORD` (brugeren skal være **administrator**).
-- **Aktivér**: merge branchen til `main` → tryk "Opdater" i CC (self-update henter install.sh fra main) → Moduler: "Autopilot-bro" er tændt som standard.
+- **Aktivér**: tryk "Opdater" i CC (self-update henter install.sh fra main) → Moduler: "Autopilot-bro" er tændt som standard.
 - Kræver at plugin **7.5.0** er uploadet (ellers viser panelet "findes ikke (404)").
 
 ## Flowet
