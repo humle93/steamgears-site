@@ -1,10 +1,15 @@
 # Steamgears Autopilot – status 30/10 2026 (til i morgen)
 
-## Opdatering 31/10 – oprydning og merge
-- **Begge `main` er opdateret**: `steamgears-site/main` (plugin 7.5.0) og `command-center/main` (v7.9.1). PR'erne er merget.
+## Opdatering 31/10 – oprydning, merge og Drive
+- **GitHub `main` er opdateret**: `steamgears-site/main` (plugin 7.5.0) og `command-center/main` (**v7.10**: rettelser, bro, optimering + kvalitetsgate, API-budget og /health fra v8-planen).
 - **Fjernet fra steamgears-site**: Command Center v8.4-kopien (startede ikke, login kunne omgås med en cookie, indbygget adgangskode) og `.env`-filerne.
-- 🔴 **Mangler stadig (kun du kan)**: tilbagekald det WordPress Application Password der lå i `.env` (Brugere → Profil → Application Passwords), opret et nyt og sæt det i CC's `.env` på serveren; lav ny `JWT_SECRET` hvis v8.4 kører nogen steder – og stop v8.4 hvis den kører (port 8000, åben for alle).
-- `command-center` har stadig en gammel `master`-branch (v8.0-skelet, 8 filer) – kan slettes på GitHub under Branches.
+- **Drive**: `command-center-main/` på Drive var en kopi af GitHub v7.9 (26/10) – nu med en "LÆS MIG"-fil om at GitHub er master. Mappen `_GAMLE_COMMAND_CENTER_FILER_SLET_MIG` er lagt i papirkurven (kan gendannes i 30 dage).
+- **Serveren må ikke længere `git pull` fra steamgears-site** – Command Center ligger kun i `humle93/command-center`. Brug "Opdater" i CC eller install.sh derfra.
+- 🔴 **Mangler stadig (kun du kan)**:
+  1. Tilbagekald det WordPress Application Password der lå i `.env` (Brugere → Profil → Application Passwords), opret et nyt og sæt det i CC's `.env` på serveren.
+  2. Stop v8.4 på serveren hvis den kører (port 8000, åben for alle).
+  3. Upload `plugins/steamgears-autopilot-v7.5.0.zip` på steamgears.eu (sitet er ikke forbundet til WordPress.com, så Claude kan ikke uploade det).
+  4. Valgfrit: slet branchen `master` i command-center (gammelt v8.0-skelet) under Branches på GitHub.
 
 ## TL;DR
 - **v7.5.0 er klar til upload**: `plugins/steamgears-autopilot-v7.5.0.zip` (på `main`).
