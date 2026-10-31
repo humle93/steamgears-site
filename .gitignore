@@ -1,0 +1,15 @@
+# Secrets never belong in this public repo
+.env
+.env.*
+*.pem
+*.key
+
+# Runtime / build files
+__pycache__/
+*.pyc
+*.db
+*.db-*
+backups/
+venv/
+node_modules/
+.DS_Store
