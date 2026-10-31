@@ -23,7 +23,7 @@
    - *Publer*: Publish mode = **RSS feeds**. Channels: fx `facebook, instagram, pinterest`.
    - *AI content*: provider **Anthropic**, indsæt Claude API-nøgle (model tom = claude-opus-5-5). Ved gem testes nøglen automatisk (✓/✗ øverst).
    - *General*: Autopilot **On**, Full auto **Off** (godkend selv de første dage).
-3. **Publer** (for hver kanal-feed fra dashboardet, fx `https://steamgears.eu/sgap-feed/facebook/`):
+3. **Publer** (for hver kanal-feed fra dashboardet, fx `https://steamgears.eu/?sgap_feed=facebook`):
    Explore → RSS Feeds → tilføj feed → Settings → **Auto-post** → "use link title/description as caption" →
    *photo* for Instagram/Pinterest/Google, *link* for resten → vælg kontoen. Pinterest: sæt default board i Publer.
 4. Dashboard → **Generate posts now** → godkend under *AI Drafts* (Approve & Queue) → **Publish queue now**.
