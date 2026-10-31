@@ -291,7 +291,7 @@ class SGAP_Settings {
     /** Settings with a fixed list of values, shown as a select. */
     const CHOICE_KEYS = [
         'publish_mode' => ['rss' => 'RSS feeds (Publer Professional)', 'api' => 'Publer API (Publer Business)'],
-        'ai_provider' => ['anthropic' => 'Anthropic (Claude)', 'openai_compatible' => 'OpenAI-compatible (AIMLAPI, OpenAI, ...)']
+        'ai_provider' => ['anthropic' => 'Anthropic (Claude)', 'aimlapi' => 'AIMLAPI (Claude and 300+ other models)', 'openai_compatible' => 'Other OpenAI-compatible API (OpenAI, OpenRouter, ...)']
     ];
 
     /** Shown in the settings page. Keys not listed here stay registered for older data but are unused. */
@@ -312,8 +312,9 @@ class SGAP_Settings {
         'publer_workspace_id' => 'Shown by "Test Publer" on the dashboard once the API key is saved.',
         'publer_pinterest_board' => 'API mode: Pinterest board ID the pins go to. RSS mode: set a default board in Publer instead.',
         'channels' => 'Comma-separated. Supported: ' . 'facebook, instagram, pinterest, linkedin, twitter, threads, bluesky, mastodon, telegram, google',
-        'ai_model' => 'Empty = claude-opus-5-5 for Anthropic. Required for OpenAI-compatible.',
-        'ai_base_url' => 'OpenAI-compatible only. Empty = https://api.aimlapi.com/v1',
+        'ai_provider' => 'AIMLAPI: key from aimlapi.com → Dashboard → API Keys; pay per use, many models with one key.',
+        'ai_model' => 'Empty = claude-opus-5-5 for Anthropic, anthropic/claude-opus-5.5 for AIMLAPI. Required for another OpenAI-compatible API.',
+        'ai_base_url' => 'Other OpenAI-compatible API only, e.g. https://api.openai.com/v1.',
         'posts_per_day' => 'How many site posts/products the AI writes social posts for each day.'
     ];
 

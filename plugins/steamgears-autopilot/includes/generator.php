@@ -14,6 +14,36 @@ class SGAP_AI {
     /** Models that accept the server-side refusal fallback. */
     const FALLBACK_MODELS = ['claude-opus-5-5', 'claude-opus-5', 'claude-fable-5-1', 'claude-sonnet-5-5'];
     const DEFAULT_BASE_URL = 'https://api.aimlapi.com/v1';
+    /** Default model on AIMLAPI (Claude through AIMLAPI's OpenAI-compatible API). */
+    const AIMLAPI_MODEL = 'anthropic/claude-opus-5.5';
+
+    public static function provider(): string {
+        $provider = (string) SGAP_Settings::get('ai_provider', 'anthropic');
+        return in_array($provider, ['anthropic', 'aimlapi', 'openai_compatible'], true) ? $provider : 'anthropic';
+    }
+
+    /** AIMLAPI and other OpenAI-compatible providers use /chat/completions. */
+    public static function uses_chat_completions(): bool {
+        return self::provider() !== 'anthropic';
+    }
+
+    /** Model from Settings, else the provider's default ('' for a generic OpenAI-compatible API). */
+    public static function model(): string {
+        $model = trim((string) SGAP_Settings::get('ai_model'));
+        if ($model !== '') {
+            return $model;
+        }
+        return ['anthropic' => self::DEFAULT_MODEL, 'aimlapi' => self::AIMLAPI_MODEL][self::provider()] ?? '';
+    }
+
+    public static function base_url(): string {
+        $base = trim((string) SGAP_Settings::get('ai_base_url'));
+        return rtrim(self::provider() === 'aimlapi' || $base === '' ? self::DEFAULT_BASE_URL : $base, '/');
+    }
+
+    public static function provider_name(): string {
+        return ['anthropic' => 'Anthropic', 'aimlapi' => 'AIMLAPI'][self::provider()] ?? self::base_url();
+    }
 
     const SYSTEM = 'You write social media posts for Steamgears (steamgears.eu), a shop and blog for steampunk '
         . 'costumes, accessories and DIY guides. Voice: enthusiastic, knowledgeable, a touch of Victorian flair, '
@@ -78,6 +108,10 @@ class SGAP_AI {
     /** Keeps only well-formed posts for the requested channels, one per channel. */
     public static function parse_posts(string $json, array $channels): array {
         $data = json_decode($json, true);
+        // Some models wrap the JSON in a ```json fence or a sentence: use the outermost object.
+        if (!is_array($data) && preg_match('/\{.*\}/s', $json, $m)) {
+            $data = json_decode($m[0], true);
+        }
         $posts = [];
         foreach ((array) ($data['posts'] ?? []) as $post) {
             $channel = is_array($post) ? (string) ($post['channel'] ?? '') : '';
@@ -122,7 +156,7 @@ class SGAP_AI {
             return new WP_Error('sgap_ai_key', 'Set an AI API key in Settings.');
         }
         $prompt = self::prompt($source, $channels);
-        if (SGAP_Settings::get('ai_provider', 'anthropic') === 'openai_compatible') {
+        if (self::uses_chat_completions()) {
             $text = self::openai_compatible($key, $prompt);
         } else {
             $text = self::anthropic($key, $prompt, $channels);
@@ -136,7 +170,7 @@ class SGAP_AI {
 
     /** @return string|WP_Error */
     private static function anthropic(string $key, string $prompt, array $channels) {
-        $model = (string) SGAP_Settings::get('ai_model') ?: self::DEFAULT_MODEL;
+        $model = self::model();
         $body = [
             'model' => $model,
             'max_tokens' => 16000,
@@ -165,30 +199,44 @@ class SGAP_AI {
 
     /** For AIMLAPI, OpenAI or any other /chat/completions endpoint. @return string|WP_Error */
     private static function openai_compatible(string $key, string $prompt) {
-        $model = (string) SGAP_Settings::get('ai_model');
+        $model = self::model();
         if ($model === '') {
             return new WP_Error('sgap_ai_model', 'Set an AI model in Settings for the OpenAI-compatible provider.');
         }
-        $base = rtrim((string) SGAP_Settings::get('ai_base_url') ?: self::DEFAULT_BASE_URL, '/');
+        $base = self::base_url();
         $response = wp_remote_post($base . '/chat/completions', [
             'timeout' => 120,
             'headers' => ['Authorization' => 'Bearer ' . $key, 'Content-Type' => 'application/json'],
-            'body' => wp_json_encode([
-                'model' => $model,
-                'max_tokens' => 4000,
-                'response_format' => ['type' => 'json_object'],
-                'messages' => [
-                    ['role' => 'system', 'content' => self::SYSTEM . ' Answer with JSON only: {"posts": [{"channel", "title", "text", "hashtags": [], "alt_text"}]}.'],
-                    ['role' => 'user', 'content' => $prompt]
-                ]
-            ])
+            'body' => wp_json_encode(self::chat_body($model, $prompt))
         ]);
-        $decoded = self::decode($response, 'AI provider');
+        $decoded = self::decode($response, self::provider_name());
         if (is_wp_error($decoded)) {
             return $decoded;
         }
         $text = $decoded['choices'][0]['message']['content'] ?? '';
+        if ((!is_string($text) || $text === '') && ($decoded['choices'][0]['finish_reason'] ?? '') === 'length') {
+            return new WP_Error('sgap_ai_truncated', 'The model response was cut off (max_tokens).');
+        }
         return is_string($text) && $text !== '' ? $text : new WP_Error('sgap_ai_empty', 'The model returned no text.');
+    }
+
+    /** Request body for /chat/completions. */
+    public static function chat_body(string $model, string $prompt): array {
+        $body = [
+            'model' => $model,
+            'max_tokens' => 8000,
+            'response_format' => ['type' => 'json_object'],
+            'messages' => [
+                ['role' => 'system', 'content' => self::SYSTEM . ' Answer with JSON only: {"posts": [{"channel", "title", "text", "hashtags": [], "alt_text"}]}.'],
+                ['role' => 'user', 'content' => $prompt]
+            ]
+        ];
+        if (self::provider() === 'aimlapi') {
+            // Claude on AIMLAPI thinks first; short marketing copy needs little, and thinking
+            // that eats the token budget leaves an empty answer.
+            $body['reasoning_effort'] = 'low';
+        }
+        return $body;
     }
 
     /** @return array|WP_Error */
@@ -280,7 +328,7 @@ class SGAP_Generator {
                     'hashtags' => $generated['hashtags'],
                     'alt_text' => $generated['alt_text'],
                     'status' => 'pending',
-                    'ai_model' => substr((string) (SGAP_Settings::get('ai_model') ?: SGAP_AI::DEFAULT_MODEL), 0, 40),
+                    'ai_model' => substr(SGAP_AI::model(), 0, 40),
                     'created_at' => current_time('mysql')
                 ]);
                 $report['drafts']++;

@@ -114,11 +114,14 @@ class SGAP_KeyCheck {
         if ($key === '') {
             return ['ok' => null, 'message' => 'No AI API key saved.'];
         }
-        if (SGAP_Settings::get('ai_provider', 'anthropic') === 'openai_compatible') {
+        if (SGAP_AI::provider() === 'aimlapi') {
+            return self::check_aimlapi($key);
+        }
+        if (SGAP_AI::provider() === 'openai_compatible') {
             return self::check_openai_compatible($key);
         }
         // The Models API validates key and model without generating (no token cost).
-        $model = (string) SGAP_Settings::get('ai_model') ?: SGAP_AI::DEFAULT_MODEL;
+        $model = SGAP_AI::model();
         $response = wp_remote_get('https://api.anthropic.com/v1/models/' . rawurlencode($model), [
             'timeout' => 20,
             'headers' => ['x-api-key' => $key, 'anthropic-version' => SGAP_AI::ANTHROPIC_VERSION]
@@ -139,9 +142,41 @@ class SGAP_KeyCheck {
         return ['ok' => false, 'message' => "Anthropic answered HTTP {$code}; try again later."];
     }
 
+    /**
+     * AIMLAPI lists its models without a key, so the key is tested with a one-token
+     * chat request to the chosen model (costs a fraction of a cent).
+     */
+    private static function check_aimlapi(string $key): array {
+        $model = SGAP_AI::model();
+        $response = wp_remote_post(SGAP_AI::base_url() . '/chat/completions', [
+            'timeout' => 30,
+            'headers' => ['Authorization' => 'Bearer ' . $key, 'Content-Type' => 'application/json'],
+            'body' => wp_json_encode(['model' => $model, 'max_tokens' => 1, 'messages' => [['role' => 'user', 'content' => 'ping']]])
+        ]);
+        if (is_wp_error($response)) {
+            return ['ok' => false, 'message' => 'Could not reach AIMLAPI: ' . $response->get_error_message()];
+        }
+        $code = (int) wp_remote_retrieve_response_code($response);
+        $body = json_decode((string) wp_remote_retrieve_body($response), true);
+        $detail = is_array($body) ? (string) ($body['error']['message'] ?? $body['message'] ?? '') : '';
+        if ($code >= 200 && $code < 300) {
+            return ['ok' => true, 'message' => "AIMLAPI key works, model {$model} answers."];
+        }
+        if ($code === 401 || $code === 403) {
+            return ['ok' => false, 'message' => 'AIMLAPI refused the key' . ($detail !== '' ? ": {$detail}" : '.')];
+        }
+        if ($code === 402) {
+            return ['ok' => false, 'message' => 'AIMLAPI key works, but the account has no credit left. Top up at aimlapi.com.'];
+        }
+        if ($code === 404 || ($code === 400 && stripos($detail, 'model') !== false)) {
+            return ['ok' => false, 'message' => "AIMLAPI does not offer the model \"{$model}\". Leave AI model empty for " . SGAP_AI::AIMLAPI_MODEL . '.'];
+        }
+        return ['ok' => false, 'message' => "AIMLAPI answered HTTP {$code}" . ($detail !== '' ? ": {$detail}" : '; try again later.')];
+    }
+
     private static function check_openai_compatible(string $key): array {
-        $base = rtrim((string) SGAP_Settings::get('ai_base_url') ?: SGAP_AI::DEFAULT_BASE_URL, '/');
-        $model = (string) SGAP_Settings::get('ai_model');
+        $base = SGAP_AI::base_url();
+        $model = SGAP_AI::model();
         $response = wp_remote_get($base . '/models', ['timeout' => 20, 'headers' => ['Authorization' => 'Bearer ' . $key]]);
         if (is_wp_error($response)) {
             return ['ok' => false, 'message' => "Could not reach {$base}: " . $response->get_error_message()];

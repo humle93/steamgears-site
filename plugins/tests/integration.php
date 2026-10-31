@@ -336,6 +336,14 @@ add_filter('pre_http_request', function ($pre, $args, $url) {
         }
         return str_ends_with($url, '/claude-opus-5-5') ? $reply(200, ['id' => 'claude-opus-5-5', 'type' => 'model']) : $reply(404, ['type' => 'error']);
     }
+    if ($url === 'https://api.aimlapi.com/v1/chat/completions') {
+        $GLOBALS['sgci_aiml'][] = json_decode((string) $args['body'], true);
+        if ($auth !== 'Bearer good-aiml-key') {
+            return $reply(401, ['error' => ['message' => 'Invalid API key']]);
+        }
+        $content = "```json\n" . wp_json_encode(['posts' => [['channel' => 'facebook', 'title' => 'Goggles', 'text' => 'Brass goggles, polished by hand.', 'hashtags' => ['#steampunk'], 'alt_text' => 'Goggles']]]) . "\n```";
+        return $reply(200, ['choices' => [['message' => ['role' => 'assistant', 'content' => $content], 'finish_reason' => 'stop']]]);
+    }
     return $pre;
 }, 10, 3);
 SGAP_Settings::register();
@@ -365,6 +373,22 @@ update_option('sgap_ai_model', '');
 update_option('sgap_ai_api_key', 'wrong-ai-key');
 $r = SGAP_KeyCheck::run();
 sgci_check('keycheck: invalid Claude key is reported', $r['ai']['ok'] === false && str_contains($r['ai']['message'], 'refused'), $r['ai']);
+// AIMLAPI: key test with a one-token request, then a real generation through /chat/completions.
+update_option('sgap_ai_provider', 'aimlapi');
+update_option('sgap_ai_api_key', 'good-aiml-key');
+$GLOBALS['sgci_aiml'] = [];
+$r = SGAP_KeyCheck::run();
+sgci_check('aimlapi: good key passes with the default model', $r['ai']['ok'] === true && str_contains($r['ai']['message'], 'anthropic/claude-opus-5.5'), $r['ai']);
+sgci_check('aimlapi: key test asks for one token', ($GLOBALS['sgci_aiml'][0]['max_tokens'] ?? 0) === 1, $GLOBALS['sgci_aiml']);
+$posts = SGAP_AI::generate(['title' => 'Brass goggles', 'type' => 'product', 'summary' => 'Hand-polished goggles.'], ['facebook']);
+$sent = end($GLOBALS['sgci_aiml']);
+sgci_check('aimlapi: generates posts (fenced JSON parsed)', is_array($posts) && count($posts) === 1 && $posts[0]['channel'] === 'facebook', $posts);
+sgci_check('aimlapi: request uses Claude, JSON mode and low reasoning effort', ($sent['model'] ?? '') === 'anthropic/claude-opus-5.5' && ($sent['reasoning_effort'] ?? '') === 'low' && ($sent['response_format']['type'] ?? '') === 'json_object', $sent);
+update_option('sgap_ai_api_key', 'wrong-aiml-key');
+$r = SGAP_KeyCheck::run();
+sgci_check('aimlapi: invalid key is reported', $r['ai']['ok'] === false && str_contains($r['ai']['message'], 'refused'), $r['ai']);
+update_option('sgap_ai_provider', 'anthropic');
+update_option('sgap_ai_api_key', 'wrong-ai-key');
 if (function_exists('wp_get_ability')) {
     $r = wp_get_ability('steamgears-autopilot/check-keys')->execute();
     sgci_check('keycheck: available as Claude tool', is_array($r) && isset($r['publer'], $r['ai']), $r);
