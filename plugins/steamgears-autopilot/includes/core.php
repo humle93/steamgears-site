@@ -67,6 +67,12 @@ class SGAP_Install {
     public static function maybe_upgrade(): void {
         if (get_option('sgap_version') !== SGAP_VERSION) {
             self::install();
+            // A page cache may still hold a feed stored by an older version: drop it so Publer sees fresh posts.
+            if (class_exists('SGAP_RSS')) {
+                foreach (SGAP_Publer::CHANNELS as $channel) {
+                    SGAP_RSS::flush_cache($channel);
+                }
+            }
         }
     }
 
