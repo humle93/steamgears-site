@@ -23,7 +23,7 @@ The whole social autopilot runs inside WordPress (Command Center is retired):
 4. **Measure** – every post links via `/go/<id>/`, so clicks (and WooCommerce
    orders) are counted per channel.
 
-Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.5.0.zip` → Activate.
+Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.5.1.zip` → Activate.
 
 ## Run it from Claude
 
