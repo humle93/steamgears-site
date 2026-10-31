@@ -116,6 +116,11 @@ class SGAP_Abilities {
                 'Tests the saved Publer and AI API keys (no AI tokens used): key valid, workspace, connected accounts per channel, model available. Fills in the Publer workspace id when the key has exactly one workspace.',
                 [], [], [__CLASS__, 'check_keys'], false, true
             ],
+            'update' => [
+                'Update the plugin',
+                'Installs the newest Steamgears Autopilot from GitHub (humle93/steamgears-site, main) over the installed version, if GitHub has a newer one. The plugin stays active. Returns the versions before and after.',
+                [], [], [__CLASS__, 'update'], false, true
+            ],
             'check-publer' => [
                 'Check Publer connection',
                 'Tests the Publer API key: lists workspaces, connected social accounts, and configured channels that have no Publer account.',
@@ -157,6 +162,7 @@ class SGAP_Abilities {
         $last = get_option('sgap_last_generate');
         return [
             'version' => SGAP_VERSION,
+            'latest_on_github' => SGAP_Updater::remote_version() ?: null,
             'autopilot' => SGAP_Settings::enabled('autopilot_enabled'),
             'full_auto' => SGAP_Settings::enabled('full_auto_enabled'),
             'channels' => SGAP_Publer::channels(),
@@ -287,6 +293,10 @@ class SGAP_Abilities {
             'autopilot' => SGAP_Settings::enabled('autopilot_enabled'),
             'full_auto' => SGAP_Settings::enabled('full_auto_enabled')
         ];
+    }
+
+    public static function update($input = null): array {
+        return SGAP_Updater::run();
     }
 
     public static function check_keys($input = null): array {

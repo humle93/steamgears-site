@@ -1198,6 +1198,7 @@ class SGAP_Admin {
         echo '<h2>Last 30 days per channel</h2>';
         self::render_rows($stats['channels'], ['channel', 'published', 'clicks', 'orders', 'revenue']);
         self::run_panel();
+        SGAP_Updater::panel();
         self::close();
     }
 

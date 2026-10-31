@@ -286,9 +286,9 @@ wp_set_current_user((int) $admin[0]);
 
 /* --- Claude / MCP abilities (WordPress 6.9+ only) --- */
 if (function_exists('wp_get_ability')) {
-    $names = ['status', 'list-drafts', 'review-draft', 'list-queue', 'queue-post', 'generate', 'publish', 'set-mode', 'check-keys', 'check-publer'];
+    $names = ['status', 'list-drafts', 'review-draft', 'list-queue', 'queue-post', 'generate', 'publish', 'set-mode', 'update', 'check-keys', 'check-publer'];
     $missing = array_values(array_filter($names, fn($n) => !wp_get_ability('steamgears-autopilot/' . $n)));
-    sgci_check('abilities: all 10 registered', !$missing, $missing);
+    sgci_check('abilities: all 11 registered', !$missing, $missing);
     $status_ability = wp_get_ability('steamgears-autopilot/status');
     $meta = $status_ability && method_exists($status_ability, 'get_meta') ? $status_ability->get_meta() : [];
     sgci_check('abilities: exposed to MCP, read-only status', ($meta['mcp']['public'] ?? false) === true && ($meta['annotations']['readonly'] ?? null) === true, $meta);
@@ -398,6 +398,53 @@ sgci_check('rss: key check needs no Publer key', SGAP_KeyCheck::check_publer()['
 update_option('sgap_ci_rss_id', (int) $rss_fb['id']);
 $wpdb->delete($wpdb->prefix . 'sgap_queue', ['id' => (int) $rss_ig['id']]);
 update_option('sgap_autopilot_enabled', 'no');
+
+/* --- Self-update from GitHub (GitHub mocked; the "new" version is this plugin relabelled 9.9.9) --- */
+$plugin_dir = WP_PLUGIN_DIR . '/steamgears-autopilot';
+$new_zip = wp_tempnam('sgap-update.zip');
+$zip = new ZipArchive();
+$zip->open($new_zip, ZipArchive::OVERWRITE);
+$files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($plugin_dir, FilesystemIterator::SKIP_DOTS));
+foreach ($files as $file) {
+    $local = 'steamgears-autopilot/' . ltrim(str_replace('\\', '/', substr($file->getPathname(), strlen($plugin_dir))), '/');
+    $body = file_get_contents($file->getPathname());
+    if ($local === 'steamgears-autopilot/steamgears-autopilot.php') {
+        $body = preg_replace('/^\* Version: .*$/m', '* Version: 9.9.9', $body);
+    }
+    $zip->addFromString($local, $body);
+}
+$zip->close();
+$GLOBALS['sgci_update_zip'] = $new_zip;
+add_filter('pre_http_request', function ($pre, $args, $url) {
+    if ($url === SGAP_Updater::RAW . 'steamgears-autopilot/steamgears-autopilot.php') {
+        return ['headers' => [], 'body' => "<?php\n/**\n* Plugin Name: Steamgears Autopilot\n* Version: 9.9.9\n*/", 'response' => ['code' => 200, 'message' => 'OK'], 'cookies' => [], 'filename' => null];
+    }
+    if ($url === SGAP_Updater::package_url('9.9.9')) {
+        if (!empty($args['stream']) && !empty($args['filename'])) {
+            copy($GLOBALS['sgci_update_zip'], $args['filename']);
+        }
+        return ['headers' => ['content-type' => 'application/zip'], 'body' => '', 'response' => ['code' => 200, 'message' => 'OK'], 'cookies' => [], 'filename' => $args['filename'] ?? null];
+    }
+    return $pre;
+}, 10, 3);
+delete_site_transient(SGAP_Updater::CACHE);
+sgci_check('update: GitHub version read', SGAP_Updater::remote_version(true) === '9.9.9');
+$transient = SGAP_Updater::inject_update((object) ['response' => [], 'no_update' => []]);
+$entry = $transient->response[SGAP_Updater::basename()] ?? null;
+sgci_check('update: shown in WordPress updates with the GitHub package', $entry && $entry->new_version === '9.9.9'
+    && $entry->package === SGAP_Updater::package_url('9.9.9'), $entry);
+$info = SGAP_Updater::plugin_info(false, 'plugin_information', (object) ['slug' => 'steamgears-autopilot']);
+sgci_check('update: "View details" info', is_object($info) && $info->version === '9.9.9');
+$report = SGAP_Updater::run();
+$installed = get_file_data($plugin_dir . '/steamgears-autopilot.php', ['Version' => 'Version']);
+sgci_check('update: Update now installs the GitHub version', $report['updated'] === true && $installed['Version'] === '9.9.9', [$report, $installed]);
+sgci_check('update: plugin still active afterwards', is_plugin_active(SGAP_Updater::basename()));
+sgci_check('update: all plugin files still there', file_exists($plugin_dir . '/includes/updater.php') && file_exists($plugin_dir . '/uninstall.php'));
+if (function_exists('wp_get_ability')) {
+    $r = wp_get_ability('steamgears-autopilot/update')->execute();
+    sgci_check('update: available as Claude tool', is_array($r) && ($r['to'] ?? '') === '9.9.9' && isset($r['message']), $r);
+}
+remove_all_filters('pre_http_request');
 
 if ($GLOBALS['sgci_failed']) {
     WP_CLI::error('Integration checks failed.');
