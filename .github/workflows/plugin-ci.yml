@@ -1,0 +1,90 @@
+name: Plugin CI
+
+on:
+  push:
+    paths:
+      - 'plugins/**'
+      - '.github/workflows/plugin-ci.yml'
+  pull_request:
+    paths:
+      - 'plugins/**'
+      - '.github/workflows/plugin-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: Lint + smoke test (PHP ${{ matrix.php }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.0', '8.1', '8.2', '8.3', '8.4']
+    steps:
+      - uses: actions/checkout@v5
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+          tools: none
+      - name: Syntax check every PHP file
+        run: find plugins -name '*.php' -print0 | xargs -0 -n1 php -l
+      - name: Smoke test with stubbed WordPress
+        run: php plugins/tests/smoke.php
+
+  zip:
+    name: Zip matches source
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Exactly one zip, same files and content as plugins/steamgears-autopilot
+        run: |
+          set -euo pipefail
+          zips=(plugins/steamgears-autopilot-v*.zip)
+          [ "${#zips[@]}" -eq 1 ] || { echo "Expected one zip, found: ${zips[*]}"; exit 1; }
+          version="$(grep -oP "define\('SGAP_VERSION', '\K[^']+" plugins/steamgears-autopilot/steamgears-autopilot.php)"
+          [ "${zips[0]}" = "plugins/steamgears-autopilot-v${version}.zip" ] || { echo "Zip name ${zips[0]} does not match version ${version}"; exit 1; }
+          grep -q "^\* Version: ${version}$" plugins/steamgears-autopilot/steamgears-autopilot.php || { echo "Plugin header version differs from SGAP_VERSION"; exit 1; }
+          tmp="$(mktemp -d)"
+          unzip -q "${zips[0]}" -d "$tmp"
+          diff -r "$tmp/steamgears-autopilot" plugins/steamgears-autopilot
+          echo "Zip is up to date (v${version})."
+
+  wordpress:
+    name: WordPress ${{ matrix.wp }} + MySQL
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        wp: ['6.4', 'latest']
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: wordpress
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -proot"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mysqli
+          coverage: none
+          tools: wp-cli
+      - name: Install, activate, exercise and uninstall the plugin
+        env:
+          WP_VERSION: ${{ matrix.wp }}
+          DB_HOST: 127.0.0.1
+          DB_USER: root
+          DB_PASS: root
+          DB_NAME: wordpress
+        run: bash plugins/tests/integration.sh
