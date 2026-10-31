@@ -64,9 +64,22 @@ class SGAP_RSS {
             }
             $wpdb->update($wpdb->prefix . 'sgap_queue', ['external_id' => self::MARKER, 'sent_at' => current_time('mysql')], ['id' => $id]);
             SGAP_Queue::mark($id, 'published');
+            self::flush_cache($channel);
             $report['sent'][] = ['id' => $id, 'channel' => $channel, 'feed' => self::url($channel)];
         }
         return $report;
+    }
+
+    /** Drops a copy of the feed a page cache stored before DONOTCACHEPAGE was in place. */
+    public static function flush_cache(string $channel): void {
+        $url = self::url($channel);
+        if (function_exists('w3tc_flush_url')) {
+            w3tc_flush_url($url);
+        }
+        if (function_exists('rocket_clean_files')) {
+            rocket_clean_files([$url]);
+        }
+        do_action('litespeed_purge_url', $url);
     }
 
     /** Items currently in a channel's feed, newest first. */
@@ -89,6 +102,11 @@ class SGAP_RSS {
             status_header(404);
             nocache_headers();
             exit;
+        }
+        // Page caches (W3 Total Cache, WP Super Cache, LiteSpeed …) must not store the feed:
+        // Publer has to see a released post on its next poll, not an hour later.
+        if (!defined('DONOTCACHEPAGE')) {
+            define('DONOTCACHEPAGE', true);
         }
         $items = self::items($channel);
         // Publer polls feeds often: answer 304 when nothing changed since its last fetch.

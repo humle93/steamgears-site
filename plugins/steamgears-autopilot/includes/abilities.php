@@ -33,6 +33,7 @@ class SGAP_Abilities {
     private static function meta(bool $readonly, bool $idempotent): array {
         return [
             'show_in_rest' => true,
+            'public' => true, // read by MCP servers that use the high-level flag
             'mcp' => ['public' => true, 'type' => 'tool'],
             'annotations' => ['readonly' => $readonly, 'destructive' => false, 'idempotent' => $idempotent]
         ];
