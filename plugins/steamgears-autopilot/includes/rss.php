@@ -90,21 +90,34 @@ class SGAP_RSS {
             nocache_headers();
             exit;
         }
+        $items = self::items($channel);
+        // Publer polls feeds often: answer 304 when nothing changed since its last fetch.
+        $etag = '"' . md5($channel . '|' . implode(',', array_map(fn($i) => $i->id . '@' . $i->published_at, $items))) . '"';
+        $newest = $items ? (string) get_gmt_from_date((string) $items[0]->published_at, 'D, d M Y H:i:s') . ' GMT' : '';
+        header('Cache-Control: public, max-age=300');
+        header('ETag: ' . $etag);
+        if ($newest !== '') {
+            header('Last-Modified: ' . $newest);
+        }
+        $if_none_match = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? trim((string) wp_unslash($_SERVER['HTTP_IF_NONE_MATCH'])) : '';
+        if ($if_none_match !== '' && $if_none_match === $etag) {
+            status_header(304);
+            exit;
+        }
         status_header(200);
         header('Content-Type: application/rss+xml; charset=UTF-8');
-        header('Cache-Control: public, max-age=300');
         header('X-Robots-Tag: noindex');
-        echo self::xml($channel);
+        echo self::xml($channel, $items);
         exit;
     }
 
-    public static function xml(string $channel): string {
+    public static function xml(string $channel, ?array $items = null): string {
         $out = '<?xml version="1.0" encoding="UTF-8"?>' . "\n"
             . '<rss version="2.0" xmlns:media="http://search.yahoo.com/mrss/"><channel>' . "\n"
             . '<title>' . esc_xml(get_bloginfo('name') . ' – ' . $channel) . "</title>\n"
             . '<link>' . esc_url(home_url('/')) . "</link>\n"
             . '<description>' . esc_xml("Steamgears Autopilot posts for {$channel}") . "</description>\n";
-        foreach (self::items($channel) as $item) {
+        foreach ($items ?? self::items($channel) as $item) {
             $link = SGAP_Tracking::url((int) $item->id);
             $out .= "<item>\n"
                 . '  <title>' . esc_xml((string) $item->title) . "</title>\n"

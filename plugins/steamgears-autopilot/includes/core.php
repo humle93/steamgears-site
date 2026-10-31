@@ -111,6 +111,9 @@ class SGAP_Install {
         KEY channel_status (channel,status),
         KEY post_channel (post_id,channel),
         KEY scheduled (scheduled_at),
+        KEY status_scheduled (status,scheduled_at),
+        KEY status_sent (status,sent_at),
+        KEY published_at (published_at),
         KEY fingerprint (fingerprint)
         ) $charset;");
 
@@ -670,9 +673,12 @@ class SGAP_Queue {
     /** How many posts may go out now: the batch size, capped by what is left of today's limit. */
     public static function capacity(): int {
         global $wpdb;
+        $today = wp_date('Y-m-d 00:00:00');
+        // Two index-backed counts (published_at, status+sent_at) instead of one OR that scans the table.
         $in_flight_or_published = (int) $wpdb->get_var($wpdb->prepare(
-            'SELECT COUNT(*) FROM ' . self::table() . " WHERE published_at >= %s OR (status = 'sending' AND sent_at >= %s)",
-            wp_date('Y-m-d 00:00:00'), wp_date('Y-m-d 00:00:00')
+            'SELECT (SELECT COUNT(*) FROM ' . self::table() . ' WHERE published_at >= %s)
+                  + (SELECT COUNT(*) FROM ' . self::table() . " WHERE status = 'sending' AND sent_at >= %s AND (published_at IS NULL OR published_at < %s))",
+            $today, $today, $today
         ));
         return max(0, min((int) SGAP_Settings::get('batch_size', 5), (int) SGAP_Settings::get('daily_cap', 8) - $in_flight_or_published));
     }

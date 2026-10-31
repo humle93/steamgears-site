@@ -165,8 +165,14 @@ class SGAP_Publer {
         return ['state' => 'working', 'error' => ''];
     }
 
+    /** Media ids uploaded during this run, so a post going to several channels uploads its image once. */
+    private static array $uploaded = [];
+
     /** Uploads the image at $url to Publer and returns its media id. @return string|WP_Error */
     public static function upload_photo(string $url) {
+        if (isset(self::$uploaded[$url])) {
+            return self::$uploaded[$url];
+        }
         $image = wp_remote_get($url, ['timeout' => 30]);
         if (is_wp_error($image) || (int) wp_remote_retrieve_response_code($image) !== 200) {
             return new WP_Error('sgap_image', 'Could not download the post image: ' . $url);
@@ -191,7 +197,10 @@ class SGAP_Publer {
         if (is_wp_error($result)) {
             return $result;
         }
-        return empty($result['id']) ? new WP_Error('sgap_image', 'Publer returned no media id.') : (string) $result['id'];
+        if (empty($result['id'])) {
+            return new WP_Error('sgap_image', 'Publer returned no media id.');
+        }
+        return self::$uploaded[$url] = (string) $result['id'];
     }
 
     /** Hands one queue item to Publer. @return string|WP_Error The Publer job id. */

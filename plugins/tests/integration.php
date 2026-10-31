@@ -248,7 +248,7 @@ sgci_check('publish: facebook link post uses the /go/ link', ($fb['networks']['f
 $pin = $by_network['pinterest'] ?? [];
 sgci_check('publish: pinterest pin on the board with uploaded photo', ($pin['accounts'][0]['album_id'] ?? '') === 'board_1'
     && ($pin['networks']['pinterest']['media'][0]['id'] ?? '') === 'media_1', $pin);
-sgci_check('publish: photos uploaded for instagram + pinterest only', count($requests_to('https://app.publer.com/api/v1/media')) === 4);
+sgci_check('publish: each post image uploaded once, for instagram + pinterest only', count($requests_to('https://app.publer.com/api/v1/media')) === 2, count($requests_to('https://app.publer.com/api/v1/media')));
 $jobs_before = count($sent);
 SGAP_Publer::tick();
 sgci_check('publish: working jobs are not sent twice', count($requests_to('https://app.publer.com/api/v1/posts/schedule/publish')) === $jobs_before);
