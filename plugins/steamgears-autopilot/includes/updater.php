@@ -153,6 +153,7 @@ class SGAP_Updater {
         }
         check_admin_referer('sgap_self_update');
         $r = self::run();
+        delete_transient('sgap_dashboard_stats');
         set_transient('sgap_run_result_' . get_current_user_id(), $r['message'], 5 * MINUTE_IN_SECONDS);
         wp_safe_redirect(admin_url('admin.php?page=steamgears-autopilot'));
         exit;

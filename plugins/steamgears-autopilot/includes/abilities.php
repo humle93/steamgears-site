@@ -173,7 +173,7 @@ class SGAP_Abilities {
             'ai_provider' => (string) SGAP_Settings::get('ai_provider', 'anthropic'),
             'ai_model' => SGAP_AI::model(),
             'key_test' => get_option(SGAP_KeyCheck::RESULT) ?: null,
-            'sending_paused_because' => SGAP_Queue::blocked_reason() ?: null,
+            'sending_paused_because' => SGAP_Queue::blocked_reason() !== '' ? SGAP_Queue::blocked_message() : null,
             'can_send_now' => SGAP_Queue::capacity(),
             'limits' => [
                 'daily_cap' => (int) SGAP_Settings::get('daily_cap', 8),
