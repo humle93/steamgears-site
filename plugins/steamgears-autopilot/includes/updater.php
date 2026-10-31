@@ -163,12 +163,13 @@ class SGAP_Updater {
     public static function panel(): void {
         $remote = self::remote_version();
         $newer = $remote !== '' && version_compare($remote, SGAP_VERSION, '>');
-        echo '<h2>Plugin update</h2><p>Installed: <strong>' . esc_html(SGAP_VERSION) . '</strong> &middot; GitHub: <strong>'
-            . esc_html($remote !== '' ? $remote : 'unknown') . '</strong> ';
-        echo $newer ? '<span style="color:#b32d2e">– update available</span>' : '<span style="color:#008a20">– up to date</span>';
-        echo '</p><form method="post" action="' . esc_url(admin_url('admin-post.php')) . '">'
+        SGAP_UI::card_open('Plugin update', 'update');
+        echo '<p>' . SGAP_UI::pill('Installed ' . SGAP_VERSION) . ' ' . SGAP_UI::pill('GitHub ' . ($remote !== '' ? $remote : 'unknown'), $newer ? 'warn' : 'ok')
+            . ' ' . ($newer ? '<strong>Update available</strong>' : '<span class="description">Up to date</span>') . '</p>'
+            . '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '">'
             . '<input type="hidden" name="action" value="sgap_self_update">'
             . wp_nonce_field('sgap_self_update', '_wpnonce', true, false)
-            . '<button class="button' . ($newer ? ' button-primary' : '') . '">' . ($newer ? 'Update now' : 'Check again and update') . '</button></form>';
+            . '<button class="button' . ($newer ? ' button-primary' : '') . '"><span class="dashicons dashicons-update"></span>' . ($newer ? 'Update now' : 'Check again and update') . '</button></form>';
+        SGAP_UI::card_close();
     }
 }
