@@ -1250,14 +1250,46 @@ class SGAP_Admin {
                 . '<button class="button">' . esc_html($label) . '</button></form>';
         }
         echo '</p>';
+        // Progress bar for "Generate posts now": one request per page, so each step is visible.
+        echo '<div id="sgap-progress" style="display:none;max-width:560px;margin:8px 0 16px">'
+            . '<progress id="sgap-progress-bar" value="0" max="1" style="width:100%;height:18px"></progress>'
+            . '<p id="sgap-progress-text" class="description" style="margin:4px 0"></p></div>';
+        $gen = [
+            'ajax' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('sgap_generate'),
+            'back' => admin_url('admin.php?page=steamgears-autopilot')
+        ];
+        echo '<script>(function(){var C=' . wp_json_encode($gen) . ';'
+            . 'var f=document.querySelector(\'form input[name="task"][value="generate"]\');if(!f||!window.fetch)return;f=f.form;'
+            . 'var box=document.getElementById("sgap-progress"),bar=document.getElementById("sgap-progress-bar"),txt=document.getElementById("sgap-progress-text");'
+            . 'function call(action,data){var b=new URLSearchParams(data||{});b.append("action",action);b.append("nonce",C.nonce);'
+            . 'return fetch(C.ajax,{method:"POST",credentials:"same-origin",body:b}).then(function(r){return r.json();}).then(function(j){if(!j||!j.success)throw new Error((j&&j.data)||"request failed");return j.data;});}'
+            . 'f.addEventListener("submit",function(e){e.preventDefault();e.stopImmediatePropagation();var btn=f.querySelector("button");btn.disabled=true;'
+            . 'document.querySelectorAll(".wrap > .notice").forEach(function(n){n.remove();});box.style.display="block";bar.removeAttribute("value");txt.textContent="Choosing pages…";'
+            . 'var tot={sources:0,drafts:0,queued:0},errs=[];'
+            . 'call("sgap_gen_plan").then(function(plan){var pages=plan.pages,i=0;bar.max=Math.max(pages.length,1);bar.value=0;'
+            . 'if(!pages.length){txt.textContent="No page needs a post right now.";}'
+            . 'function next(){if(i>=pages.length){bar.value=bar.max;txt.textContent="Done: "+tot.drafts+" posts written. Saving…";'
+            . 'var d={sources:tot.sources,drafts:tot.drafts,queued:tot.queued};errs.forEach(function(x,k){d["errors["+k+"]"]=x;});'
+            . 'return call("sgap_gen_done",d).then(function(){location.href=C.back;});}'
+            . 'var p=pages[i];txt.textContent="Writing "+plan.channels.length+" posts for \u201c"+p.title+"\u201d ("+(i+1)+" of "+pages.length+")…";'
+            . 'return call("sgap_gen_one",{post_id:p.id}).then(function(r){tot.sources+=r.sources;tot.drafts+=r.drafts;tot.queued+=r.queued;errs=errs.concat(r.errors);},'
+            . 'function(err){tot.sources++;errs.push(p.title+": "+err.message);}).then(function(){i++;bar.value=i;return next();});}'
+            . 'return next();}).catch(function(err){txt.textContent="Stopped: "+err.message;btn.disabled=false;});},true);})();</script>';
         if (SGAP_RSS::enabled()) {
             echo '<h2>Publer RSS feeds</h2><p>In Publer: <em>Explore → RSS Feeds → add feed</em>, then the feed\'s <em>Settings → Auto-post</em>, '
                 . 'tick "use link title/description as caption", choose <em>photo</em> for Instagram/Pinterest/Google and <em>link</em> for the rest, '
                 . 'and select that channel\'s account. Pinterest needs a default board in Publer.</p><table class="widefat striped" style="max-width:760px"><tbody>';
             foreach (SGAP_Publer::channels() as $channel) {
-                echo '<tr><td>' . esc_html($channel) . '</td><td><input type="text" readonly class="large-text code" value="' . esc_attr(SGAP_RSS::url($channel)) . '" onclick="this.select();"></td></tr>';
+                echo '<tr><td>' . esc_html($channel) . '</td><td><input type="text" readonly class="large-text code" value="' . esc_attr(SGAP_RSS::url($channel)) . '" onclick="this.select();"></td>'
+                    . '<td style="white-space:nowrap"><button type="button" class="button sgap-copy" data-url="' . esc_attr(SGAP_RSS::url($channel)) . '">Copy</button> '
+                    . '<a class="button" href="' . esc_url(SGAP_RSS::url($channel)) . '" target="_blank" rel="noopener">Open</a></td></tr>';
             }
-            echo '</tbody></table>';
+            echo '</tbody></table><p><a class="button button-primary" href="https://app.publer.com/" target="_blank" rel="noopener">Open Publer &rarr;</a> '
+                . '<span class="description">Copy a feed, then in Publer: Explore → RSS Feeds → add feed → paste.</span></p>';
+            echo '<script>document.querySelectorAll(".sgap-copy").forEach(function(b){b.addEventListener("click",function(){var u=b.dataset.url,done=function(){b.textContent="Copied ✓";setTimeout(function(){b.textContent="Copy";},2000);};'
+                . 'var old=function(){var t=document.createElement("textarea");t.value=u;document.body.appendChild(t);t.select();try{document.execCommand("copy");}catch(e){}t.remove();done();};'
+                . 'if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(u).then(done,old);}else{old();}});});</script>';
         }
         $keys = get_option(SGAP_KeyCheck::RESULT);
         if (is_array($keys)) {
@@ -1281,11 +1313,7 @@ class SGAP_Admin {
         $task = isset($_POST['task']) ? sanitize_key($_POST['task']) : '';
         check_admin_referer('sgap_run_' . $task);
         if ($task === 'generate') {
-            $r = SGAP_Generator::run();
-            $out = "Generated from {$r['sources']} pages: {$r['drafts']} drafts, {$r['queued']} queued."
-                . ($r['drafts'] > $r['queued'] ? ' Review them under Steamgears → AI Drafts.' : '')
-                . ($r['sources'] === 0 ? ' No page needed a post: every published post/product was promoted within the cooldown.' : '')
-                . ($r['errors'] ? "\nErrors:\n- " . implode("\n- ", $r['errors']) : '');
+            $out = SGAP_Generator::summary(SGAP_Generator::run());
         } elseif ($task === 'publish') {
             if (!SGAP_RSS::enabled() && !SGAP_Publer::configured()) {
                 $out = 'Save the Publer API key and workspace id first (or switch Publish mode to RSS feeds).';

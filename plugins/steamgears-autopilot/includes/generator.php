@@ -259,6 +259,62 @@ class SGAP_Generator {
 
     public static function init(): void {
         add_action(SGAP_Install::GENERATE_CRON, [__CLASS__, 'cron']);
+        // The dashboard's progress bar runs generation one page per request.
+        add_action('wp_ajax_sgap_gen_plan', [__CLASS__, 'ajax_plan']);
+        add_action('wp_ajax_sgap_gen_one', [__CLASS__, 'ajax_one']);
+        add_action('wp_ajax_sgap_gen_done', [__CLASS__, 'ajax_done']);
+    }
+
+    private static function ajax_guard(): void {
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('Forbidden', 403);
+        }
+        check_ajax_referer('sgap_generate', 'nonce');
+    }
+
+    /** Which pages today's run will write for. */
+    public static function ajax_plan(): void {
+        self::ajax_guard();
+        if (!SGAP_Publer::channels()) {
+            wp_send_json_error('No supported channels in Settings → Publer → Channels.');
+        }
+        $pages = array_map(fn(WP_Post $p) => ['id' => $p->ID, 'title' => get_the_title($p)], self::pick((int) SGAP_Settings::get('posts_per_day', 2)));
+        wp_send_json_success(['pages' => $pages, 'channels' => SGAP_Publer::channels()]);
+    }
+
+    /** Writes the posts for one page. */
+    public static function ajax_one(): void {
+        self::ajax_guard();
+        $post = get_post(isset($_POST['post_id']) ? absint($_POST['post_id']) : 0);
+        if (!$post || $post->post_status !== 'publish') {
+            wp_send_json_error('That page is not published.');
+        }
+        $report = ['sources' => 0, 'drafts' => 0, 'queued' => 0, 'errors' => []];
+        self::write_for($post, SGAP_Publer::channels(), SGAP_Settings::enabled('full_auto_enabled'), $report);
+        wp_send_json_success($report);
+    }
+
+    /** Stores the totals like run() does and leaves the summary for the dashboard. */
+    public static function ajax_done(): void {
+        self::ajax_guard();
+        $report = ['sources' => 0, 'drafts' => 0, 'queued' => 0, 'errors' => []];
+        foreach (['sources', 'drafts', 'queued'] as $key) {
+            $report[$key] = isset($_POST[$key]) ? absint($_POST[$key]) : 0;
+        }
+        $errors = isset($_POST['errors']) ? (array) wp_unslash($_POST['errors']) : [];
+        $report['errors'] = array_values(array_map('sanitize_text_field', array_slice($errors, 0, 20)));
+        delete_transient('sgap_dashboard_stats');
+        update_option('sgap_last_generate', ['at' => current_time('mysql')] + $report, false);
+        set_transient('sgap_run_result_' . get_current_user_id(), self::summary($report), 5 * MINUTE_IN_SECONDS);
+        wp_send_json_success();
+    }
+
+    /** The message shown after a run. */
+    public static function summary(array $r): string {
+        return "Generated from {$r['sources']} pages: {$r['drafts']} drafts, {$r['queued']} queued."
+            . ($r['drafts'] > $r['queued'] ? ' Review them under Steamgears → AI Drafts.' : '')
+            . ($r['sources'] === 0 ? ' No page needed a post: every published post/product was promoted within the cooldown.' : '')
+            . ($r['errors'] ? "\nErrors:\n- " . implode("\n- ", $r['errors']) : '');
     }
 
     public static function cron(): void {
@@ -310,40 +366,46 @@ class SGAP_Generator {
         }
         $full_auto = SGAP_Settings::enabled('full_auto_enabled');
         foreach (self::pick($count ?? (int) SGAP_Settings::get('posts_per_day', 2)) as $post) {
-            $report['sources']++;
-            $posts = SGAP_AI::generate(self::source($post), $channels);
-            if (is_wp_error($posts)) {
-                $report['errors'][] = get_the_title($post) . ': ' . $posts->get_error_message();
-                continue;
-            }
-            update_post_meta($post->ID, self::META, time());
-            foreach ($posts as $generated) {
-                $wpdb->insert($wpdb->prefix . 'sgap_ai_drafts', [
-                    'post_id' => $post->ID,
-                    'channel' => $generated['channel'],
-                    'content_type' => $post->post_type === 'product' ? 'product' : 'guide',
-                    'format' => $generated['channel'] === 'pinterest' ? 'pin' : 'post',
-                    'title' => $generated['title'] ?: get_the_title($post),
-                    'body' => $generated['text'],
-                    'hashtags' => $generated['hashtags'],
-                    'alt_text' => $generated['alt_text'],
-                    'status' => 'pending',
-                    'ai_model' => substr(SGAP_AI::model(), 0, 40),
-                    'created_at' => current_time('mysql')
-                ]);
-                $report['drafts']++;
-                if ($full_auto) {
-                    $queued = SGAP_Queue::from_draft((int) $wpdb->insert_id);
-                    if (is_wp_error($queued)) {
-                        $report['errors'][] = $queued->get_error_message();
-                    } else {
-                        $report['queued']++;
-                    }
-                }
-            }
+            self::write_for($post, $channels, $full_auto, $report);
         }
         delete_transient('sgap_dashboard_stats');
         update_option('sgap_last_generate', ['at' => current_time('mysql')] + $report, false);
         return $report;
+    }
+
+    /** Asks the AI for one page's posts and stores them as drafts (queued in Full auto). Adds to $report. */
+    public static function write_for(WP_Post $post, array $channels, bool $full_auto, array &$report): void {
+        global $wpdb;
+        $report['sources']++;
+        $posts = SGAP_AI::generate(self::source($post), $channels);
+        if (is_wp_error($posts)) {
+            $report['errors'][] = get_the_title($post) . ': ' . $posts->get_error_message();
+            return;
+        }
+        update_post_meta($post->ID, self::META, time());
+        foreach ($posts as $generated) {
+            $wpdb->insert($wpdb->prefix . 'sgap_ai_drafts', [
+                'post_id' => $post->ID,
+                'channel' => $generated['channel'],
+                'content_type' => $post->post_type === 'product' ? 'product' : 'guide',
+                'format' => $generated['channel'] === 'pinterest' ? 'pin' : 'post',
+                'title' => $generated['title'] ?: get_the_title($post),
+                'body' => $generated['text'],
+                'hashtags' => $generated['hashtags'],
+                'alt_text' => $generated['alt_text'],
+                'status' => 'pending',
+                'ai_model' => substr(SGAP_AI::model(), 0, 40),
+                'created_at' => current_time('mysql')
+            ]);
+            $report['drafts']++;
+            if ($full_auto) {
+                $queued = SGAP_Queue::from_draft((int) $wpdb->insert_id);
+                if (is_wp_error($queued)) {
+                    $report['errors'][] = $queued->get_error_message();
+                } else {
+                    $report['queued']++;
+                }
+            }
+        }
     }
 }
