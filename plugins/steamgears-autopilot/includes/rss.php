@@ -2,7 +2,7 @@
 /**
  * Publer RSS mode, for the Publer Professional plan (the Publer API needs Business).
  * Every 15 minutes due queue posts are released into one RSS feed per channel
- * (https://steamgears.eu/sgap-feed/<channel>/). In Publer each feed is added once
+ * (https://steamgears.eu/?sgap_feed=<channel>). In Publer each feed is added once
  * under Explore → RSS Feeds and set to Auto-post to that channel's account.
  * Loaded from steamgears-autopilot.php.
  */
@@ -28,7 +28,17 @@ class SGAP_RSS {
         add_rewrite_rule('^sgap-feed/([a-z]+)/?$', 'index.php?' . self::QUERY_VAR . '=$matches[1]', 'top');
     }
 
+    /**
+     * The address to give Publer. A query string, because page caches (W3 Total Cache
+     * disk enhanced on steamgears.eu) never store URLs with one, whereas they served a
+     * stale copy of /sgap-feed/<channel>/ straight from disk without reaching WordPress.
+     */
     public static function url(string $channel): string {
+        return add_query_arg([self::QUERY_VAR => $channel], home_url('/'));
+    }
+
+    /** Older pretty address; still served, but a page cache may hold a copy of it. */
+    public static function pretty_url(string $channel): string {
         return home_url('/sgap-feed/' . $channel . '/');
     }
 
@@ -72,14 +82,15 @@ class SGAP_RSS {
 
     /** Drops a copy of the feed a page cache stored before DONOTCACHEPAGE was in place. */
     public static function flush_cache(string $channel): void {
-        $url = self::url($channel);
-        if (function_exists('w3tc_flush_url')) {
-            w3tc_flush_url($url);
+        foreach ([self::url($channel), self::pretty_url($channel)] as $url) {
+            if (function_exists('w3tc_flush_url')) {
+                w3tc_flush_url($url);
+            }
+            if (function_exists('rocket_clean_files')) {
+                rocket_clean_files([$url]);
+            }
+            do_action('litespeed_purge_url', $url);
         }
-        if (function_exists('rocket_clean_files')) {
-            rocket_clean_files([$url]);
-        }
-        do_action('litespeed_purge_url', $url);
     }
 
     /** Items currently in a channel's feed, newest first. */

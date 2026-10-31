@@ -12,7 +12,7 @@ The whole social autopilot runs inside WordPress (Command Center is retired):
    Instagram, Pinterest, LinkedIn, X, Threads, Bluesky, Mastodon, Telegram and
    Google Business accounts. Two modes (*Settings → Publer → Publish mode*):
    - **RSS feeds** (default, works on Publer **Professional**): posts are released
-     into one feed per channel, `https://steamgears.eu/sgap-feed/<channel>/`. In
+     into one feed per channel, `https://steamgears.eu/?sgap_feed=<channel>`. In
      Publer add each feed once (*Explore → RSS Feeds*), open its *Settings*, choose
      **Auto-post**, tick "use link title/description as caption", pick *photo* for
      Instagram/Pinterest/Google and *link* for the others, and select the account.
@@ -23,7 +23,7 @@ The whole social autopilot runs inside WordPress (Command Center is retired):
 4. **Measure** – every post links via `/go/<id>/`, so clicks (and WooCommerce
    orders) are counted per channel.
 
-Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.7.0.zip` → Activate.
+Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.7.1.zip` → Activate.
 
 ## Run it from Claude
 

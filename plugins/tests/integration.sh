@@ -72,6 +72,7 @@ check "rss: feed served as RSS" "$(grep -ci '^content-type: application/rss+xml'
 check "rss: feed contains the released post" "$(echo "$FEED" | grep -c "<link>$URL/go/$RSS_ID/</link>")" "1"
 ETAG="$(grep -i '^etag:' /tmp/feed-headers | tr -d '\r' | cut -d' ' -f2-)"
 check "rss: unchanged feed answers 304 to If-None-Match" "$(curl -s -o /dev/null -w '%{http_code}' -H "If-None-Match: $ETAG" "$URL/sgap-feed/facebook/")" "304"
+check "rss: query-string feed URL (what Publer gets) is served" "$(curl -s -o /dev/null -w '%{http_code} %{content_type}' "$URL/?sgap_feed=facebook")" "200 application/rss+xml; charset=UTF-8"
 check "rss: unknown channel is 404" "$(curl -s -o /dev/null -w '%{http_code}' "$URL/sgap-feed/myspace/")" "404"
 HEADERS="$(curl -s -o /dev/null -D - -A 'facebookplatform/1.0 (+http://developers.facebook.com)' "$URL/go/$RSS_ID/")"
 check "rss: Publer scraper follows /go/" "$(echo "$HEADERS" | head -1 | awk '{print $2}')" "302"
