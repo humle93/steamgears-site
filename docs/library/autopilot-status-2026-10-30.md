@@ -8,17 +8,17 @@
 - 🔴 **Mangler stadig (kun du kan)**:
   1. Tilbagekald det WordPress Application Password der lå i `.env` (Brugere → Profil → Application Passwords), opret et nyt og sæt det i CC's `.env` på serveren.
   2. Stop v8.4 på serveren hvis den kører (port 8000, åben for alle).
-  3. Upload `plugins/steamgears-autopilot-v7.5.1.zip` på steamgears.eu (sitet er ikke forbundet til WordPress.com, så Claude kan ikke uploade det).
+  3. Upload `plugins/steamgears-autopilot-v7.6.0.zip` på steamgears.eu (sitet er ikke forbundet til WordPress.com, så Claude kan ikke uploade det).
   4. Valgfrit: slet branchen `master` i command-center (gammelt v8.0-skelet) under Branches på GitHub.
 
 ## TL;DR
-- **v7.5.0 er klar til upload**: `plugins/steamgears-autopilot-v7.5.1.zip` (på `main`).
+- **v7.5.0 er klar til upload**: `plugins/steamgears-autopilot-v7.6.0.zip` (på `main`).
 - Den indeholder **alt fra live 7.4.0** + AI-skribent + Publer-udsendelse + Claude-værktøjer + nøgletest.
 - Da I har **Publer Professional** (API kræver Business), kører udsendelsen som standard via **RSS-feeds**, som Publer auto-poster fra.
 - Intet er uploadet til steamgears.eu – det gør du selv.
 
 ## Hvad skal du gøre (ca. 15 min)
-1. **Upload** `steamgears-autopilot-v7.5.1.zip` i WordPress → Plugins → Tilføj ny → Upload (erstat 7.4.0).
+1. **Upload** `steamgears-autopilot-v7.6.0.zip` i WordPress → Plugins → Tilføj ny → Upload (erstat 7.4.0).
 2. **Steamgears → Settings**
    - *Publer*: Publish mode = **RSS feeds**. Channels: fx `facebook, instagram, pinterest`.
    - *AI content*: provider **Anthropic**, indsæt Claude API-nøgle (model tom = claude-opus-5-5). Ved gem testes nøglen automatisk (✓/✗ øverst).

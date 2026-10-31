@@ -23,7 +23,7 @@ The whole social autopilot runs inside WordPress (Command Center is retired):
 4. **Measure** – every post links via `/go/<id>/`, so clicks (and WooCommerce
    orders) are counted per channel.
 
-Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.5.1.zip` → Activate.
+Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.6.0.zip` → Activate.
 
 ## Run it from Claude
 
@@ -41,6 +41,7 @@ all admin-only, none of them deleting anything:
 | `steamgears-autopilot/generate` | Run the AI writer now |
 | `steamgears-autopilot/publish` | Run the Publer publisher now |
 | `steamgears-autopilot/set-mode` | Autopilot / Full Auto on or off |
+| `steamgears-autopilot/update` | Install the newest version from GitHub |
 | `steamgears-autopilot/check-keys` | Test the Publer and AI keys (see below) |
 | `steamgears-autopilot/check-publer` | Workspaces, accounts, channels without an account |
 
@@ -54,6 +55,15 @@ on drafts, Campaigns (learning matrix, winners and losers), Reports (30-day ROI 
 ROAS against the budget, attributed orders), Etsy orders and profit, Full Auto
 (suppressed combinations, reposts) and an XML product feed for Google Merchant
 Center and Pinterest Catalogs (*Google Feed*, needs a feed secret and WooCommerce).
+
+## Updates
+
+From 7.6 the plugin updates itself from GitHub (`humle93/steamgears-site`, branch `main`):
+a newer version shows up under *Plugins* and *Dashboard → Updates* like any plugin (auto-updates
+can be switched on there), and the Steamgears dashboard has an **Update now** button. Claude can
+run it too (`steamgears-autopilot/update`). The installed zip is
+`plugins/steamgears-autopilot-v<version>.zip` from `main`, so a release is: bump the version, rebuild
+the zip, merge to `main`.
 
 ## Setup
 

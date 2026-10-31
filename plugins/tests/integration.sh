@@ -28,6 +28,7 @@ wpc config set WP_ENVIRONMENT_TYPE local --quiet
 wpc config set WP_DEBUG true --raw --quiet
 wpc config set WP_DEBUG_LOG true --raw --quiet
 wpc config set WP_DEBUG_DISPLAY false --raw --quiet
+wpc config set FS_METHOD direct --quiet
 wpc db create || true
 wpc core install --url="$URL" --title="Plugin CI" --admin_user=admin --admin_password=admin \
     --admin_email=ci@example.com --skip-email --quiet
