@@ -42,6 +42,9 @@ wpc plugin activate steamgears-autopilot
 echo "== In-process checks"
 wpc eval-file "$ROOT/plugins/tests/integration.php"
 
+echo "== Admin tools for Claude"
+wpc eval-file "$ROOT/plugins/tests/admin-tools.php"
+
 echo "== HTTP checks"
 php -S 127.0.0.1:8080 -t "$WP_DIR" "$ROOT/plugins/tests/router.php" >/tmp/php-server.log 2>&1 &
 SERVER=$!

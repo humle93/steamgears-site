@@ -30,16 +30,16 @@ class SGAP_Abilities {
     }
 
     /** Shared meta: visible to MCP and REST, with MCP behaviour hints. */
-    private static function meta(bool $readonly, bool $idempotent): array {
+    public static function meta(bool $readonly, bool $idempotent, bool $destructive = false): array {
         return [
             'show_in_rest' => true,
             'public' => true, // read by MCP servers that use the high-level flag
             'mcp' => ['public' => true, 'type' => 'tool'],
-            'annotations' => ['readonly' => $readonly, 'destructive' => false, 'idempotent' => $idempotent]
+            'annotations' => ['readonly' => $readonly, 'destructive' => $destructive, 'idempotent' => $idempotent]
         ];
     }
 
-    private static function object(array $properties, array $required = []): array {
+    public static function object(array $properties, array $required = []): array {
         $schema = ['type' => 'object', 'properties' => $properties, 'additionalProperties' => false];
         if ($required) {
             $schema['required'] = $required;
