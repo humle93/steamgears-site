@@ -23,7 +23,7 @@ The whole social autopilot runs inside WordPress (Command Center is retired):
 4. **Measure** – every post links via `/go/<id>/`, so clicks (and WooCommerce
    orders) are counted per channel.
 
-Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.15.0.zip` → Activate.
+Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.15.1.zip` → Activate.
 
 ## Run it from Claude
 
@@ -163,3 +163,15 @@ but never reported back in the queue and deletes raw events and unconverted clic
 (`sgap_event_retention_days` filter). Totals are kept in `sgap_learning`.
 
 Deleting the plugin (not just deactivating) removes all its tables and settings.
+
+## Roadmap and known gaps
+
+The audit behind this release and the prioritised roadmap with effort estimates live in
+[docs/plugin-roadmap.md](../../docs/plugin-roadmap.md). Two things worth knowing before you rely on this
+unattended:
+
+- A post that fails is retried up to three times the same day and then stays `failed` in the queue.
+  Nothing emails you - the weekly report is currently the only outgoing mail.
+- The Etsy API settings and the direct Instagram/Pinterest/TikTok/YouTube/Reddit/Telegram keys are
+  registered but unused. Publishing goes through Publer (RSS feeds or API), and `/etsy/orders` takes a
+  manual import.
