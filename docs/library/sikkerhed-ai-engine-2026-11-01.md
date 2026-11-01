@@ -1,20 +1,44 @@
-# Sikkerhed: AI Engine 3.8.6 på steamgears.eu — CVE-2026-110732
+# Sikkerhed: AI Engine — CVE-2026-110732 (lukket 1/11 2026)
 
 _Undersøgt 1/11 2026 · kun læsende requests mod produktion · gælder siden steamgears.eu, ikke dette repo_
 
 ## TL;DR
 
-- Pluginnet **AI Engine (Meow Apps)** kører **3.8.6** på sitet. Det er **under 3.8.7**, som er den version der lukker
-  **CVE-2026-110732** (CVSS 7.5, uautentificeret, fører til administrator-overtagelse).
-- **Handling: opdatér AI Engine til 3.8.7 eller nyere i wp-admin** (nyeste er 3.8.9). Er MCP-funktionen ikke i brug, slå
-  den også fra — så forsvinder angrebsfladen helt, uafhængigt af versionsnummeret.
+- Pluginnet **AI Engine (Meow Apps)** kører **3.8.9 og er inaktivt**, verificeret live 1/11 2026 (afsnit 0). Fix-versionen
+  for **CVE-2026-110732** (CVSS 7.5, uautentificeret, fører til administrator-overtagelse) er 3.8.7, så **sagen er lukket**.
+- **Handling: udført.** 3.8.9 er installeret og MCP-funktionen slået fra, så angrebsfladen er væk uafhængigt af versionsnummeret.
 - Selve det endpoint der blev spurgt til, `/wp-json/mwai/v1/simpleAuthCheck`, er **korrekt lukket** (401 anonymt). Det er
   ikke der hullet er.
 - **Ikke bekræftet udnyttet.** Vi har ikke sendt en skrivende request til OAuth-registreringen, fordi det ville oprette en
   klient i produktionsdatabasen. Status er "versionen er omfattet ifølge advisory", ikke "hullet er demonstreret".
-- Versionen stammer fra `/wp-json/wp/v2/plugins`-snapshotet i `backup-2026-10-23/plugins.json` (23/10 2026). Live
-  gen-verifikation blev blokeret af site-WAF'en, se nedenfor. **Alle versioner under 3.8.7 er omfattet uanset præcis
-  hvilken.** Fuld versionsliste for alle 48 plugins: [`sikkerhed-plugin-versioner-2026-11-01.md`](sikkerhed-plugin-versioner-2026-11-01.md).
+- Versionen i afsnit 1–5 er historisk: den stammer fra `/wp-json/wp/v2/plugins`-snapshotet i
+  `backup-2026-10-23/plugins.json` (23/10 2026), som viste 3.8.6. Live-verifikation lykkedes 1/11 via MCP — resultatet står
+  i afsnit 0. Fuld versionsliste for alle 48 plugins: [`sikkerhed-plugin-versioner-2026-11-01.md`](sikkerhed-plugin-versioner-2026-11-01.md).
+
+## 0. Opdatering 1/11 2026 — sagen er lukket
+
+Sitet kører nu **AI Engine 3.8.9** (over fix-versionen 3.8.7) og **pluginnet er inaktivt**. Kontrolleret samme dag
+via MCP-forbindelsen og anonyme HTTP-kald:
+
+| Tjek | Resultat |
+| --- | --- |
+| Version ifølge plugin-header (`wp_get_plugins`) | **3.8.9** |
+| Status | **inaktiv** |
+| `/wp-json/mcp/v1/.well-known/oauth-authorization-server` | **404** — MCP-OAuth-fladen er væk |
+| `/wp-json/mwai/v1/simpleAuthCheck` | **404** — hele `mwai/v1` er væk |
+| Forside med `?cb=<random>` | ingen `mwai-`/`ai-engine/`-markup → pluginnet loader reelt ikke |
+| Forside og `/faq/` **uden** query-param | stadig `mwai-popup-container` + `ai-engine/themes/glass.css` → **gammel sidecache** |
+| `/wp-content/plugins/ai-engine/changelog.txt` | stadig `= 3.8.1` |
+
+To ting at tage med videre:
+
+1. **Angrebsfladen er væk.** Den uautentificerede MCP-OAuth-registrering, som CVE-2026-110732 handler om, svarer
+   404, og pluginnet er slået fra. Sagen kræver ikke længere handling ud over oprydning.
+2. **`changelog.txt` er ikke længere et versions-oracle.** Den står på 3.8.1 mens headeren siger 3.8.9 — brug
+   wp-admin → Plugins, ikke filen, når versionen skal aflæses. (Afsnit 5's kommando 1 er derfor upålidelig.)
+
+**Tilbage (småtteri):** purge W3TC-sidecachen så den gamle chatbot-markup forsvinder, blokér `changelog.txt`/
+`readme.txt` i WAF'en (punkt 4 i afsnit 3 — stadig `200`), og kryds tjeklisten i afsnit 4 af.
 
 ## 1. Hvad der blev tjekket
 
