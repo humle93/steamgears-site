@@ -22,7 +22,7 @@ Status pr. **2026-11-01** · beregnet af `projektstatus.py` · kilder: [`projekt
 
 | Projekt | Status i dag | Grundlag |
 | --- | --- | --- |
-| **steamgears.eu — site-optimering** *(roadmap S0–S4)* | **28,4 %** | 6 af 21,1 d (S0 1,9/2,6 · S1 0,4/4,5 · S2 1,7/6 · S3 0,6/3 · S4 1,4/5) |
+| **steamgears.eu — site-optimering** *(roadmap S0–S4)* | **31,3 %** | 6,6 af 21,1 d (S0 1,9/2,6 · S1 0,4/4,5 · S2 2,3/6 · S3 0,6/3 · S4 1,4/5) |
 | **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5) |
 | **SEO-indholdsproduktion** | **0 %** | 0 af 3 guides · drift: Daglig loop kører |
 | **Døde internlinks** | **100 %** | 39 af 39 links |
@@ -33,7 +33,7 @@ Status pr. **2026-11-01** · beregnet af `projektstatus.py` · kilder: [`projekt
 <!-- AUTO:BLOKERINGER:START -->
 | Projekt | Næste skridt | Blokering |
 | --- | --- | --- |
-| steamgears.eu — site-optimering (28,4 %) | S2.1 hubs (/start-here/, /build/), derefter S1.3 kladde-triage | 5 vanity-301 (S0.4) kræver én Redirection-gruppe (ejer) |
+| steamgears.eu — site-optimering (31,3 %) | S2.1 hub-copy er klar i docs/library/hub-blueprint-2026-11-01.md — skal ind via MCP, derefter S1.3 kladde-triage | 5 vanity-301 (S0.4) kræver én Redirection-gruppe (ejer); hub-indsættelse kræver skrivende MCP |
 | Dark academia-rebrand (63 %) | Batch 4 — mockups (~130 billeder) | Printify-adgang |
 | SEO-indholdsproduktion (0 %) | Skriv guide id 292 (men's steampunk essentials) | ingen |
 | Døde internlinks (100 %) | Vedligehold: tjek nye indlæg mod live-URL'er | ingen |
@@ -48,6 +48,7 @@ Nyeste først. Append-only — rækker må ikke slettes eller ændres.
 
 | Dato | Projekt | Modul | Før → Efter | Δ | Grundlag |
 | --- | --- | --- | --- | --- | --- |
+| 2026-11-01 | steamgears.eu — site-optimering | daglig måling | 28,4 % → 31,3 % | +2,9 | 6,6 af 21,1 d (S0 1,9/2,6 · S1 0,4/4,5 · S2 2,3/6 · S3 0,6/3 · S4 1,4/5) |
 | 2026-11-01 | Døde internlinks | daglig måling | 0 % → 100 % | +100 | 39 af 39 links |
 | 2026-11-01 | steamgears.eu — site-optimering | daglig måling | 3,6 % → 28,4 % | +24,8 | 6 af 21,1 d (S0 1,9/2,6 · S1 0,4/4,5 · S2 1,7/6 · S3 0,6/3 · S4 1,4/5) |
 | 2026-11-01 | Døde internlinks | Døde internlinks (baseline) | — → 0 % | — | 0 af 39 links rettet |

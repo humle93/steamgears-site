@@ -6,8 +6,8 @@
       "id": "site",
       "name": "steamgears.eu — site-optimering",
       "note": "roadmap S0–S4",
-      "next": "S2.1 hubs (/start-here/, /build/), derefter S1.3 kladde-triage",
-      "blocked_by": "5 vanity-301 (S0.4) kræver én Redirection-gruppe (ejer)",
+      "next": "S2.1 hub-copy er klar i docs/library/hub-blueprint-2026-11-01.md — skal ind via MCP, derefter S1.3 kladde-triage",
+      "blocked_by": "5 vanity-301 (S0.4) kræver én Redirection-gruppe (ejer); hub-indsættelse kræver skrivende MCP",
       "modules": [
         {
           "id": "s0",
@@ -28,10 +28,10 @@
         {
           "id": "s2",
           "name": "S2 — struktur og SEO",
-          "done": 1.7,
+          "done": 2.3,
           "total": 6,
           "unit": "d",
-          "note": "24 meta-titler/beskrivelser + hub-arkitektur planlagt"
+          "note": "24 meta-titler/beskrivelser + hub-blueprint (6 siders copy + link-map, 0,6 af S2.1's 3,0 d)"
         },
         {
           "id": "s3",
@@ -171,6 +171,15 @@
       "after": 100.0,
       "delta": 100.0,
       "basis": "39 af 39 links"
+    },
+    {
+      "date": "2026-11-01",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 28.4,
+      "after": 31.3,
+      "delta": 2.9,
+      "basis": "6,6 af 21,1 d (S0 1,9/2,6 · S1 0,4/4,5 · S2 2,3/6 · S3 0,6/3 · S4 1,4/5)"
     }
   ]
 }
