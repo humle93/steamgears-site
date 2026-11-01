@@ -14,7 +14,9 @@ class SGAP_Install {
         'sgap_etsy_inventory',
         'sgap_weekly_report',
         'sgap_repost_check',
-        'sgap_suppression_check'
+        'sgap_suppression_check',
+        'sgap_ai_generate',        // hourly hook of an older AI writer
+        'sgap_maintenance_daily'   // replaced by sgap_daily_cleanup
     ];
 
     const CLEANUP_CRON = 'sgap_daily_cleanup';
@@ -44,7 +46,13 @@ class SGAP_Install {
         'sgap_posts_per_day' => 2,
         'sgap_channels' => 'facebook,instagram,pinterest',
         'sgap_ai_provider' => 'anthropic',
-        'sgap_publish_mode' => 'rss'
+        'sgap_publish_mode' => 'rss',
+        'sgap_auto_images' => 'yes',
+        'sgap_auto_seo' => 'yes',
+        'sgap_auto_publish_articles' => 'no',
+        'sgap_weekly_report' => 'yes',
+        'sgap_articles_per_week' => 0,
+        'sgap_rescue_hosts' => 'steamgears.juno.page'
     ];
 
     public static function activate(): void {
@@ -55,6 +63,9 @@ class SGAP_Install {
         self::clear_legacy_cron();
         foreach ([self::CLEANUP_CRON, self::PUBLISH_CRON, self::GENERATE_CRON] as $hook) {
             wp_clear_scheduled_hook($hook);
+        }
+        if (class_exists('SGAP_Auto')) {
+            SGAP_Auto::clear();
         }
         delete_option('rewrite_rules'); // drop the /go/ rule; WP rebuilds on next request
     }
@@ -271,20 +282,20 @@ register_deactivation_hook(SGAP_FILE, ['SGAP_Install', 'deactivate']);
 
 /* ---------------- SETTINGS ---------------- */
 class SGAP_Settings {
-    const BOOL_KEYS = ['autopilot_enabled', 'full_auto_enabled'];
+    const BOOL_KEYS = ['autopilot_enabled', 'full_auto_enabled', 'auto_images', 'auto_seo', 'auto_publish_articles', 'weekly_report'];
     const HOUR_KEYS = ['quiet_start', 'quiet_end'];
     const INT_KEYS = [
         'daily_cap','batch_size','labor_rate','monthly_budget','target_roi',
-        'winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max','posts_per_day'
+        'winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max','posts_per_day','articles_per_week'
     ];
     /** Never echoed back to the browser; can be overridden by SGAP_<KEY> constants in wp-config.php. */
     const SECRET_KEYS = [
-        'publer_api_key','ai_api_key','image_api_key',
+        'publer_api_key','ai_api_key','image_api_key','serpapi_key',
         'pinterest_token','instagram_token','telegram_bot_token','tiktok_token','youtube_token',
         'etsy_oauth_token','etsy_refresh_token','merchant_feed_secret'
     ];
     const TEXT_KEYS = [
-        'publer_workspace_id','publer_pinterest_board','channels','ai_model','ai_base_url','image_model','content_language',
+        'publer_workspace_id','publer_pinterest_board','channels','ai_model','ai_base_url','image_model','content_language','rescue_hosts',
         'telegram_chat_id','email_test_recipient','youtube_channel_id','reddit_username',
         'reddit_subreddit','etsy_shop_id','etsy_shipping_profile_id','etsy_return_policy_id','ai_mode'
     ];
@@ -298,7 +309,7 @@ class SGAP_Settings {
     const SECTIONS = [
         'General' => ['autopilot_enabled','full_auto_enabled','daily_cap','batch_size','quiet_start','quiet_end'],
         'Publer' => ['publish_mode','publer_api_key','publer_workspace_id','publer_pinterest_board','channels'],
-        'AI content' => ['ai_provider','ai_api_key','ai_model','ai_base_url','posts_per_day','content_language','image_model','image_api_key'],
+        'AI content' => ['ai_provider','ai_api_key','ai_model','ai_base_url','posts_per_day','content_language','image_model','image_api_key','serpapi_key'],
         'Economics' => ['labor_rate','monthly_budget','target_roi','winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max'],
         'Etsy' => ['etsy_shop_id','etsy_oauth_token','etsy_refresh_token','etsy_shipping_profile_id','etsy_return_policy_id'],
         'Google Feed' => ['merchant_feed_secret']
@@ -311,14 +322,27 @@ class SGAP_Settings {
         'publer_api_key' => 'API mode only. Publer → Settings → Access & Login → API Keys (Business plan). Scopes: posts, media, accounts.',
         'publer_workspace_id' => 'Shown by "Test Publer" on the dashboard once the API key is saved.',
         'publer_pinterest_board' => 'API mode: Pinterest board ID the pins go to. RSS mode: set a default board in Publer instead.',
-        'channels' => 'Comma-separated. Supported: ' . 'facebook, instagram, pinterest, linkedin, twitter, threads, bluesky, mastodon, telegram, google',
         'ai_provider' => 'AIMLAPI: key from aimlapi.com → Dashboard → API Keys; pay per use, many models with one key.',
         'ai_model' => 'Empty = claude-opus-5-5 for Anthropic, anthropic/claude-opus-5.5 for AIMLAPI. Required for another OpenAI-compatible API.',
         'ai_base_url' => 'Other OpenAI-compatible API only, e.g. https://api.openai.com/v1.',
         'posts_per_day' => 'How many site posts/products the AI writes social posts for each day.',
         'content_language' => 'Language of articles and guides from the Content Studio. Empty = English.',
         'image_model' => 'AIMLAPI image model. Empty = bytedance/seedream-5-0-pro (about $0.045 per image). Cheaper: flux/schnell.',
-        'image_api_key' => 'Only needed when the AI provider is not AIMLAPI: an AIMLAPI key for images.'
+        'image_api_key' => 'Only needed when the AI provider is not AIMLAPI: an AIMLAPI key for images.',
+        'serpapi_key' => 'serpapi.com → Manage API key. Gives the article writer live Google data: People also ask, related searches, top results.',
+        'ai_api_key' => 'AIMLAPI: aimlapi.com → Dashboard → API Keys. Anthropic: console.anthropic.com → API keys.',
+        'channels' => 'Instagram and Pinterest posts need a photo; the Content Studio can create one.',
+        'daily_cap' => 'Never more than this many posts released per day, across all channels.',
+        'batch_size' => 'How many due posts are released per 15-minute run.',
+        'quiet_start' => 'No posts are released from this hour …',
+        'quiet_end' => '… until this hour (site time).',
+        'repost_cooldown_days' => 'A page is not promoted again within this many days.',
+        'auto_images' => 'Instagram and Pinterest posts without a photo get the page\'s featured image or an AI photo (AIMLAPI, about $0.045 each).',
+        'auto_seo' => 'New posts and products without a Rank Math description get a focus keyword, meta title and description from the AI when published.',
+        'articles_per_week' => 'The AI picks topics the site does not cover yet and writes this many SEO articles a week. 0 = off.',
+        'auto_publish_articles' => 'Off: weekly articles wait as drafts for you. On: they are published straight away.',
+        'weekly_report' => 'A short e-mail every week: posts, clicks, orders per channel and anything that needs you.',
+        'rescue_hosts' => 'Images on these servers are copied into your media library and every link is rewritten (comma-separated).'
     ];
 
     public static function get(string $key, $default = '') {
@@ -1250,6 +1274,9 @@ class SGAP_Admin {
             . SGAP_UI::pill('v' . SGAP_VERSION)
             . '</div>';
 
+        SGAP_Setup::checklist_card();
+        SGAP_Rescue::card();
+
         // Tiles
         $t = $stats['tiles'];
         echo '<div class="sgap-stats">'
@@ -1270,6 +1297,7 @@ class SGAP_Admin {
         echo '<p class="description" style="margin-top:0">Ask how things are going or tell the AI what to do: write posts, approve, release the queue, change settings.</p>'
             . '<p><a class="button button-primary" href="' . esc_url(admin_url('admin.php?page=sgap-chat')) . '"><span class="dashicons dashicons-format-chat"></span>Open AI Chat</a></p>';
         SGAP_UI::card_close();
+        SGAP_Auto::health_card();
         self::feeds_panel();
         self::keys_panel();
         SGAP_Updater::panel();
@@ -1428,30 +1456,7 @@ class SGAP_Admin {
     }
 
     public static function settings(): void {
-        self::open('Settings');
-        echo '<form method="post" action="options.php">';
-        settings_fields('sgap_settings');
-        foreach (SGAP_Settings::SECTIONS as $section => $keys) {
-            echo '<h2>' . esc_html($section) . '</h2><table class="form-table"><tbody>';
-            foreach ($keys as $key) {
-                $label = ucfirst(str_replace('_', ' ', $key));
-                $help_link = self::get_setting_help_link($key);
-                echo '<tr><th scope="row"><label for="sgap_' . esc_attr($key) . '">' . esc_html($label) . '</label>';
-                if ($help_link) {
-                    echo '<br><small><a href="' . esc_url($help_link['url']) . '" target="_blank" rel="noopener">' . esc_html($help_link['text']) . ' &rarr;</a></small>';
-                }
-                echo '</th><td>';
-                self::field($key);
-                if (isset(SGAP_Settings::HELP[$key])) {
-                    echo '<p class="description">' . esc_html(SGAP_Settings::HELP[$key]) . '</p>';
-                }
-                echo '</td></tr>';
-            }
-            echo '</tbody></table>';
-        }
-        submit_button();
-        echo '</form>';
-        self::close();
+        SGAP_Setup::settings_page();
     }
 
     private static function get_setting_help_link(string $key): ?array {
@@ -1527,13 +1532,13 @@ class SGAP_Admin {
             self::close();
             return;
         }
-        echo '<div class="sgap-card"><div class="sgap-scroll"><table class="widefat striped"><thead><tr><th>#</th><th>Channel</th><th>Title</th><th>Status</th><th>Scheduled</th><th>Published</th><th>Tracking link</th><th></th></tr></thead><tbody>';
+        echo '<div class="sgap-card"><div class="sgap-scroll"><table class="widefat striped sgap-qtable"><thead><tr><th>#</th><th>Channel</th><th>Title</th><th>Status</th><th>Scheduled</th><th>Published</th><th>Tracking link</th><th></th></tr></thead><tbody>';
         foreach ($rows as $r) {
-            echo '<tr><td>' . esc_html($r->id) . '</td><td>' . SGAP_UI::channel($r->channel) . '</td><td>' . esc_html($r->title)
-                . ($r->error ? '<br><small style="color:#b32d2e">' . esc_html($r->error) . '</small>' : '') . '</td><td>'
-                . SGAP_UI::status_pill((string) $r->status) . ($r->attempts > 1 ? ' <small>' . esc_html($r->attempts . ' tries') . '</small>' : '') . '</td><td>'
-                . esc_html($r->scheduled_at ? mysql2date('j M H:i', $r->scheduled_at) : '') . '</td><td>'
-                . esc_html($r->published_at ? mysql2date('j M H:i', $r->published_at) : '') . '</td><td><code>' . esc_html(wp_parse_url(SGAP_Tracking::url((int) $r->id), PHP_URL_PATH)) . '</code></td><td>'
+            echo '<tr><td data-label="#">' . esc_html($r->id) . '</td><td data-label="Channel">' . SGAP_UI::channel($r->channel) . '</td><td class="sgap-qtitle" data-label="Title">' . esc_html($r->title)
+                . ($r->error ? '<br><small style="color:#b32d2e">' . esc_html($r->error) . '</small>' : '') . '</td><td data-label="Status">'
+                . SGAP_UI::status_pill((string) $r->status) . ($r->attempts > 1 ? ' <small>' . esc_html($r->attempts . ' tries') . '</small>' : '') . '</td><td data-label="Scheduled">'
+                . esc_html($r->scheduled_at ? mysql2date('j M H:i', $r->scheduled_at) : '–') . '</td><td data-label="Published">'
+                . esc_html($r->published_at ? mysql2date('j M H:i', $r->published_at) : '–') . '</td><td data-label="Link"><code>' . esc_html(wp_parse_url(SGAP_Tracking::url((int) $r->id), PHP_URL_PATH)) . '</code></td><td data-label="">'
                 . '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '" class="sgap-actions" style="flex-wrap:nowrap">'
                 . '<input type="hidden" name="action" value="sgap_queue_action">'
                 . '<input type="hidden" name="queue_id" value="' . esc_attr($r->id) . '">'

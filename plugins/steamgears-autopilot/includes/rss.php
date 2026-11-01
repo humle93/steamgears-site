@@ -65,7 +65,13 @@ class SGAP_RSS {
             if (!in_array($channel, SGAP_Publer::CHANNELS, true)) {
                 $error = "Channel '{$channel}' is not supported.";
             } elseif (in_array($channel, SGAP_Publer::NEEDS_PHOTO, true) && empty($row['image_url'])) {
-                $error = ucfirst($channel) . ' needs a photo: give the post a featured image.';
+                // The featured image, or an AI photo when that is switched on.
+                $row['image_url'] = (string) apply_filters('sgap_missing_photo', '', $row);
+                if ($row['image_url'] !== '') {
+                    $wpdb->update($wpdb->prefix . 'sgap_queue', ['image_url' => $row['image_url']], ['id' => $id]);
+                } else {
+                    $error = ucfirst($channel) . ' needs a photo: give the post a featured image, or switch on AI photos (Settings → Automation).';
+                }
             }
             if ($error !== '') {
                 SGAP_Queue::mark($id, 'failed', $error);
