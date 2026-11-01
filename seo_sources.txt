@@ -1,0 +1,5 @@
+# Tilføj URLs på SEO-guides her (én pr. linje)
+https://developers.google.com/search/docs/fundamentals/seo-starter-guide
+https://developers.google.com/search/docs/specialty/ecommerce/overview
+https://developers.google.com/search/docs/specialty/ecommerce/designing-a-url-structure-for-ecommerce-sites
+https://developers.google.com/search/docs/appearance/structured-data/product
