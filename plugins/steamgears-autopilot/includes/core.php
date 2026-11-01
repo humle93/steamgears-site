@@ -1170,7 +1170,7 @@ class SGAP_Admin {
         return $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $wpdb->esc_like($table))) === $table;
     }
 
-    private static function open(string $title, string $subtitle = ''): void {
+    public static function open(string $title, string $subtitle = ''): void {
         SGAP_UI::css();
         echo '<div class="wrap sgap"><div class="sgap-head"><span class="sgap-logo" aria-hidden="true">⚙</span><div><h1>' . esc_html($title) . '</h1>'
             . ($subtitle !== '' ? '<p>' . esc_html($subtitle) . '</p>' : '') . '</div></div><hr class="wp-header-end" style="display:none">';
@@ -1195,7 +1195,7 @@ class SGAP_Admin {
         exit;
     }
 
-    private static function close(): void {
+    public static function close(): void {
         echo '</div>';
     }
 
@@ -1263,6 +1263,10 @@ class SGAP_Admin {
         self::render_rows($stats['channels'], ['channel', 'published', 'clicks', 'orders', 'revenue']);
         SGAP_UI::card_close();
         echo '</div><div>';
+        SGAP_UI::card_open('AI Chat', 'format-chat');
+        echo '<p class="description" style="margin-top:0">Ask how things are going or tell the AI what to do: write posts, approve, release the queue, change settings.</p>'
+            . '<p><a class="button button-primary" href="' . esc_url(admin_url('admin.php?page=sgap-chat')) . '"><span class="dashicons dashicons-format-chat"></span>Open AI Chat</a></p>';
+        SGAP_UI::card_close();
         self::feeds_panel();
         self::keys_panel();
         SGAP_Updater::panel();

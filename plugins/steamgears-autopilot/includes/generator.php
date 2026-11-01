@@ -240,7 +240,7 @@ class SGAP_AI {
     }
 
     /** @return array|WP_Error */
-    private static function decode($response, string $who) {
+    public static function decode($response, string $who) {
         if (is_wp_error($response)) {
             return $response;
         }
