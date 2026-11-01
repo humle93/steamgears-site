@@ -23,7 +23,7 @@ The whole social autopilot runs inside WordPress (Command Center is retired):
 4. **Measure** – every post links via `/go/<id>/`, so clicks (and WooCommerce
    orders) are counted per channel.
 
-Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.14.0.zip` → Activate.
+Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.15.0.zip` → Activate.
 
 ## Run it from Claude
 
@@ -142,6 +142,7 @@ add posts or read the numbers.
 | GET | `/drafts?status=approved` | Drafts approved in WP, ready to queue. |
 | POST | `/drafts/<id>/status` | `pending` / `approved` / `rejected` / `used`. |
 | GET | `/stats?days=30` | Events per channel, learning table, queue status counts. |
+| GET | `/snapshot?days=30&limit=100` | Everything in one read-only call, for an outside dashboard (Command Center): queue, drafts, results per channel and per day, conversions, learning, suppression, reposts, Etsy orders, settings (secrets only as set/not set) and health. |
 | GET/POST | `/suppression` | List, or block/reduce a channel+angle+type+format combination (Full Auto skips blocked ones). |
 | GET/POST | `/reposts` | List, or record a repost of a winner (max `repost_max`). |
 | POST | `/etsy/orders` | Import an Etsy order (`etsy_order_id`, `revenue`, `fees`, `shipping`, ...). |

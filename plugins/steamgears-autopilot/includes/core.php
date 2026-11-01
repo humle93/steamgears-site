@@ -851,6 +851,9 @@ class SGAP_REST {
         register_rest_route(self::NS, '/stats', [
             'methods' => 'GET', 'callback' => [__CLASS__, 'stats'], 'permission_callback' => $auth
         ]);
+        register_rest_route(self::NS, '/snapshot', [
+            'methods' => 'GET', 'callback' => [__CLASS__, 'snapshot'], 'permission_callback' => $auth
+        ]);
     }
 
     private static function key(WP_REST_Request $r, string $name, string $default, int $max): string {
@@ -995,6 +998,150 @@ class SGAP_REST {
             )
         ];
     }
+
+    /**
+     * Everything the plugin knows, in one read-only call, for an outside dashboard
+     * (Command Center): queue, drafts, results, conversions, learning, suppression,
+     * reposts, Etsy orders, settings (secrets reduced to set/not set) and health.
+     * It only reads, so it is safe to poll; admin application password required.
+     */
+    public static function snapshot(WP_REST_Request $r) {
+        global $wpdb;
+        $days = min(365, max(1, absint($r->get_param('days') ?: 30)));
+        $limit = min(500, max(1, absint($r->get_param('limit') ?: 100)));
+        $since = wp_date('Y-m-d H:i:s', time() - $days * DAY_IN_SECONDS);
+        $prefix = $wpdb->prefix;
+
+        // An install that lost its tables would otherwise return empty lists and look healthy.
+        $tables = [
+            'queue' => 'sgap_queue', 'drafts' => 'sgap_ai_drafts', 'events' => 'sgap_events',
+            'cro' => 'sgap_cro', 'learning' => 'sgap_learning', 'suppression' => 'sgap_suppression',
+            'reposts' => 'sgap_reposts', 'etsy_orders' => 'sgap_etsy_orders'
+        ];
+        $missing = [];
+        foreach ($tables as $name => $table) {
+            if ($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $wpdb->esc_like($prefix . $table))) !== $prefix . $table) {
+                $missing[] = $name;
+            }
+        }
+
+        $queue = $wpdb->get_results($wpdb->prepare(
+            "SELECT id, post_id, channel, angle, content_type, format, destination_url, title, body,
+                    image_url, status, attempts, scheduled_at, sent_at, published_at, error
+             FROM {$prefix}sgap_queue ORDER BY id DESC LIMIT %d",
+            $limit
+        ), ARRAY_A);
+        foreach ($queue as &$item) {
+            $item['tracking_url'] = SGAP_Tracking::url((int) $item['id']);
+        }
+        unset($item);
+
+        $drafts = $wpdb->get_results($wpdb->prepare(
+            "SELECT id, post_id, channel, angle, content_type, format, title, body, hashtags, alt_text, cta,
+                    status, ai_model, created_at
+             FROM {$prefix}sgap_ai_drafts ORDER BY id DESC LIMIT %d",
+            $limit
+        ), ARRAY_A);
+        foreach ($drafts as &$draft) {
+            $post_id = (int) $draft['post_id'];
+            $draft['promotes'] = $post_id ? ['title' => get_the_title($post_id), 'url' => get_permalink($post_id)] : null;
+            $draft['has_image'] = $post_id ? has_post_thumbnail($post_id) : false;
+            unset($draft['post_id']);
+        }
+        unset($draft);
+
+        $queue_counts = [];
+        foreach ($wpdb->get_results("SELECT status, COUNT(*) AS n FROM {$prefix}sgap_queue GROUP BY status", ARRAY_A) as $row) {
+            $queue_counts[$row['status']] = (int) $row['n'];
+        }
+        $draft_counts = [];
+        foreach ($wpdb->get_results("SELECT status, COUNT(*) AS n FROM {$prefix}sgap_ai_drafts GROUP BY status", ARRAY_A) as $row) {
+            $draft_counts[$row['status']] = (int) $row['n'];
+        }
+
+        $by_channel = $wpdb->get_results($wpdb->prepare(
+            "SELECT channel, SUM(event_type = 'publish') AS published, SUM(event_type = 'click') AS clicks,
+                    SUM(event_type = 'order') AS orders, SUM(CASE WHEN event_type = 'order' THEN value ELSE 0 END) AS revenue
+             FROM {$prefix}sgap_events WHERE created_at >= %s GROUP BY channel ORDER BY revenue DESC, clicks DESC",
+            $since
+        ), ARRAY_A);
+
+        $daily = $wpdb->get_results($wpdb->prepare(
+            "SELECT DATE(created_at) AS day, channel, event_type, COUNT(*) AS count, SUM(value) AS value
+             FROM {$prefix}sgap_events WHERE created_at >= %s
+             GROUP BY day, channel, event_type ORDER BY day ASC LIMIT 2000",
+            $since
+        ), ARRAY_A);
+
+        $conversions = $wpdb->get_results($wpdb->prepare(
+            "SELECT c.order_id, c.revenue, c.clicked_at, c.converted_at, q.channel, q.angle, q.title
+             FROM {$prefix}sgap_cro c LEFT JOIN {$prefix}sgap_queue q ON q.id = c.queue_id
+             WHERE c.order_id > 0 ORDER BY c.converted_at DESC LIMIT %d",
+            $limit
+        ), ARRAY_A);
+
+        $revenue = (float) $wpdb->get_var($wpdb->prepare(
+            "SELECT SUM(value) FROM {$prefix}sgap_events WHERE event_type = 'order' AND created_at >= %s",
+            $since
+        ));
+        $budget = (float) SGAP_Settings::get('monthly_budget', 1000);
+        $health = get_option(SGAP_Auto::HEALTH);
+
+        return [
+            'generated_at' => current_time('mysql'),
+            'site' => [
+                'name' => get_bloginfo('name'),
+                'url' => home_url('/'),
+                'timezone' => wp_timezone_string(),
+                'local_time' => wp_date('Y-m-d H:i')
+            ],
+            'version' => SGAP_VERSION,
+            'missing_tables' => $missing,
+            'window' => ['days' => $days, 'since' => $since],
+            'status' => [
+                'autopilot' => SGAP_Settings::enabled('autopilot_enabled'),
+                'full_auto' => SGAP_Settings::enabled('full_auto_enabled'),
+                'publish_mode' => SGAP_RSS::enabled() ? 'rss' : 'api',
+                'channels' => SGAP_Publer::channels(),
+                'feeds' => SGAP_RSS::enabled() ? array_map([SGAP_RSS::class, 'url'], SGAP_Publer::channels()) : null,
+                'publer_configured' => SGAP_RSS::enabled() || SGAP_Publer::configured(),
+                'ai_configured' => SGAP_Settings::get('ai_api_key') !== '',
+                'ai_provider' => (string) SGAP_Settings::get('ai_provider', 'anthropic'),
+                'ai_model' => SGAP_AI::model(),
+                'sending_paused_because' => SGAP_Queue::blocked_reason() !== '' ? SGAP_Queue::blocked_message() : null,
+                'can_send_now' => SGAP_Queue::capacity(),
+                'limits' => [
+                    'daily_cap' => (int) SGAP_Settings::get('daily_cap', 8),
+                    'batch_size' => (int) SGAP_Settings::get('batch_size', 5),
+                    'quiet_hours' => SGAP_Settings::get('quiet_start', 23) . ':00-' . SGAP_Settings::get('quiet_end', 7) . ':00'
+                ],
+                'key_test' => get_option(SGAP_KeyCheck::RESULT) ?: null,
+                'last_self_check' => is_array($health) ? $health : null,
+                'cron_lag_minutes' => SGAP_Auto::cron_lag(),
+                'last_generation' => get_option('sgap_last_generate') ?: null,
+                'last_promote_new' => get_option('sgap_last_promote_new') ?: null,
+                'last_articles' => get_option('sgap_last_articles') ?: null
+            ],
+            'counts' => ['queue' => $queue_counts, 'drafts' => $draft_counts],
+            'results' => [
+                'by_channel' => $by_channel,
+                'daily' => $daily,
+                'revenue' => $revenue,
+                'budget' => $budget,
+                'roi' => SGAP_ROI::roi($revenue, $budget),
+                'roas' => SGAP_ROI::roas($revenue, $budget)
+            ],
+            'queue' => $queue,
+            'drafts' => $drafts,
+            'conversions' => $conversions,
+            'learning' => $wpdb->get_results("SELECT dimension, dimension_value, clicks, orders, revenue, cost, updated_at FROM {$prefix}sgap_learning ORDER BY revenue DESC, clicks DESC LIMIT 200", ARRAY_A),
+            'suppression' => $wpdb->get_results("SELECT * FROM {$prefix}sgap_suppression ORDER BY suppressed_at DESC LIMIT 200", ARRAY_A),
+            'reposts' => $wpdb->get_results("SELECT * FROM {$prefix}sgap_reposts ORDER BY id DESC LIMIT 200", ARRAY_A),
+            'etsy_orders' => $wpdb->get_results("SELECT * FROM {$prefix}sgap_etsy_orders ORDER BY id DESC LIMIT 200", ARRAY_A),
+            'settings' => SGAP_AdminTools::get_settings()
+        ];
+    }
+
     public static function list_suppression(WP_REST_Request $r) {
         global $wpdb;
         return $wpdb->get_results("SELECT * FROM {$wpdb->prefix}sgap_suppression ORDER BY suppressed_at DESC LIMIT 100", ARRAY_A);

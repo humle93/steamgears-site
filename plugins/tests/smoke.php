@@ -17,6 +17,7 @@ function add_menu_page($t,$m,$c,$slug,$cb){ add_action('page_'.$slug,$cb);} func
 function esc_html($s){return htmlspecialchars((string)$s);} function esc_attr($s){return htmlspecialchars((string)$s);} function esc_url($s){return $s;}
 function get_transient($k){return false;} function set_transient(...$a){} function delete_transient($k){} function settings_fields($g){} function submit_button(){}
 function admin_url($p=''){return '/wp-admin/'.$p;} function rest_url($p=''){return '/wp-json/'.$p;} function home_url($p=''){return 'https://steamgears.eu'.$p;}
+function get_bloginfo($k=''){return 'Steamgears';} function wp_timezone_string(){return 'UTC';} function get_the_title($id){return 'Post '.$id;} function get_permalink($id){return 'https://steamgears.eu/?p='.$id;} function has_post_thumbnail($id){return false;}
 function wp_nonce_field(...$a){return '';} function wp_create_nonce($a=''){return 'n';} function selected($a,$b,$e){return $a===$b?' selected':'';} function checked($a,$b=true,$e=true){return $a===$b?' checked':'';}
 function sanitize_text_field($s){return trim(strip_tags((string)$s));} function sanitize_textarea_field($s){return trim(strip_tags((string)$s));}
 function sanitize_key($s){return preg_replace('/[^a-z0-9_\-]/','',strtolower((string)$s));} function absint($v){return abs((int)$v);}
@@ -72,6 +73,13 @@ $r=SGAP_REST::due(new WP_REST_Request([])); check('due cap reached', $r['reason'
 $wpdb->next=2; $r=SGAP_REST::due(new WP_REST_Request([])); check('due limit = min(batch5, 8-2)', str_contains(end($wpdb->log),'LIMIT 5'));
 $r=SGAP_REST::draft_status(new WP_REST_Request(['id'=>3,'status'=>'bogus'])); check('draft bad status 400', $r instanceof WP_Error);
 $r=SGAP_REST::queue_status(new WP_REST_Request(['id'=>3,'status'=>'published'])); check('queue status unknown id 404', $r instanceof WP_Error && $r->data['status']===404);
+// Dashboard snapshot: one read-only call for an outside app (Command Center).
+update_option('sgap_ai_api_key','TOPSECRET');
+$snap=SGAP_REST::snapshot(new WP_REST_Request(['days'=>30,'limit'=>5]));
+check('snapshot: every section present', is_array($snap) && isset($snap['generated_at'],$snap['site'],$snap['status'],$snap['counts'],$snap['results'],$snap['queue'],$snap['drafts'],$snap['settings'],$snap['missing_tables']));
+check('snapshot: reports the installed version', ($snap['version']??'')===SGAP_VERSION);
+check('snapshot: secrets only as set/not set', !str_contains(wp_json_encode($snap),'TOPSECRET') && ($snap['settings']['AI content']['ai_api_key']['value']??'')==='set');
+check('snapshot: window echoes the requested days', ($snap['window']['days']??0)===30);
 
 // --- Publer payloads ---
 $row=['title'=>'Brass goggles','body'=>'Look sharp.','tracking_url'=>'https://steamgears.eu/go/5/','image_url'=>'https://steamgears.eu/img.jpg'];
