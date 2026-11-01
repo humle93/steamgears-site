@@ -248,3 +248,7 @@ ingen ændringer
 - 2026-11-01 20:00 UTC: ingen ændringer (token 42444)
 2026-11-01 21:00 UTC (22:00 DK): ingen ændringer (token 42444 uændret)
 - 2026-11-01 23:00 (DK): ingen ændringer (token 42444)
+## 2026-11-01 23:00 UTC (01:00 DK 2/11)
+- ingen ændringer (token 42444 uændret)
+## 2026-11-01 23:55 UTC (00:55 DK 2/11)
+- ingen ændringer (token 42444 uændret)
