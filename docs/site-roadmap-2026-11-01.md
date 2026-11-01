@@ -124,7 +124,7 @@ S0.3, which is a repo change.
 | --- | --- | --- | --- |
 | S1.1 | Launch the Herbarium line: publish the 12 SKUs (953–956, 965–968, 969–972) and link them from story 973 | The story is live and sells nothing; the merch is finished and invisible | 0.5 d |
 | S1.2 | Decide and execute on Atelier jewellery (940–942) and DIY/digital (765–767) | Six finished products with SKUs and prices, all drafts | 0.5 d |
-| S1.3 | Draft-post triage: resolve 750 (duplicate of 699), merge 974+938, publish 897/898/789/988/989 | 8 drafts carrying duplicate intent against live posts | 1.0 d |
+| S1.3 | ✅ **Done 1/11** — 897/898/789/988/989 published, 750 merged into 699 (five-piece rule + reading note) and 938 merged into 974 (materials, dieselpunk conversion, trenchpunk hybrid); both merged drafts trashed | 8 drafts carrying duplicate intent against live posts | 1.0 d |
 | S1.4 | Empty the product trash (43) and page trash (3) after a link check | Trash inflates admin, sitemaps and any naive count | 0.5 d |
 | S1.5 | Product-link coverage: every published guide links at least one product, through the `/go/<id>/` tracking path | Traffic without a path to the shop is the leak this site can least afford | 1.0 d |
 | S1.6 | Two lead-magnet pages (801, 764) get a real capture path and a thank-you state | They exist but the funnel behind them is unverified | 1.0 d |
@@ -236,6 +236,7 @@ plugin P0.1–P0.3, P0.5 ──► parallel, different repo, nothing blocks them
 
 | Date | Change |
 |---|---|
+| 2026-11-01 (autonomous round 3) | Draft triage finished: 750 merged into 699, 938 merged into 974, both drafts trashed, and the six superseded draft products (27, 28, 29, 75, 183, 765) moved to trash so their URLs answer 404 instead of a 200 soft-404. Two hubs built — `/start-here/` (1183, 31 links) and `/build/` (1185, 15 links), both with Rank Math meta and both linked from ten guides; the eleven child pages and `/inspiration/` remain. All twelve Herbarium products (953–956, 965–968, 969–972) now have full descriptions in the live-product structure with zero placeholders left, but cannot publish: they are simple products without sizes or phone models, and MCP has no tool to set product categories. Modules now S0 73 %, S1 31 %, S2 40 %, S3 20 %, S4 27 % — 7,7 of 21,1 days. |
 | 2026-11-01 (autonomous round 2) | Six finished article drafts published (989 gaslamp fantasy, 988 steampunk books, 974 dieselpunk, 897 outfit ideas for men, 898 couple costumes, 789 accessories for men) with SEO meta and collection links; 750 and 938 left as merge candidates against live 699 and 974. Fixed the remaining dead product links in the two newly published posts and re-verified by page title, not status code — unknown URLs on this site return 404, but the six superseded draft products return **200 with a "Page Not Found" title**, a soft-404 that made status-based link checks blind. The 12 Herbarium products stay draft: they are simple products with no variants, so a tee has no sizes and a phone case has no models, and they still contain `[PLACEHOLDER]` text. Modules now S0 73 %, S1 27 %, S2 32 %, S3 20 %, S4 27 % — 7,0 of 21,1 days. |
 
 | Date | Change |

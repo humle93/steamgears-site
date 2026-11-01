@@ -22,7 +22,7 @@ Status pr. **2026-11-01** · beregnet af `projektstatus.py` · kilder: [`projekt
 
 | Projekt | Status i dag | Grundlag |
 | --- | --- | --- |
-| **steamgears.eu — site-optimering** *(roadmap S0–S4)* | **28,4 %** | 6 af 21,1 d (S0 1,9/2,6 · S1 0,4/4,5 · S2 1,7/6 · S3 0,6/3 · S4 1,4/5) |
+| **steamgears.eu — site-optimering** *(roadmap S0–S4)* | **36,5 %** | 7,7 af 21,1 d (S0 1,9/2,6 · S1 1,4/4,5 · S2 2,4/6 · S3 0,6/3 · S4 1,4/5) |
 | **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5) |
 | **SEO-indholdsproduktion** | **0 %** | 0 af 3 guides · drift: Daglig loop kører |
 | **Døde internlinks** | **100 %** | 39 af 39 links |
@@ -33,7 +33,7 @@ Status pr. **2026-11-01** · beregnet af `projektstatus.py` · kilder: [`projekt
 <!-- AUTO:BLOKERINGER:START -->
 | Projekt | Næste skridt | Blokering |
 | --- | --- | --- |
-| steamgears.eu — site-optimering (28,4 %) | S2.1 hubs (/start-here/, /build/), derefter S1.3 kladde-triage | 5 vanity-301 (S0.4) kræver én Redirection-gruppe (ejer) |
+| steamgears.eu — site-optimering (36,5 %) | S2.1 hub-børnesider (/start-here/ + 5, /build/ + 6, /inspiration/), derefter S1.1 Herbarium-varianter | S1.1 Herbarium kræver varianter i Printify; S0.4 5 vanity-301 kræver én Redirection-gruppe (ejer) |
 | Dark academia-rebrand (63 %) | Batch 4 — mockups (~130 billeder) | Printify-adgang |
 | SEO-indholdsproduktion (0 %) | Skriv guide id 292 (men's steampunk essentials) | ingen |
 | Døde internlinks (100 %) | Vedligehold: tjek nye indlæg mod live-URL'er | ingen |
@@ -48,6 +48,7 @@ Nyeste først. Append-only — rækker må ikke slettes eller ændres.
 
 | Dato | Projekt | Modul | Før → Efter | Δ | Grundlag |
 | --- | --- | --- | --- | --- | --- |
+| 2026-11-01 | steamgears.eu — site-optimering | daglig måling | 28,4 % → 36,5 % | +8,1 | 7,7 af 21,1 d (S0 1,9/2,6 · S1 1,4/4,5 · S2 2,4/6 · S3 0,6/3 · S4 1,4/5) |
 | 2026-11-01 | Døde internlinks | daglig måling | 0 % → 100 % | +100 | 39 af 39 links |
 | 2026-11-01 | steamgears.eu — site-optimering | daglig måling | 3,6 % → 28,4 % | +24,8 | 6 af 21,1 d (S0 1,9/2,6 · S1 0,4/4,5 · S2 1,7/6 · S3 0,6/3 · S4 1,4/5) |
 | 2026-11-01 | Døde internlinks | Døde internlinks (baseline) | — → 0 % | — | 0 af 39 links rettet |
@@ -65,11 +66,11 @@ Manuel tabel — opdateres når roadmap-estimaterne ændres, ikke af scriptet.
 | Band | Estimat | Udført | Rest |
 | --- | --- | --- | --- |
 | S0 — brudt/akut | 2,6 d | 1,9 d | 0,7 d (Health Check, Coming Soon, 5 vanity-301) |
-| S1 — butik og indhold | 4,5 d | 0,4 d | 4,1 d (Herbarium, kladde-triage, produktlink) |
-| S2 — struktur og SEO | 6,0 d | 1,7 d | 4,3 d (hubs, navigation, H1) |
+| S1 — butik og indhold | 4,5 d | 1,4 d | 3,1 d (Herbarium-varianter, skraldespand, `/go/`-tracking, lead magnets) |
+| S2 — struktur og SEO | 6,0 d | 2,4 d | 3,6 d (hub-børnesider, `/inspiration/`, navigation, H1) |
 | S3 — hygiejne | 3,0 d | 0,6 d | 2,4 d (webp, designsider, plugins) |
 | S4 — salgsklar butik | 5,0 d | 1,4 d | 3,6 d (valuta, betaling, anmeldelser) |
-| **I alt** | **21,1 d** | **6,0 d** | **15,1 d** |
+| **I alt** | **21,1 d** | **7,7 d** | **13,4 d** |
 
 Kilde: [`site-roadmap-2026-11-01.md`](site-roadmap-2026-11-01.md) §4 og
 [`library/seo-runde-og-status-2026-11-01.md`](library/seo-runde-og-status-2026-11-01.md) §5 (målt 1/11).

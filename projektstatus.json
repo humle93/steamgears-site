@@ -6,8 +6,8 @@
       "id": "site",
       "name": "steamgears.eu — site-optimering",
       "note": "roadmap S0–S4",
-      "next": "S2.1 hubs (/start-here/, /build/), derefter S1.3 kladde-triage",
-      "blocked_by": "5 vanity-301 (S0.4) kræver én Redirection-gruppe (ejer)",
+      "next": "S2.1 hub-børnesider (/start-here/ + 5, /build/ + 6, /inspiration/), derefter S1.1 Herbarium-varianter",
+      "blocked_by": "S1.1 Herbarium kræver varianter i Printify; S0.4 5 vanity-301 kræver én Redirection-gruppe (ejer)",
       "modules": [
         {
           "id": "s0",
@@ -20,18 +20,18 @@
         {
           "id": "s1",
           "name": "S1 — butik og indhold",
-          "done": 0.4,
+          "done": 1.4,
           "total": 4.5,
           "unit": "d",
-          "note": "kladde-triage påbegyndt"
+          "note": "S1.3 kladde-triage færdig (1,0) + S1.1 Herbarium-tekster (0,15) + S1.5 produktlinks delvis (0,3); S1.1-publicering blokeret af varianter"
         },
         {
           "id": "s2",
           "name": "S2 — struktur og SEO",
-          "done": 1.7,
+          "done": 2.4,
           "total": 6,
           "unit": "d",
-          "note": "24 meta-titler/beskrivelser + hub-arkitektur planlagt"
+          "note": "S2.5 meta-runde (1,0) + S2.1 /start-here/ og /build/ bygget, børnesider mangler (0,6) + S2.6 hub-links fra 10 guides (0,15)"
         },
         {
           "id": "s3",
@@ -171,6 +171,15 @@
       "after": 100.0,
       "delta": 100.0,
       "basis": "39 af 39 links"
+    },
+    {
+      "date": "2026-11-01",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 28.4,
+      "after": 36.5,
+      "delta": 8.1,
+      "basis": "7,7 af 21,1 d (S0 1,9/2,6 · S1 1,4/4,5 · S2 2,4/6 · S3 0,6/3 · S4 1,4/5)"
     }
   ]
 }
