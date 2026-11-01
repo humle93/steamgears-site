@@ -239,6 +239,80 @@ class SGAP_AI {
         return $body;
     }
 
+    /**
+     * One structured request to the configured AI: returns the decoded JSON object.
+     * Anthropic gets a strict json_schema; chat-completions providers get JSON mode
+     * plus the schema in the instructions. Used by the Content Studio.
+     * @return array|WP_Error
+     */
+    public static function json_call(string $system, string $prompt, array $schema, int $max_tokens = 16000, string $effort = 'medium') {
+        $key = (string) SGAP_Settings::get('ai_api_key');
+        if ($key === '') {
+            return new WP_Error('sgap_ai_key', 'Set an AI API key in Settings → AI content.');
+        }
+        $model = self::model();
+        if ($model === '') {
+            return new WP_Error('sgap_ai_model', 'Set an AI model in Settings for the OpenAI-compatible provider.');
+        }
+        if (function_exists('set_time_limit')) {
+            @set_time_limit(300);
+        }
+        if (self::uses_chat_completions()) {
+            $body = [
+                'model' => $model,
+                'max_tokens' => $max_tokens,
+                'response_format' => ['type' => 'json_object'],
+                'messages' => [
+                    ['role' => 'system', 'content' => $system . "\n\nAnswer with one JSON object only, matching this JSON schema:\n" . wp_json_encode($schema)],
+                    ['role' => 'user', 'content' => $prompt]
+                ]
+            ];
+            if (self::provider() === 'aimlapi') {
+                $body['reasoning_effort'] = $effort;
+            }
+            $response = wp_remote_post(self::base_url() . '/chat/completions', [
+                'timeout' => 280,
+                'headers' => ['Authorization' => 'Bearer ' . $key, 'Content-Type' => 'application/json'],
+                'body' => wp_json_encode($body)
+            ]);
+            $decoded = self::decode($response, self::provider_name());
+            if (is_wp_error($decoded)) {
+                return $decoded;
+            }
+            $text = (string) ($decoded['choices'][0]['message']['content'] ?? '');
+            if ($text === '' && ($decoded['choices'][0]['finish_reason'] ?? '') === 'length') {
+                return new WP_Error('sgap_ai_truncated', 'The model response was cut off (max_tokens).');
+            }
+        } else {
+            $body = [
+                'model' => $model,
+                'max_tokens' => $max_tokens,
+                'system' => $system,
+                'messages' => [['role' => 'user', 'content' => $prompt]],
+                'output_config' => ['effort' => $effort, 'format' => ['type' => 'json_schema', 'schema' => $schema]]
+            ];
+            $headers = ['x-api-key' => $key, 'anthropic-version' => self::ANTHROPIC_VERSION, 'content-type' => 'application/json'];
+            if (in_array($model, self::FALLBACK_MODELS, true)) {
+                $body['fallbacks'] = 'default';
+                $headers['anthropic-beta'] = 'server-side-fallback-2026-07-01';
+            }
+            $response = wp_remote_post(self::ANTHROPIC_URL, ['timeout' => 280, 'headers' => $headers, 'body' => wp_json_encode($body)]);
+            $decoded = self::decode($response, 'Anthropic');
+            if (is_wp_error($decoded)) {
+                return $decoded;
+            }
+            $text = self::anthropic_text($decoded);
+            if (is_wp_error($text)) {
+                return $text;
+            }
+        }
+        $data = json_decode($text, true);
+        if (!is_array($data) && preg_match('/\{.*\}/s', $text, $m)) {
+            $data = json_decode($m[0], true);
+        }
+        return is_array($data) ? $data : new WP_Error('sgap_ai_parse', 'The model did not answer with valid JSON.');
+    }
+
     /** @return array|WP_Error */
     public static function decode($response, string $who) {
         if (is_wp_error($response)) {
