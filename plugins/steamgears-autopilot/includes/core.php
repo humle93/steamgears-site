@@ -1170,8 +1170,10 @@ class SGAP_Admin {
         return $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $wpdb->esc_like($table))) === $table;
     }
 
-    private static function open(string $title): void {
-        echo '<div class="wrap"><h1>' . esc_html($title) . '</h1>';
+    private static function open(string $title, string $subtitle = ''): void {
+        SGAP_UI::css();
+        echo '<div class="wrap sgap"><div class="sgap-head"><span class="sgap-logo" aria-hidden="true">⚙</span><div><h1>' . esc_html($title) . '</h1>'
+            . ($subtitle !== '' ? '<p>' . esc_html($subtitle) . '</p>' : '') . '</div></div><hr class="wp-header-end" style="display:none">';
         // Result of the last button press, shown at the top where it is seen without scrolling.
         $result = get_transient('sgap_run_result_' . get_current_user_id());
         if (is_string($result) && $result !== '') {
@@ -1199,61 +1201,95 @@ class SGAP_Admin {
 
     public static function dashboard(): void {
         global $wpdb;
-        self::open('Steamgears Autopilot');
+        self::open('Steamgears Autopilot', 'Social media on autopilot: AI writes, Publer posts, every click is counted.');
         $stats = get_transient('sgap_dashboard_stats');
-        if (!is_array($stats) || !isset($stats['counts'])) {
-            $stats = ['counts' => [], 'channels' => []];
-            foreach (['sgap_queue' => 'Queue', 'sgap_ai_drafts' => 'AI drafts', 'sgap_events' => 'Events'] as $t => $label) {
-                $table = $wpdb->prefix . $t;
-                $stats['counts'][$label] = self::table_exists($table)
-                    ? (int) $wpdb->get_var("SELECT COUNT(*) FROM {$table}")
-                    : null;
-            }
-            if ($stats['counts']['Events'] !== null) {
-                $stats['channels'] = $wpdb->get_results($wpdb->prepare(
-                    "SELECT channel,
-                        SUM(event_type = 'publish') AS published,
-                        SUM(event_type = 'click') AS clicks,
-                        SUM(event_type = 'order') AS orders,
-                        SUM(CASE WHEN event_type = 'order' THEN value ELSE 0 END) AS revenue
-                     FROM {$wpdb->prefix}sgap_events WHERE created_at >= %s
-                     GROUP BY channel ORDER BY revenue DESC, clicks DESC",
-                    wp_date('Y-m-d H:i:s', time() - 30 * DAY_IN_SECONDS)
-                ));
-            }
+        if (!is_array($stats) || !isset($stats['tiles'])) {
+            $q = $wpdb->prefix . 'sgap_queue';
+            $d = $wpdb->prefix . 'sgap_ai_drafts';
+            $e = $wpdb->prefix . 'sgap_events';
+            $since = wp_date('Y-m-d H:i:s', time() - 30 * DAY_IN_SECONDS);
+            $has = ['q' => self::table_exists($q), 'd' => self::table_exists($d), 'e' => self::table_exists($e)];
+            $totals = $has['e'] ? $wpdb->get_row($wpdb->prepare(
+                "SELECT SUM(event_type = 'publish') AS published, SUM(event_type = 'click') AS clicks, SUM(event_type = 'order') AS orders,
+                        SUM(CASE WHEN event_type = 'order' THEN value ELSE 0 END) AS revenue FROM {$e} WHERE created_at >= %s", $since)) : null;
+            $stats = [
+                'missing' => in_array(false, $has, true),
+                'tiles' => [
+                    'queued' => $has['q'] ? (int) $wpdb->get_var("SELECT COUNT(*) FROM {$q} WHERE status = 'queued'") : 0,
+                    'pending' => $has['d'] ? (int) $wpdb->get_var("SELECT COUNT(*) FROM {$d} WHERE status = 'pending'") : 0,
+                    'published' => (int) ($totals->published ?? 0),
+                    'clicks' => (int) ($totals->clicks ?? 0),
+                    'orders' => (int) ($totals->orders ?? 0),
+                    'revenue' => (float) ($totals->revenue ?? 0)
+                ],
+                'channels' => $has['e'] ? $wpdb->get_results($wpdb->prepare(
+                    "SELECT channel, SUM(event_type = 'publish') AS published, SUM(event_type = 'click') AS clicks,
+                        SUM(event_type = 'order') AS orders, SUM(CASE WHEN event_type = 'order' THEN value ELSE 0 END) AS revenue
+                     FROM {$e} WHERE created_at >= %s GROUP BY channel ORDER BY revenue DESC, clicks DESC", $since)) : []
+            ];
             set_transient('sgap_dashboard_stats', $stats, 5 * MINUTE_IN_SECONDS);
         }
-        echo '<p>Version ' . esc_html(SGAP_VERSION) . ' &middot; Autopilot: <strong>'
-            . esc_html(SGAP_Settings::get('autopilot_enabled', 'no')) . '</strong>'
-            . ' &middot; Full Auto: <strong>' . esc_html(SGAP_Settings::get('full_auto_enabled', 'no')) . '</strong>'
-            . ' &middot; REST: <code>' . esc_html(rest_url(SGAP_REST::NS)) . '</code></p>';
-        echo '<table class="widefat striped" style="max-width:420px"><tbody>';
-        foreach ($stats['counts'] as $label => $count) {
-            echo '<tr><td>' . esc_html($label) . '</td><td>'
-                . ($count === null ? '<em>table missing &ndash; deactivate and reactivate the plugin</em>' : esc_html((string) $count))
-                . '</td></tr>';
+        if ($stats['missing']) {
+            echo '<div class="notice notice-error"><p>Some Steamgears tables are missing: deactivate and reactivate the plugin.</p></div>';
         }
-        echo '</tbody></table>';
-        echo '<h2>Last 30 days per channel</h2>';
-        self::render_rows($stats['channels'], ['channel', 'published', 'clicks', 'orders', 'revenue']);
+
+        // Status pills
+        $keys = get_option(SGAP_KeyCheck::RESULT);
+        $ai_ok = is_array($keys) ? ($keys['ai']['ok'] ?? null) : null;
+        $blocked = SGAP_Queue::blocked_reason();
+        echo '<div class="sgap-pills">'
+            . SGAP_UI::pill('Autopilot ' . (SGAP_Settings::enabled('autopilot_enabled') ? 'on' : 'off'), SGAP_Settings::enabled('autopilot_enabled') ? 'ok' : 'bad')
+            . SGAP_UI::pill('Full auto ' . (SGAP_Settings::enabled('full_auto_enabled') ? 'on' : 'off – you approve'), 'brass')
+            . SGAP_UI::pill(SGAP_RSS::enabled() ? 'Publer via RSS' : 'Publer API', 'brass')
+            . SGAP_UI::pill('AI: ' . SGAP_AI::provider_name() . ($ai_ok === null ? ' (untested)' : ($ai_ok ? ' ✓' : ' ✗')), $ai_ok === null ? 'warn' : ($ai_ok ? 'ok' : 'bad'))
+            . ($blocked === 'quiet_hours' ? SGAP_UI::pill('Quiet hours until ' . sprintf('%02d:00', (int) SGAP_Settings::get('quiet_end', 7)), 'warn') : '')
+            . ($blocked === 'daily_cap_reached' ? SGAP_UI::pill('Daily limit reached', 'warn') : '')
+            . SGAP_UI::pill('v' . SGAP_VERSION)
+            . '</div>';
+
+        // Tiles
+        $t = $stats['tiles'];
+        echo '<div class="sgap-stats">'
+            . SGAP_UI::stat('Drafts to review', $t['pending'], admin_url('admin.php?page=sgap-ai'))
+            . SGAP_UI::stat('Waiting in queue', $t['queued'], admin_url('admin.php?page=sgap-queue'))
+            . SGAP_UI::stat('Published · 30 days', $t['published'])
+            . SGAP_UI::stat('Clicks · 30 days', $t['clicks'])
+            . SGAP_UI::stat('Orders · 30 days', $t['orders'] . ($t['revenue'] > 0 ? ' · ' . number_format_i18n($t['revenue'], 0) : ''))
+            . '</div>';
+
+        echo '<div class="sgap-grid"><div>';
         self::run_panel();
+        SGAP_UI::card_open('Last 30 days per channel', 'chart-bar');
+        self::render_rows($stats['channels'], ['channel', 'published', 'clicks', 'orders', 'revenue']);
+        SGAP_UI::card_close();
+        echo '</div><div>';
+        self::feeds_panel();
+        self::keys_panel();
         SGAP_Updater::panel();
+        echo '</div></div>';
         self::close();
     }
 
     private static function run_panel(): void {
-        echo '<h2>Run now</h2><p>';
-        foreach (['generate' => 'Generate posts now', 'publish' => 'Publish queue now', 'test_keys' => 'Test API keys', 'test_publer' => 'List Publer accounts'] as $task => $label) {
-            echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '" style="display:inline-block;margin-right:8px">'
+        SGAP_UI::card_open('Run now', 'controls-play');
+        echo '<div class="sgap-actions">';
+        $tasks = [
+            'generate' => ['Generate posts now', 'edit', true],
+            'publish' => ['Publish queue now', 'megaphone', false],
+            'test_keys' => ['Test API keys', 'admin-network', false],
+            'test_publer' => ['List Publer accounts', 'groups', false]
+        ];
+        foreach ($tasks as $task => [$label, $icon, $primary]) {
+            echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '">'
                 . '<input type="hidden" name="action" value="sgap_run"><input type="hidden" name="task" value="' . esc_attr($task) . '">'
                 . wp_nonce_field('sgap_run_' . $task, '_wpnonce', true, false)
-                . '<button class="button">' . esc_html($label) . '</button></form>';
+                . '<button class="button' . ($primary ? ' button-primary' : '') . '"><span class="dashicons dashicons-' . $icon . '"></span>' . esc_html($label) . '</button></form>';
         }
-        echo '</p>';
+        echo '</div>';
         // Progress bar for "Generate posts now": one request per page, so each step is visible.
-        echo '<div id="sgap-progress" style="display:none;max-width:560px;margin:8px 0 16px">'
-            . '<progress id="sgap-progress-bar" value="0" max="1" style="width:100%;height:18px"></progress>'
-            . '<p id="sgap-progress-text" class="description" style="margin:4px 0"></p></div>';
+        echo '<div id="sgap-progress" class="sgap-progress" style="display:none">'
+            . '<progress id="sgap-progress-bar" value="0" max="1"></progress>'
+            . '<p id="sgap-progress-text"></p></div>';
         $gen = [
             'ajax' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('sgap_generate'),
@@ -1276,34 +1312,48 @@ class SGAP_Admin {
             . 'return call("sgap_gen_one",{post_id:p.id}).then(function(r){tot.sources+=r.sources;tot.drafts+=r.drafts;tot.queued+=r.queued;errs=errs.concat(r.errors);},'
             . 'function(err){tot.sources++;errs.push(p.title+": "+err.message);}).then(function(){i++;bar.value=i;return next();});}'
             . 'return next();}).catch(function(err){txt.textContent="Stopped: "+err.message;btn.disabled=false;});},true);})();</script>';
-        if (SGAP_RSS::enabled()) {
-            echo '<h2>Publer RSS feeds</h2><p>In Publer: <em>Explore → RSS Feeds → add feed</em>, then the feed\'s <em>Settings → Auto-post</em>, '
-                . 'tick "use link title/description as caption", choose <em>photo</em> for Instagram/Pinterest/Google and <em>link</em> for the rest, '
-                . 'and select that channel\'s account. Pinterest needs a default board in Publer.</p><table class="widefat striped" style="max-width:760px"><tbody>';
-            foreach (SGAP_Publer::channels() as $channel) {
-                echo '<tr><td>' . esc_html($channel) . '</td><td><input type="text" readonly class="large-text code" value="' . esc_attr(SGAP_RSS::url($channel)) . '" onclick="this.select();"></td>'
-                    . '<td style="white-space:nowrap"><button type="button" class="button sgap-copy" data-url="' . esc_attr(SGAP_RSS::url($channel)) . '">Copy</button> '
-                    . '<a class="button" href="' . esc_url(SGAP_RSS::url($channel)) . '" target="_blank" rel="noopener">Open</a></td></tr>';
-            }
-            echo '</tbody></table><p><a class="button button-primary" href="https://app.publer.com/" target="_blank" rel="noopener">Open Publer &rarr;</a> '
-                . '<span class="description">Copy a feed, then in Publer: Explore → RSS Feeds → add feed → paste.</span></p>';
-            echo '<script>document.querySelectorAll(".sgap-copy").forEach(function(b){b.addEventListener("click",function(){var u=b.dataset.url,done=function(){b.textContent="Copied ✓";setTimeout(function(){b.textContent="Copy";},2000);};'
-                . 'var old=function(){var t=document.createElement("textarea");t.value=u;document.body.appendChild(t);t.select();try{document.execCommand("copy");}catch(e){}t.remove();done();};'
-                . 'if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(u).then(done,old);}else{old();}});});</script>';
-        }
-        $keys = get_option(SGAP_KeyCheck::RESULT);
-        if (is_array($keys)) {
-            foreach (['publer' => 'Publer', 'ai' => 'AI'] as $part => $label) {
-                $check = $keys[$part] ?? ['ok' => null, 'message' => ''];
-                $mark = $check['ok'] === null ? '–' : ($check['ok'] ? '✓' : '✗');
-                echo '<p class="description"><strong>' . esc_html("{$label} key {$mark}") . '</strong> ' . esc_html($check['message']) . '</p>';
-            }
-            echo '<p class="description">Keys last tested: ' . esc_html($keys['checked_at']) . '</p>';
-        }
         $last = get_option('sgap_last_generate');
         if (is_array($last)) {
-            echo '<p class="description">Last generation: ' . esc_html($last['at'] . ' – ' . $last['drafts'] . ' drafts, ' . $last['queued'] . ' queued, ' . count($last['errors']) . ' errors') . '</p>';
+            echo '<p class="description">Last generation: ' . esc_html($last['at'] . ' – ' . $last['drafts'] . ' drafts, ' . $last['queued'] . ' queued' . ($last['errors'] ? ', ' . count($last['errors']) . ' errors' : '')) . '</p>';
         }
+        SGAP_UI::card_close();
+    }
+
+    private static function feeds_panel(): void {
+        if (!SGAP_RSS::enabled()) {
+            return;
+        }
+        SGAP_UI::card_open('Publer RSS feeds', 'rss');
+        foreach (SGAP_Publer::channels() as $channel) {
+            $url = SGAP_RSS::url($channel);
+            echo '<div class="sgap-feed">' . SGAP_UI::channel($channel) . '<code title="' . esc_attr($url) . '">' . esc_html($url) . '</code>'
+                . '<button type="button" class="button button-small sgap-copy" data-url="' . esc_attr($url) . '"><span class="dashicons dashicons-admin-page"></span>Copy</button>'
+                . '<a class="button button-small" href="' . esc_url($url) . '" target="_blank" rel="noopener">Open</a></div>';
+        }
+        echo '<p class="description">In Publer: <em>Explore → RSS Feeds → add feed</em> → paste → <em>Settings → Auto-post</em>, '
+            . 'tick "use link title/description as caption", <em>photo</em> for Instagram/Pinterest, <em>link</em> for the rest, and pick the account.</p>'
+            . '<p><a class="button button-primary" href="https://app.publer.com/" target="_blank" rel="noopener"><span class="dashicons dashicons-external"></span>Open Publer</a></p>';
+        echo '<script>document.querySelectorAll(".sgap-copy").forEach(function(b){b.addEventListener("click",function(){var u=b.dataset.url,h=b.innerHTML,done=function(){b.textContent="Copied ✓";setTimeout(function(){b.innerHTML=h;},2000);};'
+            . 'var old=function(){var t=document.createElement("textarea");t.value=u;document.body.appendChild(t);t.select();try{document.execCommand("copy");}catch(e){}t.remove();done();};'
+            . 'if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(u).then(done,old);}else{old();}});});</script>';
+        SGAP_UI::card_close();
+    }
+
+    private static function keys_panel(): void {
+        $keys = get_option(SGAP_KeyCheck::RESULT);
+        SGAP_UI::card_open('API keys', 'admin-network');
+        if (!is_array($keys)) {
+            echo '<p class="description">Not tested yet. Save a key in Settings or press "Test API keys".</p>';
+        } else {
+            foreach (['ai' => 'AI', 'publer' => 'Publer'] as $part => $label) {
+                $check = $keys[$part] ?? ['ok' => null, 'message' => ''];
+                $kind = $check['ok'] === null ? '' : ($check['ok'] ? 'ok' : 'bad');
+                $mark = $check['ok'] === null ? '–' : ($check['ok'] ? '✓' : '✗');
+                echo '<div class="sgap-check">' . SGAP_UI::pill("{$label} {$mark}", $kind) . '<span>' . esc_html($check['message']) . '</span></div>';
+            }
+            echo '<p class="description">Tested ' . esc_html($keys['checked_at']) . ' · <a href="' . esc_url(admin_url('admin.php?page=sgap-settings')) . '">Settings</a></p>';
+        }
+        SGAP_UI::card_close();
     }
 
     public static function run_action(): void {
@@ -1460,31 +1510,31 @@ class SGAP_Admin {
 
     public static function queue(): void {
         global $wpdb;
-        self::open('Queue');
+        self::open('Queue', 'Posts waiting to go out, and what happened to the ones that did.');
         $table = $wpdb->prefix . 'sgap_queue';
         $rows = self::table_exists($table)
-            ? $wpdb->get_results("SELECT id, channel, angle, title, status, attempts, scheduled_at, published_at, error FROM {$table} ORDER BY id DESC LIMIT 50")
+            ? $wpdb->get_results("SELECT id, channel, title, status, attempts, scheduled_at, published_at, error FROM {$table} ORDER BY id DESC LIMIT 50")
             : [];
         if (!$rows) {
-            echo '<p>Nothing in queue yet.</p>';
+            SGAP_UI::empty_state('clock', 'The queue is empty. Approve a draft under AI Drafts to fill it.');
             self::close();
             return;
         }
-        echo '<table class="widefat striped"><thead><tr><th>ID</th><th>Channel</th><th>Angle</th><th>Title</th><th>Tracking URL</th><th>Status</th><th>Attempts</th><th>Scheduled</th><th>Published</th><th>Error</th><th>Actions</th></tr></thead><tbody>';
+        echo '<div class="sgap-card"><div class="sgap-scroll"><table class="widefat striped"><thead><tr><th>#</th><th>Channel</th><th>Title</th><th>Status</th><th>Scheduled</th><th>Published</th><th>Tracking link</th><th></th></tr></thead><tbody>';
         foreach ($rows as $r) {
-            echo '<tr><td>' . esc_html($r->id) . '</td><td>' . esc_html($r->channel) . '</td><td>' . esc_html($r->angle) . '</td><td>'
-                . esc_html($r->title) . '</td><td><code>' . esc_html(SGAP_Tracking::url((int) $r->id)) . '</code></td><td><strong>'
-                . esc_html($r->status) . '</strong></td><td>' . esc_html($r->attempts) . '</td><td>'
-                . esc_html((string) $r->scheduled_at) . '</td><td>' . esc_html((string) $r->published_at) . '</td><td>'
-                . esc_html((string) $r->error) . '</td><td>'
-                . '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '" style="display:inline">'
+            echo '<tr><td>' . esc_html($r->id) . '</td><td>' . SGAP_UI::channel($r->channel) . '</td><td>' . esc_html($r->title)
+                . ($r->error ? '<br><small style="color:#b32d2e">' . esc_html($r->error) . '</small>' : '') . '</td><td>'
+                . SGAP_UI::status_pill((string) $r->status) . ($r->attempts > 1 ? ' <small>' . esc_html($r->attempts . ' tries') . '</small>' : '') . '</td><td>'
+                . esc_html($r->scheduled_at ? mysql2date('j M H:i', $r->scheduled_at) : '') . '</td><td>'
+                . esc_html($r->published_at ? mysql2date('j M H:i', $r->published_at) : '') . '</td><td><code>' . esc_html(wp_parse_url(SGAP_Tracking::url((int) $r->id), PHP_URL_PATH)) . '</code></td><td>'
+                . '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '" class="sgap-actions" style="flex-wrap:nowrap">'
                 . '<input type="hidden" name="action" value="sgap_queue_action">'
                 . '<input type="hidden" name="queue_id" value="' . esc_attr($r->id) . '">'
                 . wp_nonce_field('sgap_queue_' . $r->id, '_wpnonce', true, false)
-                . '<button class="button button-small" name="cmd" value="retry">Re-queue</button> '
-                . '<button class="button button-small" name="cmd" value="delete">Delete</button></form></td></tr>';
+                . '<button class="button button-small" name="cmd" value="retry">Re-queue</button>'
+                . '<button class="button button-small sgap-danger" name="cmd" value="delete">Delete</button></form></td></tr>';
         }
-        echo '</tbody></table>';
+        echo '</tbody></table></div></div>';
         self::close();
     }
 
@@ -1509,30 +1559,33 @@ class SGAP_Admin {
 
     public static function ai(): void {
         global $wpdb;
-        self::open('AI Drafts');
+        self::open('AI Drafts', 'Posts the AI wrote for your pages. Approve & Queue sends them to the publishing queue.');
         $table = $wpdb->prefix . 'sgap_ai_drafts';
         $rows = self::table_exists($table)
-            ? $wpdb->get_results("SELECT id, post_id, channel, angle, title, body, hashtags, status, created_at FROM {$table} WHERE status = 'pending' ORDER BY id DESC LIMIT 50")
+            ? $wpdb->get_results("SELECT d.id, d.post_id, d.channel, d.title, d.body, d.hashtags, d.created_at, p.post_title AS source
+                FROM {$table} d LEFT JOIN {$wpdb->posts} p ON p.ID = d.post_id WHERE d.status = 'pending' ORDER BY d.id DESC LIMIT 60")
             : [];
         if (!$rows) {
-            echo '<p>No pending drafts.</p>';
+            SGAP_UI::empty_state('yes-alt', 'No drafts waiting. Press "Generate posts now" on the dashboard to have the AI write some.');
             self::close();
             return;
         }
-        echo '<table class="widefat striped"><thead><tr><th>ID</th><th>Channel</th><th>Angle</th><th>Title</th><th>Text</th><th>Created</th><th>Actions</th></tr></thead><tbody>';
+        echo '<p class="sgap-sub">' . esc_html(count($rows) . ' draft' . (count($rows) === 1 ? '' : 's') . ' waiting for you.') . '</p><div class="sgap-drafts">';
         foreach ($rows as $row) {
-            echo '<tr><td>' . esc_html($row->id) . '</td><td>' . esc_html($row->channel) . '</td><td>' . esc_html($row->angle) . '</td><td>'
-                . esc_html($row->title) . '</td><td>' . esc_html(wp_trim_words(trim($row->body . ' ' . $row->hashtags), 40)) . '</td><td>'
-                . esc_html($row->created_at) . '</td><td>'
-                . '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '">'
+            echo '<div class="sgap-draft"><div class="sgap-meta">' . SGAP_UI::channel($row->channel) . '<span>#' . esc_html($row->id) . '</span></div>'
+                . '<h3>' . esc_html($row->title) . '</h3>'
+                . '<div class="sgap-text">' . esc_html($row->body) . '</div>'
+                . ($row->hashtags !== '' ? '<div class="sgap-tags">' . esc_html($row->hashtags) . '</div>' : '')
+                . '<div class="sgap-meta"><span>' . esc_html($row->source ? 'For: ' . $row->source : '') . '</span><span>' . esc_html(mysql2date('j M H:i', $row->created_at)) . '</span></div>'
+                . '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '" class="sgap-actions">'
                 . '<input type="hidden" name="action" value="sgap_approve_ai">'
                 . '<input type="hidden" name="draft_id" value="' . esc_attr($row->id) . '">'
                 . wp_nonce_field('sgap_approve_ai_' . $row->id, '_wpnonce', true, false)
-                . '<button class="button button-primary" name="decision" value="queue">Approve &amp; Queue</button> '
-                . '<button class="button" name="decision" value="approved">Approve Only</button> '
-                . '<button class="button" name="decision" value="rejected">Reject</button></form></td></tr>';
+                . '<button class="button button-primary" name="decision" value="queue"><span class="dashicons dashicons-yes"></span>Approve &amp; Queue</button>'
+                . '<button class="button" name="decision" value="approved">Approve Only</button>'
+                . '<button class="button sgap-danger" name="decision" value="rejected">Reject</button></form></div>';
         }
-        echo '</tbody></table>';
+        echo '</div>';
         self::close();
     }
 
@@ -1720,10 +1773,10 @@ class SGAP_Admin {
 
     private static function render_rows(array $rows, array $cols): void {
         if (!$rows) {
-            echo '<p>Nothing here yet.</p>';
+            echo '<p class="description">Nothing here yet.</p>';
             return;
         }
-        echo '<table class="widefat striped"><thead><tr>';
+        echo '<div class="sgap-scroll"><table class="widefat striped"><thead><tr>';
         foreach ($cols as $c) {
             echo '<th>' . esc_html($c) . '</th>';
         }
@@ -1736,7 +1789,7 @@ class SGAP_Admin {
             }
             echo '</tr>';
         }
-        echo '</tbody></table>';
+        echo '</tbody></table></div>';
     }
 }
 
