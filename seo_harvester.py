@@ -2,6 +2,7 @@ import os
 import re
 import sys
 import json
+import glob
 import time
 import argparse
 import urllib.request
@@ -10,10 +11,26 @@ import xml.etree.ElementTree as ET
 from html.parser import HTMLParser
 
 KB_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "knowledge_base")
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+
+def get_gemini_key():
+    key = os.getenv("GEMINI_API_KEY", "")
+    if key:
+        return key
+    # Prøv at finde nøglen i ~/.gemini/ eller ~/.bashrc
+    for path in glob.glob(os.path.expanduser("~/.gemini/**/*"), recursive=True) + [os.path.expanduser("~/.gemini/.env"), os.path.expanduser("~/.bashrc")]:
+        if os.path.isfile(path):
+            try:
+                with open(path, "r", encoding="utf-8", errors="ignore") as f:
+                    match = re.search(r"(AIza[0-9A-Za-z\-_]{35})", f.read())
+                    if match:
+                        return match.group(1)
+            except Exception:
+                pass
+    return ""
+
+GEMINI_API_KEY = get_gemini_key()
 
 class ArticleExtractor(HTMLParser):
-    """Udtrækker ren tekst og overskrifter fra HTML og ignorerer støj."""
     def __init__(self):
         super().__init__()
         self.ignore_tags = {"script", "style", "nav", "footer", "header", "aside", "noscript", "svg", "form", "iframe"}
@@ -71,12 +88,14 @@ def parse_sitemap(sitemap_url, keyword_filter=None, max_urls=10):
     xml_data = fetch_url(sitemap_url)
     root = ET.fromstring(xml_data)
     urls = []
+    skip_ext = (".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".pdf", ".zip")
 
     for elem in root.iter():
         if elem.tag.endswith("loc") and elem.text:
             loc = elem.text.strip()
+            if loc.lower().endswith(skip_ext):
+                continue
             if loc.endswith(".xml") and loc != sitemap_url:
-                # Rekursivt kald hvis det er et sitemap-index
                 urls.extend(parse_sitemap(loc, keyword_filter, max_urls - len(urls)))
             else:
                 if keyword_filter:
@@ -88,8 +107,8 @@ def parse_sitemap(sitemap_url, keyword_filter=None, max_urls=10):
     return urls[:max_urls]
 
 def distill_with_gemini(title, url, raw_text):
-    """Kondenserer rå-artiklen til skarpe SEO-regler via Gemini, hvis nøgle findes."""
     if not GEMINI_API_KEY:
+        print("  [!] Ingen GEMINI_API_KEY fundet - gemmer rå Markdown.")
         return f"# {title}\n\nKilde: {url}\n\n{raw_text[:15000]}"
 
     api_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_API_KEY}"
@@ -155,11 +174,10 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser(description="Sug SEO-guides fra URLs eller Sitemaps ind i knowledge_base/")
     ap.add_argument("--url", help="Hent en enkelt URL")
     ap.add_argument("--sitemap", help="Hent fra et XML-sitemap")
-    ap.add_argument("--filter", default="seo,ecommerce,woocommerce,product,schema,speed",
-                    help="Komma-separerede søgeord til at filtrere sitemap-URLs")
-    ap.add_argument("--max", type=int, default=5, help="Max antal URLs fra et sitemap (default: 5)")
-    ap.add_argument("--list", help="Sti til en .txt fil med én URL pr. linje")
-    ap.add_argument("--raw", action="store_true", help="Gem rå tekst uden Gemini-destillering")
+    ap.add_argument("--filter", default="seo,ecommerce,woocommerce,product,schema,speed", help="Søgeord")
+    ap.add_argument("--max", type=int, default=5, help="Max antal URLs")
+    ap.add_argument("--list", help="Sti til .txt fil med URLs")
+    ap.add_argument("--raw", action="store_true", help="Gem rå tekst")
     args = ap.parse_args()
 
     targets = []
@@ -176,7 +194,6 @@ if __name__ == "__main__":
         targets.extend(parse_sitemap(args.sitemap, keywords, args.max))
 
     if not targets:
-        print("Brug f.eks.: python seo_harvester.py --url https://...")
         sys.exit(1)
 
     for idx, t_url in enumerate(targets, 1):

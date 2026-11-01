@@ -1,4 +1,5 @@
 import os
+import re
 import glob
 import json
 import base64
@@ -9,9 +10,24 @@ import urllib.error
 WP_SITE = "https://steamgears.eu"
 WP_USER = os.getenv("WP_USER", "")
 WP_APP_PASS = os.getenv("WP_APP_PASS", "")
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 
-# Hvis vi kører lokalt i Termux, genbrug nøglen fra ~/.gemini/steamgears_auth.json
+def get_gemini_key():
+    key = os.getenv("GEMINI_API_KEY", "")
+    if key:
+        return key
+    for path in glob.glob(os.path.expanduser("~/.gemini/**/*"), recursive=True) + [os.path.expanduser("~/.gemini/.env"), os.path.expanduser("~/.bashrc")]:
+        if os.path.isfile(path):
+            try:
+                with open(path, "r", encoding="utf-8", errors="ignore") as f:
+                    match = re.search(r"(AIza[0-9A-Za-z\-_]{35})", f.read())
+                    if match:
+                        return match.group(1)
+            except Exception:
+                pass
+    return ""
+
+GEMINI_API_KEY = get_gemini_key()
+
 AUTH_FILE = os.path.expanduser("~/.gemini/steamgears_auth.json")
 if (not WP_USER or not WP_APP_PASS) and os.path.exists(AUTH_FILE):
     with open(AUTH_FILE, "r") as f:
@@ -31,11 +47,10 @@ def get_wp_headers():
     return headers
 
 def load_seo_knowledge():
-    """Opsluger alle .md og .txt filer i knowledge_base/"""
     kb_texts = []
     for path in sorted(glob.glob("knowledge_base/*.*")):
         with open(path, "r", encoding="utf-8") as f:
-            kb_texts.append(f"--- KILDE: {os.path.basename(path)} ---\n{f.read()}")
+            kb_texts.append(f"--- KILDE: {os.path.basename(path)} ---\n{f.read()[:8000]}")
     return "\n\n".join(kb_texts)
 
 def fetch_wp_json(endpoint):
@@ -66,7 +81,6 @@ def gather_site_snapshot():
         "products": []
     }
 
-    # Hent Sider
     pages = fetch_wp_json("/wp-json/wp/v2/pages?per_page=20")
     if isinstance(pages, list):
         for p in pages:
@@ -80,7 +94,6 @@ def gather_site_snapshot():
                 "yoast_head_json": p.get("yoast_head_json", None)
             })
 
-    # Hent Produkter (WooCommerce Store API / WP REST API)
     products = fetch_wp_json("/wp-json/wc/store/v1/products?per_page=30")
     if isinstance(products, list):
         for prod in products:
@@ -105,9 +118,9 @@ def gather_site_snapshot():
 def generate_seo_plan(knowledge, site_data):
     print("[2/3] Analyserer med Gemini og bygger optimeringsplan...")
     if not GEMINI_API_KEY:
-        raise ValueError("Mangler GEMINI_API_KEY miljøvariabel!")
+        raise ValueError("Kunne ikke finde GEMINI_API_KEY automatisk. Kør: export GEMINI_API_KEY='din_nøgle'")
 
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key={GEMINI_API_KEY}"
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_API_KEY}"
     prompt = f"""Du er Lead Technical SEO & E-Commerce Architect for Steamgears.eu.
 Brug nedenstående SEO-vidensbase til at lave et knivskarpt SEO-audit af sidens live-data.
 
@@ -135,18 +148,17 @@ Lever en konkret, handlingsorienteret optimeringsplan på dansk opdelt i:
         return result["candidates"][0]["content"]["parts"][0]["text"]
 
 if __name__ == "__main__":
-    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    os.makedirs("reports", exist_ok=True)
     kb = load_seo_knowledge()
     snapshot = gather_site_snapshot()
     report = generate_seo_plan(kb, snapshot)
 
     today = datetime.date.today().isoformat()
-    report_path = f"reports/seo_audit_{today}.md"
-    latest_path = "reports/LATEST_OPTIMIZATION_PLAN.md"
+    dated_file = f"reports/seo_audit_{today}.md"
+    latest_file = "reports/LATEST_OPTIMIZATION_PLAN.md"
 
-    with open(report_path, "w", encoding="utf-8") as f:
-        f.write(report)
-    with open(latest_path, "w", encoding="utf-8") as f:
-        f.write(report)
-
-    print(f"[3/3] Færdig! Optimeringsplan gemt i: {latest_path}")
+    print(f"[3/3] Gemmer rapport i {latest_file}...")
+    for path in (dated_file, latest_file):
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(report)
+    print("[OK] SEO Audit færdig!")
