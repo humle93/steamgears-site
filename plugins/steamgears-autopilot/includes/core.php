@@ -1298,6 +1298,7 @@ class SGAP_Admin {
             . '<p><a class="button button-primary" href="' . esc_url(admin_url('admin.php?page=sgap-chat')) . '"><span class="dashicons dashicons-format-chat"></span>Open AI Chat</a></p>';
         SGAP_UI::card_close();
         SGAP_Auto::health_card();
+        SGAP_CC::card();
         self::feeds_panel();
         self::keys_panel();
         SGAP_Updater::panel();

@@ -48,6 +48,9 @@ wpc eval-file "$ROOT/plugins/tests/admin-tools.php"
 echo "== Set-and-forget automation"
 wpc eval-file "$ROOT/plugins/tests/automation.php"
 
+echo "== Command Center link"
+wpc eval-file "$ROOT/plugins/tests/command-center.php"
+
 echo "== HTTP checks"
 php -S 127.0.0.1:8080 -t "$WP_DIR" "$ROOT/plugins/tests/router.php" >/tmp/php-server.log 2>&1 &
 SERVER=$!
@@ -79,6 +82,9 @@ check "rss: feed contains the released post" "$(echo "$FEED" | grep -c "<link>$U
 ETAG="$(grep -i '^etag:' /tmp/feed-headers | tr -d '\r' | cut -d' ' -f2-)"
 check "rss: unchanged feed answers 304 to If-None-Match" "$(curl -s -o /dev/null -w '%{http_code}' -H "If-None-Match: $ETAG" "$URL/sgap-feed/facebook/")" "304"
 check "rss: query-string feed URL (what Publer gets) is served" "$(curl -s -o /dev/null -w '%{http_code} %{content_type}' "$URL/?sgap_feed=facebook")" "200 application/rss+xml; charset=UTF-8"
+CC_LOGIN="$(wpc option get sgap_ci_cc_login)"
+check "cc: pairing password works over HTTP (heartbeat)" "$(curl -s -o /dev/null -w '%{http_code}' -u "$CC_LOGIN" -H 'Content-Type: application/json' -H 'X-Command-Center: ci' -d '{"version":"ci","health":"ok"}' "$URL/wp-json/sgap/v1/heartbeat")" "200"
+check "cc: wrong password refused" "$(curl -s -o /dev/null -w '%{http_code}' -u "admin:wrongpasswordwrongpassword" -X POST "$URL/wp-json/sgap/v1/heartbeat")" "401"
 check "rss: unknown channel is 404" "$(curl -s -o /dev/null -w '%{http_code}' "$URL/sgap-feed/myspace/")" "404"
 HEADERS="$(curl -s -o /dev/null -D - -A 'facebookplatform/1.0 (+http://developers.facebook.com)' "$URL/go/$RSS_ID/")"
 check "rss: Publer scraper follows /go/" "$(echo "$HEADERS" | head -1 | awk '{print $2}')" "302"
