@@ -6,45 +6,48 @@
       "id": "site",
       "name": "steamgears.eu — site-optimering",
       "note": "roadmap S0–S4",
-      "next": "S0.2, S0.5, S0.6, S0.7 — config, rører ikke indhold",
-      "blocked_by": "S0.4 kræver én Redirection-gruppe (ejer)",
+      "next": "S2.1 hubs (/start-here/, /build/), derefter S1.3 kladde-triage",
+      "blocked_by": "5 vanity-301 (S0.4) kræver én Redirection-gruppe (ejer)",
       "modules": [
         {
           "id": "s0",
           "name": "S0 — brudt/akut",
-          "done": 0.6,
+          "done": 1.9,
           "total": 2.6,
           "unit": "d",
-          "note": "S0.1 + S0.3 + S0.8 udført; S0.4 (0,5 d) blokeret"
+          "note": "S0.1, S0.3, S0.8 + meta-/link-/alt-runde 1/11"
         },
         {
           "id": "s1",
           "name": "S1 — butik og indhold",
-          "done": 0,
+          "done": 0.4,
           "total": 4.5,
-          "unit": "d"
+          "unit": "d",
+          "note": "kladde-triage påbegyndt"
         },
         {
           "id": "s2",
           "name": "S2 — struktur og SEO",
-          "done": 0,
+          "done": 1.7,
           "total": 6,
-          "unit": "d"
+          "unit": "d",
+          "note": "24 meta-titler/beskrivelser + hub-arkitektur planlagt"
         },
         {
           "id": "s3",
           "name": "S3 — hygiejne",
-          "done": 0,
+          "done": 0.6,
           "total": 3,
-          "unit": "d"
+          "unit": "d",
+          "note": "39 alt-tekster + noindex på cookie-side"
         },
         {
           "id": "s4",
           "name": "S4 — salgsklar butik",
-          "done": 0.15,
+          "done": 1.4,
           "total": 5,
           "unit": "d",
-          "note": "S4.4 formular-del udført"
+          "note": "S4.4 formular-del + produkttekster"
         }
       ]
     },
@@ -99,16 +102,17 @@
     {
       "id": "links",
       "name": "Døde internlinks",
-      "next": "Ret linkene i library/dode-links-2026-11-01.md",
+      "verified": true,
+      "next": "Vedligehold: tjek nye indlæg mod live-URL'er",
       "blocked_by": null,
       "modules": [
         {
           "id": "fix",
           "name": "39 døde links på 15 live sider",
-          "done": 0,
+          "done": 39,
           "total": 39,
           "unit": "links",
-          "note": "kortlagt 1/11, 0 rettet"
+          "note": "42 rettelser i 15 indlæg, hvert linkmål crawlet igen"
         }
       ]
     }
@@ -149,6 +153,24 @@
       "after": 0,
       "delta": null,
       "basis": "0 af 39 links rettet"
+    },
+    {
+      "date": "2026-11-01",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 3.6,
+      "after": 28.4,
+      "delta": 24.8,
+      "basis": "6 af 21,1 d (S0 1,9/2,6 · S1 0,4/4,5 · S2 1,7/6 · S3 0,6/3 · S4 1,4/5)"
+    },
+    {
+      "date": "2026-11-01",
+      "project": "Døde internlinks",
+      "module": "daglig måling",
+      "before": 0,
+      "after": 100.0,
+      "delta": 100.0,
+      "basis": "39 af 39 links"
     }
   ]
 }

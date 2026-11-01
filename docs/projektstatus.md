@@ -22,10 +22,10 @@ Status pr. **2026-11-01** · beregnet af `projektstatus.py` · kilder: [`projekt
 
 | Projekt | Status i dag | Grundlag |
 | --- | --- | --- |
-| **steamgears.eu — site-optimering** *(roadmap S0–S4)* | **3,6 %** | 0,75 af 21,1 d (S0 0,6/2,6 · S1 0/4,5 · S2 0/6 · S3 0/3 · S4 0,15/5) |
+| **steamgears.eu — site-optimering** *(roadmap S0–S4)* | **28,4 %** | 6 af 21,1 d (S0 1,9/2,6 · S1 0,4/4,5 · S2 1,7/6 · S3 0,6/3 · S4 1,4/5) |
 | **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5) |
 | **SEO-indholdsproduktion** | **0 %** | 0 af 3 guides · drift: Daglig loop kører |
-| **Døde internlinks** | **0 %** | 0 af 39 links |
+| **Døde internlinks** | **100 %** | 39 af 39 links |
 <!-- AUTO:DAGLIG:END -->
 
 ## 2. Aktive projekter og hvad der blokerer
@@ -33,10 +33,10 @@ Status pr. **2026-11-01** · beregnet af `projektstatus.py` · kilder: [`projekt
 <!-- AUTO:BLOKERINGER:START -->
 | Projekt | Næste skridt | Blokering |
 | --- | --- | --- |
-| steamgears.eu — site-optimering (3,6 %) | S0.2, S0.5, S0.6, S0.7 — config, rører ikke indhold | S0.4 kræver én Redirection-gruppe (ejer) |
+| steamgears.eu — site-optimering (28,4 %) | S2.1 hubs (/start-here/, /build/), derefter S1.3 kladde-triage | 5 vanity-301 (S0.4) kræver én Redirection-gruppe (ejer) |
 | Dark academia-rebrand (63 %) | Batch 4 — mockups (~130 billeder) | Printify-adgang |
 | SEO-indholdsproduktion (0 %) | Skriv guide id 292 (men's steampunk essentials) | ingen |
-| Døde internlinks (0 %) | Ret linkene i library/dode-links-2026-11-01.md | ingen |
+| Døde internlinks (100 %) | Vedligehold: tjek nye indlæg mod live-URL'er | ingen |
 <!-- AUTO:BLOKERINGER:END -->
 
 ---
@@ -48,6 +48,8 @@ Nyeste først. Append-only — rækker må ikke slettes eller ændres.
 
 | Dato | Projekt | Modul | Før → Efter | Δ | Grundlag |
 | --- | --- | --- | --- | --- | --- |
+| 2026-11-01 | Døde internlinks | daglig måling | 0 % → 100 % | +100 | 39 af 39 links |
+| 2026-11-01 | steamgears.eu — site-optimering | daglig måling | 3,6 % → 28,4 % | +24,8 | 6 af 21,1 d (S0 1,9/2,6 · S1 0,4/4,5 · S2 1,7/6 · S3 0,6/3 · S4 1,4/5) |
 | 2026-11-01 | Døde internlinks | Døde internlinks (baseline) | — → 0 % | — | 0 af 39 links rettet |
 | 2026-11-01 | SEO-indholdsproduktion | Dagens TOP 3-guides (baseline) | — → 0 % | — | 0 af 3 guides publiceret |
 | 2026-11-01 | Dark academia-rebrand | Batch 1–4 (baseline) | — → 63 % | — | 8,5 af 13,5 t |
@@ -62,12 +64,12 @@ Manuel tabel — opdateres når roadmap-estimaterne ændres, ikke af scriptet.
 
 | Band | Estimat | Udført | Rest |
 | --- | --- | --- | --- |
-| S0 — brudt/akut | 2,6 d | 0,6 d (S0.1, S0.3, S0.8) | 2,0 d (heraf S0.4 0,5 d blokeret) |
-| S1 — butik og indhold | 4,5 d | 0 d | 4,5 d |
-| S2 — struktur og SEO | 6,0 d | 0 d | 6,0 d |
-| S3 — hygiejne | 3,0 d | 0 d | 3,0 d |
-| S4 — salgsklar butik | 5,0 d | 0,15 d (S4.4 formular-del) | 4,85 d |
-| **I alt** | **21,1 d** | **0,75 d** | **20,35 d** |
+| S0 — brudt/akut | 2,6 d | 1,9 d | 0,7 d (Health Check, Coming Soon, 5 vanity-301) |
+| S1 — butik og indhold | 4,5 d | 0,4 d | 4,1 d (Herbarium, kladde-triage, produktlink) |
+| S2 — struktur og SEO | 6,0 d | 1,7 d | 4,3 d (hubs, navigation, H1) |
+| S3 — hygiejne | 3,0 d | 0,6 d | 2,4 d (webp, designsider, plugins) |
+| S4 — salgsklar butik | 5,0 d | 1,4 d | 3,6 d (valuta, betaling, anmeldelser) |
+| **I alt** | **21,1 d** | **6,0 d** | **15,1 d** |
 
 Kilde: [`site-roadmap-2026-11-01.md`](site-roadmap-2026-11-01.md) §4 og
-[`library/butiksaudit-2026-11-01.md`](library/butiksaudit-2026-11-01.md).
+[`library/seo-runde-og-status-2026-11-01.md`](library/seo-runde-og-status-2026-11-01.md) §5 (målt 1/11).
