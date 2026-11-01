@@ -17,9 +17,9 @@ and how long each missing piece takes.
 - **The plugin publishes well when everything is healthy, and tells nobody when it isn't.** There is no
   failure email, no "queue is running dry" alert, no retry backoff, and no publish audit trail. Those are
   the four things standing between "works" and "set and forget".
-- **Estimated effort to a credible set-and-forget v1: 8–9 developer-days** (P0 + the cheap half of P1 +
-  test hygiene). Full parity with hosted schedulers, including analytics ingestion and evergreen
-  recycling, is **19–22 developer-days**, before external API approvals that take calendar weeks.
+- **Estimated effort to a credible set-and-forget v1: 11 developer-days** (all of P0, P1 without analytics,
+  and the two test-hygiene items). Full parity with hosted schedulers, including analytics ingestion and
+  evergreen recycling, is **18–21 developer-days**, before external API approvals that take calendar weeks.
 
 ---
 
@@ -222,7 +222,7 @@ runner). That is 2.0 d on top and is the "correct" long-term answer to P0.4 on l
 | P2.3 | Telegram channel posting | Token settings already exist; also gives P0.1 a free second alert channel | 0.5 d | — |
 | P2.4 | Etsy API import (OAuth + receipt sync) **or** remove the five Etsy settings and label the page "manual import" | The screen currently promises an integration that is not there | 2.5 d to build / 0.25 d to hide | Etsy app review |
 | P2.5 | Multi-language variants per post (one source post → per-locale captions) | Nobody in the market does this properly; WPML/Polylang make it feasible | 2.5 d | — |
-| **P2 total** | | | **4.5 d build / 2.25 d if Etsy is hidden** | |
+| **P2 total** | | | **7.0 d build / 4.75 d if Etsy is hidden** | |
 
 Not recommended: direct X posting ($0.20 per post with a URL makes link posts economically pointless),
 direct LinkedIn (vetted tier, closed permission), direct Google Business Profile (quota 0 until approved).
@@ -245,9 +245,9 @@ Threads and LinkedIn stay behind Publer.
 
 | Milestone | Scope | Effort | Calendar at ~half-time |
 | --- | --- | --- | --- |
-| **Set-and-forget v1** | P0 (4.0 d) + P1.1–P1.4, P1.6 (5.0 d) + P3.1–P3.2 (1.0 d) | **10 d** | ~3 weeks |
-| Set-and-forget v1 without backoff/audit log | P0.1, P0.2, P0.4 + P1.1, P1.3 | 3.5 d | ~1 week |
-| **Full parity with hosted schedulers** | v1 + P1.5 + P2.1–P2.3 + P3 | 19–21 d | ~6–8 weeks |
+| **Set-and-forget v1** | P0 (4.0 d) + P1.1–P1.4 and P1.6 (6.0 d) + P3.1–P3.2 (1.0 d) | **11 d** | ~3 weeks |
+| Set-and-forget v1 without backoff/audit log | P0.1, P0.2, P0.4 + P1.1, P1.3 | 3.0 d | ~1 week |
+| **Full parity with hosted schedulers** | v1 + P1.5 + P2.1–P2.3 + remaining P3 (+ P2.5 if wanted) | 18–21 d | ~6–8 weeks |
 | Channel expansion alone (Bluesky, Mastodon, Telegram) | P2.1–P2.3 | 2.0 d | ~3 days |
 | Command Center consumption of `/snapshot` (different repo) | read endpoint, show status, alert on stall | 1–2 d | — |
 
