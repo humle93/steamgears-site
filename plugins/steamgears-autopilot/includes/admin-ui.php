@@ -109,6 +109,12 @@ class SGAP_UI {
 .sgap .sgap-chat-form textarea{flex:1;border-radius:10px;border-color:#dccaa8;padding:9px 12px;resize:vertical;min-height:44px}
 .sgap .sgap-chat-form textarea:focus{border-color:var(--brass);box-shadow:0 0 0 1px var(--brass)}
 .sgap .sgap-chat-form .button{min-height:44px}
+.sgap .sgap-row label{display:inline-block;margin:0 10px 6px 0;vertical-align:top}
+.sgap .sgap-studio-img{display:block;max-width:100%;max-height:420px;border-radius:10px;border:1px solid var(--line);margin:6px 0 10px}
+.sgap .sgap-spin{animation:sgap-spin 1.2s linear infinite}
+.sgap .sgap-card.sgap-bad{border-top-color:var(--bad)}
+.sgap .sgap-studio-form input:not([type=checkbox]),.sgap .sgap-studio-form textarea,.sgap .sgap-studio-form select{border-radius:8px;border:1px solid #c3a65a;padding:6px 10px;min-height:38px;box-sizing:border-box}
+.sgap .sgap-studio-form input:not([type=checkbox]):focus,.sgap .sgap-studio-form textarea:focus{border-color:var(--brass);box-shadow:0 0 0 1px var(--brass)}
 @media (max-width:600px){.sgap .sgap-head{padding:12px 14px}.sgap .sgap-head h1{font-size:19px}.sgap .sgap-grid{grid-template-columns:1fr}.sgap .sgap-stat b{font-size:22px}.sgap .form-table{padding:4px 10px}}
 </style>';
     }

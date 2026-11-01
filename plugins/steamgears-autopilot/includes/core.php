@@ -279,12 +279,12 @@ class SGAP_Settings {
     ];
     /** Never echoed back to the browser; can be overridden by SGAP_<KEY> constants in wp-config.php. */
     const SECRET_KEYS = [
-        'publer_api_key','ai_api_key',
+        'publer_api_key','ai_api_key','image_api_key',
         'pinterest_token','instagram_token','telegram_bot_token','tiktok_token','youtube_token',
         'etsy_oauth_token','etsy_refresh_token','merchant_feed_secret'
     ];
     const TEXT_KEYS = [
-        'publer_workspace_id','publer_pinterest_board','channels','ai_model','ai_base_url',
+        'publer_workspace_id','publer_pinterest_board','channels','ai_model','ai_base_url','image_model','content_language',
         'telegram_chat_id','email_test_recipient','youtube_channel_id','reddit_username',
         'reddit_subreddit','etsy_shop_id','etsy_shipping_profile_id','etsy_return_policy_id','ai_mode'
     ];
@@ -298,7 +298,7 @@ class SGAP_Settings {
     const SECTIONS = [
         'General' => ['autopilot_enabled','full_auto_enabled','daily_cap','batch_size','quiet_start','quiet_end'],
         'Publer' => ['publish_mode','publer_api_key','publer_workspace_id','publer_pinterest_board','channels'],
-        'AI content' => ['ai_provider','ai_api_key','ai_model','ai_base_url','posts_per_day'],
+        'AI content' => ['ai_provider','ai_api_key','ai_model','ai_base_url','posts_per_day','content_language','image_model','image_api_key'],
         'Economics' => ['labor_rate','monthly_budget','target_roi','winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max'],
         'Etsy' => ['etsy_shop_id','etsy_oauth_token','etsy_refresh_token','etsy_shipping_profile_id','etsy_return_policy_id'],
         'Google Feed' => ['merchant_feed_secret']
@@ -315,7 +315,10 @@ class SGAP_Settings {
         'ai_provider' => 'AIMLAPI: key from aimlapi.com → Dashboard → API Keys; pay per use, many models with one key.',
         'ai_model' => 'Empty = claude-opus-5-5 for Anthropic, anthropic/claude-opus-5.5 for AIMLAPI. Required for another OpenAI-compatible API.',
         'ai_base_url' => 'Other OpenAI-compatible API only, e.g. https://api.openai.com/v1.',
-        'posts_per_day' => 'How many site posts/products the AI writes social posts for each day.'
+        'posts_per_day' => 'How many site posts/products the AI writes social posts for each day.',
+        'content_language' => 'Language of articles and guides from the Content Studio. Empty = English.',
+        'image_model' => 'AIMLAPI image model. Empty = bytedance/seedream-5-0-pro (about $0.045 per image). Cheaper: flux/schnell.',
+        'image_api_key' => 'Only needed when the AI provider is not AIMLAPI: an AIMLAPI key for images.'
     ];
 
     public static function get(string $key, $default = '') {
