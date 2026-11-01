@@ -51,10 +51,10 @@
 		<div class="wp-block-group ext-animate--on">
 <!-- wp:html -->
 <a class="sg-logo" href="https://steamgears.eu/" aria-label="Steamgears home">
-<img src="https://steamgears.juno.page/steamgears-cdn/logo-mark.png" alt="Steamgears gear logo" width="54" height="54">
+<img src="https://steamgears.eu/wp-content/uploads/2026/11/logo-mark.png" alt="Steamgears gear logo" width="54" height="54">
 <span class="sg-word">STEAM<b>GEARS</b></span>
 </a>
-<link rel="icon" type="image/png" href="https://steamgears.juno.page/steamgears-cdn/logo-mark.png">
+<link rel="icon" type="image/png" href="https://steamgears.eu/wp-content/uploads/2026/11/logo-mark.png">
 <!-- /wp:html -->
 <!-- /wp:group -->
 		</div>
@@ -792,7 +792,7 @@ footer a:hover {
 /* Hero */
 .sg-hero{position:relative;min-height:76vh;display:flex;align-items:center;justify-content:center;text-align:center;
   background:linear-gradient(180deg,rgba(14,11,12,.5) 0%,rgba(14,11,12,.74) 55%,#0e0b0c 100%),
-  url('https://steamgears.juno.page/steamgears-cdn/hero.webp') center/cover no-repeat;
+  url('https://steamgears.eu/wp-content/uploads/2026/11/hero.webp') center/cover no-repeat;
   border-bottom:2px solid var(--sg-gold)}
 .sg-hero-inner{max-width:900px;padding:110px 24px 90px;margin:0 auto}
 .sg-hero .sg-eyebrow{color:var(--sg-gold);letter-spacing:.35em;text-transform:uppercase;font-size:13px;font-weight:700;margin-top:18px}
@@ -1353,35 +1353,31 @@ footer.wp-block-template-part {
   .wp-block-navigation__responsive-container-open svg { width: 20px; height: 20px; }
 }
 </style>
-
-<!-- wp:html -->
-<!-- og:image fallback (Rank Math global indstilling mangler) -->
-<meta property="og:image" content="https://steamgears.juno.page/steamgears-cdn/logo-mark.png" />
-<meta property="og:image:width" content="512" />
-<meta property="og:image:height" content="512" />
-<meta name="twitter:image" content="https://steamgears.juno.page/steamgears-cdn/logo-mark.png" />
 <!-- /wp:html -->
 
 
 
-<!-- GA4 e-commerce fallback (Juno) — FJERNES når GA4 Event-tag er published i GTM-54M3JCPM -->
+
+<!-- Microsoft Clarity (Juno) — consent-gated som GA4-shimmen -->
 <script>
 (function(){
-  var MEAS='G-3MYLFKY8MY';
-  var EC={view_item:1,view_item_list:1,add_to_cart:1,remove_from_cart:1,view_cart:1,begin_checkout:1,add_shipping_info:1,add_payment_info:1,purchase:1,select_item:1,select_content:1,select_promotion:1,view_promotion:1,search:1};
-  var buf=[],seen=0;
-  function consented(){try{return (typeof wp_has_consent==='function')?!!wp_has_consent('statistics'):true;}catch(e){return true;}}
-  function fwd(ev,data){try{var p=Object.assign({},data||{});p.send_to=MEAS;window.gtag('event',ev,p);}catch(e){}}
-  function flush(){if(!consented())return;if(typeof window.gtag!=='function')return;while(buf.length){var b=buf.shift();fwd(b[0],b[1]);}}
-  function pick(a){if(a&&typeof a==='object'&&typeof a.event==='string'&&EC[a.event])recv(a.event,a.ecommerce);}
-  function recv(ev,data){if(buf.length>=14)return;buf.push([ev,data]);flush();}
-  try{new Image().src='/wp-content/juno-shim-check.js?cb='+Date.now();}catch(e){}
-  setInterval(function(){var dl=window.dataLayer||[];for(;seen<dl.length;seen++){try{pick(dl[seen]);}catch(e){}}flush();},400);
-  ['wp_consent_statistics','wp_consent_all','wp_consent_type_changed'].forEach(function(evt){document.addEventListener(evt,flush);});
+  var PID = "z0dc1howvk";
+  function ok(){ try { return typeof wp_has_consent === "function" && wp_has_consent("statistics"); } catch(e){ return false; } }
+  function loadClarity(){
+    if (window.__sgClarityLoaded) return; window.__sgClarityLoaded = 1;
+    var c = window.clarity = window.clarity || [];
+    if (!c.loaded) {
+      var a = c.push = c.push || function(){ (c.q = c.q || []).push(arguments); };
+      var t = document.createElement("script"); t.async = 1; t.src = "https://www.clarity.ms/tag/" + PID;
+      var y = document.getElementsByTagName("script")[0]; y.parentNode.insertBefore(t, y);
+    }
+    try { if (window.clarity && window.clarity.q) { /* clarity('consent') kaldes efter load */ } } catch(e){}
+    var n = 0, iv = setInterval(function(){ try { if (window.clarity && typeof window.clarity === "function") { clearInterval(iv); window.clarity("consent", true); } } catch(e){} if (++n > 50) clearInterval(iv); }, 200);
+  }
+  function grant(){ if (ok()) loadClarity(); }
+  grant();
+  document.addEventListener("wp_listen_for_consent_change", function(e){ try { var d = e.detail || {}; if (d.statistics === "allow") grant(); } catch(e2){} });
+  var n = 0, iv = setInterval(function(){ grant(); if (++n > 40) clearInterval(iv); }, 500);
 })();
 </script>
-<!-- /GA4 e-commerce fallback -->
-
-
-
 
