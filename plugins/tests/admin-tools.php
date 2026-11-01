@@ -93,7 +93,7 @@ $fail = 0;
 function t($name, $ok, $info = null) { global $fail; echo ($ok ? 'PASS ' : 'FAIL ') . $name . ($info !== null ? ' — ' . substr(is_string($info) ? $info : wp_json_encode($info), 0, 300) : '') . "\n"; if (!$ok) $fail = 1; }
 function run($n, $in = null) { $a = wp_get_ability("steamgears-autopilot/" . $n); if (!$a) return new WP_Error("missing", "ability $n not registered"); return $a->execute($in ?? ($a->get_input_schema() ? [] : null)); }
 $names = array_map(fn($a) => $a->get_name(), array_filter(wp_get_abilities(), fn($a) => str_starts_with($a->get_name(), 'steamgears-autopilot/')));
-t('25 autopilot abilities registered', count($names) === 25, count($names));
+t('29 autopilot abilities registered', count($names) === 29, count($names));
 foreach ($names as $n) { $m = wp_get_ability($n)->get_meta(); if (empty($m['mcp']['public'])) t("$n public for MCP", false); }
 $r = run('get-settings'); t('get-settings groups + hides secrets', isset($r['General']['quiet_start']) && $r['AI content']['ai_api_key']['value'] === 'set', $r['AI content']['ai_api_key'] ?? $r);
 $r = run('update-settings', ['settings' => ['quiet_start' => 0, 'quiet_end' => '0', 'full_auto_enabled' => false, 'daily_cap' => '12']]); t('update-settings changes + validates', get_option('sgap_quiet_start') == 0 && get_option('sgap_daily_cap') == 12 && get_option('sgap_full_auto_enabled') === 'no', $r);

@@ -22,7 +22,9 @@ class SGAP_Setup {
         'monthly_budget' => 'Monthly budget', 'target_roi' => 'Target ROI %', 'winner_min_clicks' => 'Winner after clicks', 'loser_min_clicks' => 'Loser after clicks',
         'repost_cooldown_days' => 'Days before a page is promoted again', 'repost_max' => 'Max reposts', 'merchant_feed_secret' => 'Product feed secret',
         'etsy_shop_id' => 'Etsy shop ID', 'etsy_oauth_token' => 'Etsy OAuth token', 'etsy_refresh_token' => 'Etsy refresh token',
-        'etsy_shipping_profile_id' => 'Etsy shipping profile', 'etsy_return_policy_id' => 'Etsy return policy'
+        'etsy_shipping_profile_id' => 'Etsy shipping profile', 'etsy_return_policy_id' => 'Etsy return policy',
+        'auto_images' => 'AI photos for Instagram & Pinterest', 'auto_seo' => 'SEO meta for new posts & products', 'articles_per_week' => 'SEO articles per week',
+        'auto_publish_articles' => 'Publish weekly articles automatically', 'weekly_report' => 'Weekly e-mail report', 'rescue_hosts' => 'Copy images from these servers'
     ];
 
     /** Settings page tabs: id => [label, icon, keys]. */
@@ -32,6 +34,7 @@ class SGAP_Setup {
         'publishing' => ['Publishing', 'megaphone', ['publish_mode', 'publer_api_key', 'publer_workspace_id', 'publer_pinterest_board']],
         'schedule' => ['Schedule & limits', 'clock', ['quiet_start', 'quiet_end', 'daily_cap', 'batch_size', 'repost_cooldown_days']],
         'shop' => ['Shop & feeds', 'cart', ['merchant_feed_secret', 'etsy_shop_id', 'etsy_oauth_token', 'etsy_refresh_token', 'etsy_shipping_profile_id', 'etsy_return_policy_id']],
+        'automation' => ['Automation', 'update-alt', ['auto_images', 'auto_seo', 'articles_per_week', 'auto_publish_articles', 'weekly_report', 'rescue_hosts']],
         'advanced' => ['Economics', 'chart-line', ['labor_rate', 'monthly_budget', 'target_roi', 'winner_min_clicks', 'loser_min_clicks', 'repost_max']]
     ];
 

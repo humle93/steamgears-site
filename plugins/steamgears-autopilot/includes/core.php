@@ -44,7 +44,13 @@ class SGAP_Install {
         'sgap_posts_per_day' => 2,
         'sgap_channels' => 'facebook,instagram,pinterest',
         'sgap_ai_provider' => 'anthropic',
-        'sgap_publish_mode' => 'rss'
+        'sgap_publish_mode' => 'rss',
+        'sgap_auto_images' => 'yes',
+        'sgap_auto_seo' => 'yes',
+        'sgap_auto_publish_articles' => 'no',
+        'sgap_weekly_report' => 'yes',
+        'sgap_articles_per_week' => 0,
+        'sgap_rescue_hosts' => 'steamgears.juno.page'
     ];
 
     public static function activate(): void {
@@ -55,6 +61,9 @@ class SGAP_Install {
         self::clear_legacy_cron();
         foreach ([self::CLEANUP_CRON, self::PUBLISH_CRON, self::GENERATE_CRON] as $hook) {
             wp_clear_scheduled_hook($hook);
+        }
+        if (class_exists('SGAP_Auto')) {
+            SGAP_Auto::clear();
         }
         delete_option('rewrite_rules'); // drop the /go/ rule; WP rebuilds on next request
     }
@@ -271,11 +280,11 @@ register_deactivation_hook(SGAP_FILE, ['SGAP_Install', 'deactivate']);
 
 /* ---------------- SETTINGS ---------------- */
 class SGAP_Settings {
-    const BOOL_KEYS = ['autopilot_enabled', 'full_auto_enabled'];
+    const BOOL_KEYS = ['autopilot_enabled', 'full_auto_enabled', 'auto_images', 'auto_seo', 'auto_publish_articles', 'weekly_report'];
     const HOUR_KEYS = ['quiet_start', 'quiet_end'];
     const INT_KEYS = [
         'daily_cap','batch_size','labor_rate','monthly_budget','target_roi',
-        'winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max','posts_per_day'
+        'winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max','posts_per_day','articles_per_week'
     ];
     /** Never echoed back to the browser; can be overridden by SGAP_<KEY> constants in wp-config.php. */
     const SECRET_KEYS = [
@@ -284,7 +293,7 @@ class SGAP_Settings {
         'etsy_oauth_token','etsy_refresh_token','merchant_feed_secret'
     ];
     const TEXT_KEYS = [
-        'publer_workspace_id','publer_pinterest_board','channels','ai_model','ai_base_url','image_model','content_language',
+        'publer_workspace_id','publer_pinterest_board','channels','ai_model','ai_base_url','image_model','content_language','rescue_hosts',
         'telegram_chat_id','email_test_recipient','youtube_channel_id','reddit_username',
         'reddit_subreddit','etsy_shop_id','etsy_shipping_profile_id','etsy_return_policy_id','ai_mode'
     ];
@@ -325,7 +334,13 @@ class SGAP_Settings {
         'batch_size' => 'How many due posts are released per 15-minute run.',
         'quiet_start' => 'No posts are released from this hour …',
         'quiet_end' => '… until this hour (site time).',
-        'repost_cooldown_days' => 'A page is not promoted again within this many days.'
+        'repost_cooldown_days' => 'A page is not promoted again within this many days.',
+        'auto_images' => 'Instagram and Pinterest posts without a photo get the page\'s featured image or an AI photo (AIMLAPI, about $0.045 each).',
+        'auto_seo' => 'New posts and products without a Rank Math description get a focus keyword, meta title and description from the AI when published.',
+        'articles_per_week' => 'The AI picks topics the site does not cover yet and writes this many SEO articles a week. 0 = off.',
+        'auto_publish_articles' => 'Off: weekly articles wait as drafts for you. On: they are published straight away.',
+        'weekly_report' => 'A short e-mail every week: posts, clicks, orders per channel and anything that needs you.',
+        'rescue_hosts' => 'Images on these servers are copied into your media library and every link is rewritten (comma-separated).'
     ];
 
     public static function get(string $key, $default = '') {
@@ -1258,6 +1273,7 @@ class SGAP_Admin {
             . '</div>';
 
         SGAP_Setup::checklist_card();
+        SGAP_Rescue::card();
 
         // Tiles
         $t = $stats['tiles'];
@@ -1279,6 +1295,7 @@ class SGAP_Admin {
         echo '<p class="description" style="margin-top:0">Ask how things are going or tell the AI what to do: write posts, approve, release the queue, change settings.</p>'
             . '<p><a class="button button-primary" href="' . esc_url(admin_url('admin.php?page=sgap-chat')) . '"><span class="dashicons dashicons-format-chat"></span>Open AI Chat</a></p>';
         SGAP_UI::card_close();
+        SGAP_Auto::health_card();
         self::feeds_panel();
         self::keys_panel();
         SGAP_Updater::panel();
