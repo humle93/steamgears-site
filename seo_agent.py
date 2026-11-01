@@ -15,6 +15,11 @@ def get_gemini_key():
     key = os.getenv("GEMINI_API_KEY", "")
     if key:
         return key
+    if os.path.exists(".env"):
+        with open(".env", "r", encoding="utf-8") as ef:
+            m = re.search(r"(AIza[0-9A-Za-z\-_]{35})", ef.read())
+            if m:
+                return m.group(1)
     for path in glob.glob(os.path.expanduser("~/.gemini/**/*"), recursive=True) + [os.path.expanduser("~/.gemini/.env"), os.path.expanduser("~/.bashrc")]:
         if os.path.isfile(path):
             try:

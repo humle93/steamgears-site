@@ -1,4 +1,22 @@
+<<<<<<< HEAD
 .env
 *.pyc
 __pycache__/
 steamgears_auth.json
+=======
+# Secrets never belong in this public repo
+.env
+.env.*
+*.pem
+*.key
+
+# Runtime / build files
+__pycache__/
+*.pyc
+*.db
+*.db-*
+backups/
+venv/
+node_modules/
+.DS_Store
+>>>>>>> 679df3c992389a5c8465b4706c9e51fdafb9b94a
