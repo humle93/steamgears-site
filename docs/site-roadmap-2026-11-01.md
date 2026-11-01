@@ -235,6 +235,10 @@ plugin P0.1–P0.3, P0.5 ──► parallel, different repo, nothing blocks them
 ## 8. Change log for this document
 
 | Date | Change |
+|---|---|
+| 2026-11-01 (SEO round) | Autonomous SEO pass executed and measured across all 108 sitemap URLs: 18 pages got new SEO titles/descriptions, 5 category terms got descriptions, `/opt-out-preferences/` set to noindex, all 24 dead link targets rewritten in content (42 edits in 15 posts), and 39 product images got alt text matching the new product names. Dead internal links: 39 → 0. Titles over 62 chars: 19 → 0. Missing meta descriptions: 3 → 0. Performance diagnosed but not fixed: 458 KB product HTML, 151 KB inline CSS, 105 script tags, W3TC minify/lazyload/db-cache off and no MCP write path. Module status: S0 73 %, S1 9 %, S2 29 %, S3 20 %, S4 27 % — 6,0 of 21,1 days done. Full detail in [library/seo-runde-og-status-2026-11-01.md](library/seo-runde-og-status-2026-11-01.md). |
+
+| Date | Change |
 | --- | --- |
 | 2026-11-01 | First version. Created from the live MCP audit plus the plugin roadmap import. Actioned in the same change: **S0.1** (security case closed), **S0.3** (CI to PHP 8.5 / WP 7.1), **S0.8** (W3TC purge, verified). **S0.4 attempted and blocked** — Redirection has no group to file into, and no MCP path can create one (§4 S0.4). A full internal-link crawl then found **39 dead links across 15 live pages**, catalogued in [library/dode-links-2026-11-01.md](library/dode-links-2026-11-01.md) — this is the bigger half of S0.4 and does not need Redirection. Remaining in S0: **1.5 d** of work plus the S0.4 unblock.
 | 2026-11-01 (later) | Added band **S4 — butik og salgsklar (5.0 d)** from the store audit in [library/butiksaudit-2026-11-01.md](library/butiksaudit-2026-11-01.md). Two structural findings: the store prices in **USD**, and Complianz runs a **US opt-out** consent model in front of EU customers. Shipped in the same change: **`/right-of-withdrawal/`** (procedure + EU model form, linked from the refund policy) and a corrected refund-timing clause. Blocking on the owner for: CVR, registered name, address, phone, VAT/OSS status, and the currency decision — see the audit’s closing list.

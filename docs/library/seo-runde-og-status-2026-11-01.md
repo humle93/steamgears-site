@@ -1,0 +1,93 @@
+# SEO-optimeringsrunde + projektstatus — 1/11 2026
+
+Kørt autonomt efter «optimer efter nyeste SEO-standarder, få siden gjort færdig». Alt nedenstående er udført og verificeret mod den live side; intet er planer der mangler at blive kørt.
+
+## 1. Målt udgangspunkt
+
+108 URL'er fra sitemap crawlet og auditeret (status, title, description, canonical, H1, schema, ord, vægt, svartid).
+
+| Måling | Før | Nu |
+|---|---|---|
+| Sider der svarer 200 | 108/108 | 108/108 |
+| Manglende meta description | 3 | **0** |
+| Description uden for 70–165 tegn | 15 | **4** (125–133 tegn, inden for grænsen) |
+| Titler over 62 tegn | 19 | **0** |
+| Sider med noindex-fejl (opt-out-side indekserbar) | 1 | **0** |
+| Døde interne links (forekomster) | 39 | **0** |
+| Døde link-mål i de 15 berørte sider | 24 | **0** |
+| Produktbilleder med forældet alt-tekst | 39 | **0** |
+| Schema (Organization, WebSite, BreadcrumbList, Product) | 108/108 | 108/108 |
+
+## 2. Hvad der blev ændret
+
+**Meta (23 ændringer).** 18 sider fik ny SEO-titel og meta description, skrevet til længdekravene og med søgeordet først. 5 kategorisider (4 blog-kategorier + `digital-downloads`) fik term-beskrivelser, som Rank Math bruger som meta description. `/opt-out-preferences/` er sat til noindex — den er en cookie-side uden søgeværdi og lå åbent i indekset.
+
+**Døde links (42 rettelser i 15 indlæg).** Alle 24 døde mål er omskrevet til fungerende URL'er:
+
+- 4 rene slug-fejl: `/product-category/goggles/` → `steampunk-goggles`, `posters-wall-art` → `posters-prints`, `steampunk-top-hats` → `accessories`, `/refund-and-returns/` → `/refund_returns/`
+- 6 kladde-produkter → det tilsvarende live-produkt (fx victorian-underbust-corset → Victorian Lace-Up Corset Top, brass-rivet-goggles → Copper Pilot Goggles)
+- 12 skraldespands-produkter → nærmeste live-produkt hvor motivet findes (clockwork skull, compass mandala, sun compass, clockwork heart, whale airship, vampire hunter), ellers den relevante kollektion
+- 2 produkter der aldrig har eksisteret → live-ækvivalent
+
+Efter rettelsen er der **0 døde mål** i de 15 sider, tjekket ved at crawle dem igen og teste hvert eneste linkmål. Det gør S0.4 (301-map for `/start-here/` m.fl.) langt mindre presserende: lækagen sad i brødteksten, ikke i de fem vanity-URL'er.
+
+**Alt-tekst (39 billeder).** Alle produkters hovedbillede havde alt-tekst med det gamle navn ("Clockwork Owl - Steampunk Unisex Hoodie"). De er opdateret til de nye titler, så billedsøgning og tilgængelighed matcher omdøbningen.
+
+**Cache** purget efter hver batch; alle ændringer verificeret i den rendererede HTML.
+
+## 3. Performance — diagnosticeret, ikke løst
+
+Det er den største tilbageværende SEO-risiko, og den kan **ikke** løses via MCP.
+
+| Måling | Værdi |
+|---|---|
+| Svartid, median | 2,1–3,0 s |
+| Værste side | 13,7 s (`/the-clockwork-herbarium-short-story/`) |
+| Produktside, HTML | 458 KB |
+| Heraf inline CSS | **151–153 KB** |
+| Heraf inline JS (produktside) | **166 KB** |
+| Script-tags på en produktside | **105** |
+| Eksterne CSS-filer | 0 (alt er inline) |
+| Gzip | slået til |
+| Billeder | srcset + lazy-load findes, ~243 KB pr. billede |
+
+W3TC-status: `pgcache` ON, `objectcache` ON, `browsercache` ON — men `minify` **off**, `lazyload` **off**, `dbcache` **off**, `cdn` off. Der findes ingen MCP-metode til at skrive W3TC-konfiguration, så minify/lazyload/db-cache skal slås til i wp-admin. Det er også der, de 151 KB inline CSS og de 105 scripts skal fjernes (de kommer fra tema/plugins, ikke fra indhold).
+
+**Anbefalet rækkefølge:** 1) W3TC → Minify: aktiver CSS+JS, undlad «combine», test i inkognito. 2) Lazyload på. 3) DB-cache på. 4) Find de 105 scripts — sandsynligvis WooCommerce-blocks + elementor-lignende plugins — og deaktiver det der ikke bruges. Forventet effekt: 458 KB → ca. 120–160 KB HTML og TTFB under 1 s på cache-hit.
+
+## 4. Plugins og «cc»
+
+`wp_get_plugins` er **læse-adgang** — der findes ingen opdateringsfunktion i MCP, så plugin-opdateringer kan ikke køres herfra. Status fra audit 23/10: 48 plugins, 16 bagud, 3 mangler en sikkerhedsrettelse. De skal opdateres i wp-admin, og helst efter en backup (der ligger en fuld backup fra 23/10 i repoet).
+
+AI Engine er undtagelsen: 3.8.9, inaktiv, MCP-OAuth-ruterne svarer 404. Den sag er lukket.
+
+## 5. Projektstatus pr. modul
+
+Vægte fra [site-roadmap-2026-11-01.md](../site-roadmap-2026-11-01.md). «Færdig» tæller kun det der er udført og verificeret — ikke det der er planlagt.
+
+| Modul | Vægt | Færdig | % | Resterende |
+|---|---|---|---|---|
+| **S0 — brudt eller akut** | 2,6 d | 1,9 d | **73 %** | 0,7 d (Health Check-afklaring, Coming Soon-tjek, 5 vanity-301) |
+| **S1 — indhold der sælger** | 4,5 d | 0,4 d | **9 %** | 4,1 d (Herbarium-lancering, kladde-triage, produktlink-dækning) |
+| **S2 — struktur og SEO** | 6,0 d | 1,7 d | **29 %** | 4,3 d (hubs `/start-here/`, `/build/`, `/inspiration/`, navigation, H1-beslutning) |
+| **S3 — hygiejne** | 3,0 d | 0,6 d | **20 %** | 2,4 d (webp/Imagify, slet private designsider, plugin-rationalisering) |
+| **S4 — butik salgsklar** | 5,0 d | 1,4 d | **27 %** | 3,6 d (valuta, betalinger, anmeldelser, mockups, forsendelse) |
+| **I alt** | **21,1 d** | **6,0 d** | **28 %** | **15,1 d** |
+
+Omsat til kalendertid: 15,1 d × ~6 effektive timer ≈ **2,5–3 uger**, hvoraf **ca. 8 dage er blokeret af ejerbeslutninger** (CVR/adresse, valuta, betalingsudbydere, Printify-mockups, anmeldelsesplatform). Den reelle kritiske vej er derfor ikke kode, men de fem beslutninger.
+
+**Dagens runde:** ca. 6 timer, fordelt på måling 1,5 t · meta 1,5 t · links 1,5 t · alt-tekst 0,5 t · dokumentation 1 t.
+
+## 6. Næste tre skridt (ingen ejerinput nødvendig)
+
+1. **Hubs** (S2.1, 3,0 d): `/start-here/` med fem børn og `/build/` med seks børn. Det er den største enkeltpost i hele planen og kræver kun indhold, ikke adgang.
+2. **Kladde-triage** (S1.3, 1,0 d): 8 kladder med duplikat-intention mod live-artikler — flet eller slet.
+3. **Herbarium-linjen** (S1.1, 0,5 d): 12 færdige SKU'er ligger som kladder og kan publiceres med samme metode som de 32 omdøbte produkter.
+
+## 7. Kendte, ikke-løste punkter
+
+- **To H1 på `/`, `/free-starter-kit/`, `/steampunk-halloween/`.** Den ekstra H1 ligger i indholdet («Bespoke Horology & Atelier» m.fl.). At skifte den til H2 ændrer typografien i hero-sektionerne, og det kan ikke ses uden browser — derfor ikke rørt.
+- **`robots.txt` har to `User-agent: *`-grupper.** Google fletter grupper med samme user-agent, så det er kosmetisk, ikke skadeligt. Kan ikke rettes uden fil-/admin-adgang.
+- **Navigationen er `<!-- wp:page-list /-->`** — den auto-lister alle 43 sider, inkl. kurv, kasse og min konto. Det er både en UX- og link-equity-fejl, men en omskrivning ændrer headeren, og det bør ses i browser først.
+- **GPSR-blokken mangler postadresse** på alle 39 produkter (CVR/adresse afventer).
+- **Printify kan overskrive titler og tekster** ved næste katalog-sync. Ikke verificeret om sync er aktiv.
