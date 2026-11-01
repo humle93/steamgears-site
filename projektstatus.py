@@ -33,6 +33,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 STATE_PATH = ROOT / "projektstatus.json"
 DOC_PATH = ROOT / "docs" / "projektstatus.md"
+BRIEF_DIR = ROOT / "docs" / "daily-briefs"
+BRIEF_MARKERS = ("<!-- AUTO:PROJEKTSTATUS:START -->", "<!-- AUTO:PROJEKTSTATUS:END -->")
 BACKUP_DIR = ROOT / ".projektstatus-backups"
 LOCK_PATH = ROOT / ".projektstatus.lock"
 
@@ -318,10 +320,10 @@ def validate_history(state: dict, project_names: set, today: str) -> list[str]:
 # --------------------------------------------------------------------------- rendering
 
 
-def render_daily(state: dict, computed: dict, today: str) -> str:
+def render_daily(state: dict, computed: dict, today: str, json_href: str = "../projektstatus.json") -> str:
     lines = [
         "",
-        f"Status pr. **{today}** · beregnet af `projektstatus.py` · kilder: [`projektstatus.json`](../projektstatus.json)",
+        f"Status pr. **{today}** · beregnet af `projektstatus.py` · kilder: [`projektstatus.json`]({json_href})",
         "",
         "| Projekt | Status i dag | Grundlag |",
         "| --- | --- | --- |",
@@ -698,6 +700,73 @@ def cmd_update(
     return 0
 
 
+def cmd_brief(
+    state_path: Path = STATE_PATH,
+    brief_dir: Path = BRIEF_DIR,
+    today: str | None = None,
+    dry_run: bool = False,
+) -> int:
+    """Skriver dagens procentstatus ind i dagens daily brief (samme AUTO-princip)."""
+    today = today or today_iso()
+    state = load_json(state_path)
+    errors = validate_state(state, today)
+    if errors:
+        return report_errors(errors, "projektstatus.json er ikke gyldig")
+
+    computed = compute(state)
+    body = render_daily(state, computed, str(state.get("updated") or today), json_href="../../projektstatus.json")
+    start, end = BRIEF_MARKERS
+    section = f"\n## Projektstatus — procentvis fremgang\n\n{start}{body}{end}\n"
+
+    brief_path = brief_dir / f"{today}.md"
+    if brief_path.exists():
+        text = read_text(brief_path)
+        if text.count(start) == 1 and text.count(end) == 1:
+            merged = replace_brief_region(text, body)
+        elif start in text or end in text:
+            return report_errors(
+                [f"{brief_path.name} har kun den ene af brief-markørerne — ret dem manuelt først"],
+                "brief-markørerne er i ubalance",
+            )
+        else:
+            merged = text.rstrip("\n") + "\n" + section
+    else:
+        merged = f"# Daily Brief — {today}\n" + section
+
+    if dry_run:
+        print(merged)
+        return 0
+
+    try:
+        backup_file(brief_path, None)
+        atomic_write(brief_path, merged)
+        written = read_text(brief_path)
+        if written.count(start) != 1 or written.count(end) != 1:
+            raise Guard("skrev brief uden entydige markører — rullet tilbage")
+        if extract_brief_region(written).strip() != body.strip():
+            raise Guard("brief-verifikation fejlede: indholdet matcher ikke beregningen")
+    except Guard as exc:
+        return report_errors([str(exc)], "kunne ikke skrive dagens brief")
+
+    print(f"[OK] projektstatus skrevet ind i {brief_path.relative_to(ROOT) if brief_path.is_relative_to(ROOT) else brief_path}")
+    for project in state["projects"]:
+        info = computed[str(project["id"])]
+        print(f"  {info['name']}: {fmt_pct(info['pct'])}")
+    return 0
+
+
+def extract_brief_region(text: str) -> str:
+    start, end = BRIEF_MARKERS
+    return text[text.index(start) + len(start) : text.index(end)]
+
+
+def replace_brief_region(text: str, body: str) -> str:
+    start, end = BRIEF_MARKERS
+    begin = text.index(start) + len(start)
+    finish = text.index(end)
+    return text[:begin] + body + text[finish:]
+
+
 class _nullcontext:
     def __enter__(self):
         return self
@@ -753,7 +822,9 @@ def cmd_selftest(today: str | None = None) -> int:
     )
     case(
         "100 % uden verified fanges",
-        lambda: expect_error(_with_module(mutated(), "links", "fix", {"done": 39}), "verified"),
+        lambda: expect_error(
+            _with_module(mutated(), "links", "fix", {"done": 39}, project_patch={"verified": False}), "verified"
+        ),
     )
     case(
         "100 % med verified accepteres",
@@ -862,7 +933,22 @@ def cmd_selftest(today: str | None = None) -> int:
     case("rendering bevarer manuel tekst", roundtrip_preserves_text)
     case("manipuleret dokument rulles tilbage", tampered_document_caught)
     case("ugyldig JSON fanges", broken_json_caught)
+    def brief_roundtrip() -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            brief_dir = Path(tmp)
+            path = brief_dir / f"{today}.md"
+            path.write_text("# Daily Brief — test\n\nEksisterende tekst.\n", encoding="utf-8")
+            assert cmd_brief(STATE_PATH, brief_dir, today) == 0, "brief-skrivning fejlede"
+            first = path.read_text(encoding="utf-8")
+            assert "Eksisterende tekst." in first, "eksisterende brief-tekst blev overskrevet"
+            assert cmd_brief(STATE_PATH, brief_dir, today) == 0, "anden brief-kørsel fejlede"
+            assert path.read_text(encoding="utf-8") == first, "brief-skrivning er ikke idempotent"
+            broken = first.replace(BRIEF_MARKERS[1], "")
+            path.write_text(broken, encoding="utf-8")
+            assert cmd_brief(STATE_PATH, brief_dir, today) == 1, "ubalancerede brief-markører blev ikke afvist"
+
     case("end-to-end: update er idempotent og checker bagefter", end_to_end)
+    case("brief: bevarer tekst, er idempotent og afviser ubalancerede markører", brief_roundtrip)
 
     failed = [r for r in results if not r[1]]
     for name, ok, note in results:
@@ -928,6 +1014,7 @@ def main(argv: list[str] | None = None) -> int:
     group.add_argument("--check", action="store_true", help="valider og tjek for drift, skriv intet")
     group.add_argument("--dry-run", action="store_true", help="vis hvad --update ville gøre")
     group.add_argument("--update", action="store_true", help="beregn, skriv og verificer")
+    group.add_argument("--brief", action="store_true", help="skriv dagens status ind i dagens daily brief")
     parser.add_argument("--today", default=None, help="ISO-dato der bruges som 'i dag' (til test)")
     args = parser.parse_args(argv)
 
@@ -938,6 +1025,8 @@ def main(argv: list[str] | None = None) -> int:
             return cmd_check(today=args.today)
         if args.dry_run:
             return cmd_update(today=args.today, dry_run=True)
+        if args.brief:
+            return cmd_brief(today=args.today)
         return cmd_update(today=args.today)
     except Guard as exc:
         print(f"[FEJL] {exc}", file=sys.stderr)

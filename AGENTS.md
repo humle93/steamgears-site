@@ -56,10 +56,12 @@ Reglen over holdes automatisk, så lidt som muligt afhænger af hukommelse:
   AUTO-blok er forbudt**, og `--check` fejler hvis den ændres — ret i stedet JSON-filen.
 - Sådan opdateres en procent: ret `done`/`total` i `projektstatus.json`, kør `python3 projektstatus.py --update`.
   Scriptet beregner procenter, skriver filerne og tilføjer historik-rækken selv.
+- `python3 projektstatus.py --brief` skriver samme status ind i `docs/daily-briefs/<dato>.md` (markør
+  `AUTO:PROJEKTSTATUS`), så procenterne også står i det brief der læses hver dag. CI kører den efter `--update`.
 
 **Værn før skrivning** (`--selftest`, `--check`):
 
-- 21 selftest-fixtures bekræfter at værnene fanger fejl, før noget installeres eller skrives.
+- 22 selftest-fixtures bekræfter at værnene fanger fejl, før noget installeres eller skrives.
 - Skema og typer, `done <= total`, `total > 0`, duplikerede id'er, blandede enheder i samme projekt,
   manglende enhed/grundlag, internationally gyldige datoer og ingen dato i fremtiden.
 - **100 % kræver `"verified": true`** — ellers er tallet en påstand, ikke en status.

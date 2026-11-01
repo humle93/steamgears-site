@@ -69,6 +69,9 @@ jobs:
       - name: Efterkontrol af det der faktisk ligger på disken
         run: python3 projektstatus.py --check
 
+      - name: Skriv status ind i dagens daily brief
+        run: python3 projektstatus.py --brief
+
       - name: Status til job-summary
         run: |
           {
@@ -81,7 +84,7 @@ jobs:
         run: |
           git config user.name "Steamgears Status Bot"
           git config user.email "bot@steamgears.eu"
-          git add projektstatus.json docs/projektstatus.md
+          git add projektstatus.json docs/projektstatus.md docs/daily-briefs/
           if git diff --staged --quiet; then
             echo "Ingen ændringer i dag — intet at committe."
             exit 0
