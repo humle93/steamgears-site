@@ -8,6 +8,8 @@ Versionstyring for **steamgears.eu**-assets. WordPress-kernen og databasen ligge
 - `docs/` — AdSense-setup, konkurrentnoter, SEO-handlingsplan 24/10 (PDF-audit gap-analyse), keyword- & konkurrent-scan, SEO-research-log, daily brief.
 - `docs/site-roadmap-2026-11-01.md` — samlet optimeringsplan for sitet (S0–S3) med plugin-roadmap'en importeret i §5.
 - `docs/library/indholdsaudit-2026-11-01.md` — status på posts, sider og produkter målt via MCP 1/11 2026.
+- `docs/projektstatus.md` — **daglig procentstatus** på hvert aktivt projekt + log over fremgang pr. modul. Skrives af `projektstatus.py` ud fra `projektstatus.json` (procenter beregnes, indtastes ikke) og kører automatisk dagligt via `.github/workflows/projektstatus.yml`.
+- [`AGENTS.md`](AGENTS.md) — arbejdsregler: hvert arbejdspas skal melde procentsats før → efter med grundlag, og hvert aktivt projekt har en daglig %-status.
 
 ## Sikkerhed
 - [`docs/library/sikkerhed-ai-engine-2026-11-01.md`](docs/library/sikkerhed-ai-engine-2026-11-01.md) — AI Engine er nu **3.8.9 og inaktiv**, og MCP-OAuth-ruterne svarer 404, så CVE-2026-110732 (uautentificeret administrator-overtagelse) er lukket. **Sagen er lukket 1/11 2026** (sidecachen er purget, så den gamle chatbot-markup er væk); tilbage er kun WAF-blokering af `changelog.txt`/`readme.txt`.

@@ -1,0 +1,98 @@
+name: Daglig projektstatus
+
+on:
+  schedule:
+    - cron: '15 5 * * *'
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'projektstatus.json'
+      - 'projektstatus.py'
+      - 'docs/projektstatus.md'
+      - '.github/workflows/projektstatus.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'projektstatus.json'
+      - 'projektstatus.py'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: projektstatus
+  cancel-in-progress: false
+
+jobs:
+  vaern:
+    name: Værn før skrivning
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Selftest af alle værn (fejl fanges før noget skrives)
+        run: python3 projektstatus.py --selftest
+
+      - name: Valider projektstatus.json og tjek for drift i dokumentet
+        run: python3 projektstatus.py --check
+
+      - name: Annotation hvis værnene fejlede
+        if: failure()
+        run: |
+          echo "::error file=projektstatus.json,title=Værn fejlede::Status blev ikke opdateret. Ret fejlen ovenfor; intet er skrevet."
+          exit 1
+
+  opdater:
+    name: Beregn og skriv daglig status
+    needs: vaern
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Beregn, skriv og verificer (atomisk skrivning med backup)
+        run: python3 projektstatus.py --update
+
+      - name: Efterkontrol af det der faktisk ligger på disken
+        run: python3 projektstatus.py --check
+
+      - name: Status til job-summary
+        run: |
+          {
+            echo "## Projektstatus $(date -u +%F)"
+            echo
+            sed -n '/AUTO:DAGLIG:START/,/AUTO:DAGLIG:END/p' docs/projektstatus.md | sed '1d;$d'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Commit og push hvis noget ændrede sig
+        run: |
+          git config user.name "Steamgears Status Bot"
+          git config user.email "bot@steamgears.eu"
+          git add projektstatus.json docs/projektstatus.md
+          if git diff --staged --quiet; then
+            echo "Ingen ændringer i dag — intet at committe."
+            exit 0
+          fi
+          git commit -m "chore(status): daglig projektstatus $(date -u +%F)"
+          for attempt in 1 2 3; do
+            if git push; then
+              exit 0
+            fi
+            echo "Push afvist (forsøg $attempt) — henter og prøver igen."
+            git pull --rebase --autostash
+          done
+          echo "::error title=Push fejlede::Kunne ikke pushe daglig status efter 3 forsøg."
+          exit 1

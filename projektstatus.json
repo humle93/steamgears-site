@@ -1,0 +1,154 @@
+{
+  "schema": 1,
+  "updated": "2026-11-01",
+  "projects": [
+    {
+      "id": "site",
+      "name": "steamgears.eu — site-optimering",
+      "note": "roadmap S0–S4",
+      "next": "S0.2, S0.5, S0.6, S0.7 — config, rører ikke indhold",
+      "blocked_by": "S0.4 kræver én Redirection-gruppe (ejer)",
+      "modules": [
+        {
+          "id": "s0",
+          "name": "S0 — brudt/akut",
+          "done": 0.6,
+          "total": 2.6,
+          "unit": "d",
+          "note": "S0.1 + S0.3 + S0.8 udført; S0.4 (0,5 d) blokeret"
+        },
+        {
+          "id": "s1",
+          "name": "S1 — butik og indhold",
+          "done": 0,
+          "total": 4.5,
+          "unit": "d"
+        },
+        {
+          "id": "s2",
+          "name": "S2 — struktur og SEO",
+          "done": 0,
+          "total": 6,
+          "unit": "d"
+        },
+        {
+          "id": "s3",
+          "name": "S3 — hygiejne",
+          "done": 0,
+          "total": 3,
+          "unit": "d"
+        },
+        {
+          "id": "s4",
+          "name": "S4 — salgsklar butik",
+          "done": 0.15,
+          "total": 5,
+          "unit": "d",
+          "note": "S4.4 formular-del udført"
+        }
+      ]
+    },
+    {
+      "id": "rebrand",
+      "name": "Dark academia-rebrand",
+      "next": "Batch 4 — mockups (~130 billeder)",
+      "blocked_by": "Printify-adgang",
+      "modules": [
+        {
+          "id": "tekster",
+          "name": "Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster",
+          "done": 8.5,
+          "total": 8.5,
+          "unit": "t",
+          "note": "midtpunkt af 11–16 t minus mockups"
+        },
+        {
+          "id": "mockups",
+          "name": "Batch 4: mockups",
+          "done": 0,
+          "total": 5,
+          "unit": "t",
+          "note": "midtpunkt af 4–6 t"
+        }
+      ]
+    },
+    {
+      "id": "seo",
+      "name": "SEO-indholdsproduktion",
+      "next": "Skriv guide id 292 (men's steampunk essentials)",
+      "blocked_by": null,
+      "modules": [
+        {
+          "id": "batch",
+          "name": "Dagens TOP 3-guides (id 292, 296, 295)",
+          "done": 0,
+          "total": 3,
+          "unit": "guides"
+        },
+        {
+          "id": "loop",
+          "name": "Daglig loop: brief, keyword-DB, konkurrentscan",
+          "done": 1,
+          "total": 1,
+          "unit": "kørsler",
+          "recurring": true,
+          "note": "kørt 1/11"
+        }
+      ]
+    },
+    {
+      "id": "links",
+      "name": "Døde internlinks",
+      "next": "Ret linkene i library/dode-links-2026-11-01.md",
+      "blocked_by": null,
+      "modules": [
+        {
+          "id": "fix",
+          "name": "39 døde links på 15 live sider",
+          "done": 0,
+          "total": 39,
+          "unit": "links",
+          "note": "kortlagt 1/11, 0 rettet"
+        }
+      ]
+    }
+  ],
+  "history": [
+    {
+      "date": "2026-11-01",
+      "project": "steamgears.eu — site-optimering",
+      "module": "S0–S4 (baseline)",
+      "before": null,
+      "after": 3.6,
+      "delta": null,
+      "basis": "0,75 af 21,1 d (S0 0,6/2,6 · S1 0/4,5 · S2 0/6 · S3 0/3 · S4 0,15/5)"
+    },
+    {
+      "date": "2026-11-01",
+      "project": "Dark academia-rebrand",
+      "module": "Batch 1–4 (baseline)",
+      "before": null,
+      "after": 63,
+      "delta": null,
+      "basis": "8,5 af 13,5 t"
+    },
+    {
+      "date": "2026-11-01",
+      "project": "SEO-indholdsproduktion",
+      "module": "Dagens TOP 3-guides (baseline)",
+      "before": null,
+      "after": 0,
+      "delta": null,
+      "basis": "0 af 3 guides publiceret"
+    },
+    {
+      "date": "2026-11-01",
+      "project": "Døde internlinks",
+      "module": "Døde internlinks (baseline)",
+      "before": null,
+      "after": 0,
+      "delta": null,
+      "basis": "0 af 39 links rettet"
+    }
+  ]
+}
