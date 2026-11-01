@@ -8,7 +8,8 @@ Versionstyring for **steamgears.eu**-assets. WordPress-kernen og databasen ligge
 - `docs/` — AdSense-setup, konkurrentnoter, SEO-handlingsplan 24/10 (PDF-audit gap-analyse), keyword- & konkurrent-scan, SEO-research-log, daily brief.
 
 ## Sikkerhed
-- [`docs/library/sikkerhed-ai-engine-2026-11-01.md`](docs/library/sikkerhed-ai-engine-2026-11-01.md) — AI Engine 3.8.1 er under 3.8.7 og dermed omfattet af CVE-2026-110732 (uautentificeret administrator-overtagelse via MCP OAuth). Indeholder opdateringsplan og tjekliste. **Åben sag indtil sitet kører 3.8.7+.**
+- [`docs/library/sikkerhed-ai-engine-2026-11-01.md`](docs/library/sikkerhed-ai-engine-2026-11-01.md) — AI Engine 3.8.6 er under 3.8.7 og dermed omfattet af CVE-2026-110732 (uautentificeret administrator-overtagelse via MCP OAuth). Indeholder opdateringsplan og tjekliste. **Åben sag indtil sitet kører 3.8.7+.**
+- [`docs/library/sikkerhed-plugin-versioner-2026-11-01.md`](docs/library/sikkerhed-plugin-versioner-2026-11-01.md) — versionsstatus for alle 48 plugins pr. 23/10 2026: 16 er bagud, 3 af dem har en sikkerhedsrettelse der mangler.
 
 ## Noter
 - Repoet oprettes og opdateres via GitHub API (commit-per-batch); ingen lokal git-CLI i Juno-workspace.
