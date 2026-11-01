@@ -68,15 +68,40 @@ Vægte fra [site-roadmap-2026-11-01.md](../site-roadmap-2026-11-01.md). «Færdi
 | Modul | Vægt | Færdig | % | Resterende |
 |---|---|---|---|---|
 | **S0 — brudt eller akut** | 2,6 d | 1,9 d | **73 %** | 0,7 d (Health Check-afklaring, Coming Soon-tjek, 5 vanity-301) |
-| **S1 — indhold der sælger** | 4,5 d | 0,4 d | **9 %** | 4,1 d (Herbarium-lancering, kladde-triage, produktlink-dækning) |
-| **S2 — struktur og SEO** | 6,0 d | 1,7 d | **29 %** | 4,3 d (hubs `/start-here/`, `/build/`, `/inspiration/`, navigation, H1-beslutning) |
+| **S1 — indhold der sælger** | 4,5 d | 1,2 d | **27 %** | 3,3 d (Herbarium-varianter, 2 flette-kladder, skraldespand, lead magnets) |
+| **S2 — struktur og SEO** | 6,0 d | 1,9 d | **32 %** | 4,1 d (hubs `/start-here/`, `/build/`, `/inspiration/`, navigation, H1-beslutning) |
 | **S3 — hygiejne** | 3,0 d | 0,6 d | **20 %** | 2,4 d (webp/Imagify, slet private designsider, plugin-rationalisering) |
 | **S4 — butik salgsklar** | 5,0 d | 1,4 d | **27 %** | 3,6 d (valuta, betalinger, anmeldelser, mockups, forsendelse) |
-| **I alt** | **21,1 d** | **6,0 d** | **28 %** | **15,1 d** |
+| **I alt** | **21,1 d** | **7,0 d** | **33 %** | **14,1 d** |
 
 Omsat til kalendertid: 15,1 d × ~6 effektive timer ≈ **2,5–3 uger**, hvoraf **ca. 8 dage er blokeret af ejerbeslutninger** (CVR/adresse, valuta, betalingsudbydere, Printify-mockups, anmeldelsesplatform). Den reelle kritiske vej er derfor ikke kode, men de fem beslutninger.
 
 **Dagens runde:** ca. 6 timer, fordelt på måling 1,5 t · meta 1,5 t · links 1,5 t · alt-tekst 0,5 t · dokumentation 1 t.
+
+## 5b. Autonom runde 2 — kladder, links og soft-404
+
+**Seks artikel-kladder publiceret.** De var færdige artikler på 5.500–10.200 tegn uden live-ækvivalent, men usynlige:
+
+| ID | Ny URL | Status |
+|---|---|---|
+| 989 | `/what-is-gaslamp-fantasy/` | 200 |
+| 988 | `/best-steampunk-books/` | 200 |
+| 974 | `/what-is-dieselpunk/` | 200 |
+| 897 | `/steampunk-outfit-ideas-men/` | 200, 26 produktlinks |
+| 898 | `/steampunk-couple-costumes/` | 200, 31 produktlinks |
+| 789 | `/steampunk-accessories-for-men-the-complete-2026-checklist/` | 200 |
+
+Alle seks fik SEO-titel og meta description, og de fire uden produktlinks fik en intern linkblok til de relevante kollektioner. **Mangler:** 897, 898 og 789 har intet fremhævet billede — de vises korrekt, men får ingen OG-card ved deling.
+
+**To kladder bevidst ikke publiceret.** 750 (`outfit ideas for women`, 16.172 tegn) duplikerer den live artikel 699, og 938 (`Guide: Dieselpunk Steampunk`, 8.503 tegn) duplikerer 974, som nu er live. Begge skal flettes, ikke udgives — ellers kannibaliserer de deres egen trafik.
+
+**Soft-404 opdaget.** Ukendte URL'er svarer korrekt 404, men de seks overhalede kladde-produkter (27, 28, 29, 75, 183, 765) svarer **HTTP 200 med titlen "Page Not Found"**. Det er en soft-404: Google kan indeksere en tom fejlside som gyldig. Konsekvensen for mig var konkret — mit første linktjek brugte statuskoder og overså fire døde links i de to nye indlæg, fordi de svarede 200. Linktjekket kører nu på sidetitel i stedet.
+
+Anbefalet fix: flyt de seks overhalede kladder til skraldespanden (deres URL'er er ikke længet linket fra noget), så de svarer rigtigt 404. Det er en sletning, så den venter på dig.
+
+**Linkstatus efter runde 2:** 56 unikke produkt- og kategorimål i alt publiceret indhold testet — **0 dårlige**. I alt 56 linkforekomster rettet i denne session (42 + 3 + 5 + 4 + 3 fordelt over tre gennemløb).
+
+**Herbarium-linjen er ikke en tekstopgave.** De 12 produkter (953–956, 965–972) er **simple** produkter uden varianter, mens alle 39 live-produkter er variable. En t-shirt uden størrelsesvalg og et telefoncover uden modelvalg kan ikke sælges, og deres tekster indeholder stadig `[PLACEHOLDER: …]` fra dengang de blev oprettet. De er aldrig blevet koblet til Printify. Rækkefølgen er derfor: variantopsætning i Printify → tekst og pris → publicering. Teksten kan jeg skrive på 1 time, når varianterne findes.
 
 ## 6. Næste tre skridt (ingen ejerinput nødvendig)
 

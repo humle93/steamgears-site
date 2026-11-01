@@ -236,6 +236,10 @@ plugin P0.1–P0.3, P0.5 ──► parallel, different repo, nothing blocks them
 
 | Date | Change |
 |---|---|
+| 2026-11-01 (autonomous round 2) | Six finished article drafts published (989 gaslamp fantasy, 988 steampunk books, 974 dieselpunk, 897 outfit ideas for men, 898 couple costumes, 789 accessories for men) with SEO meta and collection links; 750 and 938 left as merge candidates against live 699 and 974. Fixed the remaining dead product links in the two newly published posts and re-verified by page title, not status code — unknown URLs on this site return 404, but the six superseded draft products return **200 with a "Page Not Found" title**, a soft-404 that made status-based link checks blind. The 12 Herbarium products stay draft: they are simple products with no variants, so a tee has no sizes and a phone case has no models, and they still contain `[PLACEHOLDER]` text. Modules now S0 73 %, S1 27 %, S2 32 %, S3 20 %, S4 27 % — 7,0 of 21,1 days. |
+
+| Date | Change |
+|---|---|
 | 2026-11-01 (SEO round) | Autonomous SEO pass executed and measured across all 108 sitemap URLs: 18 pages got new SEO titles/descriptions, 5 category terms got descriptions, `/opt-out-preferences/` set to noindex, all 24 dead link targets rewritten in content (42 edits in 15 posts), and 39 product images got alt text matching the new product names. Dead internal links: 39 → 0. Titles over 62 chars: 19 → 0. Missing meta descriptions: 3 → 0. Performance diagnosed but not fixed: 458 KB product HTML, 151 KB inline CSS, 105 script tags, W3TC minify/lazyload/db-cache off and no MCP write path. Module status: S0 73 %, S1 9 %, S2 29 %, S3 20 %, S4 27 % — 6,0 of 21,1 days done. Full detail in [library/seo-runde-og-status-2026-11-01.md](library/seo-runde-og-status-2026-11-01.md). |
 
 | Date | Change |
