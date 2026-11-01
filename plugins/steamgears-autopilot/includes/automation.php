@@ -249,7 +249,7 @@ class SGAP_Rescue {
 class SGAP_Auto {
     const ARTICLE_CRON = 'sgap_weekly_article';
     const HEALTH_CRON = 'sgap_daily_health';
-    const REPORT_CRON = 'sgap_weekly_report';
+    const REPORT_CRON = 'sgap_weekly_email';
     const NEW_CONTENT_CRON = 'sgap_promote_new';
     const HEALTH = 'sgap_health';
 

@@ -95,6 +95,7 @@ add_filter('pre_wp_mail', function ($null, $atts) use (&$mail) { $mail = $atts; 
 ta('weekly report: e-mail sent to the admin', SGAP_Auto::weekly_report() && $mail && $mail['to'] === get_option('admin_email') && str_contains($mail['message'], 'Drafts waiting'), $mail['subject'] ?? null);
 update_option('sgap_weekly_report', 'no');
 ta('weekly report: can be switched off', SGAP_Auto::weekly_report() === false);
+ta('report cron does not reuse a legacy hook name', !in_array(SGAP_Auto::REPORT_CRON, SGAP_Install::LEGACY_CRON, true));
 ta('crons scheduled', wp_next_scheduled(SGAP_Auto::HEALTH_CRON) && wp_next_scheduled(SGAP_Auto::ARTICLE_CRON) && wp_next_scheduled(SGAP_Auto::REPORT_CRON) && wp_next_scheduled(SGAP_Rescue::CRON));
 if (function_exists('wp_get_ability')) {
     $r = wp_get_ability('steamgears-autopilot/rescue-images')->execute(['dry_run' => true]);
