@@ -1,0 +1,4 @@
+.env
+*.pyc
+__pycache__/
+steamgears_auth.json
