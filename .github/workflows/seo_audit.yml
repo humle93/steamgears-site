@@ -1,0 +1,39 @@
+name: Steamgears Autonomous SEO Audit
+
+on:
+  schedule:
+    - cron: '0 6 * * 1' # Kører hver mandag kl. 06:00 UTC
+  workflow_dispatch:     # Gør at du kan starte den manuelt med ét klik på GitHub
+  push:
+    paths:
+      - 'knowledge_base/**' # Kører automatisk ny audit, når du tilføjer ny SEO-viden!
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Kør SEO Audit & Generer Optimeringsplan
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          WP_USER: ${{ secrets.WP_USER }}
+          WP_APP_PASS: ${{ secrets.WP_APP_PASS }}
+        run: python seo_agent.py
+
+      - name: Gem og Commit SEO-Plan til Repo
+        run: |
+          git config user.name "Steamgears SEO Bot"
+          git config user.email "bot@steamgears.eu"
+          git add reports/
+          git diff --staged --quiet || git commit -m "chore(seo): opdateret automatisk SEO-optimeringsplan"
+          git push
