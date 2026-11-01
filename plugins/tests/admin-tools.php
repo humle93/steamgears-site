@@ -10,10 +10,34 @@ add_filter('pre_http_request', function ($pre, $args, $url) {
     if (($body['max_tokens'] ?? 0) === 1) {
         return ['headers' => [], 'body' => '{"choices":[{"message":{"content":""},"finish_reason":"length"}]}', 'response' => ['code' => 200, 'message' => 'OK'], 'cookies' => [], 'filename' => null];
     }
+    if (!empty($body['tools'])) {
+        $tool_msgs = array_values(array_filter($body['messages'], fn($m) => ($m['role'] ?? '') === 'tool'));
+        if (!$tool_msgs) {
+            return ['headers' => [], 'body' => wp_json_encode(['choices' => [['message' => ['role' => 'assistant', 'content' => '', 'tool_calls' => [['id' => 'call_1', 'type' => 'function', 'function' => ['name' => 'status', 'arguments' => '']]]], 'finish_reason' => 'tool_calls']]]), 'response' => ['code' => 200, 'message' => 'OK'], 'cookies' => [], 'filename' => null];
+        }
+        $st = json_decode($tool_msgs[0]['content'], true) ?: [];
+        $txt = "Autopiloten er **" . (!empty($st['autopilot']) ? 'slået til' : 'slået fra') . "**.
+- Kladder der venter: " . ($st['pending_drafts'] ?? '?') . "
+- Tools: " . count($body['tools']);
+        return ['headers' => [], 'body' => wp_json_encode(['choices' => [['message' => ['role' => 'assistant', 'content' => $txt], 'finish_reason' => 'stop']]]), 'response' => ['code' => 200, 'message' => 'OK'], 'cookies' => [], 'filename' => null];
+    }
     preg_match_all('/^- ([a-z]+):/m', $body['messages'][1]['content'] ?? '', $m);
     $posts = array_map(fn($c) => ['channel' => $c, 'title' => "Mock $c title", 'text' => "Mock $c post about brass goggles.", 'hashtags' => ['#steampunk'], 'alt_text' => 'Goggles'], $m[1]);
     return ['headers' => [], 'body' => wp_json_encode(['choices' => [['message' => ['content' => "```json\n" . wp_json_encode(['posts' => $posts]) . "\n```"], 'finish_reason' => 'stop']]]), 'response' => ['code' => 200, 'message' => 'OK'], 'cookies' => [], 'filename' => null];
 }, 10, 3);
+// Anthropic tool use: first ask for the status tool, then answer from its result.
+add_filter('pre_http_request', function ($pre, $args, $url) {
+    if ($url !== 'https://api.anthropic.com/v1/messages') return $pre;
+    $body = json_decode((string) ($args['body'] ?? ''), true) ?: [];
+    if (empty($body['tools'])) return $pre;
+    $GLOBALS['sgci_anthropic_chat'][] = $body;
+    $GLOBALS['sgci_anthropic_raw'][] = (string) $args['body'];
+    $last = end($body['messages']);
+    $reply = is_array($last['content']) && ($last['content'][0]['type'] ?? '') === 'tool_result'
+        ? ['stop_reason' => 'end_turn', 'content' => [['type' => 'text', 'text' => 'Anthropic says: ' . substr($last['content'][0]['content'], 0, 40)]]]
+        : ['stop_reason' => 'tool_use', 'content' => [['type' => 'thinking', 'thinking' => '', 'signature' => 'x'], ['type' => 'tool_use', 'id' => 'toolu_1', 'name' => 'status', 'input' => new stdClass()]]];
+    return ['headers' => [], 'body' => wp_json_encode($reply), 'response' => ['code' => 200, 'message' => 'OK'], 'cookies' => [], 'filename' => null];
+}, 9, 3);
 
 update_option('sgap_autopilot_enabled', 'yes');
 update_option('sgap_ai_provider', 'aimlapi');
@@ -67,6 +91,20 @@ $r = run('enable-full-access'); t('enable-full-access without AI Engine is an er
 update_option('mwai_options', ['mcp_core' => true, 'mcp_abilities' => false, 'openai_key' => 'keep-me', 'nested' => ['a' => 1]]);
 $r = run('enable-full-access'); $o = get_option('mwai_options'); t('enable-full-access turns on Dynamic REST + Abilities, keeps the rest', $o['mcp_dynamic_rest'] === true && $o['mcp_abilities'] === true && $o['openai_key'] === 'keep-me' && $o['nested']['a'] === 1, $r);
 $r = run('enable-full-access', ['enabled' => false]); t('enable-full-access can turn it off', get_option('mwai_options')['mcp_dynamic_rest'] === false, $r);
+// AI Chat: the AI calls a tool, gets its result and answers (AIMLAPI and Anthropic).
+$tools = SGAP_Chat::tools();
+t('chat: autopilot tools offered, site-changing ones left out', isset($tools['status'], $tools['generate'], $tools['update-settings']) && !isset($tools['manage-plugin']) && !isset($tools['enable-full-access']), implode(',', array_keys($tools)));
+update_option('sgap_ai_provider', 'aimlapi'); update_option('sgap_ai_api_key', 'test-key'); update_option('sgap_ai_model', '');
+$r = SGAP_Chat::reply([], 'Hvordan går det?');
+t('chat (AIMLAPI): tool loop answers from the status tool', !is_wp_error($r) && $r['tools'] === ['status'] && str_contains($r['text'], 'slået'), is_wp_error($r) ? $r->get_error_message() : $r);
+update_option('sgap_ai_provider', 'anthropic'); update_option('sgap_ai_api_key', 'test-key');
+$GLOBALS['sgci_anthropic_chat'] = [];
+$r = SGAP_Chat::reply([['role' => 'user', 'content' => 'hej'], ['role' => 'assistant', 'content' => 'Hej!']], 'Status?');
+$second = $GLOBALS['sgci_anthropic_chat'][1] ?? [];
+t('chat (Anthropic): tool loop answers from the status tool', !is_wp_error($r) && $r['tools'] === ['status'] && str_starts_with($r['text'], 'Anthropic says: {'), is_wp_error($r) ? $r->get_error_message() : $r);
+t('chat (Anthropic): empty tool input goes back as an object', str_contains($GLOBALS['sgci_anthropic_raw'][1] ?? '', '"input":{}'), substr($GLOBALS['sgci_anthropic_raw'][1] ?? '', 0, 0));
+t('chat (Anthropic): thinking block sent back unchanged, then the tool result', ($second['messages'][3]['content'][0]['type'] ?? '') === 'thinking' && ($second['messages'][4]['content'][0]['tool_use_id'] ?? '') === 'toolu_1', $second['messages'] ?? null);
+update_option('sgap_ai_provider', 'aimlapi');
 wp_set_current_user(0);
 $r = wp_get_ability('steamgears-autopilot/list-plugins')->execute(); t('logged-out user is refused', is_wp_error($r));
 if ($fail) { WP_CLI::error("admin tools: some checks failed"); }
