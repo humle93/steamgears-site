@@ -406,6 +406,10 @@ class SGAP_Auto {
         if (!SGAP_Settings::enabled('autopilot_enabled')) {
             $problems[] = 'The autopilot is off.';
         }
+        $lag = self::cron_lag();
+        if ($lag >= 30) {
+            $problems[] = self::cron_advice($lag);
+        }
         $pending = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}sgap_ai_drafts WHERE status = 'pending'");
         if (!SGAP_Settings::enabled('full_auto_enabled') && $pending >= 12) {
             $problems[] = "{$pending} drafts are waiting for approval – nothing goes out until you approve them (or switch on Full auto).";
@@ -459,10 +463,34 @@ class SGAP_Auto {
         return wp_mail(get_option('admin_email'), 'Steamgears weekly: ' . (array_sum(array_map(fn($r) => (int) $r->clicks, $rows)) . ' clicks'), implode("\n", $lines));
     }
 
-    /** Dashboard card with the last self-check. */
+    /**
+     * Minutes the 15-minute publisher is overdue (0 when on time). WP-Cron only runs when
+     * WordPress handles a request; a full page cache plus quiet hours of traffic can stop it.
+     */
+    public static function cron_lag(): int {
+        $next = wp_next_scheduled(SGAP_Install::PUBLISH_CRON);
+        if (!$next || (defined('DISABLE_WP_CRON') && DISABLE_WP_CRON && $next > time() - 1800)) {
+            return 0;
+        }
+        return max(0, (int) floor((time() - $next) / 60));
+    }
+
+    public static function cron_advice(int $lag): string {
+        return "WP-Cron is {$lag} minutes behind, so posts are released late. Set up a free external cron that calls "
+            . site_url('wp-cron.php') . ' every 5 minutes (e.g. cron-job.org or your host\'s cron), or add the feeds in Publer – its polling also keeps cron running.';
+    }
+
+    /** Dashboard card with the last self-check (plus a live cron check). */
     public static function health_card(): void {
         $h = get_option(self::HEALTH);
+        $lag = self::cron_lag();
         if (!is_array($h)) {
+            $h = ['at' => '–', 'problems' => []];
+        }
+        if ($lag >= 30) {
+            array_unshift($h['problems'], self::cron_advice($lag));
+        }
+        if ($h['at'] === '–' && !$h['problems']) {
             return;
         }
         SGAP_UI::card_open('Self-check', 'heart');

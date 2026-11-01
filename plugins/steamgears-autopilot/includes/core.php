@@ -14,7 +14,9 @@ class SGAP_Install {
         'sgap_etsy_inventory',
         'sgap_weekly_report',
         'sgap_repost_check',
-        'sgap_suppression_check'
+        'sgap_suppression_check',
+        'sgap_ai_generate',        // hourly hook of an older AI writer
+        'sgap_maintenance_daily'   // replaced by sgap_daily_cleanup
     ];
 
     const CLEANUP_CRON = 'sgap_daily_cleanup';

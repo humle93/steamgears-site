@@ -96,6 +96,12 @@ ta('weekly report: e-mail sent to the admin', SGAP_Auto::weekly_report() && $mai
 update_option('sgap_weekly_report', 'no');
 ta('weekly report: can be switched off', SGAP_Auto::weekly_report() === false);
 ta('report cron does not reuse a legacy hook name', !in_array(SGAP_Auto::REPORT_CRON, SGAP_Install::LEGACY_CRON, true));
+wp_clear_scheduled_hook(SGAP_Install::PUBLISH_CRON);
+wp_schedule_event(time() - 3600, SGAP_Install::QUARTER_HOUR, SGAP_Install::PUBLISH_CRON);
+ta('cron lag detected and explained', SGAP_Auto::cron_lag() >= 59 && str_contains(SGAP_Auto::cron_advice(60), 'wp-cron.php'), SGAP_Auto::cron_lag());
+wp_clear_scheduled_hook(SGAP_Install::PUBLISH_CRON);
+wp_schedule_event(time() + 300, SGAP_Install::QUARTER_HOUR, SGAP_Install::PUBLISH_CRON);
+ta('no lag when on time', SGAP_Auto::cron_lag() === 0);
 ta('crons scheduled', wp_next_scheduled(SGAP_Auto::HEALTH_CRON) && wp_next_scheduled(SGAP_Auto::ARTICLE_CRON) && wp_next_scheduled(SGAP_Auto::REPORT_CRON) && wp_next_scheduled(SGAP_Rescue::CRON));
 if (function_exists('wp_get_ability')) {
     $r = wp_get_ability('steamgears-autopilot/rescue-images')->execute(['dry_run' => true]);
