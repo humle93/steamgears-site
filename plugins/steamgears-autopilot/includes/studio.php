@@ -110,6 +110,56 @@ class SGAP_Images {
     }
 }
 
+class SGAP_Research {
+    /**
+     * Live Google data for a keyword via SerpApi: "People also ask", related searches
+     * and the top-ranking pages. Cached for a week (each search uses SerpApi credit).
+     * @return array{keyword: string, questions: string[], related: string[], top: array}|WP_Error
+     */
+    public static function keyword(string $keyword) {
+        $keyword = trim($keyword);
+        $key = (string) SGAP_Settings::get('serpapi_key');
+        if ($key === '') {
+            return new WP_Error('sgap_serpapi_key', 'Add a SerpApi key under Settings → AI & images for keyword research.');
+        }
+        if ($keyword === '') {
+            return new WP_Error('sgap_keyword', 'Give a keyword.');
+        }
+        $danish = stripos((string) SGAP_Settings::get('content_language'), 'dan') === 0;
+        $cache = 'sgap_serp_' . md5(strtolower($keyword) . ($danish ? '|da' : '|en'));
+        $cached = get_transient($cache);
+        if (is_array($cached)) {
+            return $cached;
+        }
+        $url = add_query_arg(['engine' => 'google', 'q' => $keyword, 'hl' => $danish ? 'da' : 'en', 'gl' => $danish ? 'dk' : 'us', 'num' => 10, 'api_key' => $key], 'https://serpapi.com/search.json');
+        $response = wp_remote_get($url, ['timeout' => 40]);
+        if (is_wp_error($response)) {
+            return $response;
+        }
+        $data = json_decode((string) wp_remote_retrieve_body($response), true);
+        if ((int) wp_remote_retrieve_response_code($response) !== 200 || !is_array($data) || isset($data['error'])) {
+            return new WP_Error('sgap_serpapi', 'SerpApi: ' . (is_array($data) ? (string) ($data['error'] ?? 'HTTP ' . wp_remote_retrieve_response_code($response)) : 'no answer'));
+        }
+        $result = [
+            'keyword' => $keyword,
+            'questions' => array_values(array_filter(array_map(fn($q) => (string) ($q['question'] ?? ''), (array) ($data['related_questions'] ?? [])))),
+            'related' => array_values(array_filter(array_map(fn($q) => (string) ($q['query'] ?? ''), (array) ($data['related_searches'] ?? [])))),
+            'top' => array_map(fn($r) => ['title' => (string) ($r['title'] ?? ''), 'url' => (string) ($r['link'] ?? ''), 'snippet' => (string) ($r['snippet'] ?? '')], array_slice((array) ($data['organic_results'] ?? []), 0, 6))
+        ];
+        set_transient($cache, $result, WEEK_IN_SECONDS);
+        return $result;
+    }
+
+    /** Research as prompt text for the writer ('' when there is none). */
+    public static function prompt_block(array $r): string {
+        $out = "\nLive Google research for \"{$r['keyword']}\" (use it to match search intent and beat these pages):\n";
+        if ($r['questions']) $out .= "People also ask (answer these, use the best in the FAQ):\n- " . implode("\n- ", array_slice($r['questions'], 0, 8)) . "\n";
+        if ($r['related']) $out .= "Related searches (cover naturally as secondary keywords):\n- " . implode("\n- ", array_slice($r['related'], 0, 8)) . "\n";
+        if ($r['top']) $out .= "Currently ranking:\n" . implode("\n", array_map(fn($t) => "- {$t['title']}: {$t['snippet']}", $r['top'])) . "\n";
+        return $out;
+    }
+}
+
 class SGAP_Studio {
     const TYPES = [
         'guide' => 'Step-by-step DIY guide / how-to',
@@ -240,7 +290,15 @@ class SGAP_Studio {
         }
         $system = SGAP_AI::SYSTEM . ' You are also an expert SEO copywriter: helpful, original, specific content that answers search intent (E-E-A-T), never keyword stuffing.';
         $system = str_replace('Write in English. ', '', $system);
-        $data = SGAP_AI::json_call($system, self::prompt($a, self::link_targets()), self::schema(), 20000, 'medium');
+        $prompt = self::prompt($a, self::link_targets());
+        $research = null;
+        if (SGAP_Settings::get('serpapi_key') !== '') {
+            $research = SGAP_Research::keyword($a['keyword'] !== '' ? $a['keyword'] : $a['topic']);
+            if (!is_wp_error($research)) {
+                $prompt .= SGAP_Research::prompt_block($research);
+            }
+        }
+        $data = SGAP_AI::json_call($system, $prompt, self::schema(), 20000, 'medium');
         if (is_wp_error($data)) {
             return $data;
         }
@@ -281,6 +339,7 @@ class SGAP_Studio {
             'words' => str_word_count(wp_strip_all_tags($content)),
             'seo_meta_saved_for' => $seo,
             'internal_links' => substr_count($content, home_url('/')),
+            'keyword_research' => $research === null ? 'off (no SerpApi key)' : (is_wp_error($research) ? $research->get_error_message() : count($research['questions']) . ' questions, ' . count($research['related']) . ' related searches used'),
             'image' => null
         ];
         if ($a['image'] && trim((string) ($data['image_prompt'] ?? '')) !== '') {
@@ -380,6 +439,9 @@ class SGAP_Studio {
                 ['prompt' => ['type' => 'string'], 'alt' => ['type' => 'string'], 'post_id' => ['type' => 'integer', 'minimum' => 1], 'queue_id' => ['type' => 'integer', 'minimum' => 1],
                  'shape' => ['type' => 'string', 'enum' => ['landscape', 'square', 'portrait', 'pin'], 'default' => 'landscape']],
                 [], fn($i) => self::image((array) $i)],
+            'keyword-research' => ['Keyword research (Google)',
+                'Live Google data for a keyword via SerpApi: People also ask questions, related searches and the top-ranking pages. Use before writing to pick the right angle and keyword. Cached for a week.',
+                ['keyword' => ['type' => 'string', 'minLength' => 2]], ['keyword'], fn($i) => SGAP_Research::keyword((string) $i['keyword'])],
             'optimize-seo' => ['Optimise SEO of a page',
                 'Suggests a focus keyword, meta title and meta description for an existing post, page or product, plus concrete content improvements, and saves the meta to Rank Math/Yoast (apply=false only suggests).',
                 ['post_id' => ['type' => 'integer', 'minimum' => 1], 'apply' => ['type' => 'boolean', 'default' => true]],
@@ -426,7 +488,8 @@ class SGAP_Studio {
         $ai_ok = SGAP_Settings::get('ai_api_key') !== '';
         $img_ok = SGAP_Images::key() !== '';
         echo '<div class="sgap-pills">' . SGAP_UI::pill('Writer: ' . SGAP_AI::provider_name() . ' · ' . (SGAP_AI::model() ?: '?'), $ai_ok ? 'ok' : 'bad')
-            . SGAP_UI::pill('Images: ' . ($img_ok ? SGAP_Images::model() : 'needs an AIMLAPI key'), $img_ok ? 'ok' : 'warn') . '</div>';
+            . SGAP_UI::pill('Images: ' . ($img_ok ? SGAP_Images::model() : 'needs an AIMLAPI key'), $img_ok ? 'ok' : 'warn')
+            . SGAP_UI::pill('Keyword research: ' . (SGAP_Settings::get('serpapi_key') !== '' ? 'SerpApi on' : 'off – add a SerpApi key'), SGAP_Settings::get('serpapi_key') !== '' ? 'ok' : 'warn') . '</div>';
         $recent = get_posts(['post_type' => array_values(array_filter(['post', 'page', 'product'], 'post_type_exists')), 'post_status' => ['publish', 'draft'], 'posts_per_page' => 60, 'orderby' => 'modified', 'no_found_rows' => true]);
         $options = '';
         foreach ($recent as $p) {
@@ -473,7 +536,7 @@ class SGAP_Studio {
             . 'if(!j||!j.success){c.innerHTML="<h2>Something went wrong</h2><p>"+esc((j&&j.data)||"No answer")+"</p>";c.classList.add("sgap-bad");return;}var d=j.data;'
             . 'if(task==="write"){c.innerHTML="<h2><span class=\\"dashicons dashicons-yes-alt\\"></span>Draft ready: "+esc(d.title)+"</h2>"'
             . '+(d.image&&d.image.url?"<img src=\\""+esc(d.image.url)+"\\" alt=\\"\\" class=\\"sgap-studio-img\\">":"")'
-            . '+"<p>"+["Focus keyword: <b>"+esc(d.focus_keyword)+"</b>","~"+d.words+" words",d.internal_links+" internal links","SEO meta: "+esc((d.seo_meta_saved_for||[]).join(", "))].join(" · ")+"</p>"'
+            . '+"<p>"+["Focus keyword: <b>"+esc(d.focus_keyword)+"</b>","~"+d.words+" words",d.internal_links+" internal links","SEO meta: "+esc((d.seo_meta_saved_for||[]).join(", ")),"Research: "+esc(d.keyword_research)].join(" · ")+"</p>"'
             . '+"<p class=\\"description\\"><b>"+esc(d.meta_title)+"</b><br>"+esc(d.meta_description)+"</p>"'
             . '+(d.image&&d.image.error?"<p class=\\"description\\">Image: "+esc(d.image.error)+"</p>":"")'
             . '+"<p class=\\"sgap-actions\\"><a class=\\"button button-primary\\" href=\\""+esc(d.edit_url)+"\\">Edit draft</a><a class=\\"button\\" target=\\"_blank\\" href=\\""+esc(d.preview_url)+"\\">Preview</a></p>";}'
