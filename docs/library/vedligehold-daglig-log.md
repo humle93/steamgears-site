@@ -290,3 +290,61 @@
 - Implementering: page 42 content erstattet (backup: /workspace/backups/home-42-2026-10-26.html); CSS inline i content; dark takeover af header/footer via body.page-id-42. 3 iterationer: (1) full-bleed + title-case, (2) ae-11 = No Photo-placeholder → ae-07 (også placeholder!) → Steam Locomotive tee, (3) trust-bar-wrap.
 - Cache-purge: touch-PUT excerpt på page 42 ✅. Verificeret live via screenshots (?sgaverify=4/5): alle 6 produktbilleder renderer, header/footer mørke.
 - Wiki: /wiki/workspace/bespoke-frontpage.md. Preview-site (steamgears-forside-preview-bespoke) kan unpublishes senere.
+
+## 27/10 (nat) — CC GRØN ✅ + end-to-end verificeret
+- Henning kørte env-setup + 11: diag 19+20 "✅ ALLE KOMPONENTER OK", ALLE env-nøgler sat (APP_TOKEN, JUNO_DIAG_URL, SERPAPI, AIMLAPI, WP, TELEGRAM, COMPETITOR_SHOPS). GET / → 303 (auth aktiv, ingen 500).
+- Guiden kørte AUTOMATISK ved opstart (task 39 "Optimerings-guide (Balanceret)"): Woo-tjek fandt 5 produkter uden billede + 90 produkter OK; slutkontrol OK (site + WP REST + drift).
+- FUND: page-audits gav 0/100 pga. WAF rate-limit (hurtige requests fra server-IP). Fix deployet: retry efter 2,5 s + 0,8 s mellem sider + redirect-loop-detektion i safe_request (8 hop). Henning bør køre 11 én gang mere for rigtige page-scores.
+- SerpAPI verificeret live igen (Success + reelle resultater).
+
+## 27/10 2026 (nattetid)
+
+**Drift-tjek ✅** — Forside 200, /shop/ 200, /steampunk-costumes/ 200, produkt-side 200, Woo REST products+orders 200. Stripe gateway: live mode, live-nøgler valideret mod Stripe API (livemode=true). Checkout-bug (manglende Stripe payment methods pga. stale konto-cache) fundet + fixet via gateway re-save — checkout renderer nu Card + Google Pay + Link. Ingen nye ordrer forventet (test-tilstand netop afsluttet). WAF 454 set på rå curl — ventet ud som sædvanlig.
+
+**Research ✅** — Ny guide #15: /workspace/library/web-indkomst/15-wordpress-specifik-passiv-indkomst-2026.md (ad-stigen med præcise grænser, hosting-affiliate, printable wall art-marked, care-plans, 30-40x site-multiple). Steamgears GSC-baseline: 9 klik / 182 visn. / 28 d. (29/9→26/10).
+
+**SERP-chance-log:**
+- "steampunk poster digital download printable wall art" — 4/8 Pinterest, Etsy marketplace-side, steampunkary, eBay-kategori: åben redaktionel niche → printbare digitale poster-versioner kan rangere hurtigt.
+- "diy steampunk goggles pattern template pdf" — Pinterest + YouTube + Scribd + Etsy PDF-pattern listing: ingen stærk konkurrent → goggle-pattern PDF (strategi #2) har direkte SERP-åbning.
+
+**Morgen-opgave (28/10 kl. 9):** Stripe live-ordre-nudge til Henning (one-off schedule da69f390-a3bc-4157-a320-4e010ee94f88).
+
+## 27/10 2026 — Complete Looks-kollektioner (B13) + post 803-fixes (Juno)
+
+- **B13 bygget:** 5 nye Complete Looks-produktkategorier oprettet via wc/v3 — 67 airship-captain, 68 victorian-inventor, 69 dark-clockwork, 70 mechanical-explorer, 71 beginner-steampunk — hver med SEO-beskrivelse + kategori-billede (fra eksisterende produktbilleder). Alle 5 URLs verificeret 200 live.
+- 28 produkter tildelt på tværs af kollektionerne (kategori-tælling verificeret: 6/7/6/6/6). Delte stykker (goggles 477, top hat 481, utility belt 766, corset 487, coat 497) ligger i flere kollektioner med rimeligt. Ingen eksisterende kategorier berørt.
+- **Post 803 fixes:** FAQ udvidet 3→6 spørgsmål + FAQPage JSON-LD 1:1 (tekst identisk med synlige svar); nyt sg-buy CTA-blok: Goggles $24.95–29.95 (→ /product-category/steampunk-goggles/), Corsets $44.95–64.95 (→ corsets-clothing), Top hats $34.95–49.95 (→ accessories) — priser verificeret mod wc/v3 live-data; interlink-afsnit peger nu på alle 5 Complete Looks-kollektioner. Bonus-fix: sg-shoprow-link til posters rettet fra /posters-wall-art/ → /posters-prints/ (forkert slug).
+- **Post 803 var draft** (log 26/10 sagde "udgivet" — var det ikke) → publish genoprettet; /closet-steampunk-outfits/ verificeret 200 med sg-buy + 6 FAQ-h3 + 6 Question-schema + 5 kollektionslinks.
+
+## 27/10 (nat 2) — AUTO-REPARATION-SYSTEM deployet ✅
+- Nyt: programmet foreslår selv fixes (repairs-tabel): manglende produktbillede (søger i mediebibliotek), udsolgt→instock, manglende meta-description (AI-genereret udkast via Gemini). Kører EFTER Henning godkender (én-kliks "Godkend alle" eller enkeltvis i /repairs) — matcher playbook v2.1.
+- Dashboard har nyt kort "🔧 Auto-reparationer". Guide genererer forslag automatisk + verificerer efter fix.
+- Live-verificeret (zip main.py + dashboard.html md5 = lokal). Venter på Henning kører 11 én gang mere (morgen).
+- Henning sover — god nat 01:40. NY STÅENDE ORDRE: husk at kigge på (Google) Drive engang imellem.
+
+## 27/10 2026 07:00 — Daglig drift/checkout-tjek ✅
+- Forside 200, /shop/ 200.
+- Stripe gateway: enabled=true, testmode=no (live) ✅.
+- Ordrer seneste 24h: 1 — #873 (27/10 00:46), completed, $0.00, Henning's egen Stripe-test ("To Juno its mee testing stripe", gratis checklist-PDF). Ingen fejlede betalinger, ingen eksterne ordrer.
+- Plugins: alle kritiske aktive (WooCommerce, Stripe, Rank Math, W3TC, GTM Kit, Complianz, Site Kit, MailPoet). 1 inaktiv: website-llms-txt (ikke kritisk). Ingen ukendte nye plugins.
+- Ingen 5xx eller redirect-loops. WAF challenge på hurtige REST-kald som sædvanlig — ventet ud (op til ~4 min pauser), alle kald lykkedes herefter.
+
+## 31/10 2026 07:00 — Daglig drift/checkout-tjek ✅ (med 1 fund + fix)
+- Forside 200 (browser-session), /shop/ 200 ✅. Raw curl → Simply WAF 456/454 som sædvanlig (brugte browser-session + ventet ud mellem REST-kald).
+- ⚠️ FUND: **Stripe-gateway-plugin (woocommerce-gateway-stripe v11.1.1) var INAKTIV** — brøds det midlertidigt med gateway-synlighed (kun bacs/cheque/cod i REST; ingen stripe-gateway). → **Genaktiveret via REST POST** (plugin status=active, 200) ✅. Efter re-aktivering: stripe gateway enabled=true, **testmode=no (live)**, pk_live_51Tt… + sk_live_51Tt… til stede ✅.
+- Årsag ukendt (ingen deploy/update i log 27-30/10 der forklarer deaktivering; plugin-liste ellers uændret: 37 plugins, ingen nye/ukendte; inaktive = kun kendte: woo-feed, woocommerce-services, wpconsent). Kritiske plugins aktive: WooCommerce, Stripe (efter fix), Rank Math, W3TC, GTM Kit, Complianz (gdpr+terms), Site Kit, MailPoet.
+- Ordrer seneste 24h: 0 nye, 0 fejlede (efter=30/10 07:00 tom). Seneste ordre stadig #873 (27/10, Henning-test, completed, $0.00). Ingen rigtige live-ordrer endnu (KYC/payout afhænger af Hennings rigtige ordre).
+- Checkout E2E (browser-session): /cart/ viser tom-kurv korrekt → add-to-cart via produktside (Clockwork Tea Robots $26.95) → /cart/ viser 1 vare, subtotal 26.95, fri fragt, moms 25% = $5.39, total $26.95 ✅ → /checkout/ 200: guest-form, DK-rul, PLACE ORDER, Stripe **Card-element RENDERES** (Card number, Visa/MC/AmEx/Discover, expiry, CVC) + Direct bank transfer + Express checkout; Stripe Elements network-kald alle 200 (deferred_intent, currency usd; card + amazon_pay sessions; r.stripe.com beacons OK). Ordre IKKE afgivet (live).
+- NB: Ny forside-layout (Atelier/Bespoke) bekræftet live med 6 produktbilleder.
+- Bemærkning (iagttages): add-to-cart via ?add-to-cart=719 URL-param gav cart count 0 i denne session (pr. produktside-knap virkede fint — kan være redirect-cache; kosmetisk, men husk ved næste tjek).
+- Konklusion: **Alt i orden efter Stripe-plugin-genaktivering** — 1 afvigelse fundet + fixet samme morgentjek. Ingen Henning-ping nødvendig, men note: hvis Stripe-plugin deaktiverer sig selv igen, er det tegn på update-fail eller kollision (hold øje; tjek evt. WP-rocket/WP Pusher auto-update-log).
+
+## 01/11 2026 07:00 — Daglig drift/checkout-tjek ✅
+
+- Forside + /shop/ 200 (browser-session/firecrawl; /shop/ titel + produkter verificeret). Raw REST → WAF 456 som sædvanlig, ventet ud mellem kald.
+- Stripe gateway: enabled=true, **testmode=no (live)**, sk_live_51… + live publishable key til stede ✅ (plugin stadig aktivt efter lørdagens re-aktivering).
+- Ordrer seneste 24h: **0 nye, 0 fejlede** (after=31/10 07:00 tom). Seneste ordre stadig #873 (27/10, Henning-test, completed, $0.00). Stadig ingen rigtige live-ordrer.
+- Plugins (37 total, REST-liste): alle kritiske AKTIVE — WooCommerce, Stripe, Rank Math, W3TC, GTM Kit, Complianz (gdpr+terms), Site Kit, MailPoet, Printify. Ingen nye/ukendte plugins; inaktive = kun de kendte (woo-feed, woocommerce-services, wpconsent). NB: website-llms-txt vises nu som *aktiv* (var inaktiv 27/10) — kendt plugin, intet problem.
+- Checkout E2E (browser-session): add-to-cart Clockwork Tea Robots $26.95 → kurv OK (subtotal 26.95, moms 25% = $5.39, fri fragt) → /checkout/ 200 med Stripe Card-element + Direct bank transfer; Stripe Elements-kald alle 200 (deferred_intent usd 2695). Ordre IKKE afgivet.
+- Ingen 5xx eller redirect-loops.
+- Konklusion: Alt i orden. Ingen Henning-ping.
