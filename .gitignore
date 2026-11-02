@@ -18,3 +18,4 @@ node_modules/
 # projektstatus.py: lokale backups og kørselslås
 .projektstatus-backups/
 .projektstatus.lock
+tools/_deps/
