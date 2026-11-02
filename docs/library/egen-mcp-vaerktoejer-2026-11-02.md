@@ -128,6 +128,32 @@ Drafts Only indtil ejeren slår det fra:
 Først når Drafts Only slås fra, giver skrivende værktøjer mening — og de bør da have `destructive`-annotation
 og gerne approval, så et forkert kald ikke kan slette en post.
 
+## 5b. Pro-sættene: hvad de er — og hvorfor vi ikke skal genskabe dem
+
+Meow Apps' egen tutorial siger det direkte: *»The WordPress tools are free; Pro adds tool sets for plugins,
+themes, the database, WooCommerce, Polylang and WPML.«* Spørgsmålet er derfor ikke om vi skal kopiere »alle
+Pro-værktøjerne«, men om de seks sæt dækker noget vi ikke har.
+
+Målt i den frie 3.9.0-kilde: `switch_theme` **0**, `install_plugin` **0**, `activate_plugin` **0**, `run_query`
+**0**, `wc_`/`woocommerce` **0**, `polylang`/`wpml` **0** — mens `wp_list_plugins`, `wp_get_option`,
+`wp_update_option`, `wp_edit_menu`, `wp_edit_widgets`, `wp_get_users`, `wp_create_user` og `wp_update_user`
+findes i den frie udgave.
+
+| Pro-sæt | Har vi dækning i dag? | Beslutning |
+| --- | --- | --- |
+| **Plugins** (installér, aktivér, skift) | `list-plugins`, `manage-plugin`, `update`, `enable-full-access` i vores plugin; `wp_list_plugins` i den frie AI Engine | Vi bygger ikke installér/aktivér: MCP-fladen kan læse plugins men ikke installere dem, og et værktøj der skifter plugin på et produktionssite er en udrulningsknap uden fortrydelse |
+| **Tema** (filer, skift) | `wp_get_templates`, `wp_get_site_style`, `wp_update_site_style`, `wp_edit_blocks` | Fildredigering nej — det er PHP i en aktiv template. Styling er dækket |
+| **Database** (rå SQL) | `wp_get_option`/`wp_update_option` i den frie AI Engine | Nej. En rå query kan ikke annoteres meningsfuldt som læsende eller destruktiv, og den kan ikke fortrydes |
+| **WooCommerce** | **Woo registrerer selv abilities:** `product-create`, `product-update`, `product-delete`, `products-query`, `products-list`, `orders-query`, `order-update-status`, `order-add-note` | Dækket af Woo, ikke af AI Engine. Vi bygger ikke CRUD — men en læsende `product-audit` ville give mening |
+| **Polylang / WPML** | Sitet er ettsproget | Ikke relevant |
+
+**Konklusion:** vi skal ikke genskabe Pro-værktøjerne. Plugin- og temadelen er enten dækket eller bevidst
+udeladt, WooCommerce dækkes af Woo selv gennem Abilities API, database- og temasættene er den slags værktøjer
+man fortryder, og flersproglighed er ikke en problemstilling her. Det vi mangler er ikke **flere knapper**, men
+**domskraft**: læsende audits der siger hvad der er galt, så de manuelle runder forsvinder. Rækkefølgen i §5
+står derfor uændret, og `product-audit` (varianter, priser, manglende billeder, schema) bør komme ind som
+nummer fem.
+
 ## 6. Sikkerhed og governance
 
 - **Kun læsende værktøjer gøres offentlige først.** `meta.mcp.public` er ikke en etiket — det er hvad en
