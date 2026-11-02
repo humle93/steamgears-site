@@ -1,7 +1,8 @@
 <?php
 /**
 * Plugin Name: Steamgears Autopilot
-* Description: Premium multichannel growth autopilot for Steamgears.eu. * Version: 7.18.0
+* Description: Premium multichannel growth autopilot for Steamgears.eu.
+* Version: 7.18.0
 * Requires at least: 6.4
 * Requires PHP: 8.0
 * Author: Steamgears.eu
