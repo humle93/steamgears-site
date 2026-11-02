@@ -1,16 +1,20 @@
 #!/usr/bin/env python3
-"""mcp_rest.py — MCP mod WordPress' egen MCP Adapter over REST med application password.
+"""mcp_rest.py — MCP mod sitets AI Engine-server over HTTP.
 
-Royal MCP blev slukket 2/11 2026, men `WordPress/mcp-adapter` svarer på
-`/wp-json/mcp/mcp-adapter-default-server`. Den bruger WordPress' egen REST-auth, så
-her er credential et **application password** (Basic), ikke en Bearer-nøgle.
+Sitet svarer på `https://steamgears.eu/wp-json/mcp/v1/http` (AI Engine, Meow Apps). Det er
+standard MCP over HTTP med `Mcp-Session-Id`, og det kræver en credential:
+
+  * **Bearer-token** fra OAuth (anbefalet) — hentes med `tools/mcp_oauth.py --start/--finish`
+    og ligger uden for repoet, så det ikke kan committes.
+  * **Application password** (Basic) som fallback, hvis sitet accepterer det på ruten.
 
 Kør:
-    python3 tools/mcp_rest.py --ask                   # sprørger i terminalen (getpass, ingen echo)
-    python3 tools/mcp_rest.py --import mcp_rest.txt   # læser "bruger:app-password", tester, gemmer i .env, sletter filen
-    python3 tools/mcp_rest.py --check                 # initialize + tools/list
+    python3 tools/mcp_oauth.py --start             # godkendelseslink (OAuth, PKCE)
+    python3 tools/mcp_rest.py --check              # initialize + tools/list
+    python3 tools/mcp_rest.py --abilities          # alle værktøjer med skema + skrive-flag
+    python3 tools/mcp_rest.py --abilities --diff docs/library/mcp-adapter-abilities.csv
     python3 tools/mcp_rest.py --call <værktøj> '<json-objekt>'
-    python3 tools/mcp_rest.py --abilities             # alle værktøjer med skema + skrive-flag
+    python3 tools/mcp_rest.py --ask                # application password i stedet (getpass)
 
 Hemmeligheden printer aldrig: kun brugernavn, længder og serverens svar.
 """
@@ -28,12 +32,27 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 ENV = ROOT / ".env"
-URL = os.environ.get("MCP_REST_URL") or "https://steamgears.eu/wp-json/mcp/mcp-adapter-default-server"
+URL = os.environ.get("MCP_REST_URL") or "https://steamgears.eu/wp-json/mcp/v1/http"
 PROTOCOL = "2025-06-18"
 NAMES = ("MCP_USER", "MCP_APP_PASSWORD")
+CLIENT_NAME = "steamgears-agent"
 
 
-def read_credentials() -> tuple[str, str]:
+def oauth_token() -> str:
+    """Gyldigt Bearer-token fra OAuth-filerne (fornyes automatisk hvis det er ved at udløbe)."""
+    token = os.environ.get("MCP_ACCESS_TOKEN", "").strip()
+    if token:
+        return token
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        import mcp_oauth
+
+        return mcp_oauth.access_token() or ""
+    except Exception:
+        return ""
+
+
+def read_basic() -> tuple[str, str]:
     user = os.environ.get("MCP_USER", "").strip()
     secret = os.environ.get("MCP_APP_PASSWORD", "").strip()
     if user and secret:
@@ -49,19 +68,30 @@ def read_credentials() -> tuple[str, str]:
     return user, secret
 
 
-def post(payload: dict, user: str, secret: str) -> tuple[int, str, dict]:
-    token = base64.b64encode(f"{user}:{secret}".encode()).decode()
-    request = urllib.request.Request(
-        URL,
-        data=json.dumps(payload).encode(),
-        headers={
-            "Content-Type": "application/json",
-            "Accept": "application/json, text/event-stream",
-            "Authorization": "Basic " + token,
-            "User-Agent": "steamgears-mcp-rest/1.0",
-        },
-        method="POST",
-    )
+def basic_header(user: str, secret: str) -> str:
+    return "Basic " + base64.b64encode(f"{user}:{secret}".encode()).decode()
+
+
+def resolve_auth() -> str:
+    """Bearer foretrækkes; ellers Basic fra .env. Tom streng = ingen credential."""
+    token = oauth_token()
+    if token:
+        return "Bearer " + token
+    user, secret = read_basic()
+    if user and secret:
+        return basic_header(user, secret)
+    return ""
+
+
+def post(payload: dict, auth: str) -> tuple[int, str, dict]:
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json, text/event-stream",
+        "User-Agent": CLIENT_NAME + "/1.0",
+    }
+    if auth:
+        headers["Authorization"] = auth
+    request = urllib.request.Request(URL, data=json.dumps(payload).encode(), headers=headers, method="POST")
     try:
         with urllib.request.urlopen(request, timeout=60) as response:
             return response.status, response.read().decode("utf-8", "replace"), dict(response.headers)
@@ -88,27 +118,38 @@ def parse_body(raw: str) -> dict | None:
         return None
 
 
-def handshake(user: str, secret: str) -> tuple[bool, str]:
+def handshake(auth: str) -> tuple[bool, str]:
     status, raw, headers = post(
         {"jsonrpc": "2.0", "id": 1, "method": "initialize",
          "params": {"protocolVersion": PROTOCOL, "capabilities": {},
-                    "clientInfo": {"name": "steamgears-agent", "version": "1"}}},
-        user, secret,
+                    "clientInfo": {"name": CLIENT_NAME, "version": "1"}}},
+        auth,
     )
     body = parse_body(raw)
     if status != 200 or not body or "result" not in body:
         message = (body or {}).get("message") if isinstance(body, dict) else raw[:160]
         return False, f"HTTP {status}: {message}"
-    post({"jsonrpc": "2.0", "method": "notifications/initialized"}, user, secret)
+    post({"jsonrpc": "2.0", "method": "notifications/initialized"}, auth)
     server = body["result"].get("serverInfo", {})
     session = headers.get("Mcp-Session-Id") or headers.get("mcp-session-id")
-    return True, json.dumps({"server": server, "session": bool(session)}, ensure_ascii=False)
+    scheme = auth.split(" ", 1)[0] if auth else "ingen"
+    return True, json.dumps({"server": server, "session": bool(session), "auth": scheme}, ensure_ascii=False)
 
 
-def tools_list(user: str, secret: str) -> tuple[int, list[dict]]:
-    status, raw, _ = post({"jsonrpc": "2.0", "id": 2, "method": "tools/list"}, user, secret)
+def tools_list(auth: str) -> tuple[int, list[dict]]:
+    status, raw, _ = post({"jsonrpc": "2.0", "id": 2, "method": "tools/list"}, auth)
     body = parse_body(raw) or {}
     return status, (body.get("result") or {}).get("tools") or []
+
+
+def store_credentials(user: str, secret: str) -> None:
+    old = ENV.read_text(encoding="utf-8") if ENV.exists() else ""
+    kept = [line for line in old.splitlines() if not any(line.strip().startswith(n + "=") for n in NAMES)]
+    body = "\n".join([f"MCP_USER={user}", f"MCP_APP_PASSWORD={secret}", *kept]).strip() + "\n"
+    tmp = ENV.with_suffix(".env.tmp")
+    tmp.write_text(body, encoding="utf-8")
+    os.chmod(tmp, 0o600)
+    os.replace(tmp, ENV)
 
 
 def import_file(path: Path) -> int:
@@ -124,31 +165,13 @@ def import_file(path: Path) -> int:
     if not user or len(secret) < 8:
         print("Brugernavn eller app-password mangler — .env er uaendret.")
         return 1
-
-    ok, detail = handshake(user, secret)
-    print(f"Test mod adapteren: {'OK' if ok else 'AFVIST'} — {detail}")
+    ok, detail = handshake(basic_header(user, secret))
+    print(f"Test mod MCP-serveren: {'OK' if ok else 'AFVIST'} — {detail}")
     if not ok:
         return 1
-
-    old = ENV.read_text(encoding="utf-8") if ENV.exists() else ""
-    kept = [line for line in old.splitlines() if not any(line.strip().startswith(n + "=") for n in NAMES)]
-    body = "\n".join([f"MCP_USER={user}", f"MCP_APP_PASSWORD={secret}", *kept]).strip() + "\n"
-    tmp = ENV.with_suffix(".env.tmp")
-    tmp.write_text(body, encoding="utf-8")
-    os.chmod(tmp, 0o600)
-    os.replace(tmp, ENV)
+    store_credentials(user, secret)
     print(f"Skrev {ENV.name}: {len(secret)} tegn app-password for {user}, mode 600. Kildefilen er slettet.")
     return 0
-
-
-def store(user: str, secret: str) -> None:
-    old = ENV.read_text(encoding="utf-8") if ENV.exists() else ""
-    kept = [line for line in old.splitlines() if not any(line.strip().startswith(n + "=") for n in NAMES)]
-    body = "\n".join([f"MCP_USER={user}", f"MCP_APP_PASSWORD={secret}", *kept]).strip() + "\n"
-    tmp = ENV.with_suffix(".env.tmp")
-    tmp.write_text(body, encoding="utf-8")
-    os.chmod(tmp, 0o600)
-    os.replace(tmp, ENV)
 
 
 def ask() -> int:
@@ -163,11 +186,11 @@ def ask() -> int:
     if not user or len(secret) < 8:
         print("Brugernavn eller app-password mangler — .env er uaendret.")
         return 1
-    ok, detail = handshake(user, secret)
-    print(f"Test mod adapteren: {'OK' if ok else 'AFVIST'} — {detail}")
+    ok, detail = handshake(basic_header(user, secret))
+    print(f"Test mod MCP-serveren: {'OK' if ok else 'AFVIST'} — {detail}")
     if not ok:
         return 1
-    store(user, secret)
+    store_credentials(user, secret)
     print(f"Skrev .env: {len(secret)} tegn app-password for {user}, mode 600.")
     return 0
 
@@ -180,8 +203,8 @@ TARGETS = ("product", "page", "post", "order", "media", "user", "comment", "abil
 def classify(tool: dict) -> dict:
     """Afgør om et værktøj skriver, og hvad det rammer — ud fra navn, beskrivelse og MCP-annotations.
 
-    Adapteren har kun tre meta-værktøjer, og det eneste der kan skrive, hedder `execute-ability`.
-    Et rent navne-opslag på "update" ville kalde det læsning, så annotations og "execute" tælles med.
+    Meta-værktøjet `execute-ability` har ingen `update`/`create` i navnet, så et rent navne-opslag
+    ville kalde den eneste skrivevej for læsning. Derfor tælles annotations og verbet med.
     """
     name = (tool.get("name") or "").lower()
     description = tool.get("description") or ""
@@ -229,12 +252,12 @@ def compare(rows: list[dict], known: list[str]) -> dict:
     }
 
 
-def abilities(user: str, secret: str, csv_path: Path | None = None, diff_path: Path | None = None) -> int:
-    ok, detail = handshake(user, secret)
+def abilities(auth: str, csv_path: Path | None = None, diff_path: Path | None = None) -> int:
+    ok, detail = handshake(auth)
     if not ok:
         print(json.dumps({"ok": False, "error": detail}, ensure_ascii=False))
         return 1
-    status, tools = tools_list(user, secret)
+    status, tools = tools_list(auth)
     rows = [classify(tool) for tool in tools]
     if csv_path is not None:
         import csv as _csv
@@ -258,6 +281,16 @@ def abilities(user: str, secret: str, csv_path: Path | None = None, diff_path: P
     return 0
 
 
+def path_flag(args: list[str], flag: str) -> tuple[Path | None, int]:
+    if flag not in args:
+        return None, 0
+    at = args.index(flag)
+    if at + 1 >= len(args):
+        print(json.dumps({"ok": False, "error": f"{flag} kraever en sti"}, ensure_ascii=False))
+        return None, 1
+    return Path(args[at + 1]), 0
+
+
 def main() -> int:
     args = sys.argv[1:]
     if args[:1] == ["--ask"]:
@@ -265,44 +298,40 @@ def main() -> int:
     if args[:1] == ["--import"]:
         return import_file(Path(args[1]) if len(args) > 1 else ROOT / "mcp_rest.txt")
     if args[:1] == ["--abilities"]:
-        paths = {}
-        for flag in ("--csv", "--diff"):
-            if flag not in args:
-                paths[flag] = None
-                continue
-            at = args.index(flag)
-            if at + 1 >= len(args):
-                print(json.dumps({"ok": False, "error": f"{flag} kraever en sti"}, ensure_ascii=False))
-                return 1
-            paths[flag] = Path(args[at + 1])
-        user, secret = read_credentials()
-        if not user or not secret:
-            print(json.dumps({"ok": False, "error": "ingen MCP_USER/MCP_APP_PASSWORD — kør --ask"}, ensure_ascii=False))
+        csv_path, code = path_flag(args, "--csv")
+        if code:
+            return code
+        diff_path, code = path_flag(args, "--diff")
+        if code:
+            return code
+        auth = resolve_auth()
+        if not auth:
+            print(json.dumps({"ok": False, "error": "ingen credential — kør tools/mcp_oauth.py --start (OAuth) eller --ask"}, ensure_ascii=False))
             return 1
-        return abilities(user, secret, paths["--csv"], paths["--diff"])
+        return abilities(auth, csv_path, diff_path)
 
-    user, secret = read_credentials()
-    if not user or not secret:
-        print(json.dumps({"ok": False, "error": "ingen MCP_USER/MCP_APP_PASSWORD — kør --import mcp_rest.txt"}, ensure_ascii=False))
+    auth = resolve_auth()
+    if not auth:
+        print(json.dumps({"ok": False, "error": "ingen credential — kør tools/mcp_oauth.py --start (OAuth) eller --ask"}, ensure_ascii=False))
         return 1
 
     if args[:1] == ["--call"]:
         if len(args) < 2:
             print("brug: --call <vaerktoej> '<json>'")
             return 1
-        ok, detail = handshake(user, secret)
+        ok, detail = handshake(auth)
         if not ok:
             print(json.dumps({"ok": False, "error": detail}, ensure_ascii=False))
             return 1
         payload = {"jsonrpc": "2.0", "id": 3, "method": "tools/call",
                    "params": {"name": args[1], "arguments": json.loads(args[2]) if len(args) > 2 else {}}}
-        status, raw, _ = post(payload, user, secret)
+        status, raw, _ = post(payload, auth)
         body = parse_body(raw) or {}
         print(json.dumps(body.get("result", {"status": status, "raw": raw[:300]}), ensure_ascii=False, indent=2))
         return 0 if "result" in body else 1
 
-    ok, detail = handshake(user, secret)
-    status, tools = tools_list(user, secret) if ok else (0, [])
+    ok, detail = handshake(auth)
+    status, tools = tools_list(auth) if ok else (0, [])
     print(json.dumps({
         "ok": ok,
         "detail": detail,

@@ -25,6 +25,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import mcp_rest  # noqa: E402
 
 USER, SECRET = "agent", "abcd efgh ijkl mnop qrst uvwx"
+BASIC = "Basic " + base64.b64encode(f"{USER}:{SECRET}".encode()).decode()
 TOOLS = [
     {
         "name": "mcp-adapter/discover-abilities",
@@ -122,24 +123,24 @@ class AdapterTest(unittest.TestCase):
         mcp_rest.ENV = Path(self.tmp.name) / ".env"
 
     def test_01_handshake_ok(self):
-        ok, detail = mcp_rest.handshake(USER, SECRET)
+        ok, detail = mcp_rest.handshake(BASIC)
         self.assertTrue(ok, detail)
         self.assertIn("mcp-adapter", detail)
         self.assertIn('"session": true', detail)
 
     def test_02_handshake_afvises(self):
-        ok, detail = mcp_rest.handshake(USER, "forkert-password")
+        ok, detail = mcp_rest.handshake(mcp_rest.basic_header(USER, "forkert-password"))
         self.assertFalse(ok)
         self.assertIn("401", detail)
 
     def test_03_tools_list(self):
-        status, tools = mcp_rest.tools_list(USER, SECRET)
+        status, tools = mcp_rest.tools_list(BASIC)
         self.assertEqual(status, 200)
         self.assertEqual(len(tools), len(TOOLS))
 
     def test_04_sse_frame_parses(self):
         Handler.sse = True
-        status, tools = mcp_rest.tools_list(USER, SECRET)
+        status, tools = mcp_rest.tools_list(BASIC)
         self.assertEqual(status, 200)
         self.assertEqual(len(tools), len(TOOLS))
 
@@ -166,7 +167,7 @@ class AdapterTest(unittest.TestCase):
 
     def test_09_csv_skrives(self):
         out = Path(self.tmp.name) / "live.csv"
-        code = mcp_rest.abilities(USER, SECRET, out)
+        code = mcp_rest.abilities(BASIC, out)
         self.assertEqual(code, 0)
         with out.open(encoding="utf-8") as handle:
             rows = list(csv.reader(handle))
@@ -178,7 +179,7 @@ class AdapterTest(unittest.TestCase):
 
     def test_10_hemmeligheden_skrives_ikke(self):
         out = Path(self.tmp.name) / "live.csv"
-        mcp_rest.abilities(USER, SECRET, out)
+        mcp_rest.abilities(BASIC, out)
         blob = out.read_text(encoding="utf-8")
         self.assertNotIn(SECRET, blob)
         self.assertNotIn(SECRET.replace(" ", ""), blob)

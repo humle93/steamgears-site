@@ -24,7 +24,7 @@ WordPress.org, fordi deres opdateringskanal er sælgerens.
 | Plugin | Installeret | Seneste | Kommentar |
 | --- | --- | --- | --- |
 | AI Engine | 3.8.9 | 3.9.0 | Inaktiv. Bør slettes, ikke opdateres — se §4 |
-| Royal MCP | 1.5.13 | 1.5.14 | Denne forbindelse. Opdater først efter en verificeret MCP-session |
+| MCP-server (tidligere) | 1.5.13 | 1.5.14 | Ikke længere agentens vej ind — afløst af AI Engine på `/wp-json/mcp/v1/http` |
 | Simple Custom CSS and JS | 3.54.3 | 3.55 | Se overlap §3.4 |
 | Site Kit by Google | 1.190.0 | 1.191.0 | Minor |
 | Smash Balloon TikTok Feed | 1.9.0 | 1.9.1 | Se overlap §3.3 |

@@ -1,7 +1,7 @@
 # Meta-rettelser og produktlinks — 2/11 2026
 
 Klar-til-at-anvende rettelser til de poster der stadig står åbne i S2 og S1. Alt er målt mod den live
-side 2/11; intet her er anvendt endnu, fordi der ikke er skriveadgang (ingen `ROYAL_MCP_TOKEN` i
+side 2/11; intet her er anvendt endnu, fordi der ikke er skriveadgang (ingen `MCP_ACCESS_TOKEN` i
 miljøet). Når nøglen er sat, er hver række ét redigeringskald.
 
 ## 1. Tre fakta der flyttede status

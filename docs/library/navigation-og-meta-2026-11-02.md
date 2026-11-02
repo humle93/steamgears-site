@@ -1,6 +1,6 @@
 # Navigation, footer og meta — autonomt pas 2/11 2026
 
-_Udført 11:35–13:05 CET mod live-sitet via Royal MCP (OAuth, ingen nøgle i repo). Fire punkter lukket,
+_Udført 11:35–13:05 CET mod live-sitet via MCP (OAuth, ingen nøgle i repo). Fire punkter lukket,
 tre stadig blokeret. Alle tal nedenfor er målt efter ændringen, ikke antaget._
 
 ## 1. S2.3 — navigation: hub-links ind i headeren
@@ -90,7 +90,7 @@ fokusnøgleord.** W3TC purget bagefter.
 
 ## 6. Sådan blev det udført
 
-Alt gik gennem Royal MCP med Bearer-token fra OAuth-flowet (24 timer, refresh-token). Hver skrivning returnerede
+Alt gik gennem MCP med Bearer-token fra OAuth-flowet (24 timer, refresh-token). Hver skrivning returnerede
 et undo-token med 72 timers levetid, og de originale versioner af begge template parts ligger desuden i
 `artifacts/` (`part12-original.html`, `footer52-original.html`) — uden for repoet, som backup til rollback.
 

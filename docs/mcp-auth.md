@@ -1,215 +1,85 @@
-# MCP-auth i `.mcp.json` — steamgears.eu og Publer
+# MCP-adgang — steamgears.eu og Publer
 
 `.mcp.json` har tre servere: to HTTP-servere der kræver hver sin slags credential, og én lokal stdio-server
 uden credential.
 
 | Server | Endpoint | Auth i `.mcp.json` | Credential |
 | --- | --- | --- | --- |
-| `steamgears` | `https://steamgears.eu/mcp` | `Bearer ${ROYAL_MCP_TOKEN}` | Royal MCP API-nøgle (32 hex, laves i wp-admin) |
+| `steamgears` | `https://steamgears.eu/wp-json/mcp/v1/http` | `Bearer ${MCP_ACCESS_TOKEN}` | OAuth-token fra `tools/mcp_oauth.py` (ligger uden for repoet) |
 | `publer` | `https://mcp.publer.com/` | `Bearer ${PUBLER_API_KEY}` | Publer MCP API key (Business/Enterprise) |
 | `steamgears-profil` | `tools/mcp_project_profile.py` (stdio) | ingen | ingen — læser kun repoet |
 
-**Status 2/11 2026, sen aften: Royal MCP er slukket.** `/mcp` svarer `404 rest_no_route`, og broen melder samme
-fejl — plugin'et er deaktiveret, ikke bare nøglen ugyldig. Ingen læsning eller skrivning mod sitet er mulig, før
-det er tændt igen og en frisk nøgle ligger i `.env`. Rækkefølgen er: aktivér Royal MCP i wp-admin → åbn
-Settings → opret ny API-nøgle → `python3 tools/set_mcp_key.py --from-file mcp_key.txt` → `python3
-wp_mcp_stdio.py --check` skal svare `ok: true` med 270 værktøjer.
-
-**Status 2/11 2026, tidligere på dagen:** `steamgears`-nøglen ligger i `.env` som `ROYAL_MCP_TOKEN`. Den virkede om formiddagen —
-`python3 wp_mcp_stdio.py --check` gav `ok: true`, server 1.5.13 og **270 værktøjer** — men **sent 2/11 blev den
-afvist**: `401 {"code":-32600,"message":"Invalid or expired access token."}` på hvert kald, også med
-browser-UA og på en frisk session. Nøglen skal altså roteres (wp-admin → Royal MCP → Settings → ny API-nøgle
-→ ind i `.env` som `ROYAL_MCP_TOKEN`), før nogen MCP-verifikation kan køre. At sitet svarer `454` på
-forskiden til curl med browser-UA er bot-reglen fra Simply og har intet med nøglen at gøre — `/mcp` svarer
-korrekt `401` med JSON-RPC-fejlen. `PUBLER_API_KEY` er stadig usat, så `publer` står som *Pending approval*.
-`steamgears-profil` virker uden credential; den er verificeret med et rigtigt `initialize` + `tools/list`-håndtryk.
-
-> **Navnet er `ROYAL_MCP_TOKEN`.** Broen (`wp_mcp_stdio.py`) og `.mcp.json` bruger begge dette navn, og
-> broen læser desuden det ældre `ROYAL_MCP_API_KEY`, hvis nogen foretrækker det. Før 2/11 2026 ledte broen
-> **kun** efter `ROYAL_MCP_API_KEY`, mens `.env` havde `ROYAL_MCP_TOKEN` — resultatet var 401 på hver ny
-> session, selv om nøglen lå i repoet, og nogen måtte ind og eksportere den manuelt hver gang. Det er rettet:
-> nøglen læses nu fra `.env` automatisk, så der ikke skal eksporteres noget pr. session.
-
-> > **Ny nøgle uden at den rammer historikken:** `python3 tools/set_mcp_key.py`. Nøglen læses med `getpass`
-> (ingen echo, ingen shell-historik), den gamle `ROYAL_MCP_TOKEN`/`ROYAL_MCP_API_KEY` fjernes så broen ikke kan
-> bruge en forældet linje, filen får mode 600, og broens `--check` køres bagefter. Scriptet printer kun nøglens
-> **længde**, aldrig værdien — og afbryder uden at røre `.env`, hvis input er tomt.
->
-> **Uden terminal:** `python3 tools/set_mcp_key.py --from-file mcp_key.txt`. Læg nøglen i den gitignored fil
-> `mcp_key.txt` i roden (fx via editor-panelet, som ikke skjuler dotfiler), kør scriptet, og det sletter selv
-> kildefilen igen. Det er vejen når `.env` er skjult i fillister og terminalen ikke er tilgængelig.
-
-**Rettelse 2/11 2026:** denne fil påstod tidligere at Royal MCP kunne bruges med et WordPress
-> application password over Basic. Det er **forkert** for MCP-ruten — målt på sitets eget endpoint, se
-> tabellen i afsnittet om `steamgears`. Den headless-venlige vej er en **API-nøgle sendt som Bearer**.
+Sitet kører **AI Engine (Meow Apps)** som MCP-server. Det er standard MCP over HTTP med `Mcp-Session-Id`, og
+det kræver en credential på hvert kald: uden en svarer ruten `401 rest_forbidden`. Den gamle site-side
+MCP-server og dens API-nøgle er væk, og stdio-broen er derfor også fjernet — der er ingen nøgle at gemme i
+`.env` længere, kun et token der hentes med OAuth og ligger uden for repoet.
 
 ## Steamgears (`steamgears`)
 
-Endpoint: `https://steamgears.eu/mcp` (kanonisk, jf. sitets serverkort).
-Alias: `https://steamgears.eu/wp-json/royal-mcp/v1/mcp` — samme server, samme svar.
+### Hvad endpointet svarer (målt 2/11 2026)
 
-Sitet kører **Royal MCP 1.5.14** (Free) med **270 værktøjer** og tilbyder tre credential-typer:
-
-| Vej | Credential | Headless? | Bruges til |
-| --- | --- | --- | --- |
-| **API-nøgle** (anbefalet her) | `Authorization: Bearer <32 hex>` | ✅ | MCP-ruten; er lavet til CI og scripts |
-| OAuth2 (`authorization_code` + PKCE S256) | `Authorization: Bearer <access token>` | ❌ kræver browser til consent | Claude/ChatGPT-klienter; 24 t token + refresh |
-| Application password (Basic) | `Authorization: Basic <base64(bruger:nøgle)>` | ✅ | kun `wp-abilities`-ruten, **ikke** MCP |
-
-### Hvad endpointet faktisk svarer (målt 2/11 2026)
-
-| Kald | Svar |
-| --- | --- |
-| `initialize` uden credential, begge ruter | `401` · `{"code":-32600,"message":"Authentication required. Use Authorization: Bearer <token>."}` |
-| `Bearer` med ugyldig nøgle | `401` · `{"code":-32600,"message":"Invalid or expired access token."}` |
-| `Basic` med vilkårligt `bruger:nøgle` | `401` · `{"code":"invalid_username"}` — WP core prøver brugerlogin, men Royal MCP accepterer ikke Basic som MCP-credential |
-| `GET /wp-json/wp-abilities/v1/abilities` uden credential | `401` · `rest_forbidden` |
-| `GET /wp-json/mcp/mcp-oauth-server` | `401` · `mcp_unauthorized` |
-| `GET /wp-json/wc/store/v1/products?per_page=1` | `200` — offentlig læsning virker uden credential |
-
-Offentligt uden credential: `.well-known/mcp/server-card.json`, `.well-known/agent-skills/index.json`,
-`.well-known/oauth-authorization-server`, `.well-known/oauth-protected-resource` og `wp-json`-ruteindekset.
-**Ingen værktøjskald er anonyme**, og der findes ingen `client_credentials`- eller device-code-grant —
-metadataet annoncerer kun `authorization_code` og `refresh_token`.
-
-### 1. Lav API-nøglen
-
-1. Log ind som administrator på <https://steamgears.eu/wp-admin/>.
-2. Gå til **Royal MCP → Settings** og opret/vis API-nøglen (32 hex-tegn).
-3. Kopiér den med det samme — den vises kun én gang og i højst 15 minutter.
-
-Nøglen er knyttet til den WP-bruger der oprettede den, og der er **én pr. site**. Den kan roteres i wp-admin
-eller med `wp royal-mcp rotate-api-key`, og plugin-versionen kan slå den helt fra på Settings-skærmen.
-(2/11 2026 svarer sitet med **1.5.13** — denne fil nævnte tidligere 1.5.14.)
-
-### 2. Gem nøglen ét sted — helst `.env`
-
-Repoets `.env` er gitignored (`.gitignore` linje 2-3) og læses automatisk af broen og af `.mcp.json`, når
-variablen er eksporteret. Det er den ene plads, nøglen skal stå:
-
-```bash
-# i .env — dette repo bruger dette navn
-ROYAL_MCP_TOKEN=din-32-hex-noegle
-```
-
-Alternativt uden for repoet, hvis `.env` ikke må indeholde den:
-
-```bash
-printf '%s' 'din-32-hex-noegle' > ~/.royal_mcp_key
-chmod 600 ~/.royal_mcp_key
-```
-
-Broen læser `ROYAL_MCP_TOKEN`/`ROYAL_MCP_API_KEY` fra miljøet, derefter `.env` i repoets rod, derefter
-`~/.royal_mcp_key` — så en session der starter uden eksporterede variabler virker alligevel.
-
-### 3. Giv MCP-klienten nøglen
-
-`.mcp.json` sender `Authorization: Bearer ${ROYAL_MCP_TOKEN}` — altså nøglen **rå**, ikke base64. En
-MCP-klient kan ikke selv læse `.env`, så variablen skal være eksporteret i den shell klienten startes fra:
-
-```bash
-export ROYAL_MCP_TOKEN="$(grep -m1 '^ROYAL_MCP_TOKEN=' .env | cut -d= -f2-)"
-```
-
-Til scripts og stdio-broen er det ikke nødvendigt: `wp_mcp_stdio.py` læser `.env` selv, så der skal intet
-eksporteres pr. session.
-
-### 4. Verificér
-
-```bash
-curl -sS -X POST https://steamgears.eu/mcp \
-  -H 'Content-Type: application/json' \
-  -H 'Accept: application/json, text/event-stream' \
-  -H "Authorization: Bearer $ROYAL_MCP_API_KEY" \
-  -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"verify","version":"1"}}}'
-```
-
-Succes: `result` med `serverInfo`, og `Mcp-Session-Id` i svarets header. Session-id'en skal sendes med på alle
-efterfølgende kald i samme session.
-
-Derefter `claude mcp list` — `steamgears` skal vise ✓ Connected i stedet for *Pending approval*. Uden browser
-kan samme forbindelse bruges gennem stdio-broen: `printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | python3 wp_mcp_stdio.py`
-(læser nøglen fra `ROYAL_MCP_API_KEY` eller `~/.royal_mcp_key`).
-
-### Fejlsøgning (steamgears)
-
-| Symptom | Betydning | Handling |
+| Kald | Svar | Betydning |
 | --- | --- | --- |
-| `invalid_username` | du sendte Basic — MCP-ruten tager ikke app passwords | send `Authorization: Bearer <API-nøgle>` |
-| `Invalid or expired access token` | nøglen er forkert, roteret eller slået fra | lav en ny på Royal MCP → Settings, og sæt `ROYAL_MCP_API_KEY` |
-| `Missing environment variables: ROYAL_MCP_TOKEN` | variablen er ikke eksporteret i shellen (gælder MCP-klienter; broen læser `.env` selv) | trin 3 |
-| `406 Not Acceptable` | `Accept: application/json, text/event-stream` mangler | send begge typer (broen gør det selv) |
-| `/mcp` svarer `404 rest_no_route` | Royal MCP er **deaktiveret** — ruten findes ikke længere | aktivér plugin'et i wp-admin; derefter ny nøgle |
-| 401 på alle kald trods frisk nøgle | nøglen er slået fra i 1.5.14+, eller brugeren er ikke administrator | tjek Settings og brugerens rolle |
-| `initialize` svarer 200, men ingen værktøjer | session-id mangler på efterfølgende kald | send `Mcp-Session-Id` med |
-| nøglen er opdateret, men svaret er stadig 401 | `.env` i **denne** worktree er ikke ændret | tjek filens mtime — en cloud-worktree har sin egen gitignored `.env`-kopi, så en rettelse på ejerens maskine rammer ikke VM'en |
-| ny nøgle virker ikke, gammel ligger stadig i filen | broen bruger den **første** match i `.env` | erstat linjen, eller slet den gamle — læg ikke den nye under den gamle |
+| `POST /wp-json/mcp/v1/http` (`initialize`) | `401 rest_forbidden` | ruten findes og kræver login — ikke en 404 |
+| `GET` samme rute | `401 rest_forbidden` | også læsning kræver credential |
+| `OPTIONS` samme rute | `200` | tillader headere `Mcp-Protocol-Version`, `Mcp-Session-Id`, `Accept` — altså Streamable HTTP |
+| `GET /.well-known/oauth-protected-resource` | `200` | `resource` = `/wp-json/mcp/v1/http`, `scopes_supported` = `["mcp"]` |
+| `GET /.well-known/oauth-authorization-server` | `200` | `authorize`, `token`, `register`, `revoke`; `authorization_code` + `refresh_token`; `S256` |
+| `POST /wp-json/mcp/v1/oauth/register` | `201` | dynamisk klientregistrering virker; svarer `client_id`, intet secret |
+| `GET .../oauth/authorize` fra cloud-worktreen | `454` | Simplys WAF blokerer HTML-sider for datacenter-IP'er — gælder ikke JSON-ruterne |
+| `POST /wp-json/mcp/mcp-adapter-default-server` | `401 rest_forbidden` | WordPress' egen MCP Adapter er også installeret, se [`library/mcp-adapter-abilities-2026-11-02.md`](library/mcp-adapter-abilities-2026-11-02.md) |
 
-### OAuth uden browser på maskinen (verificeret 2/11 2026)
+WAF-bemærkningen er vigtig: `401` på JSON-ruterne er serverens eget svar, mens `454`/`455` er Simplys
+bot-regel og kun rammer HTML. Derfor kan OAuth-linket ikke åbnes herfra — det skal åbnes i ejerens browser.
 
-Royal MCP kan også bruges fra et miljø uden browser, hvis callbacken kan lande et sted, agenten kan læse.
-Fremgangsmåden er afprøvet mod steamgears.eu og gav et Bearer-token på 24 timer med refresh-token:
-
-1. **Læs metadata** på `https://steamgears.eu/.well-known/oauth-authorization-server`. Serveren tilbyder kun
-   `authorization_code` med PKCE S256 — der findes **intet** device-code-flow — men dynamisk klientregistrering
-   (`registration_endpoint`) er understøttet.
-2. **Registrér en klient** med `POST https://steamgears.eu/register` og en `redirect_uris`, der peger på en
-   adresse agenten selv kan læse. Svar `201` med `client_id` (`rmcp_…`).
-3. **Start en callback-modtager** på den port, der er eksponeret til ejerens browser, og verificér at den svarer.
-4. **Send ejeren til** `https://steamgears.eu/authorize?response_type=code&client_id=…&redirect_uri=…&scope=mcp:full&code_challenge=…&code_challenge_method=S256&state=…`.
-   Uden session svarer ruten `302` til `wp-login.php` — det er forventet og betyder, at klient og redirect er
-   accepteret.
-5. **Veksl koden** på `POST https://steamgears.eu/token` som form-data med `grant_type=authorization_code`,
-   `code`, `redirect_uri`, `client_id` og `code_verifier`. Svar `200` med `access_token`, `expires_in` og
-   `refresh_token`.
-6. **Kald MCP** på `https://steamgears.eu/wp-json/royal-mcp/v1/mcp` med `Authorization: Bearer <token>`,
-   `Accept: application/json, text/event-stream` og `Mcp-Session-Id` fra `initialize`-svaret.
-
-To fælder undervejs: `code_verifier` skal være den oprindelige streng, ikke challenge-værdien, og
-`redirect_uri` skal være byte-identisk med den registrerede. Token og kode hører i en fil uden for repoet med
-`chmod 600` — aldrig i chat, log eller commit.
-
-> **Målt 2/11 2026 — OAuth kan ikke køres fra cloud-worktreen.** `/mcp` er whitelistet i Simplys WAF, men
-> resten af flowet er det ikke: `.well-known/oauth-authorization-server`, `/register` og `/token` svarer alle
-> `454` med en JS-browser-check, som et script ikke kan løse. Dertil kræver consent en browser med en aktiv
-> WP-admin-session, og callbacken skal lande på en adresse agenten kan læse. Kør OAuth på ejerens egen maskine
-> (`claude mcp add --transport http steamgears-oauth https://steamgears.eu/mcp` → `/mcp` → *Authenticate*) — den
-> token bliver liggende der, ikke her. Til cloud-worktreen er API-nøglen i `.env` den eneste vej, fordi `/mcp`
-> er den ene rute WAF'en lukker igennem. En sjælden `454` på `/mcp` efter mange kald i træk er rate limiting og
-> forsvinder igen af sig selv (målt: væk efter 60 s).
-
-### Alternativ: WordPress' egen MCP Adapter (målt 2/11 2026)
-
-Royal MCP er slukket, men `WordPress/mcp-adapter` er installeret og aktiv: `POST
-https://steamgears.eu/wp-json/mcp/mcp-adapter-default-server` svarer `401 rest_forbidden`, ikke `404` — ruten
-findes, den afviser bare uden credential. Den bruger **WordPress' egen REST-auth**, altså et application
-password over Basic, ikke en Bearer-nøgle:
-
-1. wp-admin → **Users → Profile → Application Passwords** → opret en (fx »codebuff-agent«) og kopiér den
-   viste adgangskode.
-2. Læg `brugernavn:app-password` på én linje i den gitignored fil `mcp_rest.txt` i roden.
-3. `python3 tools/mcp_rest.py --import mcp_rest.txt` — tester mod adapteren, gemmer `MCP_USER` og
-   `MCP_APP_PASSWORD` i `.env` (mode 600) og sletter kildefilen. Derefter `--check` og `--call <værktøj> '<json>'`.
-
-Adapteren eksponerer sine egne tre meta-værktøjer (`discover-abilities`, `get-ability-info`, `execute-ability`)
-plus de abilities der er markeret **public**; WordPress-abilities er private som udgangspunkt. Steamgears
-Autopilot registrerer sine værktøjer gennem Royal MCP, så de dukker **ikke** op her — til gengæld er
-`wp_get_plugins`-typen arbejde muligt, hvis en ability for det er registreret offentligt. Målt med forkert
-brugernavn: `401 Unknown username. Check again or try your email address.` — altså svarer WordPress selv, og
-Basic-auth er den rigtige vej ind ad denne rute.
-
-### Alternativ: OAuth
-
-Royal MCP foretrækker OAuth2 (`authorization_code` med PKCE S256, dynamisk klientregistrering,
-`refresh_token`, scope `mcp:full`). Det kræver en browser med en aktiv WP-admin-session:
+### 1. Forbind med OAuth (den vej der virker)
 
 ```bash
-claude mcp add --transport http steamgears-oauth https://steamgears.eu/mcp
+python3 tools/mcp_oauth.py --start           # registrerer klient (én gang) og printer godkendelseslinket
+# åbn linket i browseren, log ind som administrator, godkend
+python3 tools/mcp_oauth.py --finish '<kode>' # eller hele adressen fra adresselinjen
+python3 tools/mcp_rest.py --check            # initialize + tools/list
 ```
 
-Kør derefter `claude` og vælg `/mcp` → *Authenticate*. Claude Code registrerer klienten selv og fornyer
-tokens automatisk, uden miljøvariabel. Vælg OAuth hvis nøglen skal kunne rotere uden manuelt arbejde; vælg
-application password hvis forbindelsen skal køre i miljøer uden browser.
+- Redirect er `http://127.0.0.1:8765/callback`, som **ikke** har nogen lytter: siden kan ikke indlæses, og
+  det er med vilje. Kopier hele adressen fra browserens adresselinje (eller bare `code=`-værdien) og kør
+  `--finish` med det samme — koden lever kun kort.
+- Klient og tokens ligger i `~/.config/steamgears-mcp/` (`client.json`, `tokens.json`) med mode `600`, uden
+  for repoet, så de ikke kan committes ved et uheld. `--status` viser om der er et gyldigt token.
+- Access-tokenet er kortlivet, og `refresh_token` fornyer det automatisk: `mcp_rest.py` spørger
+  `mcp_oauth.access_token()`, som fornyer når udløbstiden er passeret. `--refresh` gør det manuelt.
+- PKCE-verifieren bliver i `client.json` og står aldrig i linket; `--finish` rydder den efter brug.
+
+### 2. Alternativ: application password
+
+`python3 tools/mcp_rest.py --ask` (getpass, ingen echo) gemmer `MCP_USER`/`MCP_APP_PASSWORD` i `.env` med
+mode 600 og bruger Basic-auth. Om AI Engines rute accepterer Basic er **ikke målt endnu** — den er en
+almindelig WordPress-REST-rute, så chancen er god, men OAuth er den dokumenterede vej. Klienten foretrækker
+Bearer og falder kun tilbage til Basic når der ikke er et token.
+
+### 3. Verificér
+
+```bash
+python3 tools/mcp_oauth.py --status
+python3 tools/mcp_rest.py --check
+python3 tools/mcp_rest.py --abilities --diff docs/library/mcp-adapter-abilities.csv
+python3 tools/mcp_rest.py --abilities --csv /tmp/abilities-live.csv
+```
+
+`--diff` svarer med `mangler_live` og `ikke_i_arket`, så regnearket kan rettes mekanisk i stedet for ved
+gennemlæsning. Klassificeringen af skrive-værktøjer er testet i `tools/test_mcp_rest.py` (14 fixtures) og
+OAuth-flowet i `tools/test_mcp_oauth.py` (10 fixtures, lokal authorization server).
+
+### Fejlsøgning
+
+| Svar | Betydning | Rettelse |
+| --- | --- | --- |
+| `401 rest_forbidden` | intet gyldigt token | kør `--start`/`--finish`, eller `--ask` |
+| `400 invalid_grant` | koden er brugt, udløbet eller hører til en anden klient | kør `--start` igen og godkend på nyt |
+| `400 invalid_request` ved `/register` | redirect-URI eller grant-type afvist | brug `http://127.0.0.1:8765/callback` præcis som klienten registrerer |
+| `454` / `455` | Simplys WAF på HTML | åbn linket i en rigtig browser, ikke fra worktreen |
+| `404 rest_no_route` | forkert sti | ruten er `/wp-json/mcp/v1/http`, ikke `/mcp` |
+| tomt `tools/list` | forbundet, men ingen værktøjer eksponeret | tjek AI Engines MCP-indstillinger i wp-admin |
 
 ## Publer (`publer`)
 
@@ -296,28 +166,30 @@ printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | python3 tools/m
 
 ## Sikkerhed
 
-- API-nøglen er **én pr. site** og arver den WP-bruger der oprettede den. Lav den fra en dedikeret
-  administratorkonto, ikke den daglige konto.
-- Rotering af nøgler står som åbent punkt i
-  [`library/sikkerhed-ai-engine-2026-11-01.md`](library/sikkerhed-ai-engine-2026-11-01.md). Rotér i wp-admin
-  (eller `wp royal-mcp rotate-api-key`) når nøglen ikke længere bruges; 1.5.14+ kan slå den helt fra.
-- Nøglen må ikke stå i `.mcp.json`, i commits, i logs eller i chat — kun i miljøvariablen, i `.env`
-  (gitignored) eller i `~/.royal_mcp_key` uden for repoet.
-- Broen (`wp_mcp_stdio.py`) printer aldrig nøglen: fejl citeres som `HTTP 401` uden header-indhold.
+- Tokenet arver den WP-bruger der godkender OAuth-flowet. Godkend som en dedikeret administratorkonto, ikke
+  den daglige konto, og kun med scope `mcp`.
+- Godkendelser og aktive tokens bør ryddes op jævnligt i wp-admin (AI Engine), og et token der ikke længere
+  bruges skal tilbagekaldes — ikke bare slettes lokalt. Det står som åbent punkt i
+  [`library/sikkerhed-ai-engine-2026-11-01.md`](library/sikkerhed-ai-engine-2026-11-01.md).
+- Token og refresh-token ligger i `~/.config/steamgears-mcp/` med mode `600`, aldrig i `.mcp.json`, i commits,
+  i logs eller i chat. Klienten printer kun længder og serverens svar, aldrig værdien.
+- `refresh_token` er den følsomme del: den giver nye access-tokens uden nyt ejerklik. Tilbagekald den i
+  wp-admin hvis maskinen har været delt.
 - Publer-nøglen hører i `PUBLER_API_KEY`, ikke i URL'en: `?api_key=` lækker nemt gennem logs, historik og
   skærmbilleder. Nøglen giver adgang til workspaces og konti, og scopes afgør hvor meget agenten kan.
 - Har en nøgle været eksponeret: tilbagekald den i WordPress **først**, og opret derefter en ny.
 
 ## Referencer
 
-- [`.mcp.json`](../.mcp.json) — `steamgears`-serveren med `Bearer ${ROYAL_MCP_API_KEY}`.
-- [`wp_mcp_stdio.py`](../wp_mcp_stdio.py) — stdio-bro til samme endpoint, med Bearer-nøgle og `Mcp-Session-Id`.
-  `--check` laver `initialize` + `tools/list` og skriver ét JSON-svar på stdout.
-- [`seo_agent.py`](../seo_agent.py) — `call_royal_mcp()` sender stadig **Basic** og får derfor `401` på
-  MCP-ruten. Brug `wp_mcp_stdio.py` i stedet, eller skift funktionen til Bearer-nøglen.
-- [Royal MCP — API-nøgler](https://royalplugins.com/support/royal-mcp/api-keys/) — nøgleformat og rotation.
-- [Royal MCP — threat model](https://royalplugins.com/support/royal-mcp/direct-connect-threat-model/) — hvorfor der ikke findes anonym adgang.
-- [Royal MCP på WordPress.org](https://wordpress.org/plugins/royal-mcp/advanced/) — version og Free/Pro-fordeling.
-- [`seo_agent.py`](../seo_agent.py) — `call_royal_mcp()` kalder samme endpoint.
+- [`.mcp.json`](../.mcp.json) — `steamgears`-serveren med `Bearer ${MCP_ACCESS_TOKEN}`.
+- [`tools/mcp_oauth.py`](../tools/mcp_oauth.py) — registrering, PKCE-link, token-udveksling og fornyelse.
+  `--status` viser om der er et gyldigt token.
+- [`tools/mcp_rest.py`](../tools/mcp_rest.py) — `--check`, `--abilities`, `--diff`, `--csv`, `--call`.
+- [`tools/test_mcp_oauth.py`](../tools/test_mcp_oauth.py) og [`tools/test_mcp_rest.py`](../tools/test_mcp_rest.py)
+  — 24 fixtures mod lokale efterligninger, ingen credential nødvendig.
+- [`seo_agent.py`](../seo_agent.py) — `call_mcp()` sender Bearer fra `MCP_ACCESS_TOKEN` mod samme endpoint.
+- [MCP — authorization](https://modelcontextprotocol.io/specification/2025-06-18/basic/authorization) —
+  OAuth 2.1, PKCE og resource-indikatoren som AI Engine følger.
+- [AI Engine](https://meowapps.com/ai-engine/) — plugin'et bag `/wp-json/mcp/v1/`.
 - [Publer MCP — officiel opsætning](https://publer.com/help/en/article/how-to-set-up-and-use-publers-mcp-server-14orlq0/) — OAuth og API-nøgle, opdateret 15/10 2026.
 - [Publer MCP — integrationsside](https://publer.com/integrations/mcp) — endpoint og OAuth-flow.

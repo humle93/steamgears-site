@@ -275,7 +275,7 @@ AIMLAPI. Tre forbehold:
 2. **Kilden er scraping.** Google Suggest (uofficielt endpoint) og DuckDuckGo HTML med random user-agents og
    1,5–2,8 s forsinkelse. Det kan blokeres uden varsel og har ingen SLA.
 3. **Deploy-stien kræver den adgang vi ikke har.** `WP_USER`/`WP_APP_PASS` + `AIMLAPI_KEY`; vores REST-forsøg
-   på sitet giver 401, og MCP-endpointet kræver `ROYAL_MCP_AUTH`.
+   på sitet giver 401, og MCP-endpointet kræver `MCP_ACCESS_TOKEN`.
 
 Sammenlignet med [`tools/niche_scanner.py`](../../tools/niche_scanner.py) er formålet det samme, men princippet
 modsat: vores scanner læser Pinterests officielle trends-endpoint og skriver `utilgængelig` når en kilde

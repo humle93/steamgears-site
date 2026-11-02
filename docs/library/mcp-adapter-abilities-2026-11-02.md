@@ -31,7 +31,7 @@ mange evner.
 | `POST /wp-json/mcp/mcp-adapter-default-server` | `401 rest_forbidden` | Adapteren er aktiv; den afviser kun uden credential |
 | `GET /wp-json/wp-abilities/v1/abilities` | `401 rest_forbidden` | Abilities-API'et findes, men kræver login |
 | `GET /wp-json/mcp/v1/servers` | `404 rest_no_route` | Findes ikke |
-| `.well-known/mcp/server-card.json` | `404` | Væk — de filer tilhørte Royal MCP |
+| `.well-known/mcp/server-card.json` | `404` | Væk — de filer tilhørte den tidligere MCP-server |
 
 Der er ingen vej til at liste abilities anonymt. Alt nedenstående om *hvilke* abilities der findes,
 kommer derfor fra WooCommerce' og WordPress' egen dokumentation, og er markeret som
@@ -66,7 +66,7 @@ indlæg) alle er side- og indlægsarbejde.
 `wp-json/wp-abilities/v1/abilities/{navn}/run`. Det er de rækker i regnearket der er markeret
 `(REST)` med nytte 5, og de er den realistiske vej til S2-arbejdet. En ting skal testes før vi
 regner med det: om Rank Math eksponerer `rank_math_title` og `rank_math_description` i REST-meta
-for en bruger med `edit_posts`. Gør den ikke, skal meta sættes et andet sted, og så er Royal MCP
+for en bruger med `edit_posts`. Gør den ikke, skal meta sættes et andet sted, og så er MCP-adgangen
 igen den eneste vej.
 
 ## 4. Brugbarhedsscoren
@@ -83,7 +83,7 @@ roadmap:
 | 1 | Brug ikke | de ni udfasede REST-spejle, `order-add-note` |
 
 Syv rækker har nytte 5. Det er dem der afgør om adapter-vejen er noget værd: kan `product-update`
-og `wp/v2/pages` skrive, er 8 af S2's poster gennemførlige uden Royal MCP.
+og `wp/v2/pages` skrive, er 8 af S2's poster gennemførlige uden MCP-skriveadgang.
 
 ## 5. Sådan fyldes regnearket med rigtige tal
 

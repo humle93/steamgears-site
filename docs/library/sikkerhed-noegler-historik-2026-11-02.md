@@ -41,7 +41,7 @@ for alle, der har klonet repoet, og for eventuelle forks.
 Rækkefølgen er valgt, så adgangen ikke bryder sammen undervejs: ny legitim adgang først, derefter lukning af
 den gamle.
 
-1. **Kortlæg hvem der bruger WP-adgangen.** `seo_agent.py` (env), CI-secret `WP_APP_PASS`, MCP (`ROYAL_MCP_AUTH`)
+1. **Kortlæg hvem der bruger WP-adgangen.** `seo_agent.py` (env), CI-secret `WP_APP_PASS`, MCP (`MCP_ACCESS_TOKEN`)
    og Command Centerets egen `.env`. Alle fire steder skal have den nye værdi.
 2. **Opret nyt application password** i wp-admin → Brugere → Profil → Application Passwords. Giv det et navn,
    der siger hvad det bruges til (fx `ci-seo-audit`), og brug en bruger med de rettigheder opgaven kræver —

@@ -1,6 +1,6 @@
 # Indholdsaudit 1/11 2026 — posts, sider og produkter
 
-_Kørt 1/11 2026 via MCP-forbindelsen til steamgears.eu (Royal MCP, kun læsende værktøjer) · gælder siden, ikke dette repo_
+_Kørt 1/11 2026 via MCP-forbindelsen til steamgears.eu (MCP, kun læsende værktøjer) · gælder siden, ikke dette repo_
 
 ## TL;DR
 

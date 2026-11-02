@@ -107,7 +107,7 @@ S2 og S3 var opdateret i JSON men ikke i tabellen.
 
 | Blokering | Hvem | Effekt |
 | --- | --- | --- |
-| Ingen `ROYAL_MCP_TOKEN` i miljøet | ejer: Royal MCP → Settings → WordPress API Key → ind i Settings → Secrets | Ingen skrivning til sitet: ingen publicering, ingen nav-ændring, ingen meta-fix |
+| Ingen MCP-credential i miljøet | ejer: godkend OAuth-linket fra `tools/mcp_oauth.py --start` | Ingen skrivning til sitet: ingen publicering, ingen nav-ændringer |
 | Bot-blokering (454/455) | ejer/host: Simply | Uafklaret om søgemaskiner kan læse sitet — S0.7 kan ikke lukkes før |
 | Redirection uden gruppe | ejer: Tools → Redirection → Add Group | De sidste to vanity-301 kan ikke oprettes via MCP |
 | Manglende CVR/adresse/telefon | ejer | GPSR-blok, `/shipping/`, `/returns/` kan ikke publiceres korrekt |
