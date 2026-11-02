@@ -199,6 +199,35 @@ class AdapterTest(unittest.TestCase):
         finally:
             sys.argv = argv
 
+    def test_13_diff_mod_regnearket(self):
+        sheet = Path(self.tmp.name) / "sheet.csv"
+        sheet.write_text(
+            "ability,kilde,type\n"
+            "mcp-adapter/execute-ability,adapter,skrive\n"
+            "(REST) wp/v2/pages,core,skrive\n"
+            "woocommerce/product-delete,woo,skrive\n",
+            encoding="utf-8",
+        )
+        self.assertEqual(mcp_rest.sheet_names(sheet), [
+            "mcp-adapter/execute-ability", "wp/v2/pages", "woocommerce/product-delete",
+        ])
+        summary = mcp_rest.compare([mcp_rest.classify(tool) for tool in TOOLS], mcp_rest.sheet_names(sheet))
+        self.assertEqual(summary["live"], len(TOOLS))
+        self.assertIn("mcp-adapter/execute-ability", summary["live_skriver"])
+        self.assertIn("woocommerce/product-update", summary["live_skriver"])
+        self.assertNotIn("woocommerce/products-query", summary["live_skriver"])
+        self.assertEqual(summary["mangler_live"], ["wp/v2/pages", "woocommerce/product-delete"])
+        self.assertEqual(summary["ikke_i_arket"], ["mcp-adapter/discover-abilities",
+                                                   "mcp-adapter/get-ability-info",
+                                                   "woocommerce/product-update",
+                                                   "woocommerce/products-query"])
+
+    def test_14_diff_mod_tomt_regneark(self):
+        self.assertEqual(mcp_rest.sheet_names(Path(self.tmp.name) / "findes-ikke.csv"), [])
+        summary = mcp_rest.compare([mcp_rest.classify(TOOLS[0])], [])
+        self.assertEqual(summary["mangler_live"], [])
+        self.assertEqual(summary["ikke_i_arket"], ["mcp-adapter/discover-abilities"])
+
     def test_12_import_afviser_kort_password(self):
         bad = Path(self.tmp.name) / "mcp_rest.txt"
         bad.write_text(f"{USER}:kort\n", encoding="utf-8")

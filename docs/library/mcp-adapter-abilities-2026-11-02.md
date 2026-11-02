@@ -94,9 +94,18 @@ python3 tools/mcp_rest.py --ask                                  # getpass, skri
 python3 tools/mcp_rest.py --abilities --csv /tmp/abilities-live.csv
 ```
 
-Den anden kommando skriver hvert værktøj med `navn, skriver, rammer, parametre, beskrivelse`, så
-den kan sammenlignes med den kuraterede fil række for række. Kommandoen findes allerede som
-`--abilities` (JSON) og nu også med `--csv`.
+Den anden kommando skriver hvert værktøj med `navn, skriver, rammer, parametre, beskrivelse`. Til
+sammenligningen findes `--diff`, som læser den kuraterede fil og svarer med tre lister:
+
+```bash
+python3 tools/mcp_rest.py --abilities --diff docs/library/mcp-adapter-abilities.csv
+# {"live": ..., "live_skriver": [...], "mangler_live": [...], "ikke_i_arket": [...]}
+```
+
+`mangler_live` er rækker i regnearket som sitet ikke udstiller (fx de udfasede Woo-spejle eller
+Woo-abilities der ikke er slået til på 11.2.1), og `ikke_i_arket` er værktøjer på sitet som
+research'en ikke kendte. Det er de to lister der afgør hvad der skal rettes i regnearket — ikke
+en manuel gennemlæsning af 24 rækker.
 
 Optællingen er testet uden credential: `python3 tools/test_mcp_rest.py` starter en lokal
 efterligning af adapteren (JSON-RPC over POST, Basic-auth, SSE-frames) og kører 12 fixtures mod

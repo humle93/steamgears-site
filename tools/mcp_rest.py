@@ -202,7 +202,34 @@ def classify(tool: dict) -> dict:
             "desc": description[:120]}
 
 
-def abilities(user: str, secret: str, csv_path: Path | None = None) -> int:
+def sheet_names(path: Path) -> list[str]:
+    """Læs ability-navnene fra det kuraterede regneark (kolonne 1, `(REST) `-præfiks fjernet)."""
+    import csv as _csv
+
+    if not path.exists():
+        return []
+    with path.open(encoding="utf-8") as handle:
+        rows = list(_csv.DictReader(handle))
+    names = []
+    for row in rows:
+        name = re.sub(r"^\(REST\)\s*", "", (row.get("ability") or "").strip()).strip()
+        if name:
+            names.append(name.lower())
+    return names
+
+
+def compare(rows: list[dict], known: list[str]) -> dict:
+    """Sammenlign den levende værktøjsliste med regnearket, så opdateringen bliver mekanisk."""
+    live = {row["name"].lower(): row for row in rows if row.get("name")}
+    return {
+        "live": len(live),
+        "live_skriver": sorted(name for name, row in live.items() if row["write"]),
+        "mangler_live": [name for name in known if name not in live],
+        "ikke_i_arket": sorted(name for name in live if name not in known),
+    }
+
+
+def abilities(user: str, secret: str, csv_path: Path | None = None, diff_path: Path | None = None) -> int:
     ok, detail = handshake(user, secret)
     if not ok:
         print(json.dumps({"ok": False, "error": detail}, ensure_ascii=False))
@@ -220,6 +247,13 @@ def abilities(user: str, secret: str, csv_path: Path | None = None) -> int:
         print(f"Skrev {len(rows)} værktøjer til {csv_path}")
         return 0
 
+    if diff_path is not None:
+        summary = compare(rows, sheet_names(diff_path))
+        summary["ok"] = True
+        summary["status"] = status
+        print(json.dumps(summary, ensure_ascii=False, indent=1))
+        return 0
+
     print(json.dumps({"ok": True, "status": status, "tools": len(rows), "rows": rows}, ensure_ascii=False, indent=1))
     return 0
 
@@ -231,18 +265,21 @@ def main() -> int:
     if args[:1] == ["--import"]:
         return import_file(Path(args[1]) if len(args) > 1 else ROOT / "mcp_rest.txt")
     if args[:1] == ["--abilities"]:
-        csv_path = None
-        if "--csv" in args:
-            at = args.index("--csv")
+        paths = {}
+        for flag in ("--csv", "--diff"):
+            if flag not in args:
+                paths[flag] = None
+                continue
+            at = args.index(flag)
             if at + 1 >= len(args):
-                print(json.dumps({"ok": False, "error": "--csv kraever en sti"}, ensure_ascii=False))
+                print(json.dumps({"ok": False, "error": f"{flag} kraever en sti"}, ensure_ascii=False))
                 return 1
-            csv_path = Path(args[at + 1])
+            paths[flag] = Path(args[at + 1])
         user, secret = read_credentials()
         if not user or not secret:
             print(json.dumps({"ok": False, "error": "ingen MCP_USER/MCP_APP_PASSWORD — kør --ask"}, ensure_ascii=False))
             return 1
-        return abilities(user, secret, csv_path)
+        return abilities(user, secret, paths["--csv"], paths["--diff"])
 
     user, secret = read_credentials()
     if not user or not secret:
