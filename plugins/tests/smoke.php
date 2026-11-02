@@ -8,10 +8,10 @@ define('ABSPATH', __DIR__.'/fixtures/'); define('DAY_IN_SECONDS',86400); define(
 $GLOBALS['actions']=[]; $opts=[]; $settings=[];
 function add_action($h,$cb){ $GLOBALS['actions'][$h][]=$cb; } function add_filter($h,$cb){ $GLOBALS['actions'][$h][]=$cb; }
 function apply_filters($h,$v){return $v;}
-function do_action($h){ foreach($GLOBALS['actions'][$h]??[] as $cb) call_user_func($cb); }
+function do_action($h,...$a){ foreach($GLOBALS['actions'][$h]??[] as $cb) call_user_func_array($cb,$a); }
 function register_activation_hook(...$a){} function register_deactivation_hook(...$a){}
 function is_admin(){return true;} function get_option($k,$d=false){return $GLOBALS['opts'][$k]??$d;}
-function update_option($k,$v){$GLOBALS['opts'][$k]=$v;} function add_option($k,$v){$GLOBALS['opts'][$k]??=$v;}
+function update_option($k,$v){$GLOBALS['opts'][$k]=$v;} function add_option($k,$v){$GLOBALS['opts'][$k]??=$v;} function wp_mail($to,$s,$b){$GLOBALS['mails'][]=[$to,$s,$b]; return true;}
 function register_setting($g,$k,$a){ $GLOBALS['settings'][$k]=$a; } function wp_clear_scheduled_hook($h){}
 function add_menu_page($t,$m,$c,$slug,$cb){ add_action('page_'.$slug,$cb);} function add_submenu_page($p,$t,$m,$c,$slug,$cb){ add_action('page_'.$slug,$cb);}
 function esc_html($s){return htmlspecialchars((string)$s);} function esc_attr($s){return htmlspecialchars((string)$s);} function esc_url($s){return $s;}
@@ -33,9 +33,9 @@ class WP_REST_Request implements ArrayAccess{ function __construct(public array 
 function wp_next_scheduled($h){return false;} function wp_schedule_event(...$a){$GLOBALS['cron'][]=$a[2];} function flush_rewrite_rules($h=true){$GLOBALS['flushed']=1;} function add_rewrite_rule(...$a){$GLOBALS['rules'][]=$a[0];} function wp_set_option_autoload_values($a){$GLOBALS['noauto']=$a;}
 class W{ public $prefix='wp_'; public $posts='wp_posts'; public $postmeta='wp_postmeta'; function get_charset_collate(){return '';} public $insert_id=0; public $log=[]; public $next=null;
  function get_var($q){$this->log[]=$q; return $this->next;} function prepare($q,...$a){ if(count($a)==1&&is_array($a[0]))$a=$a[0]; return vsprintf(str_replace(['%s','%d','%f'],["'%s'",'%d','%F'],$q),$a);} function esc_like($s){return $s;}
- function get_results($q,$o=null){$this->log[]=$q;return [];} function get_row($q){$this->log[]=$q;return null;} function query($q){$this->log[]=$q;return 0;}
- function insert($t,$d){$this->log[]="INSERT $t ".json_encode($d); $this->insert_id=42; return 1;} function update($t,$d,$w){$this->log[]="UPDATE $t";return 1;} }
-$wpdb=new W;
+ function get_results($q,$o=null){$this->log[]=$q;return [];} function get_row($q){$this->log[]=$q;return $this->row ?? null;} function query($q){$this->log[]=$q;return 0;}
+ function insert($t,$d){$this->log[]="INSERT $t ".json_encode($d); $this->insert_id=42; return 1;} function update($t,$d,$w){$this->log[]="UPDATE $t ".json_encode($d);return 1;} }
+$wpdb=new W; $wpdb->row=null;
 require __DIR__.'/../steamgears-autopilot/steamgears-autopilot.php';
 function check($name,$ok){ echo ($ok?'PASS ':'FAIL ')."$name\n"; if(!$ok) $GLOBALS['fail']=1; }
 do_action('init'); do_action('admin_init'); do_action('admin_menu');
@@ -125,5 +125,46 @@ check('bot: Publer link scraper is not a click', SGAP_Tracking::is_bot('facebook
 check('updater: reads Version from a plugin header', SGAP_Updater::parse_version("<?php\n/**\n* Plugin Name: X\n* Version: 7.6.2\n*/")==='7.6.2');
 check('updater: no version in junk', SGAP_Updater::parse_version('404: Not Found')==='');
 check('updater: package url points at the versioned zip on main', SGAP_Updater::package_url('7.6.2')==='https://raw.githubusercontent.com/humle93/steamgears-site/main/plugins/steamgears-autopilot-v7.6.2.zip');
-echo empty($GLOBALS['fail'])?"ALL PASS\n":"SOME FAILED\n";
+// --- Alerts: P0.1 failed post, P0.2 queue running dry ---
+$GLOBALS['mails']=[];
+update_option('admin_email','admin@example.com'); update_option('sgap_alert_mode','immediate');
+update_option('sgap_alert_email','ops@example.com'); update_option('sgap_alert_dry_days',2); update_option('sgap_daily_cap',8);
+delete_option('sgap_alerts_last');
+check('alerts: hook registered on queue failure', in_array([SGAP_Alerts::class,'on_failure'],$GLOBALS['actions']['sgap_queue_failed']??[],true));
+check('alerts: configured recipient wins', SGAP_Alerts::recipient()==='ops@example.com');
+delete_option('sgap_alert_email');
+check('alerts: empty recipient falls back to the admin address', SGAP_Alerts::recipient()==='admin@example.com');
+update_option('sgap_alert_email','ops@example.com');
+SGAP_Alerts::on_failure(7,'pinterest','token expired');
+check('alerts: failure mailed once with item id and reason', count($GLOBALS['mails'])===1 && str_contains($GLOBALS['mails'][0][2],'#7') && str_contains($GLOBALS['mails'][0][2],'token expired'));
+SGAP_Alerts::on_failure(7,'pinterest','token expired');
+check('alerts: the same item is not mailed twice inside the window', count($GLOBALS['mails'])===1);
+SGAP_Alerts::on_failure(8,'facebook','boom');
+check('alerts: a different item is mailed', count($GLOBALS['mails'])===2);
+update_option('sgap_alert_mode','off');
+SGAP_Alerts::on_failure(9,'facebook','boom');
+check('alerts: off mode sends nothing', count($GLOBALS['mails'])===2);
+$wpdb->next=20; check('alerts: runway = queued / daily cap', SGAP_Alerts::runway_days()===2.5);
+update_option('sgap_alert_mode','immediate'); delete_option('sgap_alerts_last');
+$wpdb->next=40; SGAP_Alerts::after_health([]);
+check('alerts: five days of queue is not a warning', count($GLOBALS['mails'])===2);
+$wpdb->next=8; SGAP_Alerts::after_health([]);
+check('alerts: one day of queue sends the dry warning', count($GLOBALS['mails'])===3 && str_contains($GLOBALS['mails'][2][1],'running dry'));
+update_option('sgap_alert_mode','daily'); delete_option('sgap_alerts_last');
+$wpdb->next=0; SGAP_Alerts::after_health(['problems'=>['The autopilot is off.']]);
+check('alerts: daily mode sends one digest listing the problems', count($GLOBALS['mails'])===4 && str_contains($GLOBALS['mails'][3][2],'The autopilot is off.'));
+// --- Retry with backoff (P0.3) ---
+check('backoff: 5, 15, 45 minutes by attempt', SGAP_Queue::retry_delay_minutes(1)===5 && SGAP_Queue::retry_delay_minutes(2)===15 && SGAP_Queue::retry_delay_minutes(3)===45);
+check('backoff: clamped at both ends', SGAP_Queue::retry_delay_minutes(0)===5 && SGAP_Queue::retry_delay_minutes(99)===45);
+$wpdb->row=(object)['channel'=>'pinterest','angle'=>'angle_a','attempts'=>1]; $wpdb->log=[];
+$new=SGAP_Queue::mark(11,'failed','token expired');
+check('backoff: first failure requeues instead of failing', $new==='queued' && str_contains(end($wpdb->log),'"scheduled_at"'));
+$wpdb->row=(object)['channel'=>'pinterest','angle'=>'angle_a','attempts'=>3]; $wpdb->log=[]; update_option('sgap_alert_mode','off');
+$new=SGAP_Queue::mark(12,'failed','token expired');
+check('backoff: last attempt fails without a new schedule', $new==='failed' && !str_contains(end($wpdb->log),'"scheduled_at"'));
+$wpdb->row=(object)['channel'=>'pinterest','angle'=>'angle_a','attempts'=>1]; $wpdb->log=[];
+$new=SGAP_Queue::mark(13,'published');
+check('backoff: publishing is untouched by the retry path', $new==='published' && str_contains(implode("\n",$wpdb->log),'"published_at"'));
+$wpdb->row=null;
+$wpdb->next=null;
 exit(empty($GLOBALS['fail'])?0:1);

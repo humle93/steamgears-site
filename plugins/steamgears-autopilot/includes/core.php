@@ -51,6 +51,9 @@ class SGAP_Install {
         'sgap_auto_seo' => 'yes',
         'sgap_auto_publish_articles' => 'no',
         'sgap_weekly_report' => 'yes',
+        'sgap_alert_mode' => 'immediate',
+        'sgap_alert_email' => '',
+        'sgap_alert_dry_days' => 2,
         'sgap_articles_per_week' => 0,
         'sgap_rescue_hosts' => 'steamgears.juno.page'
     ];
@@ -286,7 +289,7 @@ class SGAP_Settings {
     const HOUR_KEYS = ['quiet_start', 'quiet_end'];
     const INT_KEYS = [
         'daily_cap','batch_size','labor_rate','monthly_budget','target_roi',
-        'winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max','posts_per_day','articles_per_week'
+        'winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max','posts_per_day','articles_per_week','alert_dry_days'
     ];
     /** Never echoed back to the browser; can be overridden by SGAP_<KEY> constants in wp-config.php. */
     const SECRET_KEYS = [
@@ -297,12 +300,13 @@ class SGAP_Settings {
     const TEXT_KEYS = [
         'publer_workspace_id','publer_pinterest_board','channels','ai_model','ai_base_url','image_model','content_language','rescue_hosts',
         'telegram_chat_id','email_test_recipient','youtube_channel_id','reddit_username',
-        'reddit_subreddit','etsy_shop_id','etsy_shipping_profile_id','etsy_return_policy_id','ai_mode'
+        'reddit_subreddit','etsy_shop_id','etsy_shipping_profile_id','etsy_return_policy_id','ai_mode','alert_email'
     ];
     /** Settings with a fixed list of values, shown as a select. */
     const CHOICE_KEYS = [
         'publish_mode' => ['rss' => 'RSS feeds (Publer Professional)', 'api' => 'Publer API (Publer Business)'],
-        'ai_provider' => ['anthropic' => 'Anthropic (Claude)', 'aimlapi' => 'AIMLAPI (Claude and 300+ other models)', 'openai_compatible' => 'Other OpenAI-compatible API (OpenAI, OpenRouter, ...)']
+        'ai_provider' => ['anthropic' => 'Anthropic (Claude)', 'aimlapi' => 'AIMLAPI (Claude and 300+ other models)', 'openai_compatible' => 'Other OpenAI-compatible API (OpenAI, OpenRouter, ...)'],
+        'alert_mode' => ['immediate' => 'Immediate — one mail per failed post, plus one when the queue runs dry', 'daily' => 'Daily digest — one mail a day from the self-check', 'off' => 'Off — the dashboard still shows the problems']
     ];
 
     /** Shown in the settings page. Keys not listed here stay registered for older data but are unused. */
@@ -311,6 +315,7 @@ class SGAP_Settings {
         'Publer' => ['publish_mode','publer_api_key','publer_workspace_id','publer_pinterest_board','channels'],
         'AI content' => ['ai_provider','ai_api_key','ai_model','ai_base_url','posts_per_day','content_language','image_model','image_api_key','serpapi_key'],
         'Economics' => ['labor_rate','monthly_budget','target_roi','winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max'],
+        'Alerts' => ['alert_mode','alert_email','alert_dry_days'],
         'Etsy' => ['etsy_shop_id','etsy_oauth_token','etsy_refresh_token','etsy_shipping_profile_id','etsy_return_policy_id'],
         'Google Feed' => ['merchant_feed_secret']
     ];
@@ -342,6 +347,9 @@ class SGAP_Settings {
         'articles_per_week' => 'The AI picks topics the site does not cover yet and writes this many SEO articles a week. 0 = off.',
         'auto_publish_articles' => 'Off: weekly articles wait as drafts for you. On: they are published straight away.',
         'weekly_report' => 'A short e-mail every week: posts, clicks, orders per channel and anything that needs you.',
+        'alert_mode' => 'Immediate: a mail the moment a post gives up after three attempts, and one when the queue has less than the warning level left. Daily: the same information collected into one mail after the daily self-check. Off: nothing.',
+        'alert_email' => 'Where alerts go. Empty = the site admin address.',
+        'alert_dry_days' => 'Warn when the queue has fewer days of posts left than this, measured as queued posts divided by the daily cap. 0 = never warn.',
         'rescue_hosts' => 'Images on these servers are copied into your media library and every link is rewritten (comma-separated).'
     ];
 
@@ -614,6 +622,8 @@ class SGAP_Tracking {
 /* ---------------- QUEUE ---------------- */
 class SGAP_Queue {
     const MAX_ATTEMPTS = 3;
+    /** Minutes to wait before the next attempt, indexed by attempt number - 1. */
+    const BACKOFF_MINUTES = [5, 15, 45];
 
     private static function table(): string {
         global $wpdb;
@@ -754,6 +764,12 @@ class SGAP_Queue {
      * Records the outcome of a send. A failure goes back in the queue until it has
      * been tried MAX_ATTEMPTS times. Returns the new status, or null for an unknown id.
      */
+    /** Delay before the next attempt of a failed item: 5, then 15, then 45 minutes. */
+    public static function retry_delay_minutes(int $attempts): int {
+        $steps = self::BACKOFF_MINUTES;
+        return $steps[max(0, min(count($steps) - 1, $attempts - 1))];
+    }
+
     public static function mark(int $id, string $outcome, string $error = ''): ?string {
         global $wpdb;
         $item = $wpdb->get_row($wpdb->prepare('SELECT channel, angle, attempts FROM ' . self::table() . ' WHERE id = %d', $id));
@@ -763,15 +779,24 @@ class SGAP_Queue {
         if ($outcome === 'published') {
             $data = ['status' => 'published', 'published_at' => current_time('mysql'), 'error' => null];
         } else {
+            $retry = (int) $item->attempts < self::MAX_ATTEMPTS;
             $data = [
-                'status' => (int) $item->attempts < self::MAX_ATTEMPTS ? 'queued' : 'failed',
+                'status' => $retry ? 'queued' : 'failed',
                 'error' => sanitize_textarea_field($error),
                 'external_id' => ''
             ];
+            if ($retry) {
+                // Back off instead of spending every attempt inside the same 15-minute window:
+                // a token that expired at 09:00 is not fixed by 09:15.
+                $data['scheduled_at'] = wp_date('Y-m-d H:i:s', time() + self::retry_delay_minutes((int) $item->attempts) * MINUTE_IN_SECONDS);
+            }
         }
         $wpdb->update(self::table(), $data, ['id' => $id]);
         if ($data['status'] === 'published') {
             SGAP_ROI::record_event($id, $item->channel, $item->angle, 'publish');
+        } elseif ($data['status'] === 'failed') {
+            // Last attempt spent: tell someone now rather than leaving it on the Queue page.
+            do_action('sgap_queue_failed', $id, (string) $item->channel, (string) $error);
         }
         delete_transient('sgap_dashboard_stats');
         return $data['status'];

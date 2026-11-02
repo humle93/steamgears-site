@@ -170,8 +170,9 @@ The audit behind this release and the prioritised roadmap with effort estimates 
 [ROADMAP.md](ROADMAP.md). Two things worth knowing before you rely on this
 unattended:
 
-- A post that fails is retried up to three times the same day and then stays `failed` in the queue.
-  Nothing emails you - the weekly report is currently the only outgoing mail.
+- A post that fails is retried with backoff (5 → 15 → 45 minutes) and then stays `failed` in the queue.
+  Settings → Alerts mails you when that happens and when the queue is running dry; `daily` mode collects
+  both into one digest after the self-check.
 - The Etsy API settings and the direct Instagram/Pinterest/TikTok/YouTube/Reddit/Telegram keys are
   registered but unused. Publishing goes through Publer (RSS feeds or API), and `/etsy/orders` takes a
   manual import.

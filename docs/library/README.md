@@ -100,6 +100,7 @@ Høstede Google-kilder i [`knowledge_base/`](../../knowledge_base/) (indlæses a
 ## Repoets hoveddokumenter
 
 - [`../../README.md`](../../README.md) — repoets indgang og mappestruktur
+- [`../plan-til-16-2026-11-02.md`](../plan-til-16-2026-11-02.md) — dagens tidsplan 07:00–16:00: P0-blokken i pluginnet, blokeringerne og definitionen på færdig
 - [`../roadmap.md`](../roadmap.md) — **den eneste** optimeringsplan for sitet (S0–S4)
 - [`../seo.md`](../seo.md) — **det eneste** SEO-dokument: regler, GEO-skabelon, måling
 - [`../../plugins/steamgears-autopilot/ROADMAP.md`](../../plugins/steamgears-autopilot/ROADMAP.md) — plugin-produktets egen roadmap

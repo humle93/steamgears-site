@@ -190,9 +190,9 @@ Effort is developer-days for one developer who knows this codebase, excluding wa
 
 | # | Item | Why | Effort | Depends on |
 | --- | --- | --- | --- | --- |
-| P0.1 | Failure alerting: mail the configured address on `failed`, plus a daily digest with the error text and a link to the queue row; reuse `email_test_recipient` and the existing `wp_mail` path | Today a broken token or a Publer outage is invisible | 0.5 d | — |
-| P0.2 | "Running dry" alert: if a channel has fewer than N queued items for the next 7 days, say so in the digest | Silent gaps are the classic autopilot failure | 0.5 d | P0.1 |
-| P0.3 | Retry with backoff: `next_attempt_at` on the queue, 5 min → 30 min → 2 h, then a terminal `failed` list viewable and re-queuable in wp-admin | Three immediate retries can all fail during one outage | 1.0 d | — |
+| P0.1 | ✅ **Done 2/11** — `includes/alerts.php` (`SGAP_Alerts`): `SGAP_Queue::mark()` fires `sgap_queue_failed`, the alert mails the error text and a link to the queue row. Deduplicated per item for 6 h and capped at 5 mails/hour so a dead channel cannot storm the inbox. Modes `immediate` / `daily` / `off` under Settings → Alerts; recipient has its own setting (empty = admin address) rather than the unused `email_test_recipient` | Today a broken token or a Publer outage is invisible | 0.5 d | ✅ |
+| P0.2 | ✅ **Done 2/11** — runway in days (`queued / daily_cap`) is checked in the daily self-check and warns below `alert_dry_days` (default 2, `0` = off); in `daily` mode it lands in the digest. Measured over the whole queue, not per channel: a per-channel alarm needs a per-channel cap, which does not exist yet | Silent gaps are the classic autopilot failure | 0.5 d | ✅ |
+| P0.3 | ✅ **Done 2/11** — backoff 5 → 15 → 45 minutes, written into the existing `scheduled_at` instead of a new `next_attempt_at` column: no schema change, and `claim()` already refuses items whose `scheduled_at` is in the future. The third attempt is still terminal `failed` and now also fires the P0.1 alert | Three immediate retries can all fail during one outage | 1.0 d | ✅ |
 | P0.4 | Cron honesty: detect `DISABLE_WP_CRON`, surface a Site Health test + the exact `wp-cron.php` line for real cron, document it in the README | On a cached site WP-Cron may not fire for hours; quiet hours then release posts late | 0.5 d (detect + docs) | — |
 | P0.5 | Publish audit log: one row per attempt (time, channel, HTTP status, response excerpt, actor) behind a **Log** tab | You cannot debug "why did this not post" from `error TEXT` alone | 1.0 d | — |
 | P0.6 | Cross-system duplicate guard: refuse a new item whose `channel`+`destination_url`+`title` fingerprint exists within N days, and expose the fingerprint in `/snapshot` | The Command Center bridge can hand over the same post twice | 0.5 d | CC side |
@@ -306,5 +306,6 @@ Platform limits: [Instagram content publishing](https://developers.facebook.com/
 
 | Date | Plugin | Change |
 | --- | --- | --- |
+| 2026-11-02 | 7.16.0 | P0.1–P0.3 shipped: `includes/alerts.php` (`SGAP_Alerts`) mails a failed post with its error and queue link, warns when the queue has fewer days left than `alert_dry_days`, and deduplicates both (6 h per item, 5 mails/hour, `immediate`/`daily`/`off`). `SGAP_Queue::mark()` now backs off 5 → 15 → 45 minutes via `scheduled_at` instead of spending all three attempts in one 15-minute window. New Settings → Alerts section; 16 smoke checks added (78 → 94). |
 | 2026-11-01 | 7.15.1 | Docs-only release: this roadmap, a README "Roadmap and known gaps" section, and smoke coverage for `sgap-setup`, `sgap-studio`, `sgap-chat`. |
 | 2026-11-01 | 7.15.0 | First audit: call-graph and settings inventory, smoke coverage extended to all 12 admin pages, research into set-and-forget gaps and platform limits, effort estimates added. |

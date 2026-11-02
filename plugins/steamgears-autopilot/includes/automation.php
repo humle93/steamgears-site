@@ -420,6 +420,9 @@ class SGAP_Auto {
         }
         $result = ['at' => current_time('mysql'), 'problems' => $problems, 'retried' => $retry];
         update_option(self::HEALTH, $result, false);
+        if (class_exists('SGAP_Alerts')) {
+            SGAP_Alerts::after_health($result);
+        }
         return $result;
     }
 
