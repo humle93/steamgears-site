@@ -18,7 +18,7 @@ typisk en voksen, der skal til cosplay, halloween, marked eller et temafest — 
 | --- | --- |
 | Platform | WordPress 7.1.4 + WooCommerce, PHP 8.5.12, hostet hos **Simply** |
 | Repo | Dokumentation, assets, plugin-kilde og status — **ikke** live-koden. Sitet ændres over MCP |
-| Katalog | **39 publicerede produkter** (posters, tees, hoodies, accessories), produceret via **Printify** |
+| Katalog | **56 publicerede produkter** (målt 2/11; heraf Herbarium-serien 953–972), produceret via **Printify** |
 | Indhold | **29 sider** + 18 guides i guide-stakken; sitemap har **108 URL'er** der alle svarer 200 |
 | Sprog | Engelsk på sitet, **dansk i commits og dokumentation** (tekniske termer på engelsk) |
 | Design | "Dark Clockwork Theatre v3"; template part til headeren ligger i [`css/`](../css/) |
@@ -27,7 +27,7 @@ Der er **fem aktive projekter**, alle målt i [`projektstatus.json`](../projekts
 
 | id | Projekt | Status | Enhed |
 | --- | --- | --- | --- |
-| `site` | steamgears.eu — site-optimering | 50,0 % (10,55 af 21,1 d) | developer-dage |
+| `site` | steamgears.eu — site-optimering | 54,0 % (11,4 af 21,1 d) | developer-dage |
 | `plugin` | Steamgears Autopilot — plugin | 29,0 % (6,95 af 24,0 d) | developer-dage |
 | `rebrand` | Dark academia-rebrand | 63,0 % (8,5 af 13,5 t) | timer |
 | `seo` | SEO-indholdsproduktion | 0,0 % (0 af 3 guides) | guides |
@@ -73,8 +73,10 @@ Alt her er målt mod den live side eller læst i kilden. Er noget ændret siden 
 
 - 108 sitemap-URL'er svarer 200; 0 fejl i sitemap; 0 døde interne links (39 rettet, hvert mål crawlet igen).
 - Titler over 62 tegn: 19 → 0. Manglende meta descriptions: 3 → 0. Billeder uden alt-tekst: 0 af 210.
-- To hubs er bygget: `/start-here/` (id 1183, børn 1205/1208/1211) og `/build/` (id 1185, børn 1214/1217).
-- `/inspiration/`, `/shipping/` og `/returns/` **findes ikke** — de skal 301'es, ikke bygges.
+- Tre hubs er bygget: `/start-here/` (id 1183, børn 1205/1208/1211), `/build/` (id 1185, børn 1214/1217)
+  og `/inspiration/` (id **1243**, verificeret 2/11 via REST). Det er 9 af de 13 sider S2.1 beskriver.
+- `/shipping/` og `/returns/` **findes ikke** (REST `pages?slug=` → `[]`). Copy ligger klar i
+  `library/roadmap-status-2026-11-02.md` §5, med `[EJER]`-felter markeret.
 - Navigationen er `wp:page-list` og viser **alle 29 sider**, inkl. `/cart/`, `/checkout/`, `/my-account/`,
   `/opt-out-preferences/`. Spec ligger klar i `docs/library/navigation-spec-2026-11-02.md` (S2.3).
 - Butikken prissætter i **USD**; Complianz kører **US opt-out**; kun **Stripe** som betaling.

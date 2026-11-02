@@ -20,6 +20,8 @@ sidste commit-dato. Målt 2/11 2026.
 
 | Dokument | Indhold | Dato |
 | --- | --- | --- |
+| [meta-fixes-og-produktlinks-2026-11-02.md](meta-fixes-og-produktlinks-2026-11-02.md) | 11 meta-rettelser med tælte længder, 2 H1-fix og produktlinkplan til de ni guides | 2026-11-02 |
+| [roadmap-status-2026-11-02.md](roadmap-status-2026-11-02.md) | Crawl af 119 URL'er, WAF-fundet (454/455) og publish-klar copy til `/shipping/` + `/returns/` | 2026-11-02 |
 | [forside-2026-11-02.md](forside-2026-11-02.md) | Forsiden: to H1'er, S2.4-beslutningen og paste-klar hero | 2026-11-02 |
 | [navigation-og-meta-2026-11-02.md](navigation-og-meta-2026-11-02.md) | Header-links, footer-fortrydelse, meta-runde og sitemap-kontrol — fire punkter lukket, fem blokeringer | 2026-11-02 |
 | [navigation-spec-2026-11-02.md](navigation-spec-2026-11-02.md) | Navigation og menu — S2.3, verificeret mod REST 2/11 | 2026-11-02 |

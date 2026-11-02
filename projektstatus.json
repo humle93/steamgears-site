@@ -21,18 +21,18 @@
         {
           "id": "s1",
           "name": "S1 — butik og indhold",
-          "done": 1.7,
+          "done": 2.05,
           "total": 4.5,
           "unit": "d",
-          "note": "S1.3 kladde-triage 1,0 + S1.1 Herbarium-tekster 0,15 + S1.5 butikslink 30/30 indlæg 0,55; /go/-tracking mangler"
+          "note": "S1.1 Herbarium 0,5 (12 SKU'er 953–972 publiceret og alle 12 linket fra historien, verificeret 2/11) + S1.3 kladde-triage 1,0 + S1.5 butikslink 30/30 indlæg 0,55; /go/-tracking mangler"
         },
         {
           "id": "s2",
           "name": "S2 — struktur og SEO",
-          "done": 3.95,
+          "done": 4.45,
           "total": 6,
           "unit": "d",
-          "note": "S2.1 to hubs og fem undersider 1,6 + S2.5 meta-runde 1,4 (15 sider/posts med titel, description og fokusnøgleord, 0 huller tilbage) + S2.6 hub-links 0,4 + S2.4 H1-fix 0,25 + S2.3 nav-links 0,3 (Start Here og Build i header, fortrydelse i footer); /inspiration/ og de to 301'er mangler"
+          "note": "S2.1 9 af 13 planlagte sider live 2,08 (/inspiration/ id 1243 verificeret 2/11) + S2.5 meta-runde 1,4 + S2.6 hub-links 0,4 + S2.4 H1 0,25 + S2.3 nav-links 0,3; 11 meta-rettelser og /shipping/ + /returns/ mangler"
         },
         {
           "id": "s3",
@@ -367,6 +367,15 @@
       "after": 29.0,
       "delta": 4.2,
       "basis": "6,95 af 24 d (P0 3,2/4 · P1 3,5/11 · P2 0/7 · P3 0,25/2)"
+    },
+    {
+      "date": "2026-11-02",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 50.0,
+      "after": 54.0,
+      "delta": 4.0,
+      "basis": "11,4 af 21,1 d (S0 1,9/2,6 · S1 2,05/4,5 · S2 4,45/6 · S3 1,6/3 · S4 1,4/5)"
     }
   ]
 }
