@@ -271,10 +271,14 @@ class SGAP_Publer {
      * Returns what happened, for the dashboard button and the Claude tool.
      */
     public static function tick(): array {
+        // Move queued posts out of a blackout first: a range added while the queue was
+        // full must not release tomorrow's posts today, and it must not hold them back
+        // when the range ends either.
+        $shifted = SGAP_Blackout::reschedule();
         if (SGAP_RSS::enabled()) {
-            return SGAP_RSS::release();
+            return SGAP_RSS::release() + ['shifted' => $shifted];
         }
-        $report = ['configured' => self::configured(), 'followed_up' => [], 'sent' => [], 'failed' => [], 'blocked' => ''];
+        $report = ['configured' => self::configured(), 'followed_up' => [], 'sent' => [], 'failed' => [], 'blocked' => '', 'shifted' => $shifted];
         if (!$report['configured']) {
             return $report;
         }

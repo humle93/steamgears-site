@@ -14,7 +14,7 @@ function is_admin(){return true;} function get_option($k,$d=false){return $GLOBA
 function update_option($k,$v){$GLOBALS['opts'][$k]=$v;} function add_option($k,$v){$GLOBALS['opts'][$k]??=$v;} function wp_mail($to,$s,$b){$GLOBALS['mails'][]=[$to,$s,$b]; return true;}
 function register_setting($g,$k,$a){ $GLOBALS['settings'][$k]=$a; } function wp_clear_scheduled_hook($h){}
 function add_menu_page($t,$m,$c,$slug,$cb){ add_action('page_'.$slug,$cb);} function add_submenu_page($p,$t,$m,$c,$slug,$cb){ add_action('page_'.$slug,$cb);}
-function esc_html($s){return htmlspecialchars((string)$s);} function esc_attr($s){return htmlspecialchars((string)$s);} function esc_url($s){return $s;}
+function esc_html($s){return htmlspecialchars((string)$s);} function esc_attr($s){return htmlspecialchars((string)$s);} function esc_url($s){return $s;} function esc_textarea($s){return htmlspecialchars((string)$s);}
 function get_transient($k){return false;} function set_transient(...$a){} function delete_transient($k){} function settings_fields($g){} function submit_button(){}
 function admin_url($p=''){return '/wp-admin/'.$p;} function rest_url($p=''){return '/wp-json/'.$p;} function home_url($p=''){return 'https://steamgears.eu'.$p;}
 function get_bloginfo($k=''){return 'Steamgears';} function wp_timezone_string(){return 'UTC';} function get_the_title($id){return 'Post '.$id;} function get_permalink($id){return 'https://steamgears.eu/?p='.$id;} function has_post_thumbnail($id){return false;}
@@ -34,7 +34,7 @@ class WP_REST_Request implements ArrayAccess{ function __construct(public array 
 function wp_next_scheduled($h){return false;} function wp_schedule_event(...$a){$GLOBALS['cron'][]=$a[2];} function flush_rewrite_rules($h=true){$GLOBALS['flushed']=1;} function add_rewrite_rule(...$a){$GLOBALS['rules'][]=$a[0];} function wp_set_option_autoload_values($a){$GLOBALS['noauto']=$a;}
 class W{ public $prefix='wp_'; public $posts='wp_posts'; public $postmeta='wp_postmeta'; function get_charset_collate(){return '';} public $insert_id=0; public $log=[]; public $next=null; public $row=null;
  function get_var($q){$this->log[]=$q; return $this->next;} function prepare($q,...$a){ if(count($a)==1&&is_array($a[0]))$a=$a[0]; return vsprintf(str_replace(['%s','%d','%f'],["'%s'",'%d','%F'],$q),$a);} function esc_like($s){return $s;}
- function get_results($q,$o=null){$this->log[]=$q;return [];} function get_row($q){$this->log[]=$q;return $this->row ?? null;} function query($q){$this->log[]=$q;return 0;}
+ function get_results($q,$o=null){$this->log[]=$q;return $GLOBALS['rows']??[];} function get_row($q){$this->log[]=$q;return $this->row ?? null;} function query($q){$this->log[]=$q;return 0;}
  function insert($t,$d){$this->log[]="INSERT $t ".json_encode($d); $this->insert_id=42; return 1;} function update($t,$d,$w){$this->log[]="UPDATE $t ".json_encode($d);return 1;} }
 $wpdb=new W; $wpdb->row=null;
 require __DIR__.'/../steamgears-autopilot/steamgears-autopilot.php';
@@ -265,6 +265,45 @@ check('preflight: publish refuses before any Publer call', is_wp_error($gate) &&
 $wpdb->next=null;
 $warn=SGAP_Queue::add(['channel'=>'instagram','title'=>'Warn','body'=>'x','destination_url'=>home_url('/warn/')]);
 check('preflight: queueing warns about what would be refused', is_array($warn) && in_array(true,array_map(fn($w)=>str_contains($w,'needs a photo'),$warn['warnings']??[]),true));
+/* --- blackout calendar (P1.3) --- */
+$cal=SGAP_Blackout::parse("2026-12-24..2026-12-26 Christmas\n2026-12-31 New Year's Eve\nnot a date\n2026-13-45 .. 2026-13-46 broken\n2027-01-05..2027-01-02 reversed");
+check('blackout: a range and two single days parse, garbage is ignored', count($cal)===3 && $cal[0]['from']==='2026-12-24' && $cal[0]['to']==='2026-12-26' && $cal[1]['label']==="New Year's Eve");
+check('blackout: a reversed range is put in order', (end($cal)['from']??'')==='2027-01-02' && (end($cal)['to']??'')==='2027-01-05');
+$opts['sgap_blackout_ranges']="2026-12-24..2026-12-26 Christmas\n2026-12-31 New Year's Eve";
+check('blackout: the day before a range is free', SGAP_Blackout::active('2026-12-23')===null);
+check('blackout: both ends of a range are blocked', SGAP_Blackout::active('2026-12-24')!==null && SGAP_Blackout::active('2026-12-26')!==null);
+check('blackout: the day after a range is free again', SGAP_Blackout::active('2026-12-27')===null);
+check('blackout: the label comes back with the range', (SGAP_Blackout::active('2026-12-25')['label']??'')==='Christmas');
+check('blackout: hits() looks at the date part of a timestamp', SGAP_Blackout::hits('2026-12-25 09:30:00') && !SGAP_Blackout::hits('2026-12-27 09:30:00'));
+check('blackout: a post inside the range moves to the first free day, same time', SGAP_Blackout::next_free('2026-12-25 09:30:00')==='2026-12-27 09:30:00');
+check('blackout: a post on a free day stays put', SGAP_Blackout::next_free('2026-12-20 08:15:00')==='2026-12-20 08:15:00');
+check('blackout: a post on the 31st moves past New Year', SGAP_Blackout::next_free('2026-12-31 12:00:00')==='2027-01-01 12:00:00');
+$GLOBALS['rows']=[(object)['id'=>1,'scheduled_at'=>'2026-12-25 09:30:00'],(object)['id'=>2,'scheduled_at'=>'2026-12-27 09:30:00']];
+$moved=SGAP_Blackout::reschedule();
+check('blackout: reschedule moves only the post inside the range', count($moved)===1 && $moved[0]['id']===1 && $moved[0]['to']==='2026-12-27 09:30:00' && $moved[0]['reason']==='Christmas');
+$GLOBALS['rows']=[(object)['id'=>3,'scheduled_at'=>'2026-12-24 07:00:00']];
+$still=SGAP_Blackout::reschedule();
+$GLOBALS['rows']=[(object)['id'=>3,'scheduled_at'=>$still[0]['to']??'x']];
+check('blackout: a moved post is not moved again on the next tick', count($still)===1 && SGAP_Blackout::reschedule()===[]);
+$GLOBALS['rows']=[];
+$opts['sgap_blackout_ranges']="2026-12-24..2026-12-26 Christmas";
+$wpdb->next=null;
+$shift=SGAP_Queue::add(['channel'=>'facebook','title'=>'Holiday','body'=>'x','destination_url'=>home_url('/holiday/'),'scheduled_at'=>'2026-12-25 10:00:00']);
+check('blackout: queueing inside a range schedules the next free day', is_array($shift) && ($shift['scheduled_at']??'')==='2026-12-27 10:00:00');
+$opts['sgap_autopilot_enabled']='yes'; $opts['sgap_quiet_start']=0; $opts['sgap_quiet_end']=0; $wpdb->next=0;
+$opts['sgap_blackout_ranges']=wp_date('Y-m-d').' Today off';
+check('blackout: an active range pauses publishing', SGAP_Queue::blocked_reason()==='blackout');
+check('blackout: the reason names the range and where posts go', str_contains(SGAP_Queue::blocked_message(),'blackout') && str_contains(SGAP_Queue::blocked_message(),'move to'));
+$sum=SGAP_Blackout::summary();
+check('blackout: summary says it is active and where posts go next', $sum['active']===true && $sum['ranges']===1 && $sum['moves_to']!==null);
+check('blackout: the publish tick reports what it shifted', array_key_exists('shifted', SGAP_Publer::tick()));
+ob_start(); do_action('page_sgap-settings'); $calhtml=ob_get_clean();
+check('blackout: the calendar has a multi-line field on the settings page', str_contains($calhtml,'name="sgap_blackout_ranges"') && str_contains($calhtml,'<textarea'));
+check('blackout: newlines survive saving the setting', ($settings['sgap_blackout_ranges']['sanitize_callback']??'')==='sanitize_textarea_field');
+ob_start(); do_action('page_sgap-queue'); $qhtml=ob_get_clean();
+check('blackout: the queue page says why nothing is going out', str_contains($qhtml,'Blackout'));
+$opts['sgap_blackout_ranges']='';
+check('blackout: no ranges means no work at all', SGAP_Blackout::reschedule()===[] && SGAP_Blackout::active()===null);
 $wpdb->row=null;
 $wpdb->next=null;
 exit(empty($GLOBALS['fail'])?0:1);

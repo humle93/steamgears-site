@@ -32,7 +32,7 @@ class SGAP_Setup {
         'basics' => ['Basics', 'admin-home', ['autopilot_enabled', 'full_auto_enabled', 'channels', 'posts_per_day']],
         'ai' => ['AI & images', 'superhero-alt', ['ai_provider', 'ai_api_key', 'ai_model', 'ai_base_url', 'content_language', 'image_model', 'image_api_key', 'serpapi_key']],
         'publishing' => ['Publishing', 'megaphone', ['publish_mode', 'publer_api_key', 'publer_workspace_id', 'publer_pinterest_board']],
-        'schedule' => ['Schedule & limits', 'clock', ['quiet_start', 'quiet_end', 'daily_cap', 'batch_size', 'repost_cooldown_days']],
+        'schedule' => ['Schedule & limits', 'clock', ['quiet_start', 'quiet_end', 'blackout_ranges', 'daily_cap', 'batch_size', 'repost_cooldown_days']],
         'shop' => ['Shop & feeds', 'cart', ['merchant_feed_secret', 'etsy_shop_id', 'etsy_oauth_token', 'etsy_refresh_token', 'etsy_shipping_profile_id', 'etsy_return_policy_id']],
         'automation' => ['Automation', 'update-alt', ['auto_images', 'auto_seo', 'articles_per_week', 'auto_publish_articles', 'weekly_report', 'rescue_hosts']],
         'advanced' => ['Economics', 'chart-line', ['labor_rate', 'monthly_budget', 'target_roi', 'winner_min_clicks', 'loser_min_clicks', 'repost_max']]
@@ -209,6 +209,9 @@ class SGAP_Setup {
                 $html .= '<label class="sgap-clear"><input type="checkbox" name="sgap_clear[' . esc_attr($key) . ']" value="1"> Remove saved key</label>';
             }
             return $html;
+        }
+        if (in_array($key, SGAP_Settings::TEXTAREA_KEYS, true)) {
+            return '<textarea id="' . esc_attr($id) . '" name="' . esc_attr($name) . '" rows="4" class="sgap-text" spellcheck="false">' . esc_textarea((string) SGAP_Settings::get($key)) . '</textarea>';
         }
         $number = in_array($key, SGAP_Settings::INT_KEYS, true);
         return '<input type="' . ($number ? 'number' : 'text') . '" id="' . esc_attr($id) . '" name="' . esc_attr($name) . '" value="' . esc_attr((string) SGAP_Settings::get($key)) . '"'

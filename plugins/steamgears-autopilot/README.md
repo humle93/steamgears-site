@@ -102,6 +102,27 @@ the moment before Publer.
 The ability `steamgears-autopilot/check-post` runs the same rules without queueing anything and returns
 `problems`, `repairs` and the text that would actually be sent.
 
+## Blackout calendar (7.21)
+
+Settings → *Schedule & limits* → **Blackout days** takes one range per line:
+
+```
+2026-12-24..2026-12-26 Christmas
+2026-12-31 New Year's Eve
+```
+
+Nothing is released on those days, and a post that is already queued inside a range is **moved to the
+next free day at the same time of day** — not dropped, and not saved up so the whole backlog lands at once
+when the range ends. The move runs from the publish tick every 15 minutes, so a range you add this morning
+is honoured before the next post goes out, and a post that was shifted is not shifted again on the next
+tick. The Queue page explains why nothing is going out, and the range label is carried into the message.
+
+Two details worth knowing. Only queued posts move: `published` and in-flight `sending` rows are never
+touched, so a blackout cannot rewrite history. And the calendar is a day filter, not a pause: the daily cap,
+quiet hours and the pre-flight checks still apply on the free day the post lands on. A post placed more
+than 60 days ahead of everything blocked is placed anyway, so a badly typed never-ending range cannot keep
+a post out of the queue forever.
+
 ## Updates
 
 From 7.6 the plugin updates itself from GitHub (`humle93/steamgears-site`, branch `main`):

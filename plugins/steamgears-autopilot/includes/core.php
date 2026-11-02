@@ -314,10 +314,13 @@ class SGAP_Settings {
         'pinterest_token','instagram_token','telegram_bot_token','tiktok_token','youtube_token',
         'etsy_oauth_token','etsy_refresh_token','merchant_feed_secret'
     ];
+    /** Multi-line text settings, shown as a textarea. */
+    const TEXTAREA_KEYS = ['blackout_ranges'];
     const TEXT_KEYS = [
         'publer_workspace_id','publer_pinterest_board','channels','ai_model','ai_base_url','image_model','content_language','rescue_hosts',
         'telegram_chat_id','email_test_recipient','youtube_channel_id','reddit_username',
-        'reddit_subreddit','etsy_shop_id','etsy_shipping_profile_id','etsy_return_policy_id','ai_mode','alert_email'
+        'reddit_subreddit','etsy_shop_id','etsy_shipping_profile_id','etsy_return_policy_id','ai_mode','alert_email',
+        'blackout_ranges'
     ];
     /** Settings with a fixed list of values, shown as a select. */
     const CHOICE_KEYS = [
@@ -328,7 +331,7 @@ class SGAP_Settings {
 
     /** Shown in the settings page. Keys not listed here stay registered for older data but are unused. */
     const SECTIONS = [
-        'General' => ['autopilot_enabled','full_auto_enabled','daily_cap','batch_size','quiet_start','quiet_end'],
+        'General' => ['autopilot_enabled','full_auto_enabled','daily_cap','batch_size','quiet_start','quiet_end','blackout_ranges'],
         'Publer' => ['publish_mode','publer_api_key','publer_workspace_id','publer_pinterest_board','channels'],
         'AI content' => ['ai_provider','ai_api_key','ai_model','ai_base_url','posts_per_day','content_language','image_model','image_api_key','serpapi_key'],
         'Economics' => ['labor_rate','monthly_budget','target_roi','winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max'],
@@ -358,6 +361,7 @@ class SGAP_Settings {
         'batch_size' => 'How many due posts are released per 15-minute run.',
         'quiet_start' => 'No posts are released from this hour …',
         'quiet_end' => '… until this hour (site time).',
+        'blackout_ranges' => 'Days where nothing is released, one range per line: 2026-12-24..2026-12-26 Christmas. Queued posts that land in a range are moved to the next free day at the same time of day — not dropped, and not saved up for one big day afterwards.',
         'repost_cooldown_days' => 'A page is not promoted again within this many days.',
         'auto_images' => 'Instagram and Pinterest posts without a photo get the page\'s featured image or an AI photo (AIMLAPI, about $0.045 each).',
         'auto_seo' => 'New posts and products without a Rank Math description get a focus keyword, meta title and description from the AI when published.',
@@ -413,7 +417,9 @@ class SGAP_Settings {
         foreach (self::TEXT_KEYS as $key) {
             register_setting('sgap_settings', 'sgap_' . $key, [
                 'type' => 'string',
-                'sanitize_callback' => 'sanitize_text_field'
+                // sanitize_text_field would flatten the newlines that separate the
+                // blackout ranges, leaving only the first range saved.
+                'sanitize_callback' => in_array($key, self::TEXTAREA_KEYS, true) ? 'sanitize_textarea_field' : 'sanitize_text_field'
             ]);
         }
         foreach (self::CHOICE_KEYS as $key => $choices) {
@@ -686,6 +692,12 @@ class SGAP_Queue {
         if ($existing) {
             return new WP_Error('sgap_duplicate', 'Already queued.', ['status' => 409, 'id' => (int) $existing]);
         }
+        // A blackout moves the post instead of refusing it: the owner asked for "not
+        // on these days", not "not at all".
+        $scheduled = (string) (($item['scheduled_at'] ?? '') ?: current_time('mysql'));
+        if (SGAP_Blackout::hits($scheduled)) {
+            $scheduled = SGAP_Blackout::next_free($scheduled);
+        }
         $row = [
             'post_id' => absint($item['post_id'] ?? 0),
             'channel' => $channel,
@@ -697,7 +709,7 @@ class SGAP_Queue {
             'body' => sanitize_textarea_field((string) ($item['body'] ?? '')),
             'image_url' => esc_url_raw((string) ($item['image_url'] ?? '')),
             'status' => ($item['status'] ?? '') === 'draft' ? 'draft' : 'queued',
-            'scheduled_at' => ($item['scheduled_at'] ?? null) ?: current_time('mysql'),
+            'scheduled_at' => $scheduled,
             'fingerprint' => $fingerprint
         ];
         $row['utm_url'] = SGAP_UTM::build($row);
@@ -710,7 +722,7 @@ class SGAP_Queue {
         // no Pinterest board. Warnings only — the photo can still arrive later (featured
         // image or an AI photo), so nothing is refused at this point.
         $warnings = array_column(SGAP_Preflight::problems($channel, $row), 'message');
-        return ['id' => $id, 'tracking_url' => SGAP_Tracking::url($id), 'utm_url' => $row['utm_url'], 'warnings' => $warnings];
+        return ['id' => $id, 'tracking_url' => SGAP_Tracking::url($id), 'utm_url' => $row['utm_url'], 'warnings' => $warnings, 'scheduled_at' => $scheduled];
     }
 
     /** True when Full Auto has blocked this channel/angle/type/format combination. */
@@ -730,6 +742,9 @@ class SGAP_Queue {
         if (!SGAP_Settings::enabled('autopilot_enabled')) {
             return 'autopilot_disabled';
         }
+        if (SGAP_Blackout::active() !== null) {
+            return 'blackout';
+        }
         if (self::in_quiet_hours((int) wp_date('G'), (int) SGAP_Settings::get('quiet_start', 23), (int) SGAP_Settings::get('quiet_end', 7))) {
             return 'quiet_hours';
         }
@@ -739,6 +754,13 @@ class SGAP_Queue {
     /** blocked_reason() in words, for the admin and the Claude tools. */
     public static function blocked_message(string $reason = ''): string {
         $reason = $reason !== '' ? $reason : self::blocked_reason();
+        if ($reason === 'blackout') {
+            $range = SGAP_Blackout::active();
+            return sprintf('blackout %s to %s%s: nothing is released, and queued posts inside the range move to %s',
+                (string) ($range['from'] ?? ''), (string) ($range['to'] ?? ''),
+                $range && $range['label'] !== '' ? ' (' . $range['label'] . ')' : '',
+                substr(SGAP_Blackout::next_free(current_time('mysql')), 0, 16));
+        }
         if ($reason === 'quiet_hours') {
             return sprintf('quiet hours %02d:00–%02d:00; queued posts are released from %02d:00 (site time is now %s). Set Quiet start and Quiet end to 0 in Settings to send at night',
                 (int) SGAP_Settings::get('quiet_start', 23), (int) SGAP_Settings::get('quiet_end', 7), (int) SGAP_Settings::get('quiet_end', 7), wp_date('H:i'));
@@ -1722,6 +1744,9 @@ class SGAP_Admin {
     public static function queue(): void {
         global $wpdb;
         self::open('Queue', 'Posts waiting to go out, and what happened to the ones that did.');
+        if (SGAP_Blackout::active() !== null) {
+            echo '<p class="sgap-notice"><strong>Blackout.</strong> ' . esc_html(SGAP_Queue::blocked_message('blackout')) . '</p>';
+        }
         $table = $wpdb->prefix . 'sgap_queue';
         $rows = self::table_exists($table)
             ? $wpdb->get_results("SELECT id, channel, title, status, attempts, scheduled_at, published_at, error FROM {$table} ORDER BY id DESC LIMIT 50")
