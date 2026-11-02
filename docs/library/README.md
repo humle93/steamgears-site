@@ -60,6 +60,7 @@ sidste commit-dato. Målt 2/11 2026.
 | --- | --- | --- |
 | [sikkerhed-ai-engine-2026-11-01.md](sikkerhed-ai-engine-2026-11-01.md) | AI Engine CVE-2026-110732 (lukket 1/11) | 2026-11-01 |
 | [sikkerhed-plugin-versioner-2026-11-01.md](sikkerhed-plugin-versioner-2026-11-01.md) | Plugin-versioner — 48 plugins, 16 bagud | 2026-11-01 |
+| [plugin-opdateringer-triage-2026-11-02.md](plugin-opdateringer-triage-2026-11-02.md) | Triage af de 16 bagudværende plugins: 8 nu, 5 i vindue, 2 fjernes | 2026-11-02 |
 
 ## Vedligehold og driftslogs
 
