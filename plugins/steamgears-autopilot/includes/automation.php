@@ -261,6 +261,37 @@ class SGAP_Auto {
         add_action(self::HEALTH_CRON, [__CLASS__, 'health']);
         add_action(self::REPORT_CRON, [__CLASS__, 'weekly_report']);
         add_action('init', [__CLASS__, 'schedule'], 20);
+        add_filter('site_status_tests', [__CLASS__, 'site_status_tests']);
+    }
+
+    /** Adds a WP-Cron check to Tools → Site Health. */
+    public static function site_status_tests(array $tests): array {
+        $tests['direct']['sgap_wp_cron'] = ['label' => 'Autopilot publishing cron', 'test' => [__CLASS__, 'site_health_cron']];
+        return $tests;
+    }
+
+    /** Site Health result: critical when the publisher is 30+ min late, recommended when WP-Cron is disabled. */
+    public static function site_health_cron(): array {
+        $lag = self::cron_lag();
+        $disabled = defined('DISABLE_WP_CRON') && DISABLE_WP_CRON;
+        if ($lag >= 30) {
+            $status = 'critical';
+            $desc = '<p>' . esc_html(self::cron_advice($lag)) . '</p>';
+        } elseif ($disabled) {
+            $status = 'recommended';
+            $desc = '<p>DISABLE_WP_CRON is set, so WordPress will not run cron on page loads. Make sure a real cron job calls <code>wp-cron.php</code> every 5 minutes, or posts will be released late.</p>';
+        } else {
+            $status = 'good';
+            $desc = '<p>The 15-minute publisher is on time.</p>';
+        }
+        $badge = $status === 'critical' ? 'red' : ($status === 'recommended' ? 'orange' : 'blue');
+        return [
+            'label' => $status === 'good' ? 'Autopilot publishing cron is on time' : 'Autopilot publishing cron needs attention',
+            'status' => $status,
+            'badge' => ['label' => 'Autopilot', 'color' => $badge],
+            'description' => $desc,
+            'test' => 'sgap_wp_cron',
+        ];
     }
 
     public static function schedule(): void {

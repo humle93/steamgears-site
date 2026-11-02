@@ -55,7 +55,7 @@ published posts, no order or revenue data. Statements below are limited to what 
 | Caching | W3 Total Cache 2.11.0 + `advanced-cache.php` + `object-cache.php` |
 | SEO | Rank Math 1.0.280, Redirection 5.10.1 |
 | Mail | WP Mail SMTP 4.10.3 (relevant for imported P0.1) |
-| Agent access | Royal MCP 1.5.13 (this connection), Steamgears Autopilot 7.17.0 |
+| Agent access | Royal MCP 1.5.13 (this connection), Steamgears Autopilot 7.18.0 |
 
 ---
 

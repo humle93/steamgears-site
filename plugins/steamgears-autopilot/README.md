@@ -23,7 +23,7 @@ The whole social autopilot runs inside WordPress (Command Center is retired):
 4. **Measure** – every post links via `/go/<id>/`, so clicks (and WooCommerce
    orders) are counted per channel.
 
-Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.17.0.zip` → Activate.
+Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.18.0.zip` → Activate.
 
 ## Run it from Claude
 
@@ -92,8 +92,25 @@ every channel, Pinterest board set. Claude: key valid and model available via th
 Models API (no tokens used). OpenAI-compatible: key valid and model offered by
 `/models`.
 
-WP-Cron only runs when the site gets visits. For exact timing, add a real cron
-job on the host that calls `https://steamgears.eu/wp-cron.php` every 5 minutes.
+## Real cron (publishing on time)
+
+WP-Cron only runs when the site gets visits, so a quiet site or a full page cache
+can delay the 15-minute publisher. Add a real cron job on the host (or an external
+service such as cron-job.org) that calls the site every 5 minutes:
+
+```
+*/5 * * * * curl -s https://steamgears.eu/wp-cron.php?doing_wp_cron > /dev/null 2>&1
+```
+
+If `DISABLE_WP_CRON` is set in `wp-config.php`, WordPress never runs cron on page
+loads, so the external job is required.
+
+Tools → Site Health shows the check *Autopilot publishing cron*:
+
+- **Critical** when the publisher is 30 minutes or more overdue (the same warning
+  appears on the dashboard).
+- **Recommended** when `DISABLE_WP_CRON` is set, as a reminder to keep the external job running.
+- **Good** when the publisher is on time.
 
 ## API keys
 
