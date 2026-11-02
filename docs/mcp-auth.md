@@ -24,7 +24,12 @@ korrekt `401` med JSON-RPC-fejlen. `PUBLER_API_KEY` er stadig usat, så `publer`
 > session, selv om nøglen lå i repoet, og nogen måtte ind og eksportere den manuelt hver gang. Det er rettet:
 > nøglen læses nu fra `.env` automatisk, så der ikke skal eksporteres noget pr. session.
 
-> **Rettelse 2/11 2026:** denne fil påstod tidligere at Royal MCP kunne bruges med et WordPress
+> > **Ny nøgle uden at den rammer historikken:** `python3 tools/set_mcp_key.py`. Nøglen læses med `getpass`
+> (ingen echo, ingen shell-historik), den gamle `ROYAL_MCP_TOKEN`/`ROYAL_MCP_API_KEY` fjernes så broen ikke kan
+> bruge en forældet linje, filen får mode 600, og broens `--check` køres bagefter. Scriptet printer kun nøglens
+> **længde**, aldrig værdien — og afbryder uden at røre `.env`, hvis input er tomt.
+
+**Rettelse 2/11 2026:** denne fil påstod tidligere at Royal MCP kunne bruges med et WordPress
 > application password over Basic. Det er **forkert** for MCP-ruten — målt på sitets eget endpoint, se
 > tabellen i afsnittet om `steamgears`. Den headless-venlige vej er en **API-nøgle sendt som Bearer**.
 
