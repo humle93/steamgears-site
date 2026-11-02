@@ -162,6 +162,15 @@ To fælder undervejs: `code_verifier` skal være den oprindelige streng, ikke ch
 `redirect_uri` skal være byte-identisk med den registrerede. Token og kode hører i en fil uden for repoet med
 `chmod 600` — aldrig i chat, log eller commit.
 
+> **Målt 2/11 2026 — OAuth kan ikke køres fra cloud-worktreen.** `/mcp` er whitelistet i Simplys WAF, men
+> resten af flowet er det ikke: `.well-known/oauth-authorization-server`, `/register` og `/token` svarer alle
+> `454` med en JS-browser-check, som et script ikke kan løse. Dertil kræver consent en browser med en aktiv
+> WP-admin-session, og callbacken skal lande på en adresse agenten kan læse. Kør OAuth på ejerens egen maskine
+> (`claude mcp add --transport http steamgears-oauth https://steamgears.eu/mcp` → `/mcp` → *Authenticate*) — den
+> token bliver liggende der, ikke her. Til cloud-worktreen er API-nøglen i `.env` den eneste vej, fordi `/mcp`
+> er den ene rute WAF'en lukker igennem. En sjælden `454` på `/mcp` efter mange kald i træk er rate limiting og
+> forsvinder igen af sig selv (målt: væk efter 60 s).
+
 ### Alternativ: OAuth
 
 Royal MCP foretrækker OAuth2 (`authorization_code` med PKCE S256, dynamisk klientregistrering,
