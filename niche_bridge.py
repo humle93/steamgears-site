@@ -194,7 +194,8 @@ def render_plan(built: list, skipped: list, source: str, links_path: str) -> str
         for index, item in enumerate(built, 1):
             row, attribute = item["payload"], item["attribution"]
             lines.append(
-                f"| {index} | {attribute['niche']} | {attribute['score']:.1f} | {row['channel']} "
+                f"| {index} | {attribute['niche']} | {attribute['score']:.1f}".replace(".", ",")
+                + f" | {row['channel']} "
                 f"| {row['title']} | {row['destination_url']} |"
             )
     else:
