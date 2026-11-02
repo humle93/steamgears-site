@@ -94,7 +94,12 @@ reaches the gate, because AI Engine answers *"This site lets assistants work on 
 done"*. Two owner-side settings therefore stand between the gate and its real test:
 
 - **AI Engine → MCP → Drafts Only** is on. With it on, the agent can read the site and nothing else, so
-  `queue-post`, `generate` and `publish` are refused by AI Engine before the plugin sees them.
+  `queue-post`, `generate` and `publish` are refused by AI Engine before the plugin sees them. **Re-measured
+  2/11 2026 after the owner reported switching it off:** still refused, and `wp_get_option
+  {"key":"mwai_options","raw":true}` shows `mcp_drafts_only: true` in the database itself (object cache
+  bypassed), with `mcp_role: admin`, `mcp_approvals: off` and `mcp_dynamic_rest: true`. So the token is strong
+  enough and nothing else is in the way — the switch simply is not saved yet. Recipe in
+  [`mcp-auth.md`](mcp-auth.md#sådan-tjekkes-spærren-uden-at-skrive).
 - **Settings → General → Banned words is empty** (`banned_words: 0`), so the headline check of 7.22 cannot fire
   on anything until the owner adds at least one word. The other three checks (dead links, missing alt text,
   duplicate captions) work without it.

@@ -118,7 +118,7 @@ posterne ikke kan lægges i køen. Indtil da er kampagnens eneste sandhed plugin
 | Blokering | Konsekvens | Ejers handling |
 | --- | --- | --- |
 | ~~Intet site-credential~~ | **lukket 2/11** — OAuth-token gemt, MCP svarer med 206 værktøjer | — |
-| AI Engine *Drafts Only* | Alle skrive-abilliteter afvises (*"This site lets assistants work on drafts only"*), også `queue-post` og `update`; kun læsning virker | slå *Drafts Only* fra i AI Engine → MCP, eller kør posten i hånden i wp-admin |
+| AI Engine *Drafts Only* | Alle skrive-abilliteter afvises (*"This site lets assistants work on drafts only"*), også `queue-post` og `update`; kun læsning virker. **Målt igen 2/11 efter ejeren meldte den slået fra: stadig `mcp_drafts_only: true` i databasen** (`wp_get_option` med `raw: true`) | gem switchen i *AI Engine → Settings → MCP* (den blev ikke gemt), eller kør posten i hånden i wp-admin |
 | Plugin 7.22.0 på sitet | `queue-post` mangler `angle`/`format`/`campaign`, så posterne ville lande som `angle_a`/`post` | *Plugins → Update* til 7.25.0 (én version, zip'en ligger på `main`) |
 | Ingen `PUBLER_API_KEY` | køen kan fyldes, men intet **udgives** automatisk | nøgle i WP-admin → Autopilot → Settings, eller RSS-tilstand |
 | Ét Pinterest-board pr. publicering | 5 pins peger på `steampunk-posters-prints`, 1 på `steampunk-complete-looks` | boardet sættes i indstillingerne; den ene pin flyttes manuelt bagefter |
@@ -130,6 +130,7 @@ posterne ikke kan lægges i køen. Indtil da er kampagnens eneste sandhed plugin
 | --- | --- |
 | Koncept og vinkler | færdig |
 | Produktvalg mod live-katalog | færdig (12/12 verificeret) |
+| Forhåndsvalidering mod live-gaten | færdig 2/11: `check-post` på alle 12 → 12 rene, 0 advarsler, 0 blokerede |
 | Kalender og regler | færdig |
 | 12 captions (EN) | færdig, højeste overlap 0,23 |
 | Kø-payload | færdig |

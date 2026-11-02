@@ -21,10 +21,10 @@
         {
           "id": "s1",
           "name": "S1 — butik og indhold",
-          "done": 2.05,
-          "total": 4.5,
+          "done": 2.15,
+          "total": 4.6,
           "unit": "d",
-          "note": "S1.1 Herbarium 0,5 (12 SKU'er 953–972 publiceret og alle 12 linket fra historien, verificeret 2/11) + S1.3 kladde-triage 1,0 + S1.5 butikslink 30/30 indlæg 0,55; /go/-tracking mangler"
+          "note": "S1.1 Herbarium 0,5 (12 SKU'er 953–972 publiceret og alle 12 linket fra historien, verificeret 2/11) + S1.3 kladde-triage 1,0 + S1.5 butikslink 30/30 indlæg 0,55; /go/-tracking mangler; + 0,1 d forhåndsvalidering af de 12 kampagneposter mod live-gaten (12 rene, 0 advarsler)."
         },
         {
           "id": "s2",
@@ -394,6 +394,15 @@
       "after": 30.0,
       "delta": 0.3,
       "basis": "7,3 af 24,35 d (P0 3,2/4 · P1 3,85/11,35 · P2 0/7 · P3 0,25/2)"
+    },
+    {
+      "date": "2026-11-02",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 54.0,
+      "after": 54.2,
+      "delta": 0.2,
+      "basis": "11,5 af 21,2 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,45/6 · S3 1,6/3 · S4 1,4/5)"
     }
   ]
 }
