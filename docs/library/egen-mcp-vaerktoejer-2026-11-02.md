@@ -101,6 +101,12 @@ Drafts Only indtil ejeren slår det fra:
 
 1. **`meta-audit`** — titel- og metabeskrivelseslængder på tværs af publicerede poster. I dag en manuel runde
    med 11 rettelser ([`meta-fixes-og-produktlinks-2026-11-02.md`](meta-fixes-og-produktlinks-2026-11-02.md)).
+   **Bygget 2/11 2026 i plugin 7.23.0:** `includes/meta-audit.php` (`SGAP_Meta_Audit`), ability
+   `steamgears-autopilot/meta-audit`, 11 nye smoke-checks (208 → 219). Læser Rank Math og derefter Yoast,
+   tæller manglende/for lange/for korte beskrivelser og sorterer de værste poster først. Skriver intet —
+   testen kontrollerer at der ikke kommer `INSERT`/`UPDATE` i `$wpdb`-loggen. **Ikke verificeret mod sitet
+   endnu:** det kræver at 7.23.0-zip'en er merget til `main` og hentet via *Plugins → Update*, plus et
+   OAuth-token i det worktree der kalder `tools/mcp_rest.py`.
 2. **`redirect-audit`** — hvilke mål i roadmap'et mangler en omdirigering, læst fra Redirection-plugin'et.
    Roadmap S0.4 står stadig på 0 % fordi gruppen ikke er oprettet.
 3. **`link-audit`** — døde interne links og links til kladder. Dækker samme grund som quality-gaten, men
@@ -131,7 +137,9 @@ og gerne approval, så et forkert kald ikke kan slette en post.
   supplement med tre meta-værktøjer. Skal vi have egne værktøjer, er abilities den fælles mængde, og derfor
   det rigtige sted at bygge.
 - **Måling mangler**: hvor mange af de 206 der kommer fra vores egne abilities kontra AI Engines indbyggede.
-  Det kræver `tools/list` med et gyldigt token og er næste skridt, når OAuth er godkendt igen.
+  Det kræver `tools/list` med et gyldigt token og er næste skridt, når OAuth er godkendt igen. Efter
+  7.23.0-udgivelsen er `steamgears-autopilot/meta-audit` det værktøj der beviser at en ny ability når hele
+  vejen frem: `python3 tools/mcp_rest.py --call steamgears-autopilot_meta-audit '{"scan":5,"limit":5}'`.
 
 ## Referencer
 

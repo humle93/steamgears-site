@@ -137,6 +137,14 @@ class SGAP_Abilities {
                 'Check Publer connection',
                 'Tests the Publer API key: lists workspaces, connected social accounts, and configured channels that have no Publer account.',
                 [], [], [__CLASS__, 'check_publer'], true, true
+            ],
+            'meta-audit' => [
+                'Audit post meta',
+                'Audits titles and meta descriptions on published posts and pages: how many have no description, how many are outside the limits (title 60, description 70-155 characters), and which posts are worst. Read-only — it changes nothing.',
+                [
+                    'scan' => ['type' => 'integer', 'minimum' => 1, 'maximum' => 500, 'default' => 100, 'description' => 'How many of the newest published posts to check'],
+                    'limit' => ['type' => 'integer', 'minimum' => 1, 'maximum' => 100, 'default' => 20, 'description' => 'How many of the worst posts to return']
+                ], [], [__CLASS__, 'meta_audit'], true, true
             ]
         ];
     }
@@ -339,6 +347,11 @@ class SGAP_Abilities {
 
     public static function check_keys($input = null): array {
         return SGAP_KeyCheck::run();
+    }
+
+    /** Read-only audit of titles and meta descriptions. Delegates to SGAP_Meta_Audit so the logic can be tested. */
+    public static function meta_audit($input = null): array {
+        return SGAP_Meta_Audit::audit($input);
     }
 
     public static function check_publer($input = null) {

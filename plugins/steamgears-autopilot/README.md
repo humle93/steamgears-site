@@ -46,6 +46,7 @@ all admin-only, none of them deleting anything:
 | `steamgears-autopilot/update` | Install the newest version from GitHub |
 | `steamgears-autopilot/check-keys` | Test the Publer and AI keys (see below) |
 | `steamgears-autopilot/check-publer` | Workspaces, accounts, channels without an account |
+| `steamgears-autopilot/meta-audit` | Title and meta-description audit on published posts: missing, too long, too short — read-only |
 | `steamgears-autopilot/optimize-site-seo` | Whole-site SEO/AEO/GEO scan in one pass; `fix=true` also writes the missing meta |
 
 Example: "Write today's posts and show them to me" → `generate`, then
@@ -155,6 +156,21 @@ briefly down. So the gate catches what it can prove without the network: placeho
 links with no domain, `http` instead of `https`, and internal addresses that do not resolve. A Pinterest pin
 that 404s is still only found by opening it.
 
+## Post meta audit (7.23)
+
+The ability `steamgears-autopilot/meta-audit` lets Claude run the meta round itself: it reads the published
+posts and pages and reports, per post: title length, meta-description
+length and what is outside the limits — **title 60 characters, description 70–155 characters**. Posts with no
+description at all are counted separately, because that is a different fix from shortening one.
+
+The description is read from Rank Math (`rank_math_description`) and, if that is empty, Yoast
+(`_yoast_wpseo_metadesc`); the report says which plugin answered, so a "0 missing" can be trusted. Nothing is
+written: the audit only reads, and the answer names the worst posts first (most problems, then the longest
+title) so the next meta round starts with the posts that matter.
+
+`meta-audit` takes two optional arguments: `scan` (how many of the newest posts to check, default 100, max
+500) and `limit` (how many of the worst to return, default 20, max 100).
+
 ## Updates
 
 From 7.6 the plugin updates itself from GitHub (`humle93/steamgears-site`, branch `main`):
@@ -170,7 +186,7 @@ before it, because the MCP surface can read plugins but cannot install or activa
 1. Bump `Version:` in `steamgears-autopilot.php` and `SGAP_VERSION` — they must agree, CI fails otherwise.
 2. Rebuild the zip from the folder so the name and the contents match:
    `cd plugins && rm -f steamgears-autopilot-*.zip && zip -qr steamgears-autopilot-v<version>.zip steamgears-autopilot`
-3. `php plugins/tests/smoke.php` (208 checks) and `diff -r` the zipped copy against the source. CI repeats
+3. `php plugins/tests/smoke.php` (219 checks) and `diff -r` the zipped copy against the source. CI repeats
    both, plus `php -l` on PHP 8.0–8.5 and WordPress 6.4 / 7.1 / latest.
 4. Commit code, zip, README and `ROADMAP.md` together and push to `main`.
 5. **Click *Plugins → Update*** (or *Dashboard → Updates*). Auto-updates can be switched on in the same
