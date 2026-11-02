@@ -12,6 +12,11 @@
       "name": "steamgears-command-center",
       "private": true,
       "description": "Android Command Center: social pilot til steamgears.eu, bygget på steamgears-autopilot sgap/v1."
+    },
+    {
+      "name": "steamgears-niche-scan",
+      "private": true,
+      "description": "Niche-scanning: genberegner niche-vurderingens rubrik (listings, søgninger, sæson, konkurrenttype) i stedet for at huske den."
     }
   ]
 }

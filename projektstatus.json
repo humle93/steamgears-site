@@ -133,6 +133,39 @@
       ]
     },
     {
+      "id": "niche",
+      "name": "Niche-scanning (eget repo)",
+      "note": "genberegner niche-vurderingens rubrik",
+      "next": "M1: indlæsning og validering af kandidatdata (CSV/JSON)",
+      "blocked_by": "GITHUB_TOKEN til at oprette repoet via sync_repos.py",
+      "modules": [
+        {
+          "id": "m1",
+          "name": "M1 — indlæsning og validering",
+          "done": 0,
+          "total": 0.5,
+          "unit": "d",
+          "note": "CSV/JSON, manglende felter fejler højt"
+        },
+        {
+          "id": "m2",
+          "name": "M2 — scoring efter niche-vurderingens grænser",
+          "done": 0,
+          "total": 1,
+          "unit": "d",
+          "note": "listings-grænser + sæsonfradrag + konkurrentflag"
+        },
+        {
+          "id": "m3",
+          "name": "M3 — Markdown-rapport og CI-test",
+          "done": 0,
+          "total": 0.5,
+          "unit": "d",
+          "note": "fixture med kendte nicher"
+        }
+      ]
+    },
+    {
       "id": "links",
       "name": "Døde internlinks",
       "verified": true,
@@ -294,6 +327,15 @@
       "after": 0.0,
       "delta": null,
       "basis": "0 af 3 d (M1 0/1 · M2 0/1,5 · M3 0/0,5)"
+    },
+    {
+      "date": "2026-11-02",
+      "project": "Niche-scanning (eget repo)",
+      "module": "baseline",
+      "before": null,
+      "after": 0.0,
+      "delta": null,
+      "basis": "0 af 2 d (M1 0/0,5 · M2 0/1 · M3 0/0,5)"
     }
   ]
 }
