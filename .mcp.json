@@ -18,6 +18,10 @@
       "type": "stdio",
       "command": "python3",
       "args": ["tools/mcp_project_profile.py"]
+    },
+    "simplycom": {
+      "type": "http",
+      "url": "https://mcp.simply.com/v2"
     }
   }
 }

@@ -1,0 +1,48 @@
+{
+ "graph": [
+  {
+   "@type": "Product",
+   "name": "Wine Red Velvet Tailcoat — Victorian Frock Coat | Steamgears",
+   "description": "Wine Red Velvet Tailcoat — Victorian Frock Coat from the Steamgears collection. Printed to order and shipped from our EU partners — matching tees, posters and access",
+   "sku": "SG-AE-07",
+   "category": "Corsets &amp; Clothing",
+   "mainEntityOfPage": {
+    "@id": "https://steamgears.eu/product/wine-red-velvet-tailcoat-victorian-frock-coat/#webpage"
+   },
+   "image": [
+    {
+     "@type": "ImageObject",
+     "url": "https://steamgears.eu/wp-content/uploads/2026/10/wine-red-tailcoat.jpg",
+     "height": "1024",
+     "width": "1024"
+    }
+   ],
+   "offers": {
+    "@type": "Offer",
+    "price": "64.95",
+    "priceValidUntil": "2027-12-31",
+    "priceSpecification": {
+     "price": "64.95",
+     "priceCurrency": "USD",
+     "valueAddedTaxIncluded": "true"
+    },
+    "priceCurrency": "USD",
+    "availability": "http://schema.org/InStock",
+    "seller": {
+     "@type": "Organization",
+     "@id": "https://steamgears.eu/",
+     "name": "Steamgears",
+     "url": "https://steamgears.eu",
+     "logo": ""
+    },
+    "url": "https://steamgears.eu/product/wine-red-velvet-tailcoat-victorian-frock-coat/"
+   },
+   "@id": "https://steamgears.eu/product/wine-red-velvet-tailcoat-victorian-frock-coat/#richSnippet"
+  },
+  {
+   "@type": "WebPage",
+   "name": "Steamgears"
+  }
+ ],
+ "_source": "live product page 2026-11-02"
+}

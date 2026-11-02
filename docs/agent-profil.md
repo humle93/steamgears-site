@@ -128,6 +128,34 @@ tools/_deps/bin/php -l plugins/steamgears-autopilot/steamgears-autopilot.php
 (`ROYAL_MCP_AUTH`), Publer-nøgle, repo-secrets `GEMINI_API_KEY`/`WP_USER`/`WP_APP_PASS`, CVR/adresse til
 GPSR og imprint, Printify-variantmapping, én Redirection-gruppe til de fem vanity-301'er.
 
+### Simply.com-connectoren (`simplycom`)
+
+Hostens egen MCP-server (`https://mcp.simply.com/v2`, OAuth 2.1, ingen nøgle) er den anden halvdel af
+adgangen: Royal MCP rører WordPress, connectoren rører **hostens** flade — DNS, nameservere og DNSSEC,
+mailkonti, subdomæner, MySQL, website- og slow-logs, deploy-oplysninger og support-sager. Den kan **ikke**
+bestille, opsige eller betale, og login kræver en browser, så kun ejeren kan gennemføre det første kald.
+Opsætning, login og tilbagekald står i [`mcp-auth.md`](mcp-auth.md#simplycom-simplycom).
+
+**A1 er ikke længere en P0.** Målingen 2/11 viste at 455 rammer **spoofede** bot-UA'er fra denne maskines
+IP, ikke Google: en `site:`-søgning viser indekserede sider med friske datoer, og GSC-data viser sitemap hentet
+31/10. Simply hvidlister allerede Googlebot, bingbot, OpenAI, Anthropic med flere — på IP — og kræver en
+**offentlig IP-liste** for at hvidliste nye tjenester, hvilket en agent-container ikke har. Hele sagen står i
+[`library/waf-diagnose-2026-11-02.md`](library/waf-diagnose-2026-11-02.md).
+
+Connectoren giver DNS, mail, databaser, logs og support-sager — **ikke** WAF-regler. Den kan altså ikke
+hvidliste noget. Det der stadig venter:
+
+| Fund | Hvad der mangler | Uden det |
+| --- | --- | --- |
+| **A1** (P1) | Læse GSC → Crawl stats → By response og bekræfte at Googlebot får 200 | Googlebotens faktiske svar er ikke dokumenteret; indekseringen er |
+| **B1** (P1) | Afklare hvem der ejer `robots.txt`: host mu-plugin, Rank Math eller W3TC | De to `User-agent: *`-grupper bliver stående — kræver WP-adgang |
+| **I1** (P2) | Samme Crawl Stats-måling som A1, for sitemap og 455/5xx | Sitemappet er kun verificeret for neutrale klienter |
+| **S0.6** i [`roadmap.md`](roadmap.md) | Omskrives: præmissen »søgemaskiner kan ikke crawle« holder ikke | Roadmap'en påstår en blokering der ikke findes |
+
+Crawl og verifikation kører med **neutral UA** ([`tools/waf_check.sh`](../tools/waf_check.sh) bekræfter at den
+giver 200). At efterligne Googlebot er både unødvendigt og det der udløser 455. Alt andet i auditten — titler,
+schema, intern linkning, ydeevne — kræver WordPress-skriveadgang eller en ejerbeslutning.
+
 ---
 
 ## 5. Opskrifter
@@ -151,7 +179,7 @@ curl -sS -X POST https://steamgears.eu/wp-json/royal-mcp/v1/mcp \
   -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"verify","version":"1"}}}'
 ```
 
-MCP-opsætningen i detaljer (Basic vs OAuth, fejlkoder, Publers to nøgletyper): [`docs/mcp-auth.md`](mcp-auth.md).
+MCP-opsætningen i detaljer (Basic vs OAuth, fejlkoder, Publers to nøgletyper, Simply-connectoren): [`docs/mcp-auth.md`](mcp-auth.md).
 Profilen kan også læses over MCP via den lokale server `tools/mcp_project_profile.py`
 (se [`../.mcp.json`](../.mcp.json)) — den kræver ingen site-credential.
 
@@ -192,7 +220,7 @@ Profilen kan også læses over MCP via den lokale server `tools/mcp_project_prof
 | Hvad skal bygges, i hvilken rækkefølge, hvor lang tid? | `docs/roadmap.md`, `plugins/steamgears-autopilot/ROADMAP.md` |
 | Hvor langt er vi, og hvorfor? | `projektstatus.json` → `docs/projektstatus.md` |
 | SEO-regler, GEO-skabelon, måling | `docs/seo.md` |
-| MCP-auth, fejlkoder, Publer | `docs/mcp-auth.md` |
+| MCP-auth, fejlkoder, Publer, Simply | `docs/mcp-auth.md` |
 | Alt hvad der er undersøgt, med dato | `docs/library/README.md` (indeks) |
 | Butik, produkter, tekster, mockups | `docs/library/butiksaudit-*`, `produkttekster-*`, `mockup-brief-*` |
 | Hvad der virker / ikke virker pr. projekt | `reports/*.pdf` |

@@ -16,6 +16,7 @@ sidste commit-dato. Målt 2/11 2026.
 
 | Dokument | Indhold | Dato |
 | --- | --- | --- |
+| [seo-audit-2026-11-02.md](seo-audit-2026-11-02.md) | **Bred SEO-audit:** 121 URL'er crawlet, score 56,5/100, 21 fund med bevis, roadmap og tid til 100 % — PDF i `reports/seo-audit-2026-11-02.pdf` | 2026-11-02 |
 | [forside-2026-11-02.md](forside-2026-11-02.md) | Forsiden: to H1'er, S2.4-beslutningen og paste-klar hero | 2026-11-02 |
 | [navigation-og-meta-2026-11-02.md](navigation-og-meta-2026-11-02.md) | Header-links, footer-fortrydelse, meta-runde og sitemap-kontrol — fire punkter lukket, fem blokeringer | 2026-11-02 |
 | [navigation-spec-2026-11-02.md](navigation-spec-2026-11-02.md) | Navigation og menu — S2.3, verificeret mod REST 2/11 | 2026-11-02 |
@@ -61,7 +62,9 @@ sidste commit-dato. Målt 2/11 2026.
 
 | Dokument | Indhold | Dato |
 | --- | --- | --- |
-| [indholdsaudit-2026-11-01.md](indholdsaudit-2026-11-01.md) | Indholdsaudit — posts, sider og produkter | 2026-11-01 |
+| [produkt-schema-fix-2026-11-02.md](produkt-schema-fix-2026-11-02.md) | Produkt-schema: brand, 14 dages returret og leveringstid — kode klar, ikke live (D2/D5) | 2026-11-02 |
+| [waf-diagnose-2026-11-02.md](waf-diagnose-2026-11-02.md) | WAF-diagnose: 455 rammer spoofede bot-UA'er, ikke Google — retter A1/S0.6; PDF i `reports/waf-diagnose-2026-11-02.pdf` | 2026-11-02 |
+| [indholdsaudit-2026-11-01.md](indholdsaudit-2026-11-01.md) | Indholdsudit — posts, sider og produkter | 2026-11-01 |
 | [dode-links-2026-11-01.md](dode-links-2026-11-01.md) | Døde interne links — 39 fund | 2026-11-01 |
 | [mangler-og-plan-25-10.md](mangler-og-plan-25-10.md) | Komplet mangel-liste og udførelsesplan (25/10) | 2026-10-26 |
 | [keyword-morgenscan-26-10.md](keyword-morgenscan-26-10.md) | Keyword-morgenscan | 2026-10-27 |
@@ -108,7 +111,7 @@ Høstede Google-kilder i [`knowledge_base/`](../../knowledge_base/) (indlæses a
 - [`../roadmap.md`](../roadmap.md) — **den eneste** optimeringsplan for sitet (S0–S4)
 - [`../seo.md`](../seo.md) — **det eneste** SEO-dokument: regler, GEO-skabelon, måling
 - [`../../plugins/steamgears-autopilot/ROADMAP.md`](../../plugins/steamgears-autopilot/ROADMAP.md) — plugin-produktets egen roadmap
-- [`../mcp-auth.md`](../mcp-auth.md) — auth for MCP-serverne i `.mcp.json`
+- [`../mcp-auth.md`](../mcp-auth.md) — auth for MCP-serverne i `.mcp.json` (Royal Basic/OAuth, Publer-nøgler, Simply OAuth)
 - [`../adsense-setup.md`](../adsense-setup.md) — AdSense-setup
 - [`../competitors.md`](../competitors.md) — Competitor Watch
 - [`../command-center-kilde.md`](../command-center-kilde.md) — hvor Command Center-kilden ligger

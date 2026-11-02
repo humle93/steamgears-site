@@ -1,16 +1,18 @@
-# MCP-auth i `.mcp.json` — steamgears.eu og Publer
+# MCP-auth i `.mcp.json` — steamgears.eu, Publer og Simply.com
 
-`.mcp.json` har tre servere: to HTTP-servere der kræver hver sin slags credential, og én lokal stdio-server
-uden credential.
+`.mcp.json` har fire servere: tre HTTP-servere og én lokal stdio-server. To af HTTP-serverne kræver hver sin
+credential i en miljøvariabel, den tredje logger ind med OAuth i klienten, og stdio-serveren kræver intet.
 
 | Server | Endpoint | Auth i `.mcp.json` | Credential |
 | --- | --- | --- | --- |
 | `steamgears` | `https://steamgears.eu/wp-json/royal-mcp/v1/mcp` | `Basic ${ROYAL_MCP_AUTH}` | WordPress application password (base64) |
 | `publer` | `https://mcp.publer.com/` | `Bearer ${PUBLER_API_KEY}` | Publer MCP API key (Business/Enterprise) |
 | `steamgears-profil` | `tools/mcp_project_profile.py` (stdio) | ingen | ingen — læser kun repoet |
+| `simplycom` | `https://mcp.simply.com/v2` | ingen headers — OAuth 2.1 i klienten | Simply.com-konto (browser-login) |
 
-Begge variabler er usatte i dag, så `steamgears` og `publer` står som *Pending approval* indtil de er
-konfigureret. `steamgears-profil` virker uden credential og er den eneste MCP-kilde der svarer i dag.
+`ROYAL_MCP_AUTH` og `PUBLER_API_KEY` er usatte i dag, så `steamgears` og `publer` står som *Pending approval*
+indtil de er konfigureret. `simplycom` kræver ingen variabel, men et browser-login ved første værktøjskald.
+`steamgears-profil` virker uden credential og er den eneste MCP-kilde der svarer uden opsætning.
 
 ## Steamgears (`steamgears`)
 
@@ -187,6 +189,131 @@ MCP kræver **Business- eller Enterprise-planen**.
 | `401` med `www-authenticate: Bearer resource_metadata=…` | serveren tilbyder OAuth | forbind via OAuth i stedet for nøgle |
 | Nøglen afvises trods frisk kopi | forkert nøgletype (REST i stedet for MCP) eller manglende scopes | opret nøgle under AI & Automations → MCP, kontrollér Workspaces/Accounts |
 
+## Simply.com (`simplycom`)
+
+Simply.com hoster steamgears.eu og ejer domæne, DNS og mail. Deres AI Connector er en MCP-server med
+**OAuth 2.1** — der findes ingen API-nøgle at kopiere, og `.mcp.json` skal derfor ikke indeholde andet end
+endpointet.
+
+| Felt | Værdi |
+| --- | --- |
+| Endpoint | `https://mcp.simply.com/v2` |
+| Transport | streamable HTTP |
+| Auth | OAuth 2.1, browser-login ved første værktøjskald |
+| Server-navn | `simplycom` · uden konto: `simplycom-public` |
+
+### Hvad agenten kan — og ikke kan
+
+Agenten får **samme rettigheder som den bruger der logger ind**: DNS-poster, nameservere og DNSSEC,
+domænetilgængelighed og ordrelinks, mailkonti og videresendelser, subdomæner, MySQL-databaser, website- og
+MySQL slow-logs, deploy-oplysninger til SSH, SFTP, FTP og rsync samt brugerens support-sager.
+
+Agenten **kan ikke** bestille, opsige eller betale for noget. Det håndhæves af serveren, ikke af en indstilling
+her i repoet.
+
+Konsekvens for dette projekt: forbindelsen giver DNS, mail, databaser, logs og support-sager — men **ikke**
+WAF-regler. Den kan altså ikke hvidliste en IP. Den 455 der blev målt 1–2/11 er WAF'ens spoofing-værn og ikke
+et Google-problem; hele sagen står i [`library/waf-diagnose-2026-11-02.md`](library/waf-diagnose-2026-11-02.md),
+og WAF-afsnittet nedenfor beskriver hvad der faktisk kan gøres.
+
+### Opsætning
+
+`.mcp.json` har allerede blokken — der er intet at udfylde:
+
+```json
+"simplycom": {
+  "type": "http",
+  "url": "https://mcp.simply.com/v2"
+}
+```
+
+Andre klienter registrerer samme endpoint med deres egen kommando:
+
+```bash
+claude mcp add --transport http --scope user simplycom https://mcp.simply.com/v2
+codex mcp add simplycom --url https://mcp.simply.com/v2
+```
+
+I Cursor og Windsurf lægges den i `mcpServers` som `{"url": …}` henholdsvis `{"serverUrl": …}` — Windsurf
+bruger `serverUrl`, ikke `url`, og er den fejl der oftest koster en runde.
+
+### Login — kun ejeren kan gøre det
+
+1. Genstart MCP-klienten, så den læser den nye server.
+2. Kald et vilkårligt Simply-værktøj. Klienten åbner browseren.
+3. Log ind på Simply.com og godkend. Consent gælder **den konto du er logget ind med** — brug kontoen der ejer
+   steamgears.eu, ellers får agenten ingen værktøjer for domænet.
+4. Kontrollér i klienten at `simplycom` er connected, fx `claude mcp list`.
+
+Der findes **intet device-code-flow og ingen nøgle**: en agent i en container uden browser kan ikke etablere
+forbindelsen selv. Det er med vilje, og det betyder at forbindelsen altid kræver et menneske første gang.
+
+### Offentlig server uden konto
+
+`https://mcp.simply.com/public` kræver intet login og kan slå domænetilgængelighed op, liste de understøttede
+TLD'er, bygge et ordrelink og søge i Simplys hjælpeartikler. Registrér den som `simplycom-public` hvis agenten
+skal kunne det uden at have en konto.
+
+### WAF: 429/454/455 og hvorfor en egen IP ikke kan hvidlistes
+
+Simplys egen artikel [HTTP 429 / 454 / 455 Blocked](https://www.simply.com/en/support/faq/php/867-http-429-454-455-blocked/)
+(hentet 2/11 2026) siger det direkte:
+
+| Kode | Betydning ifølge Simply |
+| --- | --- |
+| `429` | For mange requests — midlertidigt; respektér `Retry-After` og sænk farten |
+| `454` | Gammel/mistænkt browser eller IP med dårligt ry; normale browsere klarer JS-tjekket |
+| `455` | En enkelt request blokeret af en firewall-regel; **årsagen står i Control Panel → Webserver logs** |
+
+Tre sætninger i artiklen afgør sagen for en agent:
+
+- **Kendte tjenester er allerede hvidlistet:** »Googlebot, OpenAI, Anthropic, Bing, LinkedIn, Jetpack, PayPal,
+  Facebook, ManageWP etc.« — altså på IP, ikke på user-agent.
+- **Spoofing opdages:** »many bots pretend to be these known services … always check whether it is actually an
+  approved service that has been blocked (based on IP address)«.
+- **Hvidlistning kræver en offentlig IP-liste:** Simply hvidlister en tjeneste, hvis der findes »a public and
+  maintained URL with a list of the IP addresses in use«. Der findes **ingen selvbetjent IP-hvidlistning** i
+  panelet.
+
+Målt konsekvens (2/11 2026, egress `208.72.218.131`): neutral `curl` → 200; Googlebot-, bingbot-, Applebot- og
+GPTBot-UA → 455. Det er forventet adfærd, ikke en fejl på sitet: IP'en tilhører ikke Google, så UA'en er en
+spoof. Derfor:
+
+1. **Crawl og verifikation kører med neutral UA** — aldrig med et påtaget bot-navn. Det er hvad
+   [`tools/seo_audit_crawl.py`](../tools/seo_audit_crawl.py) gør, og hvorfor alle 121 URL'er gav 200.
+2. **En vilkårlig cloud-IP kan ikke hvidlistes.** Den har ingen offentlig, vedligeholdt IP-liste, og Simply
+   hvidlister tjenester — ikke enkeltadresser. IP'en kan desuden skifte mellem sessioner.
+3. **Googlebots faktiske svar verificeres i GSC** (Crawl stats → By response), ikke ved at efterligne UA'en.
+4. **Skal der alligevel hvidlistes**, gælder det kun en rigtig tredjepartstjeneste, og sagen skal indeholde
+   tjenestens offentlige IP-liste. En agent-container er ikke sådan en tjeneste.
+
+Kør checken efter en ændring — den skelner forventet bot-455 fra en ægte blokering:
+
+```bash
+bash tools/waf_check.sh
+# exit 0 = neutral 200 · 1 = neutral blokeret · 2 = serverfejl
+```
+
+Fejlsøgning: 455 for en *neutral* klient betyder at vores egen trafik er ramt (typisk efter en burst) — vent
+5–10 minutter og sænk farten. 455 for en bot-UA er normalt og kræver ingen handling. Den præcise regel findes
+kun i Control Panel → Webserver logs for webhotellet.
+
+### Tilbagekald adgang
+
+Adgangen tilbagekaldes under **Connected apps** på
+<https://www.simply.com/en/controlpanel/user/>. Det lukker OAuth-tokenet med det samme; blokken i `.mcp.json`
+kan blive stående, men forbindelsen virker ikke før der logges ind igen. Skal serveren slet ikke tilbydes i
+repoet, fjernes blokken — og derefter tilbagekaldes adgangen, i den rækkefølge.
+
+### Fejlsøgning (Simply)
+
+| Symptom | Betydning | Handling |
+| --- | --- | --- |
+| Serveren står som *needs authentication* | OAuth-login er ikke gennemført | åbn klienten, kald et værktøj, log ind |
+| `401` efter genstart | token udløbet eller adgang tilbagekaldt | log ind igen |
+| Login lykkes, men ingen domæneværktøjer | kontoen ejer ikke domænet | log ind med den konto der ejer steamgears.eu |
+| Værktøjerne mangler helt | klienten læser ikke projektets `.mcp.json` | åbn repoet som projekt, eller registrér i bruger-scope |
+
 ## Profil-serveren (`steamgears-profil`)
 
 [`tools/mcp_project_profile.py`](../tools/mcp_project_profile.py) er en lokal **stdio**-server der gør
@@ -218,6 +345,10 @@ printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | python3 tools/m
   `~/.royal_mcp_auth`.
 - Publer-nøglen hører i `PUBLER_API_KEY`, ikke i URL'en: `?api_key=` lækker nemt gennem logs, historik og
   skærmbilleder. Nøglen giver adgang til workspaces og konti, og scopes afgør hvor meget agenten kan.
+- Simply.com-forbindelsen er stærkere end en API-nøgle: et aktivt OAuth-token giver DNS-, mail- og
+  databaseadgang for hele kontoen. Log kun ind med kontoen der ejer steamgears.eu, og tilbagekald adgangen når
+  den ikke bruges. Der findes ingen nøgle at lække — men heller ingen nøgle at rotere, så tilbagekald er den
+  eneste bremse.
 - Har en nøgle været eksponeret: tilbagekald den i WordPress **først**, og opret derefter en ny.
 
 ## Referencer
@@ -227,3 +358,10 @@ printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | python3 tools/m
 - [`seo_agent.py`](../seo_agent.py) — `call_royal_mcp()` kalder samme endpoint.
 - [Publer MCP — officiel opsætning](https://publer.com/help/en/article/how-to-set-up-and-use-publers-mcp-server-14orlq0/) — OAuth og API-nøgle, opdateret 15/10 2026.
 - [Publer MCP — integrationsside](https://publer.com/integrations/mcp) — endpoint og OAuth-flow.
+- [Simply.com AI Connector](https://www.simply.com/en/ai/connector/) — hvad connectoren kan, og hvad den ikke kan.
+- [Simply.com agent-opsætning](https://www.simply.com/agent-setup/prompt.md) — kilden til Simply-afsnittet,
+  hentet 2/11 2026.
+- [Simply.com REST API](https://www.simply.com/en/docs/api/) — til sammenligning; connectoren er egne værktøjer.
+- [Simply.com — HTTP 429 / 454 / 455 Blocked](https://www.simply.com/en/support/faq/php/867-http-429-454-455-blocked/)
+  — WAF-koderne, hvilke tjenester der er hvidlistet, og kravet om en offentlig IP-liste, hentet 2/11 2026.
+- [Simply.com — Tilbagekald adgang](https://www.simply.com/en/controlpanel/user/) — Connected apps.
