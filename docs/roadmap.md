@@ -80,8 +80,12 @@ enter the queue as `angle_a`/`post`.
 and a queue of **35 queued / 10 published**, `publish_mode: rss`, Publer configured. `POST
 /wp-json/sgap/v1/queue` with the same Bearer token answers **401** (`Sorry, you are not allowed to do that`):
 the token authenticates AI Engine's MCP surface, not the plugin's own REST namespace. The plugin's 31 abilities
-do answer over MCP (`queue-post`, `check-post`, `list-queue`, …), so that is the write path — `tools/load_campaign.py
---post` now uses it.
+are exposed over MCP, but **AI Engine's *Drafts Only* mode refuses every write ability**: both
+`steamgears-autopilot_update` and a deliberately invalid `queue-post` answer *"This site lets assistants work on
+drafts only, so this was not done"*. Read-only abilities (`status`, `check-post`, `list-queue`, `list-plugins`)
+answer normally. So the write path that `tools/load_campaign.py --post` now uses is correct but cannot be used
+until the owner switches *Drafts Only* off — and the plugin cannot be updated from here either, for the same
+reason, so 7.25.0 still needs the owner's *Plugins → Update* click.
 
 **The quality gate is live but could only be half-proven here.** `status` reports `quality_gate: {mode: block,
 banned_words: 0}`, and `check-post` refuses a post that links to a placeholder (`placeholder_link`, severity
