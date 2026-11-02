@@ -148,14 +148,47 @@ Lever en konkret, handlingsorienteret optimeringsplan på dansk opdelt i:
     }).encode("utf-8")
 
     req = urllib.request.Request(url, data=payload, headers={"Content-Type": "application/json"}, method="POST")
-    with urllib.request.urlopen(req, timeout=120) as res:
-        result = json.loads(res.read().decode("utf-8"))
-        return result["candidates"][0]["content"]["parts"][0]["text"]
+    try:
+        with urllib.request.urlopen(req, timeout=120) as res:
+            result = json.loads(res.read().decode("utf-8"))
+    except urllib.error.HTTPError as e:
+        body = e.read().decode("utf-8", errors="replace")[:300]
+        raise SystemExit(f"Gemini svarede HTTP {e.code}: {body}")
+    except urllib.error.URLError as e:
+        raise SystemExit(f"Kunne ikke nå Gemini: {e.reason}")
+
+    candidates = result.get("candidates") or []
+    if not candidates:
+        feedback = json.dumps(result.get("promptFeedback", {}))[:200]
+        raise SystemExit(f"Gemini returnerede intet svar (feedback: {feedback})")
+    parts = candidates[0].get("content", {}).get("parts") or []
+    if not parts or "text" not in parts[0]:
+        raise SystemExit(f"Gemini-svaret havde ingen tekst (finishReason: {candidates[0].get('finishReason')})")
+    return parts[0]["text"]
+
+def fail(message, title="SEO-audit fejlede"):
+    """Stopper med en GitHub-annotation, så fejlen kan læses uden at åbne loggen."""
+    print(f"::error title={title}::{message}")
+    raise SystemExit(1)
+
 
 if __name__ == "__main__":
+    if not GEMINI_API_KEY:
+        fail("GEMINI_API_KEY er ikke sat. Tilføj den under Settings → Secrets and variables → Actions "
+             "(eller kør lokalt med export GEMINI_API_KEY=...).")
+    if not WP_USER or not WP_APP_PASS:
+        print("::warning title=Ingen WP-credentials::WP_USER/WP_APP_PASS er ikke sat — auditten kører kun på offentlige endpoints.")
+
     os.makedirs("reports", exist_ok=True)
     kb = load_seo_knowledge()
+    if not kb.strip():
+        fail("knowledge_base/ er tom — kør seo_harvester.py først.")
     snapshot = gather_site_snapshot()
+    empty = [k for k in ("pages", "products") if not snapshot.get(k)]
+    if empty:
+        print(f"::warning title=Tomme datakilder::Ingen data fra {', '.join(empty)} — rapporten bygges på det der lykkedes.")
+    if not snapshot["pages"] and not snapshot["products"]:
+        fail("Kunne ikke hente hverken sider eller produkter fra steamgears.eu — tjek WAF/credentials.")
     report = generate_seo_plan(kb, snapshot)
 
     today = datetime.date.today().isoformat()
