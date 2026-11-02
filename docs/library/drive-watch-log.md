@@ -252,3 +252,35 @@ ingen ændringer
 - ingen ændringer (token 42444 uændret)
 ## 2026-11-01 23:55 UTC (00:55 DK 2/11)
 - ingen ændringer (token 42444 uændret)
+
+## 2026-11-02 05:41 UTC — token 42444 → 42571
+- 8 poster siden 1/11 23:55, heraf 1 ny mappe; 1 fil i skraldespanden (dublet). Ingen permission-ændringer set.
+- **Ny mappe `cc-niche-scanner`** (05:33) med 5 filer: `CLAUDE_NICHE_SCANNER_SPEC.md` (v2.1, 5,3 KB),
+  `niche_engine.py`, `niche_routes.py`, `niche_deployer.py`, `cc-niche-bridge.php`.
+- **Ny `niche_harvester.py`** (05:34, 7,5 KB) — ligger i My Drive-roden, ikke i mappen.
+- **"Command Center — kilden er GitHub (denne mappe er ryddet)"** (04:27): command-center-main (v7.9),
+  v8.1/v8.2/v8.3-planer, Juno v8.0 og social-hook er flyttet til skraldespanden; GitHub
+  `humle93/command-center` v7.10 er master. Samme doc fra 04:22 ligger i skraldespanden som dublet.
+
+### Review af cc-niche-scanner (læst, ikke udført)
+Spec'en er et Command Center-tillæg: et WP-plugin (`cc-bridge`) eksporterer produkter, kostpriser, salg og
+slugs via `/wp-json/cc-bridge/v1/telemetry`; FastAPI + SQLite WAL kører tre filtre (margin under 40 %,
+slug-kannibalisering, SERP-overlap ≥ 4 ens URLs) og deployer Hub-and-Spoke-artikler plus Woo-drafts via
+AIMLAPI. Tre forbehold:
+
+1. **Tallene er syntetiske.** `niche_harvester.py` beregner `search_volume = max(150, 2400 − 320 × antal_ord)`
+   og `kd` ud fra hvor mange giganter (Amazon/Etsy/Wikipedia/Pinterest) der står i top 10, og skriver dem i
+   `niche_keywords` som om de var målt. `trend_slope` er hardcodet `1.2`, så `trend_mult` i opportunity-scoren
+   er konstant. Scoren `(volumen / kd) × margin × trend` arver dermed tre opdigtede input.
+2. **Kilden er scraping.** Google Suggest (uofficielt endpoint) og DuckDuckGo HTML med random user-agents og
+   1,5–2,8 s forsinkelse. Det kan blokeres uden varsel og har ingen SLA.
+3. **Deploy-stien kræver den adgang vi ikke har.** `WP_USER`/`WP_APP_PASS` + `AIMLAPI_KEY`; vores REST-forsøg
+   på sitet giver 401, og MCP-endpointet kræver `ROYAL_MCP_AUTH`.
+
+Sammenlignet med [`tools/niche_scanner.py`](../../tools/niche_scanner.py) er formålet det samme, men princippet
+modsat: vores scanner læser Pinterests officielle trends-endpoint og skriver `utilgængelig` når en kilde
+mangler, frem for at fylde tal ind. To dele er værd at låne: SERP-overlap-clusteringen (≥ 4 fælles URLs i
+top 10) og margin-dræberen før der bruges AI-tokens. Se også
+[`niche-scan-procedure-2026-11-02.md`](niche-scan-procedure-2026-11-02.md).
+
+newStartPageToken: 42571
