@@ -71,10 +71,15 @@ def fetch_wp_json(endpoint):
     except Exception as e:
         return {"error": str(e), "endpoint": endpoint}
 
-def call_royal_mcp(method, params=None):
-    url = f"{WP_SITE}/wp-json/royal-mcp/v1/mcp"
+def call_mcp(method, params=None):
+    url = os.environ.get("MCP_URL", "https://steamgears.eu/wp-json/mcp/v1/http")
     payload = json.dumps({"jsonrpc": "2.0", "method": method, "params": params or {}, "id": 1}).encode("utf-8")
-    req = urllib.request.Request(url, data=payload, headers=get_wp_headers(), method="POST")
+    headers = dict(get_wp_headers())
+    token = os.environ.get("MCP_ACCESS_TOKEN", "").strip()
+    if token:
+        headers["Authorization"] = "Bearer " + token
+    headers["Accept"] = "application/json, text/event-stream"
+    req = urllib.request.Request(url, data=payload, headers=headers, method="POST")
     try:
         with urllib.request.urlopen(req, timeout=20) as res:
             return json.loads(res.read().decode("utf-8"))
@@ -84,7 +89,7 @@ def call_royal_mcp(method, params=None):
 def gather_site_snapshot():
     print("[1/3] Henter live-data fra Steamgears.eu...")
     snapshot = {
-        "mcp_tools": call_royal_mcp("tools/list"),
+        "mcp_tools": call_mcp("tools/list"),
         "pages": [],
         "posts": [],
         "products": []

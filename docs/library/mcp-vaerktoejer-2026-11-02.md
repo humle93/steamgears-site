@@ -25,7 +25,11 @@ Det tal der gælder for sitet er `tools/list` på endpointet, og det kræver et 
 | `GET /wp-json/mwai/v1/mcp/status` · `…/mcp/functions` | `401` | AI Engines admin-ruter for MCP; kræver credential |
 | `POST /wp-json/mcp/mcp-adapter-default-server` | `401` · `rest_forbidden` | Adapterens ene rute |
 | `POST /mcp` · `POST /wp-json/royal-mcp/v1/mcp` | `404` | Royal MCP svarer ikke længere |
-| `GET /.well-known/oauth-*` (rod) | `301` → forsiden; dyb sti `500` | Discovery virker kun via `?rest_route=`-formen |
+| `GET /.well-known/oauth-protected-resource` og `…/oauth-authorization-server` | `200` med gyldig JSON | rod-discovery virker nu; under aktiveringen svarede de `301`/`500` — se §1-noten |
+
+**Transient, ikke en tilstand:** de to rod-stier svarede `301` til forsiden og den dybe sti `500` i minutterne
+efter `wp plugin install … --activate`, fordi aktiveringen flusher rewrite-regler. Senere samme aften svarer alle
+tre `200`. Et probe lige efter en plugin-aktivering siger derfor intet om, hvordan discovery opfører sig bagefter.
 
 ## 2. AI Engine — 74 værktøjer
 
@@ -159,19 +163,22 @@ forskellige værktøjsflader, to forskellige credential-modeller.
 - **Hvilke niveauer der er låst** for den rolle tokenet tilhører (`read_only_refusal`, rollefilter).
 - **Om adapterens default-server har nogen public abilities** — `discover-abilities` på dens rute.
 
-Indtil da er tallene herfra: **74 værktøjer i AI Engine 3.9.0**, **3 i mcp-adapter 0.7.1**, og
-**0 målte på sitet**, fordi hver eneste flade svarer `401` uden credential.
+Tallene herfra: **74 kerneværktøjer i AI Engine 3.9.0-kilden**, **3 i mcp-adapter 0.7.1**, og **206 annonceret på
+sitet** — det sidste er målt med et OAuth-token, se [`../mcp-auth.md`](../mcp-auth.md). Forskellen på 132 er
+Autopilot-familien (31), bridgede abilities og resten af Pro-sættet; fordelingen er ikke målt.
 
 ## 5. Sikkerhed
 
 - **45 af de 74 værktøjer kan ændre sitet** — heraf `wp_delete_post`, `wp_delete_media`,
   `wp_update_option`, `wp_create_user`, `wp_update_user`, `wp_site_maintenance`, `wp_update_site_style`,
-  `wp_save_redirect` og `mcp_undo_change`. En Bearer-token til AI Engines Simple Auth arver den rolle der
-  udstedte den, så den skal behandles som en admin-adgang, ikke som en læsenøgle.
+  `wp_save_redirect` og `mcp_undo_change`. Et OAuth-token til MCP arver den WP-rolle der godkendte det, så det skal behandles som admin-adgang, ikke som
+  læsenøgle. AI Engine har desuden *Drafts Only* slået til på sitet, så skrivende kald afvises før plugin'et ser
+  dem — den switch, ikke værktøjslisten, afgør om de 45 værktøjer kan bruges.
 - **To flader betyder to angrebsflader.** Adapterens `execute-ability` kan kalde de samme abilities som
   AI Engine kan, hvis de er gjort public — så en ability skal kun gøres public bevidst.
-- **Discovery-fejlen er også en sikkerhedsgevinst:** rod-`.well-known` svarer `301`/`500`, så en fremmed
-  klient ikke kan registrere sig selv mod sitet uden at kende den namespacede metadata-sti.
+- **Dynamisk klientregistrering er åben:** `POST /wp-json/mcp/v1/oauth/register` svarer `201` uden credential.
+  Hvem som helst kan altså registrere en klient — det er adgangskontrollen ved `authorize` (WP-login +
+  samtykke) og de rollebundne værktøjer der holder, ikke registreringen.
 
 ## Referencer
 

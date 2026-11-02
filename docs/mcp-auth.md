@@ -1,236 +1,128 @@
-# MCP-auth i `.mcp.json` — steamgears.eu, Publer og Simply.com
+# MCP-adgang — steamgears.eu og Publer
 
-`.mcp.json` har fire servere: tre HTTP-servere og én lokal stdio-server. To af HTTP-serverne kræver hver sin
-credential i en miljøvariabel, den tredje logger ind med OAuth i klienten, og stdio-serveren kræver intet.
+`.mcp.json` har tre servere: to HTTP-servere der kræver hver sin slags credential, og én lokal stdio-server
+uden credential.
 
 | Server | Endpoint | Auth i `.mcp.json` | Credential |
 | --- | --- | --- | --- |
-| `steamgears` | `https://steamgears.eu/mcp` | `Bearer ${ROYAL_MCP_TOKEN}` | Royal MCP API-nøgle (32 hex, laves i wp-admin) |
+| `steamgears` | `https://steamgears.eu/wp-json/mcp/v1/http` | `Bearer ${MCP_ACCESS_TOKEN}` | OAuth-token fra `tools/mcp_oauth.py` (ligger uden for repoet) |
 | `publer` | `https://mcp.publer.com/` | `Bearer ${PUBLER_API_KEY}` | Publer MCP API key (Business/Enterprise) |
 | `steamgears-profil` | `tools/mcp_project_profile.py` (stdio) | ingen | ingen — læser kun repoet |
-| `simplycom` | `https://mcp.simply.com/v2` | ingen headers — OAuth 2.1 i klienten | Simply.com-konto (browser-login) |
 
-**Status 2/11 2026:** `steamgears`-nøglen ligger i `.env` som `ROYAL_MCP_TOKEN`. Den virkede om formiddagen —
-`python3 wp_mcp_stdio.py --check` gav `ok: true`, server 1.5.13 og **270 værktøjer** — men **sent 2/11 blev den
-afvist**: `401 {"code":-32600,"message":"Invalid or expired access token."}` på hvert kald, også med
-browser-UA og på en frisk session. Nøglen skal altså roteres (wp-admin → Royal MCP → Settings → ny API-nøgle
-→ ind i `.env` som `ROYAL_MCP_TOKEN`), før nogen MCP-verifikation kan køre. At sitet svarer `454` på
-forskiden til curl med browser-UA er bot-reglen fra Simply og har intet med nøglen at gøre — `/mcp` svarer
-korrekt `401` med JSON-RPC-fejlen. `PUBLER_API_KEY` er stadig usat, så `publer` står som *Pending approval*.
-`steamgears-profil` virker uden credential; den er verificeret med et rigtigt `initialize` + `tools/list`-håndtryk.
+**Status 2/11 2026, sent: forbindelsen virker.** OAuth-klienten blev godkendt af ejeren, tokenet lever 3600 s med
+refresh, og `python3 tools/mcp_rest.py --check` svarer `ok: true` med serveren `AI Engine - Steamgears` og
+**206 værktøjer**. Læsning virker hele vejen (`wp_list_plugins`, `list-queue`, `check-post`). Skrivning gør
+**ikke**: AI Engine har *Drafts Only* slået til, så `queue-post` afvises med »This site lets assistants work on
+drafts only«, før plugin'et ser kaldet. Skal agenten skrive, skal den switch slås fra i
+*Meow Apps → AI Engine → Settings → MCP* — det er en beslutning om risikoprofil, ikke en fejl.
 
-> **Navnet er `ROYAL_MCP_TOKEN`.** Broen (`wp_mcp_stdio.py`) og `.mcp.json` bruger begge dette navn, og
-> broen læser desuden det ældre `ROYAL_MCP_API_KEY`, hvis nogen foretrækker det. Før 2/11 2026 ledte broen
-> **kun** efter `ROYAL_MCP_API_KEY`, mens `.env` havde `ROYAL_MCP_TOKEN` — resultatet var 401 på hver ny
-> session, selv om nøglen lå i repoet, og nogen måtte ind og eksportere den manuelt hver gang. Det er rettet:
-> nøglen læses nu fra `.env` automatisk, så der ikke skal eksporteres noget pr. session.
-
-> **Rettelse 2/11 2026:** denne fil påstod tidligere at Royal MCP kunne bruges med et WordPress
-> application password over Basic. Det er **forkert** for MCP-ruten — målt på sitets eget endpoint, se
-> tabellen i afsnittet om `steamgears`. Den headless-venlige vej er en **API-nøgle sendt som Bearer**.
-
-## Måling 2/11 2026 (sen aften) — AI Engine ejer MCP-fladen, `mcp-adapter` står ved siden af
-
-Ejeren installerede `mcp-adapter` (`wp plugin install https://github.com/WordPress/mcp-adapter/releases/latest/download/mcp-adapter.zip --activate`)
-og bad om at få det verificeret. Målt fra denne container med neutral curl-UA lige efter installationen:
-
-| Kald | Svar |
-| --- | --- |
-| `GET /wp-json/` | `200` — 42 namespaces; `mcp`, `mcp/v1`, `mwai/v1`, `wp-abilities/v1`, `ai/v1` er der, **`royal-mcp/v1` er ikke** |
-| `POST /wp-json/mcp/v1/http` (`initialize`, intet credential) | `401` · `rest_forbidden`, med `WWW-Authenticate: Bearer realm="MCP", resource_metadata="…/?rest_route=/mcp/v1/.well-known/oauth-protected-resource"` |
-| `GET /wp-json/mcp/v1/.well-known/oauth-protected-resource` | `200` — `resource: …/wp-json/mcp/v1/http`, `scopes_supported: ["mcp"]`, `resource_documentation: https://meowapps.com/ai-engine/` |
-| `GET /wp-json/mcp/v1/.well-known/oauth-authorization-server` | `200` — issuer `…/wp-json/mcp/v1`, `authorize`/`token`/`register` under `/wp-json/mcp/v1/oauth/*` |
-| `POST /wp-json/mcp/mcp-adapter-default-server` (`initialize`) | `401` · `rest_forbidden` |
-| `GET /wp-json/mcp/mcp-oauth-server` | `401` · `mcp_unauthorized` |
-| `POST /mcp` og `POST /wp-json/royal-mcp/v1/mcp` | **`404` `rest_no_route`** |
-| `GET /.well-known/mcp/server-card.json`, `/.well-known/agent-skills/index.json` | **`404`** |
-| `GET /.well-known/oauth-protected-resource`, `…/oauth-authorization-server` | **`301` → forsiden** |
-| `GET /.well-known/oauth-authorization-server/<vilkårlig sti>` | **`500`** — WordPress' fatale fejlside |
-| `GET /wp-json/mwai/v1/mcp/status`, `…/mcp/functions` | `401` · `rest_forbidden` (ruterne findes, kræver credential) |
-| `GET /wp-json/mwai/v1/simpleAuthCheck` | `401` · `rest_forbidden`; `POST` giver `404` — ruten er **kun GET** |
-| `GET /wp-json/ai/v1/abilities` | `403` · »You do not have permission to use the Abilities Explorer« |
-
-Hvad det betyder:
-
-- **MCP-serveren på sitet er AI Engines (Meow Apps), ikke `mcp-adapter` og ikke Royal MCP.** Metadataet peger
-  på `meowapps.com/ai-engine/`, og namespacet `mwai/v1` har 113 ruter, heriblandt `mcp/enable`, `mcp/status`,
-  `mcp/functions`, `mcp/usage`, `mcp/changes`, `mcp/approvals`, `mcp/undo`, `mcp/self_test` og `mcp/auth_echo`.
-- **Det kanoniske MCP-endpoint er `https://steamgears.eu/wp-json/mcp/v1/http`** — ikke `/mcp`, som svarer `404`.
-  Det svarer korrekt `401` med `WWW-Authenticate` og en `resource_metadata`-pegepind, så en klient der følger
-  401-headeren finder metadata.
-- **Discovery virker kun via `?rest_route=`-formen.** Rod-stierne `/.well-known/oauth-*` omdirigerer til
-  forsiden (`301`) og den dybe sti giver `500`. En standardklient der prøver rod-stien først — det gør de
-  fleste — finder ingen autorisationsserver. Det forklarer hvorfor callbacken på `127.0.0.1:8765` ikke kunne
-  indløses tidligere på dagen.
-- **`mcp-adapter` 0.7.1 er installeret og lukket, men tilføjer ingen auth-vej.** Den registrerer præcis én
-  HTTP-rute, `/wp-json/mcp/<server-id>` (`includes/Transport/HttpTransport.php`), svarer `401 rest_forbidden`
-  uden login, og release-zip'en indeholder hverken `well-known` eller et token-endpoint. Den eksponerer heller
-  ikke Royal MCP's værktøjer, men Abilities API gennem tre meta-værktøjer (`mcp-adapter/discover-abilities`,
-  `get-ability-info`, `execute-ability`), og kun abilities med `meta.public`/`meta.mcp.public` er synlige.
-  `mcp/mcp-oauth-server` hører derfor ikke til adapteren — navnet og namespacet peger på AI Engines OAuth.
-- **Royal MCP svarer ikke længere.** Hverken `/mcp`, `/wp-json/royal-mcp/v1/mcp` eller de fire
-  `.well-known`-dokumenter findes. `.mcp.json`s `steamgears`-server peger dermed på en død rute.
-- **Token-vejen findes ved siden af OAuth.** `mwai/v1/simpleAuthCheck` (kun GET) og `mwai/v1/mcp/status` er
-  AI Engines Simple Auth: et `Authorization: Bearer <token>` uden om OAuth-flowet. Værktøjsantallet er stadig
-  **ikke målt** — det kræver at  `mcp/status` eller et `tools/list` på `/wp-json/mcp/v1/http` kaldes med et
-  gyldigt credential.
-
-Den fulde værktøjsoversigt — AI Engines 74 værktøjer med adgangsniveau og mcp-adapterens tre meta-værktøjer —
-ligger i [`library/mcp-vaerktoejer-2026-11-02.md`](library/mcp-vaerktoejer-2026-11-02.md).
+Sitet kører **AI Engine (Meow Apps)** som MCP-server. Det er standard MCP over HTTP med `Mcp-Session-Id`, og
+det kræver en credential på hvert kald: uden en svarer ruten `401 rest_forbidden`. Den gamle site-side
+MCP-server og dens API-nøgle er væk, og stdio-broen er derfor også fjernet — der er ingen nøgle at gemme i
+`.env` længere, kun et token der hentes med OAuth og ligger uden for repoet.
 
 ## Steamgears (`steamgears`)
 
-Endpoint målt om formiddagen 2/11: `https://steamgears.eu/mcp` (kanonisk jf. sitets serverkort), alias
-`https://steamgears.eu/wp-json/royal-mcp/v1/mcp` — samme server, samme svar.
+### Hvad endpointet svarer (målt 2/11 2026)
 
-> **Begge ruter svarer `404` siden sen aften 2/11 2026**, og serverkortet findes ikke længere. Den nuværende
-> MCP-flade er AI Engines på `https://steamgears.eu/wp-json/mcp/v1/http` — se »Måling 2/11 2026 (sen aften)«.
-> Afsnittet herunder står som historik over Royal MCP-opsætningen og som opskrift, hvis den genaktiveres.
-
-Sitet kørte **Royal MCP 1.5.14** (Free) med **270 værktøjer** og tilbød tre credential-typer:
-
-| Vej | Credential | Headless? | Bruges til |
-| --- | --- | --- | --- |
-| **API-nøgle** (anbefalet her) | `Authorization: Bearer <32 hex>` | ✅ | MCP-ruten; er lavet til CI og scripts |
-| OAuth2 (`authorization_code` + PKCE S256) | `Authorization: Bearer <access token>` | ❌ kræver browser til consent | Claude/ChatGPT-klienter; 24 t token + refresh |
-| Application password (Basic) | `Authorization: Basic <base64(bruger:nøgle)>` | ✅ | kun `wp-abilities`-ruten, **ikke** MCP |
-
-### Hvad endpointet faktisk svarer (målt 2/11 2026)
-
-| Kald | Svar |
-| --- | --- |
-| `initialize` uden credential, begge ruter | `401` · `{"code":-32600,"message":"Authentication required. Use Authorization: Bearer <token>."}` |
-| `Bearer` med ugyldig nøgle | `401` · `{"code":-32600,"message":"Invalid or expired access token."}` |
-| `Basic` med vilkårligt `bruger:nøgle` | `401` · `{"code":"invalid_username"}` — WP core prøver brugerlogin, men Royal MCP accepterer ikke Basic som MCP-credential |
-| `GET /wp-json/wp-abilities/v1/abilities` uden credential | `401` · `rest_forbidden` |
-| `GET /wp-json/mcp/mcp-oauth-server` | `401` · `mcp_unauthorized` |
-| `GET /wp-json/wc/store/v1/products?per_page=1` | `200` — offentlig læsning virker uden credential |
-
-Offentligt uden credential (målt i formiddags 2/11): `.well-known/mcp/server-card.json`,
-`.well-known/agent-skills/index.json`, `.well-known/oauth-authorization-server`,
-`.well-known/oauth-protected-resource` og `wp-json`-ruteindekset.
-**Ingen værktøjskald er anonyme**, og der findes ingen `client_credentials`- eller device-code-grant —
-metadataet annoncerede kun `authorization_code` og `refresh_token`.
-
-> **Rettet sent 2/11 2026:** de fire `.well-known`-dokumenter svarer ikke længere `200`. To er `404`, to
-> omdirigerer til forsiden, og den dybe OAuth-metadata-sti giver `500`. Det er målt efter at `mcp-adapter`
-> blev installeret — se afsnittet »Måling 2/11 2026 (sen aften)« ovenfor. Ruteindekset på `/wp-json/` svarer
-> stadig `200`.
-
-### 1. Lav API-nøglen
-
-1. Log ind som administrator på <https://steamgears.eu/wp-admin/>.
-2. Gå til **Royal MCP → Settings** og opret/vis API-nøglen (32 hex-tegn).
-3. Kopiér den med det samme — den vises kun én gang og i højst 15 minutter.
-
-Nøglen er knyttet til den WP-bruger der oprettede den, og der er **én pr. site**. Den kan roteres i wp-admin
-eller med `wp royal-mcp rotate-api-key`, og plugin-versionen kan slå den helt fra på Settings-skærmen.
-(2/11 2026 svarer sitet med **1.5.13** — denne fil nævnte tidligere 1.5.14.)
-
-### 2. Gem nøglen ét sted — helst `.env`
-
-Repoets `.env` er gitignored (`.gitignore` linje 2-3) og læses automatisk af broen og af `.mcp.json`, når
-variablen er eksporteret. Det er den ene plads, nøglen skal stå:
-
-```bash
-# i .env — dette repo bruger dette navn
-ROYAL_MCP_TOKEN=din-32-hex-noegle
-```
-
-Alternativt uden for repoet, hvis `.env` ikke må indeholde den:
-
-```bash
-printf '%s' 'din-32-hex-noegle' > ~/.royal_mcp_key
-chmod 600 ~/.royal_mcp_key
-```
-
-Broen læser `ROYAL_MCP_TOKEN`/`ROYAL_MCP_API_KEY` fra miljøet, derefter `.env` i repoets rod, derefter
-`~/.royal_mcp_key` — så en session der starter uden eksporterede variabler virker alligevel.
-
-### 3. Giv MCP-klienten nøglen
-
-`.mcp.json` sender `Authorization: Bearer ${ROYAL_MCP_TOKEN}` — altså nøglen **rå**, ikke base64. En
-MCP-klient kan ikke selv læse `.env`, så variablen skal være eksporteret i den shell klienten startes fra:
-
-```bash
-export ROYAL_MCP_TOKEN="$(grep -m1 '^ROYAL_MCP_TOKEN=' .env | cut -d= -f2-)"
-```
-
-Til scripts og stdio-broen er det ikke nødvendigt: `wp_mcp_stdio.py` læser `.env` selv, så der skal intet
-eksporteres pr. session.
-
-### 4. Verificér
-
-```bash
-curl -sS -X POST https://steamgears.eu/mcp \
-  -H 'Content-Type: application/json' \
-  -H 'Accept: application/json, text/event-stream' \
-  -H "Authorization: Bearer $ROYAL_MCP_API_KEY" \
-  -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"verify","version":"1"}}}'
-```
-
-Succes: `result` med `serverInfo`, og `Mcp-Session-Id` i svarets header. Session-id'en skal sendes med på alle
-efterfølgende kald i samme session.
-
-Derefter `claude mcp list` — `steamgears` skal vise ✓ Connected i stedet for *Pending approval*. Uden browser
-kan samme forbindelse bruges gennem stdio-broen: `printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | python3 wp_mcp_stdio.py`
-(læser nøglen fra `ROYAL_MCP_API_KEY` eller `~/.royal_mcp_key`).
-
-### Fejlsøgning (steamgears)
-
-| Symptom | Betydning | Handling |
+| Kald | Svar | Betydning |
 | --- | --- | --- |
-| `invalid_username` | du sendte Basic — MCP-ruten tager ikke app passwords | send `Authorization: Bearer <API-nøgle>` |
-| `Invalid or expired access token` | nøglen er forkert, roteret eller slået fra | lav en ny på Royal MCP → Settings, og sæt `ROYAL_MCP_API_KEY` |
-| `Missing environment variables: ROYAL_MCP_TOKEN` | variablen er ikke eksporteret i shellen (gælder MCP-klienter; broen læser `.env` selv) | trin 3 |
-| `406 Not Acceptable` | `Accept: application/json, text/event-stream` mangler | send begge typer (broen gør det selv) |
-| 401 på alle kald trods frisk nøgle | nøglen er slået fra i 1.5.14+, eller brugeren er ikke administrator | tjek Settings og brugerens rolle |
-| `initialize` svarer 200, men ingen værktøjer | session-id mangler på efterfølgende kald | send `Mcp-Session-Id` med |
+| `POST /wp-json/mcp/v1/http` (`initialize`) | `401 rest_forbidden` | ruten findes og kræver login — ikke en 404 |
+| `GET` samme rute | `401 rest_forbidden` | også læsning kræver credential |
+| `OPTIONS` samme rute | `200` | tillader headere `Mcp-Protocol-Version`, `Mcp-Session-Id`, `Accept` — altså Streamable HTTP |
+| `POST` uden token | `401 rest_forbidden` + `WWW-Authenticate: Bearer realm="MCP", resource_metadata="…/?rest_route=/mcp/v1/.well-known/oauth-protected-resource"` | serveren fortæller selv hvor metadataet ligger; bemærk `?rest_route=`-formen, som WAF'en lukker igennem |
+| `GET /wp-json/mwai/v1/simpleAuthCheck` | `401 rest_forbidden` | AI Engine er aktiv — ruten er **ikke** MCP, se nedenfor |
+| `GET /.well-known/oauth-protected-resource` | `200` | `resource` = `/wp-json/mcp/v1/http`, `scopes_supported` = `["mcp"]` |
+| `GET /.well-known/oauth-authorization-server` | `200` | `authorize`, `token`, `register`, `revoke`; `authorization_code` + `refresh_token`; `S256` |
+| `POST /wp-json/mcp/v1/oauth/register` | `201` | dynamisk klientregistrering virker; svarer `client_id`, intet secret |
+| `GET .../oauth/authorize` fra cloud-worktreen | `454` | Simplys WAF blokerer HTML-sider for datacenter-IP'er — gælder ikke JSON-ruterne |
+| `POST /wp-json/mcp/mcp-adapter-default-server` | `401 rest_forbidden` | WordPress' egen MCP Adapter er også installeret, se [`library/mcp-adapter-abilities-2026-11-02.md`](library/mcp-adapter-abilities-2026-11-02.md) |
 
-### OAuth uden browser på maskinen (verificeret 2/11 2026)
+**Fælde: `mwai/v1/simpleAuthCheck` beviser intet om MCP.** Ruten hører til AI Engines **Public API**-modul, har
+sin egen bearer-token (`public_api_bearer_token` — et helt andet felt end MCP-token'et), og svarer på `GET` med
+`{"success":true,"data":{"type":"email","value":"<admin-email>"}}`, altså **administratorens e-mail**. Den er en
+credential-selvtest, ikke en agent-kanal: en token der virker der, virker ikke nødvendigvis på
+`/wp-json/mcp/v1/http`. CVE-2026-16954 (rettet i 3.6.4) handlede netop om at den rute lækkede admin-e-mail,
+API-nøgler og bearer-tokens til Editor-brugere — slå Public API fra hvis modulet ikke bruges.
 
-> **Forældet siden sent 2/11 2026:** trin 1 og 6 rammer ikke længere noget —
-> `.well-known/oauth-authorization-server` omdirigerer til forsiden (den dybe metadata-sti giver `500`), og
-> `/wp-json/royal-mcp/v1/mcp` svarer `404`. Flowet virkede, da det blev afprøvet om formiddagen, men kan ikke
-> gentages før discovery og ruten er tilbage (se »Måling 2/11 2026 (sen aften)«).
+**Værktøjsdækning, målt:** de 206 værktøjer inkluderer `wp_list_plugins` og `steamgears-autopilot_*`-familien
+(31 værktøjer: `status`, `queue-post`, `check-post`, `list-queue`, `manage-queue`, `publish`, `set-mode` …).
+Plugin-listen er altså **tilgængelig her**, selv om den i AI Engines dokumentation hører til Pro-sættet — mål
+`tools/list` før du konkluderer noget om licensen.
 
-Royal MCP kan også bruges fra et miljø uden browser, hvis callbacken kan lande et sted, agenten kan læse.
-Fremgangsmåden er afprøvet mod steamgears.eu og gav et Bearer-token på 24 timer med refresh-token:
+WAF-bemærkningen er vigtig: `401` på JSON-ruterne er serverens eget svar, mens `454`/`455` er Simplys
+bot-regel og kun rammer HTML. Derfor kan OAuth-linket ikke åbnes herfra — det skal åbnes i ejerens browser.
 
-1. **Læs metadata** på `https://steamgears.eu/.well-known/oauth-authorization-server`. Serveren tilbyder kun
-   `authorization_code` med PKCE S256 — der findes **intet** device-code-flow — men dynamisk klientregistrering
-   (`registration_endpoint`) er understøttet.
-2. **Registrér en klient** med `POST https://steamgears.eu/register` og en `redirect_uris`, der peger på en
-   adresse agenten selv kan læse. Svar `201` med `client_id` (`rmcp_…`).
-3. **Start en callback-modtager** på den port, der er eksponeret til ejerens browser, og verificér at den svarer.
-4. **Send ejeren til** `https://steamgears.eu/authorize?response_type=code&client_id=…&redirect_uri=…&scope=mcp:full&code_challenge=…&code_challenge_method=S256&state=…`.
-   Uden session svarer ruten `302` til `wp-login.php` — det er forventet og betyder, at klient og redirect er
-   accepteret.
-5. **Veksl koden** på `POST https://steamgears.eu/token` som form-data med `grant_type=authorization_code`,
-   `code`, `redirect_uri`, `client_id` og `code_verifier`. Svar `200` med `access_token`, `expires_in` og
-   `refresh_token`.
-6. **Kald MCP** på `https://steamgears.eu/wp-json/royal-mcp/v1/mcp` med `Authorization: Bearer <token>`,
-   `Accept: application/json, text/event-stream` og `Mcp-Session-Id` fra `initialize`-svaret.
-
-To fælder undervejs: `code_verifier` skal være den oprindelige streng, ikke challenge-værdien, og
-`redirect_uri` skal være byte-identisk med den registrerede. Token og kode hører i en fil uden for repoet med
-`chmod 600` — aldrig i chat, log eller commit.
-
-### Alternativ: OAuth
-
-Royal MCP foretrækker OAuth2 (`authorization_code` med PKCE S256, dynamisk klientregistrering,
-`refresh_token`, scope `mcp:full`). Det kræver en browser med en aktiv WP-admin-session:
+### 1. Forbind med OAuth (den vej der virker)
 
 ```bash
-claude mcp add --transport http steamgears-oauth https://steamgears.eu/mcp
+python3 tools/mcp_oauth.py --start           # registrerer klient (én gang) og printer godkendelseslinket
+# åbn linket i browseren, log ind som administrator, godkend
+python3 tools/mcp_oauth.py --finish '<kode>' # eller hele adressen fra adresselinjen
+python3 tools/mcp_rest.py --check            # initialize + tools/list
 ```
 
-**Bemærk:** `https://steamgears.eu/mcp` svarer `404` siden sent 2/11 2026, så kommandoen virker ikke, før ruten
-eller en afløser er på plads.
+- Redirect er `http://127.0.0.1:8765/callback`, som **ikke** har nogen lytter: siden kan ikke indlæses, og
+  det er med vilje. Kopier hele adressen fra browserens adresselinje (eller bare `code=`-værdien) og kør
+  `--finish` med det samme — koden lever kun kort.
+- Klient og tokens ligger i `~/.config/steamgears-mcp/` (`client.json`, `tokens.json`) med mode `600`, uden
+  for repoet, så de ikke kan committes ved et uheld. `--status` viser om der er et gyldigt token.
+- Access-tokenet er kortlivet, og `refresh_token` fornyer det automatisk: `mcp_rest.py` spørger
+  `mcp_oauth.access_token()`, som fornyer når udløbstiden er passeret. `--refresh` gør det manuelt.
+- PKCE-verifieren bliver i `client.json` og står aldrig i linket; `--finish` rydder den efter brug.
 
-Kør derefter `claude` og vælg `/mcp` → *Authenticate*. Claude Code registrerer klienten selv og fornyer
-tokens automatisk, uden miljøvariabel. Vælg OAuth hvis nøglen skal kunne rotere uden manuelt arbejde; vælg
-application password hvis forbindelsen skal køre i miljøer uden browser.
+### 2. Alternativ: application password
+
+`python3 tools/mcp_rest.py --ask` (getpass, ingen echo) gemmer `MCP_USER`/`MCP_APP_PASSWORD` i `.env` med
+mode 600 og bruger Basic-auth. Om AI Engines rute accepterer Basic er **ikke målt endnu** — den er en
+almindelig WordPress-REST-rute, så chancen er god, men OAuth er den dokumenterede vej. Klienten foretrækker
+Bearer og falder kun tilbage til Basic når der ikke er et token.
+
+### 3. Verificér
+
+```bash
+python3 tools/mcp_oauth.py --status
+python3 tools/mcp_rest.py --check
+python3 tools/mcp_rest.py --abilities --diff docs/library/mcp-adapter-abilities.csv
+python3 tools/mcp_rest.py --abilities --csv /tmp/abilities-live.csv
+```
+
+`--diff` svarer med `mangler_live` og `ikke_i_arket`, så regnearket kan rettes mekanisk i stedet for ved
+gennemlæsning. Klassificeringen af skrive-værktøjer er testet i `tools/test_mcp_rest.py` (14 fixtures) og
+OAuth-flowet i `tools/test_mcp_oauth.py` (10 fixtures, lokal authorization server).
+
+### Fejlsøgning
+
+| Svar | Betydning | Rettelse |
+| --- | --- | --- |
+| `401 rest_forbidden` | intet gyldigt token | kør `--start`/`--finish`, eller `--ask` |
+| `400 invalid_grant` | koden er brugt, udløbet eller hører til en anden klient | kør `--start` igen og godkend på nyt |
+| `400 invalid_request` ved `/register` | redirect-URI eller grant-type afvist | brug `http://127.0.0.1:8765/callback` præcis som klienten registrerer |
+| `454` / `455` | Simplys WAF på HTML | åbn linket i en rigtig browser, ikke fra worktreen |
+| `404 rest_no_route` | forkert sti | ruten er `/wp-json/mcp/v1/http`, ikke `/mcp` |
+| tomt `tools/list` | forbundet, men ingen værktøjer eksponeret | tjek AI Engines MCP-indstillinger i wp-admin |
+
+## Kildesporet: hvad AI Engine og adapteren kan kalde (læst 2/11 2026)
+
+Afsnittene ovenfor er den vej ind der virker. Dette er hvad kilden siger om værktøjerne — brugbart når et
+`tools/list` ikke kan køres, og for at vide hvad der *kan* ligge bag et kald.
+
+- **AI Engines kerneværktøjer i 3.9.0** (`labs/mcp*.php`): 74 værktøjer — 29 læsende, 31 skrivende, 14 admin
+  — plus fire prompts (`tour_my_site`, `write_a_draft`, `audit_my_content`, `improve_a_post`), ingen resources
+  (`get_resources_list()` returnerer `[]`) og en abilities-bro der lægger **ét værktøj pr. ability** oveni.
+  Sitet annoncerer 206, så mindst 132 ligger ud over de 74: Autopilot-familien (31), bridgede abilities og
+  resten af Pro-sættet. Fordelingen mellem dem er ikke målt. Hele listen med beskrivelser og adgangsniveau:
+  [`library/mcp-vaerktoejer-2026-11-02.md`](library/mcp-vaerktoejer-2026-11-02.md).
+- **mcp-adapter 0.7.1 har hverken OAuth eller `.well-known`-ruter.** Release-zip'en indeholder ingen
+  `well-known`-streng og intet token-endpoint; adapterens ene rute er `/wp-json/mcp/<server-id>`, og dens
+  credential-vej er WordPress' egen REST-auth (application password eller cookie + nonce). `mcp/mcp-oauth-server`
+  hører derfor til AI Engine og ikke til adapteren.
+- **Discovery flappede under aktiveringen — mål igen, før du fejlretter.** Minutter efter
+  `wp plugin install … --activate` svarede `/.well-known/oauth-protected-resource` og
+  `…/oauth-authorization-server` `301` til forsiden, og en dyb sti `500`; senere samme aften svarer alle tre
+  `200` med gyldig JSON. Plugin-aktivering flusher rewrite-regler, så et probe lige efter en aktivering beviser
+  intet om hvordan discovery opfører sig bagefter. (Det var også den måling der tidligere blev brugt som
+  forklaring på den døde callback — den forklaring holder ikke.)
 
 ## Publer (`publer`)
 
@@ -295,131 +187,6 @@ MCP kræver **Business- eller Enterprise-planen**.
 | `401` med `www-authenticate: Bearer resource_metadata=…` | serveren tilbyder OAuth | forbind via OAuth i stedet for nøgle |
 | Nøglen afvises trods frisk kopi | forkert nøgletype (REST i stedet for MCP) eller manglende scopes | opret nøgle under AI & Automations → MCP, kontrollér Workspaces/Accounts |
 
-## Simply.com (`simplycom`)
-
-Simply.com hoster steamgears.eu og ejer domæne, DNS og mail. Deres AI Connector er en MCP-server med
-**OAuth 2.1** — der findes ingen API-nøgle at kopiere, og `.mcp.json` skal derfor ikke indeholde andet end
-endpointet.
-
-| Felt | Værdi |
-| --- | --- |
-| Endpoint | `https://mcp.simply.com/v2` |
-| Transport | streamable HTTP |
-| Auth | OAuth 2.1, browser-login ved første værktøjskald |
-| Server-navn | `simplycom` · uden konto: `simplycom-public` |
-
-### Hvad agenten kan — og ikke kan
-
-Agenten får **samme rettigheder som den bruger der logger ind**: DNS-poster, nameservere og DNSSEC,
-domænetilgængelighed og ordrelinks, mailkonti og videresendelser, subdomæner, MySQL-databaser, website- og
-MySQL slow-logs, deploy-oplysninger til SSH, SFTP, FTP og rsync samt brugerens support-sager.
-
-Agenten **kan ikke** bestille, opsige eller betale for noget. Det håndhæves af serveren, ikke af en indstilling
-her i repoet.
-
-Konsekvens for dette projekt: forbindelsen giver DNS, mail, databaser, logs og support-sager — men **ikke**
-WAF-regler. Den kan altså ikke hvidliste en IP. Den 455 der blev målt 1–2/11 er WAF'ens spoofing-værn og ikke
-et Google-problem; hele sagen står i [`library/waf-diagnose-2026-11-02.md`](library/waf-diagnose-2026-11-02.md),
-og WAF-afsnittet nedenfor beskriver hvad der faktisk kan gøres.
-
-### Opsætning
-
-`.mcp.json` har allerede blokken — der er intet at udfylde:
-
-```json
-"simplycom": {
-  "type": "http",
-  "url": "https://mcp.simply.com/v2"
-}
-```
-
-Andre klienter registrerer samme endpoint med deres egen kommando:
-
-```bash
-claude mcp add --transport http --scope user simplycom https://mcp.simply.com/v2
-codex mcp add simplycom --url https://mcp.simply.com/v2
-```
-
-I Cursor og Windsurf lægges den i `mcpServers` som `{"url": …}` henholdsvis `{"serverUrl": …}` — Windsurf
-bruger `serverUrl`, ikke `url`, og er den fejl der oftest koster en runde.
-
-### Login — kun ejeren kan gøre det
-
-1. Genstart MCP-klienten, så den læser den nye server.
-2. Kald et vilkårligt Simply-værktøj. Klienten åbner browseren.
-3. Log ind på Simply.com og godkend. Consent gælder **den konto du er logget ind med** — brug kontoen der ejer
-   steamgears.eu, ellers får agenten ingen værktøjer for domænet.
-4. Kontrollér i klienten at `simplycom` er connected, fx `claude mcp list`.
-
-Der findes **intet device-code-flow og ingen nøgle**: en agent i en container uden browser kan ikke etablere
-forbindelsen selv. Det er med vilje, og det betyder at forbindelsen altid kræver et menneske første gang.
-
-### Offentlig server uden konto
-
-`https://mcp.simply.com/public` kræver intet login og kan slå domænetilgængelighed op, liste de understøttede
-TLD'er, bygge et ordrelink og søge i Simplys hjælpeartikler. Registrér den som `simplycom-public` hvis agenten
-skal kunne det uden at have en konto.
-
-### WAF: 429/454/455 og hvorfor en egen IP ikke kan hvidlistes
-
-Simplys egen artikel [HTTP 429 / 454 / 455 Blocked](https://www.simply.com/en/support/faq/php/867-http-429-454-455-blocked/)
-(hentet 2/11 2026) siger det direkte:
-
-| Kode | Betydning ifølge Simply |
-| --- | --- |
-| `429` | For mange requests — midlertidigt; respektér `Retry-After` og sænk farten |
-| `454` | Gammel/mistænkt browser eller IP med dårligt ry; normale browsere klarer JS-tjekket |
-| `455` | En enkelt request blokeret af en firewall-regel; **årsagen står i Control Panel → Webserver logs** |
-
-Tre sætninger i artiklen afgør sagen for en agent:
-
-- **Kendte tjenester er allerede hvidlistet:** »Googlebot, OpenAI, Anthropic, Bing, LinkedIn, Jetpack, PayPal,
-  Facebook, ManageWP etc.« — altså på IP, ikke på user-agent.
-- **Spoofing opdages:** »many bots pretend to be these known services … always check whether it is actually an
-  approved service that has been blocked (based on IP address)«.
-- **Hvidlistning kræver en offentlig IP-liste:** Simply hvidlister en tjeneste, hvis der findes »a public and
-  maintained URL with a list of the IP addresses in use«. Der findes **ingen selvbetjent IP-hvidlistning** i
-  panelet.
-
-Målt konsekvens (2/11 2026, egress `208.72.218.131`): neutral `curl` → 200; Googlebot-, bingbot-, Applebot- og
-GPTBot-UA → 455. Det er forventet adfærd, ikke en fejl på sitet: IP'en tilhører ikke Google, så UA'en er en
-spoof. Derfor:
-
-1. **Crawl og verifikation kører med neutral UA** — aldrig med et påtaget bot-navn. Det er hvad
-   [`tools/seo_audit_crawl.py`](../tools/seo_audit_crawl.py) gør, og hvorfor alle 121 URL'er gav 200.
-2. **En vilkårlig cloud-IP kan ikke hvidlistes.** Den har ingen offentlig, vedligeholdt IP-liste, og Simply
-   hvidlister tjenester — ikke enkeltadresser. IP'en kan desuden skifte mellem sessioner.
-3. **Googlebots faktiske svar verificeres i GSC** (Crawl stats → By response), ikke ved at efterligne UA'en.
-4. **Skal der alligevel hvidlistes**, gælder det kun en rigtig tredjepartstjeneste, og sagen skal indeholde
-   tjenestens offentlige IP-liste. En agent-container er ikke sådan en tjeneste.
-
-Kør checken efter en ændring — den skelner forventet bot-455 fra en ægte blokering:
-
-```bash
-bash tools/waf_check.sh
-# exit 0 = neutral 200 · 1 = neutral blokeret · 2 = serverfejl
-```
-
-Fejlsøgning: 455 for en *neutral* klient betyder at vores egen trafik er ramt (typisk efter en burst) — vent
-5–10 minutter og sænk farten. 455 for en bot-UA er normalt og kræver ingen handling. Den præcise regel findes
-kun i Control Panel → Webserver logs for webhotellet.
-
-### Tilbagekald adgang
-
-Adgangen tilbagekaldes under **Connected apps** på
-<https://www.simply.com/en/controlpanel/user/>. Det lukker OAuth-tokenet med det samme; blokken i `.mcp.json`
-kan blive stående, men forbindelsen virker ikke før der logges ind igen. Skal serveren slet ikke tilbydes i
-repoet, fjernes blokken — og derefter tilbagekaldes adgangen, i den rækkefølge.
-
-### Fejlsøgning (Simply)
-
-| Symptom | Betydning | Handling |
-| --- | --- | --- |
-| Serveren står som *needs authentication* | OAuth-login er ikke gennemført | åbn klienten, kald et værktøj, log ind |
-| `401` efter genstart | token udløbet eller adgang tilbagekaldt | log ind igen |
-| Login lykkes, men ingen domæneværktøjer | kontoen ejer ikke domænet | log ind med den konto der ejer steamgears.eu |
-| Værktøjerne mangler helt | klienten læser ikke projektets `.mcp.json` | åbn repoet som projekt, eller registrér i bruger-scope |
-
 ## Profil-serveren (`steamgears-profil`)
 
 [`tools/mcp_project_profile.py`](../tools/mcp_project_profile.py) er en lokal **stdio**-server der gør
@@ -442,39 +209,30 @@ printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | python3 tools/m
 
 ## Sikkerhed
 
-- API-nøglen er **én pr. site** og arver den WP-bruger der oprettede den. Lav den fra en dedikeret
-  administratorkonto, ikke den daglige konto.
-- Rotering af nøgler står som åbent punkt i
-  [`library/sikkerhed-ai-engine-2026-11-01.md`](library/sikkerhed-ai-engine-2026-11-01.md). Rotér i wp-admin
-  (eller `wp royal-mcp rotate-api-key`) når nøglen ikke længere bruges; 1.5.14+ kan slå den helt fra.
-- Nøglen må ikke stå i `.mcp.json`, i commits, i logs eller i chat — kun i miljøvariablen, i `.env`
-  (gitignored) eller i `~/.royal_mcp_key` uden for repoet.
-- Broen (`wp_mcp_stdio.py`) printer aldrig nøglen: fejl citeres som `HTTP 401` uden header-indhold.
+- Tokenet arver den WP-bruger der godkender OAuth-flowet. Godkend som en dedikeret administratorkonto, ikke
+  den daglige konto, og kun med scope `mcp`.
+- Godkendelser og aktive tokens bør ryddes op jævnligt i wp-admin (AI Engine), og et token der ikke længere
+  bruges skal tilbagekaldes — ikke bare slettes lokalt. Det står som åbent punkt i
+  [`library/sikkerhed-ai-engine-2026-11-01.md`](library/sikkerhed-ai-engine-2026-11-01.md).
+- Token og refresh-token ligger i `~/.config/steamgears-mcp/` med mode `600`, aldrig i `.mcp.json`, i commits,
+  i logs eller i chat. Klienten printer kun længder og serverens svar, aldrig værdien.
+- `refresh_token` er den følsomme del: den giver nye access-tokens uden nyt ejerklik. Tilbagekald den i
+  wp-admin hvis maskinen har været delt.
 - Publer-nøglen hører i `PUBLER_API_KEY`, ikke i URL'en: `?api_key=` lækker nemt gennem logs, historik og
   skærmbilleder. Nøglen giver adgang til workspaces og konti, og scopes afgør hvor meget agenten kan.
-- Simply.com-forbindelsen er stærkere end en API-nøgle: et aktivt OAuth-token giver DNS-, mail- og
-  databaseadgang for hele kontoen. Log kun ind med kontoen der ejer steamgears.eu, og tilbagekald adgangen når
-  den ikke bruges. Der findes ingen nøgle at lække — men heller ingen nøgle at rotere, så tilbagekald er den
-  eneste bremse.
 - Har en nøgle været eksponeret: tilbagekald den i WordPress **først**, og opret derefter en ny.
 
 ## Referencer
 
-- [`.mcp.json`](../.mcp.json) — `steamgears`-serveren med `Bearer ${ROYAL_MCP_API_KEY}`.
-- [`wp_mcp_stdio.py`](../wp_mcp_stdio.py) — stdio-bro til samme endpoint, med Bearer-nøgle og `Mcp-Session-Id`.
-  `--check` laver `initialize` + `tools/list` og skriver ét JSON-svar på stdout.
-- [`seo_agent.py`](../seo_agent.py) — `call_royal_mcp()` sender stadig **Basic** og får derfor `401` på
-  MCP-ruten. Brug `wp_mcp_stdio.py` i stedet, eller skift funktionen til Bearer-nøglen.
-- [Royal MCP — API-nøgler](https://royalplugins.com/support/royal-mcp/api-keys/) — nøgleformat og rotation.
-- [Royal MCP — threat model](https://royalplugins.com/support/royal-mcp/direct-connect-threat-model/) — hvorfor der ikke findes anonym adgang.
-- [Royal MCP på WordPress.org](https://wordpress.org/plugins/royal-mcp/advanced/) — version og Free/Pro-fordeling.
-- [`seo_agent.py`](../seo_agent.py) — `call_royal_mcp()` kalder samme endpoint.
+- [`.mcp.json`](../.mcp.json) — `steamgears`-serveren med `Bearer ${MCP_ACCESS_TOKEN}`.
+- [`tools/mcp_oauth.py`](../tools/mcp_oauth.py) — registrering, PKCE-link, token-udveksling og fornyelse.
+  `--status` viser om der er et gyldigt token.
+- [`tools/mcp_rest.py`](../tools/mcp_rest.py) — `--check`, `--abilities`, `--diff`, `--csv`, `--call`.
+- [`tools/test_mcp_oauth.py`](../tools/test_mcp_oauth.py) og [`tools/test_mcp_rest.py`](../tools/test_mcp_rest.py)
+  — 24 fixtures mod lokale efterligninger, ingen credential nødvendig.
+- [`seo_agent.py`](../seo_agent.py) — `call_mcp()` sender Bearer fra `MCP_ACCESS_TOKEN` mod samme endpoint.
+- [MCP — authorization](https://modelcontextprotocol.io/specification/2025-06-18/basic/authorization) —
+  OAuth 2.1, PKCE og resource-indikatoren som AI Engine følger.
+- [AI Engine](https://meowapps.com/ai-engine/) — plugin'et bag `/wp-json/mcp/v1/`.
 - [Publer MCP — officiel opsætning](https://publer.com/help/en/article/how-to-set-up-and-use-publers-mcp-server-14orlq0/) — OAuth og API-nøgle, opdateret 15/10 2026.
 - [Publer MCP — integrationsside](https://publer.com/integrations/mcp) — endpoint og OAuth-flow.
-- [Simply.com AI Connector](https://www.simply.com/en/ai/connector/) — hvad connectoren kan, og hvad den ikke kan.
-- [Simply.com agent-opsætning](https://www.simply.com/agent-setup/prompt.md) — kilden til Simply-afsnittet,
-  hentet 2/11 2026.
-- [Simply.com REST API](https://www.simply.com/en/docs/api/) — til sammenligning; connectoren er egne værktøjer.
-- [Simply.com — HTTP 429 / 454 / 455 Blocked](https://www.simply.com/en/support/faq/php/867-http-429-454-455-blocked/)
-  — WAF-koderne, hvilke tjenester der er hvidlistet, og kravet om en offentlig IP-liste, hentet 2/11 2026.
-- [Simply.com — Tilbagekald adgang](https://www.simply.com/en/controlpanel/user/) — Connected apps.

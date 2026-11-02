@@ -179,12 +179,15 @@ before it, because the MCP surface can read plugins but cannot install or activa
 Check that the release landed, in this order — each step can hide the previous one:
 
 - `wp_get_plugins` reports the new version with `active: true`.
-- A feature from the release answers from the site. For 7.22: a `queue-post` with a banned word is refused
-  and names the word, and the same call with `force` queues it with the word as a warning.
+- A feature from the release answers from the site. For 7.22: a post that fails a `block` check is refused
+  and the reason is named. `check-post` proves the decision without writing; a `queue-post` refusal also
+  proves the gate sits inside the queue, but needs the site's MCP access to allow writes.
 - `steamgears-autopilot/status` shows the new setting — `quality_gate: {mode, banned_words}` for 7.22.
 
-> **Current release 7.22.0 is not live yet.** steamgears.eu runs 7.21.0 until the update is clicked;
-> site-side status and the reason are in [`docs/roadmap.md`](../../docs/roadmap.md) §2b.
+> **Current release 7.22.0 is live.** Measured 2026-11-02 after the update click: both `wp_list_plugins` and
+> `steamgears-autopilot/status` report 7.22.0. Two owner-side settings limit what can be proven: *Banned words*
+> is empty (so that check cannot fire) and AI Engine's *Drafts Only* refuses `queue-post` before the gate sees it.
+> Site-side status and the measurements are in [`docs/roadmap.md`](../../docs/roadmap.md) §2b.
 
 ## Setup
 

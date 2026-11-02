@@ -20,8 +20,11 @@ sidste commit-dato. Målt 2/11 2026.
 
 | Dokument | Indhold | Dato |
 | --- | --- | --- |
+| [mcp-adapter-abilities-2026-11-02.md](mcp-adapter-abilities-2026-11-02.md) | MCP Adapter: 3 meta-værktøjer, 7 Woo-abilities, 9 udfasede — og hvorfor sider/indlæg kræver REST | 2026-11-02 |
+| [mcp-adapter-abilities.csv](mcp-adapter-abilities.csv) | Regneark: 24 abilities og ruter med type, parametre, roadmap-kobling og nytte 1–5 | 2026-11-02 |
+| [meta-fixes-og-produktlinks-2026-11-02.md](meta-fixes-og-produktlinks-2026-11-02.md) | 11 meta-rettelser med tælte længder, 2 H1-fix og produktlinkplan til de ni guides | 2026-11-02 |
+| [roadmap-status-2026-11-02.md](roadmap-status-2026-11-02.md) | Crawl af 119 URL'er, WAF-fundet (454/455) og publish-klar copy til `/shipping/` + `/returns/` | 2026-11-02 |
 | [mcp-vaerktoejer-2026-11-02.md](mcp-vaerktoejer-2026-11-02.md) | **MCP-inventar:** AI Engines 74 værktøjer (29 læsende/31 skrivende/14 admin) og mcp-adapterens 3 meta-værktøjer, med den målte rute-flade og hvad der først kan siges med credential | 2026-11-02 |
-| [seo-audit-2026-11-02.md](seo-audit-2026-11-02.md) | **Bred SEO-audit:** 121 URL'er crawlet, score 56,5/100, 21 fund med bevis, roadmap og tid til 100 % — PDF i `reports/seo-audit-2026-11-02.pdf` | 2026-11-02 |
 | [forside-2026-11-02.md](forside-2026-11-02.md) | Forsiden: to H1'er, S2.4-beslutningen og paste-klar hero | 2026-11-02 |
 | [navigation-og-meta-2026-11-02.md](navigation-og-meta-2026-11-02.md) | Header-links, footer-fortrydelse, meta-runde og sitemap-kontrol — fire punkter lukket, fem blokeringer | 2026-11-02 |
 | [navigation-spec-2026-11-02.md](navigation-spec-2026-11-02.md) | Navigation og menu — S2.3, verificeret mod REST 2/11 | 2026-11-02 |

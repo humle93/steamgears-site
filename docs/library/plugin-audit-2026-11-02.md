@@ -23,8 +23,8 @@ WordPress.org, fordi deres opdateringskanal er sælgerens.
 
 | Plugin | Installeret | Seneste | Kommentar |
 | --- | --- | --- | --- |
-| AI Engine | 3.8.9 | 3.9.0 | Inaktiv. Bør slettes, ikke opdateres — se §4 |
-| Royal MCP | 1.5.13 | 1.5.14 | Denne forbindelse. Opdater først efter en verificeret MCP-session |
+| AI Engine | 3.8.9 | 3.9.0 | **Ikke inaktiv — den er MCP-serveren.** `mwai/v1/simpleAuthCheck` svarer `401` og `mcp/v1/http` svarer `401` med `Bearer realm="MCP"` (målt 2/11 2026). Se §4 |
+| MCP-server (tidligere) | 1.5.13 | 1.5.14 | Ikke længere agentens vej ind — afløst af AI Engine på `/wp-json/mcp/v1/http` |
 | Simple Custom CSS and JS | 3.54.3 | 3.55 | Se overlap §3.4 |
 | Site Kit by Google | 1.190.0 | 1.191.0 | Minor |
 | Smash Balloon TikTok Feed | 1.9.0 | 1.9.1 | Se overlap §3.3 |
@@ -65,7 +65,7 @@ versioner i wp-admin før en batch er stadig den rigtige arbejdsgang.
 
 | Plugin | Anbefaling | Grund |
 | --- | --- | --- |
-| **AI Engine** 3.8.9 | **Slet** | Har en CVE-historik (CVE-2026-110732), chatboten er slået fra, og `/wp-json/mwai/v1/*` svarer 404. Et inaktivt plugin er stadig filer på serveren og stadig en fil der kan rammes hvis det genaktiveres ved et uheld |
+| **AI Engine** 3.8.9 | **Behold — den er agentens eneste kanal** | Rettet 2/11 2026: `/wp-json/mwai/v1/*` svarer `401`, ikke `404`, og `/wp-json/mcp/v1/http` er den MCP-server `.mcp.json` nu peger på; en sletning fjerner agent-adgangen til sitet. Har en CVE-historik (CVE-2026-110732), chatboten er slået fra, og `/wp-json/mwai/v1/*` svarer 404. Et inaktivt plugin er stadig filer på serveren og stadig en fil der kan rammes hvis det genaktiveres ved et uheld |
 | **Royal Access** 1.0.7 | Aktivér eller slet | Accessibility-toolbar. Enten er den en del af tilbuddet (og skal op på siden), eller den er død vægt |
 | **Royal Links** 2.0.15 | **Prøv den til S1.5** | Se nedenfor — det er det mest interessante fund i auditten |
 

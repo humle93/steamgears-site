@@ -18,7 +18,7 @@ typisk en voksen, der skal til cosplay, halloween, marked eller et temafest — 
 | --- | --- |
 | Platform | WordPress 7.1.4 + WooCommerce, PHP 8.5.12, hostet hos **Simply** |
 | Repo | Dokumentation, assets, plugin-kilde og status — **ikke** live-koden. Sitet ændres over MCP |
-| Katalog | **39 publicerede produkter** (posters, tees, hoodies, accessories), produceret via **Printify** |
+| Katalog | **56 publicerede produkter** (målt 2/11; heraf Herbarium-serien 953–972), produceret via **Printify** |
 | Indhold | **29 sider** + 18 guides i guide-stakken; sitemap har **108 URL'er** der alle svarer 200 |
 | Sprog | Engelsk på sitet, **dansk i commits og dokumentation** (tekniske termer på engelsk) |
 | Design | "Dark Clockwork Theatre v3"; template part til headeren ligger i [`css/`](../css/) |
@@ -27,7 +27,7 @@ Der er **fem aktive projekter**, alle målt i [`projektstatus.json`](../projekts
 
 | id | Projekt | Status | Enhed |
 | --- | --- | --- | --- |
-| `site` | steamgears.eu — site-optimering | 50,0 % (10,55 af 21,1 d) | developer-dage |
+| `site` | steamgears.eu — site-optimering | 54,0 % (11,4 af 21,1 d) | developer-dage |
 | `plugin` | Steamgears Autopilot — plugin | 29,0 % (6,95 af 24,0 d) | developer-dage |
 | `rebrand` | Dark academia-rebrand | 63,0 % (8,5 af 13,5 t) | timer |
 | `seo` | SEO-indholdsproduktion | 0,0 % (0 af 3 guides) | guides |
@@ -73,8 +73,10 @@ Alt her er målt mod den live side eller læst i kilden. Er noget ændret siden 
 
 - 108 sitemap-URL'er svarer 200; 0 fejl i sitemap; 0 døde interne links (39 rettet, hvert mål crawlet igen).
 - Titler over 62 tegn: 19 → 0. Manglende meta descriptions: 3 → 0. Billeder uden alt-tekst: 0 af 210.
-- To hubs er bygget: `/start-here/` (id 1183, børn 1205/1208/1211) og `/build/` (id 1185, børn 1214/1217).
-- `/inspiration/`, `/shipping/` og `/returns/` **findes ikke** — de skal 301'es, ikke bygges.
+- Tre hubs er bygget: `/start-here/` (id 1183, børn 1205/1208/1211), `/build/` (id 1185, børn 1214/1217)
+  og `/inspiration/` (id **1243**, verificeret 2/11 via REST). Det er 9 af de 13 sider S2.1 beskriver.
+- `/shipping/` og `/returns/` **findes ikke** (REST `pages?slug=` → `[]`). Copy ligger klar i
+  `library/roadmap-status-2026-11-02.md` §5, med `[EJER]`-felter markeret.
 - Navigationen er `wp:page-list` og viser **alle 29 sider**, inkl. `/cart/`, `/checkout/`, `/my-account/`,
   `/opt-out-preferences/`. Spec ligger klar i `docs/library/navigation-spec-2026-11-02.md` (S2.3).
 - Butikken prissætter i **USD**; Complianz kører **US opt-out**; kun **Stripe** som betaling.
@@ -120,7 +122,7 @@ Alt her er målt mod den live side eller læst i kilden. Er noget ændret siden 
 | Python 3.12 + PDF-biblioteker | ✅ i `tools/_deps` | rapporter i `reports/` |
 | PHP 8.5.8 (statisk binær) | ✅ i `tools/_deps/bin/php` | `php -l`, ikke tests |
 | **Skrive til sitet** | ❌ 401 | S2.3, S4.1, S4.3, S0.4 kan forberedes, ikke udføres |
-| MCP mod sitet | ✅ nøglen i `.env` som `ROYAL_MCP_TOKEN` | `wp_mcp_stdio.py --check` gav 2/11 2026 `ok: true`, server 1.5.13, **270 værktøjer**; kun `Bearer <API-nøgle>` virker (application password afvises) |
+| MCP mod sitet | ⚪ **ny server, venter på ejerens godkendelse** | `/wp-json/mcp/v1/http` (AI Engine) svarer `401 rest_forbidden` uden credential og har OAuth med PKCE. `python3 tools/mcp_oauth.py --start` giver linket, `--finish '<kode>'` gemmer token uden for repoet; `tools/mcp_rest.py --check` tester det. Application password (Basic) er fallback og ikke målt endnu — se `docs/mcp-auth.md` |
 | Publer MCP | ❌ ingen `PUBLER_API_KEY` | kan ikke planlægge opslag |
 | Browser / Lighthouse | ❌ | ingen visuel eller ydelsesverifikation |
 | Root / `apt` | ❌ | brug statiske binærer (se opskrifter) |
@@ -134,8 +136,8 @@ PYTHONPATH=tools/_deps python3 tools/project_reports.py
 tools/_deps/bin/php -l plugins/steamgears-autopilot/steamgears-autopilot.php
 ```
 
-**Blokeringer der kræver ejeren** (skriv dem i svaret, forsøg dem ikke): Royal MCP API-nøgle
-(`ROYAL_MCP_API_KEY`, laves i wp-admin), WordPress application password til REST-skrivning, Publer-nøgle,
+**Blokeringer der kræver ejeren** (skriv dem i svaret, forsøg dem ikke): ét klik på OAuth-linket fra
+`tools/mcp_oauth.py --start` (eller et WordPress application password til REST-skrivning), Publer-nøgle,
 repo-secrets `GEMINI_API_KEY`/`WP_USER`/`WP_APP_PASS`, CVR/adresse til GPSR og imprint, Printify-variantmapping,
 én Redirection-gruppe til de fem vanity-301'er.
 
@@ -183,14 +185,10 @@ curl -s -A 'Mozilla/5.0' https://steamgears.eu/<side>/ \
 curl -s 'https://steamgears.eu/wp-json/wp/v2/product?per_page=100&_fields=id,slug,link' | jq 'length'
 curl -s -D- -o /dev/null 'https://steamgears.eu/wp-json/wp/v2/product?per_page=1' | grep -i x-wp-total
 
-# MCP-håndtryk (nøglen ligger i .env som ROYAL_MCP_TOKEN; Bearer er den eneste accepterede credential)
-curl -sS -X POST https://steamgears.eu/mcp \
-  -H 'Content-Type: application/json' -H 'Accept: application/json, text/event-stream' \
-  -H "Authorization: Bearer $(grep -m1 '^ROYAL_MCP_TOKEN=' .env | cut -d= -f2-)" \
-  -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"verify","version":"1"}}}'
-
-# Samme håndtryk gennem stdio-broen (bruges når nøglen ligger i .env eller ~/.royal_mcp_key)
-python3 wp_mcp_stdio.py --check
+# MCP-håndtryk (Bearer-token fra OAuth ligger i ~/.config/steamgears-mcp, ikke i repoet)
+python3 tools/mcp_oauth.py --status        # er der et gyldigt token?
+python3 tools/mcp_rest.py --check          # initialize + tools/list mod /wp-json/mcp/v1/http
+python3 tools/mcp_rest.py --abilities --diff docs/library/mcp-adapter-abilities.csv
 
 # Offentlig læsning uden nogen credential (Store API)
 curl -sS 'https://steamgears.eu/wp-json/wc/store/v1/products?per_page=1' | head -c 200

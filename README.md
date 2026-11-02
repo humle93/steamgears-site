@@ -51,7 +51,7 @@ ind i dokumentindekset, så de ikke bliver forældreløse.
 - `.github/workflows/plugin-ci.yml` — lint + smoke/integration for pluginnet.
 
 Lokalt miljø: `cp .env.example .env` og udfyld nøglerne, koden læser — `GEMINI_API_KEY`, `WP_USER`,
-`WP_APP_PASS`, `PINTEREST_ACCESS_TOKEN`, `ROYAL_MCP_TOKEN` (MCP mod sitet) og `PUBLER_API_KEY`.
+`WP_APP_PASS`, `PINTEREST_ACCESS_TOKEN`, `MCP_ACCESS_TOKEN` (MCP mod sitet, hentes med `tools/mcp_oauth.py`) og `PUBLER_API_KEY`.
 `.env` er gitignored; skabelonen er det ikke, og den indeholder kun navne. Til CI lægges de samme navne som
 repo-secrets. Hvilke credentials der faktisk virker, står i [`docs/agent-profil.md`](docs/agent-profil.md) og
 [`docs/mcp-auth.md`](docs/mcp-auth.md).
