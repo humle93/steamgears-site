@@ -20,6 +20,8 @@ sidste commit-dato. Målt 2/11 2026.
 
 | Dokument | Indhold | Dato |
 | --- | --- | --- |
+| [mcp-adapter-abilities-2026-11-02.md](mcp-adapter-abilities-2026-11-02.md) | MCP Adapter: 3 meta-værktøjer, 7 Woo-abilities, 9 udfasede — og hvorfor sider/indlæg kræver REST | 2026-11-02 |
+| [mcp-adapter-abilities.csv](mcp-adapter-abilities.csv) | Regneark: 24 abilities og ruter med type, parametre, roadmap-kobling og nytte 1–5 | 2026-11-02 |
 | [meta-fixes-og-produktlinks-2026-11-02.md](meta-fixes-og-produktlinks-2026-11-02.md) | 11 meta-rettelser med tælte længder, 2 H1-fix og produktlinkplan til de ni guides | 2026-11-02 |
 | [roadmap-status-2026-11-02.md](roadmap-status-2026-11-02.md) | Crawl af 119 URL'er, WAF-fundet (454/455) og publish-klar copy til `/shipping/` + `/returns/` | 2026-11-02 |
 | [forside-2026-11-02.md](forside-2026-11-02.md) | Forsiden: to H1'er, S2.4-beslutningen og paste-klar hero | 2026-11-02 |

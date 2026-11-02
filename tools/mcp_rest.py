@@ -6,9 +6,11 @@ Royal MCP blev slukket 2/11 2026, men `WordPress/mcp-adapter` svarer på
 her er credential et **application password** (Basic), ikke en Bearer-nøgle.
 
 Kør:
+    python3 tools/mcp_rest.py --ask                   # sprørger i terminalen (getpass, ingen echo)
     python3 tools/mcp_rest.py --import mcp_rest.txt   # læser "bruger:app-password", tester, gemmer i .env, sletter filen
     python3 tools/mcp_rest.py --check                 # initialize + tools/list
     python3 tools/mcp_rest.py --call <værktøj> '<json-objekt>'
+    python3 tools/mcp_rest.py --abilities             # alle værktøjer med skema + skrive-flag
 
 Hemmeligheden printer aldrig: kun brugernavn, længder og serverens svar.
 """
@@ -139,10 +141,82 @@ def import_file(path: Path) -> int:
     return 0
 
 
+def store(user: str, secret: str) -> None:
+    old = ENV.read_text(encoding="utf-8") if ENV.exists() else ""
+    kept = [line for line in old.splitlines() if not any(line.strip().startswith(n + "=") for n in NAMES)]
+    body = "\n".join([f"MCP_USER={user}", f"MCP_APP_PASSWORD={secret}", *kept]).strip() + "\n"
+    tmp = ENV.with_suffix(".env.tmp")
+    tmp.write_text(body, encoding="utf-8")
+    os.chmod(tmp, 0o600)
+    os.replace(tmp, ENV)
+
+
+def ask() -> int:
+    import getpass
+
+    user = input("WordPress-brugernavn: ").strip()
+    try:
+        secret = getpass.getpass("Application password (vises ikke): ").strip()
+    except (EOFError, KeyboardInterrupt):
+        print("\nAfbrudt — .env er uaendret.")
+        return 1
+    if not user or len(secret) < 8:
+        print("Brugernavn eller app-password mangler — .env er uaendret.")
+        return 1
+    ok, detail = handshake(user, secret)
+    print(f"Test mod adapteren: {'OK' if ok else 'AFVIST'} — {detail}")
+    if not ok:
+        return 1
+    store(user, secret)
+    print(f"Skrev .env: {len(secret)} tegn app-password for {user}, mode 600.")
+    return 0
+
+
+WRITE_HINTS = ("create", "update", "delete", "edit", "publish", "insert", "set", "upload", "trash", "duplicate")
+
+
+def abilities(user: str, secret: str, csv_path: Path | None = None) -> int:
+    ok, detail = handshake(user, secret)
+    if not ok:
+        print(json.dumps({"ok": False, "error": detail}, ensure_ascii=False))
+        return 1
+    status, tools = tools_list(user, secret)
+    rows = []
+    for tool in tools:
+        name = (tool.get("name") or "").lower()
+        desc = (tool.get("description") or "")[:120]
+        props = list(((tool.get("inputSchema") or {}).get("properties") or {}).keys())
+        write = any(hint in name for hint in WRITE_HINTS)
+        target = "product" if "product" in name else "page" if "page" in name else "post" if "post" in name else "-"
+        rows.append({"name": tool.get("name"), "write": write, "target": target, "params": props, "desc": desc})
+    if csv_path is not None:
+        import csv as _csv
+
+        with csv_path.open("w", newline="", encoding="utf-8") as handle:
+            writer = _csv.writer(handle)
+            writer.writerow(["navn", "skriver", "rammer", "parametre", "beskrivelse"])
+            for row in rows:
+                writer.writerow([row["name"], row["write"], row["target"], " ".join(row["params"]), row["desc"]])
+        print(f"Skrev {len(rows)} værktøjer til {csv_path}")
+        return 0
+
+    print(json.dumps({"ok": True, "status": status, "tools": len(rows), "rows": rows}, ensure_ascii=False, indent=1))
+    return 0
+
+
 def main() -> int:
     args = sys.argv[1:]
+    if args[:1] == ["--ask"]:
+        return ask()
     if args[:1] == ["--import"]:
         return import_file(Path(args[1]) if len(args) > 1 else ROOT / "mcp_rest.txt")
+    if args[:1] == ["--abilities"]:
+        user, secret = read_credentials()
+        if not user or not secret:
+            print(json.dumps({"ok": False, "error": "ingen MCP_USER/MCP_APP_PASSWORD — kør --ask"}, ensure_ascii=False))
+            return 1
+        csv_path = Path(args[args.index("--csv") + 1]) if "--csv" in args[:-1] else None
+        return abilities(user, secret, csv_path)
 
     user, secret = read_credentials()
     if not user or not secret:
