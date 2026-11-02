@@ -44,6 +44,7 @@ all admin-only, none of them deleting anything:
 | `steamgears-autopilot/update` | Install the newest version from GitHub |
 | `steamgears-autopilot/check-keys` | Test the Publer and AI keys (see below) |
 | `steamgears-autopilot/check-publer` | Workspaces, accounts, channels without an account |
+| `steamgears-autopilot/optimize-site-seo` | Whole-site SEO/AEO/GEO scan in one pass; `fix=true` also writes the missing meta |
 
 Example: "Write today's posts and show them to me" → `generate`, then
 `list-drafts`, then `review-draft` for the ones you like.
@@ -55,6 +56,25 @@ on drafts, Campaigns (learning matrix, winners and losers), Reports (30-day ROI 
 ROAS against the budget, attributed orders), Etsy orders and profit, Full Auto
 (suppressed combinations, reposts) and an XML product feed for Google Merchant
 Center and Pinterest Catalogs (*Google Feed*, needs a feed secret and WooCommerce).
+
+## Whole-site SEO, GEO and AEO (7.19)
+
+*Content Studio → **Optimise the whole site*** replaces clicking through pages one at a time:
+
+| Button | What it does | Cost |
+|---|---|---|
+| **Scan the whole site** | Scores every published post, page and product in one pass against 20 rules, plus four whole-domain checks (llms.txt, sitemap, robots.txt, product feed) | Free — database and HTTP only |
+| **Scan and fix meta** | Runs the same scan, then writes Rank Math/Yoast title, description and focus keyword for the weakest URLs | One AI call per page, default 8 per round |
+
+Rules by group:
+
+- **SEO** — title and meta length, missing meta, focus keyword, keyword in title, one H1, enough text for the type (post 500 / page 400 / product 120 words), internal links, image alt text, featured image, slug, duplicate title and duplicate description across the site.
+- **AEO** (answer engines) — question-shaped H2/H3, an FAQ block with `FAQPage` schema, a direct answer in the first paragraph, lists or tables.
+- **GEO** (generative engines) — the brand named in the opening, quotable numbers, structured data, outbound citations, freshness.
+
+The scan is stored in one option (`sgap_seo_site`) and refreshed lazily once a week when an
+administrator opens wp-admin, because WP-Cron is not dependable on this cached host. Body text is
+never rewritten by this screen; content suggestions stay in *Optimise SEO of a page*.
 
 ## Updates
 

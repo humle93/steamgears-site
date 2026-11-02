@@ -193,6 +193,33 @@ check('audit: page size is clamped', str_contains((function(){global $wpdb; $wpd
 $wpdb->next=7; check('audit: total counts with the same filter', SGAP_Audit::total('failed')===7);
 ob_start(); do_action('page_sgap-log'); $html=ob_get_clean();
 check('audit: the log page explains the retention window', str_contains($html,'Kept for 90 days'));
+// ---- whole-site SEO / AEO / GEO (7.19.0) ----
+$sgap_check = function (array $checks, string $id) { foreach ($checks as $c) { if ($c['id'] === $id) return $c; } return ['status' => 'missing', 'detail' => '']; };
+$base = ['type' => 'post', 'slug' => 'steampunk-goggles', 'title' => 'Steampunk Goggles: How to Choose a Pair That Fits',
+    'meta_title' => 'Steampunk Goggles: How to Choose a Pair That Fits', 'keyword' => 'steampunk goggles', 'featured' => true,
+    'description' => str_repeat('Brass goggles that actually fit. ', 5)];
+check('site seo: no rules scores 100', SGAP_Site_SEO::score([]) === 100);
+check('site seo: pass + warn + fail averages to 50', SGAP_Site_SEO::score([['status' => 'pass'], ['status' => 'warn'], ['status' => 'fail']]) === 50);
+check('site seo: skipped checks are ignored', SGAP_Site_SEO::score([['status' => 'pass'], ['status' => 'skip']]) === 100);
+$empty = SGAP_Site_SEO::evaluate(array_merge($base, ['meta_title' => '', 'description' => '', 'keyword' => '', 'content' => '']));
+check('site seo: missing meta and keyword fail', $sgap_check($empty, 'meta_title')['status'] === 'fail' && $sgap_check($empty, 'meta_description')['status'] === 'fail' && $sgap_check($empty, 'focus_keyword')['status'] === 'fail');
+check('site seo: an empty page fails length and internal links', $sgap_check($empty, 'length')['status'] === 'fail' && $sgap_check($empty, 'internal_links')['status'] === 'fail');
+check('site seo: no H1 warns instead of failing', $sgap_check($empty, 'h1')['status'] === 'warn');
+check('site seo: two H1 elements fail', $sgap_check(SGAP_Site_SEO::evaluate(array_merge($base, ['content' => '<h1>A</h1><h1>B</h1>'])), 'h1')['status'] === 'fail');
+$imgs = SGAP_Site_SEO::evaluate(array_merge($base, ['content' => '<img src="a.jpg"><img src="b.jpg" alt="brass">']));
+check('site seo: a missing alt text fails and is counted', $sgap_check($imgs, 'image_alt')['status'] === 'fail' && str_contains($sgap_check($imgs, 'image_alt')['detail'], '1 of 2'));
+$aeo = SGAP_Site_SEO::evaluate(array_merge($base, ['content' => '<h2>What size goggles do I need?</h2><p>' . str_repeat('word ', 60) . '</p><ul><li>x</li></ul><script type="application/ld+json">{"@type":"FAQPage"}</script>']));
+check('site seo: question heading, FAQ schema and a list pass AEO', $sgap_check($aeo, 'question_headings')['status'] === 'pass' && $sgap_check($aeo, 'faq')['status'] === 'pass' && $sgap_check($aeo, 'scannable')['status'] === 'pass');
+check('site seo: a plain heading is not a question heading', $sgap_check(SGAP_Site_SEO::evaluate(array_merge($base, ['content' => '<h2>Materials</h2><p>x</p>'])), 'question_headings')['status'] === 'warn');
+$dup = SGAP_Site_SEO::evaluate(array_merge($base, ['duplicate_title' => true, 'duplicate_description' => true, 'content' => '<p>x</p>']));
+check('site seo: duplicate title and description fail', $sgap_check($dup, 'duplicate')['status'] === 'fail' && $sgap_check($dup, 'duplicate_description')['status'] === 'fail');
+check('site seo: a named brand is a GEO signal', $sgap_check(SGAP_Site_SEO::evaluate(array_merge($base, ['content' => '<p>Steamgears sells 12 designs.</p>'])), 'entity_named')['status'] === 'pass');
+check('site seo: numbers are quotable facts', $sgap_check(SGAP_Site_SEO::evaluate(array_merge($base, ['content' => '<p>It costs 45 euro.</p>'])), 'quotable_facts')['status'] === 'pass');
+$sum = SGAP_Site_SEO::summarize([['fails' => ['a'], 'warns' => ['b'], 'checks' => [1, 2, 3], 'fixed_at' => ''], ['fails' => [], 'warns' => [], 'checks' => [], 'fixed_at' => '']]);
+check('site seo: the summary counts fails, warns and pages needing work', $sum['fail'] === 1 && $sum['warn'] === 1 && $sum['needs_work'] === 1 && $sum['pass'] === 1);
+check('site seo: ids() picks one status only', SGAP_Site_SEO::ids([['id' => 'a', 'status' => 'fail'], ['id' => 'b', 'status' => 'pass']], 'fail') === ['a']);
+ob_start(); do_action('page_sgap-studio'); $studio = ob_get_clean();
+check('site seo: the studio page carries the whole-site card and its script', str_contains($studio, 'sgap-seo-site-out') && str_contains($studio, 'Scan the whole site') && str_contains($studio, 'sgap_seo_site'));
 $wpdb->row=null;
 $wpdb->next=null;
 exit(empty($GLOBALS['fail'])?0:1);
