@@ -72,7 +72,7 @@
           "done": 3.5,
           "total": 11.0,
           "unit": "d",
-          "note": "P1.1 pre-flight pr. kanal 1,0 d (7.20.0) + P1.3 blackout-kalender 0,5 d (7.21.0) + P1.6 quality gate 1,0 d (includes/quality.php, 7.22.0) + P1.7 helsides SEO/GEO/AEO-audit 1,0 d (7.19.0); 4 af 7 punkter. P1.5 er eksternt blokeret (Pinterest-token)"
+          "note": "P1.1 pre-flight pr. kanal 1,0 d (7.20.0) + P1.3 blackout-kalender 0,5 d (7.21.0) + P1.6 quality gate 1,0 d (includes/quality.php, 7.22.0 — nu også målt live på sitet) + P1.7 helsides SEO/GEO/AEO-audit 1,0 d (7.19.0); 4 af 7 punkter. P1.5 er eksternt blokeret (Pinterest-token)"
         },
         {
           "id": "p2",

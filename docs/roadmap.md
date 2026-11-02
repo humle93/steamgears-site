@@ -64,15 +64,25 @@ from the site itself (`wp_get_plugins`), never inferred from this repo, so it ca
 
 | What | In this repo | Live on steamgears.eu | Gap |
 | --- | --- | --- | --- |
-| Steamgears Autopilot | **7.22.0** (`plugins/steamgears-autopilot-v7.22.0.zip`, byte-identical to source) | **7.21.0**, active | **One owner click.** The 7.22.0 quality gate (P1.6) is built, tested and pushed, but not on the site |
-| MCP server | AI Engine (site-side, not in this repo) | `/wp-json/mcp/v1/http`, 401 without credential | Connection pending OAuth approval |
+| Steamgears Autopilot | **7.22.0** (`plugins/steamgears-autopilot-v7.22.0.zip`, byte-identical to source) | **7.22.0**, active (measured 2/11 2026) | **None.** The click was made and the version matches |
+| MCP server | AI Engine 3.9.0 (site-side, not in this repo) | `/wp-json/mcp/v1/http`, OAuth approved 2/11 2026, 206 tools | **Read access only** — AI Engine's *Drafts Only* is on, so `queue-post` is refused |
 
-**Blocked: no credential for the new MCP server.** The old site-side MCP plugin is gone and the site now answers
-on `/wp-json/mcp/v1/http` (AI Engine) with `401 rest_forbidden` until a token exists. The endpoint publishes OAuth
-with PKCE and dynamic client registration, so a client is already registered and an approval link can be made;
-the last step is the owner clicking it once (see [`mcp-auth.md`](mcp-auth.md)). Until then **no site-side work is
-possible**, neither reading nor writing, and the deployment table above is the last measurement rather than a
-live status. The same block stops every S0/S1/S2 item that needs the site, so the percentages cannot move either.
+**Measured 2/11 2026, after the owner approved the OAuth client:** `wp_list_plugins` returns
+`{"Name": "Steamgears Autopilot", "Version": "7.22.0"}` and `steamgears-autopilot/status` reports
+`version: 7.22.0` with `latest_on_github: 7.22.0`. The release that sat blocked on one click is therefore on the
+site, and step 1 below passes.
+
+**The quality gate is live but could only be half-proven here.** `status` reports `quality_gate: {mode: block,
+banned_words: 0}`, and `check-post` refuses a post that links to a placeholder (`placeholder_link`, severity
+`block`, `ok: false`) — the block path works. What could not be exercised is the *write* half: `queue-post` never
+reaches the gate, because AI Engine answers *"This site lets assistants work on drafts only, so this was not
+done"*. Two owner-side settings therefore stand between the gate and its real test:
+
+- **AI Engine → MCP → Drafts Only** is on. With it on, the agent can read the site and nothing else, so
+  `queue-post`, `generate` and `publish` are refused by AI Engine before the plugin sees them.
+- **Settings → General → Banned words is empty** (`banned_words: 0`), so the headline check of 7.22 cannot fire
+  on anything until the owner adds at least one word. The other three checks (dead links, missing alt text,
+  duplicate captions) work without it.
 
 **Why the gap exists:** a plugin folder can only be replaced by WordPress itself. The MCP surface reads plugins
 but cannot install or activate them, so the last step of every release belongs to the owner — *Plugins → Update*
@@ -81,12 +91,12 @@ uploaded anywhere for 7.22.0; the update is already offered.
 
 **Verifying a release after the click** — in this order, because each step can hide the one before it:
 
-1. `wp_get_plugins` → the `steamgears-autopilot` row reports the new version and `active: true`. If that tool is
-   missing, the site is on AI Engine Free, where the plugin list is a Pro tool set — check `tools/list` before
-   concluding the connection is broken (see [`mcp-auth.md`](mcp-auth.md)).
-2. A feature *from the release* answers from the site, not just "no error": for 7.22 a `queue-post` with a
-   banned word must be refused and name the word, and the same call with `force` must queue it with the word as
-   a warning.
+1. `wp_get_plugins` → the `steamgears-autopilot` row reports the new version and `active: true`. This site's
+   AI Engine does expose the plugin list (`wp_list_plugins`), measured 2/11 2026 — the Pro-only tool set is not
+   what is installed here, so a missing tool means something else.
+2. A feature *from the release* answers from the site, not just "no error": for 7.22 a post that fails a
+   `block` check must be refused with the reason named. `check-post` proves the decision without writing; a
+   `queue-post` refusal additionally proves the gate sits in the queue's own path, but needs *Drafts Only* off.
 3. `steamgears-autopilot/status` → `quality_gate.mode` reports `block` (the default).
 
 A release that fails step 1 is a failed upload, not a failed build: the zip is compared with `diff -r` locally

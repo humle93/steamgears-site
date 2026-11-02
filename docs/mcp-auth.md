@@ -9,6 +9,13 @@ uden credential.
 | `publer` | `https://mcp.publer.com/` | `Bearer ${PUBLER_API_KEY}` | Publer MCP API key (Business/Enterprise) |
 | `steamgears-profil` | `tools/mcp_project_profile.py` (stdio) | ingen | ingen — læser kun repoet |
 
+**Status 2/11 2026, sent: forbindelsen virker.** OAuth-klienten blev godkendt af ejeren, tokenet lever 3600 s med
+refresh, og `python3 tools/mcp_rest.py --check` svarer `ok: true` med serveren `AI Engine - Steamgears` og
+**206 værktøjer**. Læsning virker hele vejen (`wp_list_plugins`, `list-queue`, `check-post`). Skrivning gør
+**ikke**: AI Engine har *Drafts Only* slået til, så `queue-post` afvises med »This site lets assistants work on
+drafts only«, før plugin'et ser kaldet. Skal agenten skrive, skal den switch slås fra i
+*Meow Apps → AI Engine → Settings → MCP* — det er en beslutning om risikoprofil, ikke en fejl.
+
 Sitet kører **AI Engine (Meow Apps)** som MCP-server. Det er standard MCP over HTTP med `Mcp-Session-Id`, og
 det kræver en credential på hvert kald: uden en svarer ruten `401 rest_forbidden`. Den gamle site-side
 MCP-server og dens API-nøgle er væk, og stdio-broen er derfor også fjernet — der er ingen nøgle at gemme i
@@ -38,10 +45,10 @@ credential-selvtest, ikke en agent-kanal: en token der virker der, virker ikke n
 `/wp-json/mcp/v1/http`. CVE-2026-16954 (rettet i 3.6.4) handlede netop om at den rute lækkede admin-e-mail,
 API-nøgler og bearer-tokens til Editor-brugere — slå Public API fra hvis modulet ikke bruges.
 
-**Værktøjsdækning, til når nogen skal måle `wp_get_plugins`:** AI Engines WordPress-sæt er gratis (indlæg, sider,
-blokke, medier, kommentarer, brugere, taxonomier, menuer, SEO-felter, revisions, caches), men **plugin-listen er
-Pro** (»Plugins and Themes«). Kommer der tomt eller ingen plugin-værktøjer i `tools/list`, er det licensen og ikke
-forbindelsen — og så kan 7.22.0 ikke måles ad denne vej.
+**Værktøjsdækning, målt:** de 206 værktøjer inkluderer `wp_list_plugins` og `steamgears-autopilot_*`-familien
+(31 værktøjer: `status`, `queue-post`, `check-post`, `list-queue`, `manage-queue`, `publish`, `set-mode` …).
+Plugin-listen er altså **tilgængelig her**, selv om den i AI Engines dokumentation hører til Pro-sættet — mål
+`tools/list` før du konkluderer noget om licensen.
 
 WAF-bemærkningen er vigtig: `401` på JSON-ruterne er serverens eget svar, mens `454`/`455` er Simplys
 bot-regel og kun rammer HTML. Derfor kan OAuth-linket ikke åbnes herfra — det skal åbnes i ejerens browser.
