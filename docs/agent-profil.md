@@ -27,8 +27,8 @@ Der er **fem aktive projekter**, alle målt i [`projektstatus.json`](../projekts
 
 | id | Projekt | Status | Enhed |
 | --- | --- | --- | --- |
-| `site` | steamgears.eu — site-optimering | 43,8 % (9,25 af 21,1 d) | developer-dage |
-| `plugin` | Steamgears Autopilot — plugin | 2,0 % (0,45 af 23,0 d) | developer-dage |
+| `site` | steamgears.eu — site-optimering | 50,0 % (10,55 af 21,1 d) | developer-dage |
+| `plugin` | Steamgears Autopilot — plugin | 29,0 % (6,95 af 24,0 d) | developer-dage |
 | `rebrand` | Dark academia-rebrand | 63,0 % (8,5 af 13,5 t) | timer |
 | `seo` | SEO-indholdsproduktion | 0,0 % (0 af 3 guides) | guides |
 | `links` | Døde internlinks | 100 % (39 af 39 links) | links |
@@ -81,9 +81,16 @@ Alt her er målt mod den live side eller læst i kilden. Er noget ændret siden 
 - `/shop/` tager ~5,8 s og ~470 KB; produktside har ~151 KB inline CSS og ~105 scripts.
 - GA4 fyrer **dobbelt** på hvert pageview, så konverteringer kan ikke aflæses sikkert.
 
-**Pluginnet** (`plugins/steamgears-autopilot/`, v7.18.0)
+**Pluginnet** (`plugins/steamgears-autopilot/`, v7.22.0)
 
-- 15 PHP-filer, ~6.273 linjer, 904 linjer tests; **20 af 21 subsystemer er live**.
+- 21 PHP-filer, 8.257 linjer, 1.153 linjer tests; **21 af 22 subsystemer er live**. Version **7.19.0** tilføjede
+  helsides SEO/GEO/AEO-auditten (`includes/site-seo.php`), som erstatter den per-side-optimering der krævede
+  ét klik pr. URL. **7.20.0** tilføjede pre-flight-valideringen (`includes/preflight.php`): hver kø-post tjekkes
+  mod nettets egne grænser før det første Publer-kald, og det der kan rettes mekanisk (caption-længde, hashtags)
+  rettes i stedet for at blive afvist. **7.21.0** tilføjede blackout-kalenderen (`includes/blackout.php`):
+  datointervaller hvor intet frigives, og kø-poster flyttes til næste frie dag samme klokkeslæt. **7.22.0**
+  tilføjede quality-gaten (`includes/quality.php`) i `SGAP_Queue::add()`: bandeord, døde links, manglende
+  alt-tekst og næsten-dubletter stoppes før posten når køen. 208 smoke-checks, alle grønne.
 - Kæden virker: generér → godkend → publicér (RSS eller Publer API) → mål.
 - Self-updateren virker: zip i repoet er **byte-identisk** med kilden; 20 versioner på fire dage.
 - 9 AJAX- og 5 admin_post-handlere har capability + nonce; **kun ét `wp_mail`** i hele pluginnet (ugerapport).
@@ -110,7 +117,7 @@ Alt her er målt mod den live side eller læst i kilden. Er noget ændret siden 
 | Python 3.12 + PDF-biblioteker | ✅ i `tools/_deps` | rapporter i `reports/` |
 | PHP 8.5.8 (statisk binær) | ✅ i `tools/_deps/bin/php` | `php -l`, ikke tests |
 | **Skrive til sitet** | ❌ 401 | S2.3, S4.1, S4.3, S0.4 kan forberedes, ikke udføres |
-| MCP mod sitet | ❌ ingen `ROYAL_MCP_API_KEY` | Royal MCP svarer 401; kun `Bearer <API-nøgle>` virker (application password afvises) |
+| MCP mod sitet | ✅ nøglen i `.env` som `ROYAL_MCP_TOKEN` | `wp_mcp_stdio.py --check` gav 2/11 2026 `ok: true`, server 1.5.13, **270 værktøjer**; kun `Bearer <API-nøgle>` virker (application password afvises) |
 | Publer MCP | ❌ ingen `PUBLER_API_KEY` | kan ikke planlægge opslag |
 | Browser / Lighthouse | ❌ | ingen visuel eller ydelsesverifikation |
 | Root / `apt` | ❌ | brug statiske binærer (se opskrifter) |
@@ -145,10 +152,10 @@ curl -s -A 'Mozilla/5.0' https://steamgears.eu/<side>/ \
 curl -s 'https://steamgears.eu/wp-json/wp/v2/product?per_page=100&_fields=id,slug,link' | jq 'length'
 curl -s -D- -o /dev/null 'https://steamgears.eu/wp-json/wp/v2/product?per_page=1' | grep -i x-wp-total
 
-# MCP-håndtryk (kræver ROYAL_MCP_API_KEY; Bearer er den eneste accepterede credential)
+# MCP-håndtryk (nøglen ligger i .env som ROYAL_MCP_TOKEN; Bearer er den eneste accepterede credential)
 curl -sS -X POST https://steamgears.eu/mcp \
   -H 'Content-Type: application/json' -H 'Accept: application/json, text/event-stream' \
-  -H "Authorization: Bearer $ROYAL_MCP_API_KEY" \
+  -H "Authorization: Bearer $(grep -m1 '^ROYAL_MCP_TOKEN=' .env | cut -d= -f2-)" \
   -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"verify","version":"1"}}}'
 
 # Samme håndtryk gennem stdio-broen (bruges når nøglen ligger i .env eller ~/.royal_mcp_key)

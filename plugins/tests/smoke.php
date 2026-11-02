@@ -14,7 +14,7 @@ function is_admin(){return true;} function get_option($k,$d=false){return $GLOBA
 function update_option($k,$v){$GLOBALS['opts'][$k]=$v;} function add_option($k,$v){$GLOBALS['opts'][$k]??=$v;} function wp_mail($to,$s,$b){$GLOBALS['mails'][]=[$to,$s,$b]; return true;}
 function register_setting($g,$k,$a){ $GLOBALS['settings'][$k]=$a; } function wp_clear_scheduled_hook($h){}
 function add_menu_page($t,$m,$c,$slug,$cb){ add_action('page_'.$slug,$cb);} function add_submenu_page($p,$t,$m,$c,$slug,$cb){ add_action('page_'.$slug,$cb);}
-function esc_html($s){return htmlspecialchars((string)$s);} function esc_attr($s){return htmlspecialchars((string)$s);} function esc_url($s){return $s;}
+function esc_html($s){return htmlspecialchars((string)$s);} function esc_attr($s){return htmlspecialchars((string)$s);} function esc_url($s){return $s;} function esc_textarea($s){return htmlspecialchars((string)$s);}
 function get_transient($k){return false;} function set_transient(...$a){} function delete_transient($k){} function settings_fields($g){} function submit_button(){}
 function admin_url($p=''){return '/wp-admin/'.$p;} function rest_url($p=''){return '/wp-json/'.$p;} function home_url($p=''){return 'https://steamgears.eu'.$p;}
 function get_bloginfo($k=''){return 'Steamgears';} function wp_timezone_string(){return 'UTC';} function get_the_title($id){return 'Post '.$id;} function get_permalink($id){return 'https://steamgears.eu/?p='.$id;} function has_post_thumbnail($id){return false;}
@@ -26,7 +26,7 @@ function esc_url_raw($u,$p=null){return preg_match('#^https?://#',$u)?$u:'';} fu
 function wp_parse_args($a,$d){return array_merge($d,$a);} function add_query_arg($a,$u){return $u.(str_contains($u,'?')?'&':'?').http_build_query($a,'','&',PHP_QUERY_RFC3986);}
 function current_time($t){return '2026-10-30 12:00:00';} function wp_date($f,$t=null){return date($f,$t??time());}
 function current_user_can($c){return true;} function get_current_user_id(){return 1;} function get_site_transient($k){return false;} function set_site_transient(...$a){} function wp_remote_get(...$a){return new WP_Error('offline','offline');} function wp_nonce_field_stub(){} function delete_option($k){unset($GLOBALS["opts"][$k]);} function wp_json_encode($v){return json_encode($v);} function is_wp_error($v){return $v instanceof WP_Error;}
-function wp_strip_all_tags($s){return strip_tags((string)$s);} function wp_die($m=''){throw new RuntimeException((string)$m);} function check_admin_referer($a=''){return true;}
+function wp_strip_all_tags($s){return strip_tags((string)$s);} function attachment_url_to_postid($u){return (int)($GLOBALS['attachment_for'][$u]??0);} function get_post_meta($id,$k='',$s=false){return $GLOBALS['postmeta'][$id][$k]??'';} function url_to_postid($u){return (int)($GLOBALS['postid_for'][$u]??0);} function get_post_status($id){return (string)($GLOBALS['poststatus'][$id]??'publish');} function wp_get_attachment_metadata($id){return $GLOBALS['attachment_meta'][$id]??[];} function get_post_mime_type($id){return (string)($GLOBALS['attachment_mime'][$id]??'');} function wp_die($m=''){throw new RuntimeException((string)$m);} function check_admin_referer($a=''){return true;}
 class WP_Error{ function __construct(public $code,public $msg,public $data=[]){} function get_error_message(){return $this->msg;} }
 class WP_REST_Response{ function __construct(public $data,public $status=200){} }
 class WP_REST_Request implements ArrayAccess{ function __construct(public array $p){} function get_param($k){return $this->p[$k]??null;}
@@ -34,7 +34,7 @@ class WP_REST_Request implements ArrayAccess{ function __construct(public array 
 function wp_next_scheduled($h){return false;} function wp_schedule_event(...$a){$GLOBALS['cron'][]=$a[2];} function flush_rewrite_rules($h=true){$GLOBALS['flushed']=1;} function add_rewrite_rule(...$a){$GLOBALS['rules'][]=$a[0];} function wp_set_option_autoload_values($a){$GLOBALS['noauto']=$a;}
 class W{ public $prefix='wp_'; public $posts='wp_posts'; public $postmeta='wp_postmeta'; function get_charset_collate(){return '';} public $insert_id=0; public $log=[]; public $next=null; public $row=null;
  function get_var($q){$this->log[]=$q; return $this->next;} function prepare($q,...$a){ if(count($a)==1&&is_array($a[0]))$a=$a[0]; return vsprintf(str_replace(['%s','%d','%f'],["'%s'",'%d','%F'],$q),$a);} function esc_like($s){return $s;}
- function get_results($q,$o=null){$this->log[]=$q;return [];} function get_row($q){$this->log[]=$q;return $this->row ?? null;} function query($q){$this->log[]=$q;return 0;}
+ function get_results($q,$o=null){$this->log[]=$q;return $GLOBALS['rows']??[];} function get_row($q){$this->log[]=$q;return $this->row ?? null;} function query($q){$this->log[]=$q;return 0;}
  function insert($t,$d){$this->log[]="INSERT $t ".json_encode($d); $this->insert_id=42; return 1;} function update($t,$d,$w){$this->log[]="UPDATE $t ".json_encode($d);return 1;} }
 $wpdb=new W; $wpdb->row=null;
 require __DIR__.'/../steamgears-autopilot/steamgears-autopilot.php';
@@ -193,6 +193,177 @@ check('audit: page size is clamped', str_contains((function(){global $wpdb; $wpd
 $wpdb->next=7; check('audit: total counts with the same filter', SGAP_Audit::total('failed')===7);
 ob_start(); do_action('page_sgap-log'); $html=ob_get_clean();
 check('audit: the log page explains the retention window', str_contains($html,'Kept for 90 days'));
+// ---- whole-site SEO / AEO / GEO (7.19.0) ----
+$sgap_check = function (array $checks, string $id) { foreach ($checks as $c) { if ($c['id'] === $id) return $c; } return ['status' => 'missing', 'detail' => '']; };
+$base = ['type' => 'post', 'slug' => 'steampunk-goggles', 'title' => 'Steampunk Goggles: How to Choose a Pair That Fits',
+    'meta_title' => 'Steampunk Goggles: How to Choose a Pair That Fits', 'keyword' => 'steampunk goggles', 'featured' => true,
+    'description' => str_repeat('Brass goggles that actually fit. ', 5)];
+check('site seo: no rules scores 100', SGAP_Site_SEO::score([]) === 100);
+check('site seo: pass + warn + fail averages to 50', SGAP_Site_SEO::score([['status' => 'pass'], ['status' => 'warn'], ['status' => 'fail']]) === 50);
+check('site seo: skipped checks are ignored', SGAP_Site_SEO::score([['status' => 'pass'], ['status' => 'skip']]) === 100);
+$empty = SGAP_Site_SEO::evaluate(array_merge($base, ['meta_title' => '', 'description' => '', 'keyword' => '', 'content' => '']));
+check('site seo: missing meta and keyword fail', $sgap_check($empty, 'meta_title')['status'] === 'fail' && $sgap_check($empty, 'meta_description')['status'] === 'fail' && $sgap_check($empty, 'focus_keyword')['status'] === 'fail');
+check('site seo: an empty page fails length and internal links', $sgap_check($empty, 'length')['status'] === 'fail' && $sgap_check($empty, 'internal_links')['status'] === 'fail');
+check('site seo: no H1 warns instead of failing', $sgap_check($empty, 'h1')['status'] === 'warn');
+check('site seo: two H1 elements fail', $sgap_check(SGAP_Site_SEO::evaluate(array_merge($base, ['content' => '<h1>A</h1><h1>B</h1>'])), 'h1')['status'] === 'fail');
+$imgs = SGAP_Site_SEO::evaluate(array_merge($base, ['content' => '<img src="a.jpg"><img src="b.jpg" alt="brass">']));
+check('site seo: a missing alt text fails and is counted', $sgap_check($imgs, 'image_alt')['status'] === 'fail' && str_contains($sgap_check($imgs, 'image_alt')['detail'], '1 of 2'));
+$aeo = SGAP_Site_SEO::evaluate(array_merge($base, ['content' => '<h2>What size goggles do I need?</h2><p>' . str_repeat('word ', 60) . '</p><ul><li>x</li></ul><script type="application/ld+json">{"@type":"FAQPage"}</script>']));
+check('site seo: question heading, FAQ schema and a list pass AEO', $sgap_check($aeo, 'question_headings')['status'] === 'pass' && $sgap_check($aeo, 'faq')['status'] === 'pass' && $sgap_check($aeo, 'scannable')['status'] === 'pass');
+check('site seo: a plain heading is not a question heading', $sgap_check(SGAP_Site_SEO::evaluate(array_merge($base, ['content' => '<h2>Materials</h2><p>x</p>'])), 'question_headings')['status'] === 'warn');
+$dup = SGAP_Site_SEO::evaluate(array_merge($base, ['duplicate_title' => true, 'duplicate_description' => true, 'content' => '<p>x</p>']));
+check('site seo: duplicate title and description fail', $sgap_check($dup, 'duplicate')['status'] === 'fail' && $sgap_check($dup, 'duplicate_description')['status'] === 'fail');
+check('site seo: a named brand is a GEO signal', $sgap_check(SGAP_Site_SEO::evaluate(array_merge($base, ['content' => '<p>Steamgears sells 12 designs.</p>'])), 'entity_named')['status'] === 'pass');
+check('site seo: numbers are quotable facts', $sgap_check(SGAP_Site_SEO::evaluate(array_merge($base, ['content' => '<p>It costs 45 euro.</p>'])), 'quotable_facts')['status'] === 'pass');
+$sum = SGAP_Site_SEO::summarize([['fails' => ['a'], 'warns' => ['b'], 'checks' => [1, 2, 3], 'fixed_at' => ''], ['fails' => [], 'warns' => [], 'checks' => [], 'fixed_at' => '']]);
+check('site seo: the summary counts fails, warns and pages needing work', $sum['fail'] === 1 && $sum['warn'] === 1 && $sum['needs_work'] === 1 && $sum['pass'] === 1);
+check('site seo: ids() picks one status only', SGAP_Site_SEO::ids([['id' => 'a', 'status' => 'fail'], ['id' => 'b', 'status' => 'pass']], 'fail') === ['a']);
+ob_start(); do_action('page_sgap-studio'); $studio = ob_get_clean();
+check('site seo: the studio page carries the whole-site card and its script', str_contains($studio, 'sgap-seo-site-out') && str_contains($studio, 'Scan the whole site') && str_contains($studio, 'sgap_seo_site'));
+/* --- pre-flight per channel (P1.1) --- */
+$sgap_url=SGAP_Tracking::url(7);
+check('preflight: threads budget subtracts the tracking link', SGAP_Preflight::caption_budget('threads',$sgap_url)===500-mb_strlen($sgap_url)-2);
+check('preflight: X counts a link as 23 characters', SGAP_Preflight::caption_budget('twitter',$sgap_url)===255);
+check('preflight: instagram keeps the whole caption budget', SGAP_Preflight::caption_budget('instagram',$sgap_url)===2200);
+check('preflight: an unknown channel has no budget', SGAP_Preflight::caption_budget('myspace',$sgap_url)===0);
+$long=str_repeat('Steampunk goggles with brass frames. ',40);
+$fix=SGAP_Preflight::repair('threads',['title'=>'t','body'=>$long,'tracking_url'=>$sgap_url]);
+check('preflight: a long threads caption is cut to the budget', mb_strlen($fix['row']['body'])<=500-mb_strlen($sgap_url)-2 && str_ends_with($fix['row']['body'],'…'));
+check('preflight: the cut is reported', (bool)array_filter($fix['notes'],fn($n)=>str_contains($n,'shortened')));
+$fine=SGAP_Preflight::repair('facebook',['title'=>'t','body'=>'Short','tracking_url'=>$sgap_url]);
+check('preflight: a caption within the limit is left alone', $fine['row']['body']==='Short' && $fine['notes']===[]);
+$tags=SGAP_Preflight::repair('threads',['title'=>'t','body'=>'Brass #steampunk #goggles #brass','tracking_url'=>$sgap_url]);
+check('preflight: threads keeps one hashtag', $tags['row']['body']==='Brass #steampunk' && count($tags['notes'])===1);
+$many='x '.implode(' ',array_map(fn($i)=>'#tag'.$i,range(1,31)));
+$ig=SGAP_Preflight::repair('instagram',['title'=>'t','body'=>$many,'tracking_url'=>$sgap_url]);
+preg_match_all('/#\w+/',$ig['row']['body'],$tagm);
+check('preflight: instagram keeps 30 hashtags', count($tagm[0])===30 && count($ig['notes'])===1);
+$pin=SGAP_Preflight::repair('pinterest',['title'=>str_repeat('Brass goggles ',12),'body'=>'x','tracking_url'=>$sgap_url]);
+check('preflight: pin title cut to 100 characters', mb_strlen($pin['row']['title'])<=100 && mb_strlen($pin['row']['title'])>60);
+$nophoto=SGAP_Preflight::problems('instagram',['title'=>'t','body'=>'x','image_url'=>'']);
+check('preflight: instagram without a photo is a hard problem', ($nophoto[0]['code']??'')==='no_photo' && str_contains($nophoto[0]['message'],'needs a photo'));
+$board=SGAP_Preflight::problems('pinterest',['title'=>'t','body'=>'x','image_url'=>'https://steamgears.eu/a.jpg']);
+check('preflight: pinterest without a board is refused', in_array('no_board',array_column($board,'code'),true));
+$opts['sgap_publer_pinterest_board']='board_1';
+check('preflight: pinterest passes once the board is set', SGAP_Preflight::problems('pinterest',['title'=>'t','body'=>'x','image_url'=>'https://steamgears.eu/a.jpg'])===[]);
+$GLOBALS['attachment_for']=['https://steamgears.eu/wp-content/uploads/pin.png'=>91];
+$GLOBALS['attachment_meta'][91]=['width'=>1000,'height'=>1500,'mime_type'=>'image/png'];
+$info=SGAP_Preflight::image_info('https://steamgears.eu/wp-content/uploads/pin.png');
+check('preflight: size and type come from the media library', $info['mime']==='image/png' && $info['width']===1000 && $info['source']==='attachment');
+check('preflight: a PNG is refused on instagram', in_array('image_not_jpeg',array_column(SGAP_Preflight::problems('instagram',['image_url'=>'https://steamgears.eu/wp-content/uploads/pin.png']),'code'),true));
+check('preflight: a portrait photo outside 4:5 is refused', in_array('image_out_of_ratio',array_column(SGAP_Preflight::problems('instagram',['image_url'=>'https://steamgears.eu/wp-content/uploads/pin.png']),'code'),true));
+$GLOBALS['attachment_meta'][91]=['width'=>1080,'height'=>1080,'mime_type'=>'image/jpeg'];
+check('preflight: a square JPEG passes on instagram', SGAP_Preflight::problems('instagram',['image_url'=>'https://steamgears.eu/wp-content/uploads/pin.png'])===[]);
+$GLOBALS['attachment_for']=[]; $GLOBALS['attachment_meta']=[];
+check('preflight: the extension decides without an attachment', SGAP_Preflight::image_info('https://cdn.example.test/x.webp')['mime']==='image/webp');
+check('preflight: an unknown image is not blocked on a guess', SGAP_Preflight::problems('instagram',['image_url'=>'https://cdn.example.test/photo?id=3'])===[]);
+$c=SGAP_Preflight::check('threads',['id'=>7,'title'=>'t','body'=>$long,'destination_url'=>'https://steamgears.eu/x/']);
+check('preflight: check() repairs and still passes', $c['ok'] && mb_strlen($c['row']['body'])<=500-mb_strlen($sgap_url)-2 && $c['notes']!==[]);
+check('preflight: a message names the problems', str_contains(SGAP_Preflight::message([['message'=>'A.'],['message'=>'B.']]),'A. B.'));
+$gate=SGAP_Publer::publish(['id'=>7,'channel'=>'instagram','title'=>'Brass','body'=>'x','destination_url'=>'https://steamgears.eu/x/','image_url'=>'']);
+check('preflight: publish refuses before any Publer call', is_wp_error($gate) && $gate->code==='sgap_preflight' && str_contains($gate->get_error_message(),'needs a photo'));
+$wpdb->next=null;
+$warn=SGAP_Queue::add(['channel'=>'instagram','title'=>'Warn','body'=>'x','destination_url'=>home_url('/warn/')]);
+check('preflight: queueing warns about what would be refused', is_array($warn) && in_array(true,array_map(fn($w)=>str_contains($w,'needs a photo'),$warn['warnings']??[]),true));
+/* --- blackout calendar (P1.3) --- */
+$cal=SGAP_Blackout::parse("2026-12-24..2026-12-26 Christmas\n2026-12-31 New Year's Eve\nnot a date\n2026-13-45 .. 2026-13-46 broken\n2027-01-05..2027-01-02 reversed");
+check('blackout: a range and two single days parse, garbage is ignored', count($cal)===3 && $cal[0]['from']==='2026-12-24' && $cal[0]['to']==='2026-12-26' && $cal[1]['label']==="New Year's Eve");
+check('blackout: a reversed range is put in order', (end($cal)['from']??'')==='2027-01-02' && (end($cal)['to']??'')==='2027-01-05');
+$opts['sgap_blackout_ranges']="2026-12-24..2026-12-26 Christmas\n2026-12-31 New Year's Eve";
+check('blackout: the day before a range is free', SGAP_Blackout::active('2026-12-23')===null);
+check('blackout: both ends of a range are blocked', SGAP_Blackout::active('2026-12-24')!==null && SGAP_Blackout::active('2026-12-26')!==null);
+check('blackout: the day after a range is free again', SGAP_Blackout::active('2026-12-27')===null);
+check('blackout: the label comes back with the range', (SGAP_Blackout::active('2026-12-25')['label']??'')==='Christmas');
+check('blackout: hits() looks at the date part of a timestamp', SGAP_Blackout::hits('2026-12-25 09:30:00') && !SGAP_Blackout::hits('2026-12-27 09:30:00'));
+check('blackout: a post inside the range moves to the first free day, same time', SGAP_Blackout::next_free('2026-12-25 09:30:00')==='2026-12-27 09:30:00');
+check('blackout: a post on a free day stays put', SGAP_Blackout::next_free('2026-12-20 08:15:00')==='2026-12-20 08:15:00');
+check('blackout: a post on the 31st moves past New Year', SGAP_Blackout::next_free('2026-12-31 12:00:00')==='2027-01-01 12:00:00');
+$GLOBALS['rows']=[(object)['id'=>1,'scheduled_at'=>'2026-12-25 09:30:00'],(object)['id'=>2,'scheduled_at'=>'2026-12-27 09:30:00']];
+$moved=SGAP_Blackout::reschedule();
+check('blackout: reschedule moves only the post inside the range', count($moved)===1 && $moved[0]['id']===1 && $moved[0]['to']==='2026-12-27 09:30:00' && $moved[0]['reason']==='Christmas');
+$GLOBALS['rows']=[(object)['id'=>3,'scheduled_at'=>'2026-12-24 07:00:00']];
+$still=SGAP_Blackout::reschedule();
+$GLOBALS['rows']=[(object)['id'=>3,'scheduled_at'=>$still[0]['to']??'x']];
+check('blackout: a moved post is not moved again on the next tick', count($still)===1 && SGAP_Blackout::reschedule()===[]);
+$GLOBALS['rows']=[];
+$opts['sgap_blackout_ranges']="2026-12-24..2026-12-26 Christmas";
+$wpdb->next=null;
+$shift=SGAP_Queue::add(['channel'=>'facebook','title'=>'Holiday','body'=>'x','destination_url'=>home_url('/holiday/'),'scheduled_at'=>'2026-12-25 10:00:00']);
+check('blackout: queueing inside a range schedules the next free day', is_array($shift) && ($shift['scheduled_at']??'')==='2026-12-27 10:00:00');
+$opts['sgap_autopilot_enabled']='yes'; $opts['sgap_quiet_start']=0; $opts['sgap_quiet_end']=0; $wpdb->next=0;
+$opts['sgap_blackout_ranges']=wp_date('Y-m-d').' Today off';
+check('blackout: an active range pauses publishing', SGAP_Queue::blocked_reason()==='blackout');
+check('blackout: the reason names the range and where posts go', str_contains(SGAP_Queue::blocked_message(),'blackout') && str_contains(SGAP_Queue::blocked_message(),'move to'));
+$sum=SGAP_Blackout::summary();
+check('blackout: summary says it is active and where posts go next', $sum['active']===true && $sum['ranges']===1 && $sum['moves_to']!==null);
+check('blackout: the publish tick reports what it shifted', array_key_exists('shifted', SGAP_Publer::tick()));
+ob_start(); do_action('page_sgap-settings'); $calhtml=ob_get_clean();
+check('blackout: the calendar has a multi-line field on the settings page', str_contains($calhtml,'name="sgap_blackout_ranges"') && str_contains($calhtml,'<textarea'));
+check('blackout: newlines survive saving the setting', ($settings['sgap_blackout_ranges']['sanitize_callback']??'')==='sanitize_textarea_field');
+ob_start(); do_action('page_sgap-queue'); $qhtml=ob_get_clean();
+check('blackout: the queue page says why nothing is going out', str_contains($qhtml,'Blackout'));
+$opts['sgap_blackout_ranges']='';
+check('blackout: no ranges means no work at all', SGAP_Blackout::reschedule()===[] && SGAP_Blackout::active()===null);
+// ---- quality gate before queueing (P1.6) ----
+$opts['sgap_quality_gate']='block'; $opts['sgap_banned_words']="scam\n#giveaway, cheap junk";
+unset($GLOBALS['rows'],$GLOBALS['postid_for'],$GLOBALS['poststatus'],$GLOBALS['postmeta'],$GLOBALS['attachment_for']);
+check('quality: words parsed from lines and commas', SGAP_Quality::words()===['scam','#giveaway','cheap junk']);
+check('quality: links, punctuation and case are normalised away', SGAP_Quality::normalize('Hello,   World! https://x.se/a')==='hello world');
+check('quality: a caption is 100 % itself', SGAP_Quality::similarity('Titanium gears for the daily carry','Titanium gears for the daily carry')===1.0);
+check('quality: unrelated captions score low', SGAP_Quality::similarity('Titanium gears for the daily carry','Autumn notes on leather care and wax')<0.2);
+check('quality: a banned word fires on whole words only', SGAP_Quality::banned('This is a scam')===['scam'] && SGAP_Quality::banned('Garlic scampi tonight')===[]);
+check('quality: a hashtag counts as the word', SGAP_Quality::banned('Join the #giveaway now')===['#giveaway']);
+check('quality: a two-word phrase is matched as one term', SGAP_Quality::banned('Only cheap junk here')===['cheap junk']);
+check('quality: links are found without the sentence punctuation', SGAP_Quality::links('Se https://steamgears.eu/gear/ og https://x.se/a?b=1.')===['https://steamgears.eu/gear/','https://x.se/a?b=1']);
+check('quality: a placeholder host is blocked', (SGAP_Quality::link_problem('https://example.com/gear')['severity']??'')==='block');
+check('quality: a link without a domain is blocked', (SGAP_Quality::link_problem('https:///gear')['severity']??'')==='block');
+check('quality: http is a warning, not a block', (SGAP_Quality::link_problem('http://steamgears.eu/gear/')['severity']??'')==='warn');
+$GLOBALS['postid_for']['https://steamgears.eu/gear/']=7; $GLOBALS['poststatus'][7]='publish';
+check('quality: a link to a live page passes', SGAP_Quality::link_problem('https://steamgears.eu/gear/')===null);
+$GLOBALS['poststatus'][7]='draft';
+check('quality: a link to a draft is blocked', (SGAP_Quality::link_problem('https://steamgears.eu/gear/')['severity']??'')==='block');
+check('quality: an archive or a search is not a dead link', SGAP_Quality::link_problem('https://steamgears.eu/category/guides/')===null && SGAP_Quality::link_problem('https://steamgears.eu/?s=gear')===null);
+check('quality: an internal address nobody can open is a warning', (SGAP_Quality::link_problem('https://steamgears.eu/no-such-page/')['severity']??'')==='warn');
+check('quality: an external host is not probed', SGAP_Quality::link_problem('https://www.pinterest.com/pin/1')===null);
+$GLOBALS['attachment_for']['https://steamgears.eu/i.jpg']=55;
+check('quality: a photo without alt text is reported', SGAP_Quality::alt_problem('https://steamgears.eu/i.jpg')!=='');
+$GLOBALS['postmeta'][55]['_wp_attachment_image_alt']='Brass gear close-up';
+check('quality: a described photo passes', SGAP_Quality::alt_problem('https://steamgears.eu/i.jpg')==='');
+check('quality: an image outside the media library cannot be judged', SGAP_Quality::alt_problem('https://cdn.example.org/x.jpg')==='');
+$long='Brass and titanium gears for the daily carry, hand finished in the workshop and shipped in a linen pouch';
+$GLOBALS['rows']=[['id'=>9,'title'=>'Gears','body'=>$long.' today','scheduled_at'=>'2026-11-03 09:00:00']];
+check('quality: a repeated caption is caught', (SGAP_Quality::duplicate('instagram',$long)['id']??0)===9);
+check('quality: the duplicate is compared within one channel', str_contains(implode("\n",$wpdb->log),'channel = '));
+check('quality: short captions are not called duplicates', SGAP_Quality::duplicate('instagram','New drop')===null);
+$GLOBALS['rows']=[];
+$row=['channel'=>'instagram','title'=>'Gears','body'=>'Buy our scam gears at https://steamgears.eu/gear/','destination_url'=>'https://steamgears.eu/gear/'];
+$gate=SGAP_Quality::check($row);
+check('quality: a banned word blocks the post', $gate['ok']===false && in_array('banned_word',array_column($gate['problems'],'code'),true));
+check('quality: the blocking problems are the refusal', count(SGAP_Quality::blocking($gate['problems']))>=1 && SGAP_Quality::message($gate['problems'])!=='');
+check('quality: force queues it anyway and keeps the findings', SGAP_Quality::check($row,true)['ok']===true && SGAP_Quality::check($row,true)['problems']!==[]);
+$opts['sgap_quality_gate']='warn';
+check('quality: warn mode reports without refusing', SGAP_Quality::check($row)['ok']===true && SGAP_Quality::check($row)['problems']!==[]);
+$opts['sgap_quality_gate']='off';
+check('quality: off mode says nothing at all', SGAP_Quality::check($row)['problems']===[]);
+$opts['sgap_quality_gate']='block';
+$wpdb->next=null;
+$refused=SGAP_Queue::add(['channel'=>'facebook','title'=>'Deal','body'=>'This is a scam, click now','destination_url'=>'https://steamgears.eu/gear/']);
+check('quality: the queue refuses a post the gate blocks', is_wp_error($refused) && $refused->code==='sgap_quality');
+check('quality: the refusal says what is wrong', str_contains($refused->get_error_message(),'scam'));
+$forced=SGAP_Queue::add(['channel'=>'facebook','title'=>'Deal','body'=>'This is a scam, click now','destination_url'=>'https://steamgears.eu/gear/','force'=>true]);
+check('quality: force puts it in the queue with the findings as warnings', is_array($forced) && str_contains(implode(' ',$forced['warnings']??[]),'scam'));
+$GLOBALS['poststatus'][7]='publish';
+$clean=SGAP_Queue::add(['channel'=>'facebook','title'=>'New gears','body'=>'Fresh titanium gears in the shop','destination_url'=>'https://steamgears.eu/gear/']);
+check('quality: a clean post still goes through', is_array($clean) && ($clean['warnings']??[])===[]);
+check('quality: the mode is one of three values', ($settings['sgap_quality_gate']['sanitize_callback']??'')('nonsense')==='block');
+check('quality: the list is multi-line on the settings page', str_contains((string)($settings['sgap_banned_words']['sanitize_callback']??''),'sanitize_textarea_field'));
+ob_start(); do_action('page_sgap-settings'); $qh=ob_get_clean();
+check('quality: the settings page has the list and the mode', str_contains($qh,'name="sgap_banned_words"') && str_contains($qh,'name="sgap_quality_gate"'));
+$qstatus=SGAP_Abilities::status();
+check('quality: status says how the gate is set', ($qstatus['quality_gate']['mode']??'')==='block' && ($qstatus['quality_gate']['banned_words']??0)===3);
+$dry=SGAP_Abilities::check_post(['channel'=>'facebook','title'=>'Deal','text'=>'Buy our scam gears','destination_url'=>'https://steamgears.eu/gear/']);
+check('quality: the dry run covers both gates', isset($dry['quality']['problems']) && $dry['ok']===false && count($dry['quality']['problems'])>=1);
+$opts['sgap_banned_words']=''; $GLOBALS['postid_for']=[]; $GLOBALS['poststatus']=[]; $GLOBALS['postmeta']=[]; $GLOBALS['attachment_for']=[];
 $wpdb->row=null;
 $wpdb->next=null;
 exit(empty($GLOBALS['fail'])?0:1);

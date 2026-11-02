@@ -209,6 +209,16 @@ class SGAP_Publer {
         if (!in_array($channel, self::CHANNELS, true)) {
             return new WP_Error('sgap_channel', "Channel '{$channel}' is not supported by the Publer publisher.");
         }
+        // Pre-flight before anything leaves the site: a caption that is too long, a
+        // PNG on Instagram or a pin without a board is refused here, without a single
+        // API call, instead of coming back as a vague Publer failure that also burns
+        // one of the three attempts. What can be repaired mechanically (caption and
+        // hashtag limits) is repaired instead of refused.
+        $preflight = SGAP_Preflight::check($channel, $row);
+        if (!$preflight['ok']) {
+            return new WP_Error('sgap_preflight', SGAP_Preflight::message($preflight['problems']), ['status' => 422, 'problems' => $preflight['problems']]);
+        }
+        $row = $preflight['row'];
         $accounts = self::accounts();
         if (is_wp_error($accounts)) {
             return $accounts;
@@ -261,10 +271,14 @@ class SGAP_Publer {
      * Returns what happened, for the dashboard button and the Claude tool.
      */
     public static function tick(): array {
+        // Move queued posts out of a blackout first: a range added while the queue was
+        // full must not release tomorrow's posts today, and it must not hold them back
+        // when the range ends either.
+        $shifted = SGAP_Blackout::reschedule();
         if (SGAP_RSS::enabled()) {
-            return SGAP_RSS::release();
+            return SGAP_RSS::release() + ['shifted' => $shifted];
         }
-        $report = ['configured' => self::configured(), 'followed_up' => [], 'sent' => [], 'failed' => [], 'blocked' => ''];
+        $report = ['configured' => self::configured(), 'followed_up' => [], 'sent' => [], 'failed' => [], 'blocked' => '', 'shifted' => $shifted];
         if (!$report['configured']) {
             return $report;
         }

@@ -55,7 +55,7 @@
     {
       "id": "plugin",
       "name": "Steamgears Autopilot — plugin",
-      "next": "P0.6 (kræver Command Center), derefter P1.1 og P1.3",
+      "next": "P0.6 (kræver Command Center), derefter P1.2 \"remind me instead\" og P1.4 evergreen-recycling",
       "blocked_by": "Intet for P0. P1.5 kræver Pinterest-token (401) og Meta-review; P0.6 kræver Command Center",
       "modules": [
         {
@@ -69,10 +69,10 @@
         {
           "id": "p1",
           "name": "P1 — paritet",
-          "done": 0,
-          "total": 10.0,
+          "done": 3.5,
+          "total": 11.0,
           "unit": "d",
-          "note": "0 af 6 punkter; P1.5 er eksternt blokeret"
+          "note": "P1.1 pre-flight pr. kanal 1,0 d (7.20.0) + P1.3 blackout-kalender 0,5 d (7.21.0) + P1.6 quality gate 1,0 d (includes/quality.php, 7.22.0) + P1.7 helsides SEO/GEO/AEO-audit 1,0 d (7.19.0); 4 af 7 punkter. P1.5 er eksternt blokeret (Pinterest-token)"
         },
         {
           "id": "p2",
@@ -90,7 +90,8 @@
           "unit": "d",
           "note": "P3.3 (CI 8.0-8.5 + WP 7.1) udført som S0.3 i site-repoet"
         }
-      ]
+      ],
+      "total": 24.0
     },
     {
       "id": "rebrand",
@@ -330,6 +331,42 @@
       "after": 50.0,
       "delta": 1.7,
       "basis": "10,55 af 21,1 d (S0 1,9/2,6 · S1 1,7/4,5 · S2 3,95/6 · S3 1,6/3 · S4 1,4/5)"
+    },
+    {
+      "date": "2026-11-02",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 15.0,
+      "after": 18.5,
+      "delta": 3.5,
+      "basis": "4,45 af 24 d (P0 3,2/4 · P1 1/11 · P2 0/7 · P3 0,25/2)"
+    },
+    {
+      "date": "2026-11-02",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 18.5,
+      "after": 22.7,
+      "delta": 4.2,
+      "basis": "5,45 af 24 d (P0 3,2/4 · P1 2/11 · P2 0/7 · P3 0,25/2)"
+    },
+    {
+      "date": "2026-11-02",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 22.7,
+      "after": 24.8,
+      "delta": 2.1,
+      "basis": "5,95 af 24 d (P0 3,2/4 · P1 2,5/11 · P2 0/7 · P3 0,25/2)"
+    },
+    {
+      "date": "2026-11-02",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 24.8,
+      "after": 29.0,
+      "delta": 4.2,
+      "basis": "6,95 af 24 d (P0 3,2/4 · P1 3,5/11 · P2 0/7 · P3 0,25/2)"
     }
   ]
 }

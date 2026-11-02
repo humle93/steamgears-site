@@ -7,9 +7,12 @@ JSON-RPC-linjer fra stdin til `https://steamgears.eu/mcp`, så en klient uden
 browser (CI, script, Claude Desktop uden OAuth) kan bruge de samme værktøjer.
 
 Nøglen læses i denne rækkefølge:
-  1. miljøvariablen ROYAL_MCP_API_KEY
-  2. .env i repoets rod (gitignored)
+  1. miljøvariablen ROYAL_MCP_API_KEY eller ROYAL_MCP_TOKEN
+  2. .env i repoets rod (gitignored), under begge navne
   3. ~/.royal_mcp_key
+
+Begge navne accepteres, fordi .env i dette repo bruger ROYAL_MCP_TOKEN: en bro der kun
+kendte det ene navn svarede 401 på hver ny session, selv om nøglen lå lige der.
 
 Brug:
     printf '%s\\n' '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | python3 wp_mcp_stdio.py
@@ -41,16 +44,21 @@ def log(message: str) -> None:
     sys.stderr.flush()
 
 
+KEY_NAMES = ("ROYAL_MCP_API_KEY", "ROYAL_MCP_TOKEN")
+
+
 def read_key() -> str:
-    key = os.getenv("ROYAL_MCP_API_KEY", "").strip()
-    if key:
-        return key
+    for name in KEY_NAMES:
+        key = os.getenv(name, "").strip()
+        if key:
+            return key
     env_file = ROOT / ".env"
     if env_file.exists():
+        pattern = re.compile(rf"\s*({'|'.join(KEY_NAMES)})\s*=\s*(.+?)\s*$")
         for line in env_file.read_text(encoding="utf-8", errors="replace").splitlines():
-            match = re.match(r"\s*ROYAL_MCP_API_KEY\s*=\s*(.+?)\s*$", line)
+            match = pattern.match(line)
             if match:
-                return match.group(1).strip().strip("'\"")
+                return match.group(2).strip().strip("'\"")
     if KEY_FILE.exists():
         return KEY_FILE.read_text(encoding="utf-8").strip()
     return ""
@@ -114,8 +122,9 @@ class Bridge:
             body = exc.read().decode("utf-8", "replace")[:300]
             if exc.code == 401 and not self.key:
                 raise RuntimeError(
-                    "401 — ingen ROYAL_MCP_API_KEY. Lav nøglen i wp-admin → Royal MCP → "
-                    "Settings og sæt den som miljøvariabel eller i ~/.royal_mcp_key."
+                    "401 — ingen nøgle fundet. Læg den i .env som ROYAL_MCP_TOKEN (eller "
+                    "ROYAL_MCP_API_KEY), eller i ~/.royal_mcp_key. Nøglen laves i wp-admin → "
+                    "Royal MCP → Settings."
                 ) from exc
             raise RuntimeError(f"HTTP {exc.code}: {body}") from exc
         except urllib.error.URLError as exc:
