@@ -18,6 +18,25 @@ Versionstyring for **steamgears.eu**-assets. WordPress-kernen og databasen ligge
 - `docs/projektstatus.md` — **daglig procentstatus** på hvert aktivt projekt + log over fremgang pr. modul. Skrives af `projektstatus.py` ud fra `projektstatus.json` (procenter beregnes, indtastes ikke) og kører automatisk dagligt via `.github/workflows/projektstatus.yml`.
 - [`AGENTS.md`](AGENTS.md) — arbejdsregler: hvert arbejdspas skal melde procentsats før → efter med grundlag, og hvert aktivt projekt har en daglig %-status.
 
+## Statusformat (kort)
+
+Hvert arbejdspas rapporteres i denne blok — både i commit og i svaret til ejeren. Den udfylder AGENTS.md §1–§2, men kort: **maks. 8 linjer, ingen prosa, ingen gentagelse af hvad der allerede står i filerne.**
+
+```
+Modul: <navn — afgrænsning>
+Før: <x> %  →  Efter: <y> %  (Δ <±z>)
+Grundlag: <regnestykke, fx 7,4 af 21,1 d>
+Klar: <færdigt og verificeret — hvad og hvordan>
+Blokeret: <hvad står stille og hvorfor — eller "intet">
+Næste: <én konkret handling, ikke en plan>
+Daglig status: <projekt> <x> % — <grundlag>
+```
+
+- Tallene kommer fra `projektstatus.py` (beregnet, ikke skrevet i hånden). `% før` skrives som `—` ved første måling.
+- **Blokeret arbejde tæller ikke som fremgang**, så `Efter` kan være lig `Før` uden at det er en fejl — det skal `Blokeret` så forklare.
+- Er der intet at rapportere på en linje, skrives `intet` frem for at udelade den.
+- Længere analyser hører i `docs/library/`, ikke i statusblokken.
+
 ## Sikkerhed
 - [`docs/library/sikkerhed-ai-engine-2026-11-01.md`](docs/library/sikkerhed-ai-engine-2026-11-01.md) — AI Engine er nu **3.8.9 og inaktiv**, og MCP-OAuth-ruterne svarer 404, så CVE-2026-110732 (uautentificeret administrator-overtagelse) er lukket. **Sagen er lukket 1/11 2026** (sidecachen er purget, så den gamle chatbot-markup er væk); tilbage er kun WAF-blokering af `changelog.txt`/`readme.txt`.
 - [`docs/library/sikkerhed-plugin-versioner-2026-11-01.md`](docs/library/sikkerhed-plugin-versioner-2026-11-01.md) — versionsstatus for alle 48 plugins pr. 23/10 2026: 16 er bagud, 3 af dem har en sikkerhedsrettelse der mangler.
