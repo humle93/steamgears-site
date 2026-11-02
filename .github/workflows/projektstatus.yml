@@ -13,6 +13,8 @@ on:
       - 'tools/test_mcp_rest.py'
       - 'tools/mcp_oauth.py'
       - 'tools/test_mcp_oauth.py'
+      - 'tools/load_campaign.py'
+      - 'docs/library/*koe-*.json'
       - '.github/workflows/projektstatus.yml'
   push:
     branches:
@@ -52,6 +54,9 @@ jobs:
 
       - name: Selftest af OAuth-forbindelsen (lokal authorization server)
         run: python3 tools/test_mcp_oauth.py
+
+      - name: Selftest af kampagne-indlæseren (13 fixtures, intet netværk)
+        run: python3 tools/load_campaign.py --selftest
 
       - name: Annotation hvis værnene fejlede
         if: failure()
