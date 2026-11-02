@@ -29,6 +29,47 @@ korrekt `401` med JSON-RPC-fejlen. `PUBLER_API_KEY` er stadig usat, så `publer`
 > application password over Basic. Det er **forkert** for MCP-ruten — målt på sitets eget endpoint, se
 > tabellen i afsnittet om `steamgears`. Den headless-venlige vej er en **API-nøgle sendt som Bearer**.
 
+## Måling 2/11 2026 (sen aften) — `mcp-adapter` installeret, Royal MCP-ruterne væk
+
+Ejeren installerede `mcp-adapter` fra `https://github.com/WordPress/mcp-adapter/releases/latest/download/mcp-adapter.zip`
+(`wp plugin install … --activate`) og bad om at få det verificeret. Målt fra denne container, neutral curl-UA,
+lige efter installationen:
+
+| Kald | Svar |
+| --- | --- |
+| `GET /wp-json/` | `200` — 42 namespaces; **`mcp` og `wp-abilities/v1` er der, `royal-mcp/v1` er ikke** |
+| `POST /wp-json/mcp/mcp-adapter-default-server` (`initialize`, intet credential) | `401` · `{"code":"rest_forbidden"}` |
+| `GET /wp-json/mcp/mcp-oauth-server` | `401` · `mcp_unauthorized` — uændret fra i formiddags, altså ikke adapterens |
+| `POST /mcp` og `POST /wp-json/royal-mcp/v1/mcp` | **`404` `rest_no_route`** |
+| `GET /.well-known/mcp/server-card.json` | **`404`** |
+| `GET /.well-known/agent-skills/index.json` | **`404`** |
+| `GET /.well-known/oauth-protected-resource` og `…/oauth-authorization-server` | **`301` → `https://steamgears.eu/`** |
+| `GET /.well-known/oauth-authorization-server/<vilkårlig sti>` | **`500`** — WordPress' fatale fejlside (»There has been a critical error on this website«) |
+| `GET /wp-json/wp-abilities/v1` | `200` (ruteindeks); `…/abilities` uden credential `401` |
+
+Hvad det betyder:
+
+- **Adapteren svarer og kræver credential.** Den registrerer præcis én HTTP-rute, `/wp-json/mcp/<server-id>`
+  (`includes/Transport/HttpTransport.php`), og svarer `401 rest_forbidden` uden login. Intet er anonymt.
+- **Adapteren har ingen OAuth og ingen `.well-known`-ruter.** Release-zip'en (0.7.1) indeholder hverken
+  `well-known` eller et token-endpoint; `mcp-oauth-server` fandtes også før installationen. Med kun adapteren
+  er credential-vejen WordPress' egen REST-auth — application password over Basic eller cookie + nonce —
+  ikke Bearer-OAuth.
+- **Adapteren arver ikke Royal MCP's værktøjer.** Den eksponerer Abilities API gennem tre meta-værktøjer
+  (`mcp-adapter/discover-abilities`, `get-ability-info`, `execute-ability`), og kun abilities med
+  `meta.public`/`meta.mcp.public` er synlige. Antallet af værktøjer er **ikke målt** — det kræver et credential
+  og et `tools/list`.
+- **Royal MCP's egne ruter svarer `404`**, og alle fire `.well-known`-dokumenter er væk eller ødelagte. Det kan
+  være en deaktivering, men det kan også være tabte rewrite-regler: plugin-aktivering flusher rewrite-regler,
+  og både `/mcp` og `.well-known`-stierne er rewrites. Afgørelsen ligger i to kommandoer på hosten:
+  `wp plugin list --status=active --fields=name,version,status` og derefter `wp rewrite flush --hard`.
+- **OAuth-flowet fra tidligere på dagen kan ikke længere discoveres.** `.well-known/oauth-authorization-server`
+  omdirigerer til forsiden, og den dybe metadata-sti giver `500`. En standardklient finder derfor ingen
+  autorisationsserver — det forklarer hvorfor callbacken på `127.0.0.1:8765` ikke kunne indløses.
+
+Indtil credential-spørgsmålet er afgjort, står `steamgears` i `.mcp.json` på en død rute (`/mcp` → `404`), og
+`wp_mcp_stdio.py --check` kan ikke give `ok: true`.
+
 ## Steamgears (`steamgears`)
 
 Endpoint: `https://steamgears.eu/mcp` (kanonisk, jf. sitets serverkort).
@@ -53,10 +94,16 @@ Sitet kører **Royal MCP 1.5.14** (Free) med **270 værktøjer** og tilbyder tre
 | `GET /wp-json/mcp/mcp-oauth-server` | `401` · `mcp_unauthorized` |
 | `GET /wp-json/wc/store/v1/products?per_page=1` | `200` — offentlig læsning virker uden credential |
 
-Offentligt uden credential: `.well-known/mcp/server-card.json`, `.well-known/agent-skills/index.json`,
-`.well-known/oauth-authorization-server`, `.well-known/oauth-protected-resource` og `wp-json`-ruteindekset.
+Offentligt uden credential (målt i formiddags 2/11): `.well-known/mcp/server-card.json`,
+`.well-known/agent-skills/index.json`, `.well-known/oauth-authorization-server`,
+`.well-known/oauth-protected-resource` og `wp-json`-ruteindekset.
 **Ingen værktøjskald er anonyme**, og der findes ingen `client_credentials`- eller device-code-grant —
-metadataet annoncerer kun `authorization_code` og `refresh_token`.
+metadataet annoncerede kun `authorization_code` og `refresh_token`.
+
+> **Rettet sent 2/11 2026:** de fire `.well-known`-dokumenter svarer ikke længere `200`. To er `404`, to
+> omdirigerer til forsiden, og den dybe OAuth-metadata-sti giver `500`. Det er målt efter at `mcp-adapter`
+> blev installeret — se afsnittet »Måling 2/11 2026 (sen aften)« ovenfor. Ruteindekset på `/wp-json/` svarer
+> stadig `200`.
 
 ### 1. Lav API-nøglen
 
@@ -130,6 +177,11 @@ kan samme forbindelse bruges gennem stdio-broen: `printf '%s\n' '{"jsonrpc":"2.0
 
 ### OAuth uden browser på maskinen (verificeret 2/11 2026)
 
+> **Forældet siden sent 2/11 2026:** trin 1 og 6 rammer ikke længere noget —
+> `.well-known/oauth-authorization-server` omdirigerer til forsiden (den dybe metadata-sti giver `500`), og
+> `/wp-json/royal-mcp/v1/mcp` svarer `404`. Flowet virkede, da det blev afprøvet om formiddagen, men kan ikke
+> gentages før discovery og ruten er tilbage (se »Måling 2/11 2026 (sen aften)«).
+
 Royal MCP kan også bruges fra et miljø uden browser, hvis callbacken kan lande et sted, agenten kan læse.
 Fremgangsmåden er afprøvet mod steamgears.eu og gav et Bearer-token på 24 timer med refresh-token:
 
@@ -160,6 +212,9 @@ Royal MCP foretrækker OAuth2 (`authorization_code` med PKCE S256, dynamisk klie
 ```bash
 claude mcp add --transport http steamgears-oauth https://steamgears.eu/mcp
 ```
+
+**Bemærk:** `https://steamgears.eu/mcp` svarer `404` siden sent 2/11 2026, så kommandoen virker ikke, før ruten
+eller en afløser er på plads.
 
 Kør derefter `claude` og vælg `/mcp` → *Authenticate*. Claude Code registrerer klienten selv og fornyer
 tokens automatisk, uden miljøvariabel. Vælg OAuth hvis nøglen skal kunne rotere uden manuelt arbejde; vælg
