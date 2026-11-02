@@ -55,7 +55,7 @@
     {
       "id": "plugin",
       "name": "Steamgears Autopilot — plugin",
-      "next": "P0.6 (kræver Command Center), derefter P1.6 kvalitetsgate og P1.2 \"remind me instead\"",
+      "next": "P0.6 (kræver Command Center), derefter P1.2 \"remind me instead\" og P1.4 evergreen-recycling",
       "blocked_by": "Intet for P0. P1.5 kræver Pinterest-token (401) og Meta-review; P0.6 kræver Command Center",
       "modules": [
         {
@@ -69,10 +69,10 @@
         {
           "id": "p1",
           "name": "P1 — paritet",
-          "done": 2.5,
+          "done": 3.5,
           "total": 11.0,
           "unit": "d",
-          "note": "P1.1 pre-flight pr. kanal 1,0 d (7.20.0) + P1.3 blackout-kalender 0,5 d (includes/blackout.php, 7.21.0) + P1.7 helsides SEO/GEO/AEO-audit 1,0 d (7.19.0); 3 af 7 punkter. P1.5 er eksternt blokeret (Pinterest-token)"
+          "note": "P1.1 pre-flight pr. kanal 1,0 d (7.20.0) + P1.3 blackout-kalender 0,5 d (7.21.0) + P1.6 quality gate 1,0 d (includes/quality.php, 7.22.0) + P1.7 helsides SEO/GEO/AEO-audit 1,0 d (7.19.0); 4 af 7 punkter. P1.5 er eksternt blokeret (Pinterest-token)"
         },
         {
           "id": "p2",
@@ -358,6 +358,15 @@
       "after": 24.8,
       "delta": 2.1,
       "basis": "5,95 af 24 d (P0 3,2/4 · P1 2,5/11 · P2 0/7 · P3 0,25/2)"
+    },
+    {
+      "date": "2026-11-02",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 24.8,
+      "after": 29.0,
+      "delta": 4.2,
+      "basis": "6,95 af 24 d (P0 3,2/4 · P1 3,5/11 · P2 0/7 · P3 0,25/2)"
     }
   ]
 }

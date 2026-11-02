@@ -31,7 +31,7 @@ class SGAP_Setup {
     const TABS = [
         'basics' => ['Basics', 'admin-home', ['autopilot_enabled', 'full_auto_enabled', 'channels', 'posts_per_day']],
         'ai' => ['AI & images', 'superhero-alt', ['ai_provider', 'ai_api_key', 'ai_model', 'ai_base_url', 'content_language', 'image_model', 'image_api_key', 'serpapi_key']],
-        'publishing' => ['Publishing', 'megaphone', ['publish_mode', 'publer_api_key', 'publer_workspace_id', 'publer_pinterest_board']],
+        'publishing' => ['Publishing', 'megaphone', ['publish_mode', 'publer_api_key', 'publer_workspace_id', 'publer_pinterest_board', 'quality_gate', 'banned_words']],
         'schedule' => ['Schedule & limits', 'clock', ['quiet_start', 'quiet_end', 'blackout_ranges', 'daily_cap', 'batch_size', 'repost_cooldown_days']],
         'shop' => ['Shop & feeds', 'cart', ['merchant_feed_secret', 'etsy_shop_id', 'etsy_oauth_token', 'etsy_refresh_token', 'etsy_shipping_profile_id', 'etsy_return_policy_id']],
         'automation' => ['Automation', 'update-alt', ['auto_images', 'auto_seo', 'articles_per_week', 'auto_publish_articles', 'weekly_report', 'rescue_hosts']],

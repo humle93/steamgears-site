@@ -315,23 +315,24 @@ class SGAP_Settings {
         'etsy_oauth_token','etsy_refresh_token','merchant_feed_secret'
     ];
     /** Multi-line text settings, shown as a textarea. */
-    const TEXTAREA_KEYS = ['blackout_ranges'];
+    const TEXTAREA_KEYS = ['blackout_ranges', 'banned_words'];
     const TEXT_KEYS = [
         'publer_workspace_id','publer_pinterest_board','channels','ai_model','ai_base_url','image_model','content_language','rescue_hosts',
         'telegram_chat_id','email_test_recipient','youtube_channel_id','reddit_username',
         'reddit_subreddit','etsy_shop_id','etsy_shipping_profile_id','etsy_return_policy_id','ai_mode','alert_email',
-        'blackout_ranges'
+        'blackout_ranges','banned_words'
     ];
     /** Settings with a fixed list of values, shown as a select. */
     const CHOICE_KEYS = [
         'publish_mode' => ['rss' => 'RSS feeds (Publer Professional)', 'api' => 'Publer API (Publer Business)'],
         'ai_provider' => ['anthropic' => 'Anthropic (Claude)', 'aimlapi' => 'AIMLAPI (Claude and 300+ other models)', 'openai_compatible' => 'Other OpenAI-compatible API (OpenAI, OpenRouter, ...)'],
+        'quality_gate' => ['block' => 'Block — keep the post out of the queue until it is fixed', 'warn' => 'Warn — queue it and report what is wrong', 'off' => 'Off — do not check'],
         'alert_mode' => ['immediate' => 'Immediate — one mail per failed post, plus one when the queue runs dry', 'daily' => 'Daily digest — one mail a day from the self-check', 'off' => 'Off — the dashboard still shows the problems']
     ];
 
     /** Shown in the settings page. Keys not listed here stay registered for older data but are unused. */
     const SECTIONS = [
-        'General' => ['autopilot_enabled','full_auto_enabled','daily_cap','batch_size','quiet_start','quiet_end','blackout_ranges'],
+        'General' => ['autopilot_enabled','full_auto_enabled','daily_cap','batch_size','quiet_start','quiet_end','blackout_ranges','quality_gate','banned_words'],
         'Publer' => ['publish_mode','publer_api_key','publer_workspace_id','publer_pinterest_board','channels'],
         'AI content' => ['ai_provider','ai_api_key','ai_model','ai_base_url','posts_per_day','content_language','image_model','image_api_key','serpapi_key'],
         'Economics' => ['labor_rate','monthly_budget','target_roi','winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max'],
@@ -362,6 +363,8 @@ class SGAP_Settings {
         'quiet_start' => 'No posts are released from this hour …',
         'quiet_end' => '… until this hour (site time).',
         'blackout_ranges' => 'Days where nothing is released, one range per line: 2026-12-24..2026-12-26 Christmas. Queued posts that land in a range are moved to the next free day at the same time of day — not dropped, and not saved up for one big day afterwards.',
+        'quality_gate' => 'Checked before a post joins the queue: banned words, dead links, a photo without alt text, and a caption that already went out on the same channel. Block: the post is refused with the reason, and you can queue it anyway from the tool that refused it. Warn: it joins the queue and the problems are reported.',
+        'banned_words' => 'Words that keep a post out of the queue, one per line or comma-separated. Whole words only, so “sale” does not catch “wholesale”; hashtags count.',
         'repost_cooldown_days' => 'A page is not promoted again within this many days.',
         'auto_images' => 'Instagram and Pinterest posts without a photo get the page\'s featured image or an AI photo (AIMLAPI, about $0.045 each).',
         'auto_seo' => 'New posts and products without a Rank Math description get a focus keyword, meta title and description from the AI when published.',
@@ -713,6 +716,16 @@ class SGAP_Queue {
             'fingerprint' => $fingerprint
         ];
         $row['utm_url'] = SGAP_UTM::build($row);
+        // The quality gate sits here and not in the callers, so a new way into the
+        // queue cannot forget it. `force` queues the post anyway and reports the
+        // problems as warnings: a deliberate repost is the owner's call, not ours.
+        $gate = SGAP_Quality::check($row, !empty($item['force']));
+        if (!$gate['ok']) {
+            return new WP_Error('sgap_quality', SGAP_Quality::message(SGAP_Quality::blocking($gate['problems'])), [
+                'status' => 422,
+                'problems' => $gate['problems']
+            ]);
+        }
         if (!$wpdb->insert(self::table(), $row)) {
             return new WP_Error('sgap_db', 'Could not save.', ['status' => 500]);
         }
@@ -722,7 +735,11 @@ class SGAP_Queue {
         // no Pinterest board. Warnings only — the photo can still arrive later (featured
         // image or an AI photo), so nothing is refused at this point.
         $warnings = array_column(SGAP_Preflight::problems($channel, $row), 'message');
-        return ['id' => $id, 'tracking_url' => SGAP_Tracking::url($id), 'utm_url' => $row['utm_url'], 'warnings' => $warnings, 'scheduled_at' => $scheduled];
+        // A forced post carries the gate's findings with it, so "queued anyway" is never silent.
+        foreach ($gate['problems'] as $problem) {
+            $warnings[] = (string) ($problem['message'] ?? '');
+        }
+        return ['id' => $id, 'tracking_url' => SGAP_Tracking::url($id), 'utm_url' => $row['utm_url'], 'warnings' => array_values(array_filter($warnings)), 'scheduled_at' => $scheduled];
     }
 
     /** True when Full Auto has blocked this channel/angle/type/format combination. */
@@ -957,7 +974,8 @@ class SGAP_REST {
             'body' => self::text($r->get_param('body')),
             'image_url' => $r->get_param('image_url'),
             'status' => $r->get_param('status'),
-            'scheduled_at' => self::datetime($r->get_param('scheduled_at'))
+            'scheduled_at' => self::datetime($r->get_param('scheduled_at')),
+            'force' => (bool) $r->get_param('force')
         ]);
         if (is_wp_error($result)) {
             return $result;

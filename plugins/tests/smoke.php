@@ -26,7 +26,7 @@ function esc_url_raw($u,$p=null){return preg_match('#^https?://#',$u)?$u:'';} fu
 function wp_parse_args($a,$d){return array_merge($d,$a);} function add_query_arg($a,$u){return $u.(str_contains($u,'?')?'&':'?').http_build_query($a,'','&',PHP_QUERY_RFC3986);}
 function current_time($t){return '2026-10-30 12:00:00';} function wp_date($f,$t=null){return date($f,$t??time());}
 function current_user_can($c){return true;} function get_current_user_id(){return 1;} function get_site_transient($k){return false;} function set_site_transient(...$a){} function wp_remote_get(...$a){return new WP_Error('offline','offline');} function wp_nonce_field_stub(){} function delete_option($k){unset($GLOBALS["opts"][$k]);} function wp_json_encode($v){return json_encode($v);} function is_wp_error($v){return $v instanceof WP_Error;}
-function wp_strip_all_tags($s){return strip_tags((string)$s);} function attachment_url_to_postid($u){return (int)($GLOBALS['attachment_for'][$u]??0);} function wp_get_attachment_metadata($id){return $GLOBALS['attachment_meta'][$id]??[];} function get_post_mime_type($id){return (string)($GLOBALS['attachment_mime'][$id]??'');} function wp_die($m=''){throw new RuntimeException((string)$m);} function check_admin_referer($a=''){return true;}
+function wp_strip_all_tags($s){return strip_tags((string)$s);} function attachment_url_to_postid($u){return (int)($GLOBALS['attachment_for'][$u]??0);} function get_post_meta($id,$k='',$s=false){return $GLOBALS['postmeta'][$id][$k]??'';} function url_to_postid($u){return (int)($GLOBALS['postid_for'][$u]??0);} function get_post_status($id){return (string)($GLOBALS['poststatus'][$id]??'publish');} function wp_get_attachment_metadata($id){return $GLOBALS['attachment_meta'][$id]??[];} function get_post_mime_type($id){return (string)($GLOBALS['attachment_mime'][$id]??'');} function wp_die($m=''){throw new RuntimeException((string)$m);} function check_admin_referer($a=''){return true;}
 class WP_Error{ function __construct(public $code,public $msg,public $data=[]){} function get_error_message(){return $this->msg;} }
 class WP_REST_Response{ function __construct(public $data,public $status=200){} }
 class WP_REST_Request implements ArrayAccess{ function __construct(public array $p){} function get_param($k){return $this->p[$k]??null;}
@@ -304,6 +304,66 @@ ob_start(); do_action('page_sgap-queue'); $qhtml=ob_get_clean();
 check('blackout: the queue page says why nothing is going out', str_contains($qhtml,'Blackout'));
 $opts['sgap_blackout_ranges']='';
 check('blackout: no ranges means no work at all', SGAP_Blackout::reschedule()===[] && SGAP_Blackout::active()===null);
+// ---- quality gate before queueing (P1.6) ----
+$opts['sgap_quality_gate']='block'; $opts['sgap_banned_words']="scam\n#giveaway, cheap junk";
+unset($GLOBALS['rows'],$GLOBALS['postid_for'],$GLOBALS['poststatus'],$GLOBALS['postmeta'],$GLOBALS['attachment_for']);
+check('quality: words parsed from lines and commas', SGAP_Quality::words()===['scam','#giveaway','cheap junk']);
+check('quality: links, punctuation and case are normalised away', SGAP_Quality::normalize('Hello,   World! https://x.se/a')==='hello world');
+check('quality: a caption is 100 % itself', SGAP_Quality::similarity('Titanium gears for the daily carry','Titanium gears for the daily carry')===1.0);
+check('quality: unrelated captions score low', SGAP_Quality::similarity('Titanium gears for the daily carry','Autumn notes on leather care and wax')<0.2);
+check('quality: a banned word fires on whole words only', SGAP_Quality::banned('This is a scam')===['scam'] && SGAP_Quality::banned('Garlic scampi tonight')===[]);
+check('quality: a hashtag counts as the word', SGAP_Quality::banned('Join the #giveaway now')===['#giveaway']);
+check('quality: a two-word phrase is matched as one term', SGAP_Quality::banned('Only cheap junk here')===['cheap junk']);
+check('quality: links are found without the sentence punctuation', SGAP_Quality::links('Se https://steamgears.eu/gear/ og https://x.se/a?b=1.')===['https://steamgears.eu/gear/','https://x.se/a?b=1']);
+check('quality: a placeholder host is blocked', (SGAP_Quality::link_problem('https://example.com/gear')['severity']??'')==='block');
+check('quality: a link without a domain is blocked', (SGAP_Quality::link_problem('https:///gear')['severity']??'')==='block');
+check('quality: http is a warning, not a block', (SGAP_Quality::link_problem('http://steamgears.eu/gear/')['severity']??'')==='warn');
+$GLOBALS['postid_for']['https://steamgears.eu/gear/']=7; $GLOBALS['poststatus'][7]='publish';
+check('quality: a link to a live page passes', SGAP_Quality::link_problem('https://steamgears.eu/gear/')===null);
+$GLOBALS['poststatus'][7]='draft';
+check('quality: a link to a draft is blocked', (SGAP_Quality::link_problem('https://steamgears.eu/gear/')['severity']??'')==='block');
+check('quality: an archive or a search is not a dead link', SGAP_Quality::link_problem('https://steamgears.eu/category/guides/')===null && SGAP_Quality::link_problem('https://steamgears.eu/?s=gear')===null);
+check('quality: an internal address nobody can open is a warning', (SGAP_Quality::link_problem('https://steamgears.eu/no-such-page/')['severity']??'')==='warn');
+check('quality: an external host is not probed', SGAP_Quality::link_problem('https://www.pinterest.com/pin/1')===null);
+$GLOBALS['attachment_for']['https://steamgears.eu/i.jpg']=55;
+check('quality: a photo without alt text is reported', SGAP_Quality::alt_problem('https://steamgears.eu/i.jpg')!=='');
+$GLOBALS['postmeta'][55]['_wp_attachment_image_alt']='Brass gear close-up';
+check('quality: a described photo passes', SGAP_Quality::alt_problem('https://steamgears.eu/i.jpg')==='');
+check('quality: an image outside the media library cannot be judged', SGAP_Quality::alt_problem('https://cdn.example.org/x.jpg')==='');
+$long='Brass and titanium gears for the daily carry, hand finished in the workshop and shipped in a linen pouch';
+$GLOBALS['rows']=[['id'=>9,'title'=>'Gears','body'=>$long.' today','scheduled_at'=>'2026-11-03 09:00:00']];
+check('quality: a repeated caption is caught', (SGAP_Quality::duplicate('instagram',$long)['id']??0)===9);
+check('quality: the duplicate is compared within one channel', str_contains(implode("\n",$wpdb->log),'channel = '));
+check('quality: short captions are not called duplicates', SGAP_Quality::duplicate('instagram','New drop')===null);
+$GLOBALS['rows']=[];
+$row=['channel'=>'instagram','title'=>'Gears','body'=>'Buy our scam gears at https://steamgears.eu/gear/','destination_url'=>'https://steamgears.eu/gear/'];
+$gate=SGAP_Quality::check($row);
+check('quality: a banned word blocks the post', $gate['ok']===false && in_array('banned_word',array_column($gate['problems'],'code'),true));
+check('quality: the blocking problems are the refusal', count(SGAP_Quality::blocking($gate['problems']))>=1 && SGAP_Quality::message($gate['problems'])!=='');
+check('quality: force queues it anyway and keeps the findings', SGAP_Quality::check($row,true)['ok']===true && SGAP_Quality::check($row,true)['problems']!==[]);
+$opts['sgap_quality_gate']='warn';
+check('quality: warn mode reports without refusing', SGAP_Quality::check($row)['ok']===true && SGAP_Quality::check($row)['problems']!==[]);
+$opts['sgap_quality_gate']='off';
+check('quality: off mode says nothing at all', SGAP_Quality::check($row)['problems']===[]);
+$opts['sgap_quality_gate']='block';
+$wpdb->next=null;
+$refused=SGAP_Queue::add(['channel'=>'facebook','title'=>'Deal','body'=>'This is a scam, click now','destination_url'=>'https://steamgears.eu/gear/']);
+check('quality: the queue refuses a post the gate blocks', is_wp_error($refused) && $refused->code==='sgap_quality');
+check('quality: the refusal says what is wrong', str_contains($refused->get_error_message(),'scam'));
+$forced=SGAP_Queue::add(['channel'=>'facebook','title'=>'Deal','body'=>'This is a scam, click now','destination_url'=>'https://steamgears.eu/gear/','force'=>true]);
+check('quality: force puts it in the queue with the findings as warnings', is_array($forced) && str_contains(implode(' ',$forced['warnings']??[]),'scam'));
+$GLOBALS['poststatus'][7]='publish';
+$clean=SGAP_Queue::add(['channel'=>'facebook','title'=>'New gears','body'=>'Fresh titanium gears in the shop','destination_url'=>'https://steamgears.eu/gear/']);
+check('quality: a clean post still goes through', is_array($clean) && ($clean['warnings']??[])===[]);
+check('quality: the mode is one of three values', ($settings['sgap_quality_gate']['sanitize_callback']??'')('nonsense')==='block');
+check('quality: the list is multi-line on the settings page', str_contains((string)($settings['sgap_banned_words']['sanitize_callback']??''),'sanitize_textarea_field'));
+ob_start(); do_action('page_sgap-settings'); $qh=ob_get_clean();
+check('quality: the settings page has the list and the mode', str_contains($qh,'name="sgap_banned_words"') && str_contains($qh,'name="sgap_quality_gate"'));
+$qstatus=SGAP_Abilities::status();
+check('quality: status says how the gate is set', ($qstatus['quality_gate']['mode']??'')==='block' && ($qstatus['quality_gate']['banned_words']??0)===3);
+$dry=SGAP_Abilities::check_post(['channel'=>'facebook','title'=>'Deal','text'=>'Buy our scam gears','destination_url'=>'https://steamgears.eu/gear/']);
+check('quality: the dry run covers both gates', isset($dry['quality']['problems']) && $dry['ok']===false && count($dry['quality']['problems'])>=1);
+$opts['sgap_banned_words']=''; $GLOBALS['postid_for']=[]; $GLOBALS['poststatus']=[]; $GLOBALS['postmeta']=[]; $GLOBALS['attachment_for']=[];
 $wpdb->row=null;
 $wpdb->next=null;
 exit(empty($GLOBALS['fail'])?0:1);

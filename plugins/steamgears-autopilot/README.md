@@ -123,6 +123,36 @@ quiet hours and the pre-flight checks still apply on the free day the post lands
 than 60 days ahead of everything blocked is placed anyway, so a badly typed never-ending range cannot keep
 a post out of the queue forever.
 
+## Quality gate before queueing (7.22)
+
+Every post enters the queue through one function, so the gate sits there: a post that a person would have
+stopped gets stopped while it is still a draft, not after Instagram has it. Settings → *Publishing* →
+**Quality gate** and **Banned words**.
+
+It checks four things:
+
+- **Banned words.** Your own list, one per line or comma-separated. Whole words only, so `sale` does not fire
+  on `wholesale` — but a hashtag counts, because `#sale` is the same word in a different dress.
+- **Dead links.** Internal links are resolved against WordPress itself, so a link to a slug that no longer
+  exists, or to a post that is still a draft, is caught before it ships. Archives, feeds, search and the front
+  page are recognised and left alone. External hosts are **not** fetched — see the limitation below.
+- **Missing alt text.** A featured image with an empty *Alternative text* field is reported, so screen readers
+  and image search are not left with nothing.
+- **Near-duplicate captions.** The caption is compared with the last 40 posts on the same channel; 85 % word
+  overlap or more is the same caption in other words, and the message names the post it repeats.
+
+Three modes: **Block** (default) refuses the post and says why, **Warn** queues it and reports the problems,
+**Off** does not look. A refusal is not a dead end: pass `force`, or press *queue anyway* where the plugin
+shows the refusal, and the post is queued with its findings returned as warnings — a deliberate repost is
+your call, not the plugin's. Captions shorter than eight words are never called duplicates: "New drop" and
+"New drop!" are similar without being a repeat worth blocking.
+
+**The limitation, stated plainly:** external links are not probed. A HEAD request per link would put an
+outbound HTTP dependency in the queueing path — slow, rate-limited and wrong the one time the far site is
+briefly down. So the gate catches what it can prove without the network: placeholders (`example.com`),
+links with no domain, `http` instead of `https`, and internal addresses that do not resolve. A Pinterest pin
+that 404s is still only found by opening it.
+
 ## Updates
 
 From 7.6 the plugin updates itself from GitHub (`humle93/steamgears-site`, branch `main`):
