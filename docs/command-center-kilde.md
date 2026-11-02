@@ -36,9 +36,9 @@ Målt 2/11 2026.
   `_GAMLE_COMMAND_CENTER_FILER_SLET_MIG` er flyttet til skraldespanden. Ét pejledokument i Drive-mappen
   `Gemini` peger på dette dokument og på GitHub-repoet. Opret ikke et nyt repo ud fra de gamle filer —
   det ville genopføre v7.9 og sprede et forældet `.env`-setup.
-- `Velocity_Command_Center_v2.1_Complete_Bundle.md` og `Velocity_Trading_Motor_Plan.md` er **beholdt**:
-  det er et andet produkt (FastAPI-backend + Android-app under `com.velocity.commandcenter`), ikke
-  Steamgears Command Center.
+- `Velocity_Command_Center_v2.1_Complete_Bundle.md` og `Velocity_Trading_Motor_Plan.md` er **beholdt**, men
+  Velocity-bundlet ligger nu i [`library/arkiv/`](library/arkiv/): det er et andet produkt (FastAPI-backend +
+  Android-app under `com.velocity.commandcenter`), ikke Steamgears Command Center.
 
 ## Åbne punkter (fra statusdokumentet 31/10)
 
@@ -50,6 +50,8 @@ Målt 2/11 2026.
 ## Referencer
 
 - [`library/command-center-opdatering-2026-11-02.md`](library/command-center-opdatering-2026-11-02.md) — sådan opdateres installationen på Ultra.cc til 7.14 med bruger-login (første besøg opretter brugeren på `/setup`; `APP_TOKEN` findes ikke siden 7.11).
+- [`library/command-center/`](library/command-center/) — CC's egen dokumentation (roadmap, arkitektur, manual,
+  installationsdokument og skærmbilleder) kopieret fra samme commit.
 - [Statusdokument i Drive](https://docs.google.com/document/d/1Uk4mRpWRcaOyEYi7WaYEXVSTjx6RT7TGSuDjFpXSJRc/edit) — »LÆS MIG – Command Center status 31-10«.
 - [`humle93/command-center`](https://github.com/humle93/command-center) — kilden til Command Center.
 - [`README.md`](../README.md) — dette repos scope.

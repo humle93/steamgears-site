@@ -21,8 +21,9 @@ ind i dokumentindekset, så de ikke bliver forældreløse.
 
 | Sti | Indhold |
 | --- | --- |
-| `docs/` | Seks hoveddokumenter: roadmap, seo, projektstatus, mcp-auth, adsense-setup, competitors, command-center-kilde |
-| `docs/library/` | Daterede audits, research, specs og driftslogger — historik, ikke planer |
+| `docs/` | Syv hoveddokumenter: roadmap, seo, projektstatus, mcp-auth, adsense-setup, competitors, command-center-kilde — plus `agent-profil.md` til botter |
+| `docs/library/` | Daterede audits, research, specs og driftslogger — historik, ikke planer. Kun det der stadig gælder |
+| `docs/library/arkiv/` | Afløst materiale med afløseren noteret i indekset — tæller ikke som status |
 | `docs/daily-briefs/` | Én brief pr. dag (`AUTO:PROJEKTSTATUS` skrives af CI) |
 | `docs/site-checks/` | Rutine-tjek af den live side: PageSpeed, GSC, meta, alt-tekster |
 | `reports/` | PDF-projektrapport pr. projekt: status med regnestykket, roadmap-indeks, udviklingsvej og hvad der virker/ikke virker |
@@ -44,8 +45,10 @@ ind i dokumentindekset, så de ikke bliver forældreløse.
   `GEMINI_API_KEY`, `WP_USER` og `WP_APP_PASS` som repo-secrets.
 - `.github/workflows/plugin-ci.yml` — lint + smoke/integration for pluginnet.
 
-Lokalt miljø: `cp .env.example .env` og udfyld de fire nøgler, koden læser (`GEMINI_API_KEY`,
-`WP_USER`, `WP_APP_PASS`, `PINTEREST_ACCESS_TOKEN`). `.env` er gitignored; skabelonen er det ikke.
-Til CI lægges de samme navne som repo-secrets.
+Lokalt miljø: `cp .env.example .env` og udfyld nøglerne, koden læser — `GEMINI_API_KEY`, `WP_USER`,
+`WP_APP_PASS`, `PINTEREST_ACCESS_TOKEN`, `ROYAL_MCP_TOKEN` (MCP mod sitet) og `PUBLER_API_KEY`.
+`.env` er gitignored; skabelonen er det ikke, og den indeholder kun navne. Til CI lægges de samme navne som
+repo-secrets. Hvilke credentials der faktisk virker, står i [`docs/agent-profil.md`](docs/agent-profil.md) og
+[`docs/mcp-auth.md`](docs/mcp-auth.md).
 
 Ændringer på selve sitet sker over MCP, ikke herfra. Repoet dokumenterer og forbereder dem.
