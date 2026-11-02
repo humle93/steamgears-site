@@ -87,6 +87,30 @@ Derefter `claude mcp list` — `steamgears` skal vise ✓ Connected i stedet for
 | 403 fra sikkerhedsplugin | app passwords blokeret | whitelist i Solid Security/Wordfence, eller brug OAuth |
 | `initialize` svarer 200, men ingen værktøjer | brugeren mangler rettigheder | brug en administratorkonto |
 
+### OAuth uden browser på maskinen (verificeret 2/11 2026)
+
+Royal MCP kan også bruges fra et miljø uden browser, hvis callbacken kan lande et sted, agenten kan læse.
+Fremgangsmåden er afprøvet mod steamgears.eu og gav et Bearer-token på 24 timer med refresh-token:
+
+1. **Læs metadata** på `https://steamgears.eu/.well-known/oauth-authorization-server`. Serveren tilbyder kun
+   `authorization_code` med PKCE S256 — der findes **intet** device-code-flow — men dynamisk klientregistrering
+   (`registration_endpoint`) er understøttet.
+2. **Registrér en klient** med `POST https://steamgears.eu/register` og en `redirect_uris`, der peger på en
+   adresse agenten selv kan læse. Svar `201` med `client_id` (`rmcp_…`).
+3. **Start en callback-modtager** på den port, der er eksponeret til ejerens browser, og verificér at den svarer.
+4. **Send ejeren til** `https://steamgears.eu/authorize?response_type=code&client_id=…&redirect_uri=…&scope=mcp:full&code_challenge=…&code_challenge_method=S256&state=…`.
+   Uden session svarer ruten `302` til `wp-login.php` — det er forventet og betyder, at klient og redirect er
+   accepteret.
+5. **Veksl koden** på `POST https://steamgears.eu/token` som form-data med `grant_type=authorization_code`,
+   `code`, `redirect_uri`, `client_id` og `code_verifier`. Svar `200` med `access_token`, `expires_in` og
+   `refresh_token`.
+6. **Kald MCP** på `https://steamgears.eu/wp-json/royal-mcp/v1/mcp` med `Authorization: Bearer <token>`,
+   `Accept: application/json, text/event-stream` og `Mcp-Session-Id` fra `initialize`-svaret.
+
+To fælder undervejs: `code_verifier` skal være den oprindelige streng, ikke challenge-værdien, og
+`redirect_uri` skal være byte-identisk med den registrerede. Token og kode hører i en fil uden for repoet med
+`chmod 600` — aldrig i chat, log eller commit.
+
 ### Alternativ: OAuth
 
 Royal MCP foretrækker OAuth2 (`authorization_code` med PKCE S256, dynamisk klientregistrering,

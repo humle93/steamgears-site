@@ -28,10 +28,10 @@
         {
           "id": "s2",
           "name": "S2 — struktur og SEO",
-          "done": 3.0,
+          "done": 3.25,
           "total": 6,
           "unit": "d",
-          "note": "S2.5 meta-runde 1,0 + S2.1 to hubs og fem undersider 1,6 + S2.6 hub-links 0,4; navigation, H1 og /inspiration/ mangler"
+          "note": "S2.5 meta-runde 1,0 + S2.1 to hubs og fem undersider 1,6 + S2.6 hub-links 0,4 + S2.4 H1-fix 0,25 (én H1 på forsiden, verificeret i renderet HTML 2/11); navigation og /inspiration/ mangler"
         },
         {
           "id": "s3",
@@ -292,6 +292,15 @@
       "after": 15.0,
       "delta": 4.3,
       "basis": "3,45 af 23 d (P0 3,2/4 · P1 0/10 · P2 0/7 · P3 0,25/2)"
+    },
+    {
+      "date": "2026-11-02",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 43.8,
+      "after": 45.0,
+      "delta": 1.2,
+      "basis": "9,5 af 21,1 d (S0 1,9/2,6 · S1 1,7/4,5 · S2 3,25/6 · S3 1,25/3 · S4 1,4/5)"
     }
   ]
 }
