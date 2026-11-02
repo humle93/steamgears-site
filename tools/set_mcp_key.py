@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 """set_mcp_key.py — læg en ny Royal MCP-nøgle i `.env` uden at den rammer historik eller chat.
 
-Kør:  python3 tools/set_mcp_key.py
+To veje, begge uden at nøglen vises:
 
-Nøglen læses med `getpass`, så den står hverken i shell-historikken eller i terminalens
-rulletekst, og scriptet printer kun længden — aldrig værdien. Den gamle
-`ROYAL_MCP_TOKEN`/`ROYAL_MCP_API_KEY` fjernes, så broen ikke kan bruge en forældet linje
-(`wp_mcp_stdio.read_key` tager den første match i filen). Til sidst køres broens eget
-`--check`, så svaret på om nøglen virker kommer med det samme.
+    python3 tools/set_mcp_key.py                    # spørger i en terminal (getpass, ingen echo)
+    python3 tools/set_mcp_key.py --from-file FILE   # læser en fil, fx mcp_key.txt fra editor-panelet
+
+Nøglen læses, den gamle `ROYAL_MCP_TOKEN`/`ROYAL_MCP_API_KEY` fjernes, så broen ikke kan bruge
+en forældet linje (`wp_mcp_stdio.read_key` tager den første match i filen), `.env` får mode 600,
+og broens eget `--check` køres til sidst. Scriptet printer kun nøglens **længde**, aldrig værdien,
+og sletter kildefilen med `--from-file`, så den ikke bliver liggende.
 """
 
 from __future__ import annotations
@@ -20,12 +22,21 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 # `SGAP_ENV_FILE` og `SGAP_MCP_KEY` findes kun for at kunne afprøve omskrivningen på en
-# fil uden for repoet; den normale vej er prompten nedenfor.
+# fil uden for repoet; den normale vej er prompten eller `--from-file`.
 ENV = Path(os.environ.get("SGAP_ENV_FILE") or ROOT / ".env")
 NAMES = ("ROYAL_MCP_TOKEN", "ROYAL_MCP_API_KEY")
 
 
 def ask_key() -> str:
+    if len(sys.argv) > 2 and sys.argv[1] == "--from-file":
+        source = Path(sys.argv[2])
+        if not source.exists():
+            print(f"Filen {source} findes ikke — .env er uaendret.")
+            raise SystemExit(1)
+        key = source.read_text(encoding="utf-8", errors="replace").strip()
+        source.unlink(missing_ok=True)
+        print(f"Laeste {source.name} og slettede den igen.")
+        return key
     if os.environ.get("SGAP_MCP_KEY"):
         return os.environ["SGAP_MCP_KEY"]
     try:
@@ -37,11 +48,11 @@ def ask_key() -> str:
 
 def main() -> int:
     key = ask_key().strip().strip("'\"")
+    if key.startswith(tuple(name + "=" for name in NAMES)):
+        key = key.split("=", 1)[1].strip().strip("'\"")
     if not key:
         print("Ingen noegle indtastet — .env er uaendret.")
         return 1
-    if any(key.startswith(name + "=") for name in NAMES):
-        key = key.split("=", 1)[1].strip().strip("'\"")
     if len(key) < 16:
         print(f"Noeglen er kun {len(key)} tegn — afbrudt, .env er uaendret.")
         return 1

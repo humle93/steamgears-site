@@ -28,6 +28,10 @@ korrekt `401` med JSON-RPC-fejlen. `PUBLER_API_KEY` er stadig usat, så `publer`
 > (ingen echo, ingen shell-historik), den gamle `ROYAL_MCP_TOKEN`/`ROYAL_MCP_API_KEY` fjernes så broen ikke kan
 > bruge en forældet linje, filen får mode 600, og broens `--check` køres bagefter. Scriptet printer kun nøglens
 > **længde**, aldrig værdien — og afbryder uden at røre `.env`, hvis input er tomt.
+>
+> **Uden terminal:** `python3 tools/set_mcp_key.py --from-file mcp_key.txt`. Læg nøglen i den gitignored fil
+> `mcp_key.txt` i roden (fx via editor-panelet, som ikke skjuler dotfiler), kør scriptet, og det sletter selv
+> kildefilen igen. Det er vejen når `.env` er skjult i fillister og terminalen ikke er tilgængelig.
 
 **Rettelse 2/11 2026:** denne fil påstod tidligere at Royal MCP kunne bruges med et WordPress
 > application password over Basic. Det er **forkert** for MCP-ruten — målt på sitets eget endpoint, se
