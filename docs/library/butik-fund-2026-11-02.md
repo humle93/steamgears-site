@@ -24,9 +24,11 @@ vælge og ved ikke, hvad der bliver sendt.
 
 ## Hvorfor den ikke er rettet automatisk
 
-MCP-fladen har værktøjerne (`wc_set_product_attributes`, `wc_create_variation`,
-`wc_batch_update_variations`), så variationerne kan teknisk oprettes på få minutter. Det er ikke
-gjort, fordi:
+Værktøjerne findes (`wc_set_product_attributes`, `wc_create_variation`, `wc_batch_update_variations`),
+men **de virker ikke på et `simple` produkt**: WooCommerce afviser med `Product 953 is not a variable
+product`, og MCP kan ikke skifte produkttypen. Se `tee-varianter-spec-2026-11-02.md` for de fem
+forsøg og for den færdige spec. Uanset det tekniske er den egentlige blokering:
+
 
 1. **Ingen POD-connector er aktiv.** `wp_get_plugins` viser 38 plugins; den eneste Printify-relaterede
    er *Printify Shipping Method 3.2*. Der er ingen Printify-fulfilment-plugin, som kan mappe en
