@@ -81,7 +81,9 @@ uploaded anywhere for 7.22.0; the update is already offered.
 
 **Verifying a release after the click** — in this order, because each step can hide the one before it:
 
-1. `wp_get_plugins` → the `steamgears-autopilot` row reports the new version and `active: true`.
+1. `wp_get_plugins` → the `steamgears-autopilot` row reports the new version and `active: true`. If that tool is
+   missing, the site is on AI Engine Free, where the plugin list is a Pro tool set — check `tools/list` before
+   concluding the connection is broken (see [`mcp-auth.md`](mcp-auth.md)).
 2. A feature *from the release* answers from the site, not just "no error": for 7.22 a `queue-post` with a
    banned word must be refused and name the word, and the same call with `force` must queue it with the word as
    a warning.

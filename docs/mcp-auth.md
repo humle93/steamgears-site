@@ -23,11 +23,25 @@ MCP-server og dens API-nøgle er væk, og stdio-broen er derfor også fjernet �
 | `POST /wp-json/mcp/v1/http` (`initialize`) | `401 rest_forbidden` | ruten findes og kræver login — ikke en 404 |
 | `GET` samme rute | `401 rest_forbidden` | også læsning kræver credential |
 | `OPTIONS` samme rute | `200` | tillader headere `Mcp-Protocol-Version`, `Mcp-Session-Id`, `Accept` — altså Streamable HTTP |
+| `POST` uden token | `401 rest_forbidden` + `WWW-Authenticate: Bearer realm="MCP", resource_metadata="…/?rest_route=/mcp/v1/.well-known/oauth-protected-resource"` | serveren fortæller selv hvor metadataet ligger; bemærk `?rest_route=`-formen, som WAF'en lukker igennem |
+| `GET /wp-json/mwai/v1/simpleAuthCheck` | `401 rest_forbidden` | AI Engine er aktiv — ruten er **ikke** MCP, se nedenfor |
 | `GET /.well-known/oauth-protected-resource` | `200` | `resource` = `/wp-json/mcp/v1/http`, `scopes_supported` = `["mcp"]` |
 | `GET /.well-known/oauth-authorization-server` | `200` | `authorize`, `token`, `register`, `revoke`; `authorization_code` + `refresh_token`; `S256` |
 | `POST /wp-json/mcp/v1/oauth/register` | `201` | dynamisk klientregistrering virker; svarer `client_id`, intet secret |
 | `GET .../oauth/authorize` fra cloud-worktreen | `454` | Simplys WAF blokerer HTML-sider for datacenter-IP'er — gælder ikke JSON-ruterne |
 | `POST /wp-json/mcp/mcp-adapter-default-server` | `401 rest_forbidden` | WordPress' egen MCP Adapter er også installeret, se [`library/mcp-adapter-abilities-2026-11-02.md`](library/mcp-adapter-abilities-2026-11-02.md) |
+
+**Fælde: `mwai/v1/simpleAuthCheck` beviser intet om MCP.** Ruten hører til AI Engines **Public API**-modul, har
+sin egen bearer-token (`public_api_bearer_token` — et helt andet felt end MCP-token'et), og svarer på `GET` med
+`{"success":true,"data":{"type":"email","value":"<admin-email>"}}`, altså **administratorens e-mail**. Den er en
+credential-selvtest, ikke en agent-kanal: en token der virker der, virker ikke nødvendigvis på
+`/wp-json/mcp/v1/http`. CVE-2026-16954 (rettet i 3.6.4) handlede netop om at den rute lækkede admin-e-mail,
+API-nøgler og bearer-tokens til Editor-brugere — slå Public API fra hvis modulet ikke bruges.
+
+**Værktøjsdækning, til når nogen skal måle `wp_get_plugins`:** AI Engines WordPress-sæt er gratis (indlæg, sider,
+blokke, medier, kommentarer, brugere, taxonomier, menuer, SEO-felter, revisions, caches), men **plugin-listen er
+Pro** (»Plugins and Themes«). Kommer der tomt eller ingen plugin-værktøjer i `tools/list`, er det licensen og ikke
+forbindelsen — og så kan 7.22.0 ikke måles ad denne vej.
 
 WAF-bemærkningen er vigtig: `401` på JSON-ruterne er serverens eget svar, mens `454`/`455` er Simplys
 bot-regel og kun rammer HTML. Derfor kan OAuth-linket ikke åbnes herfra — det skal åbnes i ejerens browser.
