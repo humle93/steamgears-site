@@ -52,6 +52,46 @@
       ]
     },
     {
+      "id": "plugin",
+      "name": "Steamgears Autopilot — plugin",
+      "next": "P0.1 fejl-alarmering (0,5 d), derefter P0.2 kø-udtørring og P0.3 retry med backoff",
+      "blocked_by": "Intet for P0. P1.5 kræver Pinterest-token (401) og Meta-review; P0.6 kræver Command Center",
+      "modules": [
+        {
+          "id": "p0",
+          "name": "P0 — reliability",
+          "done": 0.2,
+          "total": 4.0,
+          "unit": "d",
+          "note": "P0.4-detektion (cron_lag + health-snapshot) 0,2 af 0,5; intet af P0.1/0.2/0.3/0.5/0.6"
+        },
+        {
+          "id": "p1",
+          "name": "P1 — paritet",
+          "done": 0,
+          "total": 10.0,
+          "unit": "d",
+          "note": "0 af 6 punkter; P1.5 er eksternt blokeret"
+        },
+        {
+          "id": "p2",
+          "name": "P2 — kanaler",
+          "done": 0,
+          "total": 7.0,
+          "unit": "d",
+          "note": "0 af 5; Bluesky/Mastodon/Telegram ikke startet"
+        },
+        {
+          "id": "p3",
+          "name": "P3 — hygiejne",
+          "done": 0.25,
+          "total": 2.0,
+          "unit": "d",
+          "note": "P3.3 (CI 8.0-8.5 + WP 7.1) udført som S0.3 i site-repoet"
+        }
+      ]
+    },
+    {
       "id": "rebrand",
       "name": "Dark academia-rebrand",
       "next": "Batch 4 — mockups (~130 billeder)",
@@ -225,6 +265,15 @@
       "after": 43.8,
       "delta": 4.5,
       "basis": "9,25 af 21,1 d (S0 1,9/2,6 · S1 1,7/4,5 · S2 3/6 · S3 1,25/3 · S4 1,4/5)"
+    },
+    {
+      "date": "2026-11-02",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "baseline",
+      "before": null,
+      "after": 2.0,
+      "delta": null,
+      "basis": "0,45 af 23 d (P0 0,2/4 · P1 0/10 · P2 0/7 · P3 0,25/2)"
     }
   ]
 }
