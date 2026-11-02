@@ -83,12 +83,12 @@ Manuel tabel — opdateres når roadmap-estimaterne ændres, ikke af scriptet.
 
 | Band | Estimat | Udført | Rest |
 | --- | --- | --- | --- |
-| S0 — brudt/akut | 2,6 d | 1,9 d | 0,7 d (Health Check, Coming Soon, 5 vanity-301) |
+| S0 — brudt/akut | 2,6 d | 1,9 d | 0,7 d (robots.txt, Health Check, Coming Soon, bot-adgang, 2 vanity-301) |
 | S1 — butik og indhold | 4,5 d | 1,7 d | 2,8 d (Herbarium-varianter, `/go/`-tracking, lead magnets) |
-| S2 — struktur og SEO | 6,0 d | 3,0 d | 3,0 d (navigation, H1-beslutning, `/shipping/` og `/returns/`) |
-| S3 — hygiejne | 3,0 d | 1,25 d | 2,4 d (webp, designsider, plugins) |
+| S2 — struktur og SEO | 6,0 d | 3,95 d | 2,05 d (4 titler, 7 descriptions, 2 H1'er, nav, `/shipping/` + `/returns/`) |
+| S3 — hygiejne | 3,0 d | 1,6 d | 1,4 d (webp, designsider, plugins) |
 | S4 — salgsklar butik | 5,0 d | 1,4 d | 3,6 d (valuta, betaling, anmeldelser) |
-| **I alt** | **21,1 d** | **9,25 d** | **11,85 d** |
+| **I alt** | **21,1 d** | **10,55 d** | **10,55 d** |
 
 Kilde: [`roadmap.md`](roadmap.md) §4 og
 [`seo.md`](seo.md) §5 (målt 1/11).
