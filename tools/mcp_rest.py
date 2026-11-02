@@ -172,7 +172,34 @@ def ask() -> int:
     return 0
 
 
-WRITE_HINTS = ("create", "update", "delete", "edit", "publish", "insert", "set", "upload", "trash", "duplicate")
+WRITE_HINTS = ("create", "update", "delete", "edit", "publish", "insert", "set", "upload", "trash",
+               "duplicate", "execute", "run", "apply", "modify")
+TARGETS = ("product", "page", "post", "order", "media", "user", "comment", "ability")
+
+
+def classify(tool: dict) -> dict:
+    """Afgør om et værktøj skriver, og hvad det rammer — ud fra navn, beskrivelse og MCP-annotations.
+
+    Adapteren har kun tre meta-værktøjer, og det eneste der kan skrive, hedder `execute-ability`.
+    Et rent navne-opslag på "update" ville kalde det læsning, så annotations og "execute" tælles med.
+    """
+    name = (tool.get("name") or "").lower()
+    description = tool.get("description") or ""
+    annotations = tool.get("annotations") or {}
+    write: bool | None = None
+    if isinstance(annotations.get("readOnlyHint"), bool):
+        write = not annotations["readOnlyHint"]
+    if annotations.get("destructiveHint") is True:
+        write = True
+    if write is None:
+        write = any(hint in name for hint in WRITE_HINTS)
+    target = next((t for t in TARGETS if t in name), None)
+    if target is None:
+        folded = description.lower()
+        target = next((t for t in TARGETS if t + "s" in folded or t in folded), "-")
+    return {"name": tool.get("name"), "write": write, "target": target,
+            "params": list(((tool.get("inputSchema") or {}).get("properties") or {}).keys()),
+            "desc": description[:120]}
 
 
 def abilities(user: str, secret: str, csv_path: Path | None = None) -> int:
@@ -181,14 +208,7 @@ def abilities(user: str, secret: str, csv_path: Path | None = None) -> int:
         print(json.dumps({"ok": False, "error": detail}, ensure_ascii=False))
         return 1
     status, tools = tools_list(user, secret)
-    rows = []
-    for tool in tools:
-        name = (tool.get("name") or "").lower()
-        desc = (tool.get("description") or "")[:120]
-        props = list(((tool.get("inputSchema") or {}).get("properties") or {}).keys())
-        write = any(hint in name for hint in WRITE_HINTS)
-        target = "product" if "product" in name else "page" if "page" in name else "post" if "post" in name else "-"
-        rows.append({"name": tool.get("name"), "write": write, "target": target, "params": props, "desc": desc})
+    rows = [classify(tool) for tool in tools]
     if csv_path is not None:
         import csv as _csv
 
@@ -211,11 +231,17 @@ def main() -> int:
     if args[:1] == ["--import"]:
         return import_file(Path(args[1]) if len(args) > 1 else ROOT / "mcp_rest.txt")
     if args[:1] == ["--abilities"]:
+        csv_path = None
+        if "--csv" in args:
+            at = args.index("--csv")
+            if at + 1 >= len(args):
+                print(json.dumps({"ok": False, "error": "--csv kraever en sti"}, ensure_ascii=False))
+                return 1
+            csv_path = Path(args[at + 1])
         user, secret = read_credentials()
         if not user or not secret:
             print(json.dumps({"ok": False, "error": "ingen MCP_USER/MCP_APP_PASSWORD — kør --ask"}, ensure_ascii=False))
             return 1
-        csv_path = Path(args[args.index("--csv") + 1]) if "--csv" in args[:-1] else None
         return abilities(user, secret, csv_path)
 
     user, secret = read_credentials()

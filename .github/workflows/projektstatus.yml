@@ -9,6 +9,8 @@ on:
       - 'projektstatus.json'
       - 'projektstatus.py'
       - 'docs/projektstatus.md'
+      - 'tools/mcp_rest.py'
+      - 'tools/test_mcp_rest.py'
       - '.github/workflows/projektstatus.yml'
   push:
     branches:
@@ -42,6 +44,9 @@ jobs:
 
       - name: Valider projektstatus.json og tjek for drift i dokumentet
         run: python3 projektstatus.py --check
+
+      - name: Selftest af MCP-adapter-klienten (lokal efterligning, ingen credential)
+        run: python3 tools/test_mcp_rest.py
 
       - name: Annotation hvis værnene fejlede
         if: failure()

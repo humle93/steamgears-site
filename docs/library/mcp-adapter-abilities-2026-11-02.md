@@ -98,6 +98,20 @@ Den anden kommando skriver hvert værktøj med `navn, skriver, rammer, parametre
 den kan sammenlignes med den kuraterede fil række for række. Kommandoen findes allerede som
 `--abilities` (JSON) og nu også med `--csv`.
 
+Optællingen er testet uden credential: `python3 tools/test_mcp_rest.py` starter en lokal
+efterligning af adapteren (JSON-RPC over POST, Basic-auth, SSE-frames) og kører 12 fixtures mod
+den. De vigtigste værn:
+
+- `execute-ability` tælles som **skrivning**, selv om navnet ikke indeholder `update` — den fanges
+  af `annotations.readOnlyHint` og af ordet `execute`. Uden det værn ville den eneste skrivevej
+  stå som læsning i regnearket.
+- `products-query` og `get-ability-info` tælles som læsning, så de ikke bliver tilbudt som skrivning.
+- Afvist login (401) giver exit 1 og rører ikke `.env`.
+- `--csv` uden sti afvises **før** credential-læsning, så en tastefejl ikke ser ud som en manglende nøgle.
+- App-passwordet optræder ikke i CSV-filen, og en afvist `mcp_rest.txt` slettes alligevel.
+
+CI kører samme selftest i `vaern`-jobbet, så en ændring i klassificeringen ikke kan snige sig ind.
+
 ## 6. Kilder
 
 - [WordPress/mcp-adapter](https://github.com/WordPress/mcp-adapter) — de tre meta-værktøjer og
