@@ -83,19 +83,23 @@ Alt her er målt mod den live side eller læst i kilden. Er noget ændret siden 
 - `/shop/` tager ~5,8 s og ~470 KB; produktside har ~151 KB inline CSS og ~105 scripts.
 - GA4 fyrer **dobbelt** på hvert pageview, så konverteringer kan ikke aflæses sikkert.
 
-**Pluginnet** (`plugins/steamgears-autopilot/`, v7.22.0)
+**Pluginnet** (`plugins/steamgears-autopilot/`, v7.25.0)
 
-- **Version i repo mod live:** repo **7.22.0**, sitet **7.21.0** (målt 2/11 med `wp_get_plugins`) — et
+- **Version i repo mod live:** repo **7.25.0**, sitet **7.22.0** (målt 2/11 med `wp_get_plugins`) — et
   plugin-folder kan kun skiftes af WordPress selv, så en release slutter med ejerens *Plugins → Update*-klik,
   ikke med et push. Status: `docs/roadmap.md` §2b; procedure og efterkontrol: plugin-README §Updates.
-- 21 PHP-filer, 8.257 linjer, 1.153 linjer tests; **21 af 22 subsystemer er live**. Version **7.19.0** tilføjede
+- 22 PHP-filer, 8.460 linjer, 1.203 linjer tests; **21 af 22 subsystemer er live**. Version **7.19.0** tilføjede
   helsides SEO/GEO/AEO-auditten (`includes/site-seo.php`), som erstatter den per-side-optimering der krævede
   ét klik pr. URL. **7.20.0** tilføjede pre-flight-valideringen (`includes/preflight.php`): hver kø-post tjekkes
   mod nettets egne grænser før det første Publer-kald, og det der kan rettes mekanisk (caption-længde, hashtags)
   rettes i stedet for at blive afvist. **7.21.0** tilføjede blackout-kalenderen (`includes/blackout.php`):
   datointervaller hvor intet frigives, og kø-poster flyttes til næste frie dag samme klokkeslæt. **7.22.0**
   tilføjede quality-gaten (`includes/quality.php`) i `SGAP_Queue::add()`: bandeord, døde links, manglende
-  alt-tekst og næsten-dubletter stoppes før posten når køen. 208 smoke-checks, alle grønne.
+  alt-tekst og næsten-dubletter stoppes før posten når køen. **7.23.0** tilføjede `meta-audit`
+  (`includes/meta-audit.php`): en læsende gennemgang af titler og metabeskrivelser med de værste poster først.
+  **7.24.0** gjorde `utm_campaign` til en parameter:
+  indstillingen *Campaign name* plus et `campaign`-felt pr. post i `/queue` og `queue-post`, så en navngivet
+  kampagne kan måles i GA4 ved siden af evergreen-strømmen. 233 smoke-checks, alle grønne.
 - Kæden virker: generér → godkend → publicér (RSS eller Publer API) → mål.
 - Self-updateren virker: zip i repoet er **byte-identisk** med kilden; 20 versioner på fire dage.
 - 9 AJAX- og 5 admin_post-handlere har capability + nonce; **kun ét `wp_mail`** i hele pluginnet (ugerapport).
@@ -140,6 +144,34 @@ tools/_deps/bin/php -l plugins/steamgears-autopilot/steamgears-autopilot.php
 `tools/mcp_oauth.py --start` (eller et WordPress application password til REST-skrivning), Publer-nøgle,
 repo-secrets `GEMINI_API_KEY`/`WP_USER`/`WP_APP_PASS`, CVR/adresse til GPSR og imprint, Printify-variantmapping,
 én Redirection-gruppe til de fem vanity-301'er.
+
+### Simply.com-connectoren (`simplycom`)
+
+Hostens egen MCP-server (`https://mcp.simply.com/v2`, OAuth 2.1, ingen nøgle) er den anden halvdel af
+adgangen: Royal MCP rører WordPress, connectoren rører **hostens** flade — DNS, nameservere og DNSSEC,
+mailkonti, subdomæner, MySQL, website- og slow-logs, deploy-oplysninger og support-sager. Den kan **ikke**
+bestille, opsige eller betale, og login kræver en browser, så kun ejeren kan gennemføre det første kald.
+Opsætning, login og tilbagekald står i [`mcp-auth.md`](mcp-auth.md#simplycom-simplycom).
+
+**A1 er ikke længere en P0.** Målingen 2/11 viste at 455 rammer **spoofede** bot-UA'er fra denne maskines
+IP, ikke Google: en `site:`-søgning viser indekserede sider med friske datoer, og GSC-data viser sitemap hentet
+31/10. Simply hvidlister allerede Googlebot, bingbot, OpenAI, Anthropic med flere — på IP — og kræver en
+**offentlig IP-liste** for at hvidliste nye tjenester, hvilket en agent-container ikke har. Hele sagen står i
+[`library/waf-diagnose-2026-11-02.md`](library/waf-diagnose-2026-11-02.md).
+
+Connectoren giver DNS, mail, databaser, logs og support-sager — **ikke** WAF-regler. Den kan altså ikke
+hvidliste noget. Det der stadig venter:
+
+| Fund | Hvad der mangler | Uden det |
+| --- | --- | --- |
+| **A1** (P1) | Læse GSC → Crawl stats → By response og bekræfte at Googlebot får 200 | Googlebotens faktiske svar er ikke dokumenteret; indekseringen er |
+| **B1** (P1) | Afklare hvem der ejer `robots.txt`: host mu-plugin, Rank Math eller W3TC | De to `User-agent: *`-grupper bliver stående — kræver WP-adgang |
+| **I1** (P2) | Samme Crawl Stats-måling som A1, for sitemap og 455/5xx | Sitemappet er kun verificeret for neutrale klienter |
+| **S0.6** i [`roadmap.md`](roadmap.md) | ✅ Omskrevet 2/11 — præmissen »søgemaskiner kan ikke crawle« er væk, og punktet er nu samme opgave som **A1**: læs GSC Crawl stats | Intet ud over A1 |
+
+Crawl og verifikation kører med **neutral UA** ([`tools/waf_check.sh`](../tools/waf_check.sh) bekræfter at den
+giver 200). At efterligne Googlebot er både unødvendigt og det der udløser 455. Alt andet i auditten — titler,
+schema, intern linkning, ydeevne — kræver WordPress-skriveadgang eller en ejerbeslutning.
 
 ---
 
@@ -198,7 +230,10 @@ Profilen kan også læses over MCP via den lokale server `tools/mcp_project_prof
    [`docs/library/README.md`](library/README.md) — ellers bliver de forældreløse.
 4. Én roadmap pr. scope: site i `docs/roadmap.md`, plugin i `plugins/steamgears-autopilot/ROADMAP.md`.
    Én SEO-kilde: `docs/seo.md`.
-5. Commit-beskeder på dansk, med `🤖 Generated with Codebuff` + `Co-Authored-By`-fod. Push med `cloud_git`.
+5. Commit-beskeder på dansk, med `🤖 Generated with Codebuff` + `Co-Authored-By`-fod. Push med `cloud_git` i
+   samme tur — og senest af den natlige auto-push kl. 02 dansk tid (`.github/workflows/natlig-push.yml`), der
+   committer alt i træet og pusher med genforsøg. Nattens kørsel er et sikkerhedsnet: den ser ikke ucommittet
+   arbejde i en sandkasse, så et push i turen er stadig den regel der gælder.
 6. **Rør ikke** site-data, nøgler eller `.mcp.json`-hemmeligheder. Nøgler hører i miljøvariabler, aldrig i repo.
 
 ## 8. Kort over viden
@@ -208,7 +243,7 @@ Profilen kan også læses over MCP via den lokale server `tools/mcp_project_prof
 | Hvad skal bygges, i hvilken rækkefølge, hvor lang tid? | `docs/roadmap.md`, `plugins/steamgears-autopilot/ROADMAP.md` |
 | Hvor langt er vi, og hvorfor? | `projektstatus.json` → `docs/projektstatus.md` |
 | SEO-regler, GEO-skabelon, måling | `docs/seo.md` |
-| MCP-auth, fejlkoder, Publer | `docs/mcp-auth.md` |
+| MCP-auth, fejlkoder, Publer, Simply | `docs/mcp-auth.md` |
 | Alt hvad der er undersøgt, med dato | `docs/library/README.md` (indeks) |
 | Butik, produkter, tekster, mockups | `docs/library/butiksaudit-*`, `produkttekster-*`, `mockup-brief-*` |
 | Hvad der virker / ikke virker pr. projekt | `reports/*.pdf` |

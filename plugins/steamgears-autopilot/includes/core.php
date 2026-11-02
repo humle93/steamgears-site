@@ -45,6 +45,7 @@ class SGAP_Install {
         'sgap_repost_max' => 3,
         'sgap_posts_per_day' => 2,
         'sgap_channels' => 'facebook,instagram,pinterest',
+        'sgap_utm_campaign' => 'steamgears_premium_evergreen',
         'sgap_ai_provider' => 'anthropic',
         'sgap_publish_mode' => 'rss',
         'sgap_auto_images' => 'yes',
@@ -320,7 +321,7 @@ class SGAP_Settings {
         'publer_workspace_id','publer_pinterest_board','channels','ai_model','ai_base_url','image_model','content_language','rescue_hosts',
         'telegram_chat_id','email_test_recipient','youtube_channel_id','reddit_username',
         'reddit_subreddit','etsy_shop_id','etsy_shipping_profile_id','etsy_return_policy_id','ai_mode','alert_email',
-        'blackout_ranges','banned_words'
+        'blackout_ranges','banned_words','utm_campaign'
     ];
     /** Settings with a fixed list of values, shown as a select. */
     const CHOICE_KEYS = [
@@ -332,7 +333,7 @@ class SGAP_Settings {
 
     /** Shown in the settings page. Keys not listed here stay registered for older data but are unused. */
     const SECTIONS = [
-        'General' => ['autopilot_enabled','full_auto_enabled','daily_cap','batch_size','quiet_start','quiet_end','blackout_ranges','quality_gate','banned_words'],
+        'General' => ['autopilot_enabled','full_auto_enabled','daily_cap','batch_size','quiet_start','quiet_end','blackout_ranges','quality_gate','banned_words','utm_campaign'],
         'Publer' => ['publish_mode','publer_api_key','publer_workspace_id','publer_pinterest_board','channels'],
         'AI content' => ['ai_provider','ai_api_key','ai_model','ai_base_url','posts_per_day','content_language','image_model','image_api_key','serpapi_key'],
         'Economics' => ['labor_rate','monthly_budget','target_roi','winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max'],
@@ -375,7 +376,8 @@ class SGAP_Settings {
         'alert_email' => 'Where alerts go. Empty = the site admin address.',
         'alert_dry_days' => 'Warn when the queue has fewer days of posts left than this, measured as queued posts divided by the daily cap. 0 = never warn.',
         'audit_keep_days' => 'How long the publish log is kept: one row per attempt, with channel, HTTP status, response and who started it. 0 = keep everything.',
-        'rescue_hosts' => 'Images on these servers are copied into your media library and every link is rewritten (comma-separated).'
+        'rescue_hosts' => 'Images on these servers are copied into your media library and every link is rewritten (comma-separated).',
+        'utm_campaign' => 'The campaign name every link from this site carries as utm_campaign: set it once per campaign (e.g. clockwork_punk_2026_11) and GA4 can tell campaigns apart. A single post can override it with its own campaign. Letters, digits, - and _ only; empty = steamgears_premium_evergreen. Posts queued before the change keep the value they were queued with.'
     ];
 
     public static function get(string $key, $default = '') {
@@ -389,6 +391,10 @@ class SGAP_Settings {
     }
     public static function enabled(string $key): bool {
         return self::get($key, 'no') === 'yes';
+    }
+    /** Empty means "use the default", never an empty utm_campaign in the link. */
+    public static function sanitize_campaign($value): string {
+        return SGAP_UTM::campaign((string) $value, true);
     }
     /** Name of the wp-config.php constant overriding a secret, or '' when not defined. */
     public static function constant_name(string $key): string {
@@ -420,9 +426,15 @@ class SGAP_Settings {
         foreach (self::TEXT_KEYS as $key) {
             register_setting('sgap_settings', 'sgap_' . $key, [
                 'type' => 'string',
-                // sanitize_text_field would flatten the newlines that separate the
-                // blackout ranges, leaving only the first range saved.
-                'sanitize_callback' => in_array($key, self::TEXTAREA_KEYS, true) ? 'sanitize_textarea_field' : 'sanitize_text_field'
+                'sanitize_callback' => match (true) {
+                    // A campaign name ends up in a URL: strip everything a query
+                    // string would have to encode, and never save an empty one.
+                    $key === 'utm_campaign' => [__CLASS__, 'sanitize_campaign'],
+                    // sanitize_text_field would flatten the newlines that separate the
+                    // blackout ranges, leaving only the first range saved.
+                    in_array($key, self::TEXTAREA_KEYS, true) => 'sanitize_textarea_field',
+                    default => 'sanitize_text_field'
+                }
             ]);
         }
         foreach (self::CHOICE_KEYS as $key => $choices) {
@@ -450,20 +462,36 @@ class SGAP_Settings {
 
 /* ---------------- UTM ---------------- */
 class SGAP_UTM {
+    /** What every link carried before the campaign was a setting: kept so old links stay comparable. */
+    const DEFAULT_CAMPAIGN = 'steamgears_premium_evergreen';
+
     public static function build(array $args): string {
         $args = wp_parse_args($args, [
             'channel' => '',
             'angle' => 'angle_a',
             'content_type' => 'product',
             'format' => 'pin',
+            'campaign' => '',
             'destination_url' => home_url('/')
         ]);
         return add_query_arg(array_map('rawurlencode', [
             'utm_source' => $args['channel'],
             'utm_medium' => 'social',
-            'utm_campaign' => 'steamgears_premium_evergreen',
+            'utm_campaign' => self::campaign((string) $args['campaign']),
             'utm_content' => $args['angle'] . '_' . $args['content_type'] . '_' . $args['format']
         ]), $args['destination_url']);
+    }
+
+    /**
+     * The campaign name for one link: the post's own campaign, else the site-wide
+     * setting, else the historical default. Never empty, always URL-safe.
+     */
+    public static function campaign(string $campaign = '', bool $default_only = false): string {
+        $campaign = sanitize_key($campaign);
+        if ($campaign === '' && !$default_only) {
+            $campaign = sanitize_key((string) SGAP_Settings::get('utm_campaign', self::DEFAULT_CAMPAIGN));
+        }
+        return $campaign === '' ? self::DEFAULT_CAMPAIGN : substr($campaign, 0, 60);
     }
 }
 
@@ -684,6 +712,9 @@ class SGAP_Queue {
         $angle = self::key($item['angle'] ?? '', 'angle_a', 20);
         $content_type = self::key($item['content_type'] ?? '', 'product', 40);
         $format = self::key($item['format'] ?? '', 'pin', 40);
+        // Per-post campaign: a twelve-post campaign can be told apart from the
+        // evergreen stream in GA4 without changing the setting for everything else.
+        $campaign = self::key($item['campaign'] ?? '', '', 60);
         if (SGAP_Settings::enabled('full_auto_enabled') && self::suppressed($channel, $angle, $content_type, $format)) {
             return new WP_Error('sgap_suppressed', 'Combination is currently suppressed.', ['status' => 422]);
         }
@@ -715,7 +746,7 @@ class SGAP_Queue {
             'scheduled_at' => $scheduled,
             'fingerprint' => $fingerprint
         ];
-        $row['utm_url'] = SGAP_UTM::build($row);
+        $row['utm_url'] = SGAP_UTM::build(['campaign' => $campaign] + $row);
         // The quality gate sits here and not in the callers, so a new way into the
         // queue cannot forget it. `force` queues the post anyway and reports the
         // problems as warnings: a deliberate repost is the owner's call, not ours.
@@ -975,6 +1006,7 @@ class SGAP_REST {
             'image_url' => $r->get_param('image_url'),
             'status' => $r->get_param('status'),
             'scheduled_at' => self::datetime($r->get_param('scheduled_at')),
+            'campaign' => $r->get_param('campaign'),
             'force' => (bool) $r->get_param('force')
         ]);
         if (is_wp_error($result)) {

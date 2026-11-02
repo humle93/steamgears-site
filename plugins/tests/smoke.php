@@ -18,7 +18,7 @@ function esc_html($s){return htmlspecialchars((string)$s);} function esc_attr($s
 function get_transient($k){return false;} function set_transient(...$a){} function delete_transient($k){} function settings_fields($g){} function submit_button(){}
 function admin_url($p=''){return '/wp-admin/'.$p;} function rest_url($p=''){return '/wp-json/'.$p;} function home_url($p=''){return 'https://steamgears.eu'.$p;}
 function get_bloginfo($k=''){return 'Steamgears';} function wp_timezone_string(){return 'UTC';} function get_the_title($id){return 'Post '.$id;} function get_permalink($id){return 'https://steamgears.eu/?p='.$id;} function has_post_thumbnail($id){return false;}
-function get_posts($a=[]){return [];} function post_type_exists($t){return in_array($t,['post','page'],true);} function get_post($id){return null;} function get_user_meta($u,$k,$s=false){return '';} function update_user_meta($u,$k,$v){return true;} function get_edit_post_link($id,$c=''){return '/edit/'.$id;} function get_preview_post_link($id){return '/preview/'.$id;}
+function get_posts($a=[]){ $r=$GLOBALS['posts_result']??[]; return array_slice($r,0,(int)($a['numberposts']??(count($r)?:1))); } function post_type_exists($t){return in_array($t,['post','page'],true);} function get_post($id){return null;} function get_user_meta($u,$k,$s=false){return '';} function update_user_meta($u,$k,$v){return true;} function get_edit_post_link($id,$c=''){return '/edit/'.$id;} function get_preview_post_link($id){return '/preview/'.$id;}
 function wp_nonce_field(...$a){return '';} function wp_create_nonce($a=''){return 'n';} function selected($a,$b,$e){return $a===$b?' selected':'';} function checked($a,$b=true,$e=true){return $a===$b?' checked':'';}
 function sanitize_text_field($s){return trim(strip_tags((string)$s));} function sanitize_textarea_field($s){return trim(strip_tags((string)$s));}
 function sanitize_key($s){return preg_replace('/[^a-z0-9_\-]/','',strtolower((string)$s));} function absint($v){return abs((int)$v);}
@@ -27,6 +27,8 @@ function wp_parse_args($a,$d){return array_merge($d,$a);} function add_query_arg
 function current_time($t){return '2026-10-30 12:00:00';} function wp_date($f,$t=null){return date($f,$t??time());}
 function current_user_can($c){return true;} function get_current_user_id(){return 1;} function get_site_transient($k){return false;} function set_site_transient(...$a){} function wp_remote_get(...$a){return new WP_Error('offline','offline');} function wp_nonce_field_stub(){} function delete_option($k){unset($GLOBALS["opts"][$k]);} function wp_json_encode($v){return json_encode($v);} function is_wp_error($v){return $v instanceof WP_Error;}
 function wp_strip_all_tags($s){return strip_tags((string)$s);} function attachment_url_to_postid($u){return (int)($GLOBALS['attachment_for'][$u]??0);} function get_post_meta($id,$k='',$s=false){return $GLOBALS['postmeta'][$id][$k]??'';} function url_to_postid($u){return (int)($GLOBALS['postid_for'][$u]??0);} function get_post_status($id){return (string)($GLOBALS['poststatus'][$id]??'publish');} function wp_get_attachment_metadata($id){return $GLOBALS['attachment_meta'][$id]??[];} function get_post_mime_type($id){return (string)($GLOBALS['attachment_mime'][$id]??'');} function wp_die($m=''){throw new RuntimeException((string)$m);} function check_admin_referer($a=''){return true;}
+$GLOBALS['abilities']=[]; $GLOBALS['ability_categories']=[];
+function wp_register_ability($n,$a=[]){ $GLOBALS['abilities'][$n]=$a; return true; } function wp_register_ability_category($s,$a=[]){ $GLOBALS['ability_categories'][$s]=$a; return true; }
 class WP_Error{ function __construct(public $code,public $msg,public $data=[]){} function get_error_message(){return $this->msg;} }
 class WP_REST_Response{ function __construct(public $data,public $status=200){} }
 class WP_REST_Request implements ArrayAccess{ function __construct(public array $p){} function get_param($k){return $this->p[$k]??null;}
@@ -67,6 +69,23 @@ check('queue missing title 400', $r instanceof WP_Error && $r->data['status']===
 $wpdb->next=null; $r=SGAP_REST::create_queue(new WP_REST_Request(['channel'=>'Pinterest','title'=>'Goggles','destination_url'=>'https://steamgears.eu/g/','angle'=>'angle_b']));
 check('queue created 201', $r instanceof WP_REST_Response && $r->status===201 && $r->data['tracking_url']==='https://steamgears.eu/go/42/');
 check('utm built', str_contains($r->data['utm_url'],'utm_source=pinterest') && str_contains($r->data['utm_url'],'utm_content=angle_b_product_pin'));
+// utm_campaign: one setting for the everyday stream, one optional field for a named campaign.
+$utm=fn(array $a)=>SGAP_UTM::build($a+['destination_url'=>'https://steamgears.eu/x/']);
+check('utm campaign default', str_contains($utm(['channel'=>'pinterest']),'utm_campaign=steamgears_premium_evergreen'));
+$opts['sgap_utm_campaign']='clockwork_punk_2026_11';
+check('utm campaign from setting', str_contains($utm(['channel'=>'pinterest']),'utm_campaign=clockwork_punk_2026_11'));
+check('utm campaign per post wins', str_contains($utm(['channel'=>'pinterest','campaign'=>'Spring Drop!']),'utm_campaign=springdrop'));
+check('utm campaign sanitized', SGAP_UTM::campaign('Clockwork Punk 2026/11')==='clockworkpunk202611');
+check('utm campaign never empty', SGAP_UTM::campaign('')==='clockwork_punk_2026_11');
+unset($opts['sgap_utm_campaign']);
+check('utm campaign falls back', SGAP_UTM::campaign('')==='steamgears_premium_evergreen');
+$campaign_san=$settings['sgap_utm_campaign']['sanitize_callback'] ?? null;
+check('utm campaign setting: empty = default', is_callable($campaign_san) && $campaign_san('')==='steamgears_premium_evergreen' && $campaign_san('Autumn Sale')==='autumnsale');
+check('utm campaign setting on the page', in_array('utm_campaign',SGAP_Settings::SECTIONS['General'],true) && isset(SGAP_Settings::HELP['utm_campaign']));
+$wpdb->next=null; $before=count($wpdb->log);
+$r=SGAP_REST::create_queue(new WP_REST_Request(['channel'=>'pinterest','title'=>'Campaign pin','destination_url'=>'https://steamgears.eu/g/','campaign'=>'Clockwork Punk 2026_11']));
+check('queue: per-post campaign in utm url', $r instanceof WP_REST_Response && str_contains((string)($r->data['utm_url']??''),'utm_campaign=clockworkpunk2026_11'));
+check('queue: per-post campaign saved on the row', str_contains(implode("\n",array_slice($wpdb->log,$before)),'utm_campaign=clockworkpunk2026_11'));
 $wpdb->next=7; $r=SGAP_REST::create_queue(new WP_REST_Request(['channel'=>'pinterest','title'=>'Goggles','destination_url'=>'https://steamgears.eu/g/']));
 check('duplicate 409', $r instanceof WP_Error && $r->data['status']===409);
 $opts['sgap_autopilot_enabled']='no'; $r=SGAP_REST::due(new WP_REST_Request([])); check('due off', $r['reason']==='autopilot_disabled');
@@ -363,6 +382,43 @@ $qstatus=SGAP_Abilities::status();
 check('quality: status says how the gate is set', ($qstatus['quality_gate']['mode']??'')==='block' && ($qstatus['quality_gate']['banned_words']??0)===3);
 $dry=SGAP_Abilities::check_post(['channel'=>'facebook','title'=>'Deal','text'=>'Buy our scam gears','destination_url'=>'https://steamgears.eu/gear/']);
 check('quality: the dry run covers both gates', isset($dry['quality']['problems']) && $dry['ok']===false && count($dry['quality']['problems'])>=1);
+// ---- queue-post: a campaign post keeps its angle, format and campaign name ----
+do_action('wp_abilities_api_init');
+$qp=$GLOBALS['abilities']['steamgears-autopilot/queue-post']??null;
+check('queue-post: angle, content_type and format are in the schema', is_array($qp) && isset($qp['input_schema']['properties']['angle'], $qp['input_schema']['properties']['content_type'], $qp['input_schema']['properties']['format'], $qp['input_schema']['properties']['campaign']));
+$wpdb->next=null; $wpdb->log=[];
+$camp=SGAP_Abilities::queue_post(['channel'=>'pinterest','title'=>'Campaign pin','text'=>'A brass moth with real escapements, printed to order for the wall.','destination_url'=>'https://steamgears.eu/gear/','image_url'=>'https://steamgears.eu/a.jpg','angle'=>'angle_c','content_type'=>'product','format'=>'pin','campaign'=>'Clockwork Punk 2026_11']);
+$logged=implode("\n",$wpdb->log);
+check('queue-post: the angle and format survive the ability', is_array($camp) && str_contains($logged,'"angle":"angle_c"') && str_contains($logged,'"format":"pin"') && str_contains($logged,'"content_type":"product"'));
+check('queue-post: the campaign reaches the tracked link', is_array($camp) && str_contains($logged,'utm_campaign=clockworkpunk2026_11'));
+$defaults=SGAP_Abilities::queue_post(['channel'=>'facebook','title'=>'Plain post','text'=>'A plain caption that is long enough to queue without a warning.','destination_url'=>'https://steamgears.eu/gear/']);
+check('queue-post: defaults stay custom/post and angle_a', is_array($defaults) && str_contains(implode("\n",$wpdb->log),'"angle":"angle_a"') && str_contains(implode("\n",$wpdb->log),'"format":"post"'));
+// ---- meta-audit: ability, summary, fixtures and the read-only promise ----
+do_action('wp_abilities_api_init');
+$ma=$GLOBALS['abilities']['steamgears-autopilot/meta-audit']??null;
+check('meta-audit: ability registered', is_array($ma));
+check('meta-audit: public for MCP and read-only', ($ma['meta']['mcp']['public']??false)===true && ($ma['meta']['annotations']['readonly']??false)===true && ($ma['meta']['annotations']['destructive']??true)===false);
+check('meta-audit: requires manage_options', ($ma['permission_callback']??null)===[SGAP_Abilities::class,'can_manage']);
+check('meta-audit: scan and limit are in the schema', isset($ma['input_schema']['properties']['scan'],$ma['input_schema']['properties']['limit']) && $ma['input_schema']['properties']['scan']['maximum']===500);
+$rows=[
+ ['id'=>1,'title'=>'Short','url'=>'u1','title_length'=>5,'description_length'=>0,'problems'=>['missing description']],
+ ['id'=>2,'title'=>str_repeat('x',70),'url'=>'u2','title_length'=>70,'description_length'=>200,'problems'=>['description too long','title too long']],
+ ['id'=>3,'title'=>'Fine','url'=>'u3','title_length'=>4,'description_length'=>120,'problems'=>[]]
+];
+$sum=SGAP_Meta_Audit::summarise($rows);
+check('meta-audit: counts each problem type', $sum['counts']===['checked'=>3,'clean'=>1,'missing_description'=>1,'title_too_long'=>1,'description_too_long'=>1,'description_too_short'=>0]);
+check('meta-audit: worst first, clean posts left out', count($sum['worst'])===2 && $sum['worst'][0]['id']===2 && $sum['worst'][1]['id']===1 && $sum['ok']===false);
+check('meta-audit: an empty scan is ok', SGAP_Meta_Audit::summarise([])['ok']===true && SGAP_Meta_Audit::summarise([])['counts']['checked']===0);
+check('meta-audit: length counts characters', SGAP_Meta_Audit::length('æøå')===3 || !function_exists('mb_strlen'));
+$GLOBALS['posts_result']=[(object)['ID'=>11],(object)['ID'=>12]];
+$GLOBALS['postmeta'][11]['rank_math_description']=str_repeat('d',160);
+$GLOBALS['postmeta'][12]['rank_math_description']='';
+$wpdb->log=[];
+$audit=SGAP_Abilities::meta_audit(['scan'=>2,'limit'=>5]);
+check('meta-audit: scans what it was asked to', ($audit['counts']['checked']??0)===2 && ($audit['scanned']??0)===2 && ($audit['seo_plugin']??'')!=='');
+check('meta-audit: 160 characters is too long, an empty description is missing', ($audit['counts']['description_too_long']??0)===1 && ($audit['counts']['missing_description']??0)===1);
+check('meta-audit: writes nothing to the database', preg_grep('/^(INSERT|UPDATE|DELETE)/',$wpdb->log)===[]);
+$GLOBALS['posts_result']=[]; $GLOBALS['postmeta'][11]=[]; $GLOBALS['postmeta'][12]=[];
 $opts['sgap_banned_words']=''; $GLOBALS['postid_for']=[]; $GLOBALS['poststatus']=[]; $GLOBALS['postmeta']=[]; $GLOBALS['attachment_for']=[];
 $wpdb->row=null;
 $wpdb->next=null;

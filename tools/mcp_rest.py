@@ -12,6 +12,7 @@ Kør:
     python3 tools/mcp_oauth.py --start             # godkendelseslink (OAuth, PKCE)
     python3 tools/mcp_rest.py --check              # initialize + tools/list
     python3 tools/mcp_rest.py --abilities          # alle værktøjer med skema + skrive-flag
+    python3 tools/mcp_rest.py --split              # vores vs. AI Engines egne vs. abilities fra andre
     python3 tools/mcp_rest.py --abilities --diff docs/library/mcp-adapter-abilities.csv
     python3 tools/mcp_rest.py --call <værktøj> '<json-objekt>'
     python3 tools/mcp_rest.py --ask                # application password i stedet (getpass)
@@ -36,6 +37,28 @@ URL = os.environ.get("MCP_REST_URL") or "https://steamgears.eu/wp-json/mcp/v1/ht
 PROTOCOL = "2025-06-18"
 NAMES = ("MCP_USER", "MCP_APP_PASSWORD")
 CLIENT_NAME = "steamgears-agent"
+
+# AI Engine 3.9.0's faste værktøjer (labs/mcp*.php). Bruges til at se hvad der er AI Engines egne
+# og hvad der kommer fra abilities. En anden plugin-version kan have navne der ikke står her.
+AI_ENGINE_NATIVE = frozenset({
+    "acf_get_fields", "acf_update_fields", "mcp_list_changes", "mcp_ping", "mcp_undo_change", "mwai_image",
+    "mwai_vision", "wp_add_post_terms", "wp_alter_post", "wp_count_media", "wp_count_posts", "wp_count_terms",
+    "wp_create_comment", "wp_create_note", "wp_create_post", "wp_create_term", "wp_create_user",
+    "wp_delete_comment", "wp_delete_media", "wp_delete_note", "wp_delete_post", "wp_delete_post_meta",
+    "wp_delete_term", "wp_edit_blocks", "wp_edit_menu", "wp_edit_shortcodes", "wp_edit_widgets",
+    "wp_get_blocks", "wp_get_comments", "wp_get_diagnostics", "wp_get_form_entries", "wp_get_media",
+    "wp_get_menus", "wp_get_option", "wp_get_post", "wp_get_post_meta", "wp_get_post_snapshot",
+    "wp_get_post_terms", "wp_get_post_types", "wp_get_posts", "wp_get_redirects", "wp_get_rendered",
+    "wp_get_revisions", "wp_get_seo", "wp_get_shortcodes", "wp_get_site_style", "wp_get_taxonomies",
+    "wp_get_templates", "wp_get_terms", "wp_get_users", "wp_get_widgets", "wp_insert_block_pattern",
+    "wp_list_block_patterns", "wp_list_plugins", "wp_moderate_comments", "wp_open_template",
+    "wp_preview_link", "wp_restore_revision", "wp_save_redirect", "wp_set_featured_image",
+    "wp_site_maintenance", "wp_update_comment", "wp_update_media", "wp_update_note", "wp_update_option",
+    "wp_update_post", "wp_update_post_meta", "wp_update_seo", "wp_update_site_style", "wp_update_term",
+    "wp_update_user", "wp_upload_media", "wp_upload_request", "wp_write_blocks",
+})
+OURS_PREFIX = "steamgears-autopilot_"
+
 
 
 def oauth_token() -> str:
@@ -281,6 +304,49 @@ def abilities(auth: str, csv_path: Path | None = None, diff_path: Path | None = 
     return 0
 
 
+def split_tools(names: list[str], ours_csv: Path | None = None) -> dict:
+    """Del en værktøjsliste i vores egne, AI Engines indbyggede og alt andet.
+
+    Alt andet er i praksis abilities fra andre plugins (WooCommerce, Autopilot-konkurrenter osv.),
+    fordi AI Engine laver ét værktøj pr. offentlig ability. Kører sitet en anden AI Engine-version end
+    den kendte liste, havner dens nye værktøjer også i »andet« — derfor står der en note med i svaret.
+    """
+    ours, native, other = [], [], []
+    for name in names:
+        key = (name or "").strip()
+        if not key:
+            continue
+        if key.startswith(OURS_PREFIX):
+            ours.append(key)
+        elif key in AI_ENGINE_NATIVE:
+            native.append(key)
+        else:
+            other.append(key)
+
+    result = {
+        "total": len(ours) + len(native) + len(other),
+        "counts": {"vores": len(ours), "ai_engine": len(native), "ability_bridge": len(other)},
+        "vores": sorted(ours),
+        "ai_engine": sorted(native),
+        "ability_bridge": sorted(other),
+        "note": "ai_engine er 3.9.0-listens navne; andre versioner kan ligge i ability_bridge.",
+    }
+    if ours_csv is not None and ours_csv.exists():
+        import csv as _csv
+
+        expected = set()
+        with ours_csv.open(encoding="utf-8") as handle:
+            for row in _csv.DictReader(handle):
+                name = (row.get("ability") or "").strip()
+                if name:
+                    expected.add(name.replace("/", "_"))
+        live = set(ours)
+        result["abilities_i_plugin"] = len(expected)
+        result["mangler_live"] = sorted(expected - live)
+        result["uventet_live"] = sorted(live - expected)
+    return result
+
+
 def path_flag(args: list[str], flag: str) -> tuple[Path | None, int]:
     if flag not in args:
         return None, 0
@@ -309,6 +375,25 @@ def main() -> int:
             print(json.dumps({"ok": False, "error": "ingen credential — kør tools/mcp_oauth.py --start (OAuth) eller --ask"}, ensure_ascii=False))
             return 1
         return abilities(auth, csv_path, diff_path)
+
+    if args[:1] == ["--split"]:
+        csv_path, code = path_flag(args, "--abilities-csv")
+        if code:
+            return code
+        auth = resolve_auth()
+        if not auth:
+            print(json.dumps({"ok": False, "error": "ingen credential — kør tools/mcp_oauth.py --start (OAuth) eller --ask"}, ensure_ascii=False))
+            return 1
+        ok, detail = handshake(auth)
+        if not ok:
+            print(json.dumps({"ok": False, "error": detail}, ensure_ascii=False))
+            return 1
+        status, tools = tools_list(auth)
+        split = split_tools([tool.get("name") or "" for tool in tools], csv_path or ROOT / "docs/library/egen-abilities-2026-11-02.csv")
+        split["ok"] = True
+        split["status"] = status
+        print(json.dumps(split, ensure_ascii=False, indent=1))
+        return 0
 
     auth = resolve_auth()
     if not auth:

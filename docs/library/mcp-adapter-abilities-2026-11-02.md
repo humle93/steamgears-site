@@ -39,8 +39,14 @@ kommer derfor fra WooCommerce' og WordPress' egen dokumentation, og er markeret 
 
 ## 3. Hvad der faktisk kan skrive
 
-**WooCommerce har syv kanoniske abilities** (fra 10.9, default-aktiveret fra 11.3). Sitet kører
-11.2.1, så de kan være til stede, men er ikke garanteret slået til:
+**WooCommerce har syv kanoniske abilities** (fra 10.9). Sitet kører 11.2.1.
+
+> **Rettet 2/11 (kildemålt):** den første udgave af dette dokument skrev at abilities først er
+> »default-aktiveret fra 11.3«, så de »kan være til stede, men er ikke garanteret slået til« på 11.2.1. Det er
+> forkert. WooCommerce 11.2.1 registrerer alle syv ubetinget: `AbilitiesRegistry::init()` kalder
+> `AbilitiesLoader::init()`, og registreringen er kun betinget af at `wp_register_ability` findes — der er
+> ingen feature-flag. Hver af de syv sætter `'meta' => [ 'mcp' => [ 'public' => true ] ]`
+> (`src/Internal/Abilities/Domain/*.php`, fx `ProductUpdate.php:55`).
 
 | Ability | Type | Rammer |
 | --- | --- | --- |
@@ -55,6 +61,14 @@ kommer derfor fra WooCommerce' og WordPress' egen dokumentation, og er markeret 
 Dertil ni **udfasede** REST-spejle (`woocommerce/products-list`, `-get`, `-create`, `-update`,
 `-delete`, `orders-list`, `-get`, `-create`, `-update`), som fjernes i 11.3. De står i regnearket
 med nytte 1, så de ikke bliver brugt ved en fejl.
+
+**Også dem er der styr på (kildemålt 2/11):** spejlene registreres af `RestAbilityFactory` med
+`'meta' => [ 'show_in_rest' => true, 'expose_in_deprecated_woocommerce_mcp' => true ]`. Den første nøgle
+er afgørende: AI Engines bro eksponerer alt med `meta.mcp.public === true` **eller** ikke-tomt
+`meta.show_in_rest` (`labs/mcp-abilities.php:42-48`). Spejlene er altså skjult i Wos egen adapter-liste,
+men ikke i AI Engines — de dukker op som MCP-værktøjer alligevel, indtil Woo fjerner dem.
+Hvad der forsvinder, og hvad vi gør ved opdateringen, står i driftsnoten
+[`woo-11-3-vaerktoejsliste-2026-11-02.md`](woo-11-3-vaerktoejsliste-2026-11-02.md).
 
 **Sider og indlæg har ingen ability.** WordPress registrerer ikke page/post-abilities som
 offentlige, så adapteren kan ikke redigere en side eller et indlæg. Det er den vigtigste

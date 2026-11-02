@@ -10,6 +10,8 @@ design/CSS, backup-data, dokumentation og status.
 | [`docs/library/README.md`](docs/library/README.md) | **Dokumentindeks** — indgangen til hvert audit-, research- og driftsdokument. Start her. |
 | [`docs/roadmap.md`](docs/roadmap.md) | Optimeringsplanen for sitet, S0–S4 med tidestimater og blokeringer |
 | [`docs/seo.md`](docs/seo.md) | SEO-regler, GEO-skabelon og måling |
+| [`docs/library/seo-audit-2026-11-02.md`](docs/library/seo-audit-2026-11-02.md) | **Bred SEO-audit 2/11** — score 56,5/100, 21 fund med bevis, roadmap og tid til 100 % (PDF i `reports/seo-audit-2026-11-02.pdf`) |
+| [`docs/library/waf-diagnose-2026-11-02.md`](docs/library/waf-diagnose-2026-11-02.md) | **WAF-diagnose 2/11** — 455 rammer spoofede bot-UA'er, ikke Google; hvidlistning kræver en offentlig IP-liste (PDF i `reports/waf-diagnose-2026-11-02.pdf`) |
 | [`docs/projektstatus.md`](docs/projektstatus.md) | Daglig procentstatus pr. projekt, beregnet af `projektstatus.py` |
 | [`AGENTS.md`](AGENTS.md) | Arbejdsregler: hvert pass melder % før → efter med grundlag |
 | [`docs/agent-profil.md`](docs/agent-profil.md) | **Agentprofil** — alt en bot skal vide: fakta, adgang, opskrifter, fælder. Kan også hentes over MCP |
@@ -32,6 +34,9 @@ ind i dokumentindekset, så de ikke bliver forældreløse.
 | `tools/setup-agent-tools.sh` | Genskaber PHP 8.5 og PDF-bibliotekerne i `tools/_deps` (gitignored) — ingen root nødvendig |
 | `tools/mcp_project_profile.py` | Lokal MCP-server (stdio) der serverer profilen, status og roadmap'erne — registreret som `steamgears-profil` |
 | `tools/niche_scanner.py` | Niche-produkt-scanner: Pinterest Trends (API) + TikTok Creative Center-eksport × vores katalog → `reports/niche-scan-<dato>.md` |
+| `wordpress/mu-plugins/` | Deploybare mu-plugins til sitet — i dag `sgap-product-schema.php` (brand, returret, leveringstid) |
+| `tools/md_to_pdf.py` | Renderer en Markdown-fil fra `docs/library` som A4-PDF i husstilen (`python3 tools/md_to_pdf.py <md> <pdf>`) |
+| `tools/waf_check.sh` | WAF/UA-check: neutral klient skal give 200; spoofede bot-UA'er giver 455 (forventet) — `bash tools/waf_check.sh` |
 | `knowledge_base/` | Høstede Google-kilder; læses af `seo_agent.py` sammen med `docs/seo.md` |
 | `plugins/steamgears-autopilot/` | Autopilot-pluginnet + dets egen `ROADMAP.md` |
 | `backup-2026-10-23/` | Fuld WP REST-backup taget lige før genopbygningen |

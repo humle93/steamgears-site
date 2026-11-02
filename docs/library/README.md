@@ -20,10 +20,17 @@ sidste commit-dato. Målt 2/11 2026.
 
 | Dokument | Indhold | Dato |
 | --- | --- | --- |
+| [mcp-skriveadgang-2026-11-02.md](mcp-skriveadgang-2026-11-02.md) | **MCP-skriveadgang og 7.25.0:** hvorfor REST-ruten svarer 401, hvad Drafts Only blokerer, hvordan `mcp_options` aflæses uden at skrive, og 12/12 forhåndsvaliderede kampagneposter (PDF i `reports/mcp-skriveadgang-2026-11-02.pdf`) | 2026-11-02 |
+| [clockwork-punk-kampagne-2026-11-02.md](clockwork-punk-kampagne-2026-11-02.md) | Clockwork Punk-kampagne 3.–14/11: koncept, 12 verificerede produkter, 3 vinkler, måling og blokeringer | 2026-11-02 |
+| [clockwork-punk-koe-2026-11-02.json](clockwork-punk-koe-2026-11-02.json) | Kø-payload til `POST /sgap/v1/queue` — 12 poster med captions, links og tidspunkter | 2026-11-02 |
+| [woo-11-3-vaerktoejsliste-2026-11-02.md](woo-11-3-vaerktoejsliste-2026-11-02.md) | Driftsnote: ni udfasede Woo REST-spejle kan forsvinde fra MCP-listen ved næste Woo-opdatering — hvad der falder, og hvad vi gør | 2026-11-02 |
 | [mcp-adapter-abilities-2026-11-02.md](mcp-adapter-abilities-2026-11-02.md) | MCP Adapter: 3 meta-værktøjer, 7 Woo-abilities, 9 udfasede — og hvorfor sider/indlæg kræver REST | 2026-11-02 |
 | [mcp-adapter-abilities.csv](mcp-adapter-abilities.csv) | Regneark: 24 abilities og ruter med type, parametre, roadmap-kobling og nytte 1–5 | 2026-11-02 |
 | [meta-fixes-og-produktlinks-2026-11-02.md](meta-fixes-og-produktlinks-2026-11-02.md) | 11 meta-rettelser med tælte længder, 2 H1-fix og produktlinkplan til de ni guides | 2026-11-02 |
 | [roadmap-status-2026-11-02.md](roadmap-status-2026-11-02.md) | Crawl af 119 URL'er, WAF-fundet (454/455) og publish-klar copy til `/shipping/` + `/returns/` | 2026-11-02 |
+| [egen-mcp-vaerktoejer-2026-11-02.md](egen-mcp-vaerktoejer-2026-11-02.md) | **Egne værktøjer:** fire veje til egne MCP-værktøjer, opskrift på en ability, de fire kandidater vi bør bygge først og hvad Drafts Only betyder for dem | 2026-11-02 |
+| [egen-abilities-2026-11-02.csv](egen-abilities-2026-11-02.csv) | Regneark: de 32 abilities vores eget plugin registrerer, med readonly-flag, MCP-public og label — grundlaget for `mcp_rest.py --split` | 2026-11-02 |
+| [mcp-vaerktoejer-2026-11-02.md](mcp-vaerktoejer-2026-11-02.md) | **MCP-inventar:** AI Engines 74 værktøjer (29 læsende/31 skrivende/14 admin) og mcp-adapterens 3 meta-værktøjer, med den målte rute-flade og hvad der først kan siges med credential | 2026-11-02 |
 | [forside-2026-11-02.md](forside-2026-11-02.md) | Forsiden: to H1'er, S2.4-beslutningen og paste-klar hero | 2026-11-02 |
 | [navigation-og-meta-2026-11-02.md](navigation-og-meta-2026-11-02.md) | Header-links, footer-fortrydelse, meta-runde og sitemap-kontrol — fire punkter lukket, fem blokeringer | 2026-11-02 |
 | [navigation-spec-2026-11-02.md](navigation-spec-2026-11-02.md) | Navigation og menu — S2.3, verificeret mod REST 2/11 | 2026-11-02 |
@@ -67,7 +74,9 @@ sidste commit-dato. Målt 2/11 2026.
 
 | Dokument | Indhold | Dato |
 | --- | --- | --- |
-| [indholdsaudit-2026-11-01.md](indholdsaudit-2026-11-01.md) | Indholdsaudit — posts, sider og produkter | 2026-11-01 |
+| [produkt-schema-fix-2026-11-02.md](produkt-schema-fix-2026-11-02.md) | Produkt-schema: brand, 14 dages returret og leveringstid — kode klar, ikke live (D2/D5) | 2026-11-02 |
+| [waf-diagnose-2026-11-02.md](waf-diagnose-2026-11-02.md) | WAF-diagnose: 455 rammer spoofede bot-UA'er, ikke Google — retter A1/S0.6; PDF i `reports/waf-diagnose-2026-11-02.pdf` | 2026-11-02 |
+| [indholdsaudit-2026-11-01.md](indholdsaudit-2026-11-01.md) | Indholdsudit — posts, sider og produkter | 2026-11-01 |
 | [dode-links-2026-11-01.md](dode-links-2026-11-01.md) | Døde interne links — 39 fund | 2026-11-01 |
 | [mangler-og-plan-25-10.md](mangler-og-plan-25-10.md) | Komplet mangel-liste og udførelsesplan (25/10) — stadig citeret som evidens i roadmap'en | 2026-10-26 |
 | [niche-scan-procedure-2026-11-02.md](niche-scan-procedure-2026-11-02.md) | Procedure for niche-scanning: 7 trin, tærskler, fem fælder og hvad kilderne ikke måler | 2026-11-02 |
@@ -100,7 +109,7 @@ Høstede Google-kilder i [`knowledge_base/`](../../knowledge_base/) (indlæses a
 - [`../roadmap.md`](../roadmap.md) — **den eneste** optimeringsplan for sitet (S0–S4)
 - [`../seo.md`](../seo.md) — **det eneste** SEO-dokument: regler, GEO-skabelon, måling
 - [`../../plugins/steamgears-autopilot/ROADMAP.md`](../../plugins/steamgears-autopilot/ROADMAP.md) — plugin-produktets egen roadmap
-- [`../mcp-auth.md`](../mcp-auth.md) — auth for MCP-serverne i `.mcp.json`
+- [`../mcp-auth.md`](../mcp-auth.md) — auth for MCP-serverne i `.mcp.json` (Royal Basic/OAuth, Publer-nøgler, Simply OAuth)
 - [`../adsense-setup.md`](../adsense-setup.md) — AdSense-setup
 - [`../competitors.md`](../competitors.md) — Competitor Watch
 - [`../command-center-kilde.md`](../command-center-kilde.md) — hvor Command Center-kilden ligger

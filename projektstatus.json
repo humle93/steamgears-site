@@ -21,10 +21,10 @@
         {
           "id": "s1",
           "name": "S1 — butik og indhold",
-          "done": 2.05,
-          "total": 4.5,
+          "done": 2.15,
+          "total": 4.6,
           "unit": "d",
-          "note": "S1.1 Herbarium 0,5 (12 SKU'er 953–972 publiceret og alle 12 linket fra historien, verificeret 2/11) + S1.3 kladde-triage 1,0 + S1.5 butikslink 30/30 indlæg 0,55; /go/-tracking mangler"
+          "note": "S1.1 Herbarium 0,5 (12 SKU'er 953–972 publiceret og alle 12 linket fra historien, verificeret 2/11) + S1.3 kladde-triage 1,0 + S1.5 butikslink 30/30 indlæg 0,55; /go/-tracking mangler; + 0,1 d forhåndsvalidering af de 12 kampagneposter mod live-gaten (12 rene, 0 advarsler)."
         },
         {
           "id": "s2",
@@ -37,10 +37,10 @@
         {
           "id": "s3",
           "name": "S3 — hygiejne",
-          "done": 1.6,
-          "total": 3,
+          "done": 1.7,
+          "total": 3.1,
           "unit": "d",
-          "note": "S3.1 0,25 + S3.2 0,1 + S3.3 alt-tekst 0,3 + S3.4 plugin-audit 0,35 + tidligere 0,6; plugin-oprydning (slet/fjern) og webp mangler stadig"
+          "note": "S3.1 0,25 + S3.2 0,1 + S3.3 alt-tekst 0,3 + S3.4 plugin-audit 0,35 + tidligere 0,6; plugin-oprydning (slet/fjern) og webp mangler stadig; + 0,1 d PDF-eksport til research-biblioteket (2 rapporter) og rettet ordombrydning i tools/md_to_pdf.py."
         },
         {
           "id": "s4",
@@ -69,10 +69,10 @@
         {
           "id": "p1",
           "name": "P1 — paritet",
-          "done": 3.5,
-          "total": 11.0,
+          "done": 3.85,
+          "total": 11.35,
           "unit": "d",
-          "note": "P1.1 pre-flight pr. kanal 1,0 d (7.20.0) + P1.3 blackout-kalender 0,5 d (7.21.0) + P1.6 quality gate 1,0 d (includes/quality.php, 7.22.0 — nu også målt live på sitet) + P1.7 helsides SEO/GEO/AEO-audit 1,0 d (7.19.0); 4 af 7 punkter. P1.5 er eksternt blokeret (Pinterest-token)"
+          "note": "P1.1 pre-flight pr. kanal 1,0 d (7.20.0) + P1.3 blackout-kalender 0,5 d (7.21.0) + P1.6 quality gate 1,0 d (includes/quality.php, 7.22.0 — nu også målt live på sitet) + P1.7 helsides SEO/GEO/AEO-audit 1,0 d (7.19.0) + P1.8 utm_campaign som parameter 0,25 d (7.23.0, venter på Update-klik) + 0,1 d queue-post bærer angle/format/kampagne (7.25.0, krævet fordi OAuth-tokenet ikke gælder pluginets REST-namespace) = 5,5 af 8 punkter. P1.5 er eksternt blokeret (Pinterest-token)"
         },
         {
           "id": "p2",
@@ -91,7 +91,7 @@
           "note": "P3.3 (CI 8.0-8.5 + WP 7.1) udført som S0.3 i site-repoet"
         }
       ],
-      "total": 24.0
+      "total": 24.35
     },
     {
       "id": "rebrand",
@@ -376,6 +376,42 @@
       "after": 54.0,
       "delta": 4.0,
       "basis": "11,4 af 21,1 d (S0 1,9/2,6 · S1 2,05/4,5 · S2 4,45/6 · S3 1,6/3 · S4 1,4/5)"
+    },
+    {
+      "date": "2026-11-02",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 29.0,
+      "after": 29.7,
+      "delta": 0.7,
+      "basis": "7,2 af 24,25 d (P0 3,2/4 · P1 3,75/11,25 · P2 0/7 · P3 0,25/2)"
+    },
+    {
+      "date": "2026-11-02",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 29.7,
+      "after": 30.0,
+      "delta": 0.3,
+      "basis": "7,3 af 24,35 d (P0 3,2/4 · P1 3,85/11,35 · P2 0/7 · P3 0,25/2)"
+    },
+    {
+      "date": "2026-11-02",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 54.0,
+      "after": 54.2,
+      "delta": 0.2,
+      "basis": "11,5 af 21,2 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,45/6 · S3 1,6/3 · S4 1,4/5)"
+    },
+    {
+      "date": "2026-11-02",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 54.2,
+      "after": 54.5,
+      "delta": 0.3,
+      "basis": "11,6 af 21,3 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,45/6 · S3 1,7/3,1 · S4 1,4/5)"
     }
   ]
 }

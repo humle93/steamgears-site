@@ -229,6 +229,46 @@ class AdapterTest(unittest.TestCase):
         self.assertEqual(summary["mangler_live"], [])
         self.assertEqual(summary["ikke_i_arket"], ["mcp-adapter/discover-abilities"])
 
+    def test_18_split_tre_spande(self):
+        split = mcp_rest.split_tools([
+            "steamgears-autopilot_status",
+            "steamgears-autopilot_meta-audit",
+            "wp_get_post",
+            "woocommerce_products_list",
+        ])
+        self.assertEqual(split["counts"], {"vores": 2, "ai_engine": 1, "ability_bridge": 1})
+        self.assertEqual(split["total"], 4)
+        self.assertIn("steamgears-autopilot_meta-audit", split["vores"])
+        self.assertIn("wp_get_post", split["ai_engine"])
+        self.assertEqual(split["ability_bridge"], ["woocommerce_products_list"])
+
+    def test_19_split_tomme_navne_tælles_ikke(self):
+        split = mcp_rest.split_tools(["", "  ", "wp_count_posts"])
+        self.assertEqual(split["total"], 1)
+        self.assertEqual(split["counts"], {"vores": 0, "ai_engine": 1, "ability_bridge": 0})
+
+    def test_20_split_kender_alle_vores_abilities(self):
+        """CSV'en er den eneste kilde til hvad vores plugin registrerer: hver linje skal ramme »vores«."""
+        csv_path = Path(__file__).resolve().parent.parent / "docs/library/egen-abilities-2026-11-02.csv"
+        self.assertTrue(csv_path.exists(), f"mangler {csv_path}")
+        expected = set()
+        with csv_path.open(encoding="utf-8") as handle:
+            for row in csv.DictReader(handle):
+                if row.get("ability"):
+                    expected.add(row["ability"].replace("/", "_"))
+        self.assertEqual(len(expected), 32, "CSV'en skal have 32 abilities")
+        empty = mcp_rest.split_tools([], csv_path)
+        self.assertEqual(empty["mangler_live"], sorted(expected))
+        live = mcp_rest.split_tools(sorted(expected), csv_path)
+        self.assertEqual(live["counts"], {"vores": 32, "ai_engine": 0, "ability_bridge": 0})
+        self.assertEqual(live["mangler_live"], [])
+        self.assertEqual(live["uventet_live"], [])
+
+    def test_21_native_listen_er_74_og_unik(self):
+        self.assertEqual(len(mcp_rest.AI_ENGINE_NATIVE), 74)
+        self.assertIn("wp_get_post", mcp_rest.AI_ENGINE_NATIVE)
+        self.assertNotIn("steamgears-autopilot_status", mcp_rest.AI_ENGINE_NATIVE)
+
     def test_12_import_afviser_kort_password(self):
         bad = Path(self.tmp.name) / "mcp_rest.txt"
         bad.write_text(f"{USER}:kort\n", encoding="utf-8")
