@@ -142,7 +142,7 @@ Alle seks fik SEO-titel og meta description, og de fire uden produktlinks fik en
 **Stadig blokeret før publicering af Herbarium:**
 
 1. **Varianter.** Alle 12 er `simple`; de skal have størrelser (tees) og telefonmodeller (covers) i Printify. Uden dem kan de ikke sælges.
-2. **Kategorier.** De 12 ligger under `Gaslight` + `T-Shirts` — også art prints og telefoncovers. MCP-fladen har ingen værktøjer til at sætte produktkategorier, så det skal gøres i admin.
+2. ~~**Kategorier.**~~ **Rettet 2/11: forkert.** Kategorierne er korrekte — prints i `posters-prints`, covers i `gothic-steampunk-phone-cases`, tees i `t-shirts`. Se `butik-fund-2026-11-02.md`.
 3. **Specifikationer.** Materialevalg, papirvægt og mål er ikke opfundet i teksten; de står som "matte art paper", "hard shell" osv. og skal bekræftes mod Printify inden publicering.
 
 ## 5d. Procentstatus efter runde 3

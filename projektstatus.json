@@ -6,7 +6,7 @@
       "id": "site",
       "name": "steamgears.eu — site-optimering",
       "note": "roadmap S0–S4",
-      "next": "S2.3 navigation og S2.4 H1-beslutning (kræver visuel kontrol), derefter S1.1 Herbarium-varianter",
+      "next": "S1.1 Herbarium-varianter (kræver Printify-mapping); derefter S2.3 navigation og S4.3 valuta efter ejerbeslutning",
       "blocked_by": "S1.1 Herbarium kræver varianter i Printify; S0.4 5 vanity-301 kræver én Redirection-gruppe (ejer)",
       "modules": [
         {
@@ -20,10 +20,10 @@
         {
           "id": "s1",
           "name": "S1 — butik og indhold",
-          "done": 1.4,
+          "done": 1.7,
           "total": 4.5,
           "unit": "d",
-          "note": "S1.3 kladde-triage færdig (1,0) + S1.1 Herbarium-tekster (0,15) + S1.5 produktlinks delvis (0,3); S1.1-publicering blokeret af varianter"
+          "note": "S1.3 kladde-triage 1,0 + S1.1 Herbarium-tekster 0,15 + S1.5 butikslink 30/30 indlæg 0,55; /go/-tracking mangler"
         },
         {
           "id": "s2",
@@ -36,10 +36,10 @@
         {
           "id": "s3",
           "name": "S3 — hygiejne",
-          "done": 0.6,
+          "done": 1.25,
           "total": 3,
           "unit": "d",
-          "note": "39 alt-tekster + noindex på cookie-side"
+          "note": "S3.1 0,25 + S3.2 0,1 (fire sider i skraldespand) + S3.3 alt-tekst 210 billeder 0,3 + tidligere 0,6; webp/Imagify og plugins mangler"
         },
         {
           "id": "s4",
@@ -216,6 +216,15 @@
       "after": 100.0,
       "delta": 0,
       "basis": "39 af 39 links"
+    },
+    {
+      "date": "2026-11-02",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 39.3,
+      "after": 43.8,
+      "delta": 4.5,
+      "basis": "9,25 af 21,1 d (S0 1,9/2,6 · S1 1,7/4,5 · S2 3/6 · S3 1,25/3 · S4 1,4/5)"
     }
   ]
 }

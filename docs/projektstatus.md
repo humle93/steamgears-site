@@ -22,7 +22,7 @@ Status pr. **2026-11-02** · beregnet af `projektstatus.py` · kilder: [`projekt
 
 | Projekt | Status i dag | Grundlag |
 | --- | --- | --- |
-| **steamgears.eu — site-optimering** *(roadmap S0–S4)* | **39,3 %** | 8,3 af 21,1 d (S0 1,9/2,6 · S1 1,4/4,5 · S2 3/6 · S3 0,6/3 · S4 1,4/5) |
+| **steamgears.eu — site-optimering** *(roadmap S0–S4)* | **43,8 %** | 9,25 af 21,1 d (S0 1,9/2,6 · S1 1,7/4,5 · S2 3/6 · S3 1,25/3 · S4 1,4/5) |
 | **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5) |
 | **SEO-indholdsproduktion** | **0 %** | 0 af 3 guides · drift: Daglig loop kører |
 | **Døde internlinks** | **100 %** | 39 af 39 links |
@@ -33,7 +33,7 @@ Status pr. **2026-11-02** · beregnet af `projektstatus.py` · kilder: [`projekt
 <!-- AUTO:BLOKERINGER:START -->
 | Projekt | Næste skridt | Blokering |
 | --- | --- | --- |
-| steamgears.eu — site-optimering (39,3 %) | S2.3 navigation og S2.4 H1-beslutning (kræver visuel kontrol), derefter S1.1 Herbarium-varianter | S1.1 Herbarium kræver varianter i Printify; S0.4 5 vanity-301 kræver én Redirection-gruppe (ejer) |
+| steamgears.eu — site-optimering (43,8 %) | S1.1 Herbarium-varianter (kræver Printify-mapping); derefter S2.3 navigation og S4.3 valuta efter ejerbeslutning | S1.1 Herbarium kræver varianter i Printify; S0.4 5 vanity-301 kræver én Redirection-gruppe (ejer) |
 | Dark academia-rebrand (63 %) | Batch 4 — mockups (~130 billeder) | Printify-adgang |
 | SEO-indholdsproduktion (0 %) | Skriv guide id 292 (men's steampunk essentials) | ingen |
 | Døde internlinks (100 %) | Vedligehold: tjek nye indlæg mod live-URL'er | ingen |
@@ -48,6 +48,7 @@ Nyeste først. Append-only — rækker må ikke slettes eller ændres.
 
 | Dato | Projekt | Modul | Før → Efter | Δ | Grundlag |
 | --- | --- | --- | --- | --- | --- |
+| 2026-11-02 | steamgears.eu — site-optimering | daglig måling | 39,3 % → 43,8 % | +4,5 | 9,25 af 21,1 d (S0 1,9/2,6 · S1 1,7/4,5 · S2 3/6 · S3 1,25/3 · S4 1,4/5) |
 | 2026-11-02 | Døde internlinks | ingen ændring | 100 % → 100 % | 0 | 39 af 39 links |
 | 2026-11-02 | SEO-indholdsproduktion | ingen ændring | 0 % → 0 % | 0 | 0 af 3 guides |
 | 2026-11-02 | Dark academia-rebrand | ingen ændring | 63 % → 63 % | 0 | 8,5 af 13,5 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5) |
@@ -70,11 +71,11 @@ Manuel tabel — opdateres når roadmap-estimaterne ændres, ikke af scriptet.
 | Band | Estimat | Udført | Rest |
 | --- | --- | --- | --- |
 | S0 — brudt/akut | 2,6 d | 1,9 d | 0,7 d (Health Check, Coming Soon, 5 vanity-301) |
-| S1 — butik og indhold | 4,5 d | 1,4 d | 3,1 d (Herbarium-varianter, skraldespand, `/go/`-tracking, lead magnets) |
+| S1 — butik og indhold | 4,5 d | 1,7 d | 2,8 d (Herbarium-varianter, `/go/`-tracking, lead magnets) |
 | S2 — struktur og SEO | 6,0 d | 3,0 d | 3,0 d (navigation, H1-beslutning, `/shipping/` og `/returns/`) |
-| S3 — hygiejne | 3,0 d | 0,6 d | 2,4 d (webp, designsider, plugins) |
+| S3 — hygiejne | 3,0 d | 1,25 d | 2,4 d (webp, designsider, plugins) |
 | S4 — salgsklar butik | 5,0 d | 1,4 d | 3,6 d (valuta, betaling, anmeldelser) |
-| **I alt** | **21,1 d** | **8,3 d** | **12,8 d** |
+| **I alt** | **21,1 d** | **9,25 d** | **11,85 d** |
 
 Kilde: [`site-roadmap-2026-11-01.md`](site-roadmap-2026-11-01.md) §4 og
 [`library/seo-runde-og-status-2026-11-01.md`](library/seo-runde-og-status-2026-11-01.md) §5 (målt 1/11).
