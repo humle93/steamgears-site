@@ -167,8 +167,13 @@ Sitet annoncerer 206 værktøjer. Fordelingen kan ikke måles uden et credential
 | **ability_bridge** | alt andet | ét værktøj pr. offentlig ability fra et andet plugin (WooCommerce, Rank Math, …) |
 
 Navnene er ikke en gætteleg: AI Engine laver værktøjsnavnet af ability-navnet ved at erstatte alt ud over
-`a-zA-Z0-9_-` med `_`, så `steamgears-autopilot/meta-audit` bliver `steamgears-autopilot_meta-audit`. Vores
-prefix er derfor entydigt, og `--split` krydstjekker samtidig mod CSV'en og melder `mangler_live` (abilities vi
+`a-zA-Z0-9_-` med `_` (`labs/mcp-abilities.php:230`), så `steamgears-autopilot/meta-audit` bliver
+`steamgears-autopilot_meta-audit`. **Én fælde:** er navnet over 64 tegn, klippes det til 57 tegn plus
+`_` plus de første seks tegn af en md5 — så et langt ability-navn er ikke længere et prefix-match. Vores 32
+ligger alle under grænsen, men et langt tredjepartsnavn kan derfor ende i `ability_bridge` uden at være
+fejltolket: spanden er »alt andet«, ikke »en bestemt plugin-familie«.
+
+Vores prefix er entydigt, og `--split` krydstjekker samtidig mod CSV'en og melder `mangler_live` (abilities vi
 registrerer, men som sitet ikke viser — det er sådan en ikke-deployeret version afsløres) og `uventet_live`.
 
 **Regnestykket indtil målingen findes:** 206 − **31** vores (målt af main på 7.22.0) = 175. Af dem er højst

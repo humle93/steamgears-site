@@ -144,7 +144,7 @@ findes i den frie udgave.
 | **Plugins** (installér, aktivér, skift) | `list-plugins`, `manage-plugin`, `update`, `enable-full-access` i vores plugin; `wp_list_plugins` i den frie AI Engine | Vi bygger ikke installér/aktivér: MCP-fladen kan læse plugins men ikke installere dem, og et værktøj der skifter plugin på et produktionssite er en udrulningsknap uden fortrydelse |
 | **Tema** (filer, skift) | `wp_get_templates`, `wp_get_site_style`, `wp_update_site_style`, `wp_edit_blocks` | Fildredigering nej — det er PHP i en aktiv template. Styling er dækket |
 | **Database** (rå SQL) | `wp_get_option`/`wp_update_option` i den frie AI Engine | Nej. En rå query kan ikke annoteres meningsfuldt som læsende eller destruktiv, og den kan ikke fortrydes |
-| **WooCommerce** | **Woo registrerer selv abilities:** `product-create`, `product-update`, `product-delete`, `products-query`, `products-list`, `orders-query`, `order-update-status`, `order-add-note` | Dækket af Woo, ikke af AI Engine. Vi bygger ikke CRUD — men en læsende `product-audit` ville give mening |
+| **WooCommerce** | **Målt i Woo 11.2.1:** syv domæne-abilities, alle `mcp.public = true`, registreret ubetinget — plus ni udfasede REST-spejle med `show_in_rest` | Dækket af Woo gennem AI Engines bro, uden Pro (se §5c). Vi bygger ikke CRUD — men en læsende `product-audit` ville give mening |
 | **Polylang / WPML** | Sitet er ettsproget | Ikke relevant |
 
 **Konklusion:** vi skal ikke genskabe Pro-værktøjerne. Plugin- og temadelen er enten dækket eller bevidst
@@ -153,6 +153,33 @@ man fortryder, og flersproglighed er ikke en problemstilling her. Det vi mangler
 **domskraft**: læsende audits der siger hvad der er galt, så de manuelle runder forsvinder. Rækkefølgen i §5
 står derfor uændret, og `product-audit` (varianter, priser, manglende billeder, schema) bør komme ind som
 nummer fem.
+
+### 5c. Woo-adgangen er målt, ikke antaget
+
+Spørgsmålet var om produkt-CRUD reelt er tilgængeligt gennem AI Engine uden Pro. Fem trin, alle
+afgjort i koden i stedet for i dokumentationen:
+
+1. **Registrering:** `src/Internal/Abilities/AbilitiesRegistry.php:28` kalder `AbilitiesLoader::init()`, som
+   hænger `register_abilities` på `wp_abilities_api_init`/`abilities_api_init` — ingen feature-flag, ingen
+   licens, kun `function_exists( 'wp_register_ability' )`.
+2. **Publicering:** alle syv sætter `'meta' => [ 'mcp' => [ 'public' => true ] ]`
+   (`src/Internal/Abilities/Domain/*.php`, fx `ProductUpdate.php:55`).
+3. **Broen:** AI Engines `labs/mcp-abilities.php:42-48` tager alt med `mcp.public === true` **eller**
+   `show_in_rest`, og et eksplicit `mcp.public = false` vinder. Broen er ikke en indstilling — den hægtes på
+   `mwai_mcp_tools` når `wp_get_abilities` findes.
+4. **Rettigheder:** de følger ability'en, ikke broen. `ProductUpdate::can_update_product()` kræver
+   `wc_rest_check_post_permissions( 'product', 'edit' )`, så MCP-brugeren skal kunne redigere produkter.
+5. **Forudsætning:** WordPress med Abilities API. Sitet svarer `401 rest_forbidden` på
+   `/wp-json/wp-abilities/v1/abilities` og `…/categories` — ruterne findes altså, de kræver bare login.
+
+**Svar:** ja. Syv Woo-værktøjer (`woocommerce_product-create`, `-update`, `-delete`, `products-query`,
+`orders-query`, `order-update-status`, `order-add-note`) er tilgængelige gennem AI Engine uden Pro — plus op
+til ni udfasede REST-spejle, fordi de bærer `show_in_rest` og derfor også går gennem broen. Tilsammen op til
+**16 værktøjer**, som alle lander i `ability_bridge`-spanden når `--split` køres.
+
+Det ændrer ikke beslutningen om ikke at bygge CRUD: funktionaliteten findes allerede, og Wos egne
+`permission_callback`s er bedre end noget vi ville skrive. Det ændrer til gengæld *hvorfor* vi ikke bygger
+den — ikke fordi Pro mangler, men fordi den er der, og dobbeltarbejde ville give to sandheder om samme produkt.
 
 ## 6. Sikkerhed og governance
 
