@@ -1,12 +1,12 @@
 {
   "schema": 1,
-  "updated": "2026-11-01",
+  "updated": "2026-11-02",
   "projects": [
     {
       "id": "site",
       "name": "steamgears.eu — site-optimering",
       "note": "roadmap S0–S4",
-      "next": "S2.1 hub-børnesider (/start-here/ + 5, /build/ + 6, /inspiration/), derefter S1.1 Herbarium-varianter",
+      "next": "S2.3 navigation og S2.4 H1-beslutning (kræver visuel kontrol), derefter S1.1 Herbarium-varianter",
       "blocked_by": "S1.1 Herbarium kræver varianter i Printify; S0.4 5 vanity-301 kræver én Redirection-gruppe (ejer)",
       "modules": [
         {
@@ -28,10 +28,10 @@
         {
           "id": "s2",
           "name": "S2 — struktur og SEO",
-          "done": 2.4,
+          "done": 3.0,
           "total": 6,
           "unit": "d",
-          "note": "S2.5 meta-runde (1,0) + S2.1 /start-here/ og /build/ bygget, børnesider mangler (0,6) + S2.6 hub-links fra 10 guides (0,15)"
+          "note": "S2.5 meta-runde 1,0 + S2.1 to hubs og fem undersider 1,6 + S2.6 hub-links 0,4; navigation, H1 og /inspiration/ mangler"
         },
         {
           "id": "s3",
@@ -180,6 +180,42 @@
       "after": 36.5,
       "delta": 8.1,
       "basis": "7,7 af 21,1 d (S0 1,9/2,6 · S1 1,4/4,5 · S2 2,4/6 · S3 0,6/3 · S4 1,4/5)"
+    },
+    {
+      "date": "2026-11-02",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 36.5,
+      "after": 39.3,
+      "delta": 2.8,
+      "basis": "8,3 af 21,1 d (S0 1,9/2,6 · S1 1,4/4,5 · S2 3/6 · S3 0,6/3 · S4 1,4/5)"
+    },
+    {
+      "date": "2026-11-02",
+      "project": "Dark academia-rebrand",
+      "module": "ingen ændring",
+      "before": 63.0,
+      "after": 63.0,
+      "delta": 0,
+      "basis": "8,5 af 13,5 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5)"
+    },
+    {
+      "date": "2026-11-02",
+      "project": "SEO-indholdsproduktion",
+      "module": "ingen ændring",
+      "before": 0.0,
+      "after": 0.0,
+      "delta": 0,
+      "basis": "0 af 3 guides"
+    },
+    {
+      "date": "2026-11-02",
+      "project": "Døde internlinks",
+      "module": "ingen ændring",
+      "before": 100.0,
+      "after": 100.0,
+      "delta": 0,
+      "basis": "39 af 39 links"
     }
   ]
 }

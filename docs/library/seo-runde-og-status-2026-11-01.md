@@ -72,7 +72,7 @@ Vægte fra [site-roadmap-2026-11-01.md](../site-roadmap-2026-11-01.md). «Færdi
 | **S2 — struktur og SEO** | 6,0 d | 2,4 d | **40 %** | 3,6 d (hub-børnesider, `/inspiration/`, navigation, H1-beslutning) |
 | **S3 — hygiejne** | 3,0 d | 0,6 d | **20 %** | 2,4 d (webp/Imagify, slet private designsider, plugin-rationalisering) |
 | **S4 — butik salgsklar** | 5,0 d | 1,4 d | **27 %** | 3,6 d (valuta, betalinger, anmeldelser, mockups, forsendelse) |
-| **I alt** | **21,1 d** | **7,7 d** | **36,5 %** | **13,4 d** |
+| **I alt** | **21,1 d** | **8,3 d** | **39,3 %** | **12,8 d** |
 
 Omsat til kalendertid: 15,1 d × ~6 effektive timer ≈ **2,5–3 uger**, hvoraf **ca. 8 dage er blokeret af ejerbeslutninger** (CVR/adresse, valuta, betalingsudbydere, Printify-mockups, anmeldelsesplatform). Den reelle kritiske vej er derfor ikke kode, men de fem beslutninger.
 
@@ -135,7 +135,7 @@ Alle seks fik SEO-titel og meta description, og de fire uden produktlinks fik en
 - `/build/` (id 1185) — 15 links: byg efter tid (en aften/weekend/måned), byg-eller-køb, 3D-print, budget, dieselpunk-konvertering.
 - Begge er linket ind fra 10 guides (15, 699, 897, 898, 30 → `/start-here/`; 8, 614, 10, 805, 17 → `/build/`), så ingen af dem er forældreløse.
 
-**Mangler i S2.1:** de 11 undersider (`/start-here/` + 5, `/build/` + 6) og `/inspiration/`. Navigationen er ikke rørt — den kræver visuel kontrol.
+**Undersider (runde 4):** fem bygget — se §5e. De øvrige seks ville blive tynde dubletter af artikler, der allerede findes, og blev derfor ikke bygget.
 
 **Herbarium-tekster skrevet (S1.1, tekst-delen).** Alle 12 kladder (953–956 tees, 965–968 art prints, 969–972 telefoncovers) har nu fuld beskrivelse i samme struktur som de 39 live-produkter: hook, "Why you'll like it", detaljer + måletabel (tees), produktion 3–7 hverdage, levering 6–10 DK · 7–12 EU, pleje, GPSR-blok og kollektionslink. 0 `[PLACEHOLDER]` tilbage, 0 manglende sektioner — verificeret ved genlæsning.
 
@@ -153,7 +153,40 @@ Beregnet af `projektstatus.py` (ikke i hånden):
 |---|---|---|---|---|
 | S0 — brudt/akut | 2,6 d | 1,9 d | **73 %** | 4 af 8 punkter |
 | S1 — butik og indhold | 4,5 d | 1,4 d | **31 %** | S1.3 1,0 + S1.1-tekster 0,15 + S1.5 0,3 |
-| S2 — struktur og SEO | 6,0 d | 2,4 d | **40 %** | S2.5 1,0 + S2.1 0,6 + S2.6 0,15 + tidligere 0,65 |
+| S2 — struktur og SEO | 6,0 d | 3,0 d | **50 %** | S2.5 1,0 + S2.1 1,6 + S2.6 0,4 |
 | S3 — hygiejne | 3,0 d | 0,6 d | **20 %** | alt-tekster + noindex |
 | S4 — salgsklar butik | 5,0 d | 1,4 d | **27 %** | formular + produkttekster |
-| **I alt** | **21,1 d** | **7,7 d** | **36,5 %** | 7,7 af 21,1 d |
+| **I alt** | **21,1 d** | **8,3 d** | **39,3 %** | 8,3 af 21,1 d |
+
+## 5e. Runde 4 — hub-undersider
+
+Fem undersider er bygget, alle under deres hub, alle med RankMath-titel og -beskrivelse, alle i `page-sitemap.xml`:
+
+| Side | ID | URL | Links |
+|---|---|---|---|
+| Steampunk Glossary: The Terms, Explained | 1205 | `/start-here/glossary/` | 10 |
+| Steampunk Characters: Pick Your Archetype | 1208 | `/start-here/characters/` | 23 |
+| Where to Wear It: Steampunk by Occasion | 1211 | `/start-here/occasions/` | 19 |
+| Tools and Materials for Steampunk Builds | 1214 | `/build/tools-and-materials/` | 6 |
+| Weathering and Ageing: Five Techniques | 1217 | `/build/weathering/` | 5 |
+
+**Linkkontrol:** 56 unikke mål på tværs af de fem sider plus de to hubs — **0 dårlige** (testet på både statuskode og sidetitel, ikke kun 200). Begge hubs linker nu ned til deres undersider.
+
+**Hvorfor fem og ikke elleve.** Roadmap'en bad om `/start-here/` + 5 og `/build/` + 6. Seks af de elleve ville have været tynde dubletter af artikler, der allerede findes og er indekseret:
+
+| Foreslået underside | Findes allerede som |
+| --- | --- |
+| Første costume | `/steampunk-cosplay-for-beginners/` |
+| Budget | `/steampunk-cosplay-on-a-budget/` + `/how-to-build-a-steampunk-costume-for-under-100-.../` |
+| Weekend-build | `/how-to-make-a-steampunk-costume/` |
+| Goggles | `/diy-steampunk-goggles/` + `/diy-vs-buy-steampunk-goggles/` |
+| Props / 3D-print | `/3d-print-steampunk-parts/` |
+| Dieselpunk-konvertering | `/dieselpunk-costume/` |
+
+To hubs og en tredje side om samme emne konkurrerer om samme søgeintent og svækker den artikel, der allerede rangerer. De fem, der blev bygget, har intet sidestykke på sitet: et glossary, en karakter-index med købsstier, en occasion-index, en værktøjsliste og en weathering-guide.
+
+**`/inspiration/` er ikke bygget.** `/steampunk-cosplay-gallery/` og `/steampunk-costume-ideas/` dækker allerede den intent. Anbefaling: 301 `/inspiration/` → `/start-here/` i stedet for en tredje index-side — men det kræver Redirection-gruppen (S0.4).
+
+**Ny MCP-erfaring:** `wp_create_page` har ingen slug-parameter, og `wp_update_post` ignorerer `slug`. Slugen fryses ved oprettelse, så en side med lang titel får en lang URL. Løsning: opret med kort titel, omdøb derefter — sluggen bliver stående.
+
+**Stadig i S2:** navigation (S2.3), H1-beslutning (S2.4), `/shipping/` og `/returns/` (S2.2). Alle tre kræver visuel kontrol eller ejerbeslutning.
