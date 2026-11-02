@@ -23,7 +23,9 @@ The whole social autopilot runs inside WordPress (Command Center is retired):
 4. **Measure** – every post links via `/go/<id>/`, so clicks (and WooCommerce
    orders) are counted per channel.
 
-Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.18.0.zip` → Activate.
+Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.22.0.zip` → Activate. On an existing
+install the same zip arrives through the self-updater (see *Updates*), so an upload is only needed for the
+first install or a recovery.
 
 ## Run it from Claude
 
@@ -160,7 +162,29 @@ a newer version shows up under *Plugins* and *Dashboard → Updates* like any pl
 can be switched on there), and the Steamgears dashboard has an **Update now** button. Claude can
 run it too (`steamgears-autopilot/update`). The installed zip is
 `plugins/steamgears-autopilot-v<version>.zip` from `main`, so a release is: bump the version, rebuild
-the zip, merge to `main`.
+the zip, merge to `main` — and then click update. The click is the deploy; nothing changes on the site
+before it, because the MCP surface can read plugins but cannot install or activate them.
+
+### Shipping a release
+
+1. Bump `Version:` in `steamgears-autopilot.php` and `SGAP_VERSION` — they must agree, CI fails otherwise.
+2. Rebuild the zip from the folder so the name and the contents match:
+   `cd plugins && rm -f steamgears-autopilot-*.zip && zip -qr steamgears-autopilot-v<version>.zip steamgears-autopilot`
+3. `php plugins/tests/smoke.php` (208 checks) and `diff -r` the zipped copy against the source. CI repeats
+   both, plus `php -l` on PHP 8.0–8.5 and WordPress 6.4 / 7.1 / latest.
+4. Commit code, zip, README and `ROADMAP.md` together and push to `main`.
+5. **Click *Plugins → Update*** (or *Dashboard → Updates*). Auto-updates can be switched on in the same
+   screen, which makes step 5 happen on its own after the next WP-Cron run.
+
+Check that the release landed, in this order — each step can hide the previous one:
+
+- `wp_get_plugins` reports the new version with `active: true`.
+- A feature from the release answers from the site. For 7.22: a `queue-post` with a banned word is refused
+  and names the word, and the same call with `force` queues it with the word as a warning.
+- `steamgears-autopilot/status` shows the new setting — `quality_gate: {mode, banned_words}` for 7.22.
+
+> **Current release 7.22.0 is not live yet.** steamgears.eu runs 7.21.0 until the update is clicked;
+> site-side status and the reason are in [`docs/roadmap.md`](../../docs/roadmap.md) §2b.
 
 ## Setup
 

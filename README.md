@@ -52,3 +52,7 @@ repo-secrets. Hvilke credentials der faktisk virker, står i [`docs/agent-profil
 [`docs/mcp-auth.md`](docs/mcp-auth.md).
 
 Ændringer på selve sitet sker over MCP, ikke herfra. Repoet dokumenterer og forbereder dem.
+
+Udgivelse af pluginnet er zip'en på `main`: selv-opdateren tilbyder den under *Plugins → Update*, og det klik
+_er_ deploy'en — MCP kan læse plugins, men ikke installere eller aktivere dem. Hvad der kører live mod hvad der
+ligger i repoet, og hvordan en release efterkontrolleres, står i [`docs/roadmap.md`](docs/roadmap.md) §2b.

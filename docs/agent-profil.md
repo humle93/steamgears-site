@@ -83,6 +83,9 @@ Alt her er målt mod den live side eller læst i kilden. Er noget ændret siden 
 
 **Pluginnet** (`plugins/steamgears-autopilot/`, v7.22.0)
 
+- **Version i repo mod live:** repo **7.22.0**, sitet **7.21.0** (målt 2/11 med `wp_get_plugins`) — et
+  plugin-folder kan kun skiftes af WordPress selv, så en release slutter med ejerens *Plugins → Update*-klik,
+  ikke med et push. Status: `docs/roadmap.md` §2b; procedure og efterkontrol: plugin-README §Updates.
 - 21 PHP-filer, 8.257 linjer, 1.153 linjer tests; **21 af 22 subsystemer er live**. Version **7.19.0** tilføjede
   helsides SEO/GEO/AEO-auditten (`includes/site-seo.php`), som erstatter den per-side-optimering der krævede
   ét klik pr. URL. **7.20.0** tilføjede pre-flight-valideringen (`includes/preflight.php`): hver kø-post tjekkes

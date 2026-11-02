@@ -55,7 +55,34 @@ published posts, no order or revenue data. Statements below are limited to what 
 | Caching | W3 Total Cache 2.11.0 + `advanced-cache.php` + `object-cache.php` |
 | SEO | Rank Math 1.0.280, Redirection 5.10.1 |
 | Mail | WP Mail SMTP 4.10.3 (relevant for imported P0.1) |
-| Agent access | Royal MCP 1.5.13 (this connection), Steamgears Autopilot 7.18.0 |
+| Agent access | Royal MCP 1.5.13 (this connection), Steamgears Autopilot **7.21.0 live** / **7.22.0 in this repo** — see §2b |
+
+### 2b. Deployment status (2026-11-02)
+
+The repo ships two things to the site, and they are not always at the same version. The "live" column is read
+from the site itself (`wp_get_plugins`), never inferred from this repo, so it can be re-measured in one call.
+
+| What | In this repo | Live on steamgears.eu | Gap |
+| --- | --- | --- | --- |
+| Steamgears Autopilot | **7.22.0** (`plugins/steamgears-autopilot-v7.22.0.zip`, byte-identical to source) | **7.21.0**, active | **One owner click.** The 7.22.0 quality gate (P1.6) is built, tested and pushed, but not on the site |
+| Royal MCP | — (site-side plugin, not in this repo) | 1.5.13, 270 tools | None |
+
+**Why the gap exists:** a plugin folder can only be replaced by WordPress itself. The MCP surface reads plugins
+but cannot install or activate them, so the last step of every release belongs to the owner — *Plugins → Update*
+or *Dashboard → Updates*, which the plugin's own self-updater feeds from the zip on `main`. Nothing has to be
+uploaded anywhere for 7.22.0; the update is already offered.
+
+**Verifying a release after the click** — in this order, because each step can hide the one before it:
+
+1. `wp_get_plugins` → the `steamgears-autopilot` row reports the new version and `active: true`.
+2. A feature *from the release* answers from the site, not just "no error": for 7.22 a `queue-post` with a
+   banned word must be refused and name the word, and the same call with `force` must queue it with the word as
+   a warning.
+3. `steamgears-autopilot/status` → `quality_gate.mode` reports `block` (the default).
+
+A release that fails step 1 is a failed upload, not a failed build: the zip is compared with `diff -r` locally
+and in CI, so the difference is always on the WordPress side. The procedure itself, with the build commands,
+is in [`plugins/steamgears-autopilot/README.md`](../plugins/steamgears-autopilot/README.md) §Updates.
 
 ---
 
@@ -200,7 +227,7 @@ this document knows what is blocked, by what, and who fixes it. Effort stays as 
 | P2.1–P2.3 Bluesky / Mastodon / Telegram | 2.0 d | Telegram needs a BotFather token; WP Mail SMTP already covers P0.1 | Needs tokens |
 | P2.4 Etsy import or hide the settings | 2.5 d / 0.25 d | Owner decision (§6.2) | **Awaiting decision** |
 | P3.3 PHP 8.5 + WP 7.1 in CI | 0.25 d | None — and production already runs both | **Done as S0.3 in this change** |
-| P1.6 Quality gate before queueing | 1.0 d | None | **Done 4/11 in 7.22.0** — `includes/quality.php` stopper bandeord, døde links, manglende alt-tekst og næsten-dubletter, før posten når køen |
+| P1.6 Quality gate before queueing | 1.0 d | None | **Done 2/11 in 7.22.0 — not yet uploaded** (site runs 7.21.0, §2b) — `includes/quality.php` stopper bandeord, døde links, manglende alt-tekst og næsten-dubletter, før posten når køen |
 | P1.7 Whole-site SEO/GEO/AEO audit | 1.0 d | None | **Done 2/11 in 7.19.0** — `includes/site-seo.php` scans every published URL in one pass and fixes the weakest meta |
 
 **Net effect of importing:** the plugin's P0 block (4.0 d) is not blocked by anything on the site, except
@@ -240,6 +267,7 @@ plugin P0.1–P0.3, P0.5 ──► parallel, different repo, nothing blocks them
 
 | Date | Change |
 |---|---|
+| 2026-11-02 (round 14 — dokumentation og deployment) | Dokumentationspas, ingen kode og ingen procenter flyttet. **§2b er ny:** hvad der ligger i repoet mod hvad der kører på sitet, målt med `wp_get_plugins` — Autopilot **7.22.0 i repo, 7.21.0 live**, altså er quality-gaten fra P1.6 bygget og CI-verificeret men ikke uploadet, fordi et plugin-folder kun kan skiftes af WordPress selv. Sektionen skriver den ene klik-vej (*Plugins → Update* via selv-opdateren) og de tre trin der afgør om en release faktisk virker: version + `active` fra `wp_get_plugins`, et feature-svar fra sitet (en blokeret `queue-post` og samme post med `force`), og `quality_gate.mode` i `status`. Rettet tre forældede steder: §2's snapshot sagde 7.18.0, P1.6-rækken sagde "4/11" (en dato der ikke var indtruffet), og plugin-README'ens installationslinje pegede på v7.18.0-zip'en. Release-proceduren ligger nu i plugin-README §Updates og er refereret herfra. |
 | 2026-11-02 (autonomous round 13) | Plugin 7.22.0: **quality gate før køning** (P1.6). `includes/quality.php` (`SGAP_Quality`) ligger inde i `SGAP_Queue::add()`, som er den eneste vej ind i køen, så Studio, AI-drafts, REST-API'et og Claude-værktøjerne alle rammer samme kontrol. Fire tjek: **bandeord** fra ejerens egen liste (hele ord, og et hashtag tæller som ordet); **døde links** — interne links slås op i WordPress selv, så et slug der er væk eller en post der stadig er kladde fanges, mens arkiver, feeds og søgning genkendes og ikke meldes; **manglende alt-tekst** på fremhævet billede; **næsten-dubletter** mod de sidste 40 poster på samme kanal (85 % ord-overlap, og posten der gentages navngives). Tre tilstande (block/warn/off, standard block) og en `force`-udvej der køer posten med fundene som advarsler; captions under otte ord kaldes aldrig dubletter. Ingen udgående HTTP — eksterne værter probles ikke, og README forklarer hvorfor. 36 nye smoke-checks (172 → 208). Plugin 24,8 % → 29,0 %. |
 | 2026-11-02 (autonomous round 12) | Plugin 7.21.0: **blackout-kalender** (P1.3). `includes/blackout.php` (`SGAP_Blackout`) tager ét datointerval pr. linje i Settings → Schedule & limits (`2026-12-24..2026-12-26 Christmas`). Intet frigives i intervallet, og en post der allerede står i køen flyttes til **næste frie dag samme klokkeslæt** — ikke slettet, og ikke opsparet til ét samlet læs når perioden slutter. Flytningen kører i toppen af publish-tick hvert 15. minut, rører aldrig `published`/`sending`-rækker og er idempotent (en flyttet post flyttes ikke igen). `blocked_reason()` melder `blackout` med intervallets label og hvor posten havner, Queue-siden forklarer det, og en post der stadig er blokeret efter 60 dage placeres alligevel, så en tastefejl ikke kan parkere den for evigt. 21 nye smoke-checks (151 → 172). Plugin 22,7 % → 24,8 %. |
 | 2026-11-02 (autonomous round 11) | Plugin 7.20.0: **pre-flight-validering pr. kanal** (P1.1). `includes/preflight.php` (`SGAP_Preflight`) tørkører hver kø-post mod nettets egne grænser *før* det første Publer-kald: Instagram kræver foto, JPEG, ≥ 320 px og 4:5–1,91:1; Pinterest kræver foto og board; captions og titler tjekkes mod 2 200/500/500/280/300/500/1 024/1 500/3 000/63 206 tegn og mod hashtag-loftet (Threads: præcis én). Det mekaniske **repareres** — ordgrænse-afkortning og overskydende hashtags fjernes — i stedet for at Publer afviser posten og brænder et af de tre forsøg; resten afvises med en besked der navngiver rettelsen. Billedtype og -størrelse læses fra attachment-metadata eller filendelsen, aldrig fra en download, så et billede den ikke kan inspicere blokeres ikke på et gæt. `SGAP_Queue::add()` returnerer de samme tjek som `warnings`, så Studio og en agent ser dem ved oprettelsen, og ability `check-post` tørkører det hele. 23 smoke-checks tilføjet (128 → 151). Plugin 18,5 % → 22,7 %. |
