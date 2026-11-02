@@ -26,6 +26,7 @@ ind i dokumentindekset, så de ikke bliver forældreløse.
 | `docs/site-checks/` | Rutine-tjek af den live side: PageSpeed, GSC, meta, alt-tekster |
 | `reports/` | PDF-projektrapport pr. projekt: status med regnestykket, roadmap-indeks, udviklingsvej og hvad der virker/ikke virker |
 | `tools/project_reports.py` | Genererer rapporterne i `reports/` ud fra `projektstatus.json` og roadmap'erne (`python3 tools/project_reports.py`) |
+| `tools/setup-agent-tools.sh` | Genskaber PHP 8.5 og PDF-bibliotekerne i `tools/_deps` (gitignored) — ingen root nødvendig |
 | `knowledge_base/` | Høstede Google-kilder; læses af `seo_agent.py` sammen med `docs/seo.md` |
 | `plugins/steamgears-autopilot/` | Autopilot-pluginnet + dets egen `ROADMAP.md` |
 | `backup-2026-10-23/` | Fuld WP REST-backup taget lige før genopbygningen |
