@@ -65,14 +65,23 @@ from the site itself (`wp_get_plugins`), never inferred from this repo, so it ca
 
 | What | In this repo | Live on steamgears.eu | Gap |
 | --- | --- | --- | --- |
-| Steamgears Autopilot | **7.24.0** (`plugins/steamgears-autopilot-v7.24.0.zip`, byte-identical to source) | **7.22.0**, active (measured 2/11 2026) | **One version** — 7.24.0 waits for the owner's *Plugins → Update* click; nothing else is missing |
+| Steamgears Autopilot | **7.25.0** (`plugins/steamgears-autopilot-v7.25.0.zip`, byte-identical to source) | **7.22.0**, active (measured 2/11 2026) | **One version** — 7.25.0 waits for the update; the plugin's own `steamgears-autopilot/update` ability can run it from MCP; nothing else is missing |
 | MCP server | AI Engine 3.9.0 (site-side, not in this repo) | `/wp-json/mcp/v1/http`, OAuth approved 2/11 2026, 206 tools | **Read access only** — AI Engine's *Drafts Only* is on, so `queue-post` is refused |
 
 **Measured 2/11 2026, after the owner approved the OAuth client:** `wp_list_plugins` returns
 `{"Name": "Steamgears Autopilot", "Version": "7.22.0"}` and `steamgears-autopilot/status` reports
 `version: 7.22.0` with `latest_on_github: 7.22.0`. The release that sat blocked on one click is therefore on the
-site, and step 1 below passes. **7.24.0** (the campaign name as a setting and a per-post field) is built,
-tested and zipped but not clicked yet — until it is, the site keeps emitting the old hardcoded campaign value.
+site, and step 1 below passes. **7.25.0** is built, tested and zipped but not installed yet; it carries 7.24.0's
+campaign name (the setting plus a per-post field) and 7.25.0's `angle`/`content_type`/`format` on `queue-post`.
+Until it is installed the site keeps emitting the old hardcoded campaign value, and a hand-written post can only
+enter the queue as `angle_a`/`post`.
+
+**Measured 2/11 2026 with the new OAuth token:** `status` reports `version: 7.22.0`, `latest_on_github: 7.22.0`
+and a queue of **35 queued / 10 published**, `publish_mode: rss`, Publer configured. `POST
+/wp-json/sgap/v1/queue` with the same Bearer token answers **401** (`Sorry, you are not allowed to do that`):
+the token authenticates AI Engine's MCP surface, not the plugin's own REST namespace. The plugin's 31 abilities
+do answer over MCP (`queue-post`, `check-post`, `list-queue`, …), so that is the write path — `tools/load_campaign.py
+--post` now uses it.
 
 **The quality gate is live but could only be half-proven here.** `status` reports `quality_gate: {mode: block,
 banned_words: 0}`, and `check-post` refuses a post that links to a placeholder (`placeholder_link`, severity

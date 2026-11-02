@@ -6,7 +6,9 @@ fælles plan. Derfor tjekker dette værktøj payloaden mod de samme regler som p
 bruger, *før* noget sendes:
 
 - `SGAP_Queue::add()` kræver `channel`, `title`, `destination_url`, og afviser et
-  gentaget `channel|destination|title` som 409 (fingerprint).
+  gentaget `channel|destination|title` som 409 (fingerprint). Posterne lægges i køen gennem
+  MCP-abilliteten `steamgears-autopilot/queue-post`, fordi det OAuth-token AI Engine udsteder
+  gælder MCP-fladen og ikke pluginets eget REST-namespace (`/sgap/v1/queue` svarer 401).
 - `SGAP_Quality` blokerer captions med >= 0,85 ord-overlap mod de seneste 40 pr. kanal,
   døde links, placeholder-hosts og manglende billede på Instagram/Pinterest.
 - Køen frigiver højst `daily_cap` (8) poster i døgnet og intet i stille-timerne 23-07.
@@ -27,13 +29,10 @@ import json
 import os
 import re
 import sys
-import urllib.error
-import urllib.request
 from datetime import datetime, timedelta
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-API = os.environ.get("SGAP_API_BASE") or "https://steamgears.eu/wp-json/sgap/v1"
 SITE_HOST = (os.environ.get("SGAP_SITE_HOST") or "steamgears.eu").lower()
 CHANNELS = ("facebook", "instagram", "pinterest")
 NEEDS_IMAGE = ("instagram", "pinterest")
@@ -213,56 +212,75 @@ def summarize(payload: dict, result: dict) -> None:
           if result["ok"] else f"{len(result['errors'])} fejl — intet blev sendt.")
 
 
-def token() -> str | None:
+def mcp_client():
+    """MCP-klienten fra mcp_rest.py: auth + ét håndtryk, eller (None, fejltekst).
+
+    REST-ruten `/wp-json/sgap/v1/queue` svarer 401 for det OAuth-token AI Engine udsteder —
+    tokenet gælder MCP-fladen, ikke pluginets eget namespace. Derfor går indlæsningen gennem
+    abilliteten `steamgears-autopilot/queue-post`, som er den samme SGAP_Queue::add() med
+    samme quality-gate, blot ad den vej der faktisk er åben.
+    """
     sys.path.insert(0, str(Path(__file__).resolve().parent))
     try:
-        import mcp_oauth
-    except Exception:  # pragma: no cover - kun når filen er flyttet
-        return os.environ.get("MCP_ACCESS_TOKEN") or None
-    return mcp_oauth.access_token() or os.environ.get("MCP_ACCESS_TOKEN") or None
+        import mcp_rest
+    except Exception as exc:  # pragma: no cover - kun når filen er flyttet
+        return None, f"kunne ikke importere tools/mcp_rest.py: {exc}"
+    auth = mcp_rest.resolve_auth()
+    if not auth:
+        return None, "ingen credential — kør tools/mcp_oauth.py --start (OAuth), eller sæt MCP_ACCESS_TOKEN"
+    ok, detail = mcp_rest.handshake(auth)
+    if not ok:
+        return None, f"MCP-håndtryk fejlede: {detail}"
+    return (mcp_rest, auth), ""
 
 
-def post_item(item: dict, bearer: str) -> tuple[int, dict | str]:
+def post_item(client, item: dict) -> tuple[bool, dict | str, bool]:
+    """Returnerer (ok, svar, var_dublet). Svar er abilityens JSON eller en fejltekst."""
+    mcp_rest, auth = client
     body = {key: item[key] for key in POSTED if item.get(key) not in (None, "")}
-    request = urllib.request.Request(
-        f"{API}/queue",
-        data=json.dumps(body).encode(),
-        method="POST",
-        headers={"Content-Type": "application/json", "Accept": "application/json",
-                 "Authorization": f"Bearer {bearer}", "User-Agent": "steamgears-campaign/1.0"},
-    )
+    payload = {"jsonrpc": "2.0", "id": 3, "method": "tools/call",
+               "params": {"name": "steamgears-autopilot_queue-post", "arguments": body}}
+    status, raw, _ = mcp_rest.post(payload, auth)
+    parsed = mcp_rest.parse_body(raw) or {}
+    if "result" not in parsed:
+        return False, parsed.get("error") or f"HTTP {status}: {str(raw)[:200]}", False
+    result = parsed["result"]
+    text = ""
+    for part in result.get("content") or []:
+        if part.get("type") == "text":
+            text = part.get("text") or ""
+            break
     try:
-        with urllib.request.urlopen(request, timeout=40) as response:
-            raw = response.read().decode("utf-8", "replace")
-            try:
-                return response.status, json.loads(raw)
-            except ValueError:
-                return response.status, raw
-    except urllib.error.HTTPError as exc:
-        raw = exc.read().decode("utf-8", "replace")
-        try:
-            return exc.code, json.loads(raw)
-        except ValueError:
-            return exc.code, raw
-    except urllib.error.URLError as exc:
-        return 0, f"nåede ikke {API}: {exc.reason}"
+        data = json.loads(text) if text else result
+    except ValueError:
+        data = text
+    if result.get("isError"):
+        message = data.get("message") if isinstance(data, dict) else str(data)
+        return False, message or text or "ukendt fejl", "already queued" in str(message).lower()
+    return True, data, False
 
 
-def push(items: list[dict], bearer: str) -> int:
+def push(items: list[dict]) -> int:
+    client, error = mcp_client()
+    if client is None:
+        print(f"[FEJL] {error}")
+        return 1
     placed, skipped, failed = 0, 0, 0
     for item in items:
-        status, body = post_item(item, bearer)
+        ok, body, duplicate = post_item(client, item)
         title = str(item.get("title"))[:48]
-        if status in (200, 201) and isinstance(body, dict) and body.get("id"):
+        if ok and isinstance(body, dict) and body.get("id"):
             placed += 1
             print(f"[KØ] #{body['id']} {title} → {body.get('utm_url') or body.get('tracking_url') or ''}")
-        elif status == 409:
+            for warning in body.get("warnings") or []:
+                print(f"      [ADVARSEL] {warning}")
+        elif duplicate:
             skipped += 1
             print(f"[FINDES] {title} — samme kanal+link+titel er allerede i køen")
         else:
             failed += 1
             detail = body.get("message") if isinstance(body, dict) else body
-            print(f"[FEJL] {title} — HTTP {status}: {str(detail)[:200]}")
+            print(f"[FEJL] {title} — {str(detail)[:300]}")
             break
     print(f"Sat i kø: {placed} · fandtes allerede: {skipped} · fejlede: {failed}")
     return 0 if failed == 0 else 1
@@ -361,11 +379,7 @@ def main() -> int:
     if not result["ok"] or not args.post:
         return 0 if result["ok"] else 1
 
-    bearer = token()
-    if not bearer:
-        print("Ingen credential — kør tools/mcp_oauth.py --start, eller sæt MCP_ACCESS_TOKEN.")
-        return 1
-    return push(result["items"], bearer)
+    return push(result["items"])
 
 
 if __name__ == "__main__":

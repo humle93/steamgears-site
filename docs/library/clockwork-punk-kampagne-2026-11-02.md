@@ -82,9 +82,14 @@ python3 tools/load_campaign.py docs/library/clockwork-punk-koe-2026-11-02.json -
 python3 tools/load_campaign.py --selftest      # 13 fixtures
 ```
 
-`--post` rammer `POST /wp-json/sgap/v1/queue`, som er den eneste vej ind i køen, og som selv kører
-`SGAP_Quality` og fingerprint-tjekket. Et 409 betyder at posten allerede ligger der — indlæseren springer den
-over i stedet for at fejle, så kommandoen kan køres igen uden at lave dubletter.
+`--post` går gennem MCP-abilliteten `steamgears-autopilot/queue-post`, fordi OAuth-tokenet fra AI Engine gælder
+MCP-fladen og ikke pluginets eget namespace: `POST /wp-json/sgap/v1/queue` svarer **401** (`Sorry, you are not
+allowed to do that`) med samme token. Abilliteten kalder den samme `SGAP_Queue::add()`, så quality-gaten og
+fingerprint-tjekket kører uændret. Ligger posten allerede der, svarer den "Already queued" og indlæseren
+springer den over i stedet for at fejle, så kommandoen kan køres igen uden at lave dubletter.
+
+Abilliteten tager først `angle`, `content_type` og `format` fra **7.25.0**; indtil den version er installeret på
+sitet, kan en håndskrevet post kun lande som `angle_a`/`post`, og så mister serien sin vinkeltest.
 
 ## 5. Måling
 
