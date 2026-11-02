@@ -1,130 +1,196 @@
-import sys
-import os
+#!/usr/bin/env python3
+"""wp_mcp_stdio.py — stdio-bro til Royal MCP på steamgears.eu.
+
+MCP-ruten accepterer **kun** `Authorization: Bearer <nøgle>` — ikke et WordPress
+application password. Denne bro læser en Royal MCP-API-nøgle og videresender
+JSON-RPC-linjer fra stdin til `https://steamgears.eu/mcp`, så en klient uden
+browser (CI, script, Claude Desktop uden OAuth) kan bruge de samme værktøjer.
+
+Nøglen læses i denne rækkefølge:
+  1. miljøvariablen ROYAL_MCP_API_KEY
+  2. .env i repoets rod (gitignored)
+  3. ~/.royal_mcp_key
+
+Brug:
+    printf '%s\\n' '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | python3 wp_mcp_stdio.py
+    python3 wp_mcp_stdio.py --check     # initialize + tools/list, KPI-linje på stdout
+
+Fejler kaldet, skrives et JSON-RPC-error-objekt på stdout, så protokollen holdes intakt;
+diagnostik går til stderr. Nøglen printes aldrig.
+"""
+
+from __future__ import annotations
+
 import json
-import base64
+import os
+import re
+import sys
+import urllib.error
 import urllib.request
-import urllib.parse
-import subprocess
-from http.server import HTTPServer, BaseHTTPRequestHandler
+from pathlib import Path
 
-WP_SITE = "https://steamgears.eu"
-WP_MCP_URL = f"{WP_SITE}/wp-json/royal-mcp/v1/mcp"
-AUTH_FILE = os.path.expanduser("~/.gemini/steamgears_auth.json")
-CALLBACK_PORT = 8765
+ROOT = Path(__file__).resolve().parent
+SITE = os.getenv("WP_SITE", "https://steamgears.eu").rstrip("/")
+URL = f"{SITE}/mcp"
+PROTOCOL = "2025-06-18"
+KEY_FILE = Path.home() / ".royal_mcp_key"
 
-class AuthCallbackHandler(BaseHTTPRequestHandler):
-    auth_data = None
 
-    def log_message(self, format, *args):
-        pass
-
-    def do_GET(self):
-        parsed = urllib.parse.urlparse(self.path)
-        params = urllib.parse.parse_qs(parsed.query)
-
-        if "user_login" in params and "password" in params:
-            AuthCallbackHandler.auth_data = {
-                "user": params["user_login"][0],
-                "password": params["password"][0]
-            }
-            self.send_response(200)
-            self.send_header("Content-Type", "text/html; charset=utf-8")
-            self.end_headers()
-            html = """
-            <html><body style="background:#121212;color:#00e676;font-family:sans-serif;text-align:center;padding-top:20%;">
-            <h1>&#10004; Steamgears.eu Autoriseret!</h1>
-            <p style="color:#ccc;">Nøglen er gemt i Termux. Du kan lukke fanen og gå tilbage til terminalen.</p>
-            </body></html>
-            """
-            self.wfile.write(html.encode("utf-8"))
-        else:
-            self.send_response(400)
-            self.end_headers()
-            self.wfile.write(b"Mangler login-parametre eller autorisering blev afvist.")
-
-def authorize_via_browser():
-    os.makedirs(os.path.dirname(AUTH_FILE), exist_ok=True)
-    callback_url = f"http://127.0.0.1:{CALLBACK_PORT}/callback"
-    auth_url = (
-        f"{WP_SITE}/wp-admin/authorize-application.php?"
-        f"app_name=Gemini_CLI_Termux&"
-        f"success_url={urllib.parse.quote(callback_url, safe='')}"
-    )
-
-    sys.stderr.write("\n[Steamgears MCP] Åbner browser for autorisering...\n")
-    sys.stderr.write(f"Hvis browseren ikke åbner automatisk, åbn dette link:\n{auth_url}\n\n")
+def log(message: str) -> None:
+    sys.stderr.write(f"[royal-mcp] {message}\n")
     sys.stderr.flush()
 
+
+def read_key() -> str:
+    key = os.getenv("ROYAL_MCP_API_KEY", "").strip()
+    if key:
+        return key
+    env_file = ROOT / ".env"
+    if env_file.exists():
+        for line in env_file.read_text(encoding="utf-8", errors="replace").splitlines():
+            match = re.match(r"\s*ROYAL_MCP_API_KEY\s*=\s*(.+?)\s*$", line)
+            if match:
+                return match.group(1).strip().strip("'\"")
+    if KEY_FILE.exists():
+        return KEY_FILE.read_text(encoding="utf-8").strip()
+    return ""
+
+
+def parse_messages(raw: str, content_type: str) -> list[dict]:
+    """Royal MCP svarer enten rent JSON eller som SSE (`data:`-linjer)."""
+    if "text/event-stream" in content_type:
+        messages: list[dict] = []
+        chunk: list[str] = []
+        for line in raw.splitlines() + [""]:
+            if line.startswith("data:"):
+                chunk.append(line[5:].strip())
+            elif not line.strip() and chunk:
+                payload = "\n".join(chunk)
+                chunk = []
+                try:
+                    messages.append(json.loads(payload))
+                except ValueError:
+                    log(f"kunne ikke læse SSE-besked: {payload[:120]}")
+        return messages
+    if not raw.strip():
+        return []
     try:
-        subprocess.run(["termux-open-url", auth_url], check=False)
-    except FileNotFoundError:
-        pass
+        parsed = json.loads(raw)
+    except ValueError:
+        log(f"svaret var ikke JSON: {raw[:200]}")
+        return []
+    return parsed if isinstance(parsed, list) else [parsed]
 
-    server = HTTPServer(("127.0.0.1", CALLBACK_PORT), AuthCallbackHandler)
-    while AuthCallbackHandler.auth_data is None:
-        server.handle_request()
-    server.server_close()
 
-    with open(AUTH_FILE, "w") as f:
-        json.dump(AuthCallbackHandler.auth_data, f)
-    os.chmod(AUTH_FILE, 0o600)
-    sys.stderr.write("[Steamgears MCP] Autorisering gennemført og gemt!\n")
-    sys.stderr.flush()
-    return AuthCallbackHandler.auth_data
+class Bridge:
+    def __init__(self, key: str) -> None:
+        self.key = key
+        self.session_id = ""
+        self.initialized = False
 
-def get_auth_header():
-    if os.path.exists(AUTH_FILE):
+    def post(self, payload: dict) -> list[dict]:
+        headers = {
+            "Content-Type": "application/json",
+            "Accept": "application/json, text/event-stream",
+            "User-Agent": "steamgears-mcp-stdio/2.0",
+        }
+        if self.key:
+            headers["Authorization"] = f"Bearer {self.key}"
+        if self.session_id:
+            headers["Mcp-Session-Id"] = self.session_id
+        request = urllib.request.Request(
+            URL, data=json.dumps(payload).encode("utf-8"), headers=headers, method="POST"
+        )
         try:
-            with open(AUTH_FILE, "r") as f:
-                data = json.load(f)
-            if "token" in data and data["token"]:
-                return f"Bearer {data['token']}"
-            creds = f"{data['user']}:{data['password']}"
-            encoded = base64.b64encode(creds.encode("utf-8")).decode("utf-8")
-            return f"Basic {encoded}"
-        except Exception:
-            pass
-    data = authorize_via_browser()
-    creds = f"{data['user']}:{data['password']}"
-    encoded = base64.b64encode(creds.encode("utf-8")).decode("utf-8")
-    return f"Basic {encoded}"
+            with urllib.request.urlopen(request, timeout=60) as response:
+                session = response.headers.get("Mcp-Session-Id", "")
+                if session:
+                    self.session_id = session
+                return parse_messages(
+                    response.read().decode("utf-8", "replace"),
+                    response.headers.get("Content-Type", ""),
+                )
+        except urllib.error.HTTPError as exc:
+            body = exc.read().decode("utf-8", "replace")[:300]
+            if exc.code == 401 and not self.key:
+                raise RuntimeError(
+                    "401 — ingen ROYAL_MCP_API_KEY. Lav nøglen i wp-admin → Royal MCP → "
+                    "Settings og sæt den som miljøvariabel eller i ~/.royal_mcp_key."
+                ) from exc
+            raise RuntimeError(f"HTTP {exc.code}: {body}") from exc
+        except urllib.error.URLError as exc:
+            raise RuntimeError(f"nåede ikke {URL}: {exc.reason}") from exc
 
-if __name__ == "__main__":
-    if "--auth" in sys.argv:
-        authorize_via_browser()
-        sys.exit(0)
+    def handle(self, message: dict) -> list[dict]:
+        method = message.get("method", "")
+        results = self.post(message)
+        if method == "initialize":
+            self.post({"jsonrpc": "2.0", "method": "notifications/initialized"})
+            self.initialized = True
+        return results
 
-    auth_header = get_auth_header()
+
+def main() -> int:
+    key = read_key()
+    bridge = Bridge(key)
+    if not key:
+        log("ingen nøgle fundet — kalder alligevel, så fejlen bliver synlig")
+
+    if "--check" in sys.argv:
+        try:
+            messages = bridge.handle(
+                {
+                    "jsonrpc": "2.0",
+                    "id": 1,
+                    "method": "initialize",
+                    "params": {
+                        "protocolVersion": PROTOCOL,
+                        "capabilities": {},
+                        "clientInfo": {"name": "verify", "version": "1"},
+                    },
+                }
+            )
+            server = next((m.get("result", {}).get("serverInfo", {}) for m in messages if "result" in m), {})
+            tools = bridge.handle({"jsonrpc": "2.0", "id": 2, "method": "tools/list"})
+            names = [
+                tool.get("name", "")
+                for message in tools
+                for tool in message.get("result", {}).get("tools", [])
+            ]
+            print(json.dumps({
+                "ok": True,
+                "server": server,
+                "session": bool(bridge.session_id),
+                "tools": len(names),
+                "first": names[:8],
+            }, ensure_ascii=False))
+            return 0
+        except RuntimeError as exc:
+            print(json.dumps({"ok": False, "error": str(exc)}, ensure_ascii=False))
+            return 1
 
     for line in sys.stdin:
         line = line.strip()
         if not line:
             continue
         try:
-            req = urllib.request.Request(
-                WP_MCP_URL,
-                data=line.encode("utf-8"),
-                headers={
-                    "Content-Type": "application/json",
-                    "Authorization": auth_header,
-                    "User-Agent": "Gemini-CLI-Termux/1.0"
-                },
-                method="POST"
-            )
-            with urllib.request.urlopen(req, timeout=30) as response:
-                res_body = response.read().decode("utf-8").strip()
-                if res_body:
-                    sys.stdout.write(res_body + "\n")
-                    sys.stdout.flush()
-        except Exception as e:
-            try:
-                msg_id = json.loads(line).get("id")
-            except Exception:
-                msg_id = None
-            err = {
+            message = json.loads(line)
+        except ValueError:
+            log("stdin var ikke JSON")
+            continue
+        try:
+            for reply in bridge.handle(message):
+                sys.stdout.write(json.dumps(reply, ensure_ascii=False) + "\n")
+                sys.stdout.flush()
+        except RuntimeError as exc:
+            sys.stdout.write(json.dumps({
                 "jsonrpc": "2.0",
-                "id": msg_id,
-                "error": {"code": -32000, "message": str(e)}
-            }
-            sys.stdout.write(json.dumps(err) + "\n")
+                "id": message.get("id"),
+                "error": {"code": -32000, "message": str(exc)},
+            }, ensure_ascii=False) + "\n")
             sys.stdout.flush()
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

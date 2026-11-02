@@ -2,9 +2,9 @@
   "mcpServers": {
     "steamgears": {
       "type": "http",
-      "url": "https://steamgears.eu/wp-json/royal-mcp/v1/mcp",
+      "url": "https://steamgears.eu/mcp",
       "headers": {
-        "Authorization": "Basic ${ROYAL_MCP_AUTH}"
+        "Authorization": "Bearer ${ROYAL_MCP_API_KEY}"
       }
     },
     "publer": {

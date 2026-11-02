@@ -110,7 +110,7 @@ Alt her er målt mod den live side eller læst i kilden. Er noget ændret siden 
 | Python 3.12 + PDF-biblioteker | ✅ i `tools/_deps` | rapporter i `reports/` |
 | PHP 8.5.8 (statisk binær) | ✅ i `tools/_deps/bin/php` | `php -l`, ikke tests |
 | **Skrive til sitet** | ❌ 401 | S2.3, S4.1, S4.3, S0.4 kan forberedes, ikke udføres |
-| MCP mod sitet | ❌ ingen `ROYAL_MCP_AUTH` | Royal MCP svarer 401 |
+| MCP mod sitet | ❌ ingen `ROYAL_MCP_API_KEY` | Royal MCP svarer 401; kun `Bearer <API-nøgle>` virker (application password afvises) |
 | Publer MCP | ❌ ingen `PUBLER_API_KEY` | kan ikke planlægge opslag |
 | Browser / Lighthouse | ❌ | ingen visuel eller ydelsesverifikation |
 | Root / `apt` | ❌ | brug statiske binærer (se opskrifter) |
@@ -124,9 +124,10 @@ PYTHONPATH=tools/_deps python3 tools/project_reports.py
 tools/_deps/bin/php -l plugins/steamgears-autopilot/steamgears-autopilot.php
 ```
 
-**Blokeringer der kræver ejeren** (skriv dem i svaret, forsøg dem ikke): WordPress application password
-(`ROYAL_MCP_AUTH`), Publer-nøgle, repo-secrets `GEMINI_API_KEY`/`WP_USER`/`WP_APP_PASS`, CVR/adresse til
-GPSR og imprint, Printify-variantmapping, én Redirection-gruppe til de fem vanity-301'er.
+**Blokeringer der kræver ejeren** (skriv dem i svaret, forsøg dem ikke): Royal MCP API-nøgle
+(`ROYAL_MCP_API_KEY`, laves i wp-admin), WordPress application password til REST-skrivning, Publer-nøgle,
+repo-secrets `GEMINI_API_KEY`/`WP_USER`/`WP_APP_PASS`, CVR/adresse til GPSR og imprint, Printify-variantmapping,
+én Redirection-gruppe til de fem vanity-301'er.
 
 ---
 
@@ -144,14 +145,21 @@ curl -s -A 'Mozilla/5.0' https://steamgears.eu/<side>/ \
 curl -s 'https://steamgears.eu/wp-json/wp/v2/product?per_page=100&_fields=id,slug,link' | jq 'length'
 curl -s -D- -o /dev/null 'https://steamgears.eu/wp-json/wp/v2/product?per_page=1' | grep -i x-wp-total
 
-# MCP-håndtryk (kræver ROYAL_MCP_AUTH)
-curl -sS -X POST https://steamgears.eu/wp-json/royal-mcp/v1/mcp \
+# MCP-håndtryk (kræver ROYAL_MCP_API_KEY; Bearer er den eneste accepterede credential)
+curl -sS -X POST https://steamgears.eu/mcp \
   -H 'Content-Type: application/json' -H 'Accept: application/json, text/event-stream' \
-  -u "$(cat ~/.royal_mcp_auth)" \
+  -H "Authorization: Bearer $ROYAL_MCP_API_KEY" \
   -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"verify","version":"1"}}}'
+
+# Samme håndtryk gennem stdio-broen (bruges når nøglen ligger i .env eller ~/.royal_mcp_key)
+python3 wp_mcp_stdio.py --check
+
+# Offentlig læsning uden nogen credential (Store API)
+curl -sS 'https://steamgears.eu/wp-json/wc/store/v1/products?per_page=1' | head -c 200
 ```
 
-MCP-opsætningen i detaljer (Basic vs OAuth, fejlkoder, Publers to nøgletyper): [`docs/mcp-auth.md`](mcp-auth.md).
+MCP-opsætningen i detaljer (målt auth-matrix, API-nøgle vs OAuth, fejlkoder, Publers to nøgletyper):
+[`docs/mcp-auth.md`](mcp-auth.md).
 Profilen kan også læses over MCP via den lokale server `tools/mcp_project_profile.py`
 (se [`../.mcp.json`](../.mcp.json)) — den kræver ingen site-credential.
 
