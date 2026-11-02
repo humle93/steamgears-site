@@ -113,3 +113,4 @@ Høstede Google-kilder i [`knowledge_base/`](../../knowledge_base/) (indlæses a
 - [`../competitors.md`](../competitors.md) — Competitor Watch
 - [`../command-center-kilde.md`](../command-center-kilde.md) — hvor Command Center-kilden ligger
 - [`command-center/`](command-center/) — Command Centers egen dokumentation hentet 2/11 2026 (roadmap, arkitektur/sikkerhed, bruger- og systemmanual) fra `humle93/command-center` @ `ac7dd53`
+- [`command-center-opdatering-2026-11-02.md`](command-center-opdatering-2026-11-02.md) — opdatering af CC på Ultra.cc til 7.14 med bruger-login (tjek, backup, tre opdateringsveje, fejlsøgning)

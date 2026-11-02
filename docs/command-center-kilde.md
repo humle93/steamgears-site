@@ -9,7 +9,7 @@ Målt 2/11 2026.
 
 | Placering | Status | Version | Handling |
 | --- | --- | --- | --- |
-| GitHub `humle93/command-center` (`main`) | **Master** | v7.10 (merget 31/10) | brug denne |
+| GitHub `humle93/command-center` (`main`) | **Master** | v7.14.0 @ `ac7dd53` (målt 2/11) | brug denne |
 | GitHub `humle93/command-center` (`master`) | forældet skelet | — | kan slettes |
 | Drive `command-center-main/` | ryddet 2/11 2026 | v7.9, 26/10 | ligger i skraldespanden, kan gendannes |
 | GitHub `steamgears-site` (dette repo) | dokumentation og assets | — | må ikke bruges som Command Center-kilde |
@@ -49,6 +49,7 @@ Målt 2/11 2026.
 
 ## Referencer
 
+- [`library/command-center-opdatering-2026-11-02.md`](library/command-center-opdatering-2026-11-02.md) — sådan opdateres installationen på Ultra.cc til 7.14 med bruger-login (første besøg opretter brugeren på `/setup`; `APP_TOKEN` findes ikke siden 7.11).
 - [Statusdokument i Drive](https://docs.google.com/document/d/1Uk4mRpWRcaOyEYi7WaYEXVSTjx6RT7TGSuDjFpXSJRc/edit) — »LÆS MIG – Command Center status 31-10«.
 - [`humle93/command-center`](https://github.com/humle93/command-center) — kilden til Command Center.
 - [`README.md`](../README.md) — dette repos scope.
