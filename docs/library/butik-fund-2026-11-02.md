@@ -49,7 +49,7 @@ forsøg og for den færdige spec. Uanset det tekniske er den egentlige blokering
 
 ## Rettelse til tidligere dokumentation
 
-`seo-runde-og-status-2026-11-01.md` §5c hævdede, at art prints og telefoncovers lå under "T-Shirts".
+`../seo.md` §5c hævdede, at art prints og telefoncovers lå under "T-Shirts".
 Det er **forkert**. Kontrolleret 2/11:
 
 - 953–956 (tees) → `gaslight`, `t-shirts`

@@ -1,6 +1,6 @@
 # Keyword-morgenscan — 26/10 2026 (man)
 
-Kilder: Google Autocomplete (live, suggestqueries, gl=us, hl=en), web_search SERP-tjek (live), GSC-snapshot i SearchCoverage-DB (38/10/24). Fortsætter scan 24/10 (keyword-og-konkurrent-scan-24-10.md).
+Kilder: Google Autocomplete (live, suggestqueries, gl=us, hl=en), web_search SERP-tjek (live), GSC-snapshot i SearchCoverage-DB (38/10/24). Fortsætter scan 24/10 (../seo.md).
 
 ## 1. NYE signaler siden 24/10 (autocompleten har flyttet sig)
 

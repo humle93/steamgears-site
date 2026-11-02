@@ -1,6 +1,6 @@
 # Butiksaudit — WooCommerce + Printify — 1/11 2026
 
-Fuld gennemgang af steamgears.eu som Printify-dropshippingbutik, målt mod gældende praksis for print-on-demand i WooCommerce og mod danske/EU-krav til netbutikker. Supplerer [indholdsaudit-2026-11-01.md](indholdsaudit-2026-11-01.md), [dode-links-2026-11-01.md](dode-links-2026-11-01.md) og [site-roadmap-2026-11-01.md](../site-roadmap-2026-11-01.md).
+Fuld gennemgang af steamgears.eu som Printify-dropshippingbutik, målt mod gældende praksis for print-on-demand i WooCommerce og mod danske/EU-krav til netbutikker. Supplerer [indholdsaudit-2026-11-01.md](indholdsaudit-2026-11-01.md), [dode-links-2026-11-01.md](dode-links-2026-11-01.md) og [roadmap.md](../roadmap.md).
 
 ## Metode
 

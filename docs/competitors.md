@@ -73,7 +73,7 @@ Seed list:
 - airshipflamel #1 på "diy steampunk goggles" = 2014-hobbyblog, bankable.
 - Verificerede huller (SERP live): "steampunk outfit ideas for women", "steampunk costume for couples", "how much does a steampunk outfit cost" — ingen dedikeret guide.
 - Autocomplete: female/male-splits dominerer; NYT: "steampunk outfit dress to impress / dti" (Roblox DTI-trend); corset-kluster (outfit/pattern/belt) ubeskrevet.
-- Fulde plan + 10 guide-prioriteter: /workspace/library/content-plan-2026-10-24/keyword-og-konkurrent-scan-24-10.md
+- Fulde plan + 10 guide-prioriteter: /workspace/library/content-plan-2026-10-24/seo.md
 
 ### SERP cross-tjek 24/10 (poster-klusteret, web_search live gl=us)
 - "steampunk poster": Displate ×2, Etsy, Adobe Stock, ScienceSource + Pinterest ×2. Ren marketplace, 0 niche-content.
@@ -82,7 +82,7 @@ Seed list:
 - Konklusion: kategorisider dominerer stadig; ingen nye domæner vs. watchlist; Pinterest holder 3-4 slots pr. query.
 
 ## Scan 2026-10-24 (poster-vertical cross-tjek)
-- Queries: "steampunk poster", "steampunk wall art", "pirate poster art" — detaljer: /library/content-plan-2026-10-24/serp-crosstjek-posters-24-10.md
+- Queries: "steampunk poster", "steampunk wall art", "pirate poster art" — detaljer: /library/content-plan-2026-10-24/seo.md
 - Ny konkurrent-kreds (poster-marketplaces, ingen overlap med costume-watchlist): displate.com, fineartamerica.com, allposters.com, art.com, greatbigcanvas.com, artesty.com, allsculptures.com, personal-prints.com.
 - Kategorisider dominerer "wall art" + "pirate poster art"; "steampunk poster" = Pinterest + produktsider. Nul steampunk-nicheaktører i alle tre.
 - Hul bekræftet: "steampunk pirate poster" har ingen dedikeret kategori/samling i top-8 → Pirat Piger-crossover.

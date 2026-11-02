@@ -5,7 +5,7 @@ _Opfølgning på [`sikkerhed-plugin-versioner-2026-11-01.md`](sikkerhed-plugin-v
 ## TL;DR
 
 - **8 af de 16 kan køres nu** i ét batch på ~15 minutter. **5 kræver et vindue med databasebackup.** **2 bør fjernes i stedet for opdateres.** **1 er allerede lukket** (`ai-engine` kører 3.8.9 og er inaktiv, verificeret 1/11).
-- **Kompatibilitet er ikke flaskehalsen.** Produktion kører **PHP 8.5.12 / WordPress 7.1.4** (`site-roadmap-2026-11-01.md` S0.3), og alle 16 kræver højst PHP 8.3, alle er testet til 7.1.4. Intet er blokeret af platformen.
+- **Kompatibilitet er ikke flaskehalsen.** Produktion kører **PHP 8.5.12 / WordPress 7.1.4** (`roadmap.md` S0.3), og alle 16 kræver højst PHP 8.3, alle er testet til 7.1.4. Intet er blokeret af platformen.
 - **Tre ting i changelogs ændrer billedet fra auditten:**
   1. **`seo-engine` 1.0.0 retter en stored XSS** (titler/beskrivelser renderet som rå HTML i admin-preview, insights og JSON-LD). Auditten førte den som »ingen kendte sårbarheder«, fordi WPScan ikke har posten — den hører i sikkerhedsbunken.
   2. **`vibe-ai` 1.21.2–1.21.3 retter sikkerhed i SeedProd-builder-sign-in** (Super Admin-begrænsning, afviste fil-uploads). Samme mønster: ikke i WPScan, men i changeloggen.
@@ -19,7 +19,7 @@ _Opfølgning på [`sikkerhed-plugin-versioner-2026-11-01.md`](sikkerhed-plugin-v
 | --- | --- |
 | Nyeste version, `requires_php`, `tested`, changelog | `api.wordpress.org/plugins/info/1.2`, hentet 2/11 2026 |
 | Installeret version (23/10) | `backup-2026-10-23/plugins.json` via `sikkerhed-plugin-versioner-2026-11-01.md` |
-| Produktionens PHP/WP | `docs/site-roadmap-2026-11-01.md` S0.3: PHP 8.5.12, WP 7.1.4 |
+| Produktionens PHP/WP | `docs/roadmap.md` S0.3: PHP 8.5.12, WP 7.1.4 |
 | Sårbarheder | WPScan + plugin-changelogs (changeloggen fangede to sager WPScan ikke har) |
 
 **Forbehold:**
@@ -115,5 +115,5 @@ Efter batch 1 er **0 af de 16 tilbage med en kendt åben sårbarhed**.
 - wordpress.org plugin-API (version, `requires_php`, `tested`, changelog), hentet 2/11 2026 for alle 16 slugs.
 - [`sikkerhed-plugin-versioner-2026-11-01.md`](sikkerhed-plugin-versioner-2026-11-01.md) — de 48 plugins, de tre sager, metoden.
 - [`sikkerhed-ai-engine-2026-11-01.md`](sikkerhed-ai-engine-2026-11-01.md) — CVE-2026-110732, lukket 1/11.
-- [`../site-roadmap-2026-11-01.md`](../site-roadmap-2026-11-01.md) S0.3 — produktionens PHP 8.5.12 / WP 7.1.4.
+- [`../roadmap.md`](../roadmap.md) S0.3 — produktionens PHP 8.5.12 / WP 7.1.4.
 - WPScan: `https://wpscan.com/plugin/<slug>/`.

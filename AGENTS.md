@@ -20,7 +20,7 @@ Ved hvert arbejdspas skal der meldes:
 Regler for tallene:
 
 - **Procenten skal kunne genberegnes** ud fra grundlaget. Ingen tal uden regnestykke, ingen "føles som 70 %".
-  Brug de dokumenterede estimater (developer-dage i `docs/site-roadmap-2026-11-01.md`, timer i
+  Brug de dokumenterede estimater (developer-dage i `docs/roadmap.md`, timer i
   `docs/library/om-maerkning-dark-academia-2026-11-01.md` osv.) som nævner.
 - **Første måling** skrives som `% før: —` (ingen tidligere baseline).
 - **Procenten må ikke falde** uden at årsagen står i loggen (fx at scope er ændret eller et modul er opdelt).

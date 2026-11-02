@@ -167,7 +167,7 @@ Deleting the plugin (not just deactivating) removes all its tables and settings.
 ## Roadmap and known gaps
 
 The audit behind this release and the prioritised roadmap with effort estimates live in
-[docs/plugin-roadmap.md](../../docs/plugin-roadmap.md). Two things worth knowing before you rely on this
+[ROADMAP.md](ROADMAP.md). Two things worth knowing before you rely on this
 unattended:
 
 - A post that fails is retried up to three times the same day and then stays `failed` in the queue.

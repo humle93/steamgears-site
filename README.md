@@ -1,23 +1,40 @@
 # steamgears-site
 
-Versionstyring for **steamgears.eu**-assets. WordPress-kernen og databasen ligger hos Simply — repoet holder design/CSS, backup-data, planer og SEO-dokumentation.
+Versionstyring for **steamgears.eu**-assets. WordPress-kernen og databasen ligger hos Simply — repoet holder
+design/CSS, backup-data, dokumentation og status.
+
+## Læs først
+
+| Dokument | Hvad det er |
+| --- | --- |
+| [`docs/library/README.md`](docs/library/README.md) | **Dokumentindeks** — indgangen til hvert audit-, research- og driftsdokument. Start her. |
+| [`docs/roadmap.md`](docs/roadmap.md) | Optimeringsplanen for sitet, S0–S4 med tidestimater og blokeringer |
+| [`docs/seo.md`](docs/seo.md) | SEO-regler, GEO-skabelon og måling |
+| [`docs/projektstatus.md`](docs/projektstatus.md) | Daglig procentstatus pr. projekt, beregnet af `projektstatus.py` |
+| [`AGENTS.md`](AGENTS.md) | Arbejdsregler: hvert pass melder % før → efter med grundlag |
+
+Reglen fra `AGENTS.md` §5: nye dokumenter lægges i `docs/` (audits og research i `docs/library/`) og skrives
+ind i dokumentindekset, så de ikke bliver forældreløse.
 
 ## Struktur
-- `backup-2026-10-23/` — fuld WP REST-backup (19 sider, 9 guides, 5 kategorier, 86 medier-metadata, 27 template-parts, 17 templates, 45 plugins) taget 23/10 2026 lige før genopbygningen. Billeder + zip: Juno `/downloads/steamgears-backup-2026-10-23.zip`.
-- `css/header-dark-clockwork-active.html` — live template part `extendable//header` (Dark Clockwork Theatre v3 CSS + GA4 e-commerce fallback-shim), hentet 24/10 2026.
-- `docs/` — AdSense-setup, konkurrentnoter, SEO-handlingsplan 24/10 (PDF-audit gap-analyse), keyword- & konkurrent-scan, SEO-research-log, daily brief.
-- `docs/site-roadmap-2026-11-01.md` — samlet optimeringsplan for sitet (S0–S3) med plugin-roadmap'en importeret i §5.
-- `docs/library/indholdsaudit-2026-11-01.md` — status på posts, sider og produkter målt via MCP 1/11 2026.
-- `docs/projektstatus.md` — **daglig procentstatus** på hvert aktivt projekt + log over fremgang pr. modul. Skrives af `projektstatus.py` ud fra `projektstatus.json` (procenter beregnes, indtastes ikke) og kører automatisk dagligt via `.github/workflows/projektstatus.yml`.
-- [`docs/mcp-auth.md`](docs/mcp-auth.md) — auth for begge MCP-servere i `.mcp.json`: application password til `steamgears` (`Basic ${ROYAL_MCP_AUTH}`) og API-nøgle til `publer` (`Bearer ${PUBLER_API_KEY}`), med OAuth-alternativer og fejlsøgning.
-- [`docs/command-center-kilde.md`](docs/command-center-kilde.md) — Command Center-koden ligger kun i `humle93/command-center`; Drive-mappen `command-center-main/` er et forældet v7.9-snapshot og skal ikke importeres.
-- [`docs/library/README.md`](docs/library/README.md) — **dokumentindeks**: hvert audit-, research- og driftsdokument i biblioteket linkes herfra, så ingen dokumenter bliver forældreløse.
-- [`AGENTS.md`](AGENTS.md) — arbejdsregler: hvert arbejdspas skal melde procentsats før → efter med grundlag, og hvert aktivt projekt har en daglig %-status.
 
-## Sikkerhed
-- [`docs/library/sikkerhed-ai-engine-2026-11-01.md`](docs/library/sikkerhed-ai-engine-2026-11-01.md) — AI Engine er nu **3.8.9 og inaktiv**, og MCP-OAuth-ruterne svarer 404, så CVE-2026-110732 (uautentificeret administrator-overtagelse) er lukket. **Sagen er lukket 1/11 2026** (sidecachen er purget, så den gamle chatbot-markup er væk); tilbage er kun WAF-blokering af `changelog.txt`/`readme.txt`.
-- [`docs/library/sikkerhed-plugin-versioner-2026-11-01.md`](docs/library/sikkerhed-plugin-versioner-2026-11-01.md) — versionsstatus for alle 48 plugins pr. 23/10 2026: 16 er bagud, 3 af dem har en sikkerhedsrettelse der mangler.
+| Sti | Indhold |
+| --- | --- |
+| `docs/` | Seks hoveddokumenter: roadmap, seo, projektstatus, mcp-auth, adsense-setup, competitors, command-center-kilde |
+| `docs/library/` | Daterede audits, research, specs og driftslogger — historik, ikke planer |
+| `docs/daily-briefs/` | Én brief pr. dag (`AUTO:PROJEKTSTATUS` skrives af CI) |
+| `docs/site-checks/` | Rutine-tjek af den live side: PageSpeed, GSC, meta, alt-tekster |
+| `knowledge_base/` | Høstede Google-kilder; læses af `seo_agent.py` sammen med `docs/seo.md` |
+| `plugins/steamgears-autopilot/` | Autopilot-pluginnet + dets egen `ROADMAP.md` |
+| `backup-2026-10-23/` | Fuld WP REST-backup taget lige før genopbygningen |
+| `css/` | Live template part `extendable//header` (Dark Clockwork Theatre v3) |
+| `posters-seo/` | Produktbeskrivelser (HTML) til poster-serien |
 
-## Noter
-- Repoet oprettes og opdateres via GitHub API (commit-per-batch); ingen lokal git-CLI i Juno-workspace.
-- Fix-ressourcer: sitemap-toggles via Rank Math REST, GTM Kit via `/wp-json/gtmkit/v1/set-options`, WAF-429 trick via steamgears.juno.page browser-side.
+## Automation
+
+- `.github/workflows/projektstatus.yml` — dagligt: selftest → check → update → efterkontrol, committer kun ved ændring.
+- `.github/workflows/seo_audit.yml` — ugentligt: høster kilder, kører `seo_agent.py`, committer planen. Kræver
+  `GEMINI_API_KEY`, `WP_USER` og `WP_APP_PASS` som repo-secrets.
+- `.github/workflows/plugin-ci.yml` — lint + smoke/integration for pluginnet.
+
+Ændringer på selve sitet sker over MCP, ikke herfra. Repoet dokumenterer og forbereder dem.

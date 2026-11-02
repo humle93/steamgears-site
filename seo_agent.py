@@ -53,6 +53,10 @@ def get_wp_headers():
 
 def load_seo_knowledge():
     kb_texts = []
+    # docs/seo.md er den eneste kilde til vores egne regler; den læses først.
+    if os.path.exists("docs/seo.md"):
+        with open("docs/seo.md", "r", encoding="utf-8") as f:
+            kb_texts.append(f"--- KILDE: docs/seo.md (site-regler) ---\n{f.read()[:8000]}")
     for path in sorted(glob.glob("knowledge_base/*.*")):
         with open(path, "r", encoding="utf-8") as f:
             kb_texts.append(f"--- KILDE: {os.path.basename(path)} ---\n{f.read()[:8000]}")

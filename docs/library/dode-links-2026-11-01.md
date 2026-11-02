@@ -1,6 +1,6 @@
 # Døde interne links — 1/11 2026
 
-Kortlægning af interne links på steamgears.eu, der peger på URL'er som returnerer 404. Supplerer [indholdsaudit-2026-11-01.md](indholdsaudit-2026-11-01.md) og punkt S0.4 i [site-roadmap-2026-11-01.md](../site-roadmap-2026-11-01.md).
+Kortlægning af interne links på steamgears.eu, der peger på URL'er som returnerer 404. Supplerer [indholdsaudit-2026-11-01.md](indholdsaudit-2026-11-01.md) og punkt S0.4 i [roadmap.md](../roadmap.md).
 
 ## Metode
 

@@ -77,5 +77,5 @@ Manuel tabel — opdateres når roadmap-estimaterne ændres, ikke af scriptet.
 | S4 — salgsklar butik | 5,0 d | 1,4 d | 3,6 d (valuta, betaling, anmeldelser) |
 | **I alt** | **21,1 d** | **9,25 d** | **11,85 d** |
 
-Kilde: [`site-roadmap-2026-11-01.md`](site-roadmap-2026-11-01.md) §4 og
-[`library/seo-runde-og-status-2026-11-01.md`](library/seo-runde-og-status-2026-11-01.md) §5 (målt 1/11).
+Kilde: [`roadmap.md`](roadmap.md) §4 og
+[`seo.md`](seo.md) §5 (målt 1/11).
