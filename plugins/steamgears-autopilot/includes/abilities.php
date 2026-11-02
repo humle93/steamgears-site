@@ -124,7 +124,7 @@ class SGAP_Abilities {
             ],
             'check-post' => [
                 'Check a post before queueing',
-                'Runs the per-network pre-flight rules on a post without queueing it: caption length (with the tracking link counted in), hashtag ceiling, Instagram photo type/size/aspect, Pinterest board and long Facebook/LinkedIn captions. Returns the problems that would make Publer refuse it, the text after the mechanical repairs (shortened caption, surplus hashtags removed) and whether it would go through as-is.',
+                'Runs both gates on a post without queueing it. Pre-flight: caption length (with the tracking link counted in), hashtag ceiling, Instagram photo type/size/aspect, Pinterest board. Quality: banned words, dead links, missing alt text and a caption that already went out on this channel. Returns the problems that would make Publer refuse it or the quality gate stop it, the text after the mechanical repairs (shortened caption, surplus hashtags removed) and whether it would go through as-is.',
                 [
                     'channel' => $channel,
                     'title' => ['type' => 'string', 'minLength' => 1, 'maxLength' => 200],
