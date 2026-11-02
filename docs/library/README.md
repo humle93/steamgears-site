@@ -20,6 +20,7 @@ sidste commit-dato. Målt 2/11 2026.
 
 | Dokument | Indhold | Dato |
 | --- | --- | --- |
+| [mcp-vaerktoejer-2026-11-02.md](mcp-vaerktoejer-2026-11-02.md) | **MCP-inventar:** AI Engines 74 værktøjer (29 læsende/31 skrivende/14 admin) og mcp-adapterens 3 meta-værktøjer, med den målte rute-flade og hvad der først kan siges med credential | 2026-11-02 |
 | [seo-audit-2026-11-02.md](seo-audit-2026-11-02.md) | **Bred SEO-audit:** 121 URL'er crawlet, score 56,5/100, 21 fund med bevis, roadmap og tid til 100 % — PDF i `reports/seo-audit-2026-11-02.pdf` | 2026-11-02 |
 | [forside-2026-11-02.md](forside-2026-11-02.md) | Forsiden: to H1'er, S2.4-beslutningen og paste-klar hero | 2026-11-02 |
 | [navigation-og-meta-2026-11-02.md](navigation-og-meta-2026-11-02.md) | Header-links, footer-fortrydelse, meta-runde og sitemap-kontrol — fire punkter lukket, fem blokeringer | 2026-11-02 |

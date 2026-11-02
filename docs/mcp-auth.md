@@ -72,8 +72,11 @@ Hvad det betyder:
   `.well-known`-dokumenter findes. `.mcp.json`s `steamgears`-server peger dermed på en død rute.
 - **Token-vejen findes ved siden af OAuth.** `mwai/v1/simpleAuthCheck` (kun GET) og `mwai/v1/mcp/status` er
   AI Engines Simple Auth: et `Authorization: Bearer <token>` uden om OAuth-flowet. Værktøjsantallet er stadig
-  **ikke målt** — det kræver at `mcp/status` eller et `tools/list` på `/wp-json/mcp/v1/http` kaldes med et
+  **ikke målt** — det kræver at  `mcp/status` eller et `tools/list` på `/wp-json/mcp/v1/http` kaldes med et
   gyldigt credential.
+
+Den fulde værktøjsoversigt — AI Engines 74 værktøjer med adgangsniveau og mcp-adapterens tre meta-værktøjer —
+ligger i [`library/mcp-vaerktoejer-2026-11-02.md`](library/mcp-vaerktoejer-2026-11-02.md).
 
 ## Steamgears (`steamgears`)
 
