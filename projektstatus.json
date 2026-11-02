@@ -12,7 +12,7 @@
         {
           "id": "s0",
           "name": "S0 — brudt/akut",
-          "done": 1.9,
+          "done": 2.4,
           "total": 2.6,
           "unit": "d",
           "note": "S0.1, S0.3, S0.8 + meta-/link-/alt-runde 1/11"
@@ -28,10 +28,10 @@
         {
           "id": "s2",
           "name": "S2 — struktur og SEO",
-          "done": 3.25,
+          "done": 3.95,
           "total": 6,
           "unit": "d",
-          "note": "S2.5 meta-runde 1,0 + S2.1 to hubs og fem undersider 1,6 + S2.6 hub-links 0,4 + S2.4 H1-fix 0,25 (én H1 på forsiden, verificeret i renderet HTML 2/11); navigation og /inspiration/ mangler"
+          "note": "S2.1 to hubs og fem undersider 1,6 + S2.5 meta-runde 1,4 (15 sider/posts med titel, description og fokusnøgleord, 0 huller tilbage) + S2.6 hub-links 0,4 + S2.4 H1-fix 0,25 + S2.3 nav-links 0,3 (Start Here og Build i header, fortrydelse i footer); /inspiration/ og de to 301'er mangler"
         },
         {
           "id": "s3",
@@ -301,6 +301,15 @@
       "after": 45.0,
       "delta": 1.2,
       "basis": "9,5 af 21,1 d (S0 1,9/2,6 · S1 1,7/4,5 · S2 3,25/6 · S3 1,25/3 · S4 1,4/5)"
+    },
+    {
+      "date": "2026-11-02",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 45.0,
+      "after": 50.7,
+      "delta": 5.7,
+      "basis": "10,7 af 21,1 d (S0 2,4/2,6 · S1 1,7/4,5 · S2 3,95/6 · S3 1,25/3 · S4 1,4/5)"
     }
   ]
 }

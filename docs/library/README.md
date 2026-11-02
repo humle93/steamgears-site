@@ -17,6 +17,7 @@ sidste commit-dato. Målt 2/11 2026.
 | Dokument | Indhold | Dato |
 | --- | --- | --- |
 | [forside-2026-11-02.md](forside-2026-11-02.md) | Forsiden: to H1'er, S2.4-beslutningen og paste-klar hero | 2026-11-02 |
+| [navigation-og-meta-2026-11-02.md](navigation-og-meta-2026-11-02.md) | Header-links, footer-fortrydelse, meta-runde og sitemap-kontrol — fire punkter lukket, fem blokeringer | 2026-11-02 |
 | [navigation-spec-2026-11-02.md](navigation-spec-2026-11-02.md) | Navigation og menu — S2.3, verificeret mod REST 2/11 | 2026-11-02 |
 | [plugin-opdateringer-triage-2026-11-02.md](plugin-opdateringer-triage-2026-11-02.md) | Triage af de 16 bagudværende plugins: 8 nu, 5 i vindue, 2 fjernes | 2026-11-02 |
 | [butik-fund-2026-11-02.md](butik-fund-2026-11-02.md) | Butiksfund: tees uden størrelsesvalg | 2026-11-02 |
