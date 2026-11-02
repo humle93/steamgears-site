@@ -81,7 +81,7 @@ Alt her er målt mod den live side eller læst i kilden. Er noget ændret siden 
 - `/shop/` tager ~5,8 s og ~470 KB; produktside har ~151 KB inline CSS og ~105 scripts.
 - GA4 fyrer **dobbelt** på hvert pageview, så konverteringer kan ikke aflæses sikkert.
 
-**Pluginnet** (`plugins/steamgears-autopilot/`, v7.15.1)
+**Pluginnet** (`plugins/steamgears-autopilot/`, v7.17.0)
 
 - 15 PHP-filer, ~6.273 linjer, 904 linjer tests; **20 af 21 subsystemer er live**.
 - Kæden virker: generér → godkend → publicér (RSS eller Publer API) → mål.
