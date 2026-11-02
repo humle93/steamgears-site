@@ -19,3 +19,4 @@ node_modules/
 .projektstatus-backups/
 .projektstatus.lock
 tools/_deps/
+artifacts/
