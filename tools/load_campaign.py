@@ -14,7 +14,7 @@ bruger, *før* noget sendes:
 Kør:
     python3 tools/load_campaign.py docs/library/clockwork-punk-koe-2026-11-02.json
     python3 tools/load_campaign.py <fil> --post      # læg posterne i køen (kræver OAuth-token)
-    python3 tools/load_campaign.py --selftest        # 10 fixtures af værnene
+    python3 tools/load_campaign.py --selftest        # 15 fixtures af værnene
 
 Uden `--post` er kørslen en tørkørsel: intet netværk, intet skrives.
 """
@@ -45,9 +45,10 @@ DAILY_CAP = 8
 QUIET_HOURS = tuple(range(23, 24)) + tuple(range(0, 7))
 REQUIRED = ("channel", "title", "destination_url")
 ALLOWED = {"dag", "produkt", "channel", "angle", "content_type", "format", "title", "body",
-           "destination_url", "image_url", "board", "scheduled_at", "status"}
+           "destination_url", "image_url", "board", "scheduled_at", "status", "campaign"}
 POSTED = ("channel", "angle", "content_type", "format", "title", "body", "destination_url",
-          "image_url", "scheduled_at", "status")
+          "image_url", "scheduled_at", "status", "campaign")
+CAMPAIGN = re.compile(r"[a-z0-9_-]{1,60}")
 
 
 def normalize(text: str) -> str:
@@ -133,6 +134,12 @@ def validate(payload: dict, now: datetime | None = None) -> dict:
             errors.append(f"{where}: destination_url peger ikke på {SITE_HOST} — /go/-redirectet ville sende trafikken til forsiden")
         elif "example." in destination or "localhost" in destination:
             errors.append(f"{where}: destination_url er en placeholder")
+
+        # Pluginnet sanitizer navnet med sanitize_key, så et navn med mellemrum eller store
+        # bogstaver ville blive ændret i stilhed. Her kræves det færdige navn.
+        campaign = str(item.get("campaign") or "").strip()
+        if campaign and not CAMPAIGN.fullmatch(campaign):
+            errors.append(f"{where}: campaign '{campaign}' skal være a-z, 0-9, - og _ (højst 60 tegn)")
 
         image = str(item.get("image_url") or "")
         if channel in NEEDS_IMAGE and not image:
@@ -282,6 +289,10 @@ FIXTURES = [
                       "destination_url": f"https://{SITE_HOST}/x/", "scheduled_at": "2020-01-01 12:00:00"}, False),
     ("ukendt felt", {"channel": "facebook", "title": "T", "body": "A moth with brass wings, printed to order for the wall.",
                      "destination_url": f"https://{SITE_HOST}/x/", "hashtag": "#x"}, False),
+    ("kampagnenavn med mellemrum", {"channel": "facebook", "title": "T", "body": "A moth with brass wings, printed to order for the wall.",
+                                    "destination_url": f"https://{SITE_HOST}/x/", "campaign": "Clockwork Punk"}, False),
+    ("kampagnenavn der kan sendes", {"channel": "facebook", "title": "T", "body": "A moth with brass wings, printed to order for the wall.",
+                                     "destination_url": f"https://{SITE_HOST}/x/", "campaign": "clockwork_punk_2026_11"}, True),
 ]
 
 

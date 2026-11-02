@@ -6,7 +6,7 @@ ikke dette dokument: captions, links, billeder og tidspunkter findes kun ét ste
 hinanden. Her står hvorfor, hvordan og hvad der stadig mangler.
 
 Målt mod live-katalog 2/11 2026 (`wc/store/v1/products`, 56 produkter) og læst i pluginnet
-`plugins/steamgears-autopilot/` (7.22.0).
+`plugins/steamgears-autopilot/` (7.22.0; 7.24.0 tilføjede kampagnenavnet, se §5).
 
 ---
 
@@ -95,11 +95,18 @@ over i stedet for at fejle, så kommandoen kan køres igen uden at lave dublette
 | Pr. kanal | samme | om Pinterest stadig er kanalen der viser noget |
 | Kampagne | **ikke mulig i dag** | se nedenfor |
 
-**Fund:** `SGAP_UTM::build()` i `includes/core.php:464` hardcoder
-`utm_campaign = steamgears_premium_evergreen`. Hver post i hele butikken bærer altså samme kampagnenavn i GA4,
-så en navngivet kampagne kan ikke skilles ud i analytics — kun i pluginets egen kø-statistik. Rettelsen er
-lille (en `campaign`-parameter med nuværende værdi som standard), men den kræver plugin-release, version-bump
-og genopbygget zip, så den er **ikke** gjort her. Indtil da er kampagnens sandhed pluginets `/stats`, ikke GA4.
+**Fund, og hvad der blev gjort ved det:** `SGAP_UTM::build()` hardcodede `utm_campaign =
+steamgears_premium_evergreen`, så hver post i hele butikken bar samme kampagnenavn i GA4, og en navngivet
+kampagne kunne ikke skilles ud i analytics. **7.24.0 gør navnet til en parameter:** indstillingen *Campaign
+name* (`sgap_utm_campaign`, standard er den gamle værdi, så ældre links forbliver sammenlignelige) plus et
+`campaign`-felt pr. post i `POST /queue` og `queue-post`. Posterne i denne kampagne sender derfor
+`campaign=clockwork_punk_2026_11`, og serien kan måles som én kampagne i GA4 (*Session campaign*) ved siden af
+evergreen-strømmen, som fortsat kører på indstillingen.
+
+Navnet fryses ind i linket når posten lægges i kø, så poster der allerede står i køen beholder det navn de fik
+— det er med vilje, så en kampagne ikke ændrer sig bagud. **To ting venter stadig på ejeren:** Update-klikket
+(før det kører sitet 7.22.0 og sender den gamle hardkodede værdi) og site-credentialet, uden hvilket
+posterne ikke kan lægges i køen. Indtil da er kampagnens eneste sandhed pluginets `/stats`, og den er tom.
 
 ## 6. Blokeringer
 

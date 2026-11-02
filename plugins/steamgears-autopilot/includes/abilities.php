@@ -90,6 +90,7 @@ class SGAP_Abilities {
                     'destination_url' => ['type' => 'string', 'format' => 'uri'],
                     'image_url' => ['type' => 'string', 'format' => 'uri'],
                     'scheduled_at' => ['type' => 'string', 'description' => 'Optional date/time in site time, e.g. 2026-11-02 18:00'],
+                    'campaign' => ['type' => 'string', 'description' => 'Optional utm_campaign for this post, e.g. clockwork_punk_2026_11. Empty = the campaign name in Settings → General.'],
                     'force' => ['type' => 'boolean', 'description' => 'Queue even when the quality gate blocks the post (a banned word, a dead link, a repeated caption). The problems come back as warnings.']
                 ], ['channel', 'title', 'text', 'destination_url'], [__CLASS__, 'queue_post'], false, false
             ],
@@ -291,6 +292,7 @@ class SGAP_Abilities {
             'image_url' => $input['image_url'] ?? '',
             'content_type' => 'custom',
             'format' => 'post',
+            'campaign' => $input['campaign'] ?? '',
             'scheduled_at' => $scheduled,
             'force' => !empty($input['force'])
         ]);
