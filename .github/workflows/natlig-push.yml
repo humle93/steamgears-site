@@ -46,7 +46,7 @@ jobs:
             echo "Lokal tid er $(TZ=Europe/Copenhagen date +%H:%M) — denne kørsel springes over."
           fi
 
-      - name: Set up PHP (til plugin-smoke)
+      - name: Set up PHP (til værnene)
         if: steps.gate.outputs.run == 'true'
         uses: shivammathur/setup-php@v2
         with:
@@ -89,24 +89,11 @@ jobs:
           echo "::error title=Natlig push fejlede::Kunne ikke pushe til main efter 3 forsøg."
           exit 1
 
-      # Smoke-testen kører efter pushet med vilje: den natlige push skal ikke
-      # afhænges af plugin-testene, men en rød test skal farve jobbet rødt og
-      # skrive de fejlende checks i job-summaryen, så den ikke kan overses.
-      - name: Plugin-smoke (fejler jobbet hvis den ikke er grøn)
+      # Værnene kører efter pushet med vilje: den natlige push skal ikke holdes
+      # tilbage af en rød test, men en rød test skal farve jobbet rødt og skrive
+      # de fejlende linjer i job-summaryen, så den ikke kan overses.
+      # Alt hvad der køres står i tools/natlige-vaern.sh, så den samme kommando
+      # kan bruges lokalt uden at huske otte enkeltkommandoer.
+      - name: Alle værn (fejler jobbet hvis ét af dem ikke er grønt)
         if: steps.gate.outputs.run == 'true'
-        run: |
-          set -o pipefail
-          log="$RUNNER_TEMP/smoke.log"
-          status=0
-          php plugins/tests/smoke.php | tee "$log" || status=$?
-          passed="$(grep -c '^PASS' "$log" || true)"
-          failed="$(grep -c '^FAIL' "$log" || true)"
-          {
-            echo "## Plugin-smoke: $passed grønne, $failed fejlede"
-            grep '^FAIL' "$log" || true
-          } >> "$GITHUB_STEP_SUMMARY"
-          if [ "$status" -ne 0 ] || [ "$failed" -ne 0 ]; then
-            echo "::error title=Plugin-smoke fejlede::$failed check(s) fejlede ($passed grønne). Se loggen under Plugin-smoke."
-            exit 1
-          fi
-          echo "Plugin-smoke grøn: $passed checks."
+        run: bash tools/natlige-vaern.sh
