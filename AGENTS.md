@@ -88,6 +88,9 @@ Reglen over holdes automatisk, så lidt som muligt afhænger af hukommelse:
   springer selv over når den lokale time ikke er 2, så sommertid ikke skal rettes. Den kan kun pushe det der
   ligger i repoet — ucommittet arbejde i en agent-sandkasse ser den ikke — så reglen om at committe og pushe i
   samme tur gælder stadig; nattens kørsel er sikkerhedsnettet, ikke en erstatning.
+  Efter pushet kører kørslen **plugin-smoke** (`php plugins/tests/smoke.php`, PHP 8.5): en rød test giver en
+  `::error`-annotation, skriver de fejlende checks i job-summaryen og fejler jobbet. Testen ligger bevidst
+  efter pushet, så en testfejl ikke holder status-dokumenterne tilbage — men den kan ikke overses.
 
 Automationen dækker **den daglige status**. Det manuelle i §1 — at vurdere hvad der reelt blev udført og melde
 `% før → % efter` i svaret og commit-beskeden — kan scriptet ikke gøre og falder stadig på den der arbejder.
