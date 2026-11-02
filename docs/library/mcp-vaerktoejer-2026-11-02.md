@@ -155,6 +155,36 @@ har **hverken OAuth eller `.well-known`-ruter** — den arver WordPress' REST-au
 Basic eller cookie + nonce). Det gør den til et supplement til AI Engine, ikke en afløser: samme site, to
 forskellige værktøjsflader, to forskellige credential-modeller.
 
+## 3b. Hvem ejer de 206 værktøjer?
+
+Sitet annoncerer 206 værktøjer. Fordelingen kan ikke måles uden et credential, men den kan deles mekanisk:
+`tools/mcp_rest.py --split` henter `tools/list` og lægger hvert navn i én af tre spande:
+
+| Spand | Regel | Hvad den betyder |
+| --- | --- | --- |
+| **vores** | navnet starter med `steamgears-autopilot_` | ét værktøj pr. ability i [`egen-abilities-2026-11-02.csv`](egen-abilities-2026-11-02.csv) — 32 i 7.23.0 |
+| **ai_engine** | navnet står i `AI_ENGINE_NATIVE` (74 navne fra 3.9.0) | AI Engines egne, indbyggede værktøjer |
+| **ability_bridge** | alt andet | ét værktøj pr. offentlig ability fra et andet plugin (WooCommerce, Rank Math, …) |
+
+Navnene er ikke en gætteleg: AI Engine laver værktøjsnavnet af ability-navnet ved at erstatte alt ud over
+`a-zA-Z0-9_-` med `_`, så `steamgears-autopilot/meta-audit` bliver `steamgears-autopilot_meta-audit`. Vores
+prefix er derfor entydigt, og `--split` krydstjekker samtidig mod CSV'en og melder `mangler_live` (abilities vi
+registrerer, men som sitet ikke viser — det er sådan en ikke-deployeret version afsløres) og `uventet_live`.
+
+**Regnestykket indtil målingen findes:** 206 − **31** vores (målt af main på 7.22.0) = 175. Af dem er højst
+**74** AI Engines egne (3.9.0-listen), så **omkring 101** er abilities fra andre plugins — forudsat at alle 74
+stadig findes i den version sitet kører. Det er en slutning, ikke en måling, og `--split` afgør den.
+
+Kør den når der er et token:
+
+```bash
+python3 tools/mcp_rest.py --split        # JSON: counts, vores, ai_engine, ability_bridge, mangler_live
+```
+
+Testene for fordelingen kører uden netværk: `python3 tools/test_mcp_rest.py` (18 tests, heraf 4 nye der
+kontrollerer spandene, tomme navne, at alle 32 abilities i CSV'en rammer »vores«, og at den indbyggede liste
+har 74 navne).
+
 ## 4. Det der først kan siges med et credential
 
 - **Hvor mange værktøjer sitet reelt annoncerer** — `tools/list` mod `/wp-json/mcp/v1/http` eller
