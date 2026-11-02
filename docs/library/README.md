@@ -22,6 +22,7 @@ sidste commit-dato. Målt 2/11 2026.
 | [tee-varianter-spec-2026-11-02.md](tee-varianter-spec-2026-11-02.md) | Størrelsesvarianter på de ni tees — spec og blokering | 2026-11-02 |
 | [valuta-og-priser-2026-11-02.md](valuta-og-priser-2026-11-02.md) | Valuta og priser — forslag til S4.3 | 2026-11-02 |
 | [drive-watch-log.md](drive-watch-log.md) | Log over ændringer i Drive | 2026-11-02 |
+| [niche-produkt-scanner-2026-11-02.md](niche-produkt-scanner-2026-11-02.md) | Niche-scanner: kilder, score og hvad Pinterest/TikTok ikke kan levere | 2026-11-02 |
 
 ## Butik og produkter
 

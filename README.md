@@ -29,6 +29,7 @@ ind i dokumentindekset, så de ikke bliver forældreløse.
 | `tools/project_reports.py` | Genererer rapporterne i `reports/` ud fra `projektstatus.json` og roadmap'erne (`python3 tools/project_reports.py`) |
 | `tools/setup-agent-tools.sh` | Genskaber PHP 8.5 og PDF-bibliotekerne i `tools/_deps` (gitignored) — ingen root nødvendig |
 | `tools/mcp_project_profile.py` | Lokal MCP-server (stdio) der serverer profilen, status og roadmap'erne — registreret som `steamgears-profil` |
+| `tools/niche_scanner.py` | Niche-produkt-scanner: Pinterest Trends (API) + TikTok Creative Center-eksport × vores katalog → `reports/niche-scan-<dato>.md` |
 | `knowledge_base/` | Høstede Google-kilder; læses af `seo_agent.py` sammen med `docs/seo.md` |
 | `plugins/steamgears-autopilot/` | Autopilot-pluginnet + dets egen `ROADMAP.md` |
 | `backup-2026-10-23/` | Fuld WP REST-backup taget lige før genopbygningen |
