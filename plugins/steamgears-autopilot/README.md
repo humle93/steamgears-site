@@ -23,7 +23,9 @@ The whole social autopilot runs inside WordPress (Command Center is retired):
 4. **Measure** – every post links via `/go/<id>/`, so clicks (and WooCommerce
    orders) are counted per channel.
 
-Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.18.0.zip` → Activate.
+Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.22.0.zip` → Activate. On an existing
+install the same zip arrives through the self-updater (see *Updates*), so an upload is only needed for the
+first install or a recovery.
 
 ## Run it from Claude
 
@@ -44,6 +46,7 @@ all admin-only, none of them deleting anything:
 | `steamgears-autopilot/update` | Install the newest version from GitHub |
 | `steamgears-autopilot/check-keys` | Test the Publer and AI keys (see below) |
 | `steamgears-autopilot/check-publer` | Workspaces, accounts, channels without an account |
+| `steamgears-autopilot/optimize-site-seo` | Whole-site SEO/AEO/GEO scan in one pass; `fix=true` also writes the missing meta |
 
 Example: "Write today's posts and show them to me" → `generate`, then
 `list-drafts`, then `review-draft` for the ones you like.
@@ -56,6 +59,102 @@ ROAS against the budget, attributed orders), Etsy orders and profit, Full Auto
 (suppressed combinations, reposts) and an XML product feed for Google Merchant
 Center and Pinterest Catalogs (*Google Feed*, needs a feed secret and WooCommerce).
 
+## Whole-site SEO, GEO and AEO (7.19)
+
+*Content Studio → **Optimise the whole site*** replaces clicking through pages one at a time:
+
+| Button | What it does | Cost |
+|---|---|---|
+| **Scan the whole site** | Scores every published post, page and product in one pass against 20 rules, plus four whole-domain checks (llms.txt, sitemap, robots.txt, product feed) | Free — database and HTTP only |
+| **Scan and fix meta** | Runs the same scan, then writes Rank Math/Yoast title, description and focus keyword for the weakest URLs | One AI call per page, default 8 per round |
+
+Rules by group:
+
+- **SEO** — title and meta length, missing meta, focus keyword, keyword in title, one H1, enough text for the type (post 500 / page 400 / product 120 words), internal links, image alt text, featured image, slug, duplicate title and duplicate description across the site.
+- **AEO** (answer engines) — question-shaped H2/H3, an FAQ block with `FAQPage` schema, a direct answer in the first paragraph, lists or tables.
+- **GEO** (generative engines) — the brand named in the opening, quotable numbers, structured data, outbound citations, freshness.
+
+The scan is stored in one option (`sgap_seo_site`) and refreshed lazily once a week when an
+administrator opens wp-admin, because WP-Cron is not dependable on this cached host. Body text is
+never rewritten by this screen; content suggestions stay in *Optimise SEO of a page*.
+
+## Pre-flight per channel (7.20)
+
+Every post is checked against the destination network's own limits **before** anything is sent to
+Publer (`includes/preflight.php`, `SGAP_Preflight`). Publer's rejection arrives as a vague error after a
+failed upload and also spends one of the three attempts; this check runs on the site, first, and costs
+nothing.
+
+| Channel | Refused | Repaired automatically |
+|---|---|---|
+| Instagram | no photo; PNG/WebP/GIF instead of JPEG; width under 320 px; photo outside 4:5–1.91:1 | caption over 2 200 characters |
+| Pinterest | no photo; no board set in Settings | title over 100, description over 500 |
+| Threads | — | caption over 500 (the tracking link is counted in), more than one hashtag |
+| Facebook / LinkedIn | — | caption over 63 206 / 3 000 |
+| X | — | 280 characters, with any link counted as 23 |
+| Bluesky / Mastodon / Telegram / Google | — | caption over 300 / 500 / 1 024 / 1 500 including the link |
+
+Two safety valves. The checker never downloads the photo, so type and size are only judged when the image
+is in the media library (mime type and dimensions come from the attachment metadata) or the file extension
+is known — an image it cannot inspect is never blocked on a guess. And queueing a post reports the same
+problems as **warnings** in the API response (`warnings`), because a photo can still arrive later: the
+featured image, or the AI photo `SGAP_RSS` adds at release. The refusal happens at publish time, which is
+the moment before Publer.
+
+The ability `steamgears-autopilot/check-post` runs the same rules without queueing anything and returns
+`problems`, `repairs` and the text that would actually be sent.
+
+## Blackout calendar (7.21)
+
+Settings → *Schedule & limits* → **Blackout days** takes one range per line:
+
+```
+2026-12-24..2026-12-26 Christmas
+2026-12-31 New Year's Eve
+```
+
+Nothing is released on those days, and a post that is already queued inside a range is **moved to the
+next free day at the same time of day** — not dropped, and not saved up so the whole backlog lands at once
+when the range ends. The move runs from the publish tick every 15 minutes, so a range you add this morning
+is honoured before the next post goes out, and a post that was shifted is not shifted again on the next
+tick. The Queue page explains why nothing is going out, and the range label is carried into the message.
+
+Two details worth knowing. Only queued posts move: `published` and in-flight `sending` rows are never
+touched, so a blackout cannot rewrite history. And the calendar is a day filter, not a pause: the daily cap,
+quiet hours and the pre-flight checks still apply on the free day the post lands on. A post placed more
+than 60 days ahead of everything blocked is placed anyway, so a badly typed never-ending range cannot keep
+a post out of the queue forever.
+
+## Quality gate before queueing (7.22)
+
+Every post enters the queue through one function, so the gate sits there: a post that a person would have
+stopped gets stopped while it is still a draft, not after Instagram has it. Settings → *Publishing* →
+**Quality gate** and **Banned words**.
+
+It checks four things:
+
+- **Banned words.** Your own list, one per line or comma-separated. Whole words only, so `sale` does not fire
+  on `wholesale` — but a hashtag counts, because `#sale` is the same word in a different dress.
+- **Dead links.** Internal links are resolved against WordPress itself, so a link to a slug that no longer
+  exists, or to a post that is still a draft, is caught before it ships. Archives, feeds, search and the front
+  page are recognised and left alone. External hosts are **not** fetched — see the limitation below.
+- **Missing alt text.** A featured image with an empty *Alternative text* field is reported, so screen readers
+  and image search are not left with nothing.
+- **Near-duplicate captions.** The caption is compared with the last 40 posts on the same channel; 85 % word
+  overlap or more is the same caption in other words, and the message names the post it repeats.
+
+Three modes: **Block** (default) refuses the post and says why, **Warn** queues it and reports the problems,
+**Off** does not look. A refusal is not a dead end: pass `force`, or press *queue anyway* where the plugin
+shows the refusal, and the post is queued with its findings returned as warnings — a deliberate repost is
+your call, not the plugin's. Captions shorter than eight words are never called duplicates: "New drop" and
+"New drop!" are similar without being a repeat worth blocking.
+
+**The limitation, stated plainly:** external links are not probed. A HEAD request per link would put an
+outbound HTTP dependency in the queueing path — slow, rate-limited and wrong the one time the far site is
+briefly down. So the gate catches what it can prove without the network: placeholders (`example.com`),
+links with no domain, `http` instead of `https`, and internal addresses that do not resolve. A Pinterest pin
+that 404s is still only found by opening it.
+
 ## Updates
 
 From 7.6 the plugin updates itself from GitHub (`humle93/steamgears-site`, branch `main`):
@@ -63,7 +162,29 @@ a newer version shows up under *Plugins* and *Dashboard → Updates* like any pl
 can be switched on there), and the Steamgears dashboard has an **Update now** button. Claude can
 run it too (`steamgears-autopilot/update`). The installed zip is
 `plugins/steamgears-autopilot-v<version>.zip` from `main`, so a release is: bump the version, rebuild
-the zip, merge to `main`.
+the zip, merge to `main` — and then click update. The click is the deploy; nothing changes on the site
+before it, because the MCP surface can read plugins but cannot install or activate them.
+
+### Shipping a release
+
+1. Bump `Version:` in `steamgears-autopilot.php` and `SGAP_VERSION` — they must agree, CI fails otherwise.
+2. Rebuild the zip from the folder so the name and the contents match:
+   `cd plugins && rm -f steamgears-autopilot-*.zip && zip -qr steamgears-autopilot-v<version>.zip steamgears-autopilot`
+3. `php plugins/tests/smoke.php` (208 checks) and `diff -r` the zipped copy against the source. CI repeats
+   both, plus `php -l` on PHP 8.0–8.5 and WordPress 6.4 / 7.1 / latest.
+4. Commit code, zip, README and `ROADMAP.md` together and push to `main`.
+5. **Click *Plugins → Update*** (or *Dashboard → Updates*). Auto-updates can be switched on in the same
+   screen, which makes step 5 happen on its own after the next WP-Cron run.
+
+Check that the release landed, in this order — each step can hide the previous one:
+
+- `wp_get_plugins` reports the new version with `active: true`.
+- A feature from the release answers from the site. For 7.22: a `queue-post` with a banned word is refused
+  and names the word, and the same call with `force` queues it with the word as a warning.
+- `steamgears-autopilot/status` shows the new setting — `quality_gate: {mode, banned_words}` for 7.22.
+
+> **Current release 7.22.0 is not live yet.** steamgears.eu runs 7.21.0 until the update is clicked;
+> site-side status and the reason are in [`docs/roadmap.md`](../../docs/roadmap.md) §2b.
 
 ## Setup
 

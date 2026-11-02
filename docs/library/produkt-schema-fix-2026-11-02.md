@@ -63,7 +63,7 @@ autopiloten.
 1. Læg `wordpress/mu-plugins/sgap-product-schema.php` i `wp-content/mu-plugins/` (mappen findes måske ikke;
    opret den). Mu-plugins aktiveres automatisk og kan ikke deaktiveres ved et uheld.
 2. Alternativt: indsæt filens indhold via Royal MCP som et snippet-plugin, hvis MCP-adgangen er etableret
-   (`ROYAL_MCP_AUTH`, se [`../mcp-auth.md`](../mcp-auth.md)).
+   (`ROYAL_MCP_TOKEN` som `Bearer`, se [`../mcp-auth.md`](../mcp-auth.md)).
 3. Ryd cache (W3TC), så JSON-LD ikke serveres fra en gammel side.
 4. Kør verifikationen nedenfor.
 

@@ -23,12 +23,14 @@ ind i dokumentindekset, så de ikke bliver forældreløse.
 
 | Sti | Indhold |
 | --- | --- |
-| `docs/` | Seks hoveddokumenter: roadmap, seo, projektstatus, mcp-auth, adsense-setup, competitors, command-center-kilde |
-| `docs/library/` | Daterede audits, research, specs og driftslogger — historik, ikke planer |
+| `docs/` | Syv hoveddokumenter: roadmap, seo, projektstatus, mcp-auth, adsense-setup, competitors, command-center-kilde — plus `agent-profil.md` til botter |
+| `docs/library/` | Daterede audits, research, specs og driftslogger — historik, ikke planer. Kun det der stadig gælder |
+| `docs/library/arkiv/` | Afløst materiale med afløseren noteret i indekset — tæller ikke som status |
 | `docs/daily-briefs/` | Én brief pr. dag (`AUTO:PROJEKTSTATUS` skrives af CI) |
 | `docs/site-checks/` | Rutine-tjek af den live side: PageSpeed, GSC, meta, alt-tekster |
 | `reports/` | PDF-projektrapport pr. projekt: status med regnestykket, roadmap-indeks, udviklingsvej og hvad der virker/ikke virker |
 | `tools/project_reports.py` | Genererer rapporterne i `reports/` ud fra `projektstatus.json` og roadmap'erne (`python3 tools/project_reports.py`) |
+| `tools/roadmap_pdf.py` | Én samlet PDF med status, tid til 100 %, alle roadmaps og Command Centers dokumentation (`PYTHONPATH=tools/_deps python3 tools/roadmap_pdf.py`) |
 | `tools/setup-agent-tools.sh` | Genskaber PHP 8.5 og PDF-bibliotekerne i `tools/_deps` (gitignored) — ingen root nødvendig |
 | `tools/mcp_project_profile.py` | Lokal MCP-server (stdio) der serverer profilen, status og roadmap'erne — registreret som `steamgears-profil` |
 | `tools/niche_scanner.py` | Niche-produkt-scanner: Pinterest Trends (API) + TikTok Creative Center-eksport × vores katalog → `reports/niche-scan-<dato>.md` |
@@ -48,8 +50,14 @@ ind i dokumentindekset, så de ikke bliver forældreløse.
   `GEMINI_API_KEY`, `WP_USER` og `WP_APP_PASS` som repo-secrets.
 - `.github/workflows/plugin-ci.yml` — lint + smoke/integration for pluginnet.
 
-Lokalt miljø: `cp .env.example .env` og udfyld de fire nøgler, koden læser (`GEMINI_API_KEY`,
-`WP_USER`, `WP_APP_PASS`, `PINTEREST_ACCESS_TOKEN`). `.env` er gitignored; skabelonen er det ikke.
-Til CI lægges de samme navne som repo-secrets.
+Lokalt miljø: `cp .env.example .env` og udfyld nøglerne, koden læser — `GEMINI_API_KEY`, `WP_USER`,
+`WP_APP_PASS`, `PINTEREST_ACCESS_TOKEN`, `ROYAL_MCP_TOKEN` (MCP mod sitet) og `PUBLER_API_KEY`.
+`.env` er gitignored; skabelonen er det ikke, og den indeholder kun navne. Til CI lægges de samme navne som
+repo-secrets. Hvilke credentials der faktisk virker, står i [`docs/agent-profil.md`](docs/agent-profil.md) og
+[`docs/mcp-auth.md`](docs/mcp-auth.md).
 
 Ændringer på selve sitet sker over MCP, ikke herfra. Repoet dokumenterer og forbereder dem.
+
+Udgivelse af pluginnet er zip'en på `main`: selv-opdateren tilbyder den under *Plugins → Update*, og det klik
+_er_ deploy'en — MCP kan læse plugins, men ikke installere eller aktivere dem. Hvad der kører live mod hvad der
+ligger i repoet, og hvordan en release efterkontrolleres, står i [`docs/roadmap.md`](docs/roadmap.md) §2b.

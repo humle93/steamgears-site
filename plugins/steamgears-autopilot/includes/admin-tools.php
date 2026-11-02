@@ -130,6 +130,7 @@ class SGAP_AdminTools {
         foreach (SGAP_Settings::HOUR_KEYS as $k) $kinds[$k] = 'hour 0-23';
         foreach (SGAP_Settings::INT_KEYS as $k) $kinds[$k] = 'number';
         foreach (SGAP_Settings::TEXT_KEYS as $k) $kinds[$k] = 'text';
+        foreach (SGAP_Settings::TEXTAREA_KEYS as $k) $kinds[$k] = 'text, one entry per line';
         foreach (SGAP_Settings::CHOICE_KEYS as $k => $choices) $kinds[$k] = 'one of: ' . implode(', ', array_keys($choices));
         foreach (SGAP_Settings::SECRET_KEYS as $k) $kinds[$k] = 'secret';
         return $kinds;

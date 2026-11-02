@@ -544,6 +544,30 @@ class SGAP_Studio {
             . 'else{c.innerHTML="<h2><span class=\\"dashicons dashicons-yes-alt\\"></span>SEO updated: "+esc(d.title)+"</h2><p>Focus keyword: <b>"+esc(d.focus_keyword)+"</b></p><p class=\\"description\\"><b>"+esc(d.meta_title)+"</b><br>"+esc(d.meta_description)+"</p>"'
             . '+(d.suggestions&&d.suggestions.length?"<p><b>Ideas for the content:</b></p><ul style=\\"list-style:disc;margin-left:18px\\">"+d.suggestions.map(function(x){return "<li>"+esc(x)+"</li>";}).join("")+"</ul>":"");}'
             . '}).catch(function(err){clearInterval(timer);btn.disabled=false;c.innerHTML="<h2>Could not reach the site</h2><p>"+esc(err.message)+"</p>";});});});})();</script>';
+        /* ---- whole-site SEO / AEO / GEO ---- */
+        echo '<div class="sgap-grid"><div>';
+        SGAP_UI::card_open('Optimise the whole site', 'admin-site-alt3');
+        echo '<p>One pass over every published page, post and product: SEO, answer engines (AEO) and generative engines (GEO). '
+            . 'The scan reads titles, meta, headings, links and images — the button with the AI also writes the missing meta.'
+            . '</p>'
+            . '<form class="sgap-seo-site-form"><p class="sgap-row"><label>Pages to fix per round '
+            . '<input type="number" name="limit" value="8" min="1" max="25" class="small-text"></label></p>'
+            . '<p><button class="button" data-task="scan"><span class="dashicons dashicons-search"></span>Scan the whole site</button> '
+            . '<button class="button button-primary" data-task="fix"><span class="dashicons dashicons-update"></span>Scan and fix meta</button></p>'
+            . '<p class="description">Body text is never rewritten here — only the meta title, description and focus keyword. '
+            . 'Content suggestions stay in &ldquo;Optimise SEO of a page&rdquo; above.</p></form>';
+        SGAP_UI::card_close();
+        echo '</div><div>';
+        SGAP_UI::card_open('What the score measures', 'info-outline');
+        echo '<p class="description"><b>SEO</b> — title and meta length, one H1, enough text for the type, internal links, image alt text, unique title and description across the site.</p>'
+            . '<p class="description"><b>AEO</b> — question-shaped headings, an FAQ block with FAQPage schema, a direct answer in the first paragraph, lists or tables.</p>'
+            . '<p class="description"><b>GEO</b> — named entities, quotable numbers, structured data, outbound citations, freshness, and the whole-domain checks: llms.txt, sitemap, robots.txt and the product feed.</p>'
+            . '<p class="description">The scan is free: database and HTTP only. The AI is called only for pages that are actually missing meta.</p>';
+        SGAP_UI::card_close();
+        echo '</div></div><div id="sgap-seo-site-out"></div>';
+        if (class_exists('SGAP_Site_SEO')) {
+            echo '<script>' . SGAP_Site_SEO::script() . '</script>';
+        }
         SGAP_Admin::close();
     }
 }

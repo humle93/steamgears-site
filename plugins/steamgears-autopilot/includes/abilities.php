@@ -89,7 +89,8 @@ class SGAP_Abilities {
                     'text' => ['type' => 'string', 'minLength' => 1],
                     'destination_url' => ['type' => 'string', 'format' => 'uri'],
                     'image_url' => ['type' => 'string', 'format' => 'uri'],
-                    'scheduled_at' => ['type' => 'string', 'description' => 'Optional date/time in site time, e.g. 2026-11-02 18:00']
+                    'scheduled_at' => ['type' => 'string', 'description' => 'Optional date/time in site time, e.g. 2026-11-02 18:00'],
+                    'force' => ['type' => 'boolean', 'description' => 'Queue even when the quality gate blocks the post (a banned word, a dead link, a repeated caption). The problems come back as warnings.']
                 ], ['channel', 'title', 'text', 'destination_url'], [__CLASS__, 'queue_post'], false, false
             ],
             'generate' => [
@@ -120,6 +121,17 @@ class SGAP_Abilities {
                 'Update the plugin',
                 'Installs the newest Steamgears Autopilot from GitHub (humle93/steamgears-site, main) over the installed version, if GitHub has a newer one. The plugin stays active. Returns the versions before and after.',
                 [], [], [__CLASS__, 'update'], false, true
+            ],
+            'check-post' => [
+                'Check a post before queueing',
+                'Runs both gates on a post without queueing it. Pre-flight: caption length (with the tracking link counted in), hashtag ceiling, Instagram photo type/size/aspect, Pinterest board. Quality: banned words, dead links, missing alt text and a caption that already went out on this channel. Returns the problems that would make Publer refuse it or the quality gate stop it, the text after the mechanical repairs (shortened caption, surplus hashtags removed) and whether it would go through as-is.',
+                [
+                    'channel' => $channel,
+                    'title' => ['type' => 'string', 'minLength' => 1, 'maxLength' => 200],
+                    'text' => ['type' => 'string', 'minLength' => 1],
+                    'destination_url' => ['type' => 'string', 'format' => 'uri'],
+                    'image_url' => ['type' => 'string', 'format' => 'uri', 'description' => 'The photo the post would use, if it has one']
+                ], ['channel', 'title', 'text', 'destination_url'], [__CLASS__, 'check_post'], true, true
             ],
             'check-publer' => [
                 'Check Publer connection',
@@ -174,6 +186,8 @@ class SGAP_Abilities {
             'ai_model' => SGAP_AI::model(),
             'key_test' => get_option(SGAP_KeyCheck::RESULT) ?: null,
             'sending_paused_because' => SGAP_Queue::blocked_reason() !== '' ? SGAP_Queue::blocked_message() : null,
+            'blackout' => SGAP_Blackout::summary(),
+            'quality_gate' => ['mode' => SGAP_Quality::mode(), 'banned_words' => count(SGAP_Quality::words())],
             'can_send_now' => SGAP_Queue::capacity(),
             'limits' => [
                 'daily_cap' => (int) SGAP_Settings::get('daily_cap', 8),
@@ -269,9 +283,32 @@ class SGAP_Abilities {
             'image_url' => $input['image_url'] ?? '',
             'content_type' => 'custom',
             'format' => 'post',
-            'scheduled_at' => $scheduled
+            'scheduled_at' => $scheduled,
+            'force' => !empty($input['force'])
         ]);
         return is_wp_error($result) ? $result : $result + ['status' => 'queued'];
+    }
+
+    /** Dry run of both gates — the publish-time pre-flight and the quality gate before queueing. Writes nothing. */
+    public static function check_post($input = null): array {
+        $input = (array) $input;
+        $channel = (string) ($input['channel'] ?? '');
+        $post = [
+            'title' => (string) ($input['title'] ?? ''),
+            'body' => (string) ($input['text'] ?? ''),
+            'image_url' => (string) ($input['image_url'] ?? ''),
+            'destination_url' => (string) ($input['destination_url'] ?? '')
+        ];
+        $check = SGAP_Preflight::check($channel, $post);
+        $quality = SGAP_Quality::check($post + ['channel' => $channel]);
+        return [
+            'channel' => $channel,
+            'ok' => $check['ok'] && $quality['ok'],
+            'problems' => $check['problems'],
+            'repairs' => $check['notes'],
+            'quality' => ['ok' => $quality['ok'], 'mode' => $quality['mode'], 'problems' => $quality['problems']],
+            'would_send' => ['title' => $check['row']['title'], 'text' => $check['row']['body']]
+        ];
     }
 
     public static function generate($input = null): array {

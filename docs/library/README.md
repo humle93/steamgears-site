@@ -11,6 +11,10 @@ sidste commit-dato. Målt 2/11 2026.
 > Oprydning 2/11: SEO-dokumenterne er slået sammen til ét [`../seo.md`](../seo.md), roadmap'en til ét
 > [`../roadmap.md`](../roadmap.md), og de gamle 24/10-planer er slettet. De kan hentes frem med
 > `git show b7a0438:<sti>`.
+>
+> Oprydning 2/11 (aften): de udløbne dagsplaner, 24.–30/10-scanningerne og Velocity-bundlet er flyttet til
+> [`arkiv/`](arkiv/README.md), så biblioteket kun rummer det der stadig gælder. Intet er slettet, og hvert
+> arkiveret dokument har sin afløser noteret i [arkivets indeks](arkiv/README.md).
 
 ## Igangværende arbejde
 
@@ -37,7 +41,7 @@ sidste commit-dato. Målt 2/11 2026.
 | [mockup-brief-2026-11-01.md](mockup-brief-2026-11-01.md) | Mockup-brief — 38 produkter | 2026-11-01 |
 | [niche-vurdering-2026-11-01.md](niche-vurdering-2026-11-01.md) | Niche-vurdering: fortsæt eller skift? | 2026-11-01 |
 | [pinterest-board-plan.md](pinterest-board-plan.md) | Pinterest board-plan (godkendt 25/10) | 2026-10-25 |
-| [pinterest-klar-til-liste-26-10.md](pinterest-klar-til-liste-26-10.md) | Pinterest klar-til-listen — ejerens 2-min-opgaver | 2026-10-27 |
+
 | [pirat-piger-prompts.md](pirat-piger-prompts.md) | Billedprompts til manglende motiver + Drive-navngivning | 2026-10-26 |
 
 ## Sikkerhed
@@ -55,8 +59,6 @@ sidste commit-dato. Målt 2/11 2026.
 | [vedligehold-daglig-log.md](vedligehold-daglig-log.md) | Daglig driftslog (løbende) | 2026-11-01 |
 | [vedligehold-ugentlig-log.md](vedligehold-ugentlig-log.md) | Ugentlig backup + 1 indholdselement | 2026-10-27 |
 | [vedligehold-kvartalsvis-log.md](vedligehold-kvartalsvis-log.md) | Kvartalsvis fuld crawl + top-20 | 2026-10-27 |
-| [vedligehold-status-24-10.md](vedligehold-status-24-10.md) | De fire rutiners UUID'er og testordre-status | 2026-10-25 |
-| [autopilot-status-2026-10-30.md](autopilot-status-2026-10-30.md) | Steamgears Autopilot — status 30/10 | 2026-10-31 |
 
 ## Research og analyser
 
@@ -66,24 +68,12 @@ sidste commit-dato. Målt 2/11 2026.
 | [waf-diagnose-2026-11-02.md](waf-diagnose-2026-11-02.md) | WAF-diagnose: 455 rammer spoofede bot-UA'er, ikke Google — retter A1/S0.6; PDF i `reports/waf-diagnose-2026-11-02.pdf` | 2026-11-02 |
 | [indholdsaudit-2026-11-01.md](indholdsaudit-2026-11-01.md) | Indholdsudit — posts, sider og produkter | 2026-11-01 |
 | [dode-links-2026-11-01.md](dode-links-2026-11-01.md) | Døde interne links — 39 fund | 2026-11-01 |
-| [mangler-og-plan-25-10.md](mangler-og-plan-25-10.md) | Komplet mangel-liste og udførelsesplan (25/10) | 2026-10-26 |
-| [keyword-morgenscan-26-10.md](keyword-morgenscan-26-10.md) | Keyword-morgenscan | 2026-10-27 |
-| ↳ [keyword-morgenscan-26-10-guide.html](keyword-morgenscan-26-10-guide.html) | Ledsagedokument til morgenscannen (HTML) | 2026-10-27 |
-| ↳ [keyword-morgenscan-26-10-paste.txt](keyword-morgenscan-26-10-paste.txt) | Ledsagedokument til morgenscannen (paste-klar tekst) | 2026-10-27 |
+| [mangler-og-plan-25-10.md](mangler-og-plan-25-10.md) | Komplet mangel-liste og udførelsesplan (25/10) — stadig citeret som evidens i roadmap'en | 2026-10-26 |
 | [niche-scan-procedure-2026-11-02.md](niche-scan-procedure-2026-11-02.md) | Procedure for niche-scanning: 7 trin, tærskler, fem fælder og hvad kilderne ikke måler | 2026-11-02 |
-| [trend-scan-26-10.md](trend-scan-26-10.md) | Trend-scan: Steamgears + Warpstorm | 2026-10-27 |
-| [chat-prioriteter-2026-10-26.md](chat-prioriteter-2026-10-26.md) | Chats efter prioritet | 2026-10-27 |
-| [deep-dive-my-steampunk-style-24-10.md](deep-dive-my-steampunk-style-24-10.md) | Deep-dive: my-steampunk-style.com | 2026-10-25 |
-| [gsc-fakta-genopbygning-25-10.md](gsc-fakta-genopbygning-25-10.md) | GSC-fakta efter genopbygningen 23/10 | 2026-10-25 |
 | [backlinks-backlink-log.md](backlinks-backlink-log.md) | Backlink Monitor — ugentlig log | 2026-10-27 |
 | [steampunk-outfit-ideas-for-women.md](steampunk-outfit-ideas-for-women.md) | Artikeludkast: steampunk outfit ideas for women | 2026-10-25 |
-| [tiktok-veo-prompts-24-10.md](tiktok-veo-prompts-24-10.md) | 6 TikTok-klip — Veo/Gemini-prompts | 2026-10-25 |
 
-## Andre projekter og kilder
-
-| Dokument | Indhold | Dato |
-| --- | --- | --- |
-| [Velocity_Command_Center_v2.1_Complete_Bundle.md](Velocity_Command_Center_v2.1_Complete_Bundle.md) | Velocity Command Center v2.1 — andet produkt, ikke Steamgears | 2026-11-01 |
+## Kilder
 
 Høstede Google-kilder i [`knowledge_base/`](../../knowledge_base/) (indlæses af `seo_agent.py` sammen med
 [`../seo.md`](../seo.md)):
@@ -106,8 +96,6 @@ Høstede Google-kilder i [`knowledge_base/`](../../knowledge_base/) (indlæses a
 ## Repoets hoveddokumenter
 
 - [`../../README.md`](../../README.md) — repoets indgang og mappestruktur
-- [`../plan-til-16-2026-11-02.md`](../plan-til-16-2026-11-02.md) — tidsplanen 07:00–16:00: P0-blokken i pluginnet, blokeringerne og definitionen på færdig
-- [`../roadmap-til-18-2026-11-02.md`](../roadmap-til-18-2026-11-02.md) — aftenplanen frem til kl. 18: forside og plugin, med definitionen på færdig og tidsblokke
 - [`../roadmap.md`](../roadmap.md) — **den eneste** optimeringsplan for sitet (S0–S4)
 - [`../seo.md`](../seo.md) — **det eneste** SEO-dokument: regler, GEO-skabelon, måling
 - [`../../plugins/steamgears-autopilot/ROADMAP.md`](../../plugins/steamgears-autopilot/ROADMAP.md) — plugin-produktets egen roadmap
@@ -115,3 +103,11 @@ Høstede Google-kilder i [`knowledge_base/`](../../knowledge_base/) (indlæses a
 - [`../adsense-setup.md`](../adsense-setup.md) — AdSense-setup
 - [`../competitors.md`](../competitors.md) — Competitor Watch
 - [`../command-center-kilde.md`](../command-center-kilde.md) — hvor Command Center-kilden ligger
+- [`command-center/`](command-center/) — Command Centers egen dokumentation hentet 2/11 2026 (roadmap, arkitektur/sikkerhed, bruger- og systemmanual) fra `humle93/command-center` @ `ac7dd53`
+- [`command-center-opdatering-2026-11-02.md`](command-center-opdatering-2026-11-02.md) — opdatering af CC på Ultra.cc til 7.14 med bruger-login (tjek, backup, tre opdateringsveje, fejlsøgning)
+
+## Arkiv
+
+- [`arkiv/`](arkiv/README.md) — afløst materiale: udløbne dagsplaner, 24.–30/10-scanninger og Velocity-bundlet.
+  Intet er slettet; hvert dokument har sin afløser noteret i arkivets indeks. Arkiveret materiale tæller
+  **ikke** som status.
