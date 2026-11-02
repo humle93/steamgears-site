@@ -26,12 +26,13 @@ function esc_url_raw($u,$p=null){return preg_match('#^https?://#',$u)?$u:'';} fu
 function wp_parse_args($a,$d){return array_merge($d,$a);} function add_query_arg($a,$u){return $u.(str_contains($u,'?')?'&':'?').http_build_query($a,'','&',PHP_QUERY_RFC3986);}
 function current_time($t){return '2026-10-30 12:00:00';} function wp_date($f,$t=null){return date($f,$t??time());}
 function current_user_can($c){return true;} function get_current_user_id(){return 1;} function get_site_transient($k){return false;} function set_site_transient(...$a){} function wp_remote_get(...$a){return new WP_Error('offline','offline');} function wp_nonce_field_stub(){} function delete_option($k){unset($GLOBALS["opts"][$k]);} function wp_json_encode($v){return json_encode($v);} function is_wp_error($v){return $v instanceof WP_Error;}
-class WP_Error{ function __construct(public $code,public $msg,public $data=[]){} }
+function wp_strip_all_tags($s){return strip_tags((string)$s);} function wp_die($m=''){throw new RuntimeException((string)$m);} function check_admin_referer($a=''){return true;}
+class WP_Error{ function __construct(public $code,public $msg,public $data=[]){} function get_error_message(){return $this->msg;} }
 class WP_REST_Response{ function __construct(public $data,public $status=200){} }
 class WP_REST_Request implements ArrayAccess{ function __construct(public array $p){} function get_param($k){return $this->p[$k]??null;}
  function offsetGet($k):mixed{return $this->p[$k]??null;} function offsetExists($k):bool{return isset($this->p[$k]);} function offsetSet($k,$v):void{} function offsetUnset($k):void{} }
 function wp_next_scheduled($h){return false;} function wp_schedule_event(...$a){$GLOBALS['cron'][]=$a[2];} function flush_rewrite_rules($h=true){$GLOBALS['flushed']=1;} function add_rewrite_rule(...$a){$GLOBALS['rules'][]=$a[0];} function wp_set_option_autoload_values($a){$GLOBALS['noauto']=$a;}
-class W{ public $prefix='wp_'; public $posts='wp_posts'; public $postmeta='wp_postmeta'; function get_charset_collate(){return '';} public $insert_id=0; public $log=[]; public $next=null;
+class W{ public $prefix='wp_'; public $posts='wp_posts'; public $postmeta='wp_postmeta'; function get_charset_collate(){return '';} public $insert_id=0; public $log=[]; public $next=null; public $row=null;
  function get_var($q){$this->log[]=$q; return $this->next;} function prepare($q,...$a){ if(count($a)==1&&is_array($a[0]))$a=$a[0]; return vsprintf(str_replace(['%s','%d','%f'],["'%s'",'%d','%F'],$q),$a);} function esc_like($s){return $s;}
  function get_results($q,$o=null){$this->log[]=$q;return [];} function get_row($q){$this->log[]=$q;return $this->row ?? null;} function query($q){$this->log[]=$q;return 0;}
  function insert($t,$d){$this->log[]="INSERT $t ".json_encode($d); $this->insert_id=42; return 1;} function update($t,$d,$w){$this->log[]="UPDATE $t ".json_encode($d);return 1;} }
@@ -39,8 +40,8 @@ $wpdb=new W; $wpdb->row=null;
 require __DIR__.'/../steamgears-autopilot/steamgears-autopilot.php';
 function check($name,$ok){ echo ($ok?'PASS ':'FAIL ')."$name\n"; if(!$ok) $GLOBALS['fail']=1; }
 do_action('init'); do_action('admin_init'); do_action('admin_menu');
-check('install: 8 tables', count($GLOBALS['ddl']??[])===8); check('install: cleanup cron', in_array('sgap_daily_cleanup',$GLOBALS['cron']??[])); check('install: /go/ rule + flush', ($GLOBALS['rules'][0]??'')==='^go/([0-9]+)/?$' && !empty($GLOBALS['flushed'])); check('install: secrets not autoloaded', isset($GLOBALS['noauto']['sgap_ai_api_key'])); check('version stored', $opts['sgap_version']===SGAP_VERSION);
-foreach(['steamgears-autopilot','sgap-settings','sgap-queue','sgap-ai','sgap-campaigns','sgap-etsy','sgap-reports','sgap-fullauto','sgap-merchant','sgap-setup','sgap-studio','sgap-chat'] as $p){ ob_start(); do_action('page_'.$p); $html=ob_get_clean(); check("page $p renders", strlen($html)>20); }
+check('install: 9 tables', count($GLOBALS['ddl']??[])===9); check('install: publish log table', str_contains(implode("\n",$GLOBALS['ddl']??[]),'sgap_publish_log')); check('install: cleanup cron', in_array('sgap_daily_cleanup',$GLOBALS['cron']??[])); check('install: /go/ rule + flush', ($GLOBALS['rules'][0]??'')==='^go/([0-9]+)/?$' && !empty($GLOBALS['flushed'])); check('install: secrets not autoloaded', isset($GLOBALS['noauto']['sgap_ai_api_key'])); check('version stored', $opts['sgap_version']===SGAP_VERSION);
+foreach(['steamgears-autopilot','sgap-settings','sgap-queue','sgap-ai','sgap-campaigns','sgap-etsy','sgap-reports','sgap-fullauto','sgap-merchant','sgap-setup','sgap-studio','sgap-chat','sgap-log'] as $p){ ob_start(); do_action('page_'.$p); $html=ob_get_clean(); check("page $p renders", strlen($html)>20); }
 // secrets never echoed
 $opts['sgap_ai_api_key']='SECRET123'; ob_start(); do_action('page_sgap-settings'); $html=ob_get_clean();
 check('secret not in settings html', !str_contains($html,'SECRET123') && str_contains($html,'Saved'));
@@ -165,6 +166,33 @@ check('backoff: last attempt fails without a new schedule', $new==='failed' && !
 $wpdb->row=(object)['channel'=>'pinterest','angle'=>'angle_a','attempts'=>1]; $wpdb->log=[];
 $new=SGAP_Queue::mark(13,'published');
 check('backoff: publishing is untouched by the retry path', $new==='published' && str_contains(implode("\n",$wpdb->log),'"published_at"'));
+// --- Publish audit log (P0.5) ---
+check('audit: default retention is 90 days', SGAP_Settings::get('audit_keep_days',90)===90);
+check('audit: excerpt collapses whitespace and strips tags', SGAP_Audit::excerpt("Publer: <b>token\n\n expired</b>")==='Publer: token expired');
+check('audit: excerpt is capped at 500 chars', mb_strlen(SGAP_Audit::excerpt(str_repeat('x',900)))===500);
+check('audit: http status is clamped to 0-599', SGAP_Audit::clamp_status(-5)===0 && SGAP_Audit::clamp_status(700)===0 && SGAP_Audit::clamp_status(404)===404);
+check('audit: error status comes from WP_Error data', SGAP_Audit::status_of(new WP_Error('x','y',['status'=>401]))===401);
+check('audit: a local failure has no status', SGAP_Audit::status_of('plain string')===0);
+check('audit: actor is admin inside wp-admin', SGAP_Audit::actor()==='admin');
+$wpdb->log=[]; SGAP_Audit::record(31,'pinterest','sent',200,'Publer job job_1');
+$ins=implode("\n",$wpdb->log);
+check('audit: a row records queue id, channel, outcome, status and actor', str_contains($ins,'INSERT wp_sgap_publish_log') && str_contains($ins,'"queue_id":31') && str_contains($ins,'"outcome":"sent"') && str_contains($ins,'"http_status":200') && str_contains($ins,'"actor":"admin"'));
+$wpdb->log=[]; SGAP_Audit::record(32,'facebook','nonsense');
+check('audit: an unknown outcome is stored as failed', str_contains(implode("\n",$wpdb->log),'"outcome":"failed"'));
+$wpdb->log=[]; SGAP_Audit::record_error(33,'instagram',new WP_Error('sgap_publer_http','Publer: HTTP 429',['status'=>429]),'requeued');
+$ins=implode("\n",$wpdb->log);
+check('audit: record_error keeps status and message', str_contains($ins,'"http_status":429') && str_contains($ins,'"outcome":"requeued"') && str_contains($ins,'Publer: HTTP 429'));
+update_option('sgap_audit_keep_days',0); $wpdb->log=[];
+check('audit: retention 0 keeps everything and runs no delete', SGAP_Audit::prune()===0 && $wpdb->log===[]);
+update_option('sgap_audit_keep_days',90); $wpdb->log=[]; SGAP_Audit::prune();
+check('audit: prune deletes rows older than the window', str_contains(implode("\n",$wpdb->log),'DELETE FROM wp_sgap_publish_log WHERE created_at < '));
+$wpdb->log=[]; SGAP_Audit::rows('failed','pinterest',25,50);
+$q=implode("\n",$wpdb->log);
+check('audit: rows filters by outcome and channel with paging', str_contains($q,"outcome = 'failed'") && str_contains($q,"channel = 'pinterest'") && str_contains($q,'LIMIT 25 OFFSET 50'));
+check('audit: page size is clamped', str_contains((function(){global $wpdb; $wpdb->log=[]; SGAP_Audit::rows('','',9999,0); return implode("\n",$wpdb->log);})(),'LIMIT 200 OFFSET 0'));
+$wpdb->next=7; check('audit: total counts with the same filter', SGAP_Audit::total('failed')===7);
+ob_start(); do_action('page_sgap-log'); $html=ob_get_clean();
+check('audit: the log page explains the retention window', str_contains($html,'Kept for 90 days'));
 $wpdb->row=null;
 $wpdb->next=null;
 exit(empty($GLOBALS['fail'])?0:1);

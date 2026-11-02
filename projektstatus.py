@@ -999,8 +999,13 @@ def _duplicate_project(state: dict) -> dict:
 
 
 def _only_recurring(state: dict) -> dict:
+    # Byg fixturet selv i stedet for at filtrere på data: projektet på plads 2 kan
+    # skifte, og har det ingen recurring-moduler, bliver listen tom og en anden
+    # fejl (»modules skal være en ikke-tom liste«) rammer før det værn der testes.
     project = state["projects"][2]
-    project["modules"] = [m for m in project["modules"] if m.get("recurring")]
+    only = dict(project["modules"][0])
+    only["recurring"] = True
+    project["modules"] = [only]
     return state
 
 

@@ -23,7 +23,7 @@ Status pr. **2026-11-02** · beregnet af `projektstatus.py` · kilder: [`projekt
 | Projekt | Status i dag | Grundlag |
 | --- | --- | --- |
 | **steamgears.eu — site-optimering** *(roadmap S0–S4)* | **43,8 %** | 9,25 af 21,1 d (S0 1,9/2,6 · S1 1,7/4,5 · S2 3/6 · S3 1,25/3 · S4 1,4/5) |
-| **Steamgears Autopilot — plugin** | **10,7 %** | 2,45 af 23 d (P0 2,2/4 · P1 0/10 · P2 0/7 · P3 0,25/2) |
+| **Steamgears Autopilot — plugin** | **15 %** | 3,45 af 23 d (P0 3,2/4 · P1 0/10 · P2 0/7 · P3 0,25/2) |
 | **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5) |
 | **SEO-indholdsproduktion** | **0 %** | 0 af 3 guides · drift: Daglig loop kører |
 | **Døde internlinks** | **100 %** | 39 af 39 links |
@@ -35,7 +35,7 @@ Status pr. **2026-11-02** · beregnet af `projektstatus.py` · kilder: [`projekt
 | Projekt | Næste skridt | Blokering |
 | --- | --- | --- |
 | steamgears.eu — site-optimering (43,8 %) | S1.1 Herbarium-varianter (kræver Printify-mapping); derefter S2.3 navigation og S4.3 valuta efter ejerbeslutning | S1.1 Herbarium kræver varianter i Printify; S0.4 5 vanity-301 kræver én Redirection-gruppe (ejer) |
-| Steamgears Autopilot — plugin (10,7 %) | P0.5 publiserings-auditlog (1,0 d), derefter P0.6 (kræver Command Center) og P1.1/P1.3 | Intet for P0. P1.5 kræver Pinterest-token (401) og Meta-review; P0.6 kræver Command Center |
+| Steamgears Autopilot — plugin (15 %) | P0.6 (kræver Command Center), derefter P1.1 og P1.3 | Intet for P0. P1.5 kræver Pinterest-token (401) og Meta-review; P0.6 kræver Command Center |
 | Dark academia-rebrand (63 %) | Batch 4 — mockups (~130 billeder) | Printify-adgang |
 | SEO-indholdsproduktion (0 %) | Skriv guide id 292 (men's steampunk essentials) | ingen |
 | Døde internlinks (100 %) | Vedligehold: tjek nye indlæg mod live-URL'er | ingen |
@@ -50,6 +50,7 @@ Nyeste først. Append-only — rækker må ikke slettes eller ændres.
 
 | Dato | Projekt | Modul | Før → Efter | Δ | Grundlag |
 | --- | --- | --- | --- | --- | --- |
+| 2026-11-02 | Steamgears Autopilot — plugin | daglig måling | 10,7 % → 15 % | +4,3 | 3,45 af 23 d (P0 3,2/4 · P1 0/10 · P2 0/7 · P3 0,25/2) |
 | 2026-11-02 | Steamgears Autopilot — plugin | daglig måling | 2 % → 10,7 % | +8,7 | 2,45 af 23 d (P0 2,2/4 · P1 0/10 · P2 0/7 · P3 0,25/2) |
 | 2026-11-02 | Steamgears Autopilot — plugin | baseline | — → 2 % | — | 0,45 af 23 d (P0 0,2/4 · P1 0/10 · P2 0/7 · P3 0,25/2) |
 | 2026-11-02 | steamgears.eu — site-optimering | daglig måling | 39,3 % → 43,8 % | +4,5 | 9,25 af 21,1 d (S0 1,9/2,6 · S1 1,7/4,5 · S2 3/6 · S3 1,25/3 · S4 1,4/5) |

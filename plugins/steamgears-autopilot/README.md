@@ -23,7 +23,7 @@ The whole social autopilot runs inside WordPress (Command Center is retired):
 4. **Measure** – every post links via `/go/<id>/`, so clicks (and WooCommerce
    orders) are counted per channel.
 
-Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.15.1.zip` → Activate.
+Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.17.0.zip` → Activate.
 
 ## Run it from Claude
 
@@ -173,6 +173,10 @@ unattended:
 - A post that fails is retried with backoff (5 → 15 → 45 minutes) and then stays `failed` in the queue.
   Settings → Alerts mails you when that happens and when the queue is running dry; `daily` mode collects
   both into one digest after the self-check.
+- Every attempt is also written to the **Publish log**: channel, outcome, HTTP status, a response excerpt and
+  the actor (cron, admin, REST, WP-CLI). The queue shows the current state; the log keeps the history the
+  `error` column overwrites. Rows are kept for `audit_keep_days` (default 90, `0` = forever) and pruned by
+  the daily maintenance job.
 - The Etsy API settings and the direct Instagram/Pinterest/TikTok/YouTube/Reddit/Telegram keys are
   registered but unused. Publishing goes through Publer (RSS feeds or API), and `/etsy/orders` takes a
   manual import.

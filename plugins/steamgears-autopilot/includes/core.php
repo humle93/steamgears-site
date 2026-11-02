@@ -54,6 +54,7 @@ class SGAP_Install {
         'sgap_alert_mode' => 'immediate',
         'sgap_alert_email' => '',
         'sgap_alert_dry_days' => 2,
+        'sgap_audit_keep_days' => 90,
         'sgap_articles_per_week' => 0,
         'sgap_rescue_hosts' => 'steamgears.juno.page'
     ];
@@ -245,6 +246,22 @@ class SGAP_Install {
         UNIQUE KEY etsy_order (etsy_order_id)
         ) $charset;");
 
+        dbDelta("CREATE TABLE {$wpdb->prefix}sgap_publish_log (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        queue_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+        channel VARCHAR(40) NOT NULL,
+        outcome VARCHAR(20) NOT NULL,
+        http_status SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+        actor VARCHAR(20) NOT NULL,
+        message VARCHAR(500) NOT NULL DEFAULT '',
+        created_at DATETIME NOT NULL,
+        PRIMARY KEY  (id),
+        KEY queue_id (queue_id),
+        KEY created_at (created_at),
+        KEY outcome_created (outcome,created_at),
+        KEY channel_created (channel,created_at)
+        ) $charset;");
+
         foreach (self::DEFAULTS as $key => $value) {
             add_option($key, $value);
         }
@@ -289,7 +306,7 @@ class SGAP_Settings {
     const HOUR_KEYS = ['quiet_start', 'quiet_end'];
     const INT_KEYS = [
         'daily_cap','batch_size','labor_rate','monthly_budget','target_roi',
-        'winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max','posts_per_day','articles_per_week','alert_dry_days'
+        'winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max','posts_per_day','articles_per_week','alert_dry_days','audit_keep_days'
     ];
     /** Never echoed back to the browser; can be overridden by SGAP_<KEY> constants in wp-config.php. */
     const SECRET_KEYS = [
@@ -315,7 +332,7 @@ class SGAP_Settings {
         'Publer' => ['publish_mode','publer_api_key','publer_workspace_id','publer_pinterest_board','channels'],
         'AI content' => ['ai_provider','ai_api_key','ai_model','ai_base_url','posts_per_day','content_language','image_model','image_api_key','serpapi_key'],
         'Economics' => ['labor_rate','monthly_budget','target_roi','winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max'],
-        'Alerts' => ['alert_mode','alert_email','alert_dry_days'],
+        'Alerts and log' => ['alert_mode','alert_email','alert_dry_days','audit_keep_days'],
         'Etsy' => ['etsy_shop_id','etsy_oauth_token','etsy_refresh_token','etsy_shipping_profile_id','etsy_return_policy_id'],
         'Google Feed' => ['merchant_feed_secret']
     ];
@@ -350,6 +367,7 @@ class SGAP_Settings {
         'alert_mode' => 'Immediate: a mail the moment a post gives up after three attempts, and one when the queue has less than the warning level left. Daily: the same information collected into one mail after the daily self-check. Off: nothing.',
         'alert_email' => 'Where alerts go. Empty = the site admin address.',
         'alert_dry_days' => 'Warn when the queue has fewer days of posts left than this, measured as queued posts divided by the daily cap. 0 = never warn.',
+        'audit_keep_days' => 'How long the publish log is kept: one row per attempt, with channel, HTTP status, response and who started it. 0 = keep everything.',
         'rescue_hosts' => 'Images on these servers are copied into your media library and every link is rewritten (comma-separated).'
     ];
 
@@ -1301,6 +1319,11 @@ class SGAP_Maintenance {
         // Items handed to Publer (external_id set) are followed up by SGAP_Publer instead.
         $wpdb->query("UPDATE {$wpdb->prefix}sgap_queue SET status = 'queued' WHERE status = 'sending' AND external_id = ''");
 
+        // The publish log keeps its own, shorter window (Settings → Alerts and log).
+        if (class_exists('SGAP_Audit')) {
+            SGAP_Audit::prune();
+        }
+
         $days = (int) apply_filters('sgap_event_retention_days', 180);
         if ($days < 1) {
             return;
@@ -1364,7 +1387,7 @@ class SGAP_Admin {
         }
     }
 
-    private static function table_exists(string $table): bool {
+    public static function table_exists(string $table): bool {
         global $wpdb;
         return $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $wpdb->esc_like($table))) === $table;
     }
@@ -1387,7 +1410,7 @@ class SGAP_Admin {
     }
 
     /** Stores a message for open() on the next page and goes there. */
-    private static function done(string $message, string $page = 'steamgears-autopilot'): void {
+    public static function done(string $message, string $page = 'steamgears-autopilot'): void {
         delete_transient('sgap_dashboard_stats');
         set_transient('sgap_run_result_' . get_current_user_id(), $message, 5 * MINUTE_IN_SECONDS);
         wp_safe_redirect(admin_url('admin.php?page=' . $page));
