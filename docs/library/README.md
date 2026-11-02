@@ -15,6 +15,7 @@ sidste commit-dato. Målt 2/11 2026.
 | [butik-fund-2026-11-02.md](butik-fund-2026-11-02.md) | Butiksfund: tees uden størrelsesvalg | 2026-11-02 |
 | [tee-varianter-spec-2026-11-02.md](tee-varianter-spec-2026-11-02.md) | Størrelsesvarianter på de ni tees — spec og blokering | 2026-11-02 |
 | [valuta-og-priser-2026-11-02.md](valuta-og-priser-2026-11-02.md) | Valuta og priser — forslag til S4.3 | 2026-11-02 |
+| [navigation-spec-2026-11-02.md](navigation-spec-2026-11-02.md) | Navigation og menu — S2.3, verificeret mod REST 2/11 | 2026-11-02 |
 | [drive-watch-log.md](drive-watch-log.md) | Log over ændringer i Drive | 2026-11-02 |
 | [seo-runde-og-status-2026-11-01.md](seo-runde-og-status-2026-11-01.md) | SEO-optimeringsrunde + projektstatus 1/11 | 2026-11-02 |
 
