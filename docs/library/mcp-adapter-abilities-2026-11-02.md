@@ -66,7 +66,9 @@ med nytte 1, så de ikke bliver brugt ved en fejl.
 `'meta' => [ 'show_in_rest' => true, 'expose_in_deprecated_woocommerce_mcp' => true ]`. Den første nøgle
 er afgørende: AI Engines bro eksponerer alt med `meta.mcp.public === true` **eller** ikke-tomt
 `meta.show_in_rest` (`labs/mcp-abilities.php:42-48`). Spejlene er altså skjult i Wos egen adapter-liste,
-men ikke i AI Engines — de dukker op som MCP-værktøjer alligevel, indtil Woo fjerner dem i 11.3.
+men ikke i AI Engines — de dukker op som MCP-værktøjer alligevel, indtil Woo fjerner dem.
+Hvad der forsvinder, og hvad vi gør ved opdateringen, står i driftsnoten
+[`woo-11-3-vaerktoejsliste-2026-11-02.md`](woo-11-3-vaerktoejsliste-2026-11-02.md).
 
 **Sider og indlæg har ingen ability.** WordPress registrerer ikke page/post-abilities som
 offentlige, så adapteren kan ikke redigere en side eller et indlæg. Det er den vigtigste
