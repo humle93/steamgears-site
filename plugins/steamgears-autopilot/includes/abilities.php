@@ -47,12 +47,20 @@ class SGAP_Abilities {
         return $schema;
     }
 
+    /** CSV-indgang: rå tekst eller sti til en fil under uploads. */
+    private static function csv_schema(): array {
+        return [
+            'type' => 'string',
+            'description' => 'Candidate niches as CSV: raw text, or the path to a .csv inside wp-content/uploads. Required columns: niche/keyword/navn, searches/søgninger, listings/antal_listings/konkurrenter, competitor/konkurrent (handmade/mixed/pod). Optional: swing/sæsonsving, difficulty/sværhedsgrad, price/pris, and url/link/destination which fills the destination URL. Delimiter , ; or tab is detected; numbers must not use thousands separators. Takes the place of candidates.'
+        ];
+    }
+
     /** One object per candidate niche. The numbers are input — nothing is fetched. */
     private static function candidates_schema(): array {
         return [
             'type' => 'array',
             'minItems' => 1,
-            'description' => 'Candidate niches. searches and listings are required; swing is the October/June ratio (1 = flat).',
+            'description' => 'Candidate niches as objects — the alternative to csv. searches and listings are required; swing is the October/June ratio (1 = flat).',
             'items' => [
                 'type' => 'object',
                 'properties' => [
@@ -146,26 +154,26 @@ class SGAP_Abilities {
             ],
             'score-niches' => [
                 'Score niche candidates',
-                'Scores niche candidates with the same rubric as the niche assessment (listings 45, searches 25, seasonal swing 20, competitor type 10; more than 50.000 listings is always "nej"). Returns the ranking, skipped niches and a Markdown plan. Writes nothing: use queue-niches to create the drafts.',
+                'Scores niche candidates with the same rubric as the niche assessment (listings 45, searches 25, seasonal swing 20, competitor type 10; more than 50.000 listings is always "nej"). Takes the candidates as objects or as CSV — raw text or a .csv under uploads. Returns the ranking, skipped niches and a Markdown plan. Writes nothing: use queue-niches to create the drafts.',
                 [
                     'candidates' => self::candidates_schema(),
-                    'links' => ['type' => 'object', 'additionalProperties' => ['type' => 'string'], 'description' => 'Niche name => destination URL. Niches without a URL are skipped with a reason, never given a guessed link.'],
+                    'csv' => self::csv_schema(),
+                    'links' => ['type' => 'object', 'additionalProperties' => ['type' => 'string'], 'description' => 'Niche name => destination URL. A url column in csv fills this automatically. Niches without a URL are skipped with a reason, never given a guessed link.'],
                     'channels' => ['type' => 'array', 'items' => $channel, 'description' => 'Target channels. Default: pinterest.'],
                     'include_yellow' => ['type' => 'boolean', 'description' => 'Include yellow niches, not only green. Default: false.'],
                     'require_image' => ['type' => 'boolean', 'description' => 'Skip channels that need a photo (instagram, pinterest). Default: false.']
-                ], ['candidates'], [__CLASS__, 'score_niches'], true, true
+                ], [], [__CLASS__, 'score_niches'], true, true
             ],
             'queue-niches' => [
                 'Queue niches as drafts',
-                'Scores the candidates, then writes the green ones into the publishing queue as drafts through the plugin itself (no REST call). Niches without a destination URL are skipped. Body and image stay empty so a human or the writer fills them in; nothing reaches Publer before approval.',
+                'Scores the candidates, then writes the green ones into the publishing queue as drafts through the plugin itself (no REST call). Takes the candidates as objects or as CSV — raw text or a .csv under uploads. Niches without a destination URL are skipped. Body and image stay empty so a human or the writer fills them in; nothing reaches Publer before approval.',
                 [
                     'candidates' => self::candidates_schema(),
-                    'links' => ['type' => 'object', 'additionalProperties' => ['type' => 'string'], 'description' => 'Niche name => destination URL.'],
+                    'csv' => self::csv_schema(),
+                    'links' => ['type' => 'object', 'additionalProperties' => ['type' => 'string'], 'description' => 'Niche name => destination URL. A url column in csv fills this automatically.'],
                     'channels' => ['type' => 'array', 'items' => $channel, 'description' => 'Target channels. Default: pinterest.'],
                     'include_yellow' => ['type' => 'boolean', 'description' => 'Include yellow niches, not only green. Default: false.'],
-                    'require_image' => ['type' => 'boolean', 'description' => 'Skip channels that need a photo (instagram, pinterest). Default: false.']
-                ],
-                ['candidates', 'links'], [__CLASS__, 'queue_niches'], false, true
+                    'require_image' => ['type' => 'boolean', 'description' => 'Skip channels that need a photo (instagram, pinterest). Default: false.']                ], [], [__CLASS__, 'queue_niches'], false, true
             ],
             'check-publer' => [
                 'Check Publer connection',

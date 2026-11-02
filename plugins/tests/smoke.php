@@ -26,6 +26,7 @@ function sanitize_key($s){return preg_replace('/[^a-z0-9_\-]/','',strtolower((st
 function esc_url_raw($u,$p=null){return preg_match('#^https?://#',$u)?$u:'';} function wp_parse_url($u,$c=-1){return parse_url($u,$c);}
 function wp_parse_args($a,$d){return array_merge($d,$a);} function add_query_arg($a,$u){return $u.(str_contains($u,'?')?'&':'?').http_build_query($a,'','&',PHP_QUERY_RFC3986);}
 function current_time($t){return '2026-10-30 12:00:00';} function wp_date($f,$t=null){return date($f,$t??time());}
+function wp_upload_dir($t=null){return ['basedir'=>$GLOBALS['uploads_dir']??sys_get_temp_dir()];}
 function current_user_can($c){return true;} function get_current_user_id(){return 1;} function get_site_transient($k){return false;} function set_site_transient(...$a){} function wp_remote_get(...$a){return new WP_Error('offline','offline');} function wp_nonce_field_stub(){} function delete_option($k){unset($GLOBALS["opts"][$k]);} function wp_json_encode($v){return json_encode($v);} function is_wp_error($v){return $v instanceof WP_Error;}
 class WP_Error{ function __construct(public $code,public $msg,public $data=[]){} function get_error_code(){return $this->code;} function get_error_message(){return $this->msg;} }
 class WP_REST_Response{ function __construct(public $data,public $status=200){} }
@@ -185,5 +186,44 @@ $preview=SGAP_Abilities::score_niches(['candidates'=>$candidates,'links'=>$links
 check('niche: ability preview ranks and writes nothing', count($preview['ranked'])===4 && $preview['drafts']===1 && $preview['ranked'][0]['score']===80.8);
 $bad=SGAP_Abilities::score_niches(['candidates'=>[['niche'=>'x','searches'=>0,'listings'=>10,'competitor'=>'pod']]]);
 check('niche: ability returns WP_Error on bad input', $bad instanceof WP_Error && $bad->get_error_code()==='sgap_niche');
+// --- CSV-indgang: kandidatfilen kan læses inde i WordPress ---
+$csv="niche,searches,listings,swing,competitor,difficulty,price,url\n"
+  ."steampunk goggles,9900,3175,,handmade,22,,https://example.com/goggles\n"
+  ."steampunk corset,2270,7114,,handmade,33,,\n"
+  ."steampunk top hat,1600,10686,,handmade,,,\n"
+  ."steampunk costume,18100,45063,16.8,handmade,41,,\n";
+$parsed=SGAP_Niche::parse_csv($csv);
+check('niche csv: four rows read, comma detected', count($parsed['rows'])===4 && $parsed['delimiter']===',');
+check('niche csv: a url column fills the links', $parsed['links']===['steampunk goggles'=>'https://example.com/goggles']);
+$from_csv=SGAP_Niche::preview(['csv'=>$csv,'channels'=>['pinterest']]);
+check('niche csv: preview scores the file like the object input', array_column($from_csv['ranked'],'score')===[80.8,61.2,53.6,38.9] && $from_csv['drafts']===1);
+check('niche csv: preview reports where the rows came from', $from_csv['source']['from']==='csv' && $from_csv['source']['rows']===4 && $from_csv['source']['links_from_csv']===1);
+$semi=SGAP_Niche::parse_csv("\u{feff}navn;søgninger;antal_listings;konkurrent\r\nsteampunk goggles;9900;3175;håndlavet\r\n");
+check('niche csv: BOM, semicolons and Danish headers', $semi['delimiter']===';' && count($semi['rows'])===1 && $semi['rows'][0]['navn']==='steampunk goggles');
+check('niche csv: a quoted comma stays inside the field', SGAP_Niche::parse_csv("niche,searches,listings,competitor\n\"goggles, brass\",9900,3175,handmade\n")['rows'][0]['niche']==='goggles, brass');
+check('niche csv: missing column names the accepted aliases', str_contains(nocatch(fn()=>SGAP_Niche::parse_csv("niche,searches,competitor\nx,1,handmade\n")),"'listings' (listings, antal_listings, konkurrenter)"));
+check('niche csv: empty file refused', str_contains(nocatch(fn()=>SGAP_Niche::parse_csv('')),'tom'));
+check('niche csv: header without rows refused', str_contains(nocatch(fn()=>SGAP_Niche::parse_csv("niche,searches,listings,competitor\n")),'ingen rækker'));
+$extra=SGAP_Niche::parse_csv("niche,searches,listings,competitor,note\nx,1000,500,pod,hej\n");
+check('niche csv: unknown columns are ignored, not fatal', count(SGAP_Niche::scan($extra['rows']))===1);
+$uploads=sys_get_temp_dir().'/sgap-smoke-uploads'; $GLOBALS['uploads_dir']=$uploads;
+@mkdir($uploads.'/sub',0777,true);
+$file=$uploads.'/kandidater.csv'; file_put_contents($file,$csv);
+check('niche csv: a file under uploads is read', SGAP_Niche::parse_csv(SGAP_Niche::read_csv_file($file))['rows'][0]['niche']==='steampunk goggles');
+$outside=dirname($uploads).'/sgap-outside.csv'; file_put_contents($outside,$csv); @mkdir($uploads.'/sub',0777,true);
+check('niche csv: .. cannot escape uploads', str_contains(nocatch(fn()=>SGAP_Niche::read_csv_file($uploads.'/../'.basename($outside))),'under uploads'));
+unlink($outside);
+check('niche csv: a path outside uploads is refused', str_contains(nocatch(fn()=>SGAP_Niche::read_csv_file(__DIR__.'/../../docs/library/niche-kandidater-2026-11-02.csv')),'under uploads'));
+check('niche csv: only .csv is read', str_contains(nocatch(fn()=>SGAP_Niche::read_csv_file($uploads.'/kandidater.txt')),'kun .csv'));
+check('niche csv: missing file is named', str_contains(nocatch(fn()=>SGAP_Niche::read_csv_file($uploads.'/findes-ikke.csv')),'findes ikke'));
+$by_path=SGAP_Niche::preview(['csv'=>$file,'channels'=>['pinterest']]);
+check('niche csv: the ability takes a path under uploads', $by_path['source']['file']===$file && count($by_path['ranked'])===4);
+check('niche csv: csv and candidates at once is refused', SGAP_Niche::preview(['csv'=>$csv,'candidates'=>[['niche'=>'x','searches'=>1,'listings'=>1,'competitor'=>'pod']]]) instanceof WP_Error);
+check('niche csv: neither csv nor candidates is refused', SGAP_Abilities::queue_niches([]) instanceof WP_Error);
+$repo=__DIR__.'/../../docs/library/niche-kandidater-2026-11-02.csv';
+if (is_readable($repo)) {
+    $repo_rows=SGAP_Niche::parse_csv(file_get_contents($repo));
+    check('niche csv: the documented candidate file parses unchanged', count($repo_rows['rows'])===4 && array_column(SGAP_Niche::scan($repo_rows['rows']),'score')===[80.8,61.2,53.6,38.9]);
+}
 echo empty($GLOBALS['fail'])?"ALL PASS\n":"SOME FAILED\n";
 exit(empty($GLOBALS['fail'])?0:1);

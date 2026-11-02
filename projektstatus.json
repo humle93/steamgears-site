@@ -186,6 +186,14 @@
           "total": 0.4,
           "unit": "d",
           "note": "SGAP_Niche i includes/niche.php, abilities score-niches/queue-niches, paritet med Python målt, 111 smoke-checks"
+        },
+        {
+          "id": "m7",
+          "name": "M7 — CSV-indgang i plugin-modulet",
+          "done": 0.2,
+          "total": 0.2,
+          "unit": "d",
+          "note": "parse_csv/read_csv_file: separator, BOM, danske headers, url-kolonne, kun filer under uploads; 19 checks"
         }
       ]
     },
@@ -396,6 +404,15 @@
       "after": 92.4,
       "delta": 1.0,
       "basis": "3,05 af 3,3 d (M1 0,5/0,5 · M2 1/1 · M3 0,5/0,5 · M4 0,25/0,5 · M5 0,4/0,4 · M6 0,4/0,4)"
+    },
+    {
+      "date": "2026-11-02",
+      "project": "Niche-scanning (eget repo)",
+      "module": "daglig måling",
+      "before": 92.4,
+      "after": 92.9,
+      "delta": 0.5,
+      "basis": "3,25 af 3,5 d (M1 0,5/0,5 · M2 1/1 · M3 0,5/0,5 · M4 0,25/0,5 · M5 0,4/0,4 · M6 0,4/0,4 · M7 0,2/0,2)"
     }
   ]
 }

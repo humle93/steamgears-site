@@ -23,7 +23,7 @@ The whole social autopilot runs inside WordPress (Command Center is retired):
 4. **Measure** – every post links via `/go/<id>/`, so clicks (and WooCommerce
    orders) are counted per channel.
 
-Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.16.0.zip` → Activate.
+Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.17.0.zip` → Activate.
 
 ## Run it from Claude
 
@@ -58,6 +58,16 @@ Example: "Write today's posts and show them to me" → `generate`, then
 input — nothing is fetched and there are no API keys involved, so the same
 candidates always give the same score, and a missing field normalises the weight
 instead of scoring zero.
+
+Both abilities take the candidates either as objects (`candidates`) or as a file in
+`csv` — raw CSV text, or the path to a `.csv` inside `wp-content/uploads`. The CSV
+needs `niche`, `searches`, `listings` and `competitor` (Danish headers such as
+`søgninger` and `konkurrent` work); `swing`, `difficulty`, `price` and `url` are
+optional, and a `url` column fills the destination link for you, so one file
+covers both the scoring and the queue. Comma, semicolon and tab are detected, and
+BOM/CRLF files from Excel are read as-is. Numbers must be written without
+thousands separators. A file outside `uploads` is refused — the module reads
+nothing it was not handed.
 
 `queue-niches` writes the green niches into the publishing queue as **drafts**
 with `angle: niche`, body and image empty. Two things it refuses: it will not

@@ -18,6 +18,10 @@
  * `sgap_niche_attribution` pr. queue-id, fordi `sgap_queue` ikke har kolonner
  * til det. Skal det i selve rækken, kræver det en migration af tabellen.
  *
+ * Kandidaterne kan komme som objekter (`candidates`) eller som CSV (`csv`): enten
+ * rå tekst eller stien til en fil under `wp-content/uploads`. Samme fil og samme
+ * tal giver samme rækkefølge, uanset om den blev læst i Python eller her.
+ *
  * Loaded from steamgears-autopilot.php.
  */
 
@@ -50,8 +54,13 @@ class SGAP_Niche {
         'swing' => 'swing', 'sæsonsving' => 'swing', 'saesonsving' => 'swing', 'seasonality' => 'swing',
         'competitor' => 'competitor', 'konkurrent' => 'competitor', 'konkurrenttype' => 'competitor',
         'difficulty' => 'difficulty', 'sværhedsgrad' => 'difficulty', 'svaerhedsgrad' => 'difficulty',
-        'price' => 'price', 'pris' => 'price'
+        'price' => 'price', 'pris' => 'price',
+        'url' => 'url', 'link' => 'url', 'destination' => 'url', 'destination_url' => 'url', 'destinations_url' => 'url'
     ];
+
+    /* Kolonner en CSV skal have for at kunne scores (url er valgfri). */
+    const CSV_REQUIRED = ['niche', 'searches', 'listings', 'competitor'];
+    const CSV_MAX_BYTES = 1048576;
 
     const GREEN = 'grøn';
     const YELLOW = 'gul';
@@ -263,6 +272,175 @@ class SGAP_Niche {
             $scored[] = self::score_row($raw, $index);
         }
         return self::rank($scored);
+    }
+
+    /* ---------- CSV-indgang ---------- */
+
+    /** Felter der kan stå i CSV'en, med de navne der accepteres for hvert felt. */
+    public static function csv_names(string $field): array {
+        $names = [];
+        foreach (self::FIELD_ALIASES as $alias => $canonical) {
+            if ($canonical === $field) {
+                $names[] = $alias;
+            }
+        }
+        return $names;
+    }
+
+    /** Vælger separator ud fra headeren: komma, semikolon eller tabulator. */
+    private static function csv_delimiter(string $line): string {
+        $clean = preg_replace('/"[^"]*"/', '', $line);
+        $best = ',';
+        $best_count = 0;
+        foreach ([',', ';', "\t"] as $candidate) {
+            $count = substr_count((string) $clean, $candidate);
+            if ($count > $best_count) {
+                $best = $candidate;
+                $best_count = $count;
+            }
+        }
+        return $best;
+    }
+
+    /**
+     * Læser CSV-tekst som Python-værktøjet: BOM og CRLF tåles, separator findes selv,
+     * og en manglende kolonne navngives sammen med de navne der ville have virket.
+     *
+     * @return array{rows: array, links: array, columns: array, delimiter: string}
+     * @throws SGAP_Niche_Error
+     */
+    public static function parse_csv(string $text): array {
+        $text = str_replace(["\r\n", "\r"], "\n", ltrim($text, "\u{feff}"));
+        if (trim($text) === '') {
+            throw new SGAP_Niche_Error('CSV: filen er tom');
+        }
+        $handle = fopen('php://temp', 'r+');
+        fwrite($handle, $text);
+        rewind($handle);
+        $delimiter = self::csv_delimiter((string) fgets($handle));
+        rewind($handle);
+
+        $header = null;
+        $rows = [];
+        $unknown = [];
+        while (($cells = fgetcsv($handle, 0, $delimiter, '"', '')) !== false) {
+            $cells = array_map(fn($c) => is_string($c) ? trim($c) : '', (array) $cells);
+            if (implode('', $cells) === '') {
+                continue;
+            }
+            if ($header === null) {
+                $header = $cells;
+                continue;
+            }
+            $raw = [];
+            foreach ($header as $position => $name) {
+                if ($name === '') {
+                    continue;
+                }
+                $raw[$name] = $cells[$position] ?? '';
+                if (!isset(self::FIELD_ALIASES[mb_strtolower($name)])) {
+                    $unknown[$name] = true;
+                }
+            }
+            $rows[] = $raw;
+        }
+        fclose($handle);
+
+        if (!$header) {
+            throw new SGAP_Niche_Error('CSV: filen har ingen header');
+        }
+        $present = [];
+        foreach ($header as $name) {
+            $canonical = self::FIELD_ALIASES[mb_strtolower($name)] ?? null;
+            if ($canonical !== null) {
+                $present[$canonical] = true;
+            }
+        }
+        $missing = [];
+        foreach (self::CSV_REQUIRED as $field) {
+            if (!isset($present[$field])) {
+                $missing[] = "'$field' (" . implode(', ', self::csv_names($field)) . ')';
+            }
+        }
+        if ($missing) {
+            throw new SGAP_Niche_Error('CSV: kolonnen mangler: ' . implode('; ', $missing));
+        }
+        if (!$rows) {
+            throw new SGAP_Niche_Error('CSV: headeren er der, men der er ingen rækker');
+        }
+
+        $links = [];
+        foreach ($rows as $raw) {
+            $row = self::normalise($raw);
+            $niche = trim((string) ($row['niche'] ?? ''));
+            $url = trim((string) ($row['url'] ?? ''));
+            if ($niche !== '' && $url !== '') {
+                $links[$niche] = $url;
+            }
+        }
+
+        return ['rows' => $rows, 'links' => $links, 'columns' => $header, 'delimiter' => $delimiter, 'unknown' => array_keys($unknown)];
+    }
+
+    /** Kun filer under uploads må læses — stien må ikke kunne pege ud af mappen. */
+    public static function read_csv_file(string $path): string {
+        $path = trim($path);
+        if (!preg_match('/\.csv$/i', $path)) {
+            throw new SGAP_Niche_Error("CSV: kun .csv-filer kan læses: $path");
+        }
+        if (!function_exists('wp_upload_dir')) {
+            throw new SGAP_Niche_Error('CSV: uploads-mappen kan ikke slås op her — send CSV-teksten i stedet');
+        }
+        $uploads = wp_upload_dir();
+        $base = realpath((string) ($uploads['basedir'] ?? ''));
+        $real = realpath($path);
+        if ($real === false || !is_file($real)) {
+            throw new SGAP_Niche_Error("CSV: filen findes ikke: $path");
+        }
+        if ($base === false || strpos($real, rtrim($base, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR) !== 0) {
+            throw new SGAP_Niche_Error("CSV: filen skal ligge under uploads ($base), ikke udenfor: $path");
+        }
+        if (filesize($real) > self::CSV_MAX_BYTES) {
+            throw new SGAP_Niche_Error('CSV: filen er større end ' . self::num((float) self::CSV_MAX_BYTES) . ' bytes — del den op');
+        }
+        $text = file_get_contents($real);
+        if ($text === false) {
+            throw new SGAP_Niche_Error("CSV: filen kunne ikke læses: $path");
+        }
+        return $text;
+    }
+
+    /** Rå tekst eller en sti, der ender på .csv uden linjeskift. */
+    private static function csv_path(?string $csv): ?string {
+        $csv = (string) $csv;
+        if ($csv === '' || strpos($csv, "\n") !== false) {
+            return null;
+        }
+        return preg_match('/\.csv$/i', trim($csv)) ? trim($csv) : null;
+    }
+
+    /**
+     * Vælger indgang: `csv` (tekst eller fil under uploads) eller `candidates`.
+     * Begge eller ingen af dem er en fejl, ikke et gæt.
+     *
+     * @return array{rows: array, links: array, from: string, file: ?string}
+     * @throws SGAP_Niche_Error
+     */
+    public static function source(array $input): array {
+        $csv = is_string($input['csv'] ?? null) ? trim($input['csv']) : '';
+        $candidates = (array) ($input['candidates'] ?? []);
+        if ($csv !== '' && $candidates) {
+            throw new SGAP_Niche_Error("Giv enten 'csv' eller 'candidates' — ikke begge");
+        }
+        if ($csv === '' && !$candidates) {
+            throw new SGAP_Niche_Error("Giv 'csv' (rå CSV-tekst eller sti til en .csv under uploads) eller 'candidates'");
+        }
+        if ($csv === '') {
+            return ['rows' => $candidates, 'links' => [], 'from' => 'candidates', 'file' => null];
+        }
+        $path = self::csv_path($csv);
+        $parsed = self::parse_csv($path === null ? $csv : self::read_csv_file($path));
+        return ['rows' => $parsed['rows'], 'links' => $parsed['links'], 'from' => 'csv', 'file' => $path, 'delimiter' => $parsed['delimiter']];
     }
 
     /* ---------- bro: kandidater + links -> draft-payloads ---------- */
@@ -488,49 +666,60 @@ class SGAP_Niche {
 
     /* ---------- abilities ---------- */
 
+    /** Læser begge indgange og bygger draft-rækkerne; fælles for de to abilities. */
+    private static function prepare(array $input): array {
+        $source = self::source($input);
+        $ranked = self::scan($source['rows']);
+        $links = array_merge($source['links'], (array) ($input['links'] ?? []));
+        $result = self::drafts(
+            $ranked,
+            $links,
+            array_values(array_filter((array) ($input['channels'] ?? ['pinterest']), 'is_string')),
+            !empty($input['include_yellow']),
+            !empty($input['require_image'])
+        );
+        return [
+            'ranked' => $ranked,
+            'drafts' => $result['drafts'],
+            'skipped' => $result['skipped'],
+            'source' => [
+                'from' => $source['from'],
+                'rows' => count($source['rows']),
+                'links_from_csv' => count($source['links']),
+                'file' => $source['file'] ?? null
+            ]
+        ];
+    }
+
     /** Forhåndsvisning: scorer kandidaterne og viser planen uden at skrive noget. */
     public static function preview($input = null) {
-        $input = (array) $input;
         try {
-            $ranked = self::scan($input['candidates'] ?? []);
-            $result = self::drafts(
-                $ranked,
-                (array) ($input['links'] ?? []),
-                array_values(array_filter((array) ($input['channels'] ?? ['pinterest']), 'is_string')),
-                !empty($input['include_yellow']),
-                !empty($input['require_image'])
-            );
+            $prepared = self::prepare((array) $input);
         } catch (SGAP_Niche_Error $error) {
             return new WP_Error('sgap_niche', $error->getMessage());
         }
         return [
+            'source' => $prepared['source'],
             'ranked' => array_map(fn($row) => [
                 'niche' => $row['niche'], 'score' => $row['score'], 'verdict' => $row['verdict'], 'notes' => $row['notes']
-            ], $ranked),
-            'drafts' => count($result['drafts']),
-            'skipped' => $result['skipped'],
-            'plan' => self::plan($result['drafts'], $result['skipped'])
+            ], $prepared['ranked']),
+            'drafts' => count($prepared['drafts']),
+            'skipped' => $prepared['skipped'],
+            'plan' => self::plan($prepared['drafts'], $prepared['skipped'])
         ];
     }
 
     /** Skriver de samme rækker i køen som draft og returnerer queue-id'erne. */
     public static function queue_ability($input = null) {
-        $input = (array) $input;
         try {
-            $ranked = self::scan($input['candidates'] ?? []);
-            $result = self::drafts(
-                $ranked,
-                (array) ($input['links'] ?? []),
-                array_values(array_filter((array) ($input['channels'] ?? ['pinterest']), 'is_string')),
-                !empty($input['include_yellow']),
-                !empty($input['require_image'])
-            );
+            $prepared = self::prepare((array) $input);
         } catch (SGAP_Niche_Error $error) {
             return new WP_Error('sgap_niche', $error->getMessage());
         }
         return [
-            'created' => self::queue($result['drafts']),
-            'skipped' => $result['skipped'],
+            'source' => $prepared['source'],
+            'created' => self::queue($prepared['drafts']),
+            'skipped' => $prepared['skipped'],
             'note' => 'Alle rækker er status: draft. Godkend dem på Queue-siden, og tilføj foto til ' . implode('/', SGAP_Publer::NEEDS_PHOTO) . ' før afsendelse.'
         ];
     }

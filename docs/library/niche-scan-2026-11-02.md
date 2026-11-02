@@ -1,6 +1,6 @@
 # Niche-scanning (eget repo) — 2026-11-02
 
-**Status: bygget, testet og i CI i `steamgears-site` — 92,4 % (3,05 af 3,3 d).** Scoren, de 62 Python-tests, workflowet, broen og plugin-modulet kører; det sidste er at flytte koden til `humle93/steamgears-niche-scan`, som **ikke er oprettet**, fordi `GITHUB_TOKEN` mangler i agent-miljøet.
+**Status: bygget, testet og i CI i `steamgears-site` — 92,9 % (3,25 af 3,5 d).** Scoren, de 62 Python-tests, workflowet, broen og plugin-modulet kører; det sidste er at flytte koden til `humle93/steamgears-niche-scan`, som **ikke er oprettet**, fordi `GITHUB_TOKEN` mangler i agent-miljøet.
 
 Koden ligger midlertidigt her: [`niche_scan.py`](../../niche_scan.py), [`tests/test_niche_scan.py`](../../tests/test_niche_scan.py) og kandidatfilen [`niche-kandidater-2026-11-02.csv`](niche-kandidater-2026-11-02.csv). Den er stdlib-only (Python 3.12) og har ingen afhængigheder at flytte med.
 
@@ -29,7 +29,8 @@ Ingen API-nøgler i første version: tallene indtastes eller importeres. Det gø
 | M4 — flyt til eget repo og CI | 0,5 d | **50 %** | workflowet [`niche-scan.yml`](../../.github/workflows/niche-scan.yml) kører testene her; selve flytningen kræver `GITHUB_TOKEN` |
 | M5 — bro til social-køen (uden WP) | 0,4 d | **færdig** | [`niche_bridge.py`](../../niche_bridge.py) + 32 tests; se [`niche-social-bro-2026-11-02.md`](niche-social-bro-2026-11-02.md) |
 | M6 — scorer og kø-bro som plugin-modul (PHP) | 0,4 d | **færdig** | [`includes/niche.php`](../../plugins/steamgears-autopilot/includes/niche.php) + 32 smoke-checks, paritet med Python målt; se [`niche-plugin-modul-2026-11-02.md`](niche-plugin-modul-2026-11-02.md) |
-| **I alt** | **3,3 d** | **3,05 af 3,3 d = 92,4 %** | M4 blev tilføjet, da koden var bygget men repoet ikke findes; M5 da broen blev bestilt; M6 da broen skulle kunne skrive i køen |
+| M7 — CSV-indgang i plugin-modulet | 0,2 d | **færdig** | `parse_csv`/`read_csv_file` + 19 checks; kandidatfilen læses uændret og giver samme scorer |
+| **I alt** | **3,5 d** | **3,25 af 3,5 d = 92,9 %** | M4 blev tilføjet, da koden var bygget men repoet ikke findes; M5 da broen blev bestilt; M6 da broen skulle kunne skrive i køen; M7 da filen skulle kunne læses inde i WordPress |
 
 ## Ikke i scope
 
@@ -48,8 +49,9 @@ python3 -m unittest discover -s tests -v                  # 62 tests
 python3 niche_bridge.py --input docs/library/niche-kandidater-2026-11-02.csv \
     --links links.csv --channels pinterest --out drafts.json --plan plan.md
 
-# inde i WordPress, uden filer eller REST (fra v7.16.0)
-# score-niches / queue-niches — se niche-plugin-modul-2026-11-02.md
+# inde i WordPress, uden REST (fra v7.16.0; CSV fra v7.17.0)
+# score-niches / queue-niches med enten "candidates" eller "csv" (rå tekst / fil under uploads)
+# se niche-plugin-modul-2026-11-02.md
 php plugins/tests/smoke.php                               # pluginets checks, inkl. niche-modulet
 ```
 
@@ -69,5 +71,5 @@ Det kan flyttes med uændret til det nye repo; eneste tilpasning er stien til ka
 
 1. Sæt `GITHUB_TOKEN`, kør `python3 sync_repos.py --apply`.
 2. M4: flyt `niche_scan.py`, `tests/` og kandidatfilen, og lad et workflow køre testene på hvert push.
-3. Kør v7.16.0 på sitet og kald `score-niches` med en rigtig linkliste — plugin-modulet er testet med stubbe, ikke i en installeret WordPress.
+3. Kør v7.17.0 på sitet og kald `score-niches` med enten kandidatfilens sti under uploads eller CSV-teksten — plugin-modulet er testet med stubbe, ikke i en installeret WordPress.
 4. Udvid datagrundlaget — sæsonsving mangler for tre af fire kandidater, og det er den ene vægt der reelt kan flytte rækkefølgen.
