@@ -27,6 +27,7 @@ ind i dokumentindekset, så de ikke bliver forældreløse.
 | `docs/site-checks/` | Rutine-tjek af den live side: PageSpeed, GSC, meta, alt-tekster |
 | `reports/` | PDF-projektrapport pr. projekt: status med regnestykket, roadmap-indeks, udviklingsvej og hvad der virker/ikke virker |
 | `tools/project_reports.py` | Genererer rapporterne i `reports/` ud fra `projektstatus.json` og roadmap'erne (`python3 tools/project_reports.py`) |
+| `tools/roadmap_pdf.py` | Én samlet PDF med status, tid til 100 %, alle roadmaps og Command Centers dokumentation (`PYTHONPATH=tools/_deps python3 tools/roadmap_pdf.py`) |
 | `tools/setup-agent-tools.sh` | Genskaber PHP 8.5 og PDF-bibliotekerne i `tools/_deps` (gitignored) — ingen root nødvendig |
 | `tools/mcp_project_profile.py` | Lokal MCP-server (stdio) der serverer profilen, status og roadmap'erne — registreret som `steamgears-profil` |
 | `tools/niche_scanner.py` | Niche-produkt-scanner: Pinterest Trends (API) + TikTok Creative Center-eksport × vores katalog → `reports/niche-scan-<dato>.md` |
