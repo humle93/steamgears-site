@@ -1,12 +1,23 @@
-# MCP-auth til steamgears.eu — application password og `ROYAL_MCP_AUTH`
+# MCP-auth i `.mcp.json` — steamgears.eu og Publer
 
-Kort: MCP-forbindelsen til **steamgears.eu** (Royal MCP-plugin) kan ikke bruge en statisk Bearer-token.
-Endpointet accepterer enten et **WordPress application password over Basic** eller en **OAuth2 access token
-over Bearer**. `.mcp.json` bruger Basic-varianten.
+`.mcp.json` har to HTTP-servere, og de kræver hver sin slags credential:
+
+| Server | Endpoint | Auth i `.mcp.json` | Credential |
+| --- | --- | --- | --- |
+| `steamgears` | `https://steamgears.eu/wp-json/royal-mcp/v1/mcp` | `Basic ${ROYAL_MCP_AUTH}` | WordPress application password (base64) |
+| `publer` | `https://mcp.publer.com/` | `Bearer ${PUBLER_API_KEY}` | Publer MCP API key (Business/Enterprise) |
+
+Begge variabler er usatte i dag, så begge servere står som *Pending approval* indtil de er konfigureret.
+
+## Steamgears (`steamgears`)
+
+Royal MCP-plugin kan ikke bruge en statisk Bearer-token. Endpointet accepterer enten et **WordPress
+application password over Basic** eller en **OAuth2 access token over Bearer**. `.mcp.json` bruger
+Basic-varianten.
 
 Endpoint: `https://steamgears.eu/wp-json/royal-mcp/v1/mcp` (kanonisk alias: `https://steamgears.eu/mcp`).
 
-## Hvad endpointet accepterer
+### Hvad endpointet accepterer
 
 | Metode | Credential | Svar ved forkert credential |
 | --- | --- | --- |
@@ -18,7 +29,7 @@ Serverkortet (`https://steamgears.eu/.well-known/mcp/server-cards.json`) angiver
 som auth-metoder. Der findes ingen rute der udsteder en langlivet API-nøgle, og Bearer accepterer **ikke**
 application passwords — derfor Basic.
 
-## 1. Opret et application password
+### 1. Opret et application password
 
 1. Log ind som administrator på <https://steamgears.eu/wp-admin/>.
 2. Gå til **Brugere → Profil** (<https://steamgears.eu/wp-admin/profile.php>).
@@ -28,7 +39,7 @@ application passwords — derfor Basic.
 Nøglen er knyttet til den bruger du er logget ind som; brugernavnet i næste trin skal være samme login
 (ikke visningsnavn eller e-mail).
 
-## 2. Gem credential lokalt — aldrig i repoet
+### 2. Gem credential lokalt — aldrig i repoet
 
 ```bash
 printf '%s' 'brugernavn:xxxx xxxx xxxx xxxx xxxx xxxx' > ~/.royal_mcp_auth
@@ -37,7 +48,7 @@ chmod 600 ~/.royal_mcp_auth
 
 Filen ligger uden for repoet og må ikke committes.
 
-## 3. Sæt `ROYAL_MCP_AUTH`
+### 3. Sæt `ROYAL_MCP_AUTH`
 
 `.mcp.json` forventer headeren `Authorization: Basic ${ROYAL_MCP_AUTH}`, så værdien skal være **base64 af
 `brugernavn:nøgle`** — ikke nøglen alene.
@@ -49,7 +60,7 @@ export ROYAL_MCP_AUTH="$(printf '%s' "$(cat ~/.royal_mcp_auth)" | base64 -w0)"
 Start Claude Code i samme shell, så variablen arves. Skal den være permanent, læg linjen i shell-profilen —
 ikke i en fil der ligger i repoet.
 
-## 4. Verificér
+### 4. Verificér
 
 ```bash
 curl -sS -X POST https://steamgears.eu/wp-json/royal-mcp/v1/mcp \
@@ -63,7 +74,7 @@ Succes: `result` med `serverInfo` og `protocolVersion`. Fejl: `error` med kode `
 
 Derefter `claude mcp list` — `steamgears` skal vise ✓ Connected i stedet for *Pending approval*.
 
-## Fejlsøgning
+### Fejlsøgning (steamgears)
 
 | Symptom | Betydning | Handling |
 | --- | --- | --- |
@@ -73,7 +84,7 @@ Derefter `claude mcp list` — `steamgears` skal vise ✓ Connected i stedet for
 | 403 fra sikkerhedsplugin | app passwords blokeret | whitelist i Solid Security/Wordfence, eller brug OAuth |
 | `initialize` svarer 200, men ingen værktøjer | brugeren mangler rettigheder | brug en administratorkonto |
 
-## Alternativ: OAuth
+### Alternativ: OAuth
 
 Royal MCP foretrækker OAuth2 (`authorization_code` med PKCE S256, dynamisk klientregistrering,
 `refresh_token`, scope `mcp:full`). Det kræver en browser med en aktiv WP-admin-session:
@@ -86,6 +97,69 @@ Kør derefter `claude` og vælg `/mcp` → *Authenticate*. Claude Code registrer
 tokens automatisk, uden miljøvariabel. Vælg OAuth hvis nøglen skal kunne rotere uden manuelt arbejde; vælg
 application password hvis forbindelsen skal køre i miljøer uden browser.
 
+## Publer (`publer`)
+
+Publer har en officiel MCP-server på `https://mcp.publer.com`. Uden credential svarer den 401 med
+`{"code":-32003,"message":"Missing Publer API key. Use ?api_key=YOUR_KEY (or Authorization: Bearer YOUR_KEY)"}`.
+
+**Status: halvt konfigureret.** Header-formatet i `.mcp.json` (`Authorization: Bearer ${PUBLER_API_KEY}`) er
+korrekt — det er præcis det format Publer angiver. Det der mangler, er værdien: `PUBLER_API_KEY` findes
+hverken i miljøet eller i en `.env` i repoet, så serveren har ingen credential.
+
+Publer tilbyder to måder at forbinde på (hjælpeartikel opdateret 15/10 2026):
+
+| Metode | Kræver | I `.mcp.json` |
+| --- | --- | --- |
+| **OAuth** | browser + Publer-login; ingen API-nøgle | ingen `headers` — forbind via klientens OAuth-flow |
+| **No auth** med API-nøgle | API-nøgle med scopes | `Authorization: Bearer ${PUBLER_API_KEY}`, eller `?api_key=` i URL'en |
+
+MCP kræver **Business- eller Enterprise-planen**.
+
+### Sådan får du nøglen
+
+1. Log ind på Publer → profilmenu → **Settings → AI & Automations → MCP**.
+2. Vælg fanen **No auth**, og tryk **Create an API key** (har du en, indsæt den).
+3. Navngiv nøglen, fx `steamgears-mcp`. **Workspaces** og **Accounts** er påkrævet; tilføj **Posts** og
+   **Media**, hvis agenten skal oprette eller planlægge indlæg.
+4. Generér og kopiér nøglen — den vises ikke igen.
+5. Eksportér den i shellen, så `.mcp.json` kan læse den:
+
+   ```bash
+   export PUBLER_API_KEY='...'
+   ```
+
+6. Verificér — `Accept`-headeren **skal** med, ellers svarer serveren 406:
+
+   ```bash
+   curl -sS -X POST https://mcp.publer.com/ \
+     -H 'Content-Type: application/json' \
+     -H 'Accept: application/json, text/event-stream' \
+     -H "Authorization: Bearer $PUBLER_API_KEY" \
+     -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"verify","version":"1"}}}'
+   ```
+
+   Succes: `result` med `serverInfo`. Manglende nøgle giver `-32003`; en forkert nøgle afvises typisk først
+   ved det første værktøjskald, ikke ved `initialize`.
+
+### Pas på: to forskellige Publer-nøgler
+
+- **MCP-nøglen** (Settings → AI & Automations → MCP) bruges mod `mcp.publer.com` med
+  `Authorization: Bearer <nøgle>`.
+- **REST-nøglen** (Settings → Access & Login → API Keys, Business-plan) bruges af
+  `steamgears-autopilot` mod `app.publer.com/api/v1` med `Authorization: Bearer-API <nøgle>`. Den ligger i
+  WordPress-options (`sgap_publer_api_key`), ikke i `.mcp.json`, og kan ikke uden videre bruges som MCP-nøgle.
+
+`Bearer-API`-skemaet hører til REST-API'et; mod `mcp.publer.com` forventes `Bearer`.
+
+### Fejlsøgning (Publer)
+
+| Symptom | Betydning | Handling |
+| --- | --- | --- |
+| `-32003 Missing Publer API key` | ingen credential sendt | sæt `PUBLER_API_KEY` eller brug `?api_key=` |
+| `406 Not Acceptable … must accept both application/json and text/event-stream` | `Accept`-header mangler ved manuelle kald | send begge typer; MCP-klienter gør det selv |
+| `401` med `www-authenticate: Bearer resource_metadata=…` | serveren tilbyder OAuth | forbind via OAuth i stedet for nøgle |
+| Nøglen afvises trods frisk kopi | forkert nøgletype (REST i stedet for MCP) eller manglende scopes | opret nøgle under AI & Automations → MCP, kontrollér Workspaces/Accounts |
+
 ## Sikkerhed
 
 - Et application password giver samme rettigheder som brugeren. Brug en dedikeret administratorkonto til
@@ -95,6 +169,8 @@ application password hvis forbindelsen skal køre i miljøer uden browser.
   nøglen i WordPress når den ikke længere bruges.
 - Nøglen må ikke stå i `.mcp.json`, i commits, i logs eller i chat — kun i miljøvariablen og i
   `~/.royal_mcp_auth`.
+- Publer-nøglen hører i `PUBLER_API_KEY`, ikke i URL'en: `?api_key=` lækker nemt gennem logs, historik og
+  skærmbilleder. Nøglen giver adgang til workspaces og konti, og scopes afgør hvor meget agenten kan.
 - Har en nøgle været eksponeret: tilbagekald den i WordPress **først**, og opret derefter en ny.
 
 ## Referencer
@@ -102,3 +178,5 @@ application password hvis forbindelsen skal køre i miljøer uden browser.
 - [`.mcp.json`](../.mcp.json) — `steamgears`-serveren med `Basic ${ROYAL_MCP_AUTH}`.
 - [`wp_mcp_stdio.py`](../wp_mcp_stdio.py) — eksisterende stdio-bro der bruger samme Basic-princip.
 - [`seo_agent.py`](../seo_agent.py) — `call_royal_mcp()` kalder samme endpoint.
+- [Publer MCP — officiel opsætning](https://publer.com/help/en/article/how-to-set-up-and-use-publers-mcp-server-14orlq0/) — OAuth og API-nøgle, opdateret 15/10 2026.
+- [Publer MCP — integrationsside](https://publer.com/integrations/mcp) — endpoint og OAuth-flow.

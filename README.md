@@ -9,7 +9,7 @@ Versionstyring for **steamgears.eu**-assets. WordPress-kernen og databasen ligge
 - `docs/site-roadmap-2026-11-01.md` — samlet optimeringsplan for sitet (S0–S3) med plugin-roadmap'en importeret i §5.
 - `docs/library/indholdsaudit-2026-11-01.md` — status på posts, sider og produkter målt via MCP 1/11 2026.
 - `docs/projektstatus.md` — **daglig procentstatus** på hvert aktivt projekt + log over fremgang pr. modul. Skrives af `projektstatus.py` ud fra `projektstatus.json` (procenter beregnes, indtastes ikke) og kører automatisk dagligt via `.github/workflows/projektstatus.yml`.
-- [`docs/mcp-auth.md`](docs/mcp-auth.md) — hvordan MCP-forbindelsen til steamgears.eu autoriseres: application password → `Basic ${ROYAL_MCP_AUTH}` i `.mcp.json`, med OAuth-alternativ og fejlsøgning.
+- [`docs/mcp-auth.md`](docs/mcp-auth.md) — auth for begge MCP-servere i `.mcp.json`: application password til `steamgears` (`Basic ${ROYAL_MCP_AUTH}`) og API-nøgle til `publer` (`Bearer ${PUBLER_API_KEY}`), med OAuth-alternativer og fejlsøgning.
 - [`AGENTS.md`](AGENTS.md) — arbejdsregler: hvert arbejdspas skal melde procentsats før → efter med grundlag, og hvert aktivt projekt har en daglig %-status.
 
 ## Sikkerhed
