@@ -37,10 +37,10 @@
         {
           "id": "s3",
           "name": "S3 — hygiejne",
-          "done": 1.25,
+          "done": 1.6,
           "total": 3,
           "unit": "d",
-          "note": "S3.1 0,25 + S3.2 0,1 (fire sider i skraldespand) + S3.3 alt-tekst 210 billeder 0,3 + tidligere 0,6; webp/Imagify og plugins mangler"
+          "note": "S3.1 0,25 + S3.2 0,1 + S3.3 alt-tekst 0,3 + S3.4 plugin-audit 0,35 + tidligere 0,6; plugin-oprydning (slet/fjern) og webp mangler stadig"
         },
         {
           "id": "s4",
@@ -321,6 +321,15 @@
       "delta": -2.4,
       "scope_change": true,
       "basis": "S0.7 (sitemap 121/121 = 200) er ikke verificeret for søgemaskiner: Simply.com svarer 455 til Googlebot og bingbot. Genmåles efter hvidliste. S0 2,4/2,6 → 1,9/2,6."
+    },
+    {
+      "date": "2026-11-02",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 48.3,
+      "after": 50.0,
+      "delta": 1.7,
+      "basis": "10,55 af 21,1 d (S0 1,9/2,6 · S1 1,7/4,5 · S2 3,95/6 · S3 1,6/3 · S4 1,4/5)"
     }
   ]
 }
