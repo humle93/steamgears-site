@@ -29,53 +29,62 @@ korrekt `401` med JSON-RPC-fejlen. `PUBLER_API_KEY` er stadig usat, så `publer`
 > application password over Basic. Det er **forkert** for MCP-ruten — målt på sitets eget endpoint, se
 > tabellen i afsnittet om `steamgears`. Den headless-venlige vej er en **API-nøgle sendt som Bearer**.
 
-## Måling 2/11 2026 (sen aften) — `mcp-adapter` installeret, Royal MCP-ruterne væk
+## Måling 2/11 2026 (sen aften) — AI Engine ejer MCP-fladen, `mcp-adapter` står ved siden af
 
-Ejeren installerede `mcp-adapter` fra `https://github.com/WordPress/mcp-adapter/releases/latest/download/mcp-adapter.zip`
-(`wp plugin install … --activate`) og bad om at få det verificeret. Målt fra denne container, neutral curl-UA,
-lige efter installationen:
+Ejeren installerede `mcp-adapter` (`wp plugin install https://github.com/WordPress/mcp-adapter/releases/latest/download/mcp-adapter.zip --activate`)
+og bad om at få det verificeret. Målt fra denne container med neutral curl-UA lige efter installationen:
 
 | Kald | Svar |
 | --- | --- |
-| `GET /wp-json/` | `200` — 42 namespaces; **`mcp` og `wp-abilities/v1` er der, `royal-mcp/v1` er ikke** |
-| `POST /wp-json/mcp/mcp-adapter-default-server` (`initialize`, intet credential) | `401` · `{"code":"rest_forbidden"}` |
-| `GET /wp-json/mcp/mcp-oauth-server` | `401` · `mcp_unauthorized` — uændret fra i formiddags, altså ikke adapterens |
+| `GET /wp-json/` | `200` — 42 namespaces; `mcp`, `mcp/v1`, `mwai/v1`, `wp-abilities/v1`, `ai/v1` er der, **`royal-mcp/v1` er ikke** |
+| `POST /wp-json/mcp/v1/http` (`initialize`, intet credential) | `401` · `rest_forbidden`, med `WWW-Authenticate: Bearer realm="MCP", resource_metadata="…/?rest_route=/mcp/v1/.well-known/oauth-protected-resource"` |
+| `GET /wp-json/mcp/v1/.well-known/oauth-protected-resource` | `200` — `resource: …/wp-json/mcp/v1/http`, `scopes_supported: ["mcp"]`, `resource_documentation: https://meowapps.com/ai-engine/` |
+| `GET /wp-json/mcp/v1/.well-known/oauth-authorization-server` | `200` — issuer `…/wp-json/mcp/v1`, `authorize`/`token`/`register` under `/wp-json/mcp/v1/oauth/*` |
+| `POST /wp-json/mcp/mcp-adapter-default-server` (`initialize`) | `401` · `rest_forbidden` |
+| `GET /wp-json/mcp/mcp-oauth-server` | `401` · `mcp_unauthorized` |
 | `POST /mcp` og `POST /wp-json/royal-mcp/v1/mcp` | **`404` `rest_no_route`** |
-| `GET /.well-known/mcp/server-card.json` | **`404`** |
-| `GET /.well-known/agent-skills/index.json` | **`404`** |
-| `GET /.well-known/oauth-protected-resource` og `…/oauth-authorization-server` | **`301` → `https://steamgears.eu/`** |
-| `GET /.well-known/oauth-authorization-server/<vilkårlig sti>` | **`500`** — WordPress' fatale fejlside (»There has been a critical error on this website«) |
-| `GET /wp-json/wp-abilities/v1` | `200` (ruteindeks); `…/abilities` uden credential `401` |
+| `GET /.well-known/mcp/server-card.json`, `/.well-known/agent-skills/index.json` | **`404`** |
+| `GET /.well-known/oauth-protected-resource`, `…/oauth-authorization-server` | **`301` → forsiden** |
+| `GET /.well-known/oauth-authorization-server/<vilkårlig sti>` | **`500`** — WordPress' fatale fejlside |
+| `GET /wp-json/mwai/v1/mcp/status`, `…/mcp/functions` | `401` · `rest_forbidden` (ruterne findes, kræver credential) |
+| `GET /wp-json/mwai/v1/simpleAuthCheck` | `401` · `rest_forbidden`; `POST` giver `404` — ruten er **kun GET** |
+| `GET /wp-json/ai/v1/abilities` | `403` · »You do not have permission to use the Abilities Explorer« |
 
 Hvad det betyder:
 
-- **Adapteren svarer og kræver credential.** Den registrerer præcis én HTTP-rute, `/wp-json/mcp/<server-id>`
-  (`includes/Transport/HttpTransport.php`), og svarer `401 rest_forbidden` uden login. Intet er anonymt.
-- **Adapteren har ingen OAuth og ingen `.well-known`-ruter.** Release-zip'en (0.7.1) indeholder hverken
-  `well-known` eller et token-endpoint; `mcp-oauth-server` fandtes også før installationen. Med kun adapteren
-  er credential-vejen WordPress' egen REST-auth — application password over Basic eller cookie + nonce —
-  ikke Bearer-OAuth.
-- **Adapteren arver ikke Royal MCP's værktøjer.** Den eksponerer Abilities API gennem tre meta-værktøjer
-  (`mcp-adapter/discover-abilities`, `get-ability-info`, `execute-ability`), og kun abilities med
-  `meta.public`/`meta.mcp.public` er synlige. Antallet af værktøjer er **ikke målt** — det kræver et credential
-  og et `tools/list`.
-- **Royal MCP's egne ruter svarer `404`**, og alle fire `.well-known`-dokumenter er væk eller ødelagte. Det kan
-  være en deaktivering, men det kan også være tabte rewrite-regler: plugin-aktivering flusher rewrite-regler,
-  og både `/mcp` og `.well-known`-stierne er rewrites. Afgørelsen ligger i to kommandoer på hosten:
-  `wp plugin list --status=active --fields=name,version,status` og derefter `wp rewrite flush --hard`.
-- **OAuth-flowet fra tidligere på dagen kan ikke længere discoveres.** `.well-known/oauth-authorization-server`
-  omdirigerer til forsiden, og den dybe metadata-sti giver `500`. En standardklient finder derfor ingen
-  autorisationsserver — det forklarer hvorfor callbacken på `127.0.0.1:8765` ikke kunne indløses.
-
-Indtil credential-spørgsmålet er afgjort, står `steamgears` i `.mcp.json` på en død rute (`/mcp` → `404`), og
-`wp_mcp_stdio.py --check` kan ikke give `ok: true`.
+- **MCP-serveren på sitet er AI Engines (Meow Apps), ikke `mcp-adapter` og ikke Royal MCP.** Metadataet peger
+  på `meowapps.com/ai-engine/`, og namespacet `mwai/v1` har 113 ruter, heriblandt `mcp/enable`, `mcp/status`,
+  `mcp/functions`, `mcp/usage`, `mcp/changes`, `mcp/approvals`, `mcp/undo`, `mcp/self_test` og `mcp/auth_echo`.
+- **Det kanoniske MCP-endpoint er `https://steamgears.eu/wp-json/mcp/v1/http`** — ikke `/mcp`, som svarer `404`.
+  Det svarer korrekt `401` med `WWW-Authenticate` og en `resource_metadata`-pegepind, så en klient der følger
+  401-headeren finder metadata.
+- **Discovery virker kun via `?rest_route=`-formen.** Rod-stierne `/.well-known/oauth-*` omdirigerer til
+  forsiden (`301`) og den dybe sti giver `500`. En standardklient der prøver rod-stien først — det gør de
+  fleste — finder ingen autorisationsserver. Det forklarer hvorfor callbacken på `127.0.0.1:8765` ikke kunne
+  indløses tidligere på dagen.
+- **`mcp-adapter` 0.7.1 er installeret og lukket, men tilføjer ingen auth-vej.** Den registrerer præcis én
+  HTTP-rute, `/wp-json/mcp/<server-id>` (`includes/Transport/HttpTransport.php`), svarer `401 rest_forbidden`
+  uden login, og release-zip'en indeholder hverken `well-known` eller et token-endpoint. Den eksponerer heller
+  ikke Royal MCP's værktøjer, men Abilities API gennem tre meta-værktøjer (`mcp-adapter/discover-abilities`,
+  `get-ability-info`, `execute-ability`), og kun abilities med `meta.public`/`meta.mcp.public` er synlige.
+  `mcp/mcp-oauth-server` hører derfor ikke til adapteren — navnet og namespacet peger på AI Engines OAuth.
+- **Royal MCP svarer ikke længere.** Hverken `/mcp`, `/wp-json/royal-mcp/v1/mcp` eller de fire
+  `.well-known`-dokumenter findes. `.mcp.json`s `steamgears`-server peger dermed på en død rute.
+- **Token-vejen findes ved siden af OAuth.** `mwai/v1/simpleAuthCheck` (kun GET) og `mwai/v1/mcp/status` er
+  AI Engines Simple Auth: et `Authorization: Bearer <token>` uden om OAuth-flowet. Værktøjsantallet er stadig
+  **ikke målt** — det kræver at `mcp/status` eller et `tools/list` på `/wp-json/mcp/v1/http` kaldes med et
+  gyldigt credential.
 
 ## Steamgears (`steamgears`)
 
-Endpoint: `https://steamgears.eu/mcp` (kanonisk, jf. sitets serverkort).
-Alias: `https://steamgears.eu/wp-json/royal-mcp/v1/mcp` — samme server, samme svar.
+Endpoint målt om formiddagen 2/11: `https://steamgears.eu/mcp` (kanonisk jf. sitets serverkort), alias
+`https://steamgears.eu/wp-json/royal-mcp/v1/mcp` — samme server, samme svar.
 
-Sitet kører **Royal MCP 1.5.14** (Free) med **270 værktøjer** og tilbyder tre credential-typer:
+> **Begge ruter svarer `404` siden sen aften 2/11 2026**, og serverkortet findes ikke længere. Den nuværende
+> MCP-flade er AI Engines på `https://steamgears.eu/wp-json/mcp/v1/http` — se »Måling 2/11 2026 (sen aften)«.
+> Afsnittet herunder står som historik over Royal MCP-opsætningen og som opskrift, hvis den genaktiveres.
+
+Sitet kørte **Royal MCP 1.5.14** (Free) med **270 værktøjer** og tilbød tre credential-typer:
 
 | Vej | Credential | Headless? | Bruges til |
 | --- | --- | --- | --- |
