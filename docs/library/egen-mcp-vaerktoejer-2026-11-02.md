@@ -36,6 +36,17 @@ begge MCP-servere viser dem:
 Konsekvens: **én registrering, to flader.** Vi skal ikke vælge mellem AI Engine og adapteren for at få egne
 værktøjer — vi skal bare registrere abilityen ordentligt.
 
+### Målt lokalt: 32 abilities, hvoraf 10 læsende
+
+Ved at køre plugin'et mod test-stubberne (samme harness som `plugins/tests/smoke.php`) og fyre
+`wp_abilities_api_init` af, registrerer 7.23.0 **32 abilities** — **10 læsende**, **22 skrivende** — og alle 32
+har `meta.mcp.public = true`. Tællingen er gjort 2/11 2026 med `do_action('wp_abilities_api_init')` efterfulgt af
+`array_keys($GLOBALS['abilities'])`, og den er reproducerbar uden WordPress.
+
+Den stemmer med sitet: main målte **31** `steamgears-autopilot_*`-værktøjer på 7.22.0, og forskellen til de 32 er
+netop `meta-audit`, som først findes fra 7.23.0. Det gør tallet til en kontrol af at en ny ability lægger præcis
+ét værktøj oveni — ikke nul og ikke to.
+
 ## 2. Fire måder at tilføje et værktøj
 
 | Vej | Hvor koden bor | Virker når | Styrke | Svaghed |
