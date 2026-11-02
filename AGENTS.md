@@ -88,3 +88,20 @@ Automationen dækker **den daglige status**. Det manuelle i §1 — at vurdere h
 - Sproget i commits og dokumentation er dansk, med tekniske termer på engelsk.
 - Nye dokumenter lægges i `docs/` (audits og research i `docs/library/`), og refereres fra `README.md` eller
   roadmap'en, så de ikke bliver forældreløse.
+
+## 6. Agent-kørsel og værktøjs-gaten
+
+Platformen har en **instruktions-gate**: hvis en turns **første værktøjs-batch** ikke indeholder en læsning af
+projektinstruktionerne, afvises hele batchen med _»The workspace is ready, og dette kald blev ikke kørt«_ og
+en henvisning til denne fil. Gaten ligger i platformen — den findes **ikke** i repoet (ingen `.claude/`,
+`.freebuff/` eller hook-scripts indeholder den besked).
+
+Derfor:
+
+- **Start hver tur med at læse `AGENTS.md` i samme batch som arbejdet**, fx `read_files(["AGENTS.md"])` plus de
+  søgninger eller redigeringer der skal køre. Så afvises intet, og der spares en runde pr. tur.
+- **Skrivninger og deres efterkontrol må ikke køre parallelt i samme batch.** Blokeres en skrivning mens en
+  søskende-redigering går igennem, står repoet halvt opdateret — det er sket med et README-link til et
+  dokument der endnu ikke var oprettet. Skriv først, verificér i næste kald.
+- Afvises et kald alligevel: gentag det uændret i samme tur sammen med en `AGENTS.md`-læsning. Det er ikke
+  nødvendigt at ændre noget i repoet for at komme videre.

@@ -11,6 +11,7 @@ Versionstyring for **steamgears.eu**-assets. WordPress-kernen og databasen ligge
 - `docs/projektstatus.md` — **daglig procentstatus** på hvert aktivt projekt + log over fremgang pr. modul. Skrives af `projektstatus.py` ud fra `projektstatus.json` (procenter beregnes, indtastes ikke) og kører automatisk dagligt via `.github/workflows/projektstatus.yml`.
 - [`docs/mcp-auth.md`](docs/mcp-auth.md) — auth for begge MCP-servere i `.mcp.json`: application password til `steamgears` (`Basic ${ROYAL_MCP_AUTH}`) og API-nøgle til `publer` (`Bearer ${PUBLER_API_KEY}`), med OAuth-alternativer og fejlsøgning.
 - [`docs/command-center-kilde.md`](docs/command-center-kilde.md) — Command Center-koden ligger kun i `humle93/command-center`; Drive-mappen `command-center-main/` er et forældet v7.9-snapshot og skal ikke importeres.
+- [`docs/library/README.md`](docs/library/README.md) — **dokumentindeks**: hvert audit-, research- og driftsdokument i biblioteket linkes herfra, så ingen dokumenter bliver forældreløse.
 - [`AGENTS.md`](AGENTS.md) — arbejdsregler: hvert arbejdspas skal melde procentsats før → efter med grundlag, og hvert aktivt projekt har en daglig %-status.
 
 ## Sikkerhed
