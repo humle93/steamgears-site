@@ -13,6 +13,11 @@
       "headers": {
         "Authorization": "Bearer ${PUBLER_API_KEY}"
       }
+    },
+    "steamgears-profil": {
+      "type": "stdio",
+      "command": "python3",
+      "args": ["tools/mcp_project_profile.py"]
     }
   }
 }

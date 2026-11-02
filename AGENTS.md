@@ -2,6 +2,11 @@
 
 Reglerne her gælder alt arbejde i dette repo, og de gælder også når arbejdet udføres af en AI-agent.
 
+> **Læs også [`docs/agent-profil.md`](docs/agent-profil.md)** — den er indholdet (hvad projektet er,
+> verificerede fakta, adgangsmatrix, opskrifter, fælder). Denne fil er formen (procenter, status, AUTO-blokke).
+> Profilen kan også hentes over MCP som `project_profile`, `project_status` og `roadmap_index`
+> (serveren `steamgears-profil` i [`.mcp.json`](.mcp.json), ingen site-credential nødvendig).
+
 ## 1. Fremskridtsprocent (obligatorisk)
 
 Alt arbejde — hvert modul, hver opgave, hver batch — skal melde sin **procentvise fremgang**.

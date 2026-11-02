@@ -1,13 +1,16 @@
 # MCP-auth i `.mcp.json` — steamgears.eu og Publer
 
-`.mcp.json` har to HTTP-servere, og de kræver hver sin slags credential:
+`.mcp.json` har tre servere: to HTTP-servere der kræver hver sin slags credential, og én lokal stdio-server
+uden credential.
 
 | Server | Endpoint | Auth i `.mcp.json` | Credential |
 | --- | --- | --- | --- |
 | `steamgears` | `https://steamgears.eu/wp-json/royal-mcp/v1/mcp` | `Basic ${ROYAL_MCP_AUTH}` | WordPress application password (base64) |
 | `publer` | `https://mcp.publer.com/` | `Bearer ${PUBLER_API_KEY}` | Publer MCP API key (Business/Enterprise) |
+| `steamgears-profil` | `tools/mcp_project_profile.py` (stdio) | ingen | ingen — læser kun repoet |
 
-Begge variabler er usatte i dag, så begge servere står som *Pending approval* indtil de er konfigureret.
+Begge variabler er usatte i dag, så `steamgears` og `publer` står som *Pending approval* indtil de er
+konfigureret. `steamgears-profil` virker uden credential og er den eneste MCP-kilde der svarer i dag.
 
 ## Steamgears (`steamgears`)
 
@@ -159,6 +162,26 @@ MCP kræver **Business- eller Enterprise-planen**.
 | `406 Not Acceptable … must accept both application/json and text/event-stream` | `Accept`-header mangler ved manuelle kald | send begge typer; MCP-klienter gør det selv |
 | `401` med `www-authenticate: Bearer resource_metadata=…` | serveren tilbyder OAuth | forbind via OAuth i stedet for nøgle |
 | Nøglen afvises trods frisk kopi | forkert nøgletype (REST i stedet for MCP) eller manglende scopes | opret nøgle under AI & Automations → MCP, kontrollér Workspaces/Accounts |
+
+## Profil-serveren (`steamgears-profil`)
+
+[`tools/mcp_project_profile.py`](../tools/mcp_project_profile.py) er en lokal **stdio**-server der gør
+[`agent-profil.md`](agent-profil.md) og den aktuelle status tilgængelig for enhver bot der forbinder til
+repoet — uden site-credential. Den læser kun filer, skriver intet og kalder intet netværk.
+
+| Type | Navn | Indhold |
+| --- | --- | --- |
+| Værktøj | `project_profile` | hele agentprofilen |
+| Værktøj | `project_status` | beregnet procentstatus pr. projekt |
+| Værktøj | `roadmap_index` | roadmap for `site` (S0–S4) eller `plugin` (P0–P3) |
+| Ressource | `steamgears://profil` | samme profil som Markdown |
+| Ressource | `steamgears://status` | samme status som Markdown |
+
+Test uden MCP-klient:
+
+```bash
+printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | python3 tools/mcp_project_profile.py
+```
 
 ## Sikkerhed
 
