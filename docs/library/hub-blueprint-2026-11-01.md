@@ -37,6 +37,20 @@ validerer dem offline (`--dry-run`, `--check-links`) før det rører sitet. Side
 scriptet selv opretter den). Med credentials er indsættelsen `--apply` (kladde) og `--publish` (børn før hub,
 som §4 kræver); uden credentials stopper scriptet før det skriver noget.
 
+**To ting målt 2/11 som ændrer verifikationskravet:**
+
+1. **Sitet svarer HTTP 200 på sider der ikke findes.** `/inspiration/`, `/build/corsets/`, `/build/jackets/`
+   og `/build/props/` returnerede alle `200` med `<title>Page Not Found - Steamgears</title>` — en cachet
+   soft-404, ikke en side. Med cache-buster (`?sgcache=…`) kommer den sande `404`. En statuskontrol der kun
+   læser HTTP-koden viser derfor falsk grønt, og en netop publiceret side kan se ud som en soft-404 indtil
+   cachen er purget. `publish_hubs.py --verify` tjekker derfor både cache-bustet status, soft-404-markør,
+   titel, meta og H1, og melder separat hvis den cachede version stadig svarer «Page Not Found».
+2. **De to live hubs er stærkere verificeret end antaget.** Alle interne links på `/start-here/` og `/build/`
+   blev crawlet igen cache-bustet: **44 unikke links, 0 fejl** (hverken 404 eller soft-404). Det tidligere tal
+   (39) talte ikke begge hubs' links sammen; konklusionen er den samme, grundlaget er nu skarpere.
+3. **`/start-here/` har en titel på 65 tegn** (`Start Here: Steampunk Outfits, Guides And DIY Builds |
+   Steamgears`), altså 3 over grænsen på 62 fra 1/11-reglen. Det kræver et skriv til sitet for at rette.
+
 De fire manglende sider er ikke lenket fra nogen af de to live hubs, så de skaber ingen 404'er i navigationen,
 men hub-strukturen er halvt bygget: `/start-here/` peger på `/build/`, og `/build/` peger tilbage på
 `/start-here/` — uden `/inspiration/` og de tre komponent-sider er der ingen vej til galleri, journal, noveller

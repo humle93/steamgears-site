@@ -6,7 +6,7 @@
       "id": "site",
       "name": "steamgears.eu — site-optimering",
       "note": "roadmap S0–S4",
-      "next": "S2.1: kør python3 publish_hubs.py --apply --publish når WP_USER + WP_APP_PASS findes — indsætter de 4 manglende hubsider, derefter S1.3 kladde-triage",
+      "next": "S2.1: kør python3 publish_hubs.py --apply --publish + --verify når WP_USER + WP_APP_PASS er sat som secrets; ret derefter /start-here/-titlen (65 tegn) og purg cachen, så de fire sider ikke hænger som cachet soft-404",
       "blocked_by": "5 vanity-301 (S0.4) kræver én Redirection-gruppe (ejer); hub-indsættelse kræver skrivende MCP",
       "modules": [
         {
@@ -28,10 +28,10 @@
         {
           "id": "s2",
           "name": "S2 — struktur og SEO",
-          "done": 2.8,
+          "done": 2.9,
           "total": 6,
           "unit": "d",
-          "note": "24 meta-titler/beskrivelser + hub-blueprint (0,6 d) + verifikation af de 2 live hubs, 39/39 links 200 (0,1 d) + WP-klar copy og publiceringsscript til de 4 manglende sider, dry-run grønt (0,4 d)"
+          "note": "24 meta-titler/beskrivelser + hub-blueprint (0,6 d) + verifikation af de 2 live hubs, 44/44 links ægte 200 (0,1 d) + WP-klar copy og publiceringsscript til de 4 manglende sider, dry-run grønt (0,4 d) + cache-bevisst --verify der fanger soft-404 (0,1 d)"
         },
         {
           "id": "s3",
@@ -225,6 +225,15 @@
       "after": 33.6,
       "delta": 1.8,
       "basis": "7,1 af 21,1 d (S0 1,9/2,6 · S1 0,4/4,5 · S2 2,8/6 · S3 0,6/3 · S4 1,4/5)"
+    },
+    {
+      "date": "2026-11-02",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 33.6,
+      "after": 34.1,
+      "delta": 0.5,
+      "basis": "7,2 af 21,1 d (S0 1,9/2,6 · S1 0,4/4,5 · S2 2,9/6 · S3 0,6/3 · S4 1,4/5)"
     }
   ]
 }

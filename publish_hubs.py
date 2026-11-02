@@ -20,6 +20,7 @@ import json
 import os
 import re
 import sys
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -252,27 +253,108 @@ def page_path(page):
 NEW_PATHS = {page_path(page) for page in PAGES}
 
 
+def fetch_html(url, timeout=25, bust=False):
+    """Returnerer (status, html). status None betyr nettverksfeil.
+
+    `bust` legger paa et query-argument. Det er ikke pynt: sitet har fuld-side-cache
+    og serverer cachede 'Page Not Found'-dokumenter med HTTP 200. Uden cache-buster
+    ser en 404 ut som en 200, og en nettopp publisert side ser ut som en soft-404
+    indtil cachen er purget."""
+    if bust:
+        sep = "&" if "?" in url else "?"
+        url = f"{url}{sep}sgcache={int(time.time())}"
+    req = urllib.request.Request(url, headers={"User-Agent": "Steamgears-HubCheck/1.0"})
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as res:
+            return res.status, res.read().decode("utf-8", "replace")
+    except urllib.error.HTTPError as e:
+        return e.code, ""
+    except Exception as e:
+        return None, str(e)
+
+
+def extract(html):
+    """Henter tittel, H1 og meta description ud af en HTML-side."""
+    def first(patterns):
+        for pattern in patterns:
+            m = re.search(pattern, html, re.S)
+            if m:
+                return strip_tags(m.group(1)).strip()
+        return ""
+
+    return {
+        "title": first([r"<title[^>]*>(.*?)</title>"]),
+        "h1": first([r"<h1[^>]*>(.*?)</h1>"]),
+        "meta": first([
+            r'<meta[^>]+name=["\']description["\'][^>]+content=["\'](.*?)["\']',
+            r'<meta[^>]+content=["\'](.*?)["\'][^>]+name=["\']description["\']',
+        ]),
+    }
+
+
+def is_soft_404(info):
+    """WordPress-temaer kan svare 200 paa en side der ikke findes. Titel eller H1
+    siger 'Page Not Found' - saa tael HTTPS-koden alene som utilstraekkelig."""
+    return "page not found" in info["title"].lower() or "page not found" in info["h1"].lower()
+
+
 def check_links(links):
     """Crawler linkene. Links til sider dette script selv opretter taeles som
-    'venter paa publicering', ikke som fejl - ellers kan dry-run aldrig blive groen."""
+    'venter paa publicering', ikke som fejl - ellers kan dry-run aldrig blive groen.
+    Soft-404 (200 + 'Page Not Found') regnes som fejl."""
     bad, pending = [], []
     for link in sorted(set(links)):
         if link in NEW_PATHS:
             pending.append(link)
             continue
-        req = urllib.request.Request(f"{WP_SITE}{link}",
-                                     headers={"User-Agent": "Steamgears-HubCheck/1.0"})
-        try:
-            with urllib.request.urlopen(req, timeout=20) as res:
-                if res.status != 200:
-                    bad.append((link, res.status))
-        except urllib.error.HTTPError as e:
-            bad.append((link, e.code))
-        except Exception as e:
-            bad.append((link, str(e)))
+        status, html = fetch_html(f"{WP_SITE}{link}", bust=True)
+        if status != 200:
+            bad.append((link, status))
+            continue
+        if is_soft_404(extract(html)):
+            bad.append((link, "soft-404 (200, men 'Page Not Found')"))
     for link in pending:
         print(f"    venter paa publicering: {link}")
     return bad
+
+
+def verify():
+    """Sammenligner de live sider med payloadene: status, soft-404, tittel,
+    meta og H1. Det er den kontrol der afgoer om indsaettelsen virkelig lykkedes."""
+    problems = 0
+    print(f"{'sti':20} {'http':>4} {'titel':>5} {'meta':>4}  status")
+    for page in PAGES:
+        path = page_path(page)
+        status, html = fetch_html(f"{WP_SITE}{path}", bust=True)  # sand status
+        issues = []
+        if status != 200:
+            issues.append(f"HTTP {status}" + (f" ({html[:60]})" if status is None else ""))
+            title_len = meta_len = 0
+        else:
+            info = extract(html)
+            title_len, meta_len = len(info["title"]), len(info["meta"])
+            if is_soft_404(info):
+                issues.append("soft-404: 200, men siden siger 'Page Not Found'")
+            else:
+                if page["seo_title"] not in info["title"]:
+                    issues.append(f"titel afviger: {info['title'][:60]!r}")
+                if info["h1"] != page["post_title"]:
+                    issues.append(f"H1 afviger: {info['h1'][:60]!r}")
+                if info["meta"] != page["meta"]:
+                    issues.append(f"meta afviger ({len(info['meta'])} tegn)")
+        # cache-tilstand: svarer den cachede version stadig 'Page Not Found'?
+        cached_status, cached_html = fetch_html(f"{WP_SITE}{path}")
+        cached_soft = cached_status == 200 and is_soft_404(extract(cached_html))
+        if not issues and cached_soft:
+            issues.append("cache: den cachede version svarer stadig 'Page Not Found' "
+                          "-> purge noedvendig")
+        problems += len(issues)
+        print(f"{path:20} {str(status):>4} {title_len:>5} {meta_len:>4}  "
+              f"{'OK' if not issues else 'FEJL'}")
+        for issue in issues:
+            print(f"    - {issue}")
+    print(f"\n{len(PAGES)} sider - {problems} afvigelse(r)")
+    return problems == 0
 
 
 def dry_run(do_links):
@@ -396,8 +478,12 @@ def main():
                         help="crawl ogsaa alle interne links (dry-run)")
     parser.add_argument("--apply", action="store_true", help="opret/opdater som kladde")
     parser.add_argument("--publish", action="store_true", help="opret/opdater og publicer")
+    parser.add_argument("--verify", action="store_true",
+                        help="sammenlign de live sider med payloadene (titel, meta, H1)")
     args = parser.parse_args()
 
+    if args.verify:
+        return 0 if verify() else 1
     if args.apply or args.publish:
         return apply_pages(publish=args.publish)
     return 0 if dry_run(args.check_links) else 1
