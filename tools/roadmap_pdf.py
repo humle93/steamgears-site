@@ -43,6 +43,7 @@ DOCS = [
     ("Command Center — roadmap", ROOT / "docs" / "library" / "command-center" / "ROADMAP.md"),
     ("Command Center — arkitektur og sikkerhed", ROOT / "docs" / "library" / "command-center" / "Command_Center_Dokumentation.md"),
     ("Command Center — bruger- og systemmanual", ROOT / "docs" / "library" / "command-center" / "Command_Center_Bruger_og_Systemmanual.md"),
+    ("Plugin-audit 2/11 2026", ROOT / "docs" / "library" / "plugin-audit-2026-11-02.md"),
 ]
 
 FONT_DIRS = [
