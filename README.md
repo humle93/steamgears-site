@@ -16,7 +16,8 @@ Versionstyring for **steamgears.eu**-assets. WordPress-kernen og databasen ligge
 - [`docs/library/meta-strategi-2026-11-02.md`](docs/library/meta-strategi-2026-11-02.md) — beslutning om auto-genereret vs. håndskrevet meta pr. sidetype, og prioriteret plan P1–P5 for de 84 afvigelser; afventer skriveadgang.
 - [`docs/library/titelrettelser-2026-11-02.md`](docs/library/titelrettelser-2026-11-02.md) — de fire live-titler over 62 tegn med præcis erstatningstekst og tegnoptælling; afventer skriveadgang.
 - `docs/projektstatus.md` — **daglig procentstatus** på hvert aktivt projekt + log over fremgang pr. modul. Skrives af `projektstatus.py` ud fra `projektstatus.json` (procenter beregnes, indtastes ikke) og kører automatisk dagligt via `.github/workflows/projektstatus.yml`.
-- [`AGENTS.md`](AGENTS.md) — arbejdsregler: hvert arbejdspas skal melde procentsats før → efter med grundlag, og hvert aktivt projekt har en daglig %-status.
+- [`AGENTS.md`](AGENTS.md) — arbejdsregler: hvert arbejdspas skal melde procentsats før → efter med grundlag, og hvert aktivt projekt har en daglig %-status. **§0 Startkontrakt** er den fælles besked til alle agenter og læses ved hver opstart: timer, procenter, dokumentation, roadmap, % færdig, resterende tid og MCP-login.
+- `sync_repos.py` + `repos.json` — synkroniserer §0-kontrakten til alle projekter: opretter manglende repos på GitHub og lægger kontrakten ind som `AGENTS.md`, så alle Freebuff-agenter læser den ved opstart. `--dry-run` viser planen; `--apply` kræver `GITHUB_TOKEN`; eksisterende indhold uden for AUTO-markørerne røres ikke.
 
 ## Statusformat (kort)
 

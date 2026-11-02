@@ -1,0 +1,12 @@
+{
+  "owner": "humle93",
+  "contract_source": "AGENTS.md",
+  "note": "Én linje pr. projekt. Kør `python3 sync_repos.py --dry-run` for at se planen; med GITHUB_TOKEN oprettes manglende repos og startkontrakten lægges ind som AGENTS.md, så alle Freebuff-agenter læser den ved opstart.",
+  "repos": [
+    {
+      "name": "steamgears-site",
+      "private": true,
+      "description": "Dokumentation og assets for steamgears.eu (roadmap, audits, projektstatus)."
+    }
+  ]
+}

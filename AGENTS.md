@@ -2,6 +2,29 @@
 
 Reglerne her gælder alt arbejde i dette repo, og de gælder også når arbejdet udføres af en AI-agent.
 
+## 0. Startkontrakt (læses ved hver opstart)
+
+<!-- AUTO:STARTKONTRAKT:START -->
+Denne blok er den fælles besked til alle agenter, der arbejder i repoet. Den læses ved hver opstart, før noget andet, og hvert arbejdspas lukkes først, når alle syv punkter er besvaret.
+
+| # | Punkt | Krav før passet lukkes |
+| --- | --- | --- |
+| 1 | **Timer** | Brugt tid angivet i modulets egen enhed (`t` eller `d`), ikke i "lidt" eller "meget". |
+| 2 | **Procenter** | `Før → Efter (Δ)` beregnet ud fra [`projektstatus.json`](projektstatus.json), aldrig gættet. |
+| 3 | **Dokumentation** | Nye fund og beslutninger i `docs/library/`, refereret fra `README.md` eller roadmap'en. |
+| 4 | **Roadmap** | Berørt række i [`docs/site-roadmap-2026-11-01.md`](docs/site-roadmap-2026-11-01.md) har fået en changelog-linje for passet. |
+| 5 | **% færdig** | Projekt- og modulprocent efter passet, med regnestykket. |
+| 6 | **Resterende tid** | `total - done` pr. projekt, i modulernes enhed (fx `21,1 - 7,4 = 13,7 d tilbage`). |
+| 7 | **MCP-login** | `WP_USER` + `WP_APP_PASS` eller `ROYAL_MCP_TOKEN` faktisk testet. Mangler de, er passet **blokeret**, ikke fremgang. |
+
+Regler:
+
+- Rækkefølgen er fast. Intet punkt springes over — mangler der noget, skrives `intet` eller `blokeret`, ikke en tom linje.
+- Kort format: brug skabelonen i [`README.md`](README.md#statusformat-kort) (maks. 8 linjer). Længere analyser hører i `docs/library/`.
+- **Alt arbejde afsluttes med commit og push**, så ejeren kan se det på GitHub. Den daglige status pushes automatisk af CI; agentens egne commits pushes i samme pas.
+- Punkt 7 er først opfyldt ved faktisk skriveadgang. Et forsøg på login tæller ikke som login.
+<!-- AUTO:STARTKONTRAKT:END -->
+
 ## 1. Fremskridtsprocent (obligatorisk)
 
 Alt arbejde — hvert modul, hver opgave, hver batch — skal melde sin **procentvise fremgang**.
