@@ -5,8 +5,35 @@ _1/11 2026 · grundlag for punkt **S2.1** i [site-roadmap-2026-11-01.md](../site
 [om-maerkning-dark-academia-2026-11-01.md](om-maerkning-dark-academia-2026-11-01.md) og
 [mangler-og-plan-25-10.md](mangler-og-plan-25-10.md) §4._
 
-Dette dokument er **copy + struktur, klar til at blive lagt ind over MCP**. Der er ikke skrevet noget på sitet i
-denne runde: hubene svarer stadig 404 (målt 1/11 i roadmap §3.1), og MCP-fladen i denne session er læsende.
+Dette dokument er **copy + struktur, klar til at blive lagt ind over MCP**. Da det blev skrevet (1/11), svarede
+hubene 404 (målt i roadmap §3.1), og MCP-fladen i den session var læsende.
+
+## Status — målt 2/11 2026
+
+| URL | Status | Målt |
+| --- | --- | --- |
+| `/start-here/` | ✅ **live** (side-id 1183), titel og meta identisk med §3 | 200 |
+| `/build/` | ✅ **live** (side-id 1185), titel og meta identisk med §4 | 200 |
+| `/inspiration/` | ❌ mangler | 404 |
+| `/build/corsets/` | ❌ mangler | 404 |
+| `/build/jackets/` | ❌ mangler | 404 |
+| `/build/props/` | ❌ mangler | 404 |
+
+**Verifikation af de to live hubs (2/11):** 951 ord (`/start-here/`) og 810 ord (`/build/`) i brødteksten, H1 er
+henholdsvis «Start Here» og «Build», og H2-rækkefølgen følger §3/§4. **39 unikke interne links er tjekket,
+39 svarer 200** — ingen nye døde links. De to sider linker til otte guides og fire kategorier, som ikke stod i
+§1's tabel, og som alle svarer 200: `/what-is-dieselpunk/`, `/what-is-gaslamp-fantasy/`,
+`/best-steampunk-books/`, `/the-clockwork-seer-short-story/`,
+`/the-last-flight-of-the-meridian-short-story/`, `/steampunk-outfit-ideas-for-women/`,
+`/steampunk-outfit-ideas-men/`, `/steampunk-couple-costumes/`, `/closet-steampunk-outfits/`,
+`/steampunk-accessories/`, `/dieselpunk-costume/`, `/product-category/airship-captain/`,
+`/product-category/victorian-inventor/`, `/product-category/hoodies/`, `/product-category/t-shirts/`.
+**`/size-guide/` og `/delivery/` svarer nu 200** og er dermed ude af «verificér før brug»-listen i §1.
+
+De fire manglende sider er ikke lenket fra nogen af de to live hubs, så de skaber ingen 404'er i navigationen,
+men hub-strukturen er halvt bygget: `/start-here/` peger på `/build/`, og `/build/` peger tilbage på
+`/start-here/` — uden `/inspiration/` og de tre komponent-sider er der ingen vej til galleri, journal, noveller
+eller til corsets/jakker/props.
 
 ---
 
