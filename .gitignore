@@ -1,6 +1,7 @@
 # Secrets never belong in this public repo
 .env
 .env.*
+!.env.example
 steamgears_auth.json
 *.pem
 *.key

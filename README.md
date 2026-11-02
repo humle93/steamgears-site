@@ -43,4 +43,8 @@ ind i dokumentindekset, så de ikke bliver forældreløse.
   `GEMINI_API_KEY`, `WP_USER` og `WP_APP_PASS` som repo-secrets.
 - `.github/workflows/plugin-ci.yml` — lint + smoke/integration for pluginnet.
 
+Lokalt miljø: `cp .env.example .env` og udfyld de fire nøgler, koden læser (`GEMINI_API_KEY`,
+`WP_USER`, `WP_APP_PASS`, `PINTEREST_ACCESS_TOKEN`). `.env` er gitignored; skabelonen er det ikke.
+Til CI lægges de samme navne som repo-secrets.
+
 Ændringer på selve sitet sker over MCP, ikke herfra. Repoet dokumenterer og forbereder dem.
