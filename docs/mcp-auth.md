@@ -5,13 +5,20 @@ uden credential.
 
 | Server | Endpoint | Auth i `.mcp.json` | Credential |
 | --- | --- | --- | --- |
-| `steamgears` | `https://steamgears.eu/mcp` | `Bearer ${ROYAL_MCP_API_KEY}` | Royal MCP API-nøgle (32 hex, laves i wp-admin) |
+| `steamgears` | `https://steamgears.eu/mcp` | `Bearer ${ROYAL_MCP_TOKEN}` | Royal MCP API-nøgle (32 hex, laves i wp-admin) |
 | `publer` | `https://mcp.publer.com/` | `Bearer ${PUBLER_API_KEY}` | Publer MCP API key (Business/Enterprise) |
 | `steamgears-profil` | `tools/mcp_project_profile.py` (stdio) | ingen | ingen — læser kun repoet |
 
-Begge variabler er usatte i dag, så `steamgears` og `publer` står som *Pending approval* indtil de er
-konfigureret. `steamgears-profil` virker uden credential og er den eneste MCP-kilde der svarer i dag —
-den er verificeret med et rigtigt `initialize` + `tools/list`-håndtryk (2/11 2026).
+**Status 2/11 2026:** `steamgears`-nøglen ligger i `.env` som `ROYAL_MCP_TOKEN` og virker — `python3
+wp_mcp_stdio.py --check` gav `ok: true`, server 1.5.13 og **270 værktøjer**. `PUBLER_API_KEY` er stadig
+usat, så `publer` står som *Pending approval*. `steamgears-profil` virker uden credential; den er verificeret
+med et rigtigt `initialize` + `tools/list`-håndtryk.
+
+> **Navnet er `ROYAL_MCP_TOKEN`.** Broen (`wp_mcp_stdio.py`) og `.mcp.json` bruger begge dette navn, og
+> broen læser desuden det ældre `ROYAL_MCP_API_KEY`, hvis nogen foretrækker det. Før 2/11 2026 ledte broen
+> **kun** efter `ROYAL_MCP_API_KEY`, mens `.env` havde `ROYAL_MCP_TOKEN` — resultatet var 401 på hver ny
+> session, selv om nøglen lå i repoet, og nogen måtte ind og eksportere den manuelt hver gang. Det er rettet:
+> nøglen læses nu fra `.env` automatisk, så der ikke skal eksporteres noget pr. session.
 
 > **Rettelse 2/11 2026:** denne fil påstod tidligere at Royal MCP kunne bruges med et WordPress
 > application password over Basic. Det er **forkert** for MCP-ruten — målt på sitets eget endpoint, se
@@ -53,28 +60,40 @@ metadataet annoncerer kun `authorization_code` og `refresh_token`.
 3. Kopiér den med det samme — den vises kun én gang og i højst 15 minutter.
 
 Nøglen er knyttet til den WP-bruger der oprettede den, og der er **én pr. site**. Den kan roteres i wp-admin
-eller med `wp royal-mcp rotate-api-key`, og siden 1.5.14 kan den slås helt fra på Settings-skærmen.
+eller med `wp royal-mcp rotate-api-key`, og plugin-versionen kan slå den helt fra på Settings-skærmen.
+(2/11 2026 svarer sitet med **1.5.13** — denne fil nævnte tidligere 1.5.14.)
 
-### 2. Gem nøglen uden for repoet
+### 2. Gem nøglen ét sted — helst `.env`
+
+Repoets `.env` er gitignored (`.gitignore` linje 2-3) og læses automatisk af broen og af `.mcp.json`, når
+variablen er eksporteret. Det er den ene plads, nøglen skal stå:
+
+```bash
+# i .env — dette repo bruger dette navn
+ROYAL_MCP_TOKEN=din-32-hex-noegle
+```
+
+Alternativt uden for repoet, hvis `.env` ikke må indeholde den:
 
 ```bash
 printf '%s' 'din-32-hex-noegle' > ~/.royal_mcp_key
 chmod 600 ~/.royal_mcp_key
 ```
 
-Filen ligger uden for repoet og må ikke committes. Lægges den i `.env` i stedet, er den dækket af
-`.gitignore`.
+Broen læser `ROYAL_MCP_TOKEN`/`ROYAL_MCP_API_KEY` fra miljøet, derefter `.env` i repoets rod, derefter
+`~/.royal_mcp_key` — så en session der starter uden eksporterede variabler virker alligevel.
 
-### 3. Sæt `ROYAL_MCP_API_KEY`
+### 3. Giv MCP-klienten nøglen
 
-`.mcp.json` sender `Authorization: Bearer ${ROYAL_MCP_API_KEY}` — altså nøglen **rå**, ikke base64.
+`.mcp.json` sender `Authorization: Bearer ${ROYAL_MCP_TOKEN}` — altså nøglen **rå**, ikke base64. En
+MCP-klient kan ikke selv læse `.env`, så variablen skal være eksporteret i den shell klienten startes fra:
 
 ```bash
-export ROYAL_MCP_API_KEY="$(cat ~/.royal_mcp_key)"
+export ROYAL_MCP_TOKEN="$(grep -m1 '^ROYAL_MCP_TOKEN=' .env | cut -d= -f2-)"
 ```
 
-Start Claude Code i samme shell, så variablen arves. Skal den være permanent, læg linjen i shell-profilen —
-ikke i en fil der ligger i repoet.
+Til scripts og stdio-broen er det ikke nødvendigt: `wp_mcp_stdio.py` læser `.env` selv, så der skal intet
+eksporteres pr. session.
 
 ### 4. Verificér
 
@@ -99,7 +118,7 @@ kan samme forbindelse bruges gennem stdio-broen: `printf '%s\n' '{"jsonrpc":"2.0
 | --- | --- | --- |
 | `invalid_username` | du sendte Basic — MCP-ruten tager ikke app passwords | send `Authorization: Bearer <API-nøgle>` |
 | `Invalid or expired access token` | nøglen er forkert, roteret eller slået fra | lav en ny på Royal MCP → Settings, og sæt `ROYAL_MCP_API_KEY` |
-| `Missing environment variables: ROYAL_MCP_API_KEY` | variablen er ikke eksporteret i shellen | trin 3 |
+| `Missing environment variables: ROYAL_MCP_TOKEN` | variablen er ikke eksporteret i shellen (gælder MCP-klienter; broen læser `.env` selv) | trin 3 |
 | `406 Not Acceptable` | `Accept: application/json, text/event-stream` mangler | send begge typer (broen gør det selv) |
 | 401 på alle kald trods frisk nøgle | nøglen er slået fra i 1.5.14+, eller brugeren er ikke administrator | tjek Settings og brugerens rolle |
 | `initialize` svarer 200, men ingen værktøjer | session-id mangler på efterfølgende kald | send `Mcp-Session-Id` med |

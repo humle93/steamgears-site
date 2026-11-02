@@ -4,7 +4,7 @@
       "type": "http",
       "url": "https://steamgears.eu/mcp",
       "headers": {
-        "Authorization": "Bearer ${ROYAL_MCP_API_KEY}"
+        "Authorization": "Bearer ${ROYAL_MCP_TOKEN}"
       }
     },
     "publer": {

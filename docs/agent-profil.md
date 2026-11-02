@@ -117,7 +117,7 @@ Alt her er målt mod den live side eller læst i kilden. Er noget ændret siden 
 | Python 3.12 + PDF-biblioteker | ✅ i `tools/_deps` | rapporter i `reports/` |
 | PHP 8.5.8 (statisk binær) | ✅ i `tools/_deps/bin/php` | `php -l`, ikke tests |
 | **Skrive til sitet** | ❌ 401 | S2.3, S4.1, S4.3, S0.4 kan forberedes, ikke udføres |
-| MCP mod sitet | ❌ ingen `ROYAL_MCP_API_KEY` | Royal MCP svarer 401; kun `Bearer <API-nøgle>` virker (application password afvises) |
+| MCP mod sitet | ✅ nøglen i `.env` som `ROYAL_MCP_TOKEN` | `wp_mcp_stdio.py --check` gav 2/11 2026 `ok: true`, server 1.5.13, **270 værktøjer**; kun `Bearer <API-nøgle>` virker (application password afvises) |
 | Publer MCP | ❌ ingen `PUBLER_API_KEY` | kan ikke planlægge opslag |
 | Browser / Lighthouse | ❌ | ingen visuel eller ydelsesverifikation |
 | Root / `apt` | ❌ | brug statiske binærer (se opskrifter) |
@@ -152,10 +152,10 @@ curl -s -A 'Mozilla/5.0' https://steamgears.eu/<side>/ \
 curl -s 'https://steamgears.eu/wp-json/wp/v2/product?per_page=100&_fields=id,slug,link' | jq 'length'
 curl -s -D- -o /dev/null 'https://steamgears.eu/wp-json/wp/v2/product?per_page=1' | grep -i x-wp-total
 
-# MCP-håndtryk (kræver ROYAL_MCP_API_KEY; Bearer er den eneste accepterede credential)
+# MCP-håndtryk (nøglen ligger i .env som ROYAL_MCP_TOKEN; Bearer er den eneste accepterede credential)
 curl -sS -X POST https://steamgears.eu/mcp \
   -H 'Content-Type: application/json' -H 'Accept: application/json, text/event-stream' \
-  -H "Authorization: Bearer $ROYAL_MCP_API_KEY" \
+  -H "Authorization: Bearer $(grep -m1 '^ROYAL_MCP_TOKEN=' .env | cut -d= -f2-)" \
   -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"verify","version":"1"}}}'
 
 # Samme håndtryk gennem stdio-broen (bruges når nøglen ligger i .env eller ~/.royal_mcp_key)
