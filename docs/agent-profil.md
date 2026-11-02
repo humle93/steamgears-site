@@ -120,7 +120,7 @@ Alt her er målt mod den live side eller læst i kilden. Er noget ændret siden 
 | Python 3.12 + PDF-biblioteker | ✅ i `tools/_deps` | rapporter i `reports/` |
 | PHP 8.5.8 (statisk binær) | ✅ i `tools/_deps/bin/php` | `php -l`, ikke tests |
 | **Skrive til sitet** | ❌ 401 | S2.3, S4.1, S4.3, S0.4 kan forberedes, ikke udføres |
-| MCP mod sitet | ✅ nøglen i `.env` som `ROYAL_MCP_TOKEN` | `wp_mcp_stdio.py --check` gav 2/11 2026 `ok: true`, server 1.5.13, **270 værktøjer**; kun `Bearer <API-nøgle>` virker (application password afvises) |
+| MCP mod sitet | ❌ **slukket 2/11 2026** | `/mcp` svarer `404 rest_no_route` — Royal MCP er deaktiveret, så både læsning og skrivning mod sitet er umulig. Sidste gode session var 1.5.13 med **270 værktøjer**; kun `Bearer <API-nøgle>` virker (application password afvises). Tænd plugin'et og læg en frisk nøgle i `.env` (se `docs/mcp-auth.md`) |
 | Publer MCP | ❌ ingen `PUBLER_API_KEY` | kan ikke planlægge opslag |
 | Browser / Lighthouse | ❌ | ingen visuel eller ydelsesverifikation |
 | Root / `apt` | ❌ | brug statiske binærer (se opskrifter) |

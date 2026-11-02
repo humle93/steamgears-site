@@ -9,7 +9,13 @@ uden credential.
 | `publer` | `https://mcp.publer.com/` | `Bearer ${PUBLER_API_KEY}` | Publer MCP API key (Business/Enterprise) |
 | `steamgears-profil` | `tools/mcp_project_profile.py` (stdio) | ingen | ingen — læser kun repoet |
 
-**Status 2/11 2026:** `steamgears`-nøglen ligger i `.env` som `ROYAL_MCP_TOKEN`. Den virkede om formiddagen —
+**Status 2/11 2026, sen aften: Royal MCP er slukket.** `/mcp` svarer `404 rest_no_route`, og broen melder samme
+fejl — plugin'et er deaktiveret, ikke bare nøglen ugyldig. Ingen læsning eller skrivning mod sitet er mulig, før
+det er tændt igen og en frisk nøgle ligger i `.env`. Rækkefølgen er: aktivér Royal MCP i wp-admin → åbn
+Settings → opret ny API-nøgle → `python3 tools/set_mcp_key.py --from-file mcp_key.txt` → `python3
+wp_mcp_stdio.py --check` skal svare `ok: true` med 270 værktøjer.
+
+**Status 2/11 2026, tidligere på dagen:** `steamgears`-nøglen ligger i `.env` som `ROYAL_MCP_TOKEN`. Den virkede om formiddagen —
 `python3 wp_mcp_stdio.py --check` gav `ok: true`, server 1.5.13 og **270 værktøjer** — men **sent 2/11 blev den
 afvist**: `401 {"code":-32600,"message":"Invalid or expired access token."}` på hvert kald, også med
 browser-UA og på en frisk session. Nøglen skal altså roteres (wp-admin → Royal MCP → Settings → ny API-nøgle
@@ -133,6 +139,7 @@ kan samme forbindelse bruges gennem stdio-broen: `printf '%s\n' '{"jsonrpc":"2.0
 | `Invalid or expired access token` | nøglen er forkert, roteret eller slået fra | lav en ny på Royal MCP → Settings, og sæt `ROYAL_MCP_API_KEY` |
 | `Missing environment variables: ROYAL_MCP_TOKEN` | variablen er ikke eksporteret i shellen (gælder MCP-klienter; broen læser `.env` selv) | trin 3 |
 | `406 Not Acceptable` | `Accept: application/json, text/event-stream` mangler | send begge typer (broen gør det selv) |
+| `/mcp` svarer `404 rest_no_route` | Royal MCP er **deaktiveret** — ruten findes ikke længere | aktivér plugin'et i wp-admin; derefter ny nøgle |
 | 401 på alle kald trods frisk nøgle | nøglen er slået fra i 1.5.14+, eller brugeren er ikke administrator | tjek Settings og brugerens rolle |
 | `initialize` svarer 200, men ingen værktøjer | session-id mangler på efterfølgende kald | send `Mcp-Session-Id` med |
 | nøglen er opdateret, men svaret er stadig 401 | `.env` i **denne** worktree er ikke ændret | tjek filens mtime — en cloud-worktree har sin egen gitignored `.env`-kopi, så en rettelse på ejerens maskine rammer ikke VM'en |

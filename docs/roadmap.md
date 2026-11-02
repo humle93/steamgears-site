@@ -55,7 +55,7 @@ published posts, no order or revenue data. Statements below are limited to what 
 | Caching | W3 Total Cache 2.11.0 + `advanced-cache.php` + `object-cache.php` |
 | SEO | Rank Math 1.0.280, Redirection 5.10.1 |
 | Mail | WP Mail SMTP 4.10.3 (relevant for imported P0.1) |
-| Agent access | Royal MCP 1.5.13 (last measured; key now 401), Steamgears Autopilot **7.22.0 in this repo**, live version unverified after the owner's update click — §2b |
+| Agent access | **Royal MCP off** since 2/11 (`/mcp` → `404 rest_no_route`); last good session was 1.5.13 with 270 tools. Steamgears Autopilot **7.22.0 in this repo**, live version unverified — §2b |
 
 ### 2b. Deployment status (2026-11-02)
 
@@ -67,10 +67,12 @@ from the site itself (`wp_get_plugins`), never inferred from this repo, so it ca
 | Steamgears Autopilot | **7.22.0** (`plugins/steamgears-autopilot-v7.22.0.zip`, byte-identical to source) | **7.21.0**, active | **One owner click.** The 7.22.0 quality gate (P1.6) is built, tested and pushed, but not on the site |
 | Royal MCP | — (site-side plugin, not in this repo) | 1.5.13, 270 tools | None |
 
-**Open since the owner's click:** the update was clicked on 2/11, but the result could not be measured — the
-MCP key returned `401 Invalid or expired access token` on every call (see [`mcp-auth.md`](mcp-auth.md)), so
-the table above is the last measurement *before* the click. The
-three checks below stay pending until the key is rotated; until then the live version is unknown, not "7.21.0".
+**Blocked: Royal MCP is off.** The update was clicked on 2/11 and then the MCP server was switched off — `/mcp`
+now answers `404 rest_no_route`, so the site is unreachable for the agent and **no site-side work is possible**,
+neither reading nor writing. The table above is therefore the last measurement *before* the click, and the live
+version is unknown rather than "7.21.0". The three checks below stay pending until the plugin is active again and
+a fresh key is in `.env` (see [`mcp-auth.md`](mcp-auth.md)); the same block stops every S0/S1/S2 item that needs
+the site, so the percentages in this file cannot move either.
 
 **Why the gap exists:** a plugin folder can only be replaced by WordPress itself. The MCP surface reads plugins
 but cannot install or activate them, so the last step of every release belongs to the owner — *Plugins → Update*
@@ -272,6 +274,7 @@ plugin P0.1–P0.3, P0.5 ──► parallel, different repo, nothing blocks them
 
 | Date | Change |
 |---|---|
+| 2026-11-02 (round 14c — Royal MCP slukket) | `/mcp` svarer nu `404 rest_no_route`, altså er Royal MCP deaktiveret, ikke bare nøglen ugyldig (den gav `401` tidligere på aftenen). Det betyder at **al** site-side læsning og skrivning er blokeret, også den verifikation af 7.22.0 der var aftalt: `wp_get_plugins`, `queue-post` og `status` kan ikke kaldes, og der findes ingen offentlig flade der viser plugin-versionen. §2's agent-linje og §2b siger nu det, og procenterne kan ikke flytte sig mens MCP er slukket. OAuth er samtidig målt død fra cloud-worktreen: `.well-known/oauth-authorization-server`, `/register` og `/token` svarer `454` fra Simplys WAF. |
 | 2026-11-02 (round 14b — MCP-nøglen døde) | Ejeren klikkede *Plugins → Update*, og verifikationen blev **blokeret**: MCP-nøglen i `.env` svarer nu `401 Invalid or expired access token` på hvert kald, også med browser-UA og på frisk session (den virkede om formiddagen med 270 værktøjer). Ingen påstand om live-version er derfor opdateret: §2's snapshot og §2b's tabel står nu som *sidste måling før klikket*, ikke som gældende status, og de tre efterkontroltrin er markeret som afventende. Nøglen skal roteres i wp-admin (Royal MCP → Settings) og lægges i `.env` som `ROYAL_MCP_TOKEN`, så kan trinnene køres. `docs/mcp-auth.md` har fået samme rettelse, inkl. at sitets `454` på forskiden er Simplys bot-regel og ikke en nøglefejl. |
 | 2026-11-02 (round 14 — dokumentation og deployment) | Dokumentationspas, ingen kode og ingen procenter flyttet. **§2b er ny:** hvad der ligger i repoet mod hvad der kører på sitet, målt med `wp_get_plugins` — Autopilot **7.22.0 i repo, 7.21.0 live**, altså er quality-gaten fra P1.6 bygget og CI-verificeret men ikke uploadet, fordi et plugin-folder kun kan skiftes af WordPress selv. Sektionen skriver den ene klik-vej (*Plugins → Update* via selv-opdateren) og de tre trin der afgør om en release faktisk virker: version + `active` fra `wp_get_plugins`, et feature-svar fra sitet (en blokeret `queue-post` og samme post med `force`), og `quality_gate.mode` i `status`. Rettet tre forældede steder: §2's snapshot sagde 7.18.0, P1.6-rækken sagde "4/11" (en dato der ikke var indtruffet), og plugin-README'ens installationslinje pegede på v7.18.0-zip'en. Release-proceduren ligger nu i plugin-README §Updates og er refereret herfra. |
 | 2026-11-02 (autonomous round 13) | Plugin 7.22.0: **quality gate før køning** (P1.6). `includes/quality.php` (`SGAP_Quality`) ligger inde i `SGAP_Queue::add()`, som er den eneste vej ind i køen, så Studio, AI-drafts, REST-API'et og Claude-værktøjerne alle rammer samme kontrol. Fire tjek: **bandeord** fra ejerens egen liste (hele ord, og et hashtag tæller som ordet); **døde links** — interne links slås op i WordPress selv, så et slug der er væk eller en post der stadig er kladde fanges, mens arkiver, feeds og søgning genkendes og ikke meldes; **manglende alt-tekst** på fremhævet billede; **næsten-dubletter** mod de sidste 40 poster på samme kanal (85 % ord-overlap, og posten der gentages navngives). Tre tilstande (block/warn/off, standard block) og en `force`-udvej der køer posten med fundene som advarsler; captions under otte ord kaldes aldrig dubletter. Ingen udgående HTTP — eksterne værter probles ikke, og README forklarer hvorfor. 36 nye smoke-checks (172 → 208). Plugin 24,8 % → 29,0 %. |
