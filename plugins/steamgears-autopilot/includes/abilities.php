@@ -175,6 +175,19 @@ class SGAP_Abilities {
                     'include_yellow' => ['type' => 'boolean', 'description' => 'Include yellow niches, not only green. Default: false.'],
                     'require_image' => ['type' => 'boolean', 'description' => 'Skip channels that need a photo (instagram, pinterest). Default: false.']                ], [], [__CLASS__, 'queue_niches'], false, true
             ],
+            'invite-user' => [
+                'Invite someone to Command Center',
+                'Command Center logs in with a WordPress user and an application password, and sgap/v1 requires manage_options — so an invitation is a real administrator: the user is created with that email, WordPress sends its own new-user email with the set-password link, and the outcome is recorded. No application password is created or emailed; the invitee makes it under Users → Profile. Calling it again for the same address creates nothing, so a retry is safe. Not exposed over REST: only an administrator may mint administrators.',
+                [
+                    'email' => ['type' => 'string', 'format' => 'email', 'description' => 'Where the invitation goes. cpaleadsis@gmail.com is seeded as pending; list-invites shows the rest.']
+                ],
+                ['email'], [__CLASS__, 'invite_user'], false, true
+            ],
+            'list-invites' => [
+                'List Command Center invitations',
+                'Shows every invitation record: email, status (pending, invited, exists, failed, blocked), user id, when it was sent, and the reason when nothing happened. Also says whether the site offers application passwords, which Command Center needs to log in at all.',
+                [], [], [__CLASS__, 'list_invites'], true, true
+            ],
             'check-publer' => [
                 'Check Publer connection',
                 'Tests the Publer API key: lists workspaces, connected social accounts, and configured channels that have no Publer account.',
@@ -364,6 +377,21 @@ class SGAP_Abilities {
 
     public static function queue_niches($input = null) {
         return SGAP_Niche::queue_ability($input);
+    }
+
+    public static function invite_user($input = null) {
+        $input = (array) $input;
+        return SGAP_Invites::invite((string) ($input['email'] ?? ''));
+    }
+
+    public static function list_invites($input = null): array {
+        $pending = array_filter(SGAP_Invites::all(), fn($record) => ($record['status'] ?? '') === 'pending');
+        return [
+            'invites' => SGAP_Invites::records(),
+            'pending' => count($pending),
+            'role' => SGAP_Invites::ROLE,
+            'application_passwords_available' => SGAP_Invites::app_passwords_available()
+        ];
     }
 
     public static function check_publer($input = null) {

@@ -286,7 +286,7 @@ wp_set_current_user((int) $admin[0]);
 
 /* --- Claude / MCP abilities (WordPress 6.9+ only) --- */
 if (function_exists('wp_get_ability')) {
-    $names = ['status', 'list-drafts', 'review-draft', 'list-queue', 'queue-post', 'generate', 'publish', 'set-mode', 'update', 'check-keys', 'check-publer', 'score-niches', 'queue-niches'];
+    $names = ['status', 'list-drafts', 'review-draft', 'list-queue', 'queue-post', 'generate', 'publish', 'set-mode', 'update', 'check-keys', 'check-publer', 'score-niches', 'queue-niches', 'invite-user', 'list-invites'];
     $missing = array_values(array_filter($names, fn($n) => !wp_get_ability('steamgears-autopilot/' . $n)));
     sgci_check('abilities: all ' . count($names) . ' registered', !$missing, $missing);
     $status_ability = wp_get_ability('steamgears-autopilot/status');
@@ -309,6 +309,12 @@ if (function_exists('wp_get_ability')) {
     sgci_check('abilities: review of unknown draft is an error', is_wp_error(wp_get_ability('steamgears-autopilot/review-draft')->execute(['draft_id' => 999999, 'decision' => 'reject'])));
     $wpdb->delete($wpdb->prefix . 'sgap_queue', ['id' => (int) $queued['id']]);
     wp_set_current_user(0);
+    // list-invites is read-only and safe to run; invite-user is not executed here, because it
+    // creates an administrator and sends a real email on the test site.
+    $invites = wp_get_ability('steamgears-autopilot/list-invites')->execute();
+    sgci_check('abilities: list-invites shows the seeded address as pending', is_array($invites)
+        && in_array('cpaleadsis@gmail.com', array_column($invites['invites'] ?? [], 'email'), true),
+        $invites);
     sgci_check('abilities: anonymous users are refused', is_wp_error(wp_get_ability('steamgears-autopilot/status')->execute()));
     wp_set_current_user((int) $admin[0]);
 } else {

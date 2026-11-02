@@ -27,7 +27,18 @@ function esc_url_raw($u,$p=null){return preg_match('#^https?://#',$u)?$u:'';} fu
 function wp_parse_args($a,$d){return array_merge($d,$a);} function add_query_arg($a,$u){return $u.(str_contains($u,'?')?'&':'?').http_build_query($a,'','&',PHP_QUERY_RFC3986);}
 function current_time($t){return '2026-10-30 12:00:00';} function wp_date($f,$t=null){return date($f,$t??time());}
 function wp_upload_dir($t=null){return ['basedir'=>$GLOBALS['uploads_dir']??sys_get_temp_dir()];}
-function current_user_can($c){return true;} function get_current_user_id(){return 1;} function get_site_transient($k){return false;} function set_site_transient(...$a){} function wp_remote_get(...$a){return new WP_Error('offline','offline');} function wp_nonce_field_stub(){} function delete_option($k){unset($GLOBALS["opts"][$k]);} function wp_json_encode($v){return json_encode($v);} function is_wp_error($v){return $v instanceof WP_Error;}
+// Invitations: WordPress-brugeroprettelse og den mail WordPress selv sender.
+function is_email($e){ return (bool) filter_var((string)$e, FILTER_VALIDATE_EMAIL); }
+function sanitize_email($e){ $e=strtolower(trim((string)$e)); return is_email($e)?$e:''; }
+function sanitize_user($s,$strict=false){ return preg_replace('/[^a-z0-9_.\-]/','',strtolower((string)$s)); }
+class Stub_User { public $ID; function __construct($id){ $this->ID=$id; } }
+function get_user_by($field,$value){ foreach($GLOBALS['users']??[] as $id=>$row){ if(($field==='email'&&$row['email']===$value)||($field==='id'&&(int)$id===(int)$value)) return new Stub_User($id); } return false; }
+function username_exists($login){ return in_array($login,$GLOBALS['logins']??[],true)? 9 : false; }
+function wp_insert_user($data){ $GLOBALS['inserts'][]=$data; if(!empty($GLOBALS['fail_insert'])) return new WP_Error('existing_user_email','Email exists.'); $id=200+count($GLOBALS['inserts']); $GLOBALS['users'][$id]=['email'=>$data['user_email'],'login'=>$data['user_login'],'role'=>$data['role']]; return $id; }
+function wp_generate_password($len=12,$s=true,$e=false){ return str_repeat('x',(int)$len); }
+function wp_send_new_user_notifications($id,$notify='both'){ $GLOBALS['mails'][]=[(int)$id,$notify]; }
+function wp_is_application_passwords_available(){ return (bool)($GLOBALS['app_passwords']??true); }
+function current_user_can($c){return $GLOBALS['caps'][$c] ?? true;} function get_current_user_id(){return 1;} function get_site_transient($k){return false;} function set_site_transient(...$a){} function wp_remote_get(...$a){return new WP_Error('offline','offline');} function wp_nonce_field_stub(){} function delete_option($k){unset($GLOBALS["opts"][$k]);} function wp_json_encode($v){return json_encode($v);} function is_wp_error($v){return $v instanceof WP_Error;}
 class WP_Error{ function __construct(public $code,public $msg,public $data=[]){} function get_error_code(){return $this->code;} function get_error_message(){return $this->msg;} }
 class WP_REST_Response{ function __construct(public $data,public $status=200){} }
 class WP_REST_Request implements ArrayAccess{ function __construct(public array $p){} function get_param($k){return $this->p[$k]??null;}
@@ -225,5 +236,53 @@ if (is_readable($repo)) {
     $repo_rows=SGAP_Niche::parse_csv(file_get_contents($repo));
     check('niche csv: the documented candidate file parses unchanged', count($repo_rows['rows'])===4 && array_column(SGAP_Niche::scan($repo_rows['rows']),'score')===[80.8,61.2,53.6,38.9]);
 }
+// --- Invitationer til Command Center ---
+// Et login i appen ER en WordPress-bruger med application password, og sgap/v1 kræver
+// manage_options — derfor opretter en invitation en administrator.
+delete_option(SGAP_Invites::OPTION);
+SGAP_Invites::seed();
+$seeded=SGAP_Invites::all();
+check('invites: seed adds the owner address as pending', isset($seeded['cpaleadsis@gmail.com']) && $seeded['cpaleadsis@gmail.com']['status']==='pending' && count($seeded)===1);
+check('invites: seed sends nothing', empty($GLOBALS['mails']) && empty($GLOBALS['inserts']));
+$seeded['cpaleadsis@gmail.com']['status']='invited'; update_option(SGAP_Invites::OPTION,$seeded);
+SGAP_Invites::seed();
+check('invites: seed never resets an existing state', SGAP_Invites::all()['cpaleadsis@gmail.com']['status']==='invited');
+delete_option(SGAP_Invites::OPTION); SGAP_Invites::seed(); $GLOBALS['inserts']=[]; $GLOBALS['mails']=[];
+check('invites: an invalid address is refused', SGAP_Invites::invite('ikke-en-mail') instanceof WP_Error && SGAP_Invites::invite('ikke-en-mail')->get_error_code()==='sgap_invalid_email');
+check('invites: nothing is created for an invalid address', empty($GLOBALS['inserts']));
+$GLOBALS['caps']=['create_users'=>false];
+check('invites: needs the create_users capability', SGAP_Invites::invite('ny@example.com') instanceof WP_Error && empty($GLOBALS['inserts']));
+unset($GLOBALS['caps']);
+$res=SGAP_Invites::invite('cpaleadsis@gmail.com');
+check('invites: a pending invitation becomes an administrator', is_array($res) && $res['created']===true && $res['status']==='invited' && ($GLOBALS['inserts'][0]['role']??'')==='administrator');
+check('invites: WordPress sends its own new-user mail', count($GLOBALS['mails'])===1 && $GLOBALS['mails'][0][1]==='both');
+check('invites: no password is put in the record', !str_contains(json_encode($res),str_repeat('x',32)));
+check('invites: login comes from the address, lowercased and stripped', ($GLOBALS['inserts'][0]['user_login']??'')==='cpaleadsis');
+check('invites: the record says where the application password is made', str_contains($res['note'],'Users → Profile') && $res['application_passwords_available']===true);
+$again=SGAP_Invites::invite('cpaleadsis@gmail.com');
+check('invites: inviting again creates nothing', is_array($again) && $again['created']===false && count($GLOBALS['inserts'])===1 && count($GLOBALS['mails'])===1);
+$GLOBALS['users'][900]=['email'=>'findes@example.com','login'=>'findes','role'=>'administrator'];
+$exists=SGAP_Invites::invite('findes@example.com');
+check('invites: an existing WordPress user is not duplicated', $exists['status']==='exists' && $exists['created']===false && $exists['user_id']===900 && count($GLOBALS['inserts'])===1);
+$GLOBALS['fail_insert']=true;
+$failed=SGAP_Invites::invite('fejler@example.com');
+check('invites: a WordPress error is recorded, not swallowed', $failed['status']==='failed' && $failed['created']===false && str_contains($failed['note'],'Email exists'));
+$GLOBALS['fail_insert']=false;
+$GLOBALS['app_passwords']=false;
+$blocked=SGAP_Invites::invite('http@example.com');
+check('invites: without application passwords nothing is created', $blocked['status']==='blocked' && $blocked['created']===false
+    && !in_array('http@example.com', array_column($GLOBALS['users']??[], 'email'), true));
+$GLOBALS['app_passwords']=true;
+$GLOBALS['logins']=['cpaleadsis'];
+check('invites: a taken login gets a suffix', SGAP_Invites::login_for('cpaleadsis@gmail.com')==='cpaleadsis2');
+$GLOBALS['logins']=[];
+$listed=SGAP_Abilities::list_invites([]);
+check('invites: list-invites counts the pending ones', is_array($listed) && $listed['pending']>=0 && is_array($listed['invites']) && $listed['role']==='administrator');
+check('invites: invite-user is registered as a writer, list-invites as read-only',
+    ($GLOBALS['abilities']['steamgears-autopilot/invite-user']['meta']['annotations']['readonly']??null)===false
+    && ($GLOBALS['abilities']['steamgears-autopilot/list-invites']['meta']['annotations']['readonly']??null)===true);
+check('invites: the ability wires the address through', is_array(SGAP_Abilities::invite_user(['email'=>'cpaleadsis@gmail.com'])));
+check('invites: no REST route can mint administrators', !str_contains(file_get_contents(__DIR__.'/../steamgears-autopilot/includes/core.php'),'invite'));
+
 echo empty($GLOBALS['fail'])?"ALL PASS\n":"SOME FAILED\n";
 exit(empty($GLOBALS['fail'])?0:1);

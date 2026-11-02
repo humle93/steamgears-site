@@ -71,5 +71,5 @@ Det kan flyttes med uændret til det nye repo; eneste tilpasning er stien til ka
 
 1. Sæt `GITHUB_TOKEN`, kør `python3 sync_repos.py --apply`.
 2. M4: flyt `niche_scan.py`, `tests/` og kandidatfilen, og lad et workflow køre testene på hvert push.
-3. Kør v7.17.0 på sitet og kald `score-niches` med enten kandidatfilens sti under uploads eller CSV-teksten — plugin-modulet er testet med stubbe, ikke i en installeret WordPress.
+3. Kør v7.18.0 på sitet og kald `score-niches` med enten kandidatfilens sti under uploads eller CSV-teksten — plugin-modulet er testet med stubbe, ikke i en installeret WordPress.
 4. Udvid datagrundlaget — sæsonsving mangler for tre af fire kandidater, og det er den ene vægt der reelt kan flytte rækkefølgen.

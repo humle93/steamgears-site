@@ -57,6 +57,14 @@ Android SDK: `snapshot`, `drafts`, `drafts/{id}/status`, `queue`, `queue/{id}/st
 som strenge) og fejl som værdier med danske beskeder. Testfixtures genereres af den
 rigtige PHP, ikke i hånden. Detaljer: [`command-center-m1-2026-11-02.md`](command-center-m1-2026-11-02.md).
 
+## Adgang: en invitation er en WordPress-bruger
+
+Appen har ingen egne konti — login er en WordPress-bruger med et application password,
+og `sgap/v1` kræver `manage_options`. Derfor ligger invitationen i pluginnet (v7.18.0):
+`invite-user` opretter administratoren og lader WordPress sende sit eget sæt-password-link,
+`list-invites` viser recorden. `cpaleadsis@gmail.com` er seeded som pending, men **intet er
+sendt** — det kræver WP-adgang. Detaljer: [`command-center-invitation-2026-11-02.md`](command-center-invitation-2026-11-02.md).
+
 ## Næste skridt
 
 1. Opret repoet (token) og læg `AGENTS.md`-kontrakten ind via `sync_repos.py`.

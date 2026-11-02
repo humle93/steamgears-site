@@ -103,7 +103,7 @@
       "id": "cc",
       "name": "Command Center (Android) — social pilot",
       "note": "eget repo, tynd klient mod sgap/v1",
-      "next": "M2: app-modul med skærmene status, kladder og kø oven på SgapApi (core er færdig og testet)",
+      "next": "M2: app-modul med skærmene status, kladder og kø; invitationen sendes ved første WP-kald af invite-user",
       "blocked_by": "GITHUB_TOKEN til at oprette repoet via sync_repos.py; ingen Android SDK i sandboxen, så APK bygges i CI",
       "modules": [
         {
@@ -129,6 +129,14 @@
           "total": 0.5,
           "unit": "d",
           "note": "Gradle + GitHub Actions"
+        },
+        {
+          "id": "m4",
+          "name": "M4 — invitation i pluginnet",
+          "done": 0.15,
+          "total": 0.2,
+          "unit": "d",
+          "note": "SGAP_Invites + invite-user/list-invites; cpaleadsis@gmail.com ligger som pending. 0,05 d tilbage = rigtig WP-bruger og mail, kræver WP-adgang"
         }
       ]
     },
@@ -422,6 +430,15 @@
       "after": 30.0,
       "delta": 30.0,
       "basis": "0,9 af 3 d (M1 0,9/1 · M2 0/1,5 · M3 0/0,5)"
+    },
+    {
+      "date": "2026-11-02",
+      "project": "Command Center (Android) — social pilot",
+      "module": "daglig måling",
+      "before": 30.0,
+      "after": 32.8,
+      "delta": 2.8,
+      "basis": "1,05 af 3,2 d (M1 0,9/1 · M2 0/1,5 · M3 0/0,5 · M4 0,15/0,2)"
     }
   ]
 }

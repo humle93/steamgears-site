@@ -1,6 +1,6 @@
 # Niche-scanneren som plugin-modul — 2026-11-02
 
-**Status: bygget og testet i PHP 8.3, 130 smoke-checks grønne, paritet med Python-versionen bekræftet på kandidatfilen — både som objekter og læst som CSV.** Modulet ligger i [`plugins/steamgears-autopilot/includes/niche.php`](../../plugins/steamgears-autopilot/includes/niche.php) og er med i plugin-zip'en fra **v7.16.0** (CSV-indgangen fra **v7.17.0**).
+**Status: bygget og testet i PHP 8.3, 150 smoke-checks grønne, paritet med Python-versionen bekræftet på kandidatfilen — både som objekter og læst som CSV.** Modulet ligger i [`plugins/steamgears-autopilot/includes/niche.php`](../../plugins/steamgears-autopilot/includes/niche.php) og er med i plugin-zip'en fra **v7.16.0** (CSV-indgangen fra **v7.17.0**).
 
 ## Hvorfor det flyttede ind i pluginnet
 
@@ -108,12 +108,12 @@ De øvrige checks i [`plugins/tests/smoke.php`](../../plugins/tests/smoke.php) d
 ## Hvad der stadig ikke er verificeret
 
 - **Intet er kørt i en rigtig WordPress.** Smoke-testen bruger stubbede WP-funktioner og en stub-`$wpdb`; `integration.sh` kører først i CI med MySQL og WP 6.4–7.1. At rækkerne lander som `draft` i den faktiske tabel er derfor stadig en CI- og ejer-verifikation, ikke noget jeg har set.
-- **Den installerede plugin er stadig v7.15.1** — v7.17.0 ligger klar som zip og i `main`, men opdateringen kræver WP-adgang.
+- **Den installerede plugin er stadig v7.15.1** — v7.18.0 ligger klar som zip og i `main`, men opdateringen kræver WP-adgang.
 - **Stilæsningen er kun testet mod en stub.** `wp_upload_dir()` er stubbet i smoke-testen, så det er ikke bevist at stien til uploads på steamgears.eu giver samme svar (fx hvis `basedir` er anderledes end forventet). Det kræver WP-adgang.
 - **Ingen rigtig URL er brugt.** Alle testdestinationer er `example.com`; køen er ikke rørt på steamgears.eu.
 
 ## Næste skridt
 
-1. Kør `update`-ability'en (eller *Update now* i dashboardet), så v7.17.0 kommer på sitet.
+1. Kør `update`-ability'en (eller *Update now* i dashboardet), så v7.18.0 kommer på sitet.
 2. Upload kandidatfilen til Media-biblioteket og kald `score-niches` med dens sti — eller med CSV-teksten — og se om planen matcher Python-rapporten på sitets egne data.
 3. Kald `queue-niches` for én kanal, godkend rækken på Queue-siden, og først derefter overveje om attribution skal have sine egne kolonner.

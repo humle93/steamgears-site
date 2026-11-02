@@ -23,7 +23,7 @@ The whole social autopilot runs inside WordPress (Command Center is retired):
 4. **Measure** – every post links via `/go/<id>/`, so clicks (and WooCommerce
    orders) are counted per channel.
 
-Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.17.0.zip` → Activate.
+Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.18.0.zip` → Activate.
 
 ## Run it from Claude
 
@@ -46,9 +46,29 @@ all admin-only, none of them deleting anything:
 | `steamgears-autopilot/check-publer` | Workspaces, accounts, channels without an account |
 | `steamgears-autopilot/score-niches` | Score niche candidates and preview the draft plan (writes nothing) |
 | `steamgears-autopilot/queue-niches` | Score the candidates and queue the green ones as drafts |
+| `steamgears-autopilot/invite-user` | Invite an email to Command Center: creates the WordPress administrator and has WordPress send its own new-user email |
+| `steamgears-autopilot/list-invites` | Invitation records: status, user id, when it was sent, why nothing happened |
 
 Example: "Write today's posts and show them to me" → `generate`, then
 `list-drafts`, then `review-draft` for the ones you like.
+
+### Invitations to Command Center (from v7.18)
+
+Command Center has no accounts of its own: a login is a WordPress user with an
+application password, and `sgap/v1` requires `manage_options`. So `invite-user`
+creates a real administrator for the address, and WordPress sends its own new-user
+email with the set-password link. The application password is **not** created or
+emailed — WordPress shows it once, to the logged-in person, under Users → Profile.
+Mailing it would leave a credential in an inbox forever.
+
+The address `cpaleadsis@gmail.com` is seeded as a pending invitation on first load,
+so `list-invites` shows it and one `invite-user` call sends it. `list-invites` also
+says whether the site offers application passwords at all; without HTTPS it does
+not, and an invitation is then recorded as `blocked` instead of creating an
+administrator who could never log in. Inviting the same address twice creates
+nothing the second time, so a retry is safe. There is deliberately **no REST route**
+for invitations: `sgap/v1` is reachable with an application password, and it must
+not be able to mint new administrators.
 
 ### Niche scoring (from v7.16)
 
