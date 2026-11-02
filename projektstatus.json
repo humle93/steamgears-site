@@ -166,10 +166,10 @@
         {
           "id": "m4",
           "name": "M4 — flyt til eget repo og CI",
-          "done": 0,
+          "done": 0.25,
           "total": 0.5,
           "unit": "d",
-          "note": "kræver GITHUB_TOKEN og et workflow i det nye repo"
+          "note": "workflow kører testene her; selve flytningen kræver GITHUB_TOKEN"
         }
       ]
     },
@@ -353,6 +353,15 @@
       "after": 80.0,
       "delta": 80.0,
       "basis": "2 af 2,5 d (M1 0,5/0,5 · M2 1/1 · M3 0,5/0,5 · M4 0/0,5)"
+    },
+    {
+      "date": "2026-11-02",
+      "project": "Niche-scanning (eget repo)",
+      "module": "daglig måling",
+      "before": 80.0,
+      "after": 90.0,
+      "delta": 10.0,
+      "basis": "2,25 af 2,5 d (M1 0,5/0,5 · M2 1/1 · M3 0,5/0,5 · M4 0,25/0,5)"
     }
   ]
 }

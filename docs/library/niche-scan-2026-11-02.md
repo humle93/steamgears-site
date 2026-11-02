@@ -1,6 +1,6 @@
 # Niche-scanning (eget repo) — 2026-11-02
 
-**Status: bygget og testet i `steamgears-site` — 80 % (2 af 2,5 d).** Scoren og de 30 tests kører; det sidste er at flytte koden til `humle93/steamgears-niche-scan`, som **ikke er oprettet**, fordi `GITHUB_TOKEN` mangler i agent-miljøet.
+**Status: bygget, testet og i CI i `steamgears-site` — 90 % (2,25 af 2,5 d).** Scoren, de 30 tests og workflowet kører; det sidste er at flytte koden til `humle93/steamgears-niche-scan`, som **ikke er oprettet**, fordi `GITHUB_TOKEN` mangler i agent-miljøet.
 
 Koden ligger midlertidigt her: [`niche_scan.py`](../../niche_scan.py), [`tests/test_niche_scan.py`](../../tests/test_niche_scan.py) og kandidatfilen [`niche-kandidater-2026-11-02.csv`](niche-kandidater-2026-11-02.csv). Den er stdlib-only (Python 3.12) og har ingen afhængigheder at flytte med.
 
@@ -26,8 +26,8 @@ Ingen API-nøgler i første version: tallene indtastes eller importeres. Det gø
 | M1 — indlæsning og validering af kandidatdata | 0,5 d | **færdig** | CSV/JSON, danske feltnavne, manglende felter fejler med række og feltnavn |
 | M2 — scoring efter niche-vurderingens grænser | 1,0 d | **færdig** | 45/25/20/10-point, normaliseret ved manglende felt, hårdt nej over 50.000 listings |
 | M3 — Markdown-rapport og test | 0,5 d | **færdig** | 30 unittest-tests, grænseværdier + rangorden + validering |
-| M4 — flyt til eget repo og CI | 0,5 d | 0 % | kræver `GITHUB_TOKEN` og et workflow i det nye repo |
-| **I alt** | **2,5 d** | **2 af 2,5 d = 80 %** | M4 blev tilføjet, da koden var bygget men repoet ikke findes |
+| M4 — flyt til eget repo og CI | 0,5 d | **50 %** | workflowet [`niche-scan.yml`](../../.github/workflows/niche-scan.yml) kører testene her; selve flytningen kræver `GITHUB_TOKEN` |
+| **I alt** | **2,5 d** | **2,25 af 2,5 d = 90 %** | M4 blev tilføjet, da koden var bygget men repoet ikke findes |
 
 ## Ikke i scope
 
@@ -44,6 +44,12 @@ python3 -m unittest discover -s tests -v                  # 30 tests
 ```
 
 Resultat på de fire søgeord fra niche-vurderingen: goggles 80,8 (grøn) · corset 61,2 (gul) · top hat 53,6 (gul) · costume 38,9 (nej, hårdt nej-reglen slår til over 50.000 listings). Det er samme konklusion som den håndskrevne vurdering, men nu med et regnestykke bag.
+
+## CI
+
+[`.github/workflows/niche-scan.yml`](../../.github/workflows/niche-scan.yml) kører ved push og pull request til `niche_scan.py`, `tests/**` eller kandidatfilerne, samt manuelt. Tre trin: unit-testene på Python 3.10 og 3.12, en scanning af kandidatfilen (fejler hvis rapporten ikke nævner `steampunk goggles` eller den hårde regel), og to identiske kørsler der skal give byte-identisk JSON. Workflowet har ingen hemmeligheder og ingen netværksadgang — kun `contents: read`.
+
+Det kan flyttes med uændret til det nye repo; eneste tilpasning er stien til kandidatfilen.
 
 ## Blokeret af
 

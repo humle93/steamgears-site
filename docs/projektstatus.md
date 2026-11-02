@@ -26,7 +26,7 @@ Status pr. **2026-11-02** · beregnet af `projektstatus.py` · kilder: [`projekt
 | **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5) |
 | **SEO-indholdsproduktion** | **0 %** | 0 af 3 guides · drift: Daglig loop kører |
 | **Command Center (Android) — social pilot** *(eget repo, tynd klient mod sgap/v1)* | **0 %** | 0 af 3 d (M1 0/1 · M2 0/1,5 · M3 0/0,5) |
-| **Niche-scanning (eget repo)** *(genberegner niche-vurderingens rubrik)* | **80 %** | 2 af 2,5 d (M1 0,5/0,5 · M2 1/1 · M3 0,5/0,5 · M4 0/0,5) |
+| **Niche-scanning (eget repo)** *(genberegner niche-vurderingens rubrik)* | **90 %** | 2,25 af 2,5 d (M1 0,5/0,5 · M2 1/1 · M3 0,5/0,5 · M4 0,25/0,5) |
 | **Døde internlinks** | **100 %** | 39 af 39 links |
 <!-- AUTO:DAGLIG:END -->
 
@@ -39,7 +39,7 @@ Status pr. **2026-11-02** · beregnet af `projektstatus.py` · kilder: [`projekt
 | Dark academia-rebrand (63 %) | Batch 4 — mockups (~130 billeder) | Printify-adgang |
 | SEO-indholdsproduktion (0 %) | Skriv guide id 292 (men's steampunk essentials) | ingen |
 | Command Center (Android) — social pilot (0 %) | M1: API-klient og application-password-auth mod sgap/v1 (snapshot, drafts, drafts/{id}/status) | GITHUB_TOKEN til at oprette repoet via sync_repos.py; ingen Android SDK i sandboxen, så APK bygges i CI |
-| Niche-scanning (eget repo) (80 %) | M1: indlæsning og validering af kandidatdata (CSV/JSON) | GITHUB_TOKEN til at oprette repoet via sync_repos.py |
+| Niche-scanning (eget repo) (90 %) | M1: indlæsning og validering af kandidatdata (CSV/JSON) | GITHUB_TOKEN til at oprette repoet via sync_repos.py |
 | Døde internlinks (100 %) | Vedligehold: tjek nye indlæg mod live-URL'er | ingen |
 <!-- AUTO:BLOKERINGER:END -->
 
@@ -52,6 +52,7 @@ Nyeste først. Append-only — rækker må ikke slettes eller ændres.
 
 | Dato | Projekt | Modul | Før → Efter | Δ | Grundlag |
 | --- | --- | --- | --- | --- | --- |
+| 2026-11-02 | Niche-scanning (eget repo) | daglig måling | 80 % → 90 % | +10 | 2,25 af 2,5 d (M1 0,5/0,5 · M2 1/1 · M3 0,5/0,5 · M4 0,25/0,5) |
 | 2026-11-02 | Niche-scanning (eget repo) | daglig måling | 0 % → 80 % | +80 | 2 af 2,5 d (M1 0,5/0,5 · M2 1/1 · M3 0,5/0,5 · M4 0/0,5) |
 | 2026-11-02 | Niche-scanning (eget repo) | baseline | — → 0 % | — | 0 af 2 d (M1 0/0,5 · M2 0/1 · M3 0/0,5) |
 | 2026-11-02 | Command Center (Android) — social pilot | baseline | — → 0 % | — | 0 af 3 d (M1 0/1 · M2 0/1,5 · M3 0/0,5) |

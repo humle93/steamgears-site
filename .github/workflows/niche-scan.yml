@@ -1,0 +1,53 @@
+name: Niche-scan CI
+
+on:
+  push:
+    paths:
+      - 'niche_scan.py'
+      - 'tests/**'
+      - 'docs/library/niche-kandidater-*.csv'
+      - '.github/workflows/niche-scan.yml'
+  pull_request:
+    paths:
+      - 'niche_scan.py'
+      - 'tests/**'
+      - 'docs/library/niche-kandidater-*.csv'
+      - '.github/workflows/niche-scan.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Tests + determinisme (Python ${{ matrix.python }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.10', '3.12']
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Unit tests
+        run: python -m unittest discover -s tests -v
+
+      - name: Kandidatfilen kan scannes
+        run: |
+          set -euo pipefail
+          python niche_scan.py --input docs/library/niche-kandidater-2026-11-02.csv --report "$RUNNER_TEMP/rapport.md"
+          grep -q 'steampunk goggles' "$RUNNER_TEMP/rapport.md"
+          grep -q 'hårdt nej' "$RUNNER_TEMP/rapport.md"
+          echo "Rapport genereret."
+
+      - name: Samme input giver samme rapport
+        run: |
+          set -euo pipefail
+          python niche_scan.py --input docs/library/niche-kandidater-2026-11-02.csv --json > "$RUNNER_TEMP/a.json"
+          python niche_scan.py --input docs/library/niche-kandidater-2026-11-02.csv --json > "$RUNNER_TEMP/b.json"
+          diff "$RUNNER_TEMP/a.json" "$RUNNER_TEMP/b.json"
+          echo "Deterministisk."
