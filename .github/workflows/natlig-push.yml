@@ -1,0 +1,82 @@
+name: Natlig auto-push
+
+# Reglen fra 2/11 2026: alt arbejde skal ende på main. Den daglige status-kørsel
+# committer kun status-filerne; denne kørsel er sikkerhedsnettet der committer
+# ALT i træet og pusher, hver nat kl. 02 dansk tid.
+#
+# GitHub cron er altid UTC, og dansk tid skifter mellem UTC+1 og UTC+2. Derfor
+# køres der på begge de to UTC-timer der kan være kl. 02 lokalt, og jobbet
+# springer over hvis den lokale time ikke er 2. Det giver præcis kl. 02 året
+# rundt uden at skulle rettes ved sommertid.
+on:
+  schedule:
+    - cron: '0 0,1 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: natlig-push
+  cancel-in-progress: false
+
+jobs:
+  push:
+    name: Commit alt og push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Kun kl. 02 dansk tid (medmindre kørslen er startet i hånden)
+        id: gate
+        run: |
+          hour="$((10#$(TZ=Europe/Copenhagen date +%H)))"
+          # GITHUB_EVENT_NAME er sat af Actions selv ("schedule" eller "workflow_dispatch").
+          # En kørsel startet i hånden springer time-tjekket over, så den kan bruges om dagen.
+          if [ "${GITHUB_EVENT_NAME}" != "schedule" ] || [ "$hour" -eq 2 ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "Lokal tid er $(TZ=Europe/Copenhagen date +%H:%M) — denne kørsel springes over."
+          fi
+
+      - name: Værn før skrivning
+        if: steps.gate.outputs.run == 'true'
+        run: |
+          python3 projektstatus.py --selftest
+          python3 projektstatus.py --check
+
+      - name: Opdatér daglig status og brief
+        if: steps.gate.outputs.run == 'true'
+        run: |
+          python3 projektstatus.py --update
+          python3 projektstatus.py --brief
+          python3 projektstatus.py --check
+
+      - name: Commit alt og push
+        if: steps.gate.outputs.run == 'true'
+        run: |
+          git config user.name "Steamgears Natlig Push"
+          git config user.email "bot@steamgears.eu"
+          git add -A
+          if git diff --staged --quiet; then
+            echo "Intet nyt i træet — der er ikke noget at pushe i nat."
+            exit 0
+          fi
+          git commit -m "$(printf 'chore: natlig auto-push %s\n\n🤖 Generated with Codebuff\nCo-Authored-By: Codebuff <noreply@codebuff.com>\n' "$(TZ=Europe/Copenhagen date +%F)")"
+          for attempt in 1 2 3; do
+            if git push; then
+              echo "Pushet til main."
+              exit 0
+            fi
+            echo "Push afvist (forsøg $attempt) — henter og prøver igen."
+            git pull --rebase --autostash
+          done
+          echo "::error title=Natlig push fejlede::Kunne ikke pushe til main efter 3 forsøg."
+          exit 1
