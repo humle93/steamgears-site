@@ -4,6 +4,7 @@
 !.env.example
 steamgears_auth.json
 mcp_key.txt
+mcp_rest.txt
 *.pem
 *.key
 

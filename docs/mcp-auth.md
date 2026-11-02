@@ -178,6 +178,26 @@ To fælder undervejs: `code_verifier` skal være den oprindelige streng, ikke ch
 > er den ene rute WAF'en lukker igennem. En sjælden `454` på `/mcp` efter mange kald i træk er rate limiting og
 > forsvinder igen af sig selv (målt: væk efter 60 s).
 
+### Alternativ: WordPress' egen MCP Adapter (målt 2/11 2026)
+
+Royal MCP er slukket, men `WordPress/mcp-adapter` er installeret og aktiv: `POST
+https://steamgears.eu/wp-json/mcp/mcp-adapter-default-server` svarer `401 rest_forbidden`, ikke `404` — ruten
+findes, den afviser bare uden credential. Den bruger **WordPress' egen REST-auth**, altså et application
+password over Basic, ikke en Bearer-nøgle:
+
+1. wp-admin → **Users → Profile → Application Passwords** → opret en (fx »codebuff-agent«) og kopiér den
+   viste adgangskode.
+2. Læg `brugernavn:app-password` på én linje i den gitignored fil `mcp_rest.txt` i roden.
+3. `python3 tools/mcp_rest.py --import mcp_rest.txt` — tester mod adapteren, gemmer `MCP_USER` og
+   `MCP_APP_PASSWORD` i `.env` (mode 600) og sletter kildefilen. Derefter `--check` og `--call <værktøj> '<json>'`.
+
+Adapteren eksponerer sine egne tre meta-værktøjer (`discover-abilities`, `get-ability-info`, `execute-ability`)
+plus de abilities der er markeret **public**; WordPress-abilities er private som udgangspunkt. Steamgears
+Autopilot registrerer sine værktøjer gennem Royal MCP, så de dukker **ikke** op her — til gengæld er
+`wp_get_plugins`-typen arbejde muligt, hvis en ability for det er registreret offentligt. Målt med forkert
+brugernavn: `401 Unknown username. Check again or try your email address.` — altså svarer WordPress selv, og
+Basic-auth er den rigtige vej ind ad denne rute.
+
 ### Alternativ: OAuth
 
 Royal MCP foretrækker OAuth2 (`authorization_code` med PKCE S256, dynamisk klientregistrering,
