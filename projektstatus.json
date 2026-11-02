@@ -6,7 +6,7 @@
       "id": "site",
       "name": "steamgears.eu — site-optimering",
       "note": "roadmap S0–S4",
-      "next": "S2.1: /start-here/ og /build/ er live og verificeret — /inspiration/, /build/corsets/, /build/jackets/ og /build/props/ mangler (404), copy ligger i hub-blueprint §5–§7",
+      "next": "S2.1: kør python3 publish_hubs.py --apply --publish når WP_USER + WP_APP_PASS findes — indsætter de 4 manglende hubsider, derefter S1.3 kladde-triage",
       "blocked_by": "5 vanity-301 (S0.4) kræver én Redirection-gruppe (ejer); hub-indsættelse kræver skrivende MCP",
       "modules": [
         {
@@ -28,10 +28,10 @@
         {
           "id": "s2",
           "name": "S2 — struktur og SEO",
-          "done": 2.4,
+          "done": 2.8,
           "total": 6,
           "unit": "d",
-          "note": "24 meta-titler/beskrivelser + hub-blueprint (0,6 d) + verifikation af de 2 live hubs: 39/39 interne links 200, copy = blueprint (0,1 d)"
+          "note": "24 meta-titler/beskrivelser + hub-blueprint (0,6 d) + verifikation af de 2 live hubs, 39/39 links 200 (0,1 d) + WP-klar copy og publiceringsscript til de 4 manglende sider, dry-run grønt (0,4 d)"
         },
         {
           "id": "s3",
@@ -216,6 +216,15 @@
       "after": 100.0,
       "delta": 0,
       "basis": "39 af 39 links"
+    },
+    {
+      "date": "2026-11-02",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 31.8,
+      "after": 33.6,
+      "delta": 1.8,
+      "basis": "7,1 af 21,1 d (S0 1,9/2,6 · S1 0,4/4,5 · S2 2,8/6 · S3 0,6/3 · S4 1,4/5)"
     }
   ]
 }

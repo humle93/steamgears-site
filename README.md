@@ -8,7 +8,8 @@ Versionstyring for **steamgears.eu**-assets. WordPress-kernen og databasen ligge
 - `docs/` — AdSense-setup, konkurrentnoter, SEO-handlingsplan 24/10 (PDF-audit gap-analyse), keyword- & konkurrent-scan, SEO-research-log, daily brief.
 - `docs/site-roadmap-2026-11-01.md` — samlet optimeringsplan for sitet (S0–S3) med plugin-roadmap'en importeret i §5.
 - `docs/library/indholdsaudit-2026-11-01.md` — status på posts, sider og produkter målt via MCP 1/11 2026.
-- `docs/library/hub-blueprint-2026-11-01.md` — **S2.1**: færdig copy, URL-kort og link-map til `/start-here/`, `/build/` og `/inspiration/` (6 sider i stedet for 13, med begrundelse), klar til indsættelse via MCP.
+- `docs/library/hub-blueprint-2026-11-01.md` — **S2.1**: færdig copy, URL-kort og link-map til `/start-here/`, `/build/` og `/inspiration/` (6 sider i stedet for 13, med begrundelse), klar til indsættelse via MCP. `/start-here/` og `/build/` er live og verificeret 2/11; de fire øvrige sider er kladde-klar copy i `publish_hubs.py`.
+- `publish_hubs.py` — WP-klare payloads (H1, SEO-titel, meta, HTML, parent) til de fire manglende hub-sider. `--dry-run` validerer længder, ordantal og at hvert link er målt 200; `--check-links` crawler dem. `--apply` opretter kladder og `--publish` publicerer via WP REST, når `WP_USER` + `WP_APP_PASS` findes i miljøet.
 - `docs/projektstatus.md` — **daglig procentstatus** på hvert aktivt projekt + log over fremgang pr. modul. Skrives af `projektstatus.py` ud fra `projektstatus.json` (procenter beregnes, indtastes ikke) og kører automatisk dagligt via `.github/workflows/projektstatus.yml`.
 - [`AGENTS.md`](AGENTS.md) — arbejdsregler: hvert arbejdspas skal melde procentsats før → efter med grundlag, og hvert aktivt projekt har en daglig %-status.
 

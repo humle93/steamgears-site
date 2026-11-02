@@ -30,6 +30,13 @@ henholdsvis «Start Here» og «Build», og H2-rækkefølgen følger §3/§4. **
 `/product-category/victorian-inventor/`, `/product-category/hoodies/`, `/product-category/t-shirts/`.
 **`/size-guide/` og `/delivery/` svarer nu 200** og er dermed ude af «verificér før brug»-listen i §1.
 
+**Copyen til de fire manglende sider er nu WP-klar** i [`publish_hubs.py`](../../publish_hubs.py) (2/11):
+HTML-brødtekst, `post_title` (= H1), `seo_title`, meta og parent er lagt ind som payloads, og scriptet
+validerer dem offline (`--dry-run`, `--check-links`) før det rører sitet. Sidemål: titler 46–51 tegn, meta
+143–156 tegn, 419–728 ord, 30 unikke interne links der alle svarer 200 (kun `/build/corsets/` venter, fordi
+scriptet selv opretter den). Med credentials er indsættelsen `--apply` (kladde) og `--publish` (børn før hub,
+som §4 kræver); uden credentials stopper scriptet før det skriver noget.
+
 De fire manglende sider er ikke lenket fra nogen af de to live hubs, så de skaber ingen 404'er i navigationen,
 men hub-strukturen er halvt bygget: `/start-here/` peger på `/build/`, og `/build/` peger tilbage på
 `/start-here/` — uden `/inspiration/` og de tre komponent-sider er der ingen vej til galleri, journal, noveller
