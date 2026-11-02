@@ -136,8 +136,8 @@
       "id": "niche",
       "name": "Niche-scanning (eget repo)",
       "note": "genberegner niche-vurderingens rubrik",
-      "next": "M1: indlæsning og validering af kandidatdata (CSV/JSON)",
-      "blocked_by": "GITHUB_TOKEN til at oprette repoet via sync_repos.py",
+      "next": "M4: flyt koden til eget repo, når GITHUB_TOKEN er sat",
+      "blocked_by": "GITHUB_TOKEN (repo) og WP_USER/WP_APP_PASS (sende broens payloads)",
       "modules": [
         {
           "id": "m1",
@@ -170,6 +170,14 @@
           "total": 0.5,
           "unit": "d",
           "note": "workflow kører testene her; selve flytningen kræver GITHUB_TOKEN"
+        },
+        {
+          "id": "m5",
+          "name": "M5 — bro til social-køen (uden WP)",
+          "done": 0.4,
+          "total": 0.4,
+          "unit": "d",
+          "note": "draft-payloads med niche+score som attribution, 32 tests; afsendelse kræver WP-adgang"
         }
       ]
     },
@@ -362,6 +370,15 @@
       "after": 90.0,
       "delta": 10.0,
       "basis": "2,25 af 2,5 d (M1 0,5/0,5 · M2 1/1 · M3 0,5/0,5 · M4 0,25/0,5)"
+    },
+    {
+      "date": "2026-11-02",
+      "project": "Niche-scanning (eget repo)",
+      "module": "daglig måling",
+      "before": 90.0,
+      "after": 91.4,
+      "delta": 1.4,
+      "basis": "2,65 af 2,9 d (M1 0,5/0,5 · M2 1/1 · M3 0,5/0,5 · M4 0,25/0,5 · M5 0,4/0,4)"
     }
   ]
 }

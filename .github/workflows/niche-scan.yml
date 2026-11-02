@@ -4,12 +4,14 @@ on:
   push:
     paths:
       - 'niche_scan.py'
+      - 'niche_bridge.py'
       - 'tests/**'
       - 'docs/library/niche-kandidater-*.csv'
       - '.github/workflows/niche-scan.yml'
   pull_request:
     paths:
       - 'niche_scan.py'
+      - 'niche_bridge.py'
       - 'tests/**'
       - 'docs/library/niche-kandidater-*.csv'
       - '.github/workflows/niche-scan.yml'

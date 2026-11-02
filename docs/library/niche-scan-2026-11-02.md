@@ -1,6 +1,6 @@
 # Niche-scanning (eget repo) — 2026-11-02
 
-**Status: bygget, testet og i CI i `steamgears-site` — 90 % (2,25 af 2,5 d).** Scoren, de 30 tests og workflowet kører; det sidste er at flytte koden til `humle93/steamgears-niche-scan`, som **ikke er oprettet**, fordi `GITHUB_TOKEN` mangler i agent-miljøet.
+**Status: bygget, testet og i CI i `steamgears-site` — 91,4 % (2,65 af 2,9 d).** Scoren, de 62 tests, workflowet og broen til social-køen kører; det sidste er at flytte koden til `humle93/steamgears-niche-scan`, som **ikke er oprettet**, fordi `GITHUB_TOKEN` mangler i agent-miljøet.
 
 Koden ligger midlertidigt her: [`niche_scan.py`](../../niche_scan.py), [`tests/test_niche_scan.py`](../../tests/test_niche_scan.py) og kandidatfilen [`niche-kandidater-2026-11-02.csv`](niche-kandidater-2026-11-02.csv). Den er stdlib-only (Python 3.12) og har ingen afhængigheder at flytte med.
 
@@ -27,7 +27,8 @@ Ingen API-nøgler i første version: tallene indtastes eller importeres. Det gø
 | M2 — scoring efter niche-vurderingens grænser | 1,0 d | **færdig** | 45/25/20/10-point, normaliseret ved manglende felt, hårdt nej over 50.000 listings |
 | M3 — Markdown-rapport og test | 0,5 d | **færdig** | 30 unittest-tests, grænseværdier + rangorden + validering |
 | M4 — flyt til eget repo og CI | 0,5 d | **50 %** | workflowet [`niche-scan.yml`](../../.github/workflows/niche-scan.yml) kører testene her; selve flytningen kræver `GITHUB_TOKEN` |
-| **I alt** | **2,5 d** | **2,25 af 2,5 d = 90 %** | M4 blev tilføjet, da koden var bygget men repoet ikke findes |
+| M5 — bro til social-køen (uden WP) | 0,4 d | **færdig** | [`niche_bridge.py`](../../niche_bridge.py) + 32 tests; se [`niche-social-bro-2026-11-02.md`](niche-social-bro-2026-11-02.md) |
+| **I alt** | **2,9 d** | **2,65 af 2,9 d = 91,4 %** | M4 blev tilføjet, da koden var bygget men repoet ikke findes; M5 da broen blev bestilt |
 
 ## Ikke i scope
 
@@ -40,7 +41,11 @@ Ingen API-nøgler i første version: tallene indtastes eller importeres. Det gø
 python3 niche_scan.py --input docs/library/niche-kandidater-2026-11-02.csv
 python3 niche_scan.py --input kandidater.csv --report   # skriver docs/library/niche-scan-rapport-<dato>.md
 python3 niche_scan.py --input kandidater.json --json --top 5
-python3 -m unittest discover -s tests -v                  # 30 tests
+python3 -m unittest discover -s tests -v                  # 62 tests
+
+# broen til social-køen (kræver en linkfil: niche,url)
+python3 niche_bridge.py --input docs/library/niche-kandidater-2026-11-02.csv \
+    --links links.csv --channels pinterest --out drafts.json --plan plan.md
 ```
 
 Resultat på de fire søgeord fra niche-vurderingen: goggles 80,8 (grøn) · corset 61,2 (gul) · top hat 53,6 (gul) · costume 38,9 (nej, hårdt nej-reglen slår til over 50.000 listings). Det er samme konklusion som den håndskrevne vurdering, men nu med et regnestykke bag.
