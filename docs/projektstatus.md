@@ -25,6 +25,7 @@ Status pr. **2026-11-02** · beregnet af `projektstatus.py` · kilder: [`projekt
 | **steamgears.eu — site-optimering** *(roadmap S0–S4)* | **35,1 %** | 7,4 af 21,1 d (S0 1,9/2,6 · S1 0,4/4,5 · S2 3,1/6 · S3 0,6/3 · S4 1,4/5) |
 | **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5) |
 | **SEO-indholdsproduktion** | **0 %** | 0 af 3 guides · drift: Daglig loop kører |
+| **Command Center (Android) — social pilot** *(eget repo, tynd klient mod sgap/v1)* | **0 %** | 0 af 3 d (M1 0/1 · M2 0/1,5 · M3 0/0,5) |
 | **Døde internlinks** | **100 %** | 39 af 39 links |
 <!-- AUTO:DAGLIG:END -->
 
@@ -36,6 +37,7 @@ Status pr. **2026-11-02** · beregnet af `projektstatus.py` · kilder: [`projekt
 | steamgears.eu — site-optimering (35,1 %) | S2: udfør P1 (6 duplikat-metaer), P2 (5 kategorimetaer), P3 (22 sider) jf. docs/library/meta-strategi-2026-11-02.md + ret de 4 titler, når WP_USER + WP_APP_PASS er sat som secrets | alt site-skriv kræver WP_USER + WP_APP_PASS eller ROYAL_MCP_TOKEN (usat); 5 vanity-301 (S0.4) kræver én Redirection-gruppe (ejer) |
 | Dark academia-rebrand (63 %) | Batch 4 — mockups (~130 billeder) | Printify-adgang |
 | SEO-indholdsproduktion (0 %) | Skriv guide id 292 (men's steampunk essentials) | ingen |
+| Command Center (Android) — social pilot (0 %) | M1: API-klient og application-password-auth mod sgap/v1 (snapshot, drafts, drafts/{id}/status) | GITHUB_TOKEN til at oprette repoet via sync_repos.py; ingen Android SDK i sandboxen, så APK bygges i CI |
 | Døde internlinks (100 %) | Vedligehold: tjek nye indlæg mod live-URL'er | ingen |
 <!-- AUTO:BLOKERINGER:END -->
 
@@ -48,6 +50,7 @@ Nyeste først. Append-only — rækker må ikke slettes eller ændres.
 
 | Dato | Projekt | Modul | Før → Efter | Δ | Grundlag |
 | --- | --- | --- | --- | --- | --- |
+| 2026-11-02 | Command Center (Android) — social pilot | baseline | — → 0 % | — | 0 af 3 d (M1 0/1 · M2 0/1,5 · M3 0/0,5) |
 | 2026-11-02 | steamgears.eu — site-optimering | daglig måling | 34,6 % → 35,1 % | +0,5 | 7,4 af 21,1 d (S0 1,9/2,6 · S1 0,4/4,5 · S2 3,1/6 · S3 0,6/3 · S4 1,4/5) |
 | 2026-11-02 | steamgears.eu — site-optimering | daglig måling | 34,1 % → 34,6 % | +0,5 | 7,3 af 21,1 d (S0 1,9/2,6 · S1 0,4/4,5 · S2 3/6 · S3 0,6/3 · S4 1,4/5) |
 | 2026-11-02 | steamgears.eu — site-optimering | daglig måling | 33,6 % → 34,1 % | +0,5 | 7,2 af 21,1 d (S0 1,9/2,6 · S1 0,4/4,5 · S2 2,9/6 · S3 0,6/3 · S4 1,4/5) |

@@ -100,6 +100,39 @@
       ]
     },
     {
+      "id": "cc",
+      "name": "Command Center (Android) — social pilot",
+      "note": "eget repo, tynd klient mod sgap/v1",
+      "next": "M1: API-klient og application-password-auth mod sgap/v1 (snapshot, drafts, drafts/{id}/status)",
+      "blocked_by": "GITHUB_TOKEN til at oprette repoet via sync_repos.py; ingen Android SDK i sandboxen, så APK bygges i CI",
+      "modules": [
+        {
+          "id": "m1",
+          "name": "M1 — API-klient og auth",
+          "done": 0,
+          "total": 1,
+          "unit": "d",
+          "note": "6 endpoints, application password, fejlhåndtering"
+        },
+        {
+          "id": "m2",
+          "name": "M2 — skærme: status, kladder, kø",
+          "done": 0,
+          "total": 1.5,
+          "unit": "d",
+          "note": "3 skærme + 3 POST-handlinger"
+        },
+        {
+          "id": "m3",
+          "name": "M3 — CI-build af APK",
+          "done": 0,
+          "total": 0.5,
+          "unit": "d",
+          "note": "Gradle + GitHub Actions"
+        }
+      ]
+    },
+    {
       "id": "links",
       "name": "Døde internlinks",
       "verified": true,
@@ -252,6 +285,15 @@
       "after": 35.1,
       "delta": 0.5,
       "basis": "7,4 af 21,1 d (S0 1,9/2,6 · S1 0,4/4,5 · S2 3,1/6 · S3 0,6/3 · S4 1,4/5)"
+    },
+    {
+      "date": "2026-11-02",
+      "project": "Command Center (Android) — social pilot",
+      "module": "baseline",
+      "before": null,
+      "after": 0.0,
+      "delta": null,
+      "basis": "0 af 3 d (M1 0/1 · M2 0/1,5 · M3 0/0,5)"
     }
   ]
 }

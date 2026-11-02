@@ -7,6 +7,11 @@
       "name": "steamgears-site",
       "private": true,
       "description": "Dokumentation og assets for steamgears.eu (roadmap, audits, projektstatus)."
+    },
+    {
+      "name": "steamgears-command-center",
+      "private": true,
+      "description": "Android Command Center: social pilot til steamgears.eu, bygget på steamgears-autopilot sgap/v1."
     }
   ]
 }
