@@ -73,10 +73,59 @@ def audit_one(url):
             "problems": problems}
 
 
+def kind(url):
+    """URL-type — bruges til at afgøre, om et fund er en side, en template eller en dublet."""
+    path = url.replace(WP_SITE, "")
+    if "/product/" in path:
+        return "produkt"
+    if "/product-category/" in path:
+        return "produktkategori"
+    if path.startswith("/category/"):
+        return "indlaegskategori"
+    if "/author/" in path:
+        return "forfatter"
+    if re.match(r"^/[^/]+/$", path):
+        return "side/indlaeg"
+    return "andet"
+
+
+def print_by_type(rows):
+    print("\nTYPE               n  titel>62  titel<30  meta<140  meta>158  ingen meta  median-meta")
+    groups = {}
+    for row in rows:
+        groups.setdefault(row["kind"], []).append(row)
+    for name, group in sorted(groups.items(), key=lambda kv: -len(kv[1])):
+        metas = sorted(len(r["meta"]) for r in group if r["meta"])
+        median = metas[len(metas) // 2] if metas else 0
+        print(f"{name:17} {len(group):3} {sum(1 for r in group if len(r['title']) > TITLE_MAX):9} "
+              f"{sum(1 for r in group if r['title'] and len(r['title']) < TITLE_MIN):9} "
+              f"{sum(1 for r in group if r['meta'] and len(r['meta']) < META_MIN):9} "
+              f"{sum(1 for r in group if len(r['meta']) > META_MAX):9} "
+              f"{sum(1 for r in group if not r['meta']):11} {median:11}")
+
+
+def print_dupes(rows):
+    """Gentagen meta-tekst på tværs af sider er værre end en anelse forkert længde."""
+    counts = {}
+    for row in rows:
+        if row["meta"]:
+            counts.setdefault(row["meta"], []).append(row["url"])
+    shared = sorted((urls for urls in counts.values() if len(urls) > 1),
+                    key=len, reverse=True)
+    print(f"\nMeta-tekster brugt på flere sider: {len(shared)}")
+    for urls in shared:
+        text = next(t for t, u in counts.items() if u is urls)
+        print(f"  {len(urls)}x ({len(text)} tegn) {text[:110]}")
+        for url in urls:
+            print(f"     {url}")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--no-report", action="store_true", help="skriv ikke markdown")
+    parser.add_argument("--by-type", action="store_true", help="fordel fundene på URL-type")
+    parser.add_argument("--dupes", action="store_true", help="vis meta-tekster der går igen")
     args = parser.parse_args()
 
     urls = sitemap_urls()
@@ -86,6 +135,8 @@ def main():
         rows = list(pool.map(audit_one, urls))
     print(f"crawlet på {time.time() - started:.0f}s\n")
 
+    for row in rows:
+        row["kind"] = kind(row["url"])
     broken = [r for r in rows if r["problems"]]
     print(f"{len(broken)} af {len(rows)} URLs har et problem\n")
     for row in sorted(broken, key=lambda r: (r["problems"][0], r["url"])):
@@ -107,6 +158,11 @@ def main():
     print(f"\nTitler over {TITLE_MAX} tegn: {len(long_titles)}")
     for row in sorted(long_titles, key=lambda r: -len(r["title"])):
         print(f"  {len(row['title'])} tegn  {row['url']}")
+
+    if args.by_type:
+        print_by_type(rows)
+    if args.dupes:
+        print_dupes(rows)
 
     if not args.no_report:
         write_report(rows, broken, long_titles)
