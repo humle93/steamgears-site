@@ -142,26 +142,34 @@
         {
           "id": "m1",
           "name": "M1 — indlæsning og validering",
-          "done": 0,
+          "done": 0.5,
           "total": 0.5,
           "unit": "d",
-          "note": "CSV/JSON, manglende felter fejler højt"
+          "note": "CSV/JSON, danske feltnavne, fejl navngiver række og felt"
         },
         {
           "id": "m2",
           "name": "M2 — scoring efter niche-vurderingens grænser",
-          "done": 0,
+          "done": 1,
           "total": 1,
           "unit": "d",
-          "note": "listings-grænser + sæsonfradrag + konkurrentflag"
+          "note": "listings-grænser + sæsonfradrag + konkurrenttype, normaliseret ved manglende felt"
         },
         {
           "id": "m3",
-          "name": "M3 — Markdown-rapport og CI-test",
+          "name": "M3 — Markdown-rapport og test",
+          "done": 0.5,
+          "total": 0.5,
+          "unit": "d",
+          "note": "30 unittest-tests: grænseværdier, rangorden, validering"
+        },
+        {
+          "id": "m4",
+          "name": "M4 — flyt til eget repo og CI",
           "done": 0,
           "total": 0.5,
           "unit": "d",
-          "note": "fixture med kendte nicher"
+          "note": "kræver GITHUB_TOKEN og et workflow i det nye repo"
         }
       ]
     },
@@ -336,6 +344,15 @@
       "after": 0.0,
       "delta": null,
       "basis": "0 af 2 d (M1 0/0,5 · M2 0/1 · M3 0/0,5)"
+    },
+    {
+      "date": "2026-11-02",
+      "project": "Niche-scanning (eget repo)",
+      "module": "daglig måling",
+      "before": 0.0,
+      "after": 80.0,
+      "delta": 80.0,
+      "basis": "2 af 2,5 d (M1 0,5/0,5 · M2 1/1 · M3 0,5/0,5 · M4 0/0,5)"
     }
   ]
 }

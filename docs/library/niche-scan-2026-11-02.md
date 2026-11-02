@@ -1,6 +1,8 @@
 # Niche-scanning (eget repo) — 2026-11-02
 
-**Status: planlagt, 0 % bygget.** Registreret i [`projektstatus.json`](../../projektstatus.json) og `repos.json`. Repoet `humle93/steamgears-niche-scan` er **ikke oprettet** — `GITHUB_TOKEN` mangler.
+**Status: bygget og testet i `steamgears-site` — 80 % (2 af 2,5 d).** Scoren og de 30 tests kører; det sidste er at flytte koden til `humle93/steamgears-niche-scan`, som **ikke er oprettet**, fordi `GITHUB_TOKEN` mangler i agent-miljøet.
+
+Koden ligger midlertidigt her: [`niche_scan.py`](../../niche_scan.py), [`tests/test_niche_scan.py`](../../tests/test_niche_scan.py) og kandidatfilen [`niche-kandidater-2026-11-02.csv`](niche-kandidater-2026-11-02.csv). Den er stdlib-only (Python 3.12) og har ingen afhængigheder at flytte med.
 
 ## Hvorfor
 
@@ -19,17 +21,29 @@ Ingen API-nøgler i første version: tallene indtastes eller importeres. Det gø
 
 ## Moduler og estimat
 
-| Modul | Estimat | Grundlag |
-| --- | --- | --- |
-| M1 — indlæsning og validering af kandidatdata | 0,5 d | CSV/JSON, manglende felter skal fejle højt |
-| M2 — scoring efter niche-vurderingens grænser | 1,0 d | 3 regler + sæsonfradrag + konkurrentflag |
-| M3 — Markdown-rapport og CI-test | 0,5 d | fixture med kendte nicher, forventet rækkefølge |
-| **I alt** | **2,0 d** | Rubrikken findes; arbejdet er at gøre den kørbar |
+| Modul | Estimat | Status | Grundlag |
+| --- | --- | --- | --- |
+| M1 — indlæsning og validering af kandidatdata | 0,5 d | **færdig** | CSV/JSON, danske feltnavne, manglende felter fejler med række og feltnavn |
+| M2 — scoring efter niche-vurderingens grænser | 1,0 d | **færdig** | 45/25/20/10-point, normaliseret ved manglende felt, hårdt nej over 50.000 listings |
+| M3 — Markdown-rapport og test | 0,5 d | **færdig** | 30 unittest-tests, grænseværdier + rangorden + validering |
+| M4 — flyt til eget repo og CI | 0,5 d | 0 % | kræver `GITHUB_TOKEN` og et workflow i det nye repo |
+| **I alt** | **2,5 d** | **2 af 2,5 d = 80 %** | M4 blev tilføjet, da koden var bygget men repoet ikke findes |
 
 ## Ikke i scope
 
 - Automatisk research af nye nicher (kræver datakilde og nøgle).
 - Pivot-anbefalinger. Værktøjet rangerer nicher; beslutningen om at skifte bliver hos ejeren.
+
+## Sådan køres den nu
+
+```
+python3 niche_scan.py --input docs/library/niche-kandidater-2026-11-02.csv
+python3 niche_scan.py --input kandidater.csv --report   # skriver docs/library/niche-scan-rapport-<dato>.md
+python3 niche_scan.py --input kandidater.json --json --top 5
+python3 -m unittest discover -s tests -v                  # 30 tests
+```
+
+Resultat på de fire søgeord fra niche-vurderingen: goggles 80,8 (grøn) · corset 61,2 (gul) · top hat 53,6 (gul) · costume 38,9 (nej, hårdt nej-reglen slår til over 50.000 listings). Det er samme konklusion som den håndskrevne vurdering, men nu med et regnestykke bag.
 
 ## Blokeret af
 
@@ -38,5 +52,5 @@ Ingen API-nøgler i første version: tallene indtastes eller importeres. Det gø
 ## Næste skridt
 
 1. Sæt `GITHUB_TOKEN`, kør `python3 sync_repos.py --apply`.
-2. M1 + M3 sammen, så scoringen har en test fra dag ét.
-3. M2, med niche-vurderingens fire søgeord som første fixture.
+2. M4: flyt `niche_scan.py`, `tests/` og kandidatfilen, og lad et workflow køre testene på hvert push.
+3. Udvid datagrundlaget — sæsonsving mangler for tre af fire kandidater, og det er den ene vægt der reelt kan flytte rækkefølgen.
