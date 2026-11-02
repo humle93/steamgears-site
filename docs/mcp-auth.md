@@ -9,10 +9,14 @@ uden credential.
 | `publer` | `https://mcp.publer.com/` | `Bearer ${PUBLER_API_KEY}` | Publer MCP API key (Business/Enterprise) |
 | `steamgears-profil` | `tools/mcp_project_profile.py` (stdio) | ingen | ingen — læser kun repoet |
 
-**Status 2/11 2026:** `steamgears`-nøglen ligger i `.env` som `ROYAL_MCP_TOKEN` og virker — `python3
-wp_mcp_stdio.py --check` gav `ok: true`, server 1.5.13 og **270 værktøjer**. `PUBLER_API_KEY` er stadig
-usat, så `publer` står som *Pending approval*. `steamgears-profil` virker uden credential; den er verificeret
-med et rigtigt `initialize` + `tools/list`-håndtryk.
+**Status 2/11 2026:** `steamgears`-nøglen ligger i `.env` som `ROYAL_MCP_TOKEN`. Den virkede om formiddagen —
+`python3 wp_mcp_stdio.py --check` gav `ok: true`, server 1.5.13 og **270 værktøjer** — men **sent 2/11 blev den
+afvist**: `401 {"code":-32600,"message":"Invalid or expired access token."}` på hvert kald, også med
+browser-UA og på en frisk session. Nøglen skal altså roteres (wp-admin → Royal MCP → Settings → ny API-nøgle
+→ ind i `.env` som `ROYAL_MCP_TOKEN`), før nogen MCP-verifikation kan køre. At sitet svarer `454` på
+forskiden til curl med browser-UA er bot-reglen fra Simply og har intet med nøglen at gøre — `/mcp` svarer
+korrekt `401` med JSON-RPC-fejlen. `PUBLER_API_KEY` er stadig usat, så `publer` står som *Pending approval*.
+`steamgears-profil` virker uden credential; den er verificeret med et rigtigt `initialize` + `tools/list`-håndtryk.
 
 > **Navnet er `ROYAL_MCP_TOKEN`.** Broen (`wp_mcp_stdio.py`) og `.mcp.json` bruger begge dette navn, og
 > broen læser desuden det ældre `ROYAL_MCP_API_KEY`, hvis nogen foretrækker det. Før 2/11 2026 ledte broen
