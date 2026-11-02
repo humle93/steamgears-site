@@ -126,6 +126,8 @@ kan samme forbindelse bruges gennem stdio-broen: `printf '%s\n' '{"jsonrpc":"2.0
 | `406 Not Acceptable` | `Accept: application/json, text/event-stream` mangler | send begge typer (broen gør det selv) |
 | 401 på alle kald trods frisk nøgle | nøglen er slået fra i 1.5.14+, eller brugeren er ikke administrator | tjek Settings og brugerens rolle |
 | `initialize` svarer 200, men ingen værktøjer | session-id mangler på efterfølgende kald | send `Mcp-Session-Id` med |
+| nøglen er opdateret, men svaret er stadig 401 | `.env` i **denne** worktree er ikke ændret | tjek filens mtime — en cloud-worktree har sin egen gitignored `.env`-kopi, så en rettelse på ejerens maskine rammer ikke VM'en |
+| ny nøgle virker ikke, gammel ligger stadig i filen | broen bruger den **første** match i `.env` | erstat linjen, eller slet den gamle — læg ikke den nye under den gamle |
 
 ### OAuth uden browser på maskinen (verificeret 2/11 2026)
 
