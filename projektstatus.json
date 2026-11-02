@@ -12,10 +12,11 @@
         {
           "id": "s0",
           "name": "S0 — brudt/akut",
-          "done": 2.4,
+          "done": 1.9,
           "total": 2.6,
           "unit": "d",
-          "note": "S0.1, S0.3, S0.8 + meta-/link-/alt-runde 1/11"
+          "scope_change": true,
+          "note": "S0.7 trukket tilbage 2/11: sitemap-URL'er svarer 200 til browsere, men 455 til Googlebot og bingbot (Simply.com bot-regel), så S0.7 er ikke verificeret for søgemaskiner. Skal genmåles efter hosten har hvidlistet bots. S0.1, S0.3, S0.8 + meta-/link-/alt-runde 1/11"
         },
         {
           "id": "s1",
@@ -310,6 +311,16 @@
       "after": 50.7,
       "delta": 5.7,
       "basis": "10,7 af 21,1 d (S0 2,4/2,6 · S1 1,7/4,5 · S2 3,95/6 · S3 1,25/3 · S4 1,4/5)"
+    },
+    {
+      "date": "2026-11-02",
+      "project": "steamgears.eu — site-optimering",
+      "module": "S0.7 trukket tilbage",
+      "before": 50.7,
+      "after": 48.3,
+      "delta": -2.4,
+      "scope_change": true,
+      "basis": "S0.7 (sitemap 121/121 = 200) er ikke verificeret for søgemaskiner: Simply.com svarer 455 til Googlebot og bingbot. Genmåles efter hvidliste. S0 2,4/2,6 → 1,9/2,6."
     }
   ]
 }

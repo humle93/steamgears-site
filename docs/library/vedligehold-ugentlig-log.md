@@ -17,3 +17,12 @@
   - page 713 (Steampunk Halloween): nyt guide-kort "Pirate Cosplay for Beginners" i DIY Workshop-grid'et
 - Verificeret live på alle 3 URLs (grep på rendered HTML = 2 hits hver, link + oembed/Kessok? begge tæller som link fundet).
 - Ingen kritiske indstillinger/URLs rørt → ingen Henning-godkendelse nødvendig pr. v2.1.
+
+## 2026-11-02 — autonomt pas (navigation, footer, meta, bot-adgang)
+
+- **Header:** `Start Here` og `Build` tilføjet til site-wide navigation (template part 12). Verificeret på `/`, `/shop/`, `/faq/`, `/journal/`.
+- **Footer:** `/right-of-withdrawal/` og `/opt-out-preferences/` tilføjet i Legal-kolonnen (part 52). Verificeret på `/` (begge links findes), W3TC purget.
+- **Meta:** 15 indekserbare sider og indlæg fik titel, description og fokusnøgleord; 0 huller tilbage. Se [navigation-og-meta-2026-11-02.md](navigation-og-meta-2026-11-02.md).
+- **Sitemap:** 121/121 URL'er svarer 200 (S0.7).
+- **Interne links (S2.6-kontrol):** de tre guides `/steampunk-cosplay-for-beginners/`, `/how-to-make-a-steampunk-costume/` og `/steampunk-cosplay-gallery/` linker alle til `/start-here/`, `/build/` og `/shop/`.
+- **Bot-adgang (ny finding, S0.6):** hosten Simply.com svarer **455 «Security Incident Detected»** på Googlebot- og bingbot-user-agents for alle sider, inkl. `/robots.txt` og `/sitemap_index.xml`. Browser-UA'er får 200. Det er hostens bot-regel, ikke SeedProd Coming Soon (plugin 6.20.10, som er aktivt). Det kan ikke rettes via MCP eller repoet. Se roadmap S0.6.
