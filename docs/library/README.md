@@ -64,6 +64,7 @@ sidste commit-dato. Målt 2/11 2026.
 | [keyword-morgenscan-26-10.md](keyword-morgenscan-26-10.md) | Keyword-morgenscan | 2026-10-27 |
 | ↳ [keyword-morgenscan-26-10-guide.html](keyword-morgenscan-26-10-guide.html) | Ledsagedokument til morgenscannen (HTML) | 2026-10-27 |
 | ↳ [keyword-morgenscan-26-10-paste.txt](keyword-morgenscan-26-10-paste.txt) | Ledsagedokument til morgenscannen (paste-klar tekst) | 2026-10-27 |
+| [niche-scan-procedure-2026-11-02.md](niche-scan-procedure-2026-11-02.md) | Procedure for niche-scanning: 7 trin, tærskler, fem fælder og hvad kilderne ikke måler | 2026-11-02 |
 | [trend-scan-26-10.md](trend-scan-26-10.md) | Trend-scan: Steamgears + Warpstorm | 2026-10-27 |
 | [chat-prioriteter-2026-10-26.md](chat-prioriteter-2026-10-26.md) | Chats efter prioritet | 2026-10-27 |
 | [deep-dive-my-steampunk-style-24-10.md](deep-dive-my-steampunk-style-24-10.md) | Deep-dive: my-steampunk-style.com | 2026-10-25 |
