@@ -41,6 +41,7 @@ sidste commit-dato. Målt 2/11 2026.
 
 | Dokument | Indhold | Dato |
 | --- | --- | --- |
+| [sikkerhed-noegler-historik-2026-11-02.md](sikkerhed-noegler-historik-2026-11-02.md) | Lækkede nøgler i git-historikken: rotations-tjekliste og plan for historik-rensning | 2026-11-02 |
 | [sikkerhed-ai-engine-2026-11-01.md](sikkerhed-ai-engine-2026-11-01.md) | AI Engine CVE-2026-110732 (lukket 1/11) | 2026-11-01 |
 | [sikkerhed-plugin-versioner-2026-11-01.md](sikkerhed-plugin-versioner-2026-11-01.md) | Plugin-versioner — 48 plugins, 16 bagud | 2026-11-01 |
 
