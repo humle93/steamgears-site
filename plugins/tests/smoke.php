@@ -382,6 +382,17 @@ $qstatus=SGAP_Abilities::status();
 check('quality: status says how the gate is set', ($qstatus['quality_gate']['mode']??'')==='block' && ($qstatus['quality_gate']['banned_words']??0)===3);
 $dry=SGAP_Abilities::check_post(['channel'=>'facebook','title'=>'Deal','text'=>'Buy our scam gears','destination_url'=>'https://steamgears.eu/gear/']);
 check('quality: the dry run covers both gates', isset($dry['quality']['problems']) && $dry['ok']===false && count($dry['quality']['problems'])>=1);
+// ---- queue-post: a campaign post keeps its angle, format and campaign name ----
+do_action('wp_abilities_api_init');
+$qp=$GLOBALS['abilities']['steamgears-autopilot/queue-post']??null;
+check('queue-post: angle, content_type and format are in the schema', is_array($qp) && isset($qp['input_schema']['properties']['angle'], $qp['input_schema']['properties']['content_type'], $qp['input_schema']['properties']['format'], $qp['input_schema']['properties']['campaign']));
+$wpdb->next=null; $wpdb->log=[];
+$camp=SGAP_Abilities::queue_post(['channel'=>'pinterest','title'=>'Campaign pin','text'=>'A brass moth with real escapements, printed to order for the wall.','destination_url'=>'https://steamgears.eu/gear/','image_url'=>'https://steamgears.eu/a.jpg','angle'=>'angle_c','content_type'=>'product','format'=>'pin','campaign'=>'Clockwork Punk 2026_11']);
+$logged=implode("\n",$wpdb->log);
+check('queue-post: the angle and format survive the ability', is_array($camp) && str_contains($logged,'"angle":"angle_c"') && str_contains($logged,'"format":"pin"') && str_contains($logged,'"content_type":"product"'));
+check('queue-post: the campaign reaches the tracked link', is_array($camp) && str_contains($logged,'utm_campaign=clockworkpunk2026_11'));
+$defaults=SGAP_Abilities::queue_post(['channel'=>'facebook','title'=>'Plain post','text'=>'A plain caption that is long enough to queue without a warning.','destination_url'=>'https://steamgears.eu/gear/']);
+check('queue-post: defaults stay custom/post and angle_a', is_array($defaults) && str_contains(implode("\n",$wpdb->log),'"angle":"angle_a"') && str_contains(implode("\n",$wpdb->log),'"format":"post"'));
 // ---- meta-audit: ability, summary, fixtures and the read-only promise ----
 do_action('wp_abilities_api_init');
 $ma=$GLOBALS['abilities']['steamgears-autopilot/meta-audit']??null;

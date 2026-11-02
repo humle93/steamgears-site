@@ -90,6 +90,9 @@ class SGAP_Abilities {
                     'destination_url' => ['type' => 'string', 'format' => 'uri'],
                     'image_url' => ['type' => 'string', 'format' => 'uri'],
                     'scheduled_at' => ['type' => 'string', 'description' => 'Optional date/time in site time, e.g. 2026-11-02 18:00'],
+                    'angle' => ['type' => 'string', 'maxLength' => 20, 'description' => 'Optional angle used by the learning table, e.g. angle_a. Empty = angle_a.'],
+                    'content_type' => ['type' => 'string', 'maxLength' => 40, 'description' => 'Optional content type, e.g. product or custom. Empty = custom.'],
+                    'format' => ['type' => 'string', 'maxLength' => 40, 'description' => 'Optional format, e.g. pin or post. Empty = post.'],
                     'campaign' => ['type' => 'string', 'description' => 'Optional utm_campaign for this post, e.g. clockwork_punk_2026_11. Empty = the campaign name in Settings → General.'],
                     'force' => ['type' => 'boolean', 'description' => 'Queue even when the quality gate blocks the post (a banned word, a dead link, a repeated caption). The problems come back as warnings.']
                 ], ['channel', 'title', 'text', 'destination_url'], [__CLASS__, 'queue_post'], false, false
@@ -290,8 +293,9 @@ class SGAP_Abilities {
             'body' => $input['text'] ?? '',
             'destination_url' => $input['destination_url'] ?? '',
             'image_url' => $input['image_url'] ?? '',
-            'content_type' => 'custom',
-            'format' => 'post',
+            'angle' => $input['angle'] ?? '',
+            'content_type' => $input['content_type'] ?? 'custom',
+            'format' => $input['format'] ?? 'post',
             'campaign' => $input['campaign'] ?? '',
             'scheduled_at' => $scheduled,
             'force' => !empty($input['force'])

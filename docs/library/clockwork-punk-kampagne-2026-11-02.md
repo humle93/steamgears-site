@@ -82,9 +82,14 @@ python3 tools/load_campaign.py docs/library/clockwork-punk-koe-2026-11-02.json -
 python3 tools/load_campaign.py --selftest      # 13 fixtures
 ```
 
-`--post` rammer `POST /wp-json/sgap/v1/queue`, som er den eneste vej ind i køen, og som selv kører
-`SGAP_Quality` og fingerprint-tjekket. Et 409 betyder at posten allerede ligger der — indlæseren springer den
-over i stedet for at fejle, så kommandoen kan køres igen uden at lave dubletter.
+`--post` går gennem MCP-abilliteten `steamgears-autopilot/queue-post`, fordi OAuth-tokenet fra AI Engine gælder
+MCP-fladen og ikke pluginets eget namespace: `POST /wp-json/sgap/v1/queue` svarer **401** (`Sorry, you are not
+allowed to do that`) med samme token. Abilliteten kalder den samme `SGAP_Queue::add()`, så quality-gaten og
+fingerprint-tjekket kører uændret. Ligger posten allerede der, svarer den "Already queued" og indlæseren
+springer den over i stedet for at fejle, så kommandoen kan køres igen uden at lave dubletter.
+
+Abilliteten tager først `angle`, `content_type` og `format` fra **7.25.0**; indtil den version er installeret på
+sitet, kan en håndskrevet post kun lande som `angle_a`/`post`, og så mister serien sin vinkeltest.
 
 ## 5. Måling
 
@@ -112,7 +117,9 @@ posterne ikke kan lægges i køen. Indtil da er kampagnens eneste sandhed plugin
 
 | Blokering | Konsekvens | Ejers handling |
 | --- | --- | --- |
-| Intet site-credential | `--post` kan ikke køre; intet ligger i køen endnu | ét klik på OAuth-linket fra `python3 tools/mcp_oauth.py --start` og koden indsat i terminalen |
+| ~~Intet site-credential~~ | **lukket 2/11** — OAuth-token gemt, MCP svarer med 206 værktøjer | — |
+| AI Engine *Drafts Only* | Alle skrive-abilliteter afvises (*"This site lets assistants work on drafts only"*), også `queue-post` og `update`; kun læsning virker. **Målt igen 2/11 efter ejeren meldte den slået fra: stadig `mcp_drafts_only: true` i databasen** (`wp_get_option` med `raw: true`) | gem switchen i *AI Engine → Settings → MCP* (den blev ikke gemt), eller kør posten i hånden i wp-admin |
+| Plugin 7.22.0 på sitet | `queue-post` mangler `angle`/`format`/`campaign`, så posterne ville lande som `angle_a`/`post` | *Plugins → Update* til 7.25.0 (én version, zip'en ligger på `main`) |
 | Ingen `PUBLER_API_KEY` | køen kan fyldes, men intet **udgives** automatisk | nøgle i WP-admin → Autopilot → Settings, eller RSS-tilstand |
 | Ét Pinterest-board pr. publicering | 5 pins peger på `steampunk-posters-prints`, 1 på `steampunk-complete-looks` | boardet sættes i indstillingerne; den ene pin flyttes manuelt bagefter |
 | Mockups 0 af 5 timer | hvert produkt har 1–2 billeder, så pins er produktbilleder, ikke 2:3-mockups | mockup-briefen, når den køres |
@@ -123,6 +130,7 @@ posterne ikke kan lægges i køen. Indtil da er kampagnens eneste sandhed plugin
 | --- | --- |
 | Koncept og vinkler | færdig |
 | Produktvalg mod live-katalog | færdig (12/12 verificeret) |
+| Forhåndsvalidering mod live-gaten | færdig 2/11: `check-post` på alle 12 → 12 rene, 0 advarsler, 0 blokerede |
 | Kalender og regler | færdig |
 | 12 captions (EN) | færdig, højeste overlap 0,23 |
 | Kø-payload | færdig |

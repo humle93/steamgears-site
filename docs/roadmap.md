@@ -65,14 +65,27 @@ from the site itself (`wp_get_plugins`), never inferred from this repo, so it ca
 
 | What | In this repo | Live on steamgears.eu | Gap |
 | --- | --- | --- | --- |
-| Steamgears Autopilot | **7.24.0** (`plugins/steamgears-autopilot-v7.24.0.zip`, byte-identical to source) | **7.22.0**, active (measured 2/11 2026) | **One version** — 7.24.0 waits for the owner's *Plugins → Update* click; nothing else is missing |
+| Steamgears Autopilot | **7.25.0** (`plugins/steamgears-autopilot-v7.25.0.zip`, byte-identical to source) | **7.22.0**, active (measured 2/11 2026) | **One version** — 7.25.0 waits for the update; the plugin's own `steamgears-autopilot/update` ability can run it from MCP; nothing else is missing |
 | MCP server | AI Engine 3.9.0 (site-side, not in this repo) | `/wp-json/mcp/v1/http`, OAuth approved 2/11 2026, 206 tools | **Read access only** — AI Engine's *Drafts Only* is on, so `queue-post` is refused |
 
 **Measured 2/11 2026, after the owner approved the OAuth client:** `wp_list_plugins` returns
 `{"Name": "Steamgears Autopilot", "Version": "7.22.0"}` and `steamgears-autopilot/status` reports
 `version: 7.22.0` with `latest_on_github: 7.22.0`. The release that sat blocked on one click is therefore on the
-site, and step 1 below passes. **7.24.0** (the campaign name as a setting and a per-post field) is built,
-tested and zipped but not clicked yet — until it is, the site keeps emitting the old hardcoded campaign value.
+site, and step 1 below passes. **7.25.0** is built, tested and zipped but not installed yet; it carries 7.24.0's
+campaign name (the setting plus a per-post field) and 7.25.0's `angle`/`content_type`/`format` on `queue-post`.
+Until it is installed the site keeps emitting the old hardcoded campaign value, and a hand-written post can only
+enter the queue as `angle_a`/`post`.
+
+**Measured 2/11 2026 with the new OAuth token:** `status` reports `version: 7.22.0`, `latest_on_github: 7.22.0`
+and a queue of **35 queued / 10 published**, `publish_mode: rss`, Publer configured. `POST
+/wp-json/sgap/v1/queue` with the same Bearer token answers **401** (`Sorry, you are not allowed to do that`):
+the token authenticates AI Engine's MCP surface, not the plugin's own REST namespace. The plugin's 31 abilities
+are exposed over MCP, but **AI Engine's *Drafts Only* mode refuses every write ability**: both
+`steamgears-autopilot_update` and a deliberately invalid `queue-post` answer *"This site lets assistants work on
+drafts only, so this was not done"*. Read-only abilities (`status`, `check-post`, `list-queue`, `list-plugins`)
+answer normally. So the write path that `tools/load_campaign.py --post` now uses is correct but cannot be used
+until the owner switches *Drafts Only* off — and the plugin cannot be updated from here either, for the same
+reason, so 7.25.0 still needs the owner's *Plugins → Update* click.
 
 **The quality gate is live but could only be half-proven here.** `status` reports `quality_gate: {mode: block,
 banned_words: 0}`, and `check-post` refuses a post that links to a placeholder (`placeholder_link`, severity
@@ -81,7 +94,12 @@ reaches the gate, because AI Engine answers *"This site lets assistants work on 
 done"*. Two owner-side settings therefore stand between the gate and its real test:
 
 - **AI Engine → MCP → Drafts Only** is on. With it on, the agent can read the site and nothing else, so
-  `queue-post`, `generate` and `publish` are refused by AI Engine before the plugin sees them.
+  `queue-post`, `generate` and `publish` are refused by AI Engine before the plugin sees them. **Re-measured
+  2/11 2026 after the owner reported switching it off:** still refused, and `wp_get_option
+  {"key":"mwai_options","raw":true}` shows `mcp_drafts_only: true` in the database itself (object cache
+  bypassed), with `mcp_role: admin`, `mcp_approvals: off` and `mcp_dynamic_rest: true`. So the token is strong
+  enough and nothing else is in the way — the switch simply is not saved yet. Recipe in
+  [`mcp-auth.md`](mcp-auth.md#sådan-tjekkes-spærren-uden-at-skrive).
 - **Settings → General → Banned words is empty** (`banned_words: 0`), so the headline check of 7.22 cannot fire
   on anything until the owner adds at least one word. The other three checks (dead links, missing alt text,
   duplicate captions) work without it.

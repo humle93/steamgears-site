@@ -39,7 +39,7 @@ all admin-only, none of them deleting anything:
 | `steamgears-autopilot/list-drafts` | AI drafts (default: waiting for approval) with the page they promote |
 | `steamgears-autopilot/review-draft` | `queue` (approve + queue), `approve` or `reject` one draft |
 | `steamgears-autopilot/list-queue` | Queue items with status, attempts, errors, tracking links |
-| `steamgears-autopilot/queue-post` | Queue a post Claude (or you) wrote |
+| `steamgears-autopilot/queue-post` | Queue a post Claude (or you) wrote. Takes `angle`, `content_type`, `format` and `campaign`, so a hand-written campaign post lands in the queue with the same dimensions the AI posts get (7.25) |
 | `steamgears-autopilot/generate` | Run the AI writer now |
 | `steamgears-autopilot/publish` | Run the Publer publisher now |
 | `steamgears-autopilot/set-mode` | Autopilot / Full Auto on or off |
@@ -180,7 +180,8 @@ not be separated from the everyday stream in GA4. Now the name has two levels:
   Set it once at the start of a campaign and change it back afterwards — the old posts keep the name they were
   queued with, because the value is baked into each link when the post joins the queue. Letters, digits, `-`
   and `_` only; empty means `steamgears_premium_evergreen`, so nothing ever goes out with a blank campaign.
-- **Per post:** pass `campaign` to `POST /queue` (or the `queue-post` ability) for a single post, e.g.
+- **Per post:** pass `campaign` to `POST /queue` (or the `queue-post` ability, which since 7.25 also takes
+  `angle`, `content_type` and `format`) for a single post, e.g.
   `campaign=clockwork_punk_2026_11`. The post's own name wins over the setting, which is what a finite series
   needs: twelve posts can be measured as one campaign while the evergreen posts run on the setting.
 

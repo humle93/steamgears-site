@@ -16,6 +16,26 @@ refresh, og `python3 tools/mcp_rest.py --check` svarer `ok: true` med serveren `
 drafts only«, før plugin'et ser kaldet. Skal agenten skrive, skal den switch slås fra i
 *Meow Apps → AI Engine → Settings → MCP* — det er en beslutning om risikoprofil, ikke en fejl.
 
+**Sådan tjekkes spærren uden at skrive** (målt 2/11 2026, efter ejeren havde slået den fra — den var stadig
+til): AI Engines indstillinger ligger i option `mwai_options`, og læsende værktøjer må gerne læse den. Med
+`raw: true` læses databasen udenom object-cachen, så svaret er den faktiske tilstand og ikke et cachet billede:
+
+```bash
+python3 tools/mcp_rest.py --call wp_get_option '{"key":"mwai_options","raw":true}' | grep -o '"mcp_[a-z_]*": [^,}]*'
+```
+
+| Nøgle | Målt 2/11 | Betydning |
+| --- | --- | --- |
+| `mcp_drafts_only` | **true** | spærren: alle skrivende kald afvises, også plugin'ets egne |
+| `mcp_role` | `admin` | tokenet har administratorkraft, så kun Drafts Only holder det tilbage |
+| `mcp_approvals` | `off` | ingen godkendelse pr. værktøj — spærren er den eneste |
+| `mcp_default_readonly` | false | læse-only er ikke slået til |
+| `mcp_dynamic_rest` | true | Dynamic REST er allerede tændt, så `wp_update_option` m.fl. er tilgængelige |
+| `mcp_abilities` / `module_mcp` | true | Abilities og MCP-modulet kører |
+
+Pointen: en switch der ikke blev gemt, eller som blev sat på en anden fane, kan ses her med det samme — og
+agenten kan ikke selv slå den fra, fordi spærren også dækker `wp_update_option`. Det er med vilje.
+
 Sitet kører **AI Engine (Meow Apps)** som MCP-server. Det er standard MCP over HTTP med `Mcp-Session-Id`, og
 det kræver en credential på hvert kald: uden en svarer ruten `401 rest_forbidden`. Den gamle site-side
 MCP-server og dens API-nøgle er væk, og stdio-broen er derfor også fjernet — der er ingen nøgle at gemme i
