@@ -706,7 +706,11 @@ class SGAP_Queue {
         }
         $id = (int) $wpdb->insert_id;
         delete_transient('sgap_dashboard_stats');
-        return ['id' => $id, 'tracking_url' => SGAP_Tracking::url($id), 'utm_url' => $row['utm_url']];
+        // Say now what Publer would reject later: a missing photo, a PNG on Instagram,
+        // no Pinterest board. Warnings only — the photo can still arrive later (featured
+        // image or an AI photo), so nothing is refused at this point.
+        $warnings = array_column(SGAP_Preflight::problems($channel, $row), 'message');
+        return ['id' => $id, 'tracking_url' => SGAP_Tracking::url($id), 'utm_url' => $row['utm_url'], 'warnings' => $warnings];
     }
 
     /** True when Full Auto has blocked this channel/angle/type/format combination. */

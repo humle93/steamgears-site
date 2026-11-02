@@ -26,7 +26,7 @@ function esc_url_raw($u,$p=null){return preg_match('#^https?://#',$u)?$u:'';} fu
 function wp_parse_args($a,$d){return array_merge($d,$a);} function add_query_arg($a,$u){return $u.(str_contains($u,'?')?'&':'?').http_build_query($a,'','&',PHP_QUERY_RFC3986);}
 function current_time($t){return '2026-10-30 12:00:00';} function wp_date($f,$t=null){return date($f,$t??time());}
 function current_user_can($c){return true;} function get_current_user_id(){return 1;} function get_site_transient($k){return false;} function set_site_transient(...$a){} function wp_remote_get(...$a){return new WP_Error('offline','offline');} function wp_nonce_field_stub(){} function delete_option($k){unset($GLOBALS["opts"][$k]);} function wp_json_encode($v){return json_encode($v);} function is_wp_error($v){return $v instanceof WP_Error;}
-function wp_strip_all_tags($s){return strip_tags((string)$s);} function wp_die($m=''){throw new RuntimeException((string)$m);} function check_admin_referer($a=''){return true;}
+function wp_strip_all_tags($s){return strip_tags((string)$s);} function attachment_url_to_postid($u){return (int)($GLOBALS['attachment_for'][$u]??0);} function wp_get_attachment_metadata($id){return $GLOBALS['attachment_meta'][$id]??[];} function get_post_mime_type($id){return (string)($GLOBALS['attachment_mime'][$id]??'');} function wp_die($m=''){throw new RuntimeException((string)$m);} function check_admin_referer($a=''){return true;}
 class WP_Error{ function __construct(public $code,public $msg,public $data=[]){} function get_error_message(){return $this->msg;} }
 class WP_REST_Response{ function __construct(public $data,public $status=200){} }
 class WP_REST_Request implements ArrayAccess{ function __construct(public array $p){} function get_param($k){return $this->p[$k]??null;}
@@ -220,6 +220,51 @@ check('site seo: the summary counts fails, warns and pages needing work', $sum['
 check('site seo: ids() picks one status only', SGAP_Site_SEO::ids([['id' => 'a', 'status' => 'fail'], ['id' => 'b', 'status' => 'pass']], 'fail') === ['a']);
 ob_start(); do_action('page_sgap-studio'); $studio = ob_get_clean();
 check('site seo: the studio page carries the whole-site card and its script', str_contains($studio, 'sgap-seo-site-out') && str_contains($studio, 'Scan the whole site') && str_contains($studio, 'sgap_seo_site'));
+/* --- pre-flight per channel (P1.1) --- */
+$sgap_url=SGAP_Tracking::url(7);
+check('preflight: threads budget subtracts the tracking link', SGAP_Preflight::caption_budget('threads',$sgap_url)===500-mb_strlen($sgap_url)-2);
+check('preflight: X counts a link as 23 characters', SGAP_Preflight::caption_budget('twitter',$sgap_url)===255);
+check('preflight: instagram keeps the whole caption budget', SGAP_Preflight::caption_budget('instagram',$sgap_url)===2200);
+check('preflight: an unknown channel has no budget', SGAP_Preflight::caption_budget('myspace',$sgap_url)===0);
+$long=str_repeat('Steampunk goggles with brass frames. ',40);
+$fix=SGAP_Preflight::repair('threads',['title'=>'t','body'=>$long,'tracking_url'=>$sgap_url]);
+check('preflight: a long threads caption is cut to the budget', mb_strlen($fix['row']['body'])<=500-mb_strlen($sgap_url)-2 && str_ends_with($fix['row']['body'],'…'));
+check('preflight: the cut is reported', (bool)array_filter($fix['notes'],fn($n)=>str_contains($n,'shortened')));
+$fine=SGAP_Preflight::repair('facebook',['title'=>'t','body'=>'Short','tracking_url'=>$sgap_url]);
+check('preflight: a caption within the limit is left alone', $fine['row']['body']==='Short' && $fine['notes']===[]);
+$tags=SGAP_Preflight::repair('threads',['title'=>'t','body'=>'Brass #steampunk #goggles #brass','tracking_url'=>$sgap_url]);
+check('preflight: threads keeps one hashtag', $tags['row']['body']==='Brass #steampunk' && count($tags['notes'])===1);
+$many='x '.implode(' ',array_map(fn($i)=>'#tag'.$i,range(1,31)));
+$ig=SGAP_Preflight::repair('instagram',['title'=>'t','body'=>$many,'tracking_url'=>$sgap_url]);
+preg_match_all('/#\w+/',$ig['row']['body'],$tagm);
+check('preflight: instagram keeps 30 hashtags', count($tagm[0])===30 && count($ig['notes'])===1);
+$pin=SGAP_Preflight::repair('pinterest',['title'=>str_repeat('Brass goggles ',12),'body'=>'x','tracking_url'=>$sgap_url]);
+check('preflight: pin title cut to 100 characters', mb_strlen($pin['row']['title'])<=100 && mb_strlen($pin['row']['title'])>60);
+$nophoto=SGAP_Preflight::problems('instagram',['title'=>'t','body'=>'x','image_url'=>'']);
+check('preflight: instagram without a photo is a hard problem', ($nophoto[0]['code']??'')==='no_photo' && str_contains($nophoto[0]['message'],'needs a photo'));
+$board=SGAP_Preflight::problems('pinterest',['title'=>'t','body'=>'x','image_url'=>'https://steamgears.eu/a.jpg']);
+check('preflight: pinterest without a board is refused', in_array('no_board',array_column($board,'code'),true));
+$opts['sgap_publer_pinterest_board']='board_1';
+check('preflight: pinterest passes once the board is set', SGAP_Preflight::problems('pinterest',['title'=>'t','body'=>'x','image_url'=>'https://steamgears.eu/a.jpg'])===[]);
+$GLOBALS['attachment_for']=['https://steamgears.eu/wp-content/uploads/pin.png'=>91];
+$GLOBALS['attachment_meta'][91]=['width'=>1000,'height'=>1500,'mime_type'=>'image/png'];
+$info=SGAP_Preflight::image_info('https://steamgears.eu/wp-content/uploads/pin.png');
+check('preflight: size and type come from the media library', $info['mime']==='image/png' && $info['width']===1000 && $info['source']==='attachment');
+check('preflight: a PNG is refused on instagram', in_array('image_not_jpeg',array_column(SGAP_Preflight::problems('instagram',['image_url'=>'https://steamgears.eu/wp-content/uploads/pin.png']),'code'),true));
+check('preflight: a portrait photo outside 4:5 is refused', in_array('image_out_of_ratio',array_column(SGAP_Preflight::problems('instagram',['image_url'=>'https://steamgears.eu/wp-content/uploads/pin.png']),'code'),true));
+$GLOBALS['attachment_meta'][91]=['width'=>1080,'height'=>1080,'mime_type'=>'image/jpeg'];
+check('preflight: a square JPEG passes on instagram', SGAP_Preflight::problems('instagram',['image_url'=>'https://steamgears.eu/wp-content/uploads/pin.png'])===[]);
+$GLOBALS['attachment_for']=[]; $GLOBALS['attachment_meta']=[];
+check('preflight: the extension decides without an attachment', SGAP_Preflight::image_info('https://cdn.example.test/x.webp')['mime']==='image/webp');
+check('preflight: an unknown image is not blocked on a guess', SGAP_Preflight::problems('instagram',['image_url'=>'https://cdn.example.test/photo?id=3'])===[]);
+$c=SGAP_Preflight::check('threads',['id'=>7,'title'=>'t','body'=>$long,'destination_url'=>'https://steamgears.eu/x/']);
+check('preflight: check() repairs and still passes', $c['ok'] && mb_strlen($c['row']['body'])<=500-mb_strlen($sgap_url)-2 && $c['notes']!==[]);
+check('preflight: a message names the problems', str_contains(SGAP_Preflight::message([['message'=>'A.'],['message'=>'B.']]),'A. B.'));
+$gate=SGAP_Publer::publish(['id'=>7,'channel'=>'instagram','title'=>'Brass','body'=>'x','destination_url'=>'https://steamgears.eu/x/','image_url'=>'']);
+check('preflight: publish refuses before any Publer call', is_wp_error($gate) && $gate->code==='sgap_preflight' && str_contains($gate->get_error_message(),'needs a photo'));
+$wpdb->next=null;
+$warn=SGAP_Queue::add(['channel'=>'instagram','title'=>'Warn','body'=>'x','destination_url'=>home_url('/warn/')]);
+check('preflight: queueing warns about what would be refused', is_array($warn) && in_array(true,array_map(fn($w)=>str_contains($w,'needs a photo'),$warn['warnings']??[]),true));
 $wpdb->row=null;
 $wpdb->next=null;
 exit(empty($GLOBALS['fail'])?0:1);

@@ -76,6 +76,32 @@ The scan is stored in one option (`sgap_seo_site`) and refreshed lazily once a w
 administrator opens wp-admin, because WP-Cron is not dependable on this cached host. Body text is
 never rewritten by this screen; content suggestions stay in *Optimise SEO of a page*.
 
+## Pre-flight per channel (7.20)
+
+Every post is checked against the destination network's own limits **before** anything is sent to
+Publer (`includes/preflight.php`, `SGAP_Preflight`). Publer's rejection arrives as a vague error after a
+failed upload and also spends one of the three attempts; this check runs on the site, first, and costs
+nothing.
+
+| Channel | Refused | Repaired automatically |
+|---|---|---|
+| Instagram | no photo; PNG/WebP/GIF instead of JPEG; width under 320 px; photo outside 4:5–1.91:1 | caption over 2 200 characters |
+| Pinterest | no photo; no board set in Settings | title over 100, description over 500 |
+| Threads | — | caption over 500 (the tracking link is counted in), more than one hashtag |
+| Facebook / LinkedIn | — | caption over 63 206 / 3 000 |
+| X | — | 280 characters, with any link counted as 23 |
+| Bluesky / Mastodon / Telegram / Google | — | caption over 300 / 500 / 1 024 / 1 500 including the link |
+
+Two safety valves. The checker never downloads the photo, so type and size are only judged when the image
+is in the media library (mime type and dimensions come from the attachment metadata) or the file extension
+is known — an image it cannot inspect is never blocked on a guess. And queueing a post reports the same
+problems as **warnings** in the API response (`warnings`), because a photo can still arrive later: the
+featured image, or the AI photo `SGAP_RSS` adds at release. The refusal happens at publish time, which is
+the moment before Publer.
+
+The ability `steamgears-autopilot/check-post` runs the same rules without queueing anything and returns
+`problems`, `repairs` and the text that would actually be sent.
+
 ## Updates
 
 From 7.6 the plugin updates itself from GitHub (`humle93/steamgears-site`, branch `main`):

@@ -121,6 +121,17 @@ class SGAP_Abilities {
                 'Installs the newest Steamgears Autopilot from GitHub (humle93/steamgears-site, main) over the installed version, if GitHub has a newer one. The plugin stays active. Returns the versions before and after.',
                 [], [], [__CLASS__, 'update'], false, true
             ],
+            'check-post' => [
+                'Check a post before queueing',
+                'Runs the per-network pre-flight rules on a post without queueing it: caption length (with the tracking link counted in), hashtag ceiling, Instagram photo type/size/aspect, Pinterest board and long Facebook/LinkedIn captions. Returns the problems that would make Publer refuse it, the text after the mechanical repairs (shortened caption, surplus hashtags removed) and whether it would go through as-is.',
+                [
+                    'channel' => $channel,
+                    'title' => ['type' => 'string', 'minLength' => 1, 'maxLength' => 200],
+                    'text' => ['type' => 'string', 'minLength' => 1],
+                    'destination_url' => ['type' => 'string', 'format' => 'uri'],
+                    'image_url' => ['type' => 'string', 'format' => 'uri', 'description' => 'The photo the post would use, if it has one']
+                ], ['channel', 'title', 'text', 'destination_url'], [__CLASS__, 'check_post'], true, true
+            ],
             'check-publer' => [
                 'Check Publer connection',
                 'Tests the Publer API key: lists workspaces, connected social accounts, and configured channels that have no Publer account.',
@@ -272,6 +283,24 @@ class SGAP_Abilities {
             'scheduled_at' => $scheduled
         ]);
         return is_wp_error($result) ? $result : $result + ['status' => 'queued'];
+    }
+
+    /** Dry run of the publish-time pre-flight. Writes nothing. */
+    public static function check_post($input = null): array {
+        $input = (array) $input;
+        $check = SGAP_Preflight::check((string) ($input['channel'] ?? ''), [
+            'title' => (string) ($input['title'] ?? ''),
+            'body' => (string) ($input['text'] ?? ''),
+            'image_url' => (string) ($input['image_url'] ?? ''),
+            'destination_url' => (string) ($input['destination_url'] ?? '')
+        ]);
+        return [
+            'channel' => (string) ($input['channel'] ?? ''),
+            'ok' => $check['ok'],
+            'problems' => $check['problems'],
+            'repairs' => $check['notes'],
+            'would_send' => ['title' => $check['row']['title'], 'text' => $check['row']['body']]
+        ];
     }
 
     public static function generate($input = null): array {

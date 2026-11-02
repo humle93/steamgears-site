@@ -209,6 +209,16 @@ class SGAP_Publer {
         if (!in_array($channel, self::CHANNELS, true)) {
             return new WP_Error('sgap_channel', "Channel '{$channel}' is not supported by the Publer publisher.");
         }
+        // Pre-flight before anything leaves the site: a caption that is too long, a
+        // PNG on Instagram or a pin without a board is refused here, without a single
+        // API call, instead of coming back as a vague Publer failure that also burns
+        // one of the three attempts. What can be repaired mechanically (caption and
+        // hashtag limits) is repaired instead of refused.
+        $preflight = SGAP_Preflight::check($channel, $row);
+        if (!$preflight['ok']) {
+            return new WP_Error('sgap_preflight', SGAP_Preflight::message($preflight['problems']), ['status' => 422, 'problems' => $preflight['problems']]);
+        }
+        $row = $preflight['row'];
         $accounts = self::accounts();
         if (is_wp_error($accounts)) {
             return $accounts;

@@ -28,7 +28,7 @@ Der er **fem aktive projekter**, alle målt i [`projektstatus.json`](../projekts
 | id | Projekt | Status | Enhed |
 | --- | --- | --- | --- |
 | `site` | steamgears.eu — site-optimering | 50,0 % (10,55 af 21,1 d) | developer-dage |
-| `plugin` | Steamgears Autopilot — plugin | 18,5 % (4,45 af 24,0 d) | developer-dage |
+| `plugin` | Steamgears Autopilot — plugin | 22,7 % (5,45 af 24,0 d) | developer-dage |
 | `rebrand` | Dark academia-rebrand | 63,0 % (8,5 af 13,5 t) | timer |
 | `seo` | SEO-indholdsproduktion | 0,0 % (0 af 3 guides) | guides |
 | `links` | Døde internlinks | 100 % (39 af 39 links) | links |
@@ -81,11 +81,13 @@ Alt her er målt mod den live side eller læst i kilden. Er noget ændret siden 
 - `/shop/` tager ~5,8 s og ~470 KB; produktside har ~151 KB inline CSS og ~105 scripts.
 - GA4 fyrer **dobbelt** på hvert pageview, så konverteringer kan ikke aflæses sikkert.
 
-**Pluginnet** (`plugins/steamgears-autopilot/`, v7.18.0)
+**Pluginnet** (`plugins/steamgears-autopilot/`, v7.20.0)
 
-- 16 PHP-filer, ~7.480 linjer, 1.008 linjer tests; **21 af 22 subsystemer er live**. Version **7.19.0** tilføjede
+- 19 PHP-filer, 7.751 linjer, 1.054 linjer tests; **21 af 22 subsystemer er live**. Version **7.19.0** tilføjede
   helsides SEO/GEO/AEO-auditten (`includes/site-seo.php`), som erstatter den per-side-optimering der krævede
-  ét klik pr. URL. 128 smoke-checks, alle grønne.
+  ét klik pr. URL. **7.20.0** tilføjede pre-flight-valideringen (`includes/preflight.php`): hver kø-post tjekkes
+  mod nettets egne grænser før det første Publer-kald, og det der kan rettes mekanisk (caption-længde, hashtags)
+  rettes i stedet for at blive afvist. 151 smoke-checks, alle grønne.
 - Kæden virker: generér → godkend → publicér (RSS eller Publer API) → mål.
 - Self-updateren virker: zip i repoet er **byte-identisk** med kilden; 20 versioner på fire dage.
 - 9 AJAX- og 5 admin_post-handlere har capability + nonce; **kun ét `wp_mail`** i hele pluginnet (ugerapport).
