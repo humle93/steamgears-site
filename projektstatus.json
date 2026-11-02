@@ -69,10 +69,10 @@
         {
           "id": "p1",
           "name": "P1 — paritet",
-          "done": 3.75,
-          "total": 11.25,
+          "done": 3.85,
+          "total": 11.35,
           "unit": "d",
-          "note": "P1.1 pre-flight pr. kanal 1,0 d (7.20.0) + P1.3 blackout-kalender 0,5 d (7.21.0) + P1.6 quality gate 1,0 d (includes/quality.php, 7.22.0 — nu også målt live på sitet) + P1.7 helsides SEO/GEO/AEO-audit 1,0 d (7.19.0) + P1.8 utm_campaign som parameter 0,25 d (7.23.0, venter på Update-klik) = 5 af 8 punkter. P1.5 er eksternt blokeret (Pinterest-token)"
+          "note": "P1.1 pre-flight pr. kanal 1,0 d (7.20.0) + P1.3 blackout-kalender 0,5 d (7.21.0) + P1.6 quality gate 1,0 d (includes/quality.php, 7.22.0 — nu også målt live på sitet) + P1.7 helsides SEO/GEO/AEO-audit 1,0 d (7.19.0) + P1.8 utm_campaign som parameter 0,25 d (7.23.0, venter på Update-klik) + 0,1 d queue-post bærer angle/format/kampagne (7.25.0, krævet fordi OAuth-tokenet ikke gælder pluginets REST-namespace) = 5,5 af 8 punkter. P1.5 er eksternt blokeret (Pinterest-token)"
         },
         {
           "id": "p2",
@@ -91,7 +91,7 @@
           "note": "P3.3 (CI 8.0-8.5 + WP 7.1) udført som S0.3 i site-repoet"
         }
       ],
-      "total": 24.25
+      "total": 24.35
     },
     {
       "id": "rebrand",
@@ -385,6 +385,15 @@
       "after": 29.7,
       "delta": 0.7,
       "basis": "7,2 af 24,25 d (P0 3,2/4 · P1 3,75/11,25 · P2 0/7 · P3 0,25/2)"
+    },
+    {
+      "date": "2026-11-02",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 29.7,
+      "after": 30.0,
+      "delta": 0.3,
+      "basis": "7,3 af 24,35 d (P0 3,2/4 · P1 3,85/11,35 · P2 0/7 · P3 0,25/2)"
     }
   ]
 }
