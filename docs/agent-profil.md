@@ -230,7 +230,10 @@ Profilen kan også læses over MCP via den lokale server `tools/mcp_project_prof
    [`docs/library/README.md`](library/README.md) — ellers bliver de forældreløse.
 4. Én roadmap pr. scope: site i `docs/roadmap.md`, plugin i `plugins/steamgears-autopilot/ROADMAP.md`.
    Én SEO-kilde: `docs/seo.md`.
-5. Commit-beskeder på dansk, med `🤖 Generated with Codebuff` + `Co-Authored-By`-fod. Push med `cloud_git`.
+5. Commit-beskeder på dansk, med `🤖 Generated with Codebuff` + `Co-Authored-By`-fod. Push med `cloud_git` i
+   samme tur — og senest af den natlige auto-push kl. 02 dansk tid (`.github/workflows/natlig-push.yml`), der
+   committer alt i træet og pusher med genforsøg. Nattens kørsel er et sikkerhedsnet: den ser ikke ucommittet
+   arbejde i en sandkasse, så et push i turen er stadig den regel der gælder.
 6. **Rør ikke** site-data, nøgler eller `.mcp.json`-hemmeligheder. Nøgler hører i miljøvariabler, aldrig i repo.
 
 ## 8. Kort over viden

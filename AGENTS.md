@@ -82,12 +82,26 @@ Reglen over holdes automatisk, så lidt som muligt afhænger af hukommelse:
 - Kørselslås (`.projektstatus.lock`) så to samtidige kørsler ikke kan overskrive hinanden.
 - CI (`.github/workflows/projektstatus.yml`) kører selftest → check → update → efterkontrol **hver dag**, fejler
   jobbet med en annotation ved brud og committer kun når noget faktisk ændrede sig.
+- **Natlig auto-push** (`.github/workflows/natlig-push.yml`): hver nat **kl. 02 dansk tid** kører værnene,
+  opdaterer daglig status + brief og committer **alt** i træet og pusher til `main`, med tre genforsøg og
+  `pull --rebase` hvis nogen kom først. Kørslen ligger på begge de UTC-timer der kan være kl. 02 lokalt og
+  springer selv over når den lokale time ikke er 2, så sommertid ikke skal rettes. Den kan kun pushe det der
+  ligger i repoet — ucommittet arbejde i en agent-sandkasse ser den ikke — så reglen om at committe og pushe i
+  samme tur gælder stadig; nattens kørsel er sikkerhedsnettet, ikke en erstatning.
+  Efter pushet kører kørslen **alle repoets værn** via [`tools/natlige-vaern.sh`](tools/natlige-vaern.sh):
+  `php -l` på alle plugin-filer, `projektstatus.py --selftest` og `--check`, `load_campaign.py --selftest`,
+  `plugins/tests/smoke.php`, `test_mcp_rest.py`, `test_mcp_oauth.py` og `test_niche_scanner.py`. Et rødt værn
+  giver en `::error`-annotation, skriver en tabel og de fejlende linjer i job-summaryen og fejler jobbet. Det
+  ligger bevidst efter pushet, så en testfejl ikke holder status-dokumenterne tilbage — men det kan ikke
+  overses. Den samme kommando kan køres lokalt før et push: `bash tools/natlige-vaern.sh`.
 
 Automationen dækker **den daglige status**. Det manuelle i §1 — at vurdere hvad der reelt blev udført og melde
 `% før → % efter` i svaret og commit-beskeden — kan scriptet ikke gøre og falder stadig på den der arbejder.
 
 ## 5. Øvrige regler
 
+- **Alt arbejde skal ende på `main`.** Push i samme tur som arbejdet blev lavet (`cloud_git`), og senest af den
+  natlige kørsel kl. 02. Efterlad ikke commits lokalt "til senere".
 - Repoet er dokumentation og assets for **steamgears.eu**; WordPress-kernen ligger hos Simply. Ændringer på
   selve sitet sker over MCP, ikke her.
 - Sproget i commits og dokumentation er dansk, med tekniske termer på engelsk.
