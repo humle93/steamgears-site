@@ -7,6 +7,7 @@
 define('ABSPATH', __DIR__.'/fixtures/'); define('DAY_IN_SECONDS',86400); define('HOUR_IN_SECONDS',3600); define('MINUTE_IN_SECONDS',60); define('ARRAY_A','ARRAY_A');
 $GLOBALS['actions']=[]; $opts=[]; $settings=[];
 function add_action($h,$cb){ $GLOBALS['actions'][$h][]=$cb; } function add_filter($h,$cb){ $GLOBALS['actions'][$h][]=$cb; }
+function wp_register_ability($n,$a){ $GLOBALS['abilities'][$n]=$a; } function wp_register_ability_category(...$a){}
 function apply_filters($h,$v){return $v;}
 function do_action($h){ foreach($GLOBALS['actions'][$h]??[] as $cb) call_user_func($cb); }
 function register_activation_hook(...$a){} function register_deactivation_hook(...$a){}
@@ -26,7 +27,7 @@ function esc_url_raw($u,$p=null){return preg_match('#^https?://#',$u)?$u:'';} fu
 function wp_parse_args($a,$d){return array_merge($d,$a);} function add_query_arg($a,$u){return $u.(str_contains($u,'?')?'&':'?').http_build_query($a,'','&',PHP_QUERY_RFC3986);}
 function current_time($t){return '2026-10-30 12:00:00';} function wp_date($f,$t=null){return date($f,$t??time());}
 function current_user_can($c){return true;} function get_current_user_id(){return 1;} function get_site_transient($k){return false;} function set_site_transient(...$a){} function wp_remote_get(...$a){return new WP_Error('offline','offline');} function wp_nonce_field_stub(){} function delete_option($k){unset($GLOBALS["opts"][$k]);} function wp_json_encode($v){return json_encode($v);} function is_wp_error($v){return $v instanceof WP_Error;}
-class WP_Error{ function __construct(public $code,public $msg,public $data=[]){} }
+class WP_Error{ function __construct(public $code,public $msg,public $data=[]){} function get_error_code(){return $this->code;} function get_error_message(){return $this->msg;} }
 class WP_REST_Response{ function __construct(public $data,public $status=200){} }
 class WP_REST_Request implements ArrayAccess{ function __construct(public array $p){} function get_param($k){return $this->p[$k]??null;}
  function offsetGet($k):mixed{return $this->p[$k]??null;} function offsetExists($k):bool{return isset($this->p[$k]);} function offsetSet($k,$v):void{} function offsetUnset($k):void{} }
@@ -125,5 +126,64 @@ check('bot: Publer link scraper is not a click', SGAP_Tracking::is_bot('facebook
 check('updater: reads Version from a plugin header', SGAP_Updater::parse_version("<?php\n/**\n* Plugin Name: X\n* Version: 7.6.2\n*/")==='7.6.2');
 check('updater: no version in junk', SGAP_Updater::parse_version('404: Not Found')==='');
 check('updater: package url points at the versioned zip on main', SGAP_Updater::package_url('7.6.2')==='https://raw.githubusercontent.com/humle93/steamgears-site/main/plugins/steamgears-autopilot-v7.6.2.zip');
+// --- Niche-modul: samme rubrik som niche_scan.py, kørt i PHP ---
+$candidates=[
+ ['niche'=>'steampunk goggles','searches'=>9900,'listings'=>3175,'competitor'=>'handmade','difficulty'=>22],
+ ['niche'=>'steampunk corset','searches'=>2270,'listings'=>7114,'competitor'=>'handmade','difficulty'=>33],
+ ['niche'=>'steampunk top hat','searches'=>1600,'listings'=>10686,'competitor'=>'handmade'],
+ ['niche'=>'steampunk costume','searches'=>18100,'listings'=>45063,'swing'=>16.8,'competitor'=>'handmade','difficulty'=>41],
+];
+$ranked=SGAP_Niche::scan($candidates);
+check('niche: scores match the Python scanner', array_column($ranked,'score')===[80.8,61.2,53.6,38.9]);
+check('niche: green/yellow/yellow/nej', array_column($ranked,'verdict')===['grøn','gul','gul','nej']);
+check('niche: ranking is highest score first', $ranked[0]['niche']==='steampunk goggles' && end($ranked)['niche']==='steampunk costume');
+$hard=SGAP_Niche::score_row(['niche'=>'x','searches'=>20000,'listings'=>60000,'swing'=>1,'competitor'=>'handmade'],1);
+check('niche: the hard rule beats a 48-point score', $hard['verdict']==='nej' && $hard['score']===48.0 && in_array('hårdt nej: over 50.000 listings',$hard['notes'],true));
+$no_swing=SGAP_Niche::score_row(['niche'=>'y','searches'=>9900,'listings'=>3175,'competitor'=>'handmade'],1);
+check('niche: missing swing normalises the weight instead of scoring zero', $no_swing['available_weight']===80.0 && in_array('sæsonsving mangler — 20 % af grundlaget er ikke med',$no_swing['notes'],true));
+$da=SGAP_Niche::score_row(['navn'=>'z','søgninger'=>1000,'antal_listings'=>500,'konkurrent'=>'håndlavet'],1);
+check('niche: Danish field names and competitor alias', $da['competitor']==='handmade' && $da['listings']===500.0);
+function nocatch(callable $fn): string { try { $fn(); return ''; } catch (Throwable $e) { return $e->getMessage(); } }
+check('niche: thousands separator is refused, not read as 18,1', str_contains(nocatch(fn()=>SGAP_Niche::score_row(['niche'=>'t','searches'=>9900,'listings'=>'18.100','competitor'=>'pod'],1)),'tusindadskillelse'));
+check('niche: zero searches refused', str_contains(nocatch(fn()=>SGAP_Niche::score_row(['niche'=>'t','searches'=>0,'listings'=>10,'competitor'=>'pod'],1)),'større end 0'));
+check('niche: swing below 1 refused', str_contains(nocatch(fn()=>SGAP_Niche::score_row(['niche'=>'t','searches'=>10,'listings'=>10,'swing'=>0.5,'competitor'=>'pod'],1)),'mindst 1'));
+check('niche: unknown competitor names the allowed values', str_contains(nocatch(fn()=>SGAP_Niche::score_row(['niche'=>'t','searches'=>10,'listings'=>10,'competitor'=>'etsy'],1)),'handmade, mixed, pod'));
+check('niche: empty input refused', nocatch(fn()=>SGAP_Niche::scan([]))!=='');
+$links=[' steampunk   GOGGLES '=>'https://example.com/goggles'];
+$built=SGAP_Niche::drafts($ranked,$links,['pinterest']);
+check('niche: only green niches become drafts', count($built['drafts'])===1 && $built['drafts'][0]['payload']['channel']==='pinterest');
+$payload=$built['drafts'][0]['payload'];
+check('niche: payload is a draft with no body, image or post', $payload['status']==='draft' && $payload['body']==='' && $payload['image_url']==='' && $payload['post_id']===0);
+check('niche: angle/type/format match the queue defaults', $payload['angle']==='niche' && $payload['content_type']==='custom' && $payload['format']==='post');
+check('niche: title is the niche name', $payload['title']==='Steampunk goggles');
+check('niche: fingerprint matches SGAP_Queue::add()', $built['drafts'][0]['fingerprint']==='d0d518e6f58bde85e915260b9409e8be15aa710f35cb0acd289f64bc1b29258b');
+check('niche: link keys ignore case and extra spaces', $payload['destination_url']==='https://example.com/goggles');
+$missing=SGAP_Niche::drafts($ranked,[],['pinterest']);
+check('niche: no URL means skipped with a reason, not a guessed link', count($missing['drafts'])===0 && $missing['skipped'][0]['reason']==='ingen URL i linklisten');
+$evil=SGAP_Niche::drafts($ranked,['steampunk goggles'=>'javascript:alert(1)'],['pinterest']);
+check('niche: javascript: URL refused', count($evil['drafts'])===0 && str_contains($evil['skipped'][0]['reason'],'http(s)'));
+$photo=SGAP_Niche::drafts($ranked,$links,['pinterest','facebook'],false,true);
+check('niche: require_image skips pinterest but keeps facebook', count($photo['drafts'])===1 && $photo['drafts'][0]['payload']['channel']==='facebook' && str_contains($photo['skipped'][0]['reason'],'kræver foto'));
+$dup=SGAP_Niche::drafts($ranked,$links,['pinterest','pinterest']);
+check('niche: duplicate channel collapses to one draft', count($dup['drafts'])===1 && str_contains($dup['skipped'][0]['reason'],'duplikat'));
+$yellow=SGAP_Niche::drafts($ranked,['steampunk corset'=>'https://example.com/corset'],['pinterest'],true);
+check('niche: include_yellow adds yellow niches', count($yellow['drafts'])===1 && $yellow['drafts'][0]['attribution']['verdict']==='gul');
+check('niche: unknown channel refused', str_contains(nocatch(fn()=>SGAP_Niche::drafts($ranked,$links,['myspace'])),'Ukendte kanaler'));
+$plan=SGAP_Niche::plan($built['drafts'],$built['skipped']);
+check('niche: plan writes the score with a Danish decimal', str_contains($plan,'| 80,8 |'));
+check('niche: plan warns about the missing photo', str_contains($plan,'Mangler foto:** pinterest'));
+check('niche: plan says nothing was sent', str_contains($plan,'intet er sendt til Publer'));
+$wpdb->log=[]; $wpdb->next=null; $created=SGAP_Niche::queue($built['drafts']);
+check('niche: queue writes the row as draft', $created[0]['queue_id']===42 && str_contains(implode("\n",$wpdb->log),'"status":"draft"'));
+check('niche: attribution is remembered per queue id', (SGAP_Niche::attribution()[42]['score']??null)===80.8 && (SGAP_Niche::attribution()[42]['niche']??'')==='steampunk goggles');
+$wpdb->next=9; $again=SGAP_Niche::queue($built['drafts']);
+check('niche: a queue duplicate is reported, not thrown', ($again[0]['error']??'')==='sgap_duplicate' && $again[0]['message']==='Already queued.');
+do_action('wp_abilities_api_init');
+check('niche: score-niches is registered read-only', ($GLOBALS['abilities']['steamgears-autopilot/score-niches']['meta']['annotations']['readonly']??null)===true);
+check('niche: queue-niches is registered as a writer', ($GLOBALS['abilities']['steamgears-autopilot/queue-niches']['meta']['annotations']['readonly']??null)===false);
+$preview=SGAP_Abilities::score_niches(['candidates'=>$candidates,'links'=>$links]);
+check('niche: ability preview ranks and writes nothing', count($preview['ranked'])===4 && $preview['drafts']===1 && $preview['ranked'][0]['score']===80.8);
+$bad=SGAP_Abilities::score_niches(['candidates'=>[['niche'=>'x','searches'=>0,'listings'=>10,'competitor'=>'pod']]]);
+check('niche: ability returns WP_Error on bad input', $bad instanceof WP_Error && $bad->get_error_code()==='sgap_niche');
 echo empty($GLOBALS['fail'])?"ALL PASS\n":"SOME FAILED\n";
 exit(empty($GLOBALS['fail'])?0:1);

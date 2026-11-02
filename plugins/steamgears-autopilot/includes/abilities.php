@@ -47,6 +47,29 @@ class SGAP_Abilities {
         return $schema;
     }
 
+    /** One object per candidate niche. The numbers are input — nothing is fetched. */
+    private static function candidates_schema(): array {
+        return [
+            'type' => 'array',
+            'minItems' => 1,
+            'description' => 'Candidate niches. searches and listings are required; swing is the October/June ratio (1 = flat).',
+            'items' => [
+                'type' => 'object',
+                'properties' => [
+                    'niche' => ['type' => 'string'],
+                    'searches' => ['type' => 'number', 'exclusiveMinimum' => 0],
+                    'listings' => ['type' => 'number', 'exclusiveMinimum' => 0],
+                    'swing' => ['type' => 'number', 'minimum' => 1],
+                    'competitor' => ['type' => 'string', 'enum' => ['handmade', 'mixed', 'pod']],
+                    'difficulty' => ['type' => 'number', 'minimum' => 0, 'maximum' => 100],
+                    'price' => ['type' => 'number']
+                ],
+                'required' => ['niche', 'searches', 'listings', 'competitor'],
+                'additionalProperties' => false
+            ]
+        ];
+    }
+
     /** name => [label, description, input schema properties, required, execute, readonly, idempotent] */
     private static function definitions(): array {
         $channel = ['type' => 'string', 'enum' => SGAP_Publer::CHANNELS];
@@ -120,6 +143,29 @@ class SGAP_Abilities {
                 'Update the plugin',
                 'Installs the newest Steamgears Autopilot from GitHub (humle93/steamgears-site, main) over the installed version, if GitHub has a newer one. The plugin stays active. Returns the versions before and after.',
                 [], [], [__CLASS__, 'update'], false, true
+            ],
+            'score-niches' => [
+                'Score niche candidates',
+                'Scores niche candidates with the same rubric as the niche assessment (listings 45, searches 25, seasonal swing 20, competitor type 10; more than 50.000 listings is always "nej"). Returns the ranking, skipped niches and a Markdown plan. Writes nothing: use queue-niches to create the drafts.',
+                [
+                    'candidates' => self::candidates_schema(),
+                    'links' => ['type' => 'object', 'additionalProperties' => ['type' => 'string'], 'description' => 'Niche name => destination URL. Niches without a URL are skipped with a reason, never given a guessed link.'],
+                    'channels' => ['type' => 'array', 'items' => $channel, 'description' => 'Target channels. Default: pinterest.'],
+                    'include_yellow' => ['type' => 'boolean', 'description' => 'Include yellow niches, not only green. Default: false.'],
+                    'require_image' => ['type' => 'boolean', 'description' => 'Skip channels that need a photo (instagram, pinterest). Default: false.']
+                ], ['candidates'], [__CLASS__, 'score_niches'], true, true
+            ],
+            'queue-niches' => [
+                'Queue niches as drafts',
+                'Scores the candidates, then writes the green ones into the publishing queue as drafts through the plugin itself (no REST call). Niches without a destination URL are skipped. Body and image stay empty so a human or the writer fills them in; nothing reaches Publer before approval.',
+                [
+                    'candidates' => self::candidates_schema(),
+                    'links' => ['type' => 'object', 'additionalProperties' => ['type' => 'string'], 'description' => 'Niche name => destination URL.'],
+                    'channels' => ['type' => 'array', 'items' => $channel, 'description' => 'Target channels. Default: pinterest.'],
+                    'include_yellow' => ['type' => 'boolean', 'description' => 'Include yellow niches, not only green. Default: false.'],
+                    'require_image' => ['type' => 'boolean', 'description' => 'Skip channels that need a photo (instagram, pinterest). Default: false.']
+                ],
+                ['candidates', 'links'], [__CLASS__, 'queue_niches'], false, true
             ],
             'check-publer' => [
                 'Check Publer connection',
@@ -302,6 +348,14 @@ class SGAP_Abilities {
 
     public static function check_keys($input = null): array {
         return SGAP_KeyCheck::run();
+    }
+
+    public static function score_niches($input = null) {
+        return SGAP_Niche::preview($input);
+    }
+
+    public static function queue_niches($input = null) {
+        return SGAP_Niche::queue_ability($input);
     }
 
     public static function check_publer($input = null) {

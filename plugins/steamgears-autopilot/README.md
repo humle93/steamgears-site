@@ -23,7 +23,7 @@ The whole social autopilot runs inside WordPress (Command Center is retired):
 4. **Measure** – every post links via `/go/<id>/`, so clicks (and WooCommerce
    orders) are counted per channel.
 
-Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.15.1.zip` → Activate.
+Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.16.0.zip` → Activate.
 
 ## Run it from Claude
 
@@ -44,9 +44,30 @@ all admin-only, none of them deleting anything:
 | `steamgears-autopilot/update` | Install the newest version from GitHub |
 | `steamgears-autopilot/check-keys` | Test the Publer and AI keys (see below) |
 | `steamgears-autopilot/check-publer` | Workspaces, accounts, channels without an account |
+| `steamgears-autopilot/score-niches` | Score niche candidates and preview the draft plan (writes nothing) |
+| `steamgears-autopilot/queue-niches` | Score the candidates and queue the green ones as drafts |
 
 Example: "Write today's posts and show them to me" → `generate`, then
 `list-drafts`, then `review-draft` for the ones you like.
+
+### Niche scoring (from v7.16)
+
+`score-niches` and `queue-niches` run the same rubric as the niche assessment
+(listings 45 / searches 25 / seasonal swing 20 / competitor type 10; more than
+50.000 listings is always `nej`, however good the rest looks). The numbers are
+input — nothing is fetched and there are no API keys involved, so the same
+candidates always give the same score, and a missing field normalises the weight
+instead of scoring zero.
+
+`queue-niches` writes the green niches into the publishing queue as **drafts**
+with `angle: niche`, body and image empty. Two things it refuses: it will not
+invent a destination URL (no link, no row — the niche is skipped with a reason),
+and it never sends anything to Publer. Attribution (`niche`, `score`, `verdict`)
+is kept per queue id in the `sgap_niche_attribution` option, because
+`sgap_queue` has no columns for it.
+
+To have image and copy ready, add the photo on the Queue page or call
+`generate-image` with the returned `queue_id` before approving.
 
 ## Also in the admin (from v7.4)
 

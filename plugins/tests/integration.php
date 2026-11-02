@@ -286,9 +286,9 @@ wp_set_current_user((int) $admin[0]);
 
 /* --- Claude / MCP abilities (WordPress 6.9+ only) --- */
 if (function_exists('wp_get_ability')) {
-    $names = ['status', 'list-drafts', 'review-draft', 'list-queue', 'queue-post', 'generate', 'publish', 'set-mode', 'update', 'check-keys', 'check-publer'];
+    $names = ['status', 'list-drafts', 'review-draft', 'list-queue', 'queue-post', 'generate', 'publish', 'set-mode', 'update', 'check-keys', 'check-publer', 'score-niches', 'queue-niches'];
     $missing = array_values(array_filter($names, fn($n) => !wp_get_ability('steamgears-autopilot/' . $n)));
-    sgci_check('abilities: all 11 registered', !$missing, $missing);
+    sgci_check('abilities: all ' . count($names) . ' registered', !$missing, $missing);
     $status_ability = wp_get_ability('steamgears-autopilot/status');
     $meta = $status_ability && method_exists($status_ability, 'get_meta') ? $status_ability->get_meta() : [];
     sgci_check('abilities: exposed to MCP, read-only status', ($meta['mcp']['public'] ?? false) === true && ($meta['annotations']['readonly'] ?? null) === true, $meta);

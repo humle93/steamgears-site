@@ -135,9 +135,9 @@
     {
       "id": "niche",
       "name": "Niche-scanning (eget repo)",
-      "note": "genberegner niche-vurderingens rubrik",
+      "note": "genberegner niche-vurderingens rubrik; kører både som stdlib-CLI og som plugin-modul",
       "next": "M4: flyt koden til eget repo, når GITHUB_TOKEN er sat",
-      "blocked_by": "GITHUB_TOKEN (repo) og WP_USER/WP_APP_PASS (sende broens payloads)",
+      "blocked_by": "GITHUB_TOKEN (repo) og WP-adgang (køre v7.16.0 på sitet)",
       "modules": [
         {
           "id": "m1",
@@ -178,6 +178,14 @@
           "total": 0.4,
           "unit": "d",
           "note": "draft-payloads med niche+score som attribution, 32 tests; afsendelse kræver WP-adgang"
+        },
+        {
+          "id": "m6",
+          "name": "M6 — scorer og kø-bro som plugin-modul (PHP)",
+          "done": 0.4,
+          "total": 0.4,
+          "unit": "d",
+          "note": "SGAP_Niche i includes/niche.php, abilities score-niches/queue-niches, paritet med Python målt, 111 smoke-checks"
         }
       ]
     },
@@ -379,6 +387,15 @@
       "after": 91.4,
       "delta": 1.4,
       "basis": "2,65 af 2,9 d (M1 0,5/0,5 · M2 1/1 · M3 0,5/0,5 · M4 0,25/0,5 · M5 0,4/0,4)"
+    },
+    {
+      "date": "2026-11-02",
+      "project": "Niche-scanning (eget repo)",
+      "module": "daglig måling",
+      "before": 91.4,
+      "after": 92.4,
+      "delta": 1.0,
+      "basis": "3,05 af 3,3 d (M1 0,5/0,5 · M2 1/1 · M3 0,5/0,5 · M4 0,25/0,5 · M5 0,4/0,4 · M6 0,4/0,4)"
     }
   ]
 }
