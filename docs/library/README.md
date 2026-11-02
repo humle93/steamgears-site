@@ -20,6 +20,7 @@ sidste commit-dato. Målt 2/11 2026.
 
 | Dokument | Indhold | Dato |
 | --- | --- | --- |
+| [mcp-skriveadgang-2026-11-02.md](mcp-skriveadgang-2026-11-02.md) | **MCP-skriveadgang og 7.25.0:** hvorfor REST-ruten svarer 401, hvad Drafts Only blokerer, hvordan `mcp_options` aflæses uden at skrive, og 12/12 forhåndsvaliderede kampagneposter (PDF i `reports/mcp-skriveadgang-2026-11-02.pdf`) | 2026-11-02 |
 | [clockwork-punk-kampagne-2026-11-02.md](clockwork-punk-kampagne-2026-11-02.md) | Clockwork Punk-kampagne 3.–14/11: koncept, 12 verificerede produkter, 3 vinkler, måling og blokeringer | 2026-11-02 |
 | [clockwork-punk-koe-2026-11-02.json](clockwork-punk-koe-2026-11-02.json) | Kø-payload til `POST /sgap/v1/queue` — 12 poster med captions, links og tidspunkter | 2026-11-02 |
 | [woo-11-3-vaerktoejsliste-2026-11-02.md](woo-11-3-vaerktoejsliste-2026-11-02.md) | Driftsnote: ni udfasede Woo REST-spejle kan forsvinde fra MCP-listen ved næste Woo-opdatering — hvad der falder, og hvad vi gør | 2026-11-02 |

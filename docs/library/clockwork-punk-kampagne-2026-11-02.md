@@ -12,12 +12,12 @@ Målt mod live-katalog 2/11 2026 (`wc/store/v1/products`, 56 produkter) og læst
 
 ## 1. Koncept
 
-**Clockwork punk** er den gren af steampunk hvor *mekanikken er ornamentet*: tandhjul som blomster, escapement
+**Clockwork punk** er den gren af steampunk hvor «mekanikken er ornamentet»: tandhjul som blomster, escapement
 som ansigt, messing som materiale man kan se alderen på. Det er ikke dieselpunk (rust, industri, krig) og ikke
 dark academia (bøger, botanik, melankoli) — det er **præcision som æstetik**. Butikken har allerede linjen:
 seks hoodies, fire tees, to art prints, et phone case, to lommeure og et charm-armbånd.
 
-Kampagnens påstand, som al copy tjener: *ting der virker, er smukkere end ting der bare er gamle.* Derfor er
+Kampagnens påstand, som al copy tjener: «ting der virker, er smukkere end ting der bare er gamle.» Derfor er
 hver caption skrevet som en lille iagttagelse af mekanikken — ikke som "køb nu".
 
 | Led | Valg | Grundlag |
@@ -105,7 +105,7 @@ steamgears_premium_evergreen`, så hver post i hele butikken bar samme kampagnen
 kampagne kunne ikke skilles ud i analytics. **7.24.0 gør navnet til en parameter:** indstillingen *Campaign
 name* (`sgap_utm_campaign`, standard er den gamle værdi, så ældre links forbliver sammenlignelige) plus et
 `campaign`-felt pr. post i `POST /queue` og `queue-post`. Posterne i denne kampagne sender derfor
-`campaign=clockwork_punk_2026_11`, og serien kan måles som én kampagne i GA4 (*Session campaign*) ved siden af
+`campaign=clockwork_punk_2026_11`, og serien kan måles som én kampagne i GA4 («Session campaign») ved siden af
 evergreen-strømmen, som fortsat kører på indstillingen.
 
 Navnet fryses ind i linket når posten lægges i kø, så poster der allerede står i køen beholder det navn de fik
@@ -118,8 +118,8 @@ posterne ikke kan lægges i køen. Indtil da er kampagnens eneste sandhed plugin
 | Blokering | Konsekvens | Ejers handling |
 | --- | --- | --- |
 | ~~Intet site-credential~~ | **lukket 2/11** — OAuth-token gemt, MCP svarer med 206 værktøjer | — |
-| AI Engine *Drafts Only* | Alle skrive-abilliteter afvises (*"This site lets assistants work on drafts only"*), også `queue-post` og `update`; kun læsning virker. **Målt igen 2/11 efter ejeren meldte den slået fra: stadig `mcp_drafts_only: true` i databasen** (`wp_get_option` med `raw: true`) | gem switchen i *AI Engine → Settings → MCP* (den blev ikke gemt), eller kør posten i hånden i wp-admin |
-| Plugin 7.22.0 på sitet | `queue-post` mangler `angle`/`format`/`campaign`, så posterne ville lande som `angle_a`/`post` | *Plugins → Update* til 7.25.0 (én version, zip'en ligger på `main`) |
+| AI Engine «Drafts Only» | Alle skrive-abilliteter afvises ("This site lets assistants work on drafts only"), også `queue-post` og `update`; kun læsning virker. **Målt igen 2/11 efter ejeren meldte den slået fra: stadig `mcp_drafts_only: true` i databasen** (`wp_get_option` med `raw: true`) | gem switchen i «AI Engine → Settings → MCP» (den blev ikke gemt), eller kør posten i hånden i wp-admin |
+| Plugin 7.22.0 på sitet | `queue-post` mangler `angle`/`format`/`campaign`, så posterne ville lande som `angle_a`/`post` | «Plugins → Update» til 7.25.0 (én version, zip'en ligger på `main`) |
 | Ingen `PUBLER_API_KEY` | køen kan fyldes, men intet **udgives** automatisk | nøgle i WP-admin → Autopilot → Settings, eller RSS-tilstand |
 | Ét Pinterest-board pr. publicering | 5 pins peger på `steampunk-posters-prints`, 1 på `steampunk-complete-looks` | boardet sættes i indstillingerne; den ene pin flyttes manuelt bagefter |
 | Mockups 0 af 5 timer | hvert produkt har 1–2 billeder, så pins er produktbilleder, ikke 2:3-mockups | mockup-briefen, når den køres |

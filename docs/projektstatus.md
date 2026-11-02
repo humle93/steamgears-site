@@ -22,7 +22,7 @@ Status pr. **2026-11-02** · beregnet af `projektstatus.py` · kilder: [`projekt
 
 | Projekt | Status i dag | Grundlag |
 | --- | --- | --- |
-| **steamgears.eu — site-optimering** *(roadmap S0–S4)* | **54,2 %** | 11,5 af 21,2 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,45/6 · S3 1,6/3 · S4 1,4/5) |
+| **steamgears.eu — site-optimering** *(roadmap S0–S4)* | **54,5 %** | 11,6 af 21,3 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,45/6 · S3 1,7/3,1 · S4 1,4/5) |
 | **Steamgears Autopilot — plugin** | **30 %** | 7,3 af 24,35 d (P0 3,2/4 · P1 3,85/11,35 · P2 0/7 · P3 0,25/2) |
 | **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5) |
 | **SEO-indholdsproduktion** | **0 %** | 0 af 3 guides · drift: Daglig loop kører |
@@ -34,7 +34,7 @@ Status pr. **2026-11-02** · beregnet af `projektstatus.py` · kilder: [`projekt
 <!-- AUTO:BLOKERINGER:START -->
 | Projekt | Næste skridt | Blokering |
 | --- | --- | --- |
-| steamgears.eu — site-optimering (54,2 %) | S1.1 Herbarium-varianter (kræver Printify-mapping); derefter S2.3 navigation og S4.3 valuta efter ejerbeslutning | S1.1 Herbarium kræver varianter i Printify; S0.4 5 vanity-301 kræver én Redirection-gruppe (ejer) |
+| steamgears.eu — site-optimering (54,5 %) | S1.1 Herbarium-varianter (kræver Printify-mapping); derefter S2.3 navigation og S4.3 valuta efter ejerbeslutning | S1.1 Herbarium kræver varianter i Printify; S0.4 5 vanity-301 kræver én Redirection-gruppe (ejer) |
 | Steamgears Autopilot — plugin (30 %) | P0.6 (kræver Command Center), derefter P1.2 "remind me instead" og P1.4 evergreen-recycling | Intet for P0. P1.5 kræver Pinterest-token (401) og Meta-review; P0.6 kræver Command Center |
 | Dark academia-rebrand (63 %) | Batch 4 — mockups (~130 billeder) | Printify-adgang |
 | SEO-indholdsproduktion (0 %) | Skriv guide id 292 (men's steampunk essentials) | ingen |
@@ -50,6 +50,7 @@ Nyeste først. Append-only — rækker må ikke slettes eller ændres.
 
 | Dato | Projekt | Modul | Før → Efter | Δ | Grundlag |
 | --- | --- | --- | --- | --- | --- |
+| 2026-11-02 | steamgears.eu — site-optimering | daglig måling | 54,2 % → 54,5 % | +0,3 | 11,6 af 21,3 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,45/6 · S3 1,7/3,1 · S4 1,4/5) |
 | 2026-11-02 | steamgears.eu — site-optimering | daglig måling | 54 % → 54,2 % | +0,2 | 11,5 af 21,2 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,45/6 · S3 1,6/3 · S4 1,4/5) |
 | 2026-11-02 | Steamgears Autopilot — plugin | daglig måling | 29,7 % → 30 % | +0,3 | 7,3 af 24,35 d (P0 3,2/4 · P1 3,85/11,35 · P2 0/7 · P3 0,25/2) |
 | 2026-11-02 | Steamgears Autopilot — plugin | daglig måling | 29 % → 29,7 % | +0,7 | 7,2 af 24,25 d (P0 3,2/4 · P1 3,75/11,25 · P2 0/7 · P3 0,25/2) |
