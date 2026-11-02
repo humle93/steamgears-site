@@ -23,7 +23,7 @@ The whole social autopilot runs inside WordPress (Command Center is retired):
 4. **Measure** – every post links via `/go/<id>/`, so clicks (and WooCommerce
    orders) are counted per channel.
 
-Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.22.0.zip` → Activate. On an existing
+Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.24.0.zip` → Activate. On an existing
 install the same zip arrives through the self-updater (see *Updates*), so an upload is only needed for the
 first install or a recovery.
 
@@ -171,6 +171,23 @@ title) so the next meta round starts with the posts that matter.
 `meta-audit` takes two optional arguments: `scan` (how many of the newest posts to check, default 100, max
 500) and `limit` (how many of the worst to return, default 20, max 100).
 
+## Naming a campaign (7.24)
+
+Every link already carried `utm_campaign=steamgears_premium_evergreen`, hardcoded, so a named campaign could
+not be separated from the everyday stream in GA4. Now the name has two levels:
+
+- **Settings → General → Campaign name** (`utm_campaign`) sets the name for everything queued from now on.
+  Set it once at the start of a campaign and change it back afterwards — the old posts keep the name they were
+  queued with, because the value is baked into each link when the post joins the queue. Letters, digits, `-`
+  and `_` only; empty means `steamgears_premium_evergreen`, so nothing ever goes out with a blank campaign.
+- **Per post:** pass `campaign` to `POST /queue` (or the `queue-post` ability) for a single post, e.g.
+  `campaign=clockwork_punk_2026_11`. The post's own name wins over the setting, which is what a finite series
+  needs: twelve posts can be measured as one campaign while the evergreen posts run on the setting.
+
+In GA4 the campaign shows up under *Traffic acquisition → Session campaign* and in *Explore* as the dimension
+`Session campaign`. The plugin's own `/stats` still counts clicks and orders per channel and angle, so a
+campaign can be read from two independent sources instead of one.
+
 ## Updates
 
 From 7.6 the plugin updates itself from GitHub (`humle93/steamgears-site`, branch `main`):
@@ -186,7 +203,7 @@ before it, because the MCP surface can read plugins but cannot install or activa
 1. Bump `Version:` in `steamgears-autopilot.php` and `SGAP_VERSION` — they must agree, CI fails otherwise.
 2. Rebuild the zip from the folder so the name and the contents match:
    `cd plugins && rm -f steamgears-autopilot-*.zip && zip -qr steamgears-autopilot-v<version>.zip steamgears-autopilot`
-3. `php plugins/tests/smoke.php` (219 checks) and `diff -r` the zipped copy against the source. CI repeats
+3. `php plugins/tests/smoke.php` (229 checks) and `diff -r` the zipped copy against the source. CI repeats
    both, plus `php -l` on PHP 8.0–8.5 and WordPress 6.4 / 7.1 / latest.
 4. Commit code, zip, README and `ROADMAP.md` together and push to `main`.
 5. **Click *Plugins → Update*** (or *Dashboard → Updates*). Auto-updates can be switched on in the same
@@ -198,9 +215,15 @@ Check that the release landed, in this order — each step can hide the previous
 - A feature from the release answers from the site. For 7.22: a post that fails a `block` check is refused
   and the reason is named. `check-post` proves the decision without writing; a `queue-post` refusal also
   proves the gate sits inside the queue, but needs the site's MCP access to allow writes.
-- `steamgears-autopilot/status` shows the new setting — `quality_gate: {mode, banned_words}` for 7.22.
+- A release with an ability answers too: `meta-audit` (7.23) returns the worst posts with their title and
+description lengths and writes nothing.
+- `steamgears-autopilot/status` shows the new setting — `quality_gate: {mode, banned_words}` for 7.22,
+  `utm_campaign` under *General* for 7.24 (and `check-post` still writes nothing).
 
-> **Current release 7.22.0 is live.** Measured 2026-11-02 after the update click: both `wp_list_plugins` and
+> **7.22.0 was the live release when this was written; 7.24.0 ships the campaign name (7.23.0 shipped the
+> `meta-audit` ability).** The proof steps below are unchanged, and the update click is still the deploy.
+>
+> **7.22.0 measured live.** Measured 2026-11-02 after the update click: both `wp_list_plugins` and
 > `steamgears-autopilot/status` report 7.22.0. Two owner-side settings limit what can be proven: *Banned words*
 > is empty (so that check cannot fire) and AI Engine's *Drafts Only* refuses `queue-post` before the gate sees it.
 > Site-side status and the measurements are in [`docs/roadmap.md`](../../docs/roadmap.md) §2b.
@@ -292,7 +315,7 @@ add posts or read the numbers.
 
 | Method | Path | Purpose |
 |---|---|---|
-| POST | `/queue` | Add a post. Required: `channel`, `title`, `destination_url`. Optional: `body`, `image_url`, `angle`, `content_type`, `format`, `post_id`, `scheduled_at`, `status` (`queued`/`draft`). Returns `id`, `tracking_url`, `utm_url`. Same channel + URL + title again → `409`. |
+| POST | `/queue` | Add a post. Required: `channel`, `title`, `destination_url`. Optional: `body`, `image_url`, `angle`, `content_type`, `format`, `post_id`, `scheduled_at`, `campaign` (utm_campaign for this post; empty = the setting), `status` (`queued`/`draft`). Returns `id`, `tracking_url`, `utm_url`. Same channel + URL + title again → `409`. |
 | GET | `/queue/due` | Next posts to publish (optional `?channel=`). Respects Autopilot on/off, quiet hours, daily cap and batch size. Returned items are marked `sending`. |
 | POST | `/queue/<id>/status` | `status=published`, or `status=failed&error=...` (retried up to 3 times, then `failed`). |
 | POST | `/drafts` | Add an AI draft for approval in WP (fields as the `sgap_ai_drafts` table). |

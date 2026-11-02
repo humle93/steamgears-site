@@ -69,6 +69,23 @@ check('queue missing title 400', $r instanceof WP_Error && $r->data['status']===
 $wpdb->next=null; $r=SGAP_REST::create_queue(new WP_REST_Request(['channel'=>'Pinterest','title'=>'Goggles','destination_url'=>'https://steamgears.eu/g/','angle'=>'angle_b']));
 check('queue created 201', $r instanceof WP_REST_Response && $r->status===201 && $r->data['tracking_url']==='https://steamgears.eu/go/42/');
 check('utm built', str_contains($r->data['utm_url'],'utm_source=pinterest') && str_contains($r->data['utm_url'],'utm_content=angle_b_product_pin'));
+// utm_campaign: one setting for the everyday stream, one optional field for a named campaign.
+$utm=fn(array $a)=>SGAP_UTM::build($a+['destination_url'=>'https://steamgears.eu/x/']);
+check('utm campaign default', str_contains($utm(['channel'=>'pinterest']),'utm_campaign=steamgears_premium_evergreen'));
+$opts['sgap_utm_campaign']='clockwork_punk_2026_11';
+check('utm campaign from setting', str_contains($utm(['channel'=>'pinterest']),'utm_campaign=clockwork_punk_2026_11'));
+check('utm campaign per post wins', str_contains($utm(['channel'=>'pinterest','campaign'=>'Spring Drop!']),'utm_campaign=springdrop'));
+check('utm campaign sanitized', SGAP_UTM::campaign('Clockwork Punk 2026/11')==='clockworkpunk202611');
+check('utm campaign never empty', SGAP_UTM::campaign('')==='clockwork_punk_2026_11');
+unset($opts['sgap_utm_campaign']);
+check('utm campaign falls back', SGAP_UTM::campaign('')==='steamgears_premium_evergreen');
+$campaign_san=$settings['sgap_utm_campaign']['sanitize_callback'] ?? null;
+check('utm campaign setting: empty = default', is_callable($campaign_san) && $campaign_san('')==='steamgears_premium_evergreen' && $campaign_san('Autumn Sale')==='autumnsale');
+check('utm campaign setting on the page', in_array('utm_campaign',SGAP_Settings::SECTIONS['General'],true) && isset(SGAP_Settings::HELP['utm_campaign']));
+$wpdb->next=null; $before=count($wpdb->log);
+$r=SGAP_REST::create_queue(new WP_REST_Request(['channel'=>'pinterest','title'=>'Campaign pin','destination_url'=>'https://steamgears.eu/g/','campaign'=>'Clockwork Punk 2026_11']));
+check('queue: per-post campaign in utm url', $r instanceof WP_REST_Response && str_contains((string)($r->data['utm_url']??''),'utm_campaign=clockworkpunk2026_11'));
+check('queue: per-post campaign saved on the row', str_contains(implode("\n",array_slice($wpdb->log,$before)),'utm_campaign=clockworkpunk2026_11'));
 $wpdb->next=7; $r=SGAP_REST::create_queue(new WP_REST_Request(['channel'=>'pinterest','title'=>'Goggles','destination_url'=>'https://steamgears.eu/g/']));
 check('duplicate 409', $r instanceof WP_Error && $r->data['status']===409);
 $opts['sgap_autopilot_enabled']='no'; $r=SGAP_REST::due(new WP_REST_Request([])); check('due off', $r['reason']==='autopilot_disabled');

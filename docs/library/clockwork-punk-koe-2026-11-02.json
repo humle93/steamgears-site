@@ -1,5 +1,6 @@
 {
-  "campaign": "clockwork-punk",
+  "kampagne": "clockwork-punk",
+  "utm_kampagne": "clockwork_punk_2026_11",
   "navn": "Clockwork Punk — 12 dage, 12 produkter, 3 vinkler",
   "oprettet": "2026-11-02",
   "kanaler": ["pinterest", "instagram", "facebook"],
@@ -24,7 +25,8 @@
       "image_url": "https://steamgears.eu/wp-content/uploads/2026/10/03-clockwork-figurehead-1.jpg",
       "board": "steampunk-posters-prints",
       "scheduled_at": "2026-11-03 18:30:00",
-      "status": "queued"
+      "status": "queued",
+      "campaign": "clockwork_punk_2026_11"
     },
     {
       "dag": 2,
@@ -39,7 +41,8 @@
       "image_url": "https://steamgears.eu/wp-content/uploads/2026/10/vol3-09-tea.webp",
       "board": "",
       "scheduled_at": "2026-11-04 12:15:00",
-      "status": "queued"
+      "status": "queued",
+      "campaign": "clockwork_punk_2026_11"
     },
     {
       "dag": 3,
@@ -54,7 +57,8 @@
       "image_url": "https://steamgears.eu/wp-content/uploads/2026/10/file-01a1895d-83a5-73c5-be2e-2c980e2b6ad5.jpg",
       "board": "steampunk-posters-prints",
       "scheduled_at": "2026-11-05 18:30:00",
-      "status": "queued"
+      "status": "queued",
+      "campaign": "clockwork_punk_2026_11"
     },
     {
       "dag": 4,
@@ -69,7 +73,8 @@
       "image_url": "https://steamgears.eu/wp-content/uploads/2026/10/file-01a18813-4204-7316-901a-8526380687d2.jpg",
       "board": "",
       "scheduled_at": "2026-11-06 18:30:00",
-      "status": "queued"
+      "status": "queued",
+      "campaign": "clockwork_punk_2026_11"
     },
     {
       "dag": 5,
@@ -84,7 +89,8 @@
       "image_url": "https://steamgears.eu/wp-content/uploads/2026/10/file-01a1895d-b020-72ce-9de6-153ecf08799b.jpg",
       "board": "steampunk-posters-prints",
       "scheduled_at": "2026-11-07 12:15:00",
-      "status": "queued"
+      "status": "queued",
+      "campaign": "clockwork_punk_2026_11"
     },
     {
       "dag": 6,
@@ -99,7 +105,8 @@
       "image_url": "https://steamgears.eu/wp-content/uploads/2026/10/clockwork-owl-steampunk-unisex-hoodie.jpg",
       "board": "",
       "scheduled_at": "2026-11-08 18:30:00",
-      "status": "queued"
+      "status": "queued",
+      "campaign": "clockwork_punk_2026_11"
     },
     {
       "dag": 7,
@@ -114,7 +121,8 @@
       "image_url": "https://steamgears.eu/wp-content/uploads/2026/10/file-01a1895e-3804-777e-924a-ef688fd12f4d.jpg",
       "board": "steampunk-posters-prints",
       "scheduled_at": "2026-11-09 18:30:00",
-      "status": "queued"
+      "status": "queued",
+      "campaign": "clockwork_punk_2026_11"
     },
     {
       "dag": 8,
@@ -129,7 +137,8 @@
       "image_url": "https://steamgears.eu/wp-content/uploads/2026/10/file-01a18813-6fb0-7543-8fa4-1f85533df338.jpg",
       "board": "",
       "scheduled_at": "2026-11-10 12:15:00",
-      "status": "queued"
+      "status": "queued",
+      "campaign": "clockwork_punk_2026_11"
     },
     {
       "dag": 9,
@@ -144,7 +153,8 @@
       "image_url": "https://steamgears.eu/wp-content/uploads/2026/10/vol3-10.webp",
       "board": "steampunk-complete-looks",
       "scheduled_at": "2026-11-11 18:30:00",
-      "status": "queued"
+      "status": "queued",
+      "campaign": "clockwork_punk_2026_11"
     },
     {
       "dag": 10,
@@ -159,7 +169,8 @@
       "image_url": "https://steamgears.eu/wp-content/uploads/2026/10/clockwork-heart-steampunk-unisex-hoodie.jpg",
       "board": "",
       "scheduled_at": "2026-11-12 18:30:00",
-      "status": "queued"
+      "status": "queued",
+      "campaign": "clockwork_punk_2026_11"
     },
     {
       "dag": 11,
@@ -174,7 +185,8 @@
       "image_url": "https://steamgears.eu/wp-content/uploads/2026/10/clockwork-octopus-steampunk-unisex-hoodie.jpg",
       "board": "steampunk-posters-prints",
       "scheduled_at": "2026-11-13 12:15:00",
-      "status": "queued"
+      "status": "queued",
+      "campaign": "clockwork_punk_2026_11"
     },
     {
       "dag": 12,
@@ -189,7 +201,8 @@
       "image_url": "https://steamgears.eu/wp-content/uploads/2026/10/file-01a18812-a514-765f-b155-86a07c72eefa.jpg",
       "board": "",
       "scheduled_at": "2026-11-14 18:30:00",
-      "status": "queued"
+      "status": "queued",
+      "campaign": "clockwork_punk_2026_11"
     }
   ]
 }
