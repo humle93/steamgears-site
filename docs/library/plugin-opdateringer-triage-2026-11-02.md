@@ -2,9 +2,15 @@
 
 _Opfølgning på [`sikkerhed-plugin-versioner-2026-11-01.md`](sikkerhed-plugin-versioner-2026-11-01.md) · kun læsende opslag (wordpress.org plugin-API 2/11, changelogs) · intet er opdateret på sitet endnu_
 
+> **Status 2/11 2026, sen aften:** dokumentet bygger på et 23/10-snapshot og beskriver derfor ikke den live
+> plugin-liste. Den faktiske måling står i [`plugin-audit-2026-11-02.md`](plugin-audit-2026-11-02.md) §1:
+> 38 installeret, 36 aktive, **3 bagud**. `ai-engine` er opdateret til **3.9.0** og er **aktiv** — den er
+> MCP-serveren, ikke et plugin der skal fjernes. Risikovurderingerne pr. plugin nedenfor gælder stadig for de
+> plugins, der faktisk er installeret.
+
 ## TL;DR
 
-- **8 af de 16 kan køres nu** i ét batch på ~15 minutter. **5 kræver et vindue med databasebackup.** **2 bør fjernes i stedet for opdateres.** **1 er allerede lukket** (`ai-engine` kører 3.8.9 og er inaktiv, verificeret 1/11).
+- **8 af de 16 kan køres nu** i ét batch på ~15 minutter. **5 kræver et vindue med databasebackup.** **2 bør fjernes i stedet for opdateres.** **1 er allerede lukket** (`ai-engine` kørte 3.8.9 og var inaktiv 1/11 — den er nu 3.9.0 og **aktiv**, fordi den er MCP-serveren).
 - **Kompatibilitet er ikke flaskehalsen.** Produktion kører **PHP 8.5.12 / WordPress 7.1.4** (`roadmap.md` S0.3), og alle 16 kræver højst PHP 8.3, alle er testet til 7.1.4. Intet er blokeret af platformen.
 - **Tre ting i changelogs ændrer billedet fra auditten:**
   1. **`seo-engine` 1.0.0 retter en stored XSS** (titler/beskrivelser renderet som rå HTML i admin-preview, insights og JSON-LD). Auditten førte den som »ingen kendte sårbarheder«, fordi WPScan ikke har posten — den hører i sikkerhedsbunken.
