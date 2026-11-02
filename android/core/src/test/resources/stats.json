@@ -1,0 +1,48 @@
+{
+    "days": 30,
+    "events": [
+        {
+            "channel": "pinterest",
+            "event_type": "publish",
+            "count": "42",
+            "value": "0"
+        },
+        {
+            "channel": "pinterest",
+            "event_type": "click",
+            "count": "310",
+            "value": "0"
+        },
+        {
+            "channel": "pinterest",
+            "event_type": "order",
+            "count": "7",
+            "value": "612.40"
+        }
+    ],
+    "learning": [
+        {
+            "dimension": "channel",
+            "dimension_value": "pinterest",
+            "clicks": "310",
+            "orders": "7",
+            "revenue": "612.40",
+            "cost": "0.00",
+            "updated_at": "2026-11-02 06:00:00"
+        }
+    ],
+    "queue": [
+        {
+            "status": "sent",
+            "count": "11"
+        },
+        {
+            "status": "queued",
+            "count": "4"
+        },
+        {
+            "status": "failed",
+            "count": "1"
+        }
+    ]
+}

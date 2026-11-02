@@ -103,16 +103,16 @@
       "id": "cc",
       "name": "Command Center (Android) — social pilot",
       "note": "eget repo, tynd klient mod sgap/v1",
-      "next": "M1: API-klient og application-password-auth mod sgap/v1 (snapshot, drafts, drafts/{id}/status)",
+      "next": "M2: app-modul med skærmene status, kladder og kø oven på SgapApi (core er færdig og testet)",
       "blocked_by": "GITHUB_TOKEN til at oprette repoet via sync_repos.py; ingen Android SDK i sandboxen, så APK bygges i CI",
       "modules": [
         {
           "id": "m1",
           "name": "M1 — API-klient og auth",
-          "done": 0,
+          "done": 0.9,
           "total": 1,
           "unit": "d",
-          "note": "6 endpoints, application password, fejlhåndtering"
+          "note": "6 endpoints + auth bygget i android/core, 46 JVM-tests grønne; 0,1 d tilbage = første kald mod steamgears.eu (kræver WP-creds)"
         },
         {
           "id": "m2",
@@ -413,6 +413,15 @@
       "after": 92.9,
       "delta": 0.5,
       "basis": "3,25 af 3,5 d (M1 0,5/0,5 · M2 1/1 · M3 0,5/0,5 · M4 0,25/0,5 · M5 0,4/0,4 · M6 0,4/0,4 · M7 0,2/0,2)"
+    },
+    {
+      "date": "2026-11-02",
+      "project": "Command Center (Android) — social pilot",
+      "module": "daglig måling",
+      "before": 0.0,
+      "after": 30.0,
+      "delta": 30.0,
+      "basis": "0,9 af 3 d (M1 0,9/1 · M2 0/1,5 · M3 0/0,5)"
     }
   ]
 }

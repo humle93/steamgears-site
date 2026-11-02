@@ -1,6 +1,6 @@
 # Command Center (Android) — social pilot for steamgears.eu (2026-11-02)
 
-**Status: planlagt, 0 % bygget.** Projektet er registreret i [`projektstatus.json`](../../projektstatus.json) og `repos.json`, men repoet findes ikke endnu (`GITHUB_TOKEN` mangler).
+**Status: M1 bygget og testet (API-klient + auth, 46 JVM-tests), resten planlagt.** Koden ligger i [`android/`](../../android/README.md), se [`command-center-m1-2026-11-02.md`](command-center-m1-2026-11-02.md). Projektet er registreret i [`projektstatus.json`](../../projektstatus.json) og `repos.json`, men repoet findes ikke endnu (`GITHUB_TOKEN` mangler), så koden bor her indtil videre.
 
 ## Hvad det er
 
@@ -49,8 +49,16 @@ Alt nedenstående er registreret i `plugins/steamgears-autopilot/includes/core.p
 1. `GITHUB_TOKEN` — repoet `humle93/steamgears-command-center` kan ikke oprettes af `sync_repos.py --apply` uden det.
 2. Android-build — der er ingen Android SDK i denne sandbox, så APK'en skal bygges i CI (`.github/workflows/`), ikke her. Det skal siges højt, før nogen kalder appen "testet".
 
+## Hvad M1 blev
+
+Seks endpoints i en ren Kotlin/JVM-modul (`android/core`), så klienten kan testes uden
+Android SDK: `snapshot`, `drafts`, `drafts/{id}/status`, `queue`, `queue/{id}/status` og
+`stats`, med application password som Basic auth, tolerante serializers (MySQL giver tal
+som strenge) og fejl som værdier med danske beskeder. Testfixtures genereres af den
+rigtige PHP, ikke i hånden. Detaljer: [`command-center-m1-2026-11-02.md`](command-center-m1-2026-11-02.md).
+
 ## Næste skridt
 
 1. Opret repoet (token) og læg `AGENTS.md`-kontrakten ind via `sync_repos.py`.
-2. M1: API-klient med `snapshot`, `drafts`, `drafts/{id}/status`.
-3. M3 tidligt, så M2 kan bygges og fejle i CI i stedet for på telefonen.
+2. M2: `app`-modul med skærmene status, kladder og kø oven på `SgapApi`.
+3. M3: CI der bygger APK — `command-center-ci.yml` kører allerede `:core:test`.
