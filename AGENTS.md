@@ -103,8 +103,19 @@ Reglen over holdes automatisk, så lidt som muligt afhænger af hukommelse:
   gaten flyttes ikke. Er tokenet udløbet (401), fejler jobbet rødt. Hvad et token kræver, og hvad kørslen
   ikke kan: se [`docs/library/niche-scan-ci-2026-11-03.md`](docs/library/niche-scan-ci-2026-11-03.md).
 
-Automationen dækker **den daglige status**. Det manuelle i §1 — at vurdere hvad der reelt blev udført og melde
-`% før → % efter` i svaret og commit-beskeden — kan scriptet ikke gøre og falder stadig på den der arbejder.
+- **Commit-besked-værnet** ([`tools/commit_check.py`](tools/commit_check.py)): reglen i §1 bliver kontrolleret
+  maskinelt på tre flader — `--message-file` er **commit-msg-hooken** (`python3 tools/commit_check.py --install`,
+  som [`tools/setup-agent-tools.sh`](tools/setup-agent-tools.sh) også kører), `--range A..B` tjekker de commits
+  der blev pushet (CI: [`.github/workflows/commit-vaern.yml`](.github/workflows/commit-vaern.yml)), og
+  `--selftest` kører 24 fixtures. Værnet kræver `Modul:`, `Før:`, `Efter:`, `Δ:` og `Grundlag:` — også når de
+  står som `Før: 63 % → Efter: 78 % (Δ +15)` på én linje — afviser procentfelter der ikke er et tal eller en
+  streg, kræver at `Grundlag` kan genberegnes (tal eller `ingen ændring`), og at `Δ` passer med `Efter − Før`.
+  Merge-, revert- og bot-committene fra de to workflows er undtaget, fordi de ikke kan bære procenter;
+  historikken før 3/11 er ikke tjekket efter.
+
+Automationen dækker **den daglige status**, og commit-beskeden bliver holdt op på formen. Det manuelle i §1 — at
+vurdere hvad der reelt blev udført og melde `% før → % efter` i svaret — kan scriptet ikke gøre og falder stadig
+på den der arbejder.
 
 ## 5. Øvrige regler
 

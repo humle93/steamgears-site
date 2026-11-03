@@ -68,6 +68,10 @@ Grundlag: 12,05 af 21,75 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,45/6 · S3 2,15/3,
   | site · plugin · rebrand · seo · links | som i §1 i `docs/projektstatus.md` | samme grundlag |
 
 - **Commit-beskeden bærer samme tal.** Dansk, med `🤖 Generated with Codebuff` + `Co-Authored-By`-fod.
+  Værnet [`tools/commit_check.py`](../../../tools/commit_check.py) afviser beskeden hvis blokken mangler, hvis et
+  procentfelt ikke er et tal eller en streg, hvis `Grundlag` ikke kan genberegnes, eller hvis `Δ` ikke passer med
+  `Efter − Før`. Er hooken ikke installeret i sandkassen: `python3 tools/commit_check.py --install`.
+  Merge-, revert- og bot-commits er undtaget.
 
 ## 5. Efter passet
 
