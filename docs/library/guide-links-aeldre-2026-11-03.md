@@ -61,6 +61,44 @@ der skal laves, med den linktekst der skal bruges.
 | `/sustainable-steampunk/` | /go/809/ | Steampunk costume checklist | gratis | `klar` |
 | `/build/tools-and-materials/` | /go/809/ | Steampunk costume checklist | gratis | `klar` |
 
+## 2b. Dækning pr. guide — ti guides, fyrre rækker
+
+Planen har **ti** guides: **ni** fra 2/11-planen plus outfit-guiden, som er den ene ældre guide der findes som fil
+i repoet. Det er de samme ti som `link_plan_check` tæller i sin første linje — antallet i tabellen her, i værnet
+og i rapporten er nu det samme.
+
+| Guide | Antal | Produkt-ID'er | Status | ID-kilde |
+| --- | ---: | --- | --- | --- |
+| `/steampunk-outfit-ideas-for-women/` | 20 | 399, 403, 409, 475, 477, 479, 481, 483, 485, 487, 489, 491, 493, 495, 497, 555, 559, 561, 567, 719 | `indsat` | mapping (39 designs) |
+| `/how-to-make-a-steampunk-costume/` | 3 | 477, 481, 809 | `klar` | mapping |
+| `/3d-print-steampunk-parts/` | 2 | 479 `klar` · 766 `pris mangler` | delvis | 766: appendix |
+| `/best-steampunk-books/` | 2 | 728, 721 | `klar` | mapping |
+| `/casual-steampunk-outfits/` | 2 | 563, 405 | `klar` | mapping |
+| `/closet-steampunk-outfits/` | 2 | 561, 483 | `klar` | mapping |
+| `/sustainable-steampunk/` | 2 | 809 `klar` · 767 `pris mangler` | delvis | 767: appendix |
+| `/build/tools-and-materials/` | 2 | 809 `klar` · 767 `pris mangler` | delvis | 767: appendix |
+| `/build/weathering/` | 1 | 767 `pris mangler` | **navngivet blokering** | 767: appendix |
+| `/steampunk-gift-guide-2026/` | 4 | 940, 941, 942, 968 — alle `pris mangler` | **navngivet blokering** | appendix |
+
+20 + 3 + 2 + 2 + 2 + 2 + 2 + 2 + 1 + 4 = **40 rækker**, som er det `link_plan_check` rapporterer.
+
+### De to stier der kræver et ejer-opslag, ikke et gæt
+
+- **`/build/weathering/`** har `/go/767/` (Digital Blueprint: Victorian Corset & Vest PDF). ID'et er sporet til
+  [`drafts-udgivet-2026-11-02.md`](drafts-udgivet-2026-11-02.md) og
+  [`meta-fixes-og-produktlinks-2026-11-02.md`](meta-fixes-og-produktlinks-2026-11-02.md) §3 og står nu i
+  appendix i mappingen. **Blokeringen er prisen og adgangen, ikke ID'et:** produktet blev udgivet 2/11 2026 og
+  har ingen række i pristabellen fra samme dag, så teksten kan ikke få en kontrolleret pris, og siden kan ikke
+  redigeres uden WordPress-adgang.
+- **`/steampunk-gift-guide-2026/`** har fire links — 940 (Clockwork Seer pendant), 941 (The Aeronaut pocket
+  watch), 942 (Ink and Steam bracelet) og 968 (Nightshade Apothecary art print). Alle fire er sporet til
+  `meta-fixes-og-produktlinks-2026-11-02.md` §3 (og 968 også til
+  [`butik-fund-2026-11-02.md`](butik-fund-2026-11-02.md)) og står i appendix. Samme to blokeringer som ovenfor:
+  ingen prisrække i repoet, og ingen adgang til at indsætte dem.
+
+**Ingen række i planen er uden ID.** Alle ti guides har mindst ét `/go/<id>/`, og hvert ID peger på en fil i
+repoet. Det der mangler for de to stier er en pris og en redigering — ikke en kortlægning.
+
 ## 3. Kortlagt, men uden pris i repoet
 
 De seks produkter nedenfor var ikke i ID-mappingen; de er lagt ind i
@@ -82,9 +120,9 @@ med den kilde i repoet der nævner dem. **Ingen af dem har en prisrække i prist
 Det er ikke længere en tavs mangel: hvert ID har en række i mappingen med en kilde, og hullet er prisen — som
 kræver et opslag i butikken, ikke en gætning her.
 
-**Hvad der stadig ikke kan linkes:** intet. Alle ni guides fra 2/11-planen har nu mindst ét kortlagt produkt.
-`/build/weathering/` og `/steampunk-gift-guide-2026/` var de to der så ud til at være blokeret; de er dækket af
-henholdsvis 767 og de fire Atelier/Herbarium-ID'er, blot uden pris.
+**Status pr. guide:** se dækningstabellen i §2b — ti guides, fyrre rækker, hvoraf de to
+(`/build/weathering/` og `/steampunk-gift-guide-2026/`) er navngivne blokeringer med årsag.
+
 
 ## 4. Strukturen der følger med
 
