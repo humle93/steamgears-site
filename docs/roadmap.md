@@ -108,7 +108,13 @@ done"*. Two owner-side settings therefore stand between the gate and its real te
   **Re-measured 3/11 2026:** `mcp_drafts_only` is still `true` in `mwai_options`, and
   `steamgears-autopilot_update` still answers *"This site lets assistants work on drafts only, so this was not
   done. It would change the live site; ask the owner to do it."* Nothing is different from 2/11 — the switch has
-  not been saved, so 7.25.0 stays one version behind and the campaign fields it carries stay unused.
+  not been saved, so 7.25.0 stays one version behind and the campaign fields it carries stay unused. The gate was
+  then read in AI Engine 3.9.0's own source: it refuses every tool outside its 10 draft-safe and 21 post tools,
+  **including `wp_update_option`**, so no agent-side route can lift it — and an unsaved toggle looks saved until
+  the page is reloaded. Recipe and verification in
+  [`library/mcp-drafts-only-gaten-2026-11-03.md`](library/mcp-drafts-only-gaten-2026-11-03.md). The 7.25.0 zip is
+  reachable at the URL the plugin's updater uses (HTTP 200, 161 KB), and `status` already reports
+  `latest_on_github: 7.25.0`, so the owner's *Plugins → Update* click is enough.
 - **Settings → General → Banned words is empty** (`banned_words: 0`), so the headline check of 7.22 cannot fire
   on anything until the owner adds at least one word. The other three checks (dead links, missing alt text,
   duplicate captions) work without it.

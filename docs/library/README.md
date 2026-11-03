@@ -20,6 +20,7 @@ sidste commit-dato. Målt 2/11 2026.
 
 | Dokument | Indhold | Dato |
 | --- | --- | --- |
+| [mcp-drafts-only-gaten-2026-11-03.md](mcp-drafts-only-gaten-2026-11-03.md) | **Drafts Only-gaten:** kildelæst i AI Engine 3.9.0 — hvilke 10+21 værktøjer der slipper igennem, hvorfor `wp_update_option` selv er spærret, hvorfor et gem kan se gennemført ud uden at være det, og de tre veje til 7.25.0 (PDF i `reports/mcp-drafts-only-gaten-2026-11-03.pdf`) | 2026-11-03 |
 | [mcp-skriveadgang-2026-11-02.md](mcp-skriveadgang-2026-11-02.md) | **MCP-skriveadgang og 7.25.0:** hvorfor REST-ruten svarer 401, hvad Drafts Only blokerer, hvordan `mcp_options` aflæses uden at skrive, og 12/12 forhåndsvaliderede kampagneposter (PDF i `reports/mcp-skriveadgang-2026-11-02.pdf`) | 2026-11-02 |
 | [clockwork-punk-kampagne-2026-11-02.md](clockwork-punk-kampagne-2026-11-02.md) | Clockwork Punk-kampagne 3.–14/11: koncept, 12 verificerede produkter, 3 vinkler, måling og blokeringer | 2026-11-02 |
 | [clockwork-punk-koe-2026-11-02.json](clockwork-punk-koe-2026-11-02.json) | Kø-payload til `POST /sgap/v1/queue` — 12 poster med captions, links og tidspunkter | 2026-11-02 |
