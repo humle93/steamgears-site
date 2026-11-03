@@ -422,4 +422,119 @@ $GLOBALS['posts_result']=[]; $GLOBALS['postmeta'][11]=[]; $GLOBALS['postmeta'][1
 $opts['sgap_banned_words']=''; $GLOBALS['postid_for']=[]; $GLOBALS['poststatus']=[]; $GLOBALS['postmeta']=[]; $GLOBALS['attachment_for']=[];
 $wpdb->row=null;
 $wpdb->next=null;
+// ---- MCP tool catalogue (includes/mcp-tools.php) ----
+if (!function_exists('untrailingslashit')) { function untrailingslashit($s){ return rtrim((string)$s,'/'); } }
+if (!function_exists('wp_unslash')) { function wp_unslash($v){ return $v; } }
+if (!function_exists('nocache_headers')) { function nocache_headers(){} }
+if (!function_exists('status_header')) { function status_header($c){ $GLOBALS['status']=$c; } }
+if (!function_exists('get_query_var')) { function get_query_var($k){ return ''; } }
+if (!function_exists('has_action')) { function has_action($h){ return false; } }
+if (!function_exists('do_action_ref_array')) { function do_action_ref_array($h,$a=[]){ $GLOBALS['ran'][]=$h; } }
+if (!function_exists('sanitize_title')) { function sanitize_title($s){ return trim(strtolower(preg_replace('/[^a-z0-9]+/i','-',(string)$s)),'-'); } }
+if (!function_exists('wp_remote_retrieve_response_code')) { function wp_remote_retrieve_response_code($r){ return 200; } }
+if (!function_exists('wp_remote_retrieve_body')) { function wp_remote_retrieve_body($r){ return ''; } }
+if (!function_exists('wp_get_abilities')) { function wp_get_abilities(){ return $GLOBALS['ability_objects']??[]; } }
+if (!function_exists('wp_get_ability')) { function wp_get_ability($n){ return $GLOBALS['ability_objects'][$n]??null; } }
+class SGAP_Fake_Ability { function __construct(public string $n, public array $a=[]){} function get_name(){return $this->n;} function get_label(){return 'Label '.$this->n;} function get_description(){return 'Does '.$this->n;} function get_category(){return $this->a['category']??'cat';} function get_input_schema(){return $this->a['input_schema']??null;} function get_meta(){return ['mcp'=>['public'=>true,'type'=>'tool']];} function check_permissions($x=[]){return true;} function execute($x=[]){return ['ran'=>$this->n,'input'=>$x];} }
+do_action('wp_abilities_api_categories_init'); do_action('wp_abilities_api_init');
+$tools=array_filter($GLOBALS['abilities'],fn($k)=>str_starts_with($k,'steamgears-tools/'),ARRAY_FILTER_USE_KEY);
+check('tools: category registered', isset($GLOBALS['ability_categories']['steamgears-tools']));
+check('tools: full catalogue registered', count($tools)===26);
+check('tools: the actions we kept needing are there', !array_diff([
+    'steamgears-tools/get-option','steamgears-tools/update-option','steamgears-tools/undo','steamgears-tools/set-plugin-state',
+    'steamgears-tools/flush-rewrites','steamgears-tools/flush-caches','steamgears-tools/list-posts','steamgears-tools/update-post',
+    'steamgears-tools/upload-media','steamgears-tools/update-product','steamgears-tools/indexnow-submit',
+    'steamgears-tools/indexnow-status','steamgears-tools/sitemap-audit','steamgears-tools/list-abilities','steamgears-tools/call-ability'
+], array_keys($tools)));
+$bad=[];
+foreach($tools as $n=>$a){
+    if(!is_callable($a['execute_callback']??null)) $bad[]="$n: execute";
+    if(!is_callable($a['permission_callback']??null)) $bad[]="$n: permission";
+    if(!isset($a['meta']['mcp']['type'])) $bad[]="$n: mcp meta";
+    if(isset($a['input_schema']) && ($a['input_schema']['type']??'')!=='object') $bad[]="$n: schema";
+    if(isset($a['input_schema']['properties']) && ($a['input_schema']['additionalProperties']??null)!==false) $bad[]="$n: strict";
+}
+check('tools: every tool is callable and well-formed', $bad===[]);
+check('tools: destructive tool is flagged', ($tools['steamgears-tools/trash-post']['meta']['annotations']['destructive']??false)===true);
+check('tools: read-only tools are flagged read-only', ($tools['steamgears-tools/site-info']['meta']['annotations']['readonly']??false)===true);
+check('tools: key options are never readable', SGAP_MCP_Tools::is_secret_option('rank_math_indexnow_key') && SGAP_MCP_Tools::is_secret_option('sgap_ai_api_key') && SGAP_MCP_Tools::is_secret_option('woocommerce_api_key'));
+check('tools: ordinary options stay readable', !SGAP_MCP_Tools::is_secret_option('blogdescription') && !SGAP_MCP_Tools::is_secret_option('permalink_structure'));
+check('tools: tagline is writable, siteurl is not', SGAP_MCP_Tools::is_writable_option('blogdescription') && !SGAP_MCP_Tools::is_writable_option('siteurl'));
+check('tools: reading a key option is refused', SGAP_MCP_Tools::get_option_tool(['name'=>'rank_math_indexnow_key']) instanceof WP_Error);
+$GLOBALS['opts']['blogdescription']='Old tagline';
+$dry=SGAP_MCP_Tools::update_option_tool(['name'=>'blogdescription','value'=>'New']);
+check('tools: writing is a dry run by default', $dry['written']===false && get_option('blogdescription')==='Old tagline');
+check('tools: writing needs confirm', SGAP_MCP_Tools::update_option_tool(['name'=>'blogdescription','value'=>'New','dry_run'=>false])['written']===false);
+$w=SGAP_MCP_Tools::update_option_tool(['name'=>'blogdescription','value'=>'New','dry_run'=>false,'confirm'=>true]);
+check('tools: confirmed write lands and reports the old value', get_option('blogdescription')==='New' && $w['written']===true && $w['previous']==='Old tagline');
+check('tools: undo restores the old value', SGAP_MCP_Tools::undo(['token'=>$w['undo_token']])['restored']==='blogdescription' && get_option('blogdescription')==='Old tagline');
+check('tools: undo token works only once', SGAP_MCP_Tools::undo(['token'=>$w['undo_token']]) instanceof WP_Error);
+check('tools: writing siteurl is refused', SGAP_MCP_Tools::update_option_tool(['name'=>'siteurl','value'=>'https://evil.example','dry_run'=>false,'confirm'=>true]) instanceof WP_Error);
+$p=SGAP_MCP_Tools::indexnow_payload(['https://steamgears.eu/a','nope','https://steamgears.eu/b'],'k','https://steamgears.eu/k');
+check('tools: indexnow payload has host, key, keyLocation and only http urls', $p['host']==='steamgears.eu' && $p['key']==='k' && $p['keyLocation']==='https://steamgears.eu/k' && $p['urlList']===['https://steamgears.eu/a','https://steamgears.eu/b']);
+check('tools: indexnow payload is capped at 100 urls', count(SGAP_MCP_Tools::indexnow_payload(array_map(fn($i)=>"https://x/$i",range(1,150)),'k','u')['urlList'])===100);
+check('tools: sitemap locs are parsed and trimmed', SGAP_MCP_Tools::sitemap_locs('<urlset><url><loc>https://a/1</loc></url><url><loc> https://a/2 </loc></url></urlset>')===['https://a/1','https://a/2']);
+check('tools: empty or broken sitemap gives no locs', SGAP_MCP_Tools::sitemap_locs('<html>404</html>')===[]);
+check('tools: key is 32 hex characters', preg_match('/^[a-f0-9]{32}$/',SGAP_MCP_Key::key())===1);
+check('tools: key url carries the key on our own host', str_contains(SGAP_MCP_Key::url(),'sgap_indexnow_key='.SGAP_MCP_Key::key()));
+check('tools: indexnow status probes without crashing', isset(SGAP_MCP_Tools::indexnow_status([])['key_url_served_correctly']));
+check('tools: sitemap audit reports a fetch failure', isset(SGAP_MCP_Tools::sitemap_audit([])['error']));
+check('tools: run-cron dispatches the hook', (SGAP_MCP_Tools::run_cron(['hook'=>'sgap_probe'])['ran']??false) && in_array('sgap_probe',$GLOBALS['ran']??[],true));
+check('tools: empty registry is handled', (SGAP_MCP_Tools::list_abilities([])['count']??-1)===0);
+check('tools: unknown ability is an error', SGAP_MCP_Tools::call_ability(['name'=>'nope/nope']) instanceof WP_Error);
+check('tools: ability described from an array', SGAP_MCP_Tools::describe_ability(['name'=>'a/b','label'=>'A','category'=>'c'])['name']==='a/b');
+check('tools: ability described from an object', SGAP_MCP_Tools::describe_ability(new SGAP_Fake_Ability('x/y'))['label']==='Label x/y');
+$GLOBALS['ability_objects']=['x/y'=>new SGAP_Fake_Ability('x/y'),'z/q'=>new SGAP_Fake_Ability('z/q',['category'=>'other'])];
+$la=SGAP_MCP_Tools::list_abilities([]);
+check('tools: bridge lists every registered ability', $la['count']===2 && $la['abilities'][0]['name']==='x/y');
+check('tools: bridge filters by category', SGAP_MCP_Tools::list_abilities(['category'=>'other'])['count']===1);
+$called=SGAP_MCP_Tools::call_ability(['name'=>'x/y','input'=>['a'=>1]]);
+check('tools: bridge runs an ability and echoes its name', $called['ran']==='x/y' && $called['_ability']==='x/y' && $called['input']===['a'=>1]);
+unset($GLOBALS['ability_objects']);
+
+// ---- P1.2: remind me instead of posting ----
+if (!function_exists('is_email')) { function is_email($e){ return (bool) filter_var((string)$e, FILTER_VALIDATE_EMAIL); } }
+$GLOBALS['opts']['sgap_alert_email']='owner@steamgears.eu';
+check('reminder: the queue table has the flag', str_contains(implode("\n",$GLOBALS['ddl']??[]),'remind TINYINT'));
+$wpdb->next=null; $wpdb->log=[];
+$rem=SGAP_Queue::add(['channel'=>'pinterest','title'=>'Story test','destination_url'=>'https://steamgears.eu/p/1','format'=>'story','remind'=>true]);
+check('reminder: add stores the flag and reports it', is_array($rem) && $rem['remind']===1 && str_contains(implode("\n",$wpdb->log),'"remind":1'));
+$plain=SGAP_Queue::add(['channel'=>'pinterest','title'=>'Normal post','destination_url'=>'https://steamgears.eu/p/2']);
+check('reminder: an unflagged post stores 0', is_array($plain) && $plain['remind']===0);
+$wpdb->log=[]; $GLOBALS['rows']=[];
+SGAP_Queue::claim(5);
+check('reminder: claim selects the flag so the publisher can see it', str_contains(implode("\n",$wpdb->log),'remind, destination_url'));
+check('reminder: the reason names the format for a story', str_contains(SGAP_Reminder::reason('pinterest','story'),'story') && str_contains(SGAP_Reminder::reason('pinterest','story'),'own app'));
+check('reminder: the reason explains the flag for other formats', str_contains(SGAP_Reminder::reason('pinterest','pin'),'remind me'));
+$row=['id'=>77,'channel'=>'pinterest','format'=>'story','title'=>'Goggles','body'=>'Clockwork goggles, 30% off.','image_url'=>'https://steamgears.eu/g.jpg','destination_url'=>'https://steamgears.eu/p/1','utm_url'=>'https://steamgears.eu/p/1?utm_source=pinterest','scheduled_at'=>'2026-11-04 18:00:00'];
+check('reminder: subject names channel and format', SGAP_Reminder::subject($row)==='Steamgears: post this story on pinterest by hand');
+$msg=SGAP_Reminder::message($row);
+check('reminder: the mail carries text, image, link and queue id', str_contains($msg,'Clockwork goggles') && str_contains($msg,'https://steamgears.eu/g.jpg') && str_contains($msg,'utm_source=pinterest') && str_contains($msg,'#77') && str_contains($msg,'page=sgap-queue'));
+check('reminder: the mail says it is not a failure', str_contains($msg,'not counted as a failure'));
+$noimg=SGAP_Reminder::message(['id'=>78,'channel'=>'instagram','format'=>'carousel','title'=>'x','body'=>'y']);
+check('reminder: a missing image points at the media library', str_contains($noimg,'media library') && str_contains($noimg,'carousel'));
+$GLOBALS['mails']=[]; $GLOBALS['opts']['sgap_reminders_last']=[];
+check('reminder: a mail is sent once', SGAP_Reminder::send($row)===true && count($GLOBALS['mails'])===1);
+check('reminder: the same item is not mailed twice', SGAP_Reminder::send($row)===false && count($GLOBALS['mails'])===1);
+check('reminder: the mail goes to the alert recipient', ($GLOBALS['mails'][0][0]??'')==='owner@steamgears.eu');
+$GLOBALS['opts']['sgap_reminders_last']=[]; $GLOBALS['opts']['sgap_alert_email']=''; $GLOBALS['opts']['admin_email']='admin@steamgears.eu'; $GLOBALS['mails']=[];
+check('reminder: an empty alert address falls back to the admin', SGAP_Reminder::send(['id'=>79,'channel'=>'pinterest'])===true && ($GLOBALS['mails'][0][0]??'')==='admin@steamgears.eu');
+$GLOBALS['opts']['sgap_reminders_last']=[]; $GLOBALS['opts']['admin_email']=''; $GLOBALS['mails']=[];
+check('reminder: no address at all means no mail', SGAP_Reminder::send(['id'=>80,'channel'=>'pinterest'])===false && $GLOBALS['mails']===[]);
+$GLOBALS['opts']['sgap_alert_email']='owner@steamgears.eu';
+$wpdb->row=(object)['channel'=>'pinterest','angle'=>'angle_a','attempts'=>1]; $wpdb->log=[]; $GLOBALS['mails']=[]; $GLOBALS['opts']['sgap_reminders_last']=[];
+$done=SGAP_Reminder::deliver($row);
+$log=implode("\n",$wpdb->log);
+check('reminder: deliver marks the item reminded', $done['status']==='reminded' && str_contains($log,'"status":"reminded"'));
+check('reminder: reminded is terminal, not a retry', !str_contains($log,'scheduled_at'));
+check('reminder: the mail is the reminder, not a failure alert', count($GLOBALS['mails'])===1 && str_contains((string)($GLOBALS['mails'][0][1]??''),'by hand'));
+check('reminder: the publish log has an outcome for it', isset(SGAP_Audit::OUTCOMES['reminded']));
+$pub=file_get_contents(__DIR__.'/../steamgears-autopilot/includes/publer.php'); $feed=file_get_contents(__DIR__.'/../steamgears-autopilot/includes/rss.php');
+check('reminder: both publishers route flagged items to the reminder', str_contains($pub,'SGAP_Reminder::deliver') && str_contains($feed,'SGAP_Reminder::deliver'));
+$wpdb->next='wp_sgap_queue';
+$GLOBALS['rows']=[(object)['id'=>77,'channel'=>'pinterest','title'=>'Story','status'=>'reminded','remind'=>1,'attempts'=>1,'scheduled_at'=>null,'published_at'=>null,'error'=>null]];
+ob_start(); do_action('page_sgap-queue'); $qhtml=ob_get_clean();
+check('reminder: the queue row offers the button and shows the badge', str_contains($qhtml,'value="remind"') && str_contains($qhtml,'>reminder</'));
+$GLOBALS['rows']=[]; $wpdb->next=null;
+
 exit(empty($GLOBALS['fail'])?0:1);

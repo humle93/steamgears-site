@@ -1,0 +1,70 @@
+name: Commit-besked-værn
+
+# AGENTS.md §1: hvert arbejdspas melder Modul / % før / % efter / Δ / Grundlag.
+# projektstatus.py beregner tallene — dette værn holder selve beskeden op på reglen,
+# så den ikke kun afhænger af hukommelse. Det tjekker præcis de commits der blev
+# pushet: historikken før 3/11 2026 har ingen blok og må ikke farve jobbet rødt.
+#
+# Lokalt sidder samme regel som commit-msg-hook:
+#   python3 tools/commit_check.py --install
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: commit-vaern-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  commit-besked:
+    name: Tjek commit-beskeder
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Selftest af værnets fixtures
+        run: python3 tools/commit_check.py --selftest
+
+      - name: Tjek de pushede commits
+        env:
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.event.after }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          zero="0000000000000000000000000000000000000000"
+          if [ -n "${BASE:-}" ] && [ -n "${HEAD_SHA:-}" ]; then
+            range="$BASE..$HEAD_SHA"
+          elif [ -n "${BEFORE:-}" ] && [ "$BEFORE" != "$zero" ]; then
+            range="$BEFORE..${AFTER:-HEAD}"
+          else
+            range=""
+          fi
+          if [ -z "$range" ]; then
+            echo "::notice::Ingen sammenligningsbase (ny branch) — tjekker kun tip-committen."
+            python3 tools/commit_check.py --commit HEAD
+          else
+            echo "Tjekker $range"
+            python3 tools/commit_check.py --range "$range"
+          fi
+
+      - name: Annotation hvis værnene fejlede
+        if: failure()
+        run: |
+          echo "::error title=Commit-besked uden procenter::Skriv Modul / Før / Efter / Δ / Grundlag i beskeden (AGENTS.md §1), eller brug en merge/revert/bot-besked. Se loggen ovenfor."
+          exit 1

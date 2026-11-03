@@ -116,6 +116,7 @@ class SGAP_Install {
         angle VARCHAR(20) NOT NULL DEFAULT 'angle_a',
         content_type VARCHAR(40) NOT NULL DEFAULT 'product',
         format VARCHAR(40) NOT NULL DEFAULT 'pin',
+        remind TINYINT(1) NOT NULL DEFAULT 0,
         destination_url TEXT NOT NULL,
         title TEXT NOT NULL,
         body LONGTEXT NULL,
@@ -738,6 +739,8 @@ class SGAP_Queue {
             'angle' => $angle,
             'content_type' => $content_type,
             'format' => $format,
+            // P1.2: hand this one to the owner instead of trying to post a format the API rejects.
+            'remind' => !empty($item['remind']) ? 1 : 0,
             'destination_url' => $destination,
             'title' => $title,
             'body' => sanitize_textarea_field((string) ($item['body'] ?? '')),
@@ -770,7 +773,7 @@ class SGAP_Queue {
         foreach ($gate['problems'] as $problem) {
             $warnings[] = (string) ($problem['message'] ?? '');
         }
-        return ['id' => $id, 'tracking_url' => SGAP_Tracking::url($id), 'utm_url' => $row['utm_url'], 'warnings' => array_values(array_filter($warnings)), 'scheduled_at' => $scheduled];
+        return ['id' => $id, 'tracking_url' => SGAP_Tracking::url($id), 'utm_url' => $row['utm_url'], 'warnings' => array_values(array_filter($warnings)), 'scheduled_at' => $scheduled, 'remind' => (int) $row['remind']];
     }
 
     /** True when Full Auto has blocked this channel/angle/type/format combination. */
@@ -840,7 +843,7 @@ class SGAP_Queue {
         }
         $where = $channel !== '' ? $wpdb->prepare(' AND channel = %s', $channel) : '';
         $items = $wpdb->get_results($wpdb->prepare(
-            'SELECT id, post_id, channel, angle, content_type, format, destination_url, title, body, image_url, utm_url, attempts, scheduled_at
+            'SELECT id, post_id, channel, angle, content_type, format, remind, destination_url, title, body, image_url, utm_url, attempts, scheduled_at
              FROM ' . self::table() . " WHERE status = 'queued' AND (scheduled_at IS NULL OR scheduled_at <= %s){$where}
              ORDER BY scheduled_at ASC, id ASC LIMIT %d",
             current_time('mysql'), $limit
@@ -870,6 +873,9 @@ class SGAP_Queue {
         }
         if ($outcome === 'published') {
             $data = ['status' => 'published', 'published_at' => current_time('mysql'), 'error' => null];
+        } elseif ($outcome === 'reminded') {
+            // P1.2: the owner has been mailed and will post it by hand. Terminal, never a failure.
+            $data = ['status' => 'reminded', 'error' => null, 'external_id' => ''];
         } else {
             $retry = (int) $item->attempts < self::MAX_ATTEMPTS;
             $data = [
@@ -1007,7 +1013,8 @@ class SGAP_REST {
             'status' => $r->get_param('status'),
             'scheduled_at' => self::datetime($r->get_param('scheduled_at')),
             'campaign' => $r->get_param('campaign'),
-            'force' => (bool) $r->get_param('force')
+            'force' => (bool) $r->get_param('force'),
+            'remind' => (bool) $r->get_param('remind')
         ]);
         if (is_wp_error($result)) {
             return $result;
@@ -1799,7 +1806,7 @@ class SGAP_Admin {
         }
         $table = $wpdb->prefix . 'sgap_queue';
         $rows = self::table_exists($table)
-            ? $wpdb->get_results("SELECT id, channel, title, status, attempts, scheduled_at, published_at, error FROM {$table} ORDER BY id DESC LIMIT 50")
+            ? $wpdb->get_results("SELECT id, channel, title, status, remind, attempts, scheduled_at, published_at, error FROM {$table} ORDER BY id DESC LIMIT 50")
             : [];
         if (!$rows) {
             SGAP_UI::empty_state('clock', 'The queue is empty. Approve a draft under AI Drafts to fill it.');
@@ -1810,7 +1817,7 @@ class SGAP_Admin {
         foreach ($rows as $r) {
             echo '<tr><td data-label="#">' . esc_html($r->id) . '</td><td data-label="Channel">' . SGAP_UI::channel($r->channel) . '</td><td class="sgap-qtitle" data-label="Title">' . esc_html($r->title)
                 . ($r->error ? '<br><small style="color:#b32d2e">' . esc_html($r->error) . '</small>' : '') . '</td><td data-label="Status">'
-                . SGAP_UI::status_pill((string) $r->status) . ($r->attempts > 1 ? ' <small>' . esc_html($r->attempts . ' tries') . '</small>' : '') . '</td><td data-label="Scheduled">'
+                . SGAP_UI::status_pill((string) $r->status) . (!empty($r->remind) ? ' <small title="The autopilot leaves this one to you">reminder</small>' : '') . ($r->attempts > 1 ? ' <small>' . esc_html($r->attempts . ' tries') . '</small>' : '') . '</td><td data-label="Scheduled">'
                 . esc_html($r->scheduled_at ? mysql2date('j M H:i', $r->scheduled_at) : '–') . '</td><td data-label="Published">'
                 . esc_html($r->published_at ? mysql2date('j M H:i', $r->published_at) : '–') . '</td><td data-label="Link"><code>' . esc_html(wp_parse_url(SGAP_Tracking::url((int) $r->id), PHP_URL_PATH)) . '</code></td><td data-label="">'
                 . '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '" class="sgap-actions" style="flex-wrap:nowrap">'
@@ -1818,6 +1825,7 @@ class SGAP_Admin {
                 . '<input type="hidden" name="queue_id" value="' . esc_attr($r->id) . '">'
                 . wp_nonce_field('sgap_queue_' . $r->id, '_wpnonce', true, false)
                 . '<button class="button button-small" name="cmd" value="retry">Re-queue</button>'
+                . '<button class="button button-small" name="cmd" value="remind" title="Mail yourself the text, image and link instead of posting it">Remind me</button>'
                 . '<button class="button button-small sgap-danger" name="cmd" value="delete">Delete</button></form></td></tr>';
         }
         echo '</tbody></table></div></div>';
@@ -1833,9 +1841,14 @@ class SGAP_Admin {
         $table = $wpdb->prefix . 'sgap_queue';
         $message = 'Nothing changed.';
         if ($id && $cmd === 'retry') {
-            $wpdb->update($table, ['status' => 'queued', 'attempts' => 0, 'error' => null, 'external_id' => ''], ['id' => $id]);
+            // Re-queue means "let the autopilot try again", so a reminder flag is cleared too.
+            $wpdb->update($table, ['status' => 'queued', 'attempts' => 0, 'error' => null, 'external_id' => '', 'remind' => 0], ['id' => $id]);
             $blocked = SGAP_Queue::blocked_reason();
             $message = "Post #{$id} is queued again." . ($blocked !== '' ? ' It waits: ' . SGAP_Queue::blocked_message($blocked) . '.' : '');
+        } elseif ($id && $cmd === 'remind') {
+            // P1.2: hand it to the owner. The next tick mails it instead of posting it.
+            $wpdb->update($table, ['status' => 'queued', 'remind' => 1, 'error' => null, 'external_id' => ''], ['id' => $id]);
+            $message = "Post #{$id} is marked “remind me”: on the next run you get a mail with the text, image and link instead of the autopilot posting it.";
         } elseif ($id && $cmd === 'delete') {
             $wpdb->delete($table, ['id' => $id]);
             $message = "Post #{$id} deleted from the queue.";

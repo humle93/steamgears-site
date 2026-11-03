@@ -1,0 +1,490 @@
+#!/usr/bin/env python3
+"""tools/commit_check.py — værn for commit-beskeder i steamgears-site.
+
+AGENTS.md §1 kræver at hvert arbejdspas melder **Modul / % før / % efter / Δ / Grundlag**.
+Indtil nu blev reglen holdt i hånden. Dette værn kontrollerer den maskinelt på tre flader:
+
+  * **commit-msg-hook** — `--install` skriver `.git/hooks/commit-msg`, så en commit uden
+    blokken afvises lokalt, før den findes.
+  * **CI** — `--range <base>..<head>` tjekker præcis de commits der blev pushet.
+  * **selftest** — `--selftest` kører fixtures, som de øvrige værn gør.
+
+Kommandoer:
+
+  python3 tools/commit_check.py --selftest
+  python3 tools/commit_check.py --commit HEAD
+  python3 tools/commit_check.py --range origin/main..HEAD
+  python3 tools/commit_check.py --message-file .git/COMMIT_EDITMSG
+  python3 tools/commit_check.py --install
+
+Undtaget, fordi de ikke kan bære procenter: merge- og revert-commits samt bot-committene fra
+`.github/workflows/projektstatus.yml` (`chore(status): …`) og `.github/workflows/natlig-push.yml`
+(`chore: natlig auto-push …`).
+
+Exitkoder: 0 = ok, 1 = regelbrud, 2 = intern fejl eller forkert brug.
+"""
+
+from __future__ import annotations
+
+import argparse
+import re
+import subprocess
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+NBSP = "\u00a0"
+ARROW = "\u2192"
+BOLD_RE = re.compile(r"\*\*|__")
+DASHES = ("—", "–", "-")
+TOLERANCE = 0.05
+
+# Emner der med vilje ikke bærer procenter. Maskingenereret eller ikke-arbejde.
+SKIP_SUBJECTS = (
+    "merge ",
+    "revert ",
+    "chore(status):",
+    "chore: natlig auto-push",
+)
+
+FIELDS = (
+    ("modul", "Modul"),
+    ("før", "Før"),
+    ("efter", "Efter"),
+    ("delta", "Δ"),
+    ("grundlag", "Grundlag"),
+)
+
+FIELD_RE = re.compile(
+    r"(?i)^[ \t]*(?:\*\*)?(?:%[ \t]*)?(modul|før|efter|delta|Δ|grundlag)(?:\*\*)?[ \t]*:[ \t]*(.*?)[ \t]*$"
+)
+DELTA_RE = re.compile(r"(?i)(?:Δ|delta)[ \t]*([+\-−]?[0-9]+(?:[.,][0-9]+)?|—|–|-)")
+PCT_RE = re.compile(r"[0-9]+(?:[.,][0-9]+)?[ \t]*%?")
+BAD_GROUNDS = ("tbd", "todo", "ved ikke", "føles", "??", "xxx")
+
+EXAMPLE = """\
+Modul: Dark academia-rebrand — batch 4 (mockups)
+Før: 63 %  →  Efter: 78 %  (Δ +15)
+Grundlag: 2 af 5 mockup-faser klar (4,5 t af 6,5 t i mockup-brief)"""
+
+HOOK = """\
+#!/usr/bin/env bash
+# Skrevet af `python3 tools/commit_check.py --install`.
+# Afviser commits uden Modul/Før/Efter/Δ/Grundlag — se AGENTS.md §1 og §4.
+# Fjernes med `rm .git/hooks/commit-msg` (eller skriv en besked der opfylder reglen).
+set -euo pipefail
+root="$(git rev-parse --show-toplevel 2>/dev/null)" || exit 0
+exec python3 "$root/tools/commit_check.py" --message-file "$1"
+"""
+
+
+class Guard(Exception):
+    """Fejl der skal stoppe kørslen med en forståelig besked."""
+
+
+# --------------------------------------------------------------------------- parsing
+
+
+def as_number(text: str) -> float | None:
+    """'55,4 %' -> 55.4, '+0,5' -> 0.5, '—' -> None (stregen betyder »ingen måling«)."""
+    value = (text or "").strip().replace("%", "").replace(" ", "").replace(NBSP, "")
+    value = value.replace("−", "-").lstrip("+")
+    if value in ("", "—", "–", "-"):
+        return None
+    try:
+        return float(value.replace(",", "."))
+    except ValueError:
+        return None
+
+
+def extract_delta(text: str) -> str | None:
+    match = DELTA_RE.search(text or "")
+    return match.group(1) if match else None
+
+
+def parse_fields(message: str) -> dict[str, str]:
+    """Læs felterne linje for linje. Både `Før: 63 % → Efter: 78 % (Δ +15)` og
+    `% før:`, `% efter:`, `Delta:` på hver sin linje accepteres."""
+    found: dict[str, str] = {}
+    for raw in (message or "").splitlines():
+        line = BOLD_RE.sub("", raw).replace(NBSP, " ").strip()
+        match = FIELD_RE.match(line)
+        if not match:
+            continue
+        key = match.group(1).lower()
+        if key == "δ":
+            key = "delta"
+        if key == "Δ":
+            key = "delta"
+        value = match.group(2).strip()
+        if key == "før":
+            head, arrow, tail = value.partition(ARROW)
+            if arrow:
+                value = head.strip()
+                efter = re.search(r"(?i)efter[ \t]*:[ \t]*([^()]*)", tail)
+                if efter:
+                    found.setdefault("efter", efter.group(1).strip())
+                delta = extract_delta(tail)
+                if delta:
+                    found.setdefault("delta", delta)
+        elif key == "efter":
+            delta = extract_delta(value)
+            if delta:
+                found.setdefault("delta", delta)
+                value = re.split(r"\(", value)[0].strip()
+        found.setdefault(key, value)
+    return found
+
+
+# --------------------------------------------------------------------------- regler
+
+
+def check_pct(value: str, label: str, errors: list[str]) -> float | None:
+    """Et procentfelt er enten et tal 0–100 (med valgfrit %) eller en streg."""
+    text = (value or "").strip()
+    if text in DASHES:
+        return None
+    if not PCT_RE.fullmatch(text):
+        errors.append(f"'{label}' skal være et tal (fx '55,4 %') eller en streg (—), ikke '{text}'")
+        return None
+    number = as_number(text)
+    if number is None or number < 0 or number > 100:
+        errors.append(f"'{label}' skal ligge mellem 0 og 100, ikke '{text}'")
+        return None
+    return number
+
+
+def check_delta(value: str, errors: list[str]) -> float | None:
+    text = (value or "").strip()
+    if text in DASHES:
+        return None
+    if not re.fullmatch(r"[+\-−]?[0-9]+(?:[.,][0-9]+)?", text):
+        errors.append(f"'Δ' skal være et tal (fx '+0,5', '-2,4', '0') eller en streg (—), ikke '{text}'")
+        return None
+    return as_number(text)
+
+
+def check_grounds(value: str, errors: list[str]) -> None:
+    text = (value or "").strip()
+    low = text.lower()
+    bad = next((word for word in BAD_GROUNDS if word in low), None)
+    if bad:
+        errors.append(f"'Grundlag' må ikke indeholde '{bad}' — skriv regnestykket i stedet")
+        return
+    if low in ("ingen ændring", "igen ændring"):
+        return
+    if not re.search(r"\d", text):
+        errors.append(
+            "'Grundlag' skal kunne genberegnes: et regnestykke med tal "
+            "(fx '2 af 5 faser' eller '12,45 af 21,75 d') eller 'ingen ændring'"
+        )
+
+
+def check_message(message: str) -> tuple[bool, list[str], str]:
+    """Returner (ok, fejl, undtagelsesgrund)."""
+    text = (message or "").strip()
+    if not text:
+        return True, [], "tom besked (committen blev afbrudt)"
+    subject = text.splitlines()[0].strip().lower()
+    for pattern in SKIP_SUBJECTS:
+        if subject.startswith(pattern):
+            return True, [], f"undtaget emne: {pattern.strip()}"
+
+    fields = parse_fields(text)
+    errors: list[str] = []
+    for key, label in FIELDS:
+        if not fields.get(key, "").strip():
+            errors.append(f"mangler linjen '{label}:'")
+
+    if not fields.get("modul", "").strip() and "modul" in fields:
+        errors.append("'Modul' er tom — skriv modulet/opgaven der blev arbejdet på")
+
+    before = check_pct(fields.get("før", ""), "Før", errors) if fields.get("før", "").strip() else None
+    after = check_pct(fields.get("efter", ""), "Efter", errors) if fields.get("efter", "").strip() else None
+    delta = check_delta(fields.get("delta", ""), errors) if fields.get("delta", "").strip() else None
+    if fields.get("grundlag", "").strip():
+        check_grounds(fields["grundlag"], errors)
+
+    if before is None and delta is not None:
+        errors.append("Δ kan ikke være et tal når 'Før' er en streg — første måling skriver begge som '—'")
+    if before is not None and after is not None and delta is not None:
+        expected = round(after - before, 4)
+        if abs(delta - expected) > TOLERANCE:
+            errors.append(f"Δ {delta:+g} passer ikke med {before:g} → {after:g} (Δ skal være {expected:+g})")
+
+    return (not errors), errors, ""
+
+
+# --------------------------------------------------------------------------- fixtures
+
+FIXTURES: list[tuple[str, str, bool]] = [
+    (
+        "fuld blok i tre linjer",
+        "Ret navigationen\n\nModul: S2.3 navigation — nav-links\n"
+        "Før: 55,4 %  →  Efter: 56,3 %  (Δ +0,9)\n"
+        "Grundlag: 12,45 af 21,75 d (S2 4,65/6)\n\n🤖 Generated with Codebuff\n",
+        True,
+    ),
+    (
+        "felter på hver sin linje",
+        "Modul: P1.2 påmindelse\n% før: 30 %\n% efter: 34,1 %\nDelta: +4,1\nGrundlag: 1,0 af 11,35 d\n",
+        True,
+    ),
+    (
+        "første måling med streg",
+        "Modul: S0 — baseline\nFør: —\nEfter: 3,6 %\nΔ: —\nGrundlag: 0,75 af 21,1 d\n",
+        True,
+    ),
+    (
+        "ingen ændring",
+        "Modul: rebrand — batch 4\nFør: 63 %\nEfter: 63 %\nΔ: 0\nGrundlag: ingen ændring\n",
+        True,
+    ),
+    (
+        "fed markdown i felterne",
+        "**Modul:** docs — indeks\n**Før:** 0 %  →  **Efter:** 0 %  (Δ 0)\n**Grundlag:** 0 af 3 guides\n",
+        True,
+    ),
+    (
+        "decimaler med punktum",
+        "Modul: plugin — P0.4\nFør: 29.7 %\nEfter: 30.0 %\nΔ: +0.3\nGrundlag: 7,3 af 24,35 d\n",
+        True,
+    ),
+    (
+        "plus uden fortegn på Δ",
+        "Modul: links\nFør: 100 %\nEfter: 100 %\nΔ: 0\nGrundlag: 39 af 39 links\n",
+        True,
+    ),
+    (
+        "merge-commit undtages",
+        "Merge branch 'main' of github.com:humle93/steamgears-site\n",
+        True,
+    ),
+    (
+        "revert undtages",
+        'Revert "Skriv corset-guiden"\n\nThis reverts commit a07c743.\n',
+        True,
+    ),
+    (
+        "status-bottens commit undtages",
+        "chore(status): daglig projektstatus 2026-11-03\n",
+        True,
+    ),
+    (
+        "natlig auto-push undtages",
+        "chore: natlig auto-push 2026-11-03\n\n🤖 Generated with Codebuff\n",
+        True,
+    ),
+    ("tom besked undtages", "", True),
+    (
+        "mangler Modul",
+        "Før: 55 %\nEfter: 56 %\nΔ: +1\nGrundlag: 1 af 5 faser\n",
+        False,
+    ),
+    (
+        "mangler Grundlag",
+        "Modul: S2.3\nFør: 55 %\nEfter: 56 %\nΔ: +1\n",
+        False,
+    ),
+    (
+        "mangler Δ",
+        "Modul: S2.3\nFør: 55 %\nEfter: 56 %\nGrundlag: 1 af 5 faser\n",
+        False,
+    ),
+    (
+        "Grundlag uden tal",
+        "Modul: S2.3\nFør: 55 %\nEfter: 56 %\nΔ: +1\nGrundlag: arbejdet føles færdigt\n",
+        False,
+    ),
+    (
+        "Grundlag er TBD",
+        "Modul: S2.3\nFør: 55 %\nEfter: 56 %\nΔ: +1\nGrundlag: TBD\n",
+        False,
+    ),
+    (
+        "Δ passer ikke med før/efter",
+        "Modul: S2.3\nFør: 54 %\nEfter: 60 %\nΔ: +5\nGrundlag: 1 af 5 faser\n",
+        False,
+    ),
+    (
+        "Før er ikke et tal",
+        "Modul: S2.3\nFør: næsten 55 %\nEfter: 56 %\nΔ: +1\nGrundlag: 1 af 5 faser\n",
+        False,
+    ),
+    (
+        "procent over 100",
+        "Modul: S2.3\nFør: 90 %\nEfter: 120 %\nΔ: +30\nGrundlag: 1 af 5 faser\n",
+        False,
+    ),
+    (
+        "Efter er tom",
+        "Modul: S2.3\nFør: 55 %\nEfter: \nΔ: +1\nGrundlag: 1 af 5 faser\n",
+        False,
+    ),
+    (
+        "Modul er tom",
+        "Modul:\nFør: 55 %\nEfter: 56 %\nΔ: +1\nGrundlag: 1 af 5 faser\n",
+        False,
+    ),
+    (
+        "Δ som tal uden baseline",
+        "Modul: S0\nFør: —\nEfter: 3,6 %\nΔ: +3,6\nGrundlag: 0,75 af 21,1 d\n",
+        False,
+    ),
+    (
+        "ingen af felterne",
+        "Ship the 7.26.0 package and keep .secrets out of git\n",
+        False,
+    ),
+]
+
+
+def run_selftest() -> int:
+    failed = []
+    for name, message, expected in FIXTURES:
+        ok, errors, _skip = check_message(message)
+        if ok != expected:
+            failed.append(f"{name}: forventet {'OK' if expected else 'FEJL'}, fik {'OK' if ok else 'FEJL'}"
+                          + (f" ({'; '.join(errors)})" if errors else ""))
+    for line in failed:
+        print(f"[FEJL] {line}")
+    if failed:
+        print(f"[FEJL] {len(failed)} af {len(FIXTURES)} fixtures fejlede")
+        return 1
+    print(f"[OK] {len(FIXTURES)} af {len(FIXTURES)} fixtures som forventet")
+    return 0
+
+
+# --------------------------------------------------------------------------- kilder
+
+
+def git(*args: str) -> subprocess.CompletedProcess:
+    return subprocess.run(["git", *args], cwd=ROOT, capture_output=True, text=True)
+
+
+def message_from_commit(rev: str) -> str:
+    result = git("log", "-1", "--format=%B", rev)
+    if result.returncode != 0:
+        raise Guard(f"kunne ikke læse commit '{rev}': {result.stderr.strip()[:200]}")
+    return result.stdout
+
+
+def commits_in_range(spec: str) -> list[tuple[str, str]]:
+    """[(sha, besked)] for intervallet, nyeste sidst. Fejler intervallet (fx nuller på en ny
+    branch), tjekkes kun tip-committen — så en push aldrig går igennem ustraffet."""
+    result = git("log", "--format=%H%x1f%B%x1e", spec)
+    if result.returncode != 0:
+        tip = git("rev-parse", "--verify", spec.split("..")[-1] or "HEAD")
+        if tip.returncode != 0:
+            raise Guard(f"intervallet '{spec}' kunne ikke læses: {result.stderr.strip()[:200]}")
+        print(f"[NOTE] intervallet '{spec}' kunne ikke læses — tjekker kun tip-committen")
+        return [(tip.stdout.strip(), message_from_commit(tip.stdout.strip()))]
+    rows = []
+    for record in result.stdout.split("\x1e"):
+        record = record.strip("\n")
+        if not record:
+            continue
+        sha, _sep, body = record.partition("\x1f")
+        rows.append((sha.strip(), body))
+    return rows
+
+
+def report(message: str, errors: list[str], label: str) -> None:
+    print(f"[FEJL] {label}: commit-beskeden mangler procenterne (AGENTS.md §1).")
+    for error in errors:
+        print(f"  - {error}")
+    print("\nSkriv blokken i beskeden:\n")
+    for line in EXAMPLE.splitlines():
+        print(f"  {line}")
+    print("\nRegler: hvert pas melder Modul / % før / % efter / Δ / Grundlag, og grundlaget skal")
+    print("kunne genberegnes. Se AGENTS.md §1 (reglen) og §4 (værnet).")
+
+
+def install_hook() -> int:
+    path = git("rev-parse", "--git-path", "hooks")
+    if path.returncode != 0:
+        print("[FEJL] dette er ikke et git-repo")
+        return 2
+    hooks = Path(path.stdout.strip())
+    if not hooks.is_absolute():
+        hooks = ROOT / hooks
+    hooks.mkdir(parents=True, exist_ok=True)
+    target = hooks / "commit-msg"
+    if target.exists() and target.read_text() != HOOK:
+        backup = hooks / "commit-msg.bak"
+        backup.write_text(target.read_text())
+        print(f"[NOTE] den gamle hook er gemt som {backup.name}")
+    target.write_text(HOOK)
+    target.chmod(0o755)
+    print(f"[OK] installeret: {target.relative_to(ROOT) if target.is_relative_to(ROOT) else target}")
+    print("[OK] en commit uden Modul/Før/Efter/Δ/Grundlag afvises nu lokalt")
+    return 0
+
+
+# --------------------------------------------------------------------------- main
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        prog="commit_check.py",
+        description="Værn: kræver Modul/% før/% efter/Δ/Grundlag i commit-beskeder (AGENTS.md §1).",
+    )
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument("--selftest", action="store_true", help="kør fixtures (før installation)")
+    group.add_argument("--commit", metavar="REV", help="tjek én commit (standard: HEAD)")
+    group.add_argument("--range", dest="range_spec", metavar="A..B", help="tjek alle commits i intervallet")
+    group.add_argument("--message-file", metavar="FIL", help="tjek en beskedfil (bruges af commit-msg-hooken)")
+    group.add_argument("--install", action="store_true", help="skriv .git/hooks/commit-msg")
+    args = parser.parse_args(argv)
+
+    try:
+        if args.selftest:
+            return run_selftest()
+
+        if args.install:
+            return install_hook()
+
+        if args.message_file:
+            try:
+                message = Path(args.message_file).read_text()
+            except OSError as exc:
+                raise Guard(f"kunne ikke læse beskedfilen: {exc}")
+            ok, errors, skip = check_message(message)
+            if ok:
+                if skip:
+                    print(f"[OK] undtaget: {skip}")
+                else:
+                    print("[OK] commit-beskeden har procenterne")
+                return 0
+            report(message, errors, args.message_file)
+            return 1
+
+        if args.range_spec:
+            rows = commits_in_range(args.range_spec)
+            bad = 0
+            for sha, body in rows:
+                ok, errors, skip = check_message(body)
+                short = sha[:8]
+                if ok:
+                    print(f"[OK] {short} {skip or 'har procenterne'}")
+                    continue
+                bad += 1
+                report(body, errors, f"{short}")
+            print(f"[{'OK' if bad == 0 else 'FEJL'}] {len(rows) - bad} af {len(rows)} commits i '{args.range_spec}'"
+                  f" opfylder reglen")
+            return 0 if bad == 0 else 1
+
+        message = message_from_commit(args.commit or "HEAD")
+        ok, errors, skip = check_message(message)
+        if ok:
+            print(f"[OK] {skip or 'commit-beskeden har procenterne'}")
+            return 0
+        report(message, errors, args.commit or "HEAD")
+        return 1
+    except Guard as exc:
+        print(f"[FEJL] {exc}")
+        return 2
+
+
+if __name__ == "__main__":
+    sys.exit(main())

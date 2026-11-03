@@ -44,9 +44,15 @@ else
   echo "  installeret: $("$DEPS/bin/php" -v | head -1)"
 fi
 
+echo "== Commit-msg-værn =="
+# Kræver Modul / % før / % efter / Δ / Grundlag i commit-beskeden (AGENTS.md §1).
+# Hooken ligger i .git/hooks/ og følger ikke med repoet, så den installeres her.
+python3 tools/commit_check.py --install
+
 echo
 echo "== Klar =="
 echo "  PDF:  PYTHONPATH=tools/_deps python3 tools/project_reports.py"
 echo "  PHP:  tools/_deps/bin/php -l plugins/steamgears-autopilot/steamgears-autopilot.php"
 echo
 echo "  Status-værnet kræver intet: python3 projektstatus.py --check"
+echo "  Commit-værnet kræver intet: python3 tools/commit_check.py --selftest"

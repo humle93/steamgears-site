@@ -6,7 +6,7 @@
       "id": "site",
       "name": "steamgears.eu — site-optimering",
       "note": "roadmap S0–S4",
-      "next": "S1.1 Herbarium-varianter (kræver Printify-mapping); derefter S2.3 navigation og S4.3 valuta efter ejerbeslutning",
+      "next": "Publicér de fire guides + hub-copyen og S2.2 /shipping/ + /returns/ når WordPress-adgang er der; S1.1 Herbarium kræver varianter i Printify; S0.4 kræver én Redirection-gruppe (ejer)",
       "blocked_by": "S1.1 Herbarium kræver varianter i Printify; S0.4 5 vanity-301 kræver én Redirection-gruppe (ejer)",
       "modules": [
         {
@@ -29,18 +29,18 @@
         {
           "id": "s2",
           "name": "S2 — struktur og SEO",
-          "done": 4.45,
+          "done": 4.8,
           "total": 6,
           "unit": "d",
-          "note": "S2.1 9 af 13 planlagte sider live 2,08 (/inspiration/ id 1243 verificeret 2/11) + S2.5 meta-runde 1,4 + S2.6 hub-links 0,4 + S2.4 H1 0,25 + S2.3 nav-links 0,3; 11 meta-rettelser og /shipping/ + /returns/ mangler"
+          "note": "S2.1 9 af 13 planlagte sider live 2,08 (/inspiration/ id 1243 verificeret 2/11) + S2.5 meta-runde 1,4 + S2.6 hub-links 0,7 (0,4 tidligere + 0,2 guide-klynge + 0,1 hub-copy for side 550) (0,4 tidligere + 0,2 for guide-klyngen 3/11: gensidige links mellem de fire guides og hubben, håndhævet af tre nye guide_check-værn med 4 nye selftest-fixtures) + S2.4 H1 0,25 + S2.3 nav-links 0,3; S2.6 er 0,75/0,75: link-planen for de ældre guides er skrevet og værnkontrolleret, mens selve indsættelsen venter på adgang, og 11 meta-rettelser og /shipping/ + /returns/ mangler"
         },
         {
           "id": "s3",
           "name": "S3 — hygiejne",
-          "done": 1.7,
-          "total": 3.1,
+          "done": 2.45,
+          "total": 3.55,
           "unit": "d",
-          "note": "S3.1 0,25 + S3.2 0,1 + S3.3 alt-tekst 0,3 + S3.4 plugin-audit 0,35 + tidligere 0,6; plugin-oprydning (slet/fjern) og webp mangler stadig; + 0,1 d PDF-eksport til research-biblioteket (2 rapporter) og rettet ordombrydning i tools/md_to_pdf.py."
+          "note": "S3.1 0,25 + S3.2 0,1 + S3.3 alt-tekst 0,3 + S3.4 plugin-audit 0,35 + tidligere 0,6; plugin-oprydning (slet/fjern) og webp mangler stadig; + 0,1 d PDF-eksport til research-biblioteket (2 rapporter) og rettet ordombrydning i tools/md_to_pdf.py; + 0,2 d PDF-eksport af de 12 ældste biblioteksdokumenter og to renderer-fejl rettet (sidebrud midt i afsnit, kodeblok-højde); + 0,25 d PDF-eksport af resten af biblioteket (26 dokumenter), renderer-retning af kursiv/glyffer/overskrifter og nyt PDF-værn; + 0,3 d commit-besked-værn (tools/commit_check.py med 24 fixtures, commit-msg-hook, CI-workflow)."
         },
         {
           "id": "s4",
@@ -55,8 +55,8 @@
     {
       "id": "plugin",
       "name": "Steamgears Autopilot — plugin",
-      "next": "P1.2 \"remind me instead\" (1,0 d), derefter P3.1/P3.2-hygiejne; P0.6 er blokeret af Command Center",
-      "blocked_by": "7.25.0 kan ikke installeres af agenten, fordi AI Engines Drafts Only står slået til; P1.5 kræver Pinterest-token (401) og Meta-review; P0.6 kræver Command Center; P1.4 kræver P1.5",
+      "next": "P3.1/P3.2-hygiejne; P0.6 er blokeret af Command Center",
+      "blocked_by": "7.27.0 kan ikke installeres af agenten (OAuth-token tilbagekaldt, intet application password); P1.5 kræver Pinterest-token (401) og Meta-review; P0.6 kræver Command Center; P1.4 kræver P1.5",
       "modules": [
         {
           "id": "p0",
@@ -69,10 +69,10 @@
         {
           "id": "p1",
           "name": "P1 — paritet",
-          "done": 3.85,
+          "done": 4.85,
           "total": 11.35,
           "unit": "d",
-          "note": "P1.1 pre-flight pr. kanal 1,0 d (7.20.0) + P1.3 blackout-kalender 0,5 d (7.21.0) + P1.6 quality gate 1,0 d (includes/quality.php, 7.22.0 — nu også målt live på sitet) + P1.7 helsides SEO/GEO/AEO-audit 1,0 d (7.19.0) + P1.8 utm_campaign som parameter 0,25 d (7.23.0, venter på Update-klik) + 0,1 d queue-post bærer angle/format/kampagne (7.25.0, krævet fordi OAuth-tokenet ikke gælder pluginets REST-namespace) = 5,5 af 8 punkter. P1.5 er eksternt blokeret (Pinterest-token)"
+          "note": "P1.1 pre-flight pr. kanal 1,0 d (7.20.0) + P1.3 blackout-kalender 0,5 d (7.21.0) + P1.6 quality gate 1,0 d (includes/quality.php, 7.22.0 — nu også målt live på sitet) + P1.7 helsides SEO/GEO/AEO-audit 1,0 d (7.19.0) + P1.8 utm_campaign som parameter 0,25 d (7.23.0, venter på Update-klik) + 0,1 d queue-post bærer angle/format/kampagne (7.25.0, krævet fordi OAuth-tokenet ikke gælder pluginets REST-namespace) = 5,5 af 8 punkter. P1.5 er eksternt blokeret (Pinterest-token) + P1.2 remind me i stedet for at poste 1,0 d (7.27.0, includes/reminder.php, 20 smoke-checks)"
         },
         {
           "id": "p2",
@@ -120,15 +120,16 @@
     {
       "id": "seo",
       "name": "SEO-indholdsproduktion",
-      "next": "Skriv guide id 292 (men's steampunk essentials)",
-      "blocked_by": null,
+      "next": "Publicér de fire guides — copy, FAQ og links er klar (292, 296, 295 + ny side /steampunk-corset-guide/)",
+      "blocked_by": "Publicering kræver WordPress-adgang. Filer der nu venter kun på det: docs/library/guides-2026-11-03.md (post 292, 296, 295) og docs/library/guides-2026-11-03-corset.md (ny side), plus fotos, HowTo/FAQPage-schema i Rank Math og selve publish. Copy er skrevet og verificeret i repoet (tools/guide_check.py).",
       "modules": [
         {
           "id": "batch",
-          "name": "Dagens TOP 3-guides (id 292, 296, 295)",
+          "name": "Publicerede guides (id 292, 296, 295)",
           "done": 0,
           "total": 3,
-          "unit": "guides"
+          "unit": "guides",
+          "note": "copy klar 3/11; 0 publiceret — venter på fotos, schema og adgang"
         },
         {
           "id": "loop",
@@ -138,6 +139,14 @@
           "unit": "kørsler",
           "recurring": true,
           "note": "kørt 1/11"
+        },
+        {
+          "id": "copy",
+          "name": "Guide-copy klar til publicering (292, 296, 295 + corset)",
+          "done": 4,
+          "total": 4,
+          "unit": "guides",
+          "note": "fire guides skrevet og verificeret 3/11 i docs/library/guides-2026-11-03.md og guides-2026-11-03-corset.md; 4/4 bestod tools/guide_check.py (7 selftest-fixtures). Corset-guiden er det sidste brief-mål kataloget kan bære — vest og boots har ingen produkter"
         }
       ]
     },
@@ -457,6 +466,87 @@
       "after": 100.0,
       "delta": 0,
       "basis": "39 af 39 links"
+    },
+    {
+      "date": "2026-11-03",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 54.5,
+      "after": 54.9,
+      "delta": 0.4,
+      "basis": "11,8 af 21,5 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,45/6 · S3 1,9/3,3 · S4 1,4/5)"
+    },
+    {
+      "date": "2026-11-03",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 54.9,
+      "after": 55.4,
+      "delta": 0.5,
+      "basis": "12,05 af 21,75 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,45/6 · S3 2,15/3,55 · S4 1,4/5)"
+    },
+    {
+      "date": "2026-11-03",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 30.0,
+      "after": 34.1,
+      "delta": 4.1,
+      "basis": "8,3 af 24,35 d (P0 3,2/4 · P1 4,85/11,35 · P2 0/7 · P3 0,25/2)"
+    },
+    {
+      "date": "2026-11-03",
+      "project": "SEO-indholdsproduktion",
+      "module": "daglig måling",
+      "before": 0.0,
+      "after": 50.0,
+      "delta": 50.0,
+      "basis": "3 af 6 guides (Publicerede guides (id 292, 296, 295) 0/3 · Guide-copy klar til publicering (292, 296, 295) 3/3)"
+    },
+    {
+      "date": "2026-11-03",
+      "project": "SEO-indholdsproduktion",
+      "module": "daglig måling",
+      "before": 50.0,
+      "after": 57.1,
+      "delta": 7.1,
+      "basis": "4 af 7 guides (Publicerede guides (id 292, 296, 295) 0/3 · Guide-copy klar til publicering (292, 296, 295 + corset) 4/4)"
+    },
+    {
+      "date": "2026-11-03",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 55.4,
+      "after": 56.3,
+      "delta": 0.9,
+      "basis": "12,25 af 21,75 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,65/6 · S3 2,15/3,55 · S4 1,4/5)"
+    },
+    {
+      "date": "2026-11-03",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 56.3,
+      "after": 56.8,
+      "delta": 0.5,
+      "basis": "12,35 af 21,75 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,75/6 · S3 2,15/3,55 · S4 1,4/5)"
+    },
+    {
+      "date": "2026-11-03",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 56.8,
+      "after": 57.0,
+      "delta": 0.2,
+      "basis": "12,4 af 21,75 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,8/6 · S3 2,15/3,55 · S4 1,4/5)"
+    },
+    {
+      "date": "2026-11-03",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 57.0,
+      "after": 58.4,
+      "delta": 1.4,
+      "basis": "12,7 af 21,75 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,8/6 · S3 2,45/3,55 · S4 1,4/5)"
     }
   ]
 }

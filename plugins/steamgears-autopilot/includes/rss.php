@@ -52,7 +52,7 @@ class SGAP_RSS {
      * within quiet hours, the daily cap and batch size. Same report shape as the API publisher.
      */
     public static function release(): array {
-        $report = ['mode' => 'rss', 'configured' => true, 'followed_up' => [], 'sent' => [], 'failed' => [], 'blocked' => ''];
+        $report = ['mode' => 'rss', 'configured' => true, 'followed_up' => [], 'sent' => [], 'failed' => [], 'reminded' => [], 'blocked' => ''];
         $report['blocked'] = SGAP_Queue::blocked_reason();
         if ($report['blocked'] !== '') {
             return $report;
@@ -61,6 +61,14 @@ class SGAP_RSS {
         foreach (SGAP_Queue::claim(SGAP_Queue::capacity()) as $row) {
             $id = (int) $row['id'];
             $channel = (string) $row['channel'];
+            // P1.2: a reminder never reaches the feed — the feed is what posts, so
+            // leaving it in would be the opposite of "do not post this one for me".
+            if (!empty($row['remind'])) {
+                $done = SGAP_Reminder::deliver($row);
+                SGAP_Audit::record($id, $channel, 'reminded', 0, $done['message']);
+                $report['reminded'][] = ['id' => $id, 'channel' => $channel, 'mailed' => $done['mailed']];
+                continue;
+            }
             $error = '';
             if (!in_array($channel, SGAP_Publer::CHANNELS, true)) {
                 $error = "Channel '{$channel}' is not supported.";

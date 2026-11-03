@@ -83,7 +83,7 @@ Sitet er altså **kun** bagud på de to sager der blev rettet i 3.8.7 — men de
 ### Hvorfor CVE-2026-110732 er den vigtige
 
 Det er den eneste af de to der er **uautentificeret**, og den ender i **administrator**. Patchstack beskriver den som
-*high priority / forventet masseudnyttet*, kræver til gengæld at en privilegeret bruger udfører en handling
+«high priority / forventet masseudnyttet», kræver til gengæld at en privilegeret bruger udfører en handling
 (klikker på et craftet link til OAuth-consent-siden). OAuth-ruterne er live på sitet:
 
 ```

@@ -24,6 +24,7 @@ class SGAP_Audit {
         'published' => 'Published',
         'requeued' => 'Requeued for retry',
         'failed' => 'Failed',
+        'reminded' => 'Reminded by mail',
         'blocked' => 'Blocked'
     ];
 
@@ -203,7 +204,7 @@ class SGAP_Audit {
             . '<th>When</th><th>Channel</th><th>Outcome</th><th>HTTP</th><th>Actor</th><th>Response</th><th>Queue</th>'
             . '</tr></thead><tbody>';
         foreach ($rows as $row) {
-            $kind = ['published' => 'ok', 'sent' => 'ok', 'rss' => 'ok', 'requeued' => 'warn', 'failed' => 'bad', 'blocked' => 'warn'][$row->outcome] ?? '';
+            $kind = ['published' => 'ok', 'sent' => 'ok', 'rss' => 'ok', 'reminded' => 'brass', 'requeued' => 'warn', 'failed' => 'bad', 'blocked' => 'warn'][$row->outcome] ?? '';
             echo '<tr>'
                 . '<td data-label="When">' . esc_html($row->created_at) . '</td>'
                 . '<td data-label="Channel">' . SGAP_UI::channel((string) $row->channel) . '</td>'

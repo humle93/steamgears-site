@@ -278,7 +278,7 @@ class SGAP_Publer {
         if (SGAP_RSS::enabled()) {
             return SGAP_RSS::release() + ['shifted' => $shifted];
         }
-        $report = ['configured' => self::configured(), 'followed_up' => [], 'sent' => [], 'failed' => [], 'blocked' => '', 'shifted' => $shifted];
+        $report = ['configured' => self::configured(), 'followed_up' => [], 'sent' => [], 'failed' => [], 'reminded' => [], 'blocked' => '', 'shifted' => $shifted];
         if (!$report['configured']) {
             return $report;
         }
@@ -289,6 +289,14 @@ class SGAP_Publer {
         }
         global $wpdb;
         foreach (SGAP_Queue::claim(SGAP_Queue::capacity()) as $row) {
+            // P1.2: flagged items are mailed to the owner instead of being sent. No API call,
+            // no retries, no failure alert — the item is the owner's now.
+            if (!empty($row['remind'])) {
+                $done = SGAP_Reminder::deliver($row);
+                SGAP_Audit::record((int) $row['id'], (string) $row['channel'], 'reminded', 0, $done['message']);
+                $report['reminded'][] = ['id' => (int) $row['id'], 'channel' => $row['channel'], 'mailed' => $done['mailed']];
+                continue;
+            }
             $job = self::publish($row);
             if (is_wp_error($job)) {
                 $state = SGAP_Queue::mark((int) $row['id'], 'failed', $job->get_error_message());

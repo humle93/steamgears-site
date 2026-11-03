@@ -90,7 +90,8 @@ Reglen over holdes automatisk, så lidt som muligt afhænger af hukommelse:
   samme tur gælder stadig; nattens kørsel er sikkerhedsnettet, ikke en erstatning.
   Efter pushet kører kørslen **alle repoets værn** via [`tools/natlige-vaern.sh`](tools/natlige-vaern.sh):
   `php -l` på alle plugin-filer, `projektstatus.py --selftest` og `--check`, `load_campaign.py --selftest`,
-  `plugins/tests/smoke.php`, `test_mcp_rest.py`, `test_mcp_oauth.py` og `test_niche_scanner.py`. Et rødt værn
+  `plugins/tests/smoke.php`, `test_mcp_rest.py`, `test_mcp_oauth.py`, `test_niche_scanner.py` og en
+  PDF-render-kontrol af tre biblioteksdokumenter. Et rødt værn
   giver en `::error`-annotation, skriver en tabel og de fejlende linjer i job-summaryen og fejler jobbet. Det
   ligger bevidst efter pushet, så en testfejl ikke holder status-dokumenterne tilbage — men det kan ikke
   overses. Den samme kommando kan køres lokalt før et push: `bash tools/natlige-vaern.sh`.
@@ -104,8 +105,19 @@ Reglen over holdes automatisk, så lidt som muligt afhænger af hukommelse:
   roterer refresh-tokenet, så det gamle er dødt bagefter. Hvad der kræves, og hvad kørslen ikke kan: se
   [`docs/library/pinterest-token-fornyelse-2026-11-03.md`](docs/library/pinterest-token-fornyelse-2026-11-03.md).
 
-Automationen dækker **den daglige status**. Det manuelle i §1 — at vurdere hvad der reelt blev udført og melde
-`% før → % efter` i svaret og commit-beskeden — kan scriptet ikke gøre og falder stadig på den der arbejder.
+- **Commit-besked-værnet** ([`tools/commit_check.py`](tools/commit_check.py)): reglen i §1 bliver kontrolleret
+  maskinelt på tre flader — `--message-file` er **commit-msg-hooken** (`python3 tools/commit_check.py --install`,
+  som [`tools/setup-agent-tools.sh`](tools/setup-agent-tools.sh) også kører), `--range A..B` tjekker de commits
+  der blev pushet (CI: [`.github/workflows/commit-vaern.yml`](.github/workflows/commit-vaern.yml)), og
+  `--selftest` kører 24 fixtures. Værnet kræver `Modul:`, `Før:`, `Efter:`, `Δ:` og `Grundlag:` — også når de
+  står som `Før: 63 % → Efter: 78 % (Δ +15)` på én linje — afviser procentfelter der ikke er et tal eller en
+  streg, kræver at `Grundlag` kan genberegnes (tal eller `ingen ændring`), og at `Δ` passer med `Efter − Før`.
+  Merge-, revert- og bot-committene fra de to workflows er undtaget, fordi de ikke kan bære procenter;
+  historikken før 3/11 er ikke tjekket efter.
+
+Automationen dækker **den daglige status**, og commit-beskeden bliver holdt op på formen. Det manuelle i §1 — at
+vurdere hvad der reelt blev udført og melde `% før → % efter` i svaret — kan scriptet ikke gøre og falder stadig
+på den der arbejder.
 
 ## 5. Øvrige regler
 
@@ -126,8 +138,13 @@ Automationen dækker **den daglige status**. Det manuelle i §1 — at vurdere h
   ```
 
   Markdown-kilden er sandheden, PDF'en er eksporten, og **begge** skal stå i `docs/library/README.md`. Tjek siden
-  visuelt før den regnes som færdig (`pypdfium2` → PNG), for rendereren har to grænser: enkelt-stjerne kursiv
-  (`*sådan*`) vises som stjerner — brug `«citationstegn»` — og kodelinjer over ca. 78 tegn løber ud over spalten.
+  visuelt før den regnes som færdig (`pypdfium2` → PNG). Rendereren klarer selv de tre ting der tidligere gik
+  galt: enkelt-stjerne kursiv (`*sådan*`, også med `**fed**` indeni) skrives som «sådan», glyffer DejaVu ikke har
+  oversættes (`✅`→`✓`, `❌`→`✗`) eller fjernes **med en advarselslinje** i stedet for i stilhed, og kodelinjer
+  ombrydes inden for den grå boks. Et sidebrud midt i et afsnit flytter resten korrekt med over — det gjorde det
+  ikke før 3/11, hvor en side fyldt til bunden kunne blive til 20 næsten tomme sider. Værnet `PDF-renderer` i
+  [`tools/natlige-vaern.sh`](tools/natlige-vaern.sh) renderer tre dokumenter og fejler på sideantal, glyf-advarsler
+  og tilbageværende stjerner.
 
 ## 6. Agent-kørsel og værktøjs-gaten
 
@@ -145,3 +162,41 @@ Derfor:
   dokument der endnu ikke var oprettet. Skriv først, verificér i næste kald.
 - Afvises et kald alligevel: gentag det uændret i samme tur sammen med en `AGENTS.md`-læsning. Det er ikke
   nødvendigt at ændre noget i repoet for at komme videre.
+- Reglerne i §1–2 og §6 findes også som **skill**: [`.agents/skills/projektstatus/SKILL.md`](.agents/skills/projektstatus/SKILL.md)
+  (`/skill:projektstatus`). Den indlæses kun når et pas skal melde procenter eller røre statusfilerne —
+  denne fil gælder stadig altid, og ved uenighed vinder den.
+
+## 7. WordPress- og WooCommerce-pluginregler
+
+Gælder alt arbejde i `plugins/`.
+
+### 7.1 Roadmap før kode
+
+- Start **aldrig** på koden før der ligger et roadmap med (1) komplet filstruktur for pluginnet og
+  (2) estimeret tidsforbrug med procentvis opdeling fra 0 % til 100 %.
+- Når roadmappet er godkendt: stop ikke undervejs. Skriv samtlige filer færdige uden placeholders eller `// TODO`.
+- Angiv status ved hvert skridt, fx `[50 % — REST API & Admin UI færdig]`, og meld procenterne som §1 kræver.
+
+### 7.2 WordPress- og PHP-arkitektur
+
+- PHP 8.2+ kompatibel, objektorienteret struktur eller tydeligt namespacede klasser.
+- Hovedfilen skal have gyldig WordPress Plugin Header og starte med `if ( ! defined( 'ABSPATH' ) ) exit;`.
+- Sikkerhed: `check_ajax_referer()` / `wp_verify_nonce()`, `current_user_can( 'manage_options' )`,
+  `sanitize_text_field()` på input og `esc_html()` / `esc_url()` på output.
+- Database: `$wpdb->prepare()` ved custom tabeller (`dbDelta` ved aktivering) eller WordPress' Options- og
+  Transients-API.
+- SEO / AEO / GEO: genererer pluginnet frontend-indhold eller produktsider, skal det understøtte gyldig
+  JSON-LD (Schema.org) og kun enqueue scripts på de sider der har brug for dem.
+
+### 7.3 Syntakstjek og pakning
+
+- Efter hver skrevet PHP-fil: `find . -name "*.php" -not -path "./vendor/*" -not -path "./.git/*" -exec php -l {} +`.
+- Findes der ingen `php` i miljøet (gælder Freebuff/cloud), brug den statiske binær i `.tools/php` — hentet fra
+  `https://dl.static-php.dev/static-php-cli/common/php-8.3.14-cli-linux-x86_64.tar.gz` og pakket ud, så binæren
+  ligger som `.tools/php`; `.tools/` er ikke i git — og kør samme kommando med `./.tools/php -l`.
+- Melder `php -l` fejl, rettes fejlen med det samme, før der gås videre.
+- Ved 100 %: pak pluginnet i en installationsklar `.zip` i `plugins/` (uden `.git`, `AGENTS.md`, `node_modules`
+  og `.tools`), så den kan uploades direkte under *Plugins → Tilføj nyt*.
+- Zip-filen **skal** ligge i `plugins/` på `main` og hedde `steamgears-autopilot-v<version>.zip`. Selvopdateringen
+  henter præcis `https://raw.githubusercontent.com/humle93/steamgears-site/main/plugins/steamgears-autopilot-v<version>.zip`
+  (`SGAP_Updater::package_url()`), så en zip i rodmappen eller på en sidegren bliver aldrig fundet.

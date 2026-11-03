@@ -94,7 +94,8 @@ class SGAP_Abilities {
                     'content_type' => ['type' => 'string', 'maxLength' => 40, 'description' => 'Optional content type, e.g. product or custom. Empty = custom.'],
                     'format' => ['type' => 'string', 'maxLength' => 40, 'description' => 'Optional format, e.g. pin or post. Empty = post.'],
                     'campaign' => ['type' => 'string', 'description' => 'Optional utm_campaign for this post, e.g. clockwork_punk_2026_11. Empty = the campaign name in Settings → General.'],
-                    'force' => ['type' => 'boolean', 'description' => 'Queue even when the quality gate blocks the post (a banned word, a dead link, a repeated caption). The problems come back as warnings.']
+                    'force' => ['type' => 'boolean', 'description' => 'Queue even when the quality gate blocks the post (a banned word, a dead link, a repeated caption). The problems come back as warnings.'],
+                    'remind' => ['type' => 'boolean', 'description' => 'Do not post it: mail the owner the text, image and link so it can be posted by hand (stories, carousels and native uploads). The item goes to status reminded and is never retried.']
                 ], ['channel', 'title', 'text', 'destination_url'], [__CLASS__, 'queue_post'], false, false
             ],
             'generate' => [
@@ -298,7 +299,8 @@ class SGAP_Abilities {
             'format' => $input['format'] ?? 'post',
             'campaign' => $input['campaign'] ?? '',
             'scheduled_at' => $scheduled,
-            'force' => !empty($input['force'])
+            'force' => !empty($input['force']),
+            'remind' => !empty($input['remind'])
         ]);
         return is_wp_error($result) ? $result : $result + ['status' => 'queued'];
     }
