@@ -538,6 +538,15 @@
       "after": 57.0,
       "delta": 0.2,
       "basis": "12,4 af 21,75 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,8/6 · S3 2,15/3,55 · S4 1,4/5)"
+    },
+    {
+      "date": "2026-11-03",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 57.0,
+      "after": 58.4,
+      "delta": 1.4,
+      "basis": "12,7 af 21,75 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,8/6 · S3 2,45/3,55 · S4 1,4/5)"
     }
   ]
 }
