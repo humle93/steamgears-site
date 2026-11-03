@@ -104,6 +104,11 @@ done"*. Two owner-side settings therefore stand between the gate and its real te
   bypassed), with `mcp_role: admin`, `mcp_approvals: off` and `mcp_dynamic_rest: true`. So the token is strong
   enough and nothing else is in the way — the switch simply is not saved yet. Recipe in
   [`mcp-auth.md`](mcp-auth.md#sådan-tjekkes-spærren-uden-at-skrive).
+
+  **Re-measured 3/11 2026:** `mcp_drafts_only` is still `true` in `mwai_options`, and
+  `steamgears-autopilot_update` still answers *"This site lets assistants work on drafts only, so this was not
+  done. It would change the live site; ask the owner to do it."* Nothing is different from 2/11 — the switch has
+  not been saved, so 7.25.0 stays one version behind and the campaign fields it carries stay unused.
 - **Settings → General → Banned words is empty** (`banned_words: 0`), so the headline check of 7.22 cannot fire
   on anything until the owner adds at least one word. The other three checks (dead links, missing alt text,
   duplicate captions) work without it.
