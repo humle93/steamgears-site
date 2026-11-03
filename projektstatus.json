@@ -55,8 +55,8 @@
     {
       "id": "plugin",
       "name": "Steamgears Autopilot — plugin",
-      "next": "P1.2 \"remind me instead\" (1,0 d), derefter P3.1/P3.2-hygiejne; P0.6 er blokeret af Command Center",
-      "blocked_by": "7.25.0 kan ikke installeres af agenten, fordi AI Engines Drafts Only står slået til; P1.5 kræver Pinterest-token (401) og Meta-review; P0.6 kræver Command Center; P1.4 kræver P1.5",
+      "next": "P3.1/P3.2-hygiejne; P0.6 er blokeret af Command Center",
+      "blocked_by": "7.27.0 kan ikke installeres af agenten (OAuth-token tilbagekaldt, intet application password); P1.5 kræver Pinterest-token (401) og Meta-review; P0.6 kræver Command Center; P1.4 kræver P1.5",
       "modules": [
         {
           "id": "p0",
@@ -69,10 +69,10 @@
         {
           "id": "p1",
           "name": "P1 — paritet",
-          "done": 3.85,
+          "done": 4.85,
           "total": 11.35,
           "unit": "d",
-          "note": "P1.1 pre-flight pr. kanal 1,0 d (7.20.0) + P1.3 blackout-kalender 0,5 d (7.21.0) + P1.6 quality gate 1,0 d (includes/quality.php, 7.22.0 — nu også målt live på sitet) + P1.7 helsides SEO/GEO/AEO-audit 1,0 d (7.19.0) + P1.8 utm_campaign som parameter 0,25 d (7.23.0, venter på Update-klik) + 0,1 d queue-post bærer angle/format/kampagne (7.25.0, krævet fordi OAuth-tokenet ikke gælder pluginets REST-namespace) = 5,5 af 8 punkter. P1.5 er eksternt blokeret (Pinterest-token)"
+          "note": "P1.1 pre-flight pr. kanal 1,0 d (7.20.0) + P1.3 blackout-kalender 0,5 d (7.21.0) + P1.6 quality gate 1,0 d (includes/quality.php, 7.22.0 — nu også målt live på sitet) + P1.7 helsides SEO/GEO/AEO-audit 1,0 d (7.19.0) + P1.8 utm_campaign som parameter 0,25 d (7.23.0, venter på Update-klik) + 0,1 d queue-post bærer angle/format/kampagne (7.25.0, krævet fordi OAuth-tokenet ikke gælder pluginets REST-namespace) = 5,5 af 8 punkter. P1.5 er eksternt blokeret (Pinterest-token) + P1.2 remind me i stedet for at poste 1,0 d (7.27.0, includes/reminder.php, 20 smoke-checks)"
         },
         {
           "id": "p2",
@@ -475,6 +475,15 @@
       "after": 55.4,
       "delta": 0.5,
       "basis": "12,05 af 21,75 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,45/6 · S3 2,15/3,55 · S4 1,4/5)"
+    },
+    {
+      "date": "2026-11-03",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 30.0,
+      "after": 34.1,
+      "delta": 4.1,
+      "basis": "8,3 af 24,35 d (P0 3,2/4 · P1 4,85/11,35 · P2 0/7 · P3 0,25/2)"
     }
   ]
 }

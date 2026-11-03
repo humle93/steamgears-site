@@ -236,6 +236,28 @@ In GA4 the campaign shows up under *Traffic acquisition → Session campaign* an
 `Session campaign`. The plugin's own `/stats` still counts clicks and orders per channel and angle, so a
 campaign can be read from two independent sources instead of one.
 
+## Remind me instead of posting (7.27)
+
+Some formats only exist inside the network's own app: a story, a carousel, a native upload. The API refuses
+them, so the post spent three attempts, landed in *failed* and the owner had to read an error to find out what
+the caption said anyway. A queue item can now be flagged **remind me**: it is neither sent to Publer nor
+released into the RSS feed — it is mailed to you with everything needed to post it by hand, and its status
+becomes `reminded`.
+
+- **Where:** the *Remind me* button on a row in **Queue**, or `remind: true` on `POST /queue` and on the
+  `queue-post` ability. *Re-queue* clears the flag again, because re-queueing means "let the autopilot try".
+- **The mail** carries the channel, format, title, due time, the full caption, the image URL (or a note to pick
+  one from the media library), the tracked link and a link to the queue row. It goes to the address under
+  **Settings → Alerts** (`alert_email`, falling back to the admin address).
+- **Not an alert:** a reminder is the post itself, so it is mailed even when Alerts is set to `off`. A queue item
+  is never mailed twice inside six hours, and a broken mail setup cannot leave it spinning: the item is marked
+  `reminded` either way, with the reason in the publish log.
+- **Not a failure:** `reminded` is terminal. No retry, no backoff, no failure mail, and the publish log gets an
+  outcome of its own (*Reminded by mail*) so the history still says what happened.
+
+RSS mode uses the same path: a flagged item is held back from the feed (leaving it in would be the opposite of
+"do not post this one for me") and mailed instead.
+
 ## Updates
 
 From 7.6 the plugin updates itself from GitHub (`humle93/steamgears-site`, branch `main`):
