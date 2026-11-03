@@ -24,6 +24,7 @@ lukkedes research-bibliotek.
 
 | Dokument | Indhold | Dato |
 | --- | --- | --- |
+| [phase-0-baseline-2026-11-03.md](phase-0-baseline-2026-11-03.md) | **Fase 0-baseline 3/11:** friske read-only-målinger — USD-priser, `/shipping/` og `/returns/` 404, ingen CVR, 450–475 KB HTML, schema uden fragt/retur — PDF i `reports/phase-0-baseline-2026-11-03.pdf` | 2026-11-03 |
 | [sitewide-audit-2026-11-03.md](sitewide-audit-2026-11-03.md) | **Sitewide-audit 3/11:** P0/P1-fund for juridisk identitet, consent, valuta og checkout, anbefalede funktioner og målepunkter — dokumentbaseret, så hvert live-fund skal genmåles før en ændring — PDF i `reports/sitewide-audit-2026-11-03.pdf` | 2026-11-03 |
 | [deploy-roadmap-2026-11-03.md](deploy-roadmap-2026-11-03.md) | **Deploy-roadmap 3/11:** 7 faser, 6–9 udviklerdage, porte for backup/rollback og testliste før og efter live — separat scope, ændrer ikke `projektstatus.json` — PDF i `reports/deploy-roadmap-2026-11-03.pdf` | 2026-11-03 |
 | [mcp-drafts-only-gaten-2026-11-03.md](mcp-drafts-only-gaten-2026-11-03.md) | **Drafts Only-gaten:** kildelæst i AI Engine 3.9.0 — hvilke 10+21 værktøjer der slipper igennem, hvorfor `wp_update_option` selv er spærret, hvorfor et gem kan se gennemført ud uden at være det, og de tre veje til 7.25.0 (PDF i `reports/mcp-drafts-only-gaten-2026-11-03.pdf`) | 2026-11-03 |

@@ -32,6 +32,8 @@ Tilgængelighedsnotatet [`../agent-profil.md`](../agent-profil.md) dokumenterer,
 | 5. Ydeevne, SEO og tilgængelighed | Mobil-baseline, billeder/CWV, H1/meta/alt/schema, kritiske URL'er, tastatur og kontrast. Ret afgrænset. | 1–1,5 dag | Nye målinger er skrevet ned; checkout er ikke cachet; schema svarer til den synlige produktoplysning; ingen kritiske regressioner. |
 | 6. Accept og gradvis udrulning | Staging-test, accept, udrulning til production i små kurve, smoke-test efter hver, overvågning og overdragelse. | 0,5–1 dag | Alle acceptkriterier er gennemført; overvågning kører; tilbagerulningsberedskab og ejer er bekræftet. |
 
+Fase 0 er målt 3/11 med read-only HTTP: se [`phase-0-baseline-2026-11-03.md`](phase-0-baseline-2026-11-03.md). Ejerbeslutningerne i fase 0–3 udestår, og checkout kan ikke måles uden en session.
+
 **I alt: 6–9 udviklerdage.** Fase 2–4 kan blive forsinket af eksterne godkendelser eller ejerens oplysninger. Tid tælles ikke som færdigt arbejde, hvis live-udførelsen ikke kan verificeres.
 
 ## Foreslået udrulnings- og rollback-rækkefølge
