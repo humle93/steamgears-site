@@ -296,6 +296,31 @@ class CliTests(unittest.TestCase):
         with self.assertRaises(SystemExit):
             ns.main(["--offline"])
 
+    def test_cli_without_data_writes_nothing_and_keeps_gate(self):
+        """En kørsel uden data må hverken overskrive dagens rapport eller tælle som måledag."""
+        catalog = ns.load_catalog(offline=True)
+        with tempfile.TemporaryDirectory() as tmp, \
+             mock.patch.object(ns, "pinterest_signals", return_value=([], "utilgængelig: test")), \
+             mock.patch.object(ns, "tiktok_signals", return_value=([], "utilgængelig: test")), \
+             mock.patch.object(ns, "load_catalog", return_value=catalog):
+            code = ns.main(["--seeds", "steampunk corset", "--out-dir", tmp])
+            self.assertEqual(code, 2)
+            self.assertEqual(list(Path(tmp).iterdir()), [])
+
+    def test_cli_records_only_measured_keywords(self):
+        """Seeds uden data skrives ikke i historikken — ellers ville de flytte gaten uden en måling."""
+        catalog = ns.load_catalog(offline=True)
+        measured = ns.Signal(keyword="herbarium print", source="pinterest",
+                             growth_yoy=120, growth_mom=40, points=[("2026-08-04", 55)])
+        with tempfile.TemporaryDirectory() as tmp, \
+             mock.patch.object(ns, "pinterest_signals", return_value=([measured], "ok: 1 søgeord")), \
+             mock.patch.object(ns, "tiktok_signals", return_value=([], "utilgængelig: test")), \
+             mock.patch.object(ns, "load_catalog", return_value=catalog):
+            code = ns.main(["--seeds", "herbarium print,steampunk corset", "--out-dir", tmp])
+            self.assertEqual(code, 0)
+            history = json.loads((Path(tmp) / ns.HISTORY_NAME).read_text(encoding="utf-8"))
+            self.assertEqual(sorted(history["keywords"]), ["herbarium print"])
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

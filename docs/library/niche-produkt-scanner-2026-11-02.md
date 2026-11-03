@@ -31,7 +31,8 @@ mulighed      = efterspørgsel × (1 − dækning),   dækning = min(antal match
 
 - `klippet(x)` mapper vækst i procent til 0–100 med grænserne −50 % og +200 %, så ét enkelt udsving ikke
   dominerer rækken.
-- `momentum` er ændringen fra de fire ældste til de fire nyeste uger i tidsserien.
+- `momentum` er kildens eget `pct_growth_mom`. Mangler feltet (TikTok-eksporten har kun én
+  vækstkolonne), vægtes retningen neutralt, så den årlige vækst ikke tælles to gange.
 - Dækning er **antal** matchende produkter, ikke kvalitet: søgeords-overlap mod produktnavne og
   -kategorier. Et ord er *generisk* — og tæller ikke — hvis det står i over 40 % af kataloget **og** i
   mindst fem produkter, så "steampunk goggles" ikke melder dækning bare fordi alt hedder steampunk.
@@ -53,8 +54,9 @@ PINTEREST_ACCESS_TOKEN=... python3 tools/niche_scanner.py \
 `--region` tager Pinterests 18 kuraterede områder (`SE+DK+FI+NO` er Norden). `--trend-type seasonal` er
 den nyttige til produkter, fordi den fanger tilbagevendende årlig efterspørgsel; `growing` fanger nye nicher.
 
-Udfil: `reports/niche-scan-<dato>.md` (læsbar) og `.json` (rå). Exit-kode 2 betyder «ingen kilde gav data»,
-så en CI-kørsel ikke melder grønt på en tom scanning.
+Udfil: `reports/niche-scan-<dato>.md` (læsbar) og `.json` (rå). Exit-kode 2 betyder «ingen kilde gav data»:
+så skrives ingen rapport, og `reports/niche-scan-history.json` får ingen ny måledag — en natlig kørsel
+uden data flytter altså ikke tre-dages-gaten. Se [niche-scan-ci-2026-11-03.md](niche-scan-ci-2026-11-03.md).
 
 ## Status
 
@@ -62,6 +64,7 @@ så en CI-kørsel ikke melder grønt på en tom scanning.
 | --- | --- |
 | Scoring, katalogmatch, rapport, CLI, tests | **Færdig** — 38 tests, kører offline |
 | Lavsæson, censur af nuller, tre-dages-gate | **Færdig** 3/11 — se [niche-scanner-lavsaeson-2026-11-03.md](niche-scanner-lavsaeson-2026-11-03.md) |
+| Natlig CI-kørsel, så gaten passer sig selv | **Færdig** 3/11 — se [niche-scan-ci-2026-11-03.md](niche-scan-ci-2026-11-03.md); kræver `PINTEREST_ACCESS_TOKEN` |
 | Pinterest-kilde | **Kode klar, blokeret** af `PINTEREST_ACCESS_TOKEN` (Standard-adgang + app-review) |
 | TikTok-kilde | **Kode klar, halvt blokeret** — virker ved manuel Creative Center-eksport, som ikke findes endnu |
 | Saturation/konkurrence | **Ikke muligt** med de officielle API'er |

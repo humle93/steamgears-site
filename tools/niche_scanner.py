@@ -42,7 +42,9 @@ Kør:
     python3 tools/niche_scanner.py --offline            # fixtures, ingen netværk/token
     python3 tools/test_niche_scanner.py                 # tests
 
-Ud: reports/niche-scan-<dato>.md + .json og rapports/niche-scan-history.json (kørselsdage)
+Ud: reports/niche-scan-<dato>.md + .json og reports/niche-scan-history.json (kørselsdage).
+En kørsel uden data skriver intet og rykker ikke tre-dages-gaten — den natlige CI-kørsel
+(.github/workflows/niche-scan.yml) bruger netop det til at skelne «målt» fra «forsøgt».
 """
 
 from __future__ import annotations
@@ -609,7 +611,14 @@ def main(argv: list[str] | None = None) -> int:
 
     rows, sources, catalog, code = run(terms, args.region, args.trend_type, args.offline,
                                        args.tiktok_export, history=history, today=today)
-    history = record_run(out_dir, history, [r.keyword for r in rows] or terms, today)
+    if not rows:
+        # Uden data overskrives dagens rapport ikke, og dagen tæller ikke som måledag: en
+        # natlig kørsel der ikke kunne hente noget må ikke flytte tre-dages-gaten.
+        print("  [FEJL] ingen kilde gav data — ingen rapport skrevet, gaten er urørt", file=sys.stderr)
+        for name, status in sources.items():
+            print(f"    {name}: {status}", file=sys.stderr)
+        return code or 2
+    history = record_run(out_dir, history, [r.keyword for r in rows], today)
 
     meta = {"date": today, "region": args.region, "trend_type": args.trend_type,
             "catalog_count": len(catalog), "seeds": terms, "history": history}
@@ -636,10 +645,6 @@ def main(argv: list[str] | None = None) -> int:
               f"lav={row.season.low_text:<4} match={len(row.matches)}  {row.status}")
     shown = md_path.relative_to(ROOT) if md_path.is_relative_to(ROOT) else md_path
     print(f"  skrev {shown}, {json_path.name} og {HISTORY_NAME}")
-
-    if code == 2:
-        print("  [FEJL] ingen kilde gav data — sæt PINTEREST_ACCESS_TOKEN eller giv --tiktok-export / --offline",
-              file=sys.stderr)
     return code
 
 

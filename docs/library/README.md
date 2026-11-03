@@ -43,6 +43,7 @@ sidste commit-dato. Målt 2/11 2026.
 | [drive-watch-log.md](drive-watch-log.md) | Log over ændringer i Drive | 2026-11-02 |
 | [niche-produkt-scanner-2026-11-02.md](niche-produkt-scanner-2026-11-02.md) | Niche-scanner: kilder, score og hvad Pinterest/TikTok ikke kan levere | 2026-11-02 |
 | [niche-scanner-lavsaeson-2026-11-03.md](niche-scanner-lavsaeson-2026-11-03.md) | Niche-scanneren: lavsæson, censur af nuller og tre-dages-gaten — de tre §7-krav er kodet | 2026-11-03 |
+| [niche-scan-ci-2026-11-03.md](niche-scan-ci-2026-11-03.md) | Natlig niche-scanning i CI: gaten der passer sig selv, de to gate-fejl og hvad et token kræver | 2026-11-03 |
 
 ## Butik og produkter
 
