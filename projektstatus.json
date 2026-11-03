@@ -62,10 +62,10 @@
         {
           "id": "p0",
           "name": "P0 — reliability",
-          "done": 3.2,
+          "done": 3.35,
           "total": 4.0,
           "unit": "d",
-          "note": "P0.1 0,5 + P0.2 0,5 + P0.3 1,0 + P0.5 1,0 (alarmer i includes/alerts.php, backoff 5/15/45, auditlog i includes/audit.php) + P0.4-detektion 0,2; P0.6 mangler"
+          "note": "P0.1 0,5 + P0.2 0,5 + P0.3 1,0 + P0.5 1,0 (alarmer i includes/alerts.php, backoff 5/15/45, auditlog i includes/audit.php) + P0.4-detektion 0,2; + 0,15 d /go-ruten: produktlink uden kø-post gik til forsiden, nu produkt-fallback i 7.32.0 med 5 checks (404 PASS); P0.6 mangler"
         },
         {
           "id": "p1",
@@ -594,6 +594,15 @@
       "after": 55.6,
       "delta": 10.2,
       "basis": "13,55 af 24,35 d (P0 3,2/4 · P1 4,85/11,35 · P2 4,5/7 · P3 1/2)"
+    },
+    {
+      "date": "2026-11-03",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 55.6,
+      "after": 56.3,
+      "delta": 0.7,
+      "basis": "13,7 af 24,35 d (P0 3,35/4 · P1 4,85/11,35 · P2 4,5/7 · P3 1/2)"
     }
   ]
 }

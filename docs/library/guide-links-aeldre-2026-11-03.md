@@ -145,5 +145,17 @@ gyldig status: begge er afløst af målingen 3/11. `--selftest` har tretten fixt
 en opdigtet pris, en tom pris, den afskaffede status, et ukendt id, et forkert produktnavn, en dublering, en
 ukendt status, en tom plan og et påstået-indsat link der ikke står i filen.
 
-**Det der venter på WordPress-adgang:** de tyve `klar`-rækker i §2 og §3, og at `/go/`-ruten selv virker
-(Redirection-gruppe eller Royal Links — ejer). Det er den eneste blokering tilbage i S2.6.
+**Det der venter på WordPress-adgang:** de tyve `klar`-rækker i §2 og §3. Det er den eneste blokering tilbage
+i S2.6.
+
+## 6. Ruten `/go/<id>/` — målt 3/11, rettet i plugin 7.30.0
+
+Ruten fandtes allerede, men den slog kun op i `sgap_queue`. Produkt-ID'er gav derfor `302` til **forsiden**:
+`/go/477/`, `/go/767/`, `/go/940/` og `/go/809/` landede alle på `https://steamgears.eu/` med `x-redirect-by:
+Steamgears`. Det er rettet i plugin **7.30.0**, hvor et ID uden kø-post slås op som produkt og redirecter til
+permalinken; ukendte ID'er går stadig til forsiden.
+
+Derfor bliver linkformatet i denne plan stående: `/go/<id>/` virker som produktkortlink, så snart 7.30.0 er
+aktiv på sitet — uden at der skal oprettes en Redirection-gruppe. Diagnosen, kilden og kontrolkommandoen står i
+[`go-ruten-produktlinks-2026-11-03.md`](go-ruten-produktlinks-2026-11-03.md). Målt 3/11 har de publicerede
+guides **nul** `/go/`-links, så intet live-link peger forkert imens.

@@ -339,7 +339,7 @@ before it, because the MCP surface can read plugins but cannot install or activa
 1. Bump `Version:` in `steamgears-autopilot.php` and `SGAP_VERSION` — they must agree, CI fails otherwise.
 2. Rebuild the zip from the folder so the name and the contents match:
    `cd plugins && rm -f steamgears-autopilot-*.zip && zip -qr steamgears-autopilot-v<version>.zip steamgears-autopilot`
-3. `php plugins/tests/smoke.php` (399 checks) and `diff -r` the zipped copy against the source. CI repeats
+3. `php plugins/tests/smoke.php` (404 checks) and `diff -r` the zipped copy against the source. CI repeats
    both, plus `php -l` on PHP 8.0–8.5 and WordPress 6.4 / 7.1 / latest.
 4. Commit code, zip, README and `ROADMAP.md` together and push to `main`.
 5. **Click *Plugins → Update*** (or *Dashboard → Updates*). Auto-updates can be switched on in the same
@@ -430,7 +430,11 @@ define('SGAP_TELEGRAM_BOT_TOKEN', '...');
 ## Click tracking
 
 Every queue item gets a short link `https://steamgears.eu/go/<id>/`. Use that link
-in the post instead of the raw URL. A visit:
+in the post instead of the raw URL. **A `/go/<id>/` with no queue item is treated as a product short
+link** and resolves to that product's permalink (7.32.0), so the same route can be used in guides,
+newsletters and print; only an id that is neither a queue item nor a product falls back to the front
+page. Product links are not counted in the per-channel click stats, because they have no queue item
+to attribute to. A visit:
 
 1. logs a `click` event (bots and link-preview crawlers are ignored),
 2. sets a first-party cookie `sgap_click` (30 days, HttpOnly),

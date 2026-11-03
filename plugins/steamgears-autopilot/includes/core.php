@@ -618,6 +618,23 @@ class SGAP_Tracking {
         return $host !== '' && in_array($host, $allowed, true) ? $url : home_url('/');
     }
 
+    /**
+     * A /go/<id>/ that is not a queue item is a product short link (guides, print, campaigns).
+     * It resolves to the product permalink; anything unresolvable still lands on the front page.
+     */
+    public static function product_target(int $id): string {
+        if ($id > 0 && function_exists('wc_get_product')) {
+            $product = wc_get_product($id);
+            if ($product && method_exists($product, 'get_permalink')) {
+                $url = (string) $product->get_permalink();
+                if ($url !== '') {
+                    return $url;
+                }
+            }
+        }
+        return home_url('/');
+    }
+
     public static function redirect(): void {
         $id = absint(get_query_var(self::QUERY_VAR));
         if (!$id) {
@@ -630,7 +647,8 @@ class SGAP_Tracking {
         ));
         nocache_headers();
         if (!$row) {
-            wp_redirect(home_url('/'), 302, 'Steamgears');
+            // No queue row with this id: treat it as a product short link instead of the front page.
+            wp_redirect(self::product_target($id), 302, 'Steamgears');
             exit;
         }
 

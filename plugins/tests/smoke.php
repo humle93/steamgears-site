@@ -879,5 +879,18 @@ $core_src = file_get_contents(__DIR__.'/../steamgears-autopilot/includes/core.ph
 check('locales: the queue table stores language and source id', str_contains($core_src,'locale VARCHAR(10)') && str_contains($core_src,'source_id BIGINT UNSIGNED'));
 check('locales: every caption is translated through the AI module', str_contains(file_get_contents(__DIR__.'/../steamgears-autopilot/includes/locales.php'),'SGAP_AI::json_call('));
 
+// 7.32.0 — /go/<id>/ som produktkortlink: ruten sendte læseren til forsiden når id'et ikke var en kø-post.
+if (!function_exists('wc_get_product')) { function wc_get_product($id){ return $GLOBALS['wc_product_by_id'][(int)$id] ?? false; } }
+$GLOBALS['wc_product_by_id']=[
+    477=>new Fake_Product(['id'=>477,'name'=>'Copper Pilot Goggles']),
+    766=>new Fake_Product(['id'=>766,'name'=>'Steampunk Leather Utility Belt & Holster']),
+];
+check('product link: a product id resolves to its permalink', SGAP_Tracking::product_target(477)==='https://steamgears.eu/p/477/');
+check('product link: an unknown id still lands on the front page', SGAP_Tracking::product_target(987654)===home_url('/'));
+check('product link: a queue id is not treated as a product', SGAP_Tracking::product_target(0)===home_url('/'));
+$coresrc=file_get_contents(__DIR__.'/../steamgears-autopilot/includes/core.php');
+check('product link: the missing-row branch uses the product fallback', str_contains($coresrc,'wp_redirect(self::product_target($id), 302, \'Steamgears\')'));
+check('product link: the product lookup is guarded, so the route cannot fatal without WooCommerce', str_contains($coresrc,"function_exists('wc_get_product')"));
+
 // P3.2/P3.5-slut
 exit(empty($GLOBALS['fail'])?0:1);
