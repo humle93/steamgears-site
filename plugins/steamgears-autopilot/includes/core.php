@@ -47,6 +47,11 @@ class SGAP_Install {
         'sgap_channels' => 'facebook,instagram,pinterest',
         'sgap_bluesky_handle' => '',
         'sgap_bluesky_app_password' => '',
+        'sgap_mastodon_instance' => '',
+        'sgap_mastodon_token' => '',
+        'sgap_mastodon_limit' => 500,
+        'sgap_telegram_bot_token' => '',
+        'sgap_telegram_chat_id' => '',
         'sgap_utm_campaign' => 'steamgears_premium_evergreen',
         'sgap_ai_provider' => 'anthropic',
         'sgap_publish_mode' => 'rss',
@@ -310,13 +315,13 @@ class SGAP_Settings {
     const HOUR_KEYS = ['quiet_start', 'quiet_end'];
     const INT_KEYS = [
         'daily_cap','batch_size','labor_rate','monthly_budget','target_roi',
-        'winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max','posts_per_day','articles_per_week','alert_dry_days','audit_keep_days'
+        'winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max','posts_per_day','articles_per_week','alert_dry_days','audit_keep_days','mastodon_limit'
     ];
     /** Never echoed back to the browser; can be overridden by SGAP_<KEY> constants in wp-config.php. */
     const SECRET_KEYS = [
         'publer_api_key','ai_api_key','image_api_key','serpapi_key',
         'pinterest_token','instagram_token','telegram_bot_token','tiktok_token','youtube_token',
-        'etsy_oauth_token','etsy_refresh_token','merchant_feed_secret','bluesky_app_password'
+        'etsy_oauth_token','etsy_refresh_token','merchant_feed_secret','bluesky_app_password','mastodon_token'
     ];
     /** Multi-line text settings, shown as a textarea. */
     const TEXTAREA_KEYS = ['blackout_ranges', 'banned_words'];
@@ -324,7 +329,7 @@ class SGAP_Settings {
         'publer_workspace_id','publer_pinterest_board','channels','ai_model','ai_base_url','image_model','content_language','rescue_hosts',
         'telegram_chat_id','email_test_recipient','youtube_channel_id','reddit_username',
         'reddit_subreddit','etsy_shop_id','etsy_shipping_profile_id','etsy_return_policy_id','ai_mode','alert_email',
-        'blackout_ranges','banned_words','utm_campaign','bluesky_handle'
+        'blackout_ranges','banned_words','utm_campaign','bluesky_handle','mastodon_instance'
     ];
     /** Settings with a fixed list of values, shown as a select. */
     const CHOICE_KEYS = [
@@ -337,7 +342,7 @@ class SGAP_Settings {
     /** Shown in the settings page. Keys not listed here stay registered for older data but are unused. */
     const SECTIONS = [
         'General' => ['autopilot_enabled','full_auto_enabled','daily_cap','batch_size','quiet_start','quiet_end','blackout_ranges','quality_gate','banned_words','utm_campaign'],
-        'Publer' => ['publish_mode','publer_api_key','publer_workspace_id','publer_pinterest_board','channels','bluesky_handle','bluesky_app_password'],
+        'Publer' => ['publish_mode','publer_api_key','publer_workspace_id','publer_pinterest_board','channels','bluesky_handle','bluesky_app_password','mastodon_instance','mastodon_token','mastodon_limit','telegram_bot_token','telegram_chat_id'],
         'AI content' => ['ai_provider','ai_api_key','ai_model','ai_base_url','posts_per_day','content_language','image_model','image_api_key','serpapi_key'],
         'Economics' => ['labor_rate','monthly_budget','target_roi','winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max'],
         'Alerts and log' => ['alert_mode','alert_email','alert_dry_days','audit_keep_days'],
@@ -364,6 +369,11 @@ class SGAP_Settings {
         'channels' => 'Instagram and Pinterest posts need a photo; the Content Studio can create one. Comma-separated. Add bluesky to post there directly, without Publer — it needs the handle and an app password below, and is skipped (through Publer) until both are filled in.',
         'bluesky_handle' => 'Your Bluesky handle, e.g. steamgears.bsky.social. The @ is optional. Used together with an app password to post directly; an email address works too but the handle is what readers see.',
         'bluesky_app_password' => 'Bluesky → Settings → Privacy and security → App passwords (not the account password). Stays on this server: it is never shown again after saving, and an empty field keeps the stored value.',
+        'mastodon_instance' => 'Address of the server the account lives on, e.g. mastodon.social. There is no central Mastodon, so the token only works on the instance it was created on.',
+        'mastodon_token' => 'Mastodon → Preferences → Development → New application, then the access token of that application (scopes: write:statuses). Never shown again after saving; an empty field keeps the stored value.',
+        'mastodon_limit' => 'Characters the instance accepts in one post. 500 is what every server allows; raise it only when the instance documents a higher limit. The tracking link is always kept whole.',
+        'telegram_bot_token' => 'BotFather → /newbot (or /token for an existing bot). The token is what authorises the message; it is never shown again after saving.',
+        'telegram_chat_id' => 'Where the message lands: @channelname for a public channel, or the numeric id (a group is negative). The bot must be an administrator of the channel, or the API answers ok=false.',
         'daily_cap' => 'Never more than this many posts released per day, across all channels.',
         'batch_size' => 'How many due posts are released per 15-minute run.',
         'quiet_start' => 'No posts are released from this hour …',

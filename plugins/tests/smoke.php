@@ -704,5 +704,96 @@ $pubsrc=file_get_contents(__DIR__.'/../steamgears-autopilot/includes/publer.php'
 check('bluesky: the publish loop routes it through the same loop', str_contains($pubsrc,'SGAP_Bluesky::handles(') && str_contains($pubsrc,'SGAP_Bluesky::publish($row)'));
 check('bluesky: a direct post is marked published instead of polled as a Publer job', str_contains($pubsrc, "SGAP_Queue::mark((int) \$row['id'], 'published')") && str_contains($pubsrc,'Bluesky post '));
 
+// P2.2/P2.3 — Mastodon og Telegram som direkte kanaler gennem samme plumbing som Bluesky.
+// HTTP stubberne fra Bluesky-afsnittet bruges igen: intet netværk, ingen rigtige nøgler.
+$GLOBALS['opts']['sgap_channels']='facebook,bluesky,mastodon,telegram';
+$GLOBALS['opts']['sgap_mastodon_instance']='mastodon.example';
+$GLOBALS['opts']['sgap_mastodon_token']='masto-token-1';
+$row2=['id'=>6,'channel'=>'mastodon','title'=>'Brass goggles','body'=>'Look sharp.','tracking_url'=>'https://steamgears.eu/go/6/'];
+check('mastodon: the instance gets https:// and no trailing slash', SGAP_Mastodon::instance()==='https://mastodon.example');
+check('mastodon: enabled and routed only for its own channel', SGAP_Mastodon::enabled() && SGAP_Mastodon::handles('mastodon') && !SGAP_Mastodon::handles('telegram'));
+check('mastodon: 500 is the default limit', SGAP_Mastodon::limit()===500);
+
+$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[sgap_http(200,['id'=>'99','url'=>'https://mastodon.example/@steamgears/99'])];
+$job=SGAP_Mastodon::publish($row2);
+check('mastodon: one call to /api/v1/statuses', count($GLOBALS['http_calls'])===1 && $GLOBALS['http_calls'][0][0]==='https://mastodon.example/api/v1/statuses');
+check('mastodon: the post url becomes the external id', $job==='https://mastodon.example/@steamgears/99');
+check('mastodon: the token is a bearer header, never a query parameter', ($GLOBALS['http_calls'][0][1]['headers']['Authorization']??'')==='Bearer masto-token-1' && !str_contains($GLOBALS['http_calls'][0][0],'masto-token-1'));
+$mbody=json_decode($GLOBALS['http_calls'][0][1]['body'],true);
+check('mastodon: the status carries the text and the tracking link', str_contains($mbody['status'],'Look sharp.') && str_contains($mbody['status'],'https://steamgears.eu/go/6/'));
+
+$long2=str_repeat('Brass goggles and leather. ',60);
+$mtext=SGAP_Mastodon::compose(['body'=>$long2],'https://steamgears.eu/go/6/');
+check('mastodon: a long post is trimmed inside 500 graphemes', SGAP_Text::length($mtext)<=500 && str_ends_with($mtext,'https://steamgears.eu/go/6/') && str_contains($mtext,'…'));
+$GLOBALS['opts']['sgap_mastodon_limit']='800';
+check('mastodon: the instance limit is a setting', SGAP_Mastodon::limit()===800);
+$GLOBALS['opts']['sgap_mastodon_limit']='500';
+
+$GLOBALS['opts']['sgap_mastodon_token']='';
+$GLOBALS['http_calls']=[];
+$e=SGAP_Mastodon::publish($row2);
+check('mastodon: missing credentials is a setup error and sends nothing', $e instanceof WP_Error && $e->code==='sgap_mastodon_setup' && $GLOBALS['http_calls']===[]);
+$GLOBALS['opts']['sgap_mastodon_token']='masto-token-1';
+
+$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[sgap_http(401,['error'=>'The access token is invalid'])];
+$e=SGAP_Mastodon::publish($row2);
+check('mastodon: a refused token is reported with the instance message', $e instanceof WP_Error && str_contains($e->get_error_message(),'The access token is invalid') && (int)($e->data['status']??0)===401);
+
+$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[sgap_http(422,['error'=>'Validation failed: Text character limit of 500 exceeded'])];
+$e=SGAP_Mastodon::publish($row2);
+check('mastodon: an API rejection keeps its own wording', $e instanceof WP_Error && str_contains($e->get_error_message(),'character limit of 500 exceeded'));
+
+$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[new WP_Error('http_request_failed','cURL error 28: timed out')];
+$e=SGAP_Mastodon::publish($row2);
+check('mastodon: a network failure is an error, not a warning', $e instanceof WP_Error && str_contains($e->get_error_message(),'could not be reached'));
+
+$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[sgap_http(201,['id'=>'100'])];
+$job=SGAP_Mastodon::publish($row2);
+check('mastodon: a response without a url still yields an id', $job==='mastodon:100');
+
+// Telegram: token kommer fra SGAP_TELEGRAM_BOT_TOKEN-konstanten længere oppe, chat-id fra indstillingerne.
+$GLOBALS['opts']['sgap_telegram_chat_id']='@steamgears';
+$row3=['id'=>7,'channel'=>'telegram','title'=>'Brass goggles','body'=>'Look sharp.','tracking_url'=>'https://steamgears.eu/go/7/'];
+check('telegram: enabled and routed only for its own channel', SGAP_Telegram::enabled() && SGAP_Telegram::handles('telegram') && !SGAP_Telegram::handles('mastodon'));
+$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[sgap_http(200,['ok'=>true,'result'=>['message_id'=>321]])];
+$job=SGAP_Telegram::publish($row3);
+check('telegram: one call to bot<token>/sendMessage', count($GLOBALS['http_calls'])===1 && str_starts_with($GLOBALS['http_calls'][0][0],'https://api.telegram.org/bot') && str_ends_with($GLOBALS['http_calls'][0][0],'/sendMessage'));
+check('telegram: the message id becomes the external id', $job==='telegram:321');
+$tbody=json_decode($GLOBALS['http_calls'][0][1]['body'],true);
+check('telegram: chat id, text and link travel in the body', $tbody['chat_id']==='@steamgears' && str_contains($tbody['text'],'Look sharp.') && str_contains($tbody['text'],'https://steamgears.eu/go/7/'));
+
+$long3=str_repeat('Brass goggles and leather. ',400);
+$ttext=SGAP_Telegram::compose(['body'=>$long3],'https://steamgears.eu/go/7/');
+check('telegram: a long message is trimmed inside 4096 graphemes', SGAP_Text::length($ttext)<=4096 && str_ends_with($ttext,'https://steamgears.eu/go/7/') && str_contains($ttext,'…'));
+check('telegram: preflight allows the real 4096, not 1024', SGAP_Preflight::caption_budget('telegram','https://steamgears.eu/go/7/')>3000);
+
+$GLOBALS['opts']['sgap_telegram_chat_id']='';
+$GLOBALS['http_calls']=[];
+$e=SGAP_Telegram::publish($row3);
+check('telegram: missing chat id is a setup error and sends nothing', $e instanceof WP_Error && $e->code==='sgap_telegram_setup' && $GLOBALS['http_calls']===[]);
+$GLOBALS['opts']['sgap_telegram_chat_id']='@steamgears';
+
+// HTTP 200 med ok:false er en fejl — ellers ville en tavs afvisning se ud som en post.
+$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[sgap_http(200,['ok'=>false,'error_code'=>400,'description'=>'Bad Request: chat not found'])];
+$e=SGAP_Telegram::publish($row3);
+check('telegram: ok=false at HTTP 200 is a failure, not a post', $e instanceof WP_Error && str_contains($e->get_error_message(),'chat not found'));
+
+$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[sgap_http(401,['ok'=>false,'error_code'=>401,'description'=>'Unauthorized'])];
+$e=SGAP_Telegram::publish($row3);
+check('telegram: a refused token is an error and the token is not echoed', $e instanceof WP_Error && str_contains($e->get_error_message(),'Unauthorized') && !str_contains($e->get_error_message(),'fromconfig'));
+
+$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[new WP_Error('http_request_failed','cURL error 6: Could not resolve host')];
+$e=SGAP_Telegram::publish($row3);
+check('telegram: a network failure is an error, not a warning', $e instanceof WP_Error && str_contains($e->get_error_message(),'could not be reached'));
+
+$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[sgap_http(200,'not json')];
+$e=SGAP_Telegram::publish($row3);
+check('telegram: a non-JSON answer is an error', $e instanceof WP_Error && str_contains($e->get_error_message(),'not JSON'));
+
+$pubsrc2=file_get_contents(__DIR__.'/../steamgears-autopilot/includes/publer.php');
+check('mastodon: routed through the same publish loop', str_contains($pubsrc2,'SGAP_Mastodon::handles(') && str_contains($pubsrc2,'SGAP_Mastodon::publish($row)'));
+check('telegram: routed through the same publish loop', str_contains($pubsrc2,'SGAP_Telegram::handles(') && str_contains($pubsrc2,'SGAP_Telegram::publish($row)'));
+check('direct channels: all three are marked published at once, not polled', str_contains($pubsrc2, "'bluesky' => 'Bluesky post '") && str_contains($pubsrc2, "'mastodon' => 'Mastodon post '") && str_contains($pubsrc2, "'telegram' => 'Telegram message '"));
+
 // P3.2/P3.5-slut
 exit(empty($GLOBALS['fail'])?0:1);

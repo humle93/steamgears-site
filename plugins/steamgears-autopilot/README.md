@@ -280,6 +280,33 @@ Every failure is the ordinary path: missing credentials, a refused login, a refu
 all put the item back in the queue with the same backoff, fire the alert after the last attempt and write a
 publish-log row. Nothing is swallowed, and no SDK is needed.
 
+## Mastodon (direct posting)
+
+One call to the instance's own API: `POST {instance}/api/v1/statuses` with the access token as a Bearer header
+and an `Idempotency-Key` per queue item, so a retried run cannot post twice. Settings → Publer:
+
+1. **Instance** — the server the account lives on, e.g. `mastodon.social`. `https://` is added when missing.
+2. **Access token** — Preferences → Development → New application, scope `write:statuses`.
+3. **Channels** — add `mastodon`. Removing it, or clearing the token, hands the channel back to Publer.
+
+The limit is **500 characters** by default because every instance accepts that; raise *Mastodon limit* only when
+the instance documents more. Trimming is grapheme-aware and keeps the tracking link whole. The API's own error
+text — `The access token is invalid`, a validation message — is what lands in the queue and the publish log,
+so a refused post says why.
+
+## Telegram (direct posting)
+
+One call to `https://api.telegram.org/bot<token>/sendMessage`. Settings → Publer:
+
+1. **Bot token** — from BotFather (`/newbot`, or `/token` for an existing bot).
+2. **Chat id** — `@channelname` for a public channel, or the numeric id; a group id is negative. The bot has to
+   be an administrator of the channel, otherwise the API refuses the message.
+3. **Channels** — add `telegram`.
+
+Telegram answers **HTTP 200 with `{"ok": false}`** when it refuses a message, so the plugin checks `ok` before
+anything else and reports `description` as the error — a refusal never looks like a published post. The limit is
+4096 characters, trimmed the same way as the others, and the bot token never appears in an error message.
+
 ## Updates
 
 From 7.6 the plugin updates itself from GitHub (`humle93/steamgears-site`, branch `main`):
@@ -295,7 +322,7 @@ before it, because the MCP surface can read plugins but cannot install or activa
 1. Bump `Version:` in `steamgears-autopilot.php` and `SGAP_VERSION` — they must agree, CI fails otherwise.
 2. Rebuild the zip from the folder so the name and the contents match:
    `cd plugins && rm -f steamgears-autopilot-*.zip && zip -qr steamgears-autopilot-v<version>.zip steamgears-autopilot`
-3. `php plugins/tests/smoke.php` (336 checks) and `diff -r` the zipped copy against the source. CI repeats
+3. `php plugins/tests/smoke.php` (364 checks) and `diff -r` the zipped copy against the source. CI repeats
    both, plus `php -l` on PHP 8.0–8.5 and WordPress 6.4 / 7.1 / latest.
 4. Commit code, zip, README and `ROADMAP.md` together and push to `main`.
 5. **Click *Plugins → Update*** (or *Dashboard → Updates*). Auto-updates can be switched on in the same
