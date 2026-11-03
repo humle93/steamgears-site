@@ -78,10 +78,10 @@
         {
           "id": "p2",
           "name": "P2 — kanaler",
-          "done": 0,
+          "done": 1.0,
           "total": 7.0,
           "unit": "d",
-          "note": "0 af 5; Bluesky/Mastodon/Telegram ikke startet"
+          "note": "1 af 5: Bluesky direkte i 7.29.0 (P2.1); Mastodon/Telegram ikke startet"
         },
         {
           "id": "p3",
@@ -567,6 +567,15 @@
       "after": 37.2,
       "delta": 3.1,
       "basis": "9,05 af 24,35 d (P0 3,2/4 · P1 4,85/11,35 · P2 0/7 · P3 1/2)"
+    },
+    {
+      "date": "2026-11-03",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 37.2,
+      "after": 41.3,
+      "delta": 4.1,
+      "basis": "10,05 af 24,35 d (P0 3,2/4 · P1 4,85/11,35 · P2 1/7 · P3 1/2)"
     }
   ]
 }

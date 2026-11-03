@@ -45,6 +45,8 @@ class SGAP_Install {
         'sgap_repost_max' => 3,
         'sgap_posts_per_day' => 2,
         'sgap_channels' => 'facebook,instagram,pinterest',
+        'sgap_bluesky_handle' => '',
+        'sgap_bluesky_app_password' => '',
         'sgap_utm_campaign' => 'steamgears_premium_evergreen',
         'sgap_ai_provider' => 'anthropic',
         'sgap_publish_mode' => 'rss',
@@ -314,7 +316,7 @@ class SGAP_Settings {
     const SECRET_KEYS = [
         'publer_api_key','ai_api_key','image_api_key','serpapi_key',
         'pinterest_token','instagram_token','telegram_bot_token','tiktok_token','youtube_token',
-        'etsy_oauth_token','etsy_refresh_token','merchant_feed_secret'
+        'etsy_oauth_token','etsy_refresh_token','merchant_feed_secret','bluesky_app_password'
     ];
     /** Multi-line text settings, shown as a textarea. */
     const TEXTAREA_KEYS = ['blackout_ranges', 'banned_words'];
@@ -322,7 +324,7 @@ class SGAP_Settings {
         'publer_workspace_id','publer_pinterest_board','channels','ai_model','ai_base_url','image_model','content_language','rescue_hosts',
         'telegram_chat_id','email_test_recipient','youtube_channel_id','reddit_username',
         'reddit_subreddit','etsy_shop_id','etsy_shipping_profile_id','etsy_return_policy_id','ai_mode','alert_email',
-        'blackout_ranges','banned_words','utm_campaign'
+        'blackout_ranges','banned_words','utm_campaign','bluesky_handle'
     ];
     /** Settings with a fixed list of values, shown as a select. */
     const CHOICE_KEYS = [
@@ -335,7 +337,7 @@ class SGAP_Settings {
     /** Shown in the settings page. Keys not listed here stay registered for older data but are unused. */
     const SECTIONS = [
         'General' => ['autopilot_enabled','full_auto_enabled','daily_cap','batch_size','quiet_start','quiet_end','blackout_ranges','quality_gate','banned_words','utm_campaign'],
-        'Publer' => ['publish_mode','publer_api_key','publer_workspace_id','publer_pinterest_board','channels'],
+        'Publer' => ['publish_mode','publer_api_key','publer_workspace_id','publer_pinterest_board','channels','bluesky_handle','bluesky_app_password'],
         'AI content' => ['ai_provider','ai_api_key','ai_model','ai_base_url','posts_per_day','content_language','image_model','image_api_key','serpapi_key'],
         'Economics' => ['labor_rate','monthly_budget','target_roi','winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max'],
         'Alerts and log' => ['alert_mode','alert_email','alert_dry_days','audit_keep_days'],
@@ -359,7 +361,9 @@ class SGAP_Settings {
         'image_api_key' => 'Only needed when the AI provider is not AIMLAPI: an AIMLAPI key for images.',
         'serpapi_key' => 'serpapi.com → Manage API key. Gives the article writer live Google data: People also ask, related searches, top results.',
         'ai_api_key' => 'AIMLAPI: aimlapi.com → Dashboard → API Keys. Anthropic: console.anthropic.com → API keys.',
-        'channels' => 'Instagram and Pinterest posts need a photo; the Content Studio can create one.',
+        'channels' => 'Instagram and Pinterest posts need a photo; the Content Studio can create one. Comma-separated. Add bluesky to post there directly, without Publer — it needs the handle and an app password below, and is skipped (through Publer) until both are filled in.',
+        'bluesky_handle' => 'Your Bluesky handle, e.g. steamgears.bsky.social. The @ is optional. Used together with an app password to post directly; an email address works too but the handle is what readers see.',
+        'bluesky_app_password' => 'Bluesky → Settings → Privacy and security → App passwords (not the account password). Stays on this server: it is never shown again after saving, and an empty field keeps the stored value.',
         'daily_cap' => 'Never more than this many posts released per day, across all channels.',
         'batch_size' => 'How many due posts are released per 15-minute run.',
         'quiet_start' => 'No posts are released from this hour …',
@@ -1229,6 +1233,7 @@ class SGAP_REST {
                 'full_auto' => SGAP_Settings::enabled('full_auto_enabled'),
                 'publish_mode' => SGAP_RSS::enabled() ? 'rss' : 'api',
                 'channels' => SGAP_Publer::channels(),
+                'bluesky_direct' => SGAP_Bluesky::enabled(),
                 'feeds' => SGAP_RSS::enabled() ? array_map([SGAP_RSS::class, 'url'], SGAP_Publer::channels()) : null,
                 'publer_configured' => SGAP_RSS::enabled() || SGAP_Publer::configured(),
                 'ai_configured' => SGAP_Settings::get('ai_api_key') !== '',

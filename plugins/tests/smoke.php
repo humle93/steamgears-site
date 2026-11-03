@@ -615,5 +615,94 @@ check('uninstall: drops every table install creates ('.$dropped.'/'.count($creat
 check('uninstall: deletes options and transients', str_contains($ulog,'DELETE FROM wp_options') && str_contains($ulog,"sgap\\_%"));
 check('uninstall: removes the promoted-post meta', in_array('_sgap_promoted_at',$GLOBALS['deleted_meta_keys']??[],true));
 
+// P2.1 — Bluesky som direkte kanal. HTTP går gennem WordPress' eget API, så det kan stubbes:
+// hvert kald lægger sig i http_calls, og svarene kommer fra http_queue i den rækkefølge
+// plugin'et spørger (login, derefter opslag). Intet netværk, ingen rigtige nøgler.
+$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[];
+function wp_remote_post($url,$args=[]){ $GLOBALS['http_calls'][]=[$url,$args]; $q=$GLOBALS['http_queue']??[]; return $q?array_shift($GLOBALS['http_queue']):new WP_Error('offline','offline'); }
+function wp_remote_request($url,$args=[]){ return wp_remote_post($url,$args); }
+function wp_remote_retrieve_response_code($r){ return is_array($r)?(int)($r['response']['code']??0):0; }
+function wp_remote_retrieve_body($r){ return is_array($r)?(string)($r['body']??''):''; }
+function sgap_http($code,$body){ return ['response'=>['code'=>$code],'body'=>is_array($body)?json_encode($body):(string)$body]; }
+
+$GLOBALS['opts']['sgap_bluesky_handle']='@steamgears.bsky.social';
+$GLOBALS['opts']['sgap_bluesky_app_password']='abcd-efgh-ijkl-mnop';
+$GLOBALS['opts']['sgap_channels']='facebook,bluesky';
+check('bluesky: enabled when configured and listed as a channel', SGAP_Bluesky::enabled() && SGAP_Bluesky::handles('bluesky'));
+check('bluesky: another channel is never routed to it', !SGAP_Bluesky::handles('instagram'));
+$GLOBALS['opts']['sgap_channels']='facebook,instagram';
+check('bluesky: removing it from the channel list turns it off', !SGAP_Bluesky::enabled() && !SGAP_Bluesky::handles('bluesky'));
+$GLOBALS['opts']['sgap_channels']='facebook,bluesky';
+check('bluesky: @ is optional in the handle', SGAP_Bluesky::handle()==='steamgears.bsky.social');
+
+// 300 graphemes, ikke bytes: en emoji og et sammensat bogstav må ikke deles.
+check('bluesky: length counts graphemes', SGAP_Bluesky::length("👩🏽‍🚀")===1 && SGAP_Bluesky::length("e\u{0301}")===1);
+$long=str_repeat('Brass goggles and leather. ',20);
+$cut=SGAP_Bluesky::shorten($long,40);
+check('bluesky: a cut fits, ends in an ellipsis and stays valid UTF-8', SGAP_Bluesky::length($cut)<=40 && str_ends_with($cut,'…') && mb_check_encoding($cut,'UTF-8'));
+check('bluesky: a cut never splits an emoji cluster', SGAP_Bluesky::shorten("👩🏽‍🚀👩🏽‍🚀👩🏽‍🚀",2)!=="👩🏽‍🚀👩");
+
+$row=['id'=>5,'channel'=>'bluesky','title'=>'Brass goggles','body'=>'Look sharp.','tracking_url'=>'https://steamgears.eu/go/5/'];
+$text=SGAP_Bluesky::compose($row,'https://steamgears.eu/go/5/');
+check('bluesky: the link is kept whole and last', str_ends_with($text,"\n\nhttps://steamgears.eu/go/5/") && SGAP_Bluesky::length($text)<=300);
+$long_text=SGAP_Bluesky::compose(['body'=>$long],'https://steamgears.eu/go/5/');
+check('bluesky: a long body is trimmed inside 300 graphemes', SGAP_Bluesky::length($long_text)<=300 && str_contains($long_text,'…') && str_ends_with($long_text,'https://steamgears.eu/go/5/'));
+$facets=SGAP_Bluesky::facets("Look sharp #steampunk\n\nhttps://steamgears.eu/go/5/",'https://steamgears.eu/go/5/');
+check('bluesky: the link becomes a clickable link facet', count($facets)===2 && $facets[0]['features'][0]['uri']==='https://steamgears.eu/go/5/' && $facets[0]['features'][0]['$type']==='app.bsky.richtext.facet#link');
+check('bluesky: the hashtag becomes a tag facet at the right byte offset', $facets[1]['features'][0]['tag']==='steampunk' && $facets[1]['index']['byteStart']===11);
+
+$GLOBALS['http_calls']=[];
+$GLOBALS['http_queue']=[sgap_http(200,['accessJwt'=>'jwt-1','did'=>'did:plc:abc','handle'=>'steamgears.bsky.social']), sgap_http(200,['uri'=>'at://did:plc:abc/app.bsky.feed.post/xyz','cid'=>'cid1'])];
+$job=SGAP_Bluesky::publish($row);
+check('bluesky: a published post returns its AT URI', $job==='at://did:plc:abc/app.bsky.feed.post/xyz');
+check('bluesky: exactly two calls — login, then record', count($GLOBALS['http_calls'])===2
+    && str_ends_with($GLOBALS['http_calls'][0][0],'/xrpc/com.atproto.server.createSession')
+    && str_ends_with($GLOBALS['http_calls'][1][0],'/xrpc/com.atproto.repo.createRecord'));
+$login=json_decode($GLOBALS['http_calls'][0][1]['body'],true);
+check('bluesky: the login sends handle and app password as JSON', $login['identifier']==='steamgears.bsky.social' && $login['password']==='abcd-efgh-ijkl-mnop');
+check('bluesky: the login carries no bearer token', !isset($GLOBALS['http_calls'][0][1]['headers']['Authorization']));
+$rec=json_decode($GLOBALS['http_calls'][1][1]['body'],true);
+check('bluesky: the record names repo, collection and type', $rec['repo']==='did:plc:abc' && $rec['collection']==='app.bsky.feed.post' && $rec['record']['$type']==='app.bsky.feed.post');
+check('bluesky: the record call is authorised with the session token', ($GLOBALS['http_calls'][1][1]['headers']['Authorization']??'')==='Bearer jwt-1');
+check('bluesky: the post text and createdAt travel in the record', str_contains($rec['record']['text'],'Look sharp.') && !empty($rec['record']['createdAt']) && isset($rec['record']['facets']));
+
+$GLOBALS['http_calls']=[];
+$GLOBALS['http_queue']=[sgap_http(200,['accessJwt'=>'jwt-1','did'=>'did:plc:abc']), sgap_http(200,['uri'=>'at://did:plc:abc/app.bsky.feed.post/xyz'])];
+SGAP_Bluesky::publish(['id'=>5,'channel'=>'bluesky','title'=>'Titel','body'=>'']);
+$rec=json_decode($GLOBALS['http_calls'][1][1]['body'],true);
+check('bluesky: the tracking link is generated when the row has none', str_contains($rec['record']['text'],'https://steamgears.eu/go/5/'));
+check('bluesky: an empty body falls back to the title', str_contains($rec['record']['text'],'Titel'));
+
+// Fejlstierne: alle skal give en WP_Error med en brugbar besked — aldrig en tavs no-op.
+$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[];
+$e=SGAP_Bluesky::publish(['id'=>5,'channel'=>'bluesky','title'=>'','body'=>'']);
+check('bluesky: an empty post is refused before any call', $e instanceof WP_Error && $e->code==='sgap_bluesky_text' && $GLOBALS['http_calls']===[]);
+
+$GLOBALS['opts']['sgap_bluesky_app_password']='';
+$GLOBALS['http_calls']=[];
+$e=SGAP_Bluesky::publish($row);
+check('bluesky: missing credentials is a setup error, not a silent no-op', $e instanceof WP_Error && $e->code==='sgap_bluesky_setup' && $GLOBALS['http_calls']===[]);
+$GLOBALS['opts']['sgap_bluesky_app_password']='abcd-efgh-ijkl-mnop';
+
+$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[sgap_http(401,['error'=>'invalid_grant','message'=>'Invalid identifier or password'])];
+$e=SGAP_Bluesky::publish($row);
+check('bluesky: a refused login names the reason and stops after one call', $e instanceof WP_Error && str_contains($e->get_error_message(),'invalid_grant') && count($GLOBALS['http_calls'])===1);
+
+$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[sgap_http(200,['accessJwt'=>'jwt-2','did'=>'did:plc:abc']), sgap_http(400,['error'=>'InvalidRequest','message'=>'Record text is too long'])];
+$e=SGAP_Bluesky::publish($row);
+check('bluesky: a refused record is reported with the API message', $e instanceof WP_Error && str_contains($e->get_error_message(),'Record text is too long') && (int)($e->data['status']??0)===400);
+
+$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[new WP_Error('http_request_failed','cURL error 28: timed out')];
+$e=SGAP_Bluesky::publish($row);
+check('bluesky: a network failure is an error, not a PHP warning', $e instanceof WP_Error && str_contains($e->get_error_message(),'could not be reached'));
+
+$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[sgap_http(200,['accessJwt'=>'stale','did'=>'did:plc:abc']), sgap_http(401,['error'=>'ExpiredToken','message'=>'Token has expired']), sgap_http(200,['accessJwt'=>'fresh','did'=>'did:plc:abc']), sgap_http(200,['uri'=>'at://did:plc:abc/app.bsky.feed.post/new'])];
+$job=SGAP_Bluesky::publish($row);
+check('bluesky: an expired token is renewed once and the post retried', $job==='at://did:plc:abc/app.bsky.feed.post/new' && count($GLOBALS['http_calls'])===4);
+
+$pubsrc=file_get_contents(__DIR__.'/../steamgears-autopilot/includes/publer.php');
+check('bluesky: the publish loop routes it through the same loop', str_contains($pubsrc,'SGAP_Bluesky::handles(') && str_contains($pubsrc,'SGAP_Bluesky::publish($row)'));
+check('bluesky: a direct post is marked published instead of polled as a Publer job', str_contains($pubsrc, "SGAP_Queue::mark((int) \$row['id'], 'published')") && str_contains($pubsrc,'Bluesky post '));
+
 // P3.2/P3.5-slut
 exit(empty($GLOBALS['fail'])?0:1);

@@ -258,6 +258,28 @@ becomes `reminded`.
 RSS mode uses the same path: a flagged item is held back from the feed (leaving it in would be the opposite of
 "do not post this one for me") and mailed instead.
 
+## Bluesky (direct posting)
+
+Bluesky needs no app review and no partner tier, so the plugin posts there itself instead of going through
+Publer: `includes/bluesky.php` logs in with `com.atproto.server.createSession` and posts with
+`com.atproto.repo.createRecord`, both through WordPress' HTTP API. Configure it under **Settings → Publer**:
+
+1. **Handle** — e.g. `steamgears.bsky.social`. The `@` is optional.
+2. **App password** — Bluesky → Settings → Privacy and security → App passwords. Not the account password.
+   It is stored like the Publer key: never shown again, and an empty field keeps the saved value.
+3. **Channels** — add `bluesky` to the list. That is also the switch: drop it again, or clear the password,
+   and posts for that channel go back to Publer.
+
+The login is cached for 90 minutes, and a refused token (401) is renewed once before the post is retried.
+Text follows Bluesky's 300 **graphemes**, not bytes: the tracking link is reserved first and never cut, the
+body is trimmed at a grapheme boundary with an ellipsis, and the link is sent as a richtext facet so it is
+clickable. Hashtags become tag facets. Direct posting runs in API mode only — in RSS mode the feed still owns
+every channel.
+
+Every failure is the ordinary path: missing credentials, a refused login, a refused post and a network error
+all put the item back in the queue with the same backoff, fire the alert after the last attempt and write a
+publish-log row. Nothing is swallowed, and no SDK is needed.
+
 ## Updates
 
 From 7.6 the plugin updates itself from GitHub (`humle93/steamgears-site`, branch `main`):
@@ -273,7 +295,7 @@ before it, because the MCP surface can read plugins but cannot install or activa
 1. Bump `Version:` in `steamgears-autopilot.php` and `SGAP_VERSION` — they must agree, CI fails otherwise.
 2. Rebuild the zip from the folder so the name and the contents match:
    `cd plugins && rm -f steamgears-autopilot-*.zip && zip -qr steamgears-autopilot-v<version>.zip steamgears-autopilot`
-3. `php plugins/tests/smoke.php` (308 checks) and `diff -r` the zipped copy against the source. CI repeats
+3. `php plugins/tests/smoke.php` (336 checks) and `diff -r` the zipped copy against the source. CI repeats
    both, plus `php -l` on PHP 8.0–8.5 and WordPress 6.4 / 7.1 / latest.
 4. Commit code, zip, README and `ROADMAP.md` together and push to `main`.
 5. **Click *Plugins → Update*** (or *Dashboard → Updates*). Auto-updates can be switched on in the same

@@ -297,7 +297,11 @@ class SGAP_Publer {
                 $report['reminded'][] = ['id' => (int) $row['id'], 'channel' => $row['channel'], 'mailed' => $done['mailed']];
                 continue;
             }
-            $job = self::publish($row);
+            // P2.1: Bluesky is posted directly, without Publer, when its credentials are set
+            // and the channel is enabled. It runs through this same loop, so a failure gets
+            // the same backoff, alert and publish log as a rejected Publer post.
+            $direct = SGAP_Bluesky::handles((string) $row['channel']);
+            $job = $direct ? SGAP_Bluesky::publish($row) : self::publish($row);
             if (is_wp_error($job)) {
                 $state = SGAP_Queue::mark((int) $row['id'], 'failed', $job->get_error_message());
                 // The queue only remembers the last error; the log keeps every attempt.
@@ -306,6 +310,14 @@ class SGAP_Publer {
                 continue;
             }
             $wpdb->update($wpdb->prefix . 'sgap_queue', ['external_id' => $job, 'sent_at' => current_time('mysql')], ['id' => (int) $row['id']]);
+            if ($direct) {
+                // There is no Publer job to follow up: the AT URI is the receipt, so the item
+                // is published here instead of being polled as 'sending' until it times out.
+                SGAP_Queue::mark((int) $row['id'], 'published');
+                SGAP_Audit::record((int) $row['id'], (string) $row['channel'], 'published', 200, 'Bluesky post ' . $job);
+                $report['sent'][] = ['id' => (int) $row['id'], 'channel' => $row['channel'], 'job_id' => $job, 'direct' => 'bluesky'];
+                continue;
+            }
             SGAP_Audit::record((int) $row['id'], (string) $row['channel'], 'sent', 200, 'Publer job ' . $job);
             $report['sent'][] = ['id' => (int) $row['id'], 'channel' => $row['channel'], 'job_id' => $job];
         }
