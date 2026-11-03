@@ -104,7 +104,20 @@ Det er WordPress-kernens **Connector Approvals**-funktion, ikke en fejl i AI Eng
 
 Bemærk: den token, der blev delt i chatten, bør tilbagekaldes i AI Engine → Settings → Tokens, uanset om den kun har snæver adgang.
 
-## 8. Ikke verificeret
+## 8. Sådan afsluttes det med plugin v7.16
+
+Plugin 7.16.0 tilføjer 26 værktøjer i kategorien `steamgears-tools`, så alt det her kan gøres gennem MCP i stedet for wp-admin. Rækkefølgen:
+
+1. **Opdatér pluginnet** til 7.16.0 (Plugins → Opdater, eller upload `plugins/steamgears-autopilot-v7.16.0.zip`). Værktøjerne dukker op i MCP-klienten som `steamgears-tools/...`.
+2. **Gendan tagline:** `update-option` med `name=blogdescription`, `value=DIY steampunk costumes, goggles & gear — build it, wear it, own it.`, `dry_run=false`, `confirm=true`. Læs den efter med `get-option`.
+3. **Tjek nøglefilen:** `indexnow-status` — `key_url_served_correctly` skal være `true`. Er den ikke det, blokerer WAF'en IndexNow-crawleren, og så kan ingen IndeNow-indsendelse virke uanset nøgle.
+4. **Indsend de 18 URL'er:** `indexnow-submit` med listen fra `indexnow-urls-2026-11-02.txt`. 200 = nøglen blev fundet; 202 = kun modtaget.
+5. **Bekræft sitemappen:** `sitemap-audit` med en af de nye produkt-URL'er — `present` skal være `true`, og `total_urls` skal ligge omkring 80.
+6. **Search Console** kræver stadig ét menneske: Sitemaps → tilføj `sitemap_index.xml`. Ingen af værktøjerne kan logge ind hos Google.
+
+Vil noget uden for kataloget senere vise sig nødvendigt, så kig i `list-abilities`: alt, hvad WooCommerce, Rank Math og AI Engine selv registrerer, kan køres med `call-ability` uden at ændre koden.
+
+## 9. Ikke verificeret
 
 - Om Rank Maths nøglefil faktisk svarer 200 på den rigtige sti. Kan kun ses i wp-admin.
 - Om IndexNow ville acceptere en indsendelse lige nu (API'et svarer 202 uanset gyldighed).
