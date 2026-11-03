@@ -34,7 +34,7 @@ class WP_REST_Response{ function __construct(public $data,public $status=200){} 
 class WP_REST_Request implements ArrayAccess{ function __construct(public array $p){} function get_param($k){return $this->p[$k]??null;}
  function offsetGet($k):mixed{return $this->p[$k]??null;} function offsetExists($k):bool{return isset($this->p[$k]);} function offsetSet($k,$v):void{} function offsetUnset($k):void{} }
 function wp_next_scheduled($h){return false;} function wp_schedule_event(...$a){$GLOBALS['cron'][]=$a[2];} function flush_rewrite_rules($h=true){$GLOBALS['flushed']=1;} function add_rewrite_rule(...$a){$GLOBALS['rules'][]=$a[0];} function wp_set_option_autoload_values($a){$GLOBALS['noauto']=$a;}
-class W{ public $prefix='wp_'; public $posts='wp_posts'; public $postmeta='wp_postmeta'; function get_charset_collate(){return '';} public $insert_id=0; public $log=[]; public $next=null; public $row=null;
+class W{ public $prefix='wp_'; public $posts='wp_posts'; public $postmeta='wp_postmeta'; public $options='wp_options'; function get_charset_collate(){return '';} public $insert_id=0; public $log=[]; public $next=null; public $row=null;
  function get_var($q){$this->log[]=$q; return $this->next;} function prepare($q,...$a){ if(count($a)==1&&is_array($a[0]))$a=$a[0]; return vsprintf(str_replace(['%s','%d','%f'],["'%s'",'%d','%F'],$q),$a);} function esc_like($s){return $s;}
  function get_results($q,$o=null){$this->log[]=$q;return $GLOBALS['rows']??[];} function get_row($q){$this->log[]=$q;return $this->row ?? null;} function query($q){$this->log[]=$q;return 0;}
  function insert($t,$d){$this->log[]="INSERT $t ".json_encode($d); $this->insert_id=42; return 1;} function update($t,$d,$w){$this->log[]="UPDATE $t ".json_encode($d);return 1;} }
@@ -537,4 +537,83 @@ ob_start(); do_action('page_sgap-queue'); $qhtml=ob_get_clean();
 check('reminder: the queue row offers the button and shows the badge', str_contains($qhtml,'value="remind"') && str_contains($qhtml,'>reminder</'));
 $GLOBALS['rows']=[]; $wpdb->next=null;
 
+// P3.2 — /feed og /reposts havde nul assertions, og merchant_feed kunne ikke testes: den
+// echoede kroppen og kaldte exit. Nu returnerer den et svar, og begge ruter er dækket.
+function esc_xml($s){return htmlspecialchars((string)$s, ENT_XML1|ENT_QUOTES, 'UTF-8');}
+function wp_get_attachment_url($id){return $id ? 'https://steamgears.eu/img/'.$id.'.jpg' : '';}
+function get_woocommerce_currency(){return 'USD';}
+function delete_post_meta_by_key($k){$GLOBALS['deleted_meta_keys'][]=$k;}
+class WP_HTTP_Response{ public function __construct(public $data, public $status=200, public $headers=[]){} function get_data(){return $this->data;} function get_status(){return $this->status;} function get_headers(){return $this->headers;} }
+class Fake_Product{
+ public function __construct(private array $p){}
+ function get_id(){return $this->p['id'];} function get_sku(){return $this->p['sku']??'';}
+ function get_name(){return $this->p['name'];} function get_price(){return $this->p['price']??'';}
+ function get_image_id(){return $this->p['image_id']??0;}
+ function get_short_description(){return $this->p['short']??'';} function get_description(){return $this->p['desc']??'';}
+ function get_permalink(){return 'https://steamgears.eu/p/'.$this->p['id'].'/';}
+ function is_in_stock(){return $this->p['stock']??true;} }
+
+$GLOBALS['opts']['sgap_merchant_feed_secret']='';
+$feed=SGAP_REST::merchant_feed(new WP_REST_Request(['key'=>'x']));
+check('feed: no secret configured is 403', $feed instanceof WP_Error && $feed->data['status']===403);
+$GLOBALS['opts']['sgap_merchant_feed_secret']='hemmelig';
+$feed=SGAP_REST::merchant_feed(new WP_REST_Request(['key'=>'forkert']));
+check('feed: a wrong key is 403', $feed instanceof WP_Error && $feed->data['status']===403);
+$feed=SGAP_REST::merchant_feed(new WP_REST_Request(['key'=>'hemmelig']));
+check('feed: no WooCommerce is 501, not a fatal', $feed instanceof WP_Error && $feed->data['status']===501);
+if (!function_exists('wc_get_products')) { function wc_get_products($a=[]){ return $GLOBALS['wc_products'] ?? []; } }
+$GLOBALS['wc_products']=[
+ new Fake_Product(['id'=>1,'sku'=>'SG-TEE-1','name'=>'Corset & Goggles','price'=>'21.90','image_id'=>9,'short'=>'Short <b>copy</b>']),
+ new Fake_Product(['id'=>2,'name'=>'Uden pris','price'=>'','image_id'=>9]),
+ new Fake_Product(['id'=>3,'name'=>'Uden billede','price'=>'10.00','image_id'=>0]),
+ new Fake_Product(['id'=>4,'name'=>'Uden SKU','price'=>'10.00','image_id'=>9,'stock'=>false]),
+];
+$feed=SGAP_REST::merchant_feed(new WP_REST_Request(['key'=>'hemmelig']));
+$x=$feed instanceof WP_HTTP_Response ? (string)$feed->data : '';
+check('feed: XML with the Google namespace', str_starts_with($x,'<?xml') && str_contains($x,'xmlns:g="http://base.google.com/ns/1.0"'));
+check('feed: the SKU is g:id', str_contains($x,'<g:id>SG-TEE-1</g:id>'));
+check('feed: a SKU-less product falls back to its id', str_contains($x,'<g:id>4</g:id>'));
+check('feed: the price carries the store currency', str_contains($x,'<g:price>21.90 USD</g:price>'));
+check('feed: the title is XML-escaped', str_contains($x,'Corset &amp; Goggles') && !str_contains($x,'Corset & Goggles'));
+check('feed: no HTML survives in the description', str_contains($x,'Short copy') && !str_contains($x,'<b>'));
+check('feed: a product without price or image is skipped', substr_count($x,'<item>')===2);
+check('feed: availability follows WooCommerce', str_contains($x,'in_stock') && str_contains($x,'out_of_stock'));
+check('feed: declares the XML content type', ($feed->get_headers()['Content-Type']??'')==='application/xml; charset=utf-8');
+
+$wpdb->log=[]; $GLOBALS['rows']=[(object)['id'=>5,'original_queue_id'=>1,'repost_number'=>1]];
+$list=SGAP_REST::list_reposts(new WP_REST_Request([]));
+check('reposts: the list returns the stored rows', is_array($list) && (int)$list[0]->id===5);
+$bad=SGAP_REST::create_repost(new WP_REST_Request(['original_queue_id'=>0,'repost_queue_id'=>2]));
+check('reposts: missing ids is 400', $bad instanceof WP_Error && $bad->data['status']===400);
+$wpdb->next='2'; // repost_max er 3
+$ok=SGAP_REST::create_repost(new WP_REST_Request(['original_queue_id'=>1,'repost_queue_id'=>2]));
+check('reposts: the next repost is numbered 3 and returns 201', $ok instanceof WP_REST_Response && $ok->status===201 && $ok->data['repost_number']===3);
+check('reposts: the row is inserted with its number', str_contains(implode("\n",$wpdb->log),'"repost_number":3'));
+$wpdb->next='3';
+$cap=SGAP_REST::create_repost(new WP_REST_Request(['original_queue_id'=>1,'repost_queue_id'=>2]));
+check('reposts: hitting the cap is 422, not a silent insert', $cap instanceof WP_Error && $cap->data['status']===422);
+$wpdb->next=null; $GLOBALS['rows']=[];
+
+// P3.5 — uninstall skal fjerne præcis det install oprettede. Listen tjekkes mod DDL'en,
+// ikke mod hukommelsen, og filen køres rigtigt bagefter.
+$created=[];
+foreach ((array)($GLOBALS['ddl']??[]) as $ddl) {
+    if (preg_match('/(?:CREATE TABLE (?:IF NOT EXISTS )?)?`?(?:wp_)?(sgap_[a-z_]+)`?/i', (string)$ddl, $mm)) { $created[$mm[1]]=$mm[1]; }
+}
+$created=array_values($created);
+$uninstall=(string)file_get_contents(__DIR__.'/../steamgears-autopilot/uninstall.php');
+preg_match_all("/'(sgap_[a-z_]+)'/", $uninstall, $m2);
+$declared=array_values(array_unique($m2[1]));
+check('uninstall: install creates 9 tables ('.count($created).')', count($created)===9);
+check('uninstall: declares every table install creates', array_diff($created,$declared)===[]);
+$wpdb->log=[]; $GLOBALS['deleted_meta_keys']=[];
+if (!defined('WP_UNINSTALL_PLUGIN')) define('WP_UNINSTALL_PLUGIN', true);
+include __DIR__.'/../steamgears-autopilot/uninstall.php';
+$ulog=implode("\n",$wpdb->log);
+$dropped=count(array_filter($created, fn($t)=>str_contains($ulog,"DROP TABLE IF EXISTS wp_$t")));
+check('uninstall: drops every table install creates ('.$dropped.'/'.count($created).')', $dropped===count($created) && $dropped>0);
+check('uninstall: deletes options and transients', str_contains($ulog,'DELETE FROM wp_options') && str_contains($ulog,"sgap\\_%"));
+check('uninstall: removes the promoted-post meta', in_array('_sgap_promoted_at',$GLOBALS['deleted_meta_keys']??[],true));
+
+// P3.2/P3.5-slut
 exit(empty($GLOBALS['fail'])?0:1);

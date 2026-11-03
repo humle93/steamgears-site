@@ -1,6 +1,6 @@
 # Steamgears Autopilot — audit, roadmap and effort estimates
 
-_Last audited: 2026-11-01 · audit was of **7.15.0** (`ab676db` on `main`); current release **7.25.0**, and
+_Last audited: 2026-11-01 · audit was of **7.15.0** (`ab676db` on `main`); current release **7.28.0**, and
 **7.22.0 is what steamgears.eu runs** (measured 2026-11-02 after the update click, with `wp_list_plugins`
 and `steamgears-autopilot/status`; see `docs/roadmap.md` §2b) — 7.25.0 ships in the zip and waits for the
 same one click · update this file in the same commit as any release._
@@ -239,10 +239,10 @@ Threads and LinkedIn stay behind Publer.
 | # | Item | Effort |
 | --- | --- | --- |
 | P3.1 | Delete `get_setting_help_link()`; remove or wire the 17 unused settings | 0.5 d |
-| P3.2 | Tests for `/feed` (merchant) and `/reposts`; assert `/snapshot` auth in `integration.php` | 0.5 d |
-| P3.3 | Add PHP 8.5 + WordPress 7.1 to the CI matrix (code already nullable-clean) | 0.25 d |
+| P3.2 | ✅ **Done 3/11 (7.28.0)** — tests for `/feed` and `/reposts`. `merchant_feed()` printed the XML and called `exit`, so the feed could not be tested at all; it now returns a `WP_HTTP_Response` with `Content-Type: application/xml` (and stops calling `header()` after output). 12 checks cover the secret gate (missing secret, wrong key), the 501 without WooCommerce, the Google namespace, SKU falling back to the product id, price with the store currency, XML-escaped titles, stripped HTML in the description, skipped products without price or image, both availability states and the content type; 5 cover the reposts (list, 400 without ids, numbering, 422 at the cap, the insert); 5 cover the uninstall (table list, drops, options, post meta). `assert /snapshot` auth is still open — it needs a WordPress user in `integration.php` | 0.5 d |
+| P3.3 | ✅ **Done as S0.3** — PHP 8.0–8.5 and WordPress 6.4 / 7.1 / latest are in the CI matrix | 0.25 d |
 | P3.4 | Release notes in the update modal (changelog from the zip's `readme.txt`/release body) | 0.5 d |
-| P3.5 | Verify `uninstall.php` removes every option/table it created, including the new ones | 0.25 d |
+| P3.5 | ✅ **Done 3/11 (7.28.0)** — `uninstall.php` is now checked against the `dbDelta` DDL instead of memory: the test extracts every table `SGAP_Install::install()` creates, asserts the uninstall file declares all nine, then includes `uninstall.php` with a stubbed `$wpdb` and requires a `DROP TABLE IF EXISTS` for each, the option/transient delete and the post-meta cleanup. The file was correct; the check is what was missing | 0.25 d |
 | **P3 total** | | **2.0 d** |
 
 ---
@@ -312,6 +312,7 @@ Platform limits: [Instagram content publishing](https://developers.facebook.com/
 
 | Date | Plugin | Change |
 | --- | --- | --- |
+| 2026-11-03 | 7.28.0 | P3.2 and P3.5 shipped, plus a header bug found on the way: **`* Version:` sat on the same line as `* Description:`**, so `get_plugin_data()` had no version to compare and the update screen depended on a header WordPress could not parse. Split into two lines, which is what the zip check in CI had already warned about once. `SGAP_REST::merchant_feed()` returns the XML instead of echoing it and calling `exit`, so the merchant feed can be tested; the content type travels with the response instead of a `header()` that came after the output had started. 22 new smoke checks cover both REST routes that had zero assertions and the uninstall path; the suite prints **308 PASS, 0 FAIL** (the README's «229 checks» was stale and is corrected). No behaviour change in the feed itself. |
 | 2026-11-02 | 7.23.0 | `meta-audit` ability shipped: `includes/meta-audit.php` (`SGAP_Meta_Audit`) audits titles and meta descriptions on published posts and pages — how many have none, how many are outside 60 / 70–155 characters, and which posts are worst — and writes nothing. The description is read from Rank Math and, if empty, Yoast, and the answer says which plugin answered. Exposed as the `steamgears-autopilot/meta-audit` ability; this release was bumped and zipped but not written into the changelog at the time, so it is recorded here. 11 smoke checks (208 → 219). |
 | 2026-11-02 | 7.25.0 | `queue-post` takes `angle`, `content_type` and `format` (defaults `angle_a`, `custom`, `post`, so older callers are unaffected). Needed because the OAuth token AI Engine issues authenticates the MCP surface but not the plugin's own REST namespace — `POST /sgap/v1/queue` answers 401 with it — so a hand-written campaign has to go through the ability, and without these three fields every campaign post would have landed as `angle_a`/`post` and flattened the angle experiment the learning table depends on. 4 smoke checks (229 → 233). |
 | 2026-11-02 | 7.24.0 | P1.8 shipped: **`utm_campaign` is a parameter**. `SGAP_UTM::build()` accepts `campaign`, falls back to the new setting *Campaign name* (`sgap_utm_campaign`, default `steamgears_premium_evergreen`), and `SGAP_Queue::add()` forwards a post's own campaign from REST `/queue` and the `queue-post` ability. `sanitize_key` on the way in keeps a campaign from injecting a query string, an empty value always means the default, and the value is frozen into each link at queue time — so old posts keep the name they were queued with. 10 smoke checks (219 → 229) and 3 integration checks. 7.23.0 had already taken the version number with the `meta-audit` ability, so this release is 7.24.0. |

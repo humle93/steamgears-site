@@ -1362,30 +1362,32 @@ class SGAP_REST {
         if (!function_exists('wc_get_products')) {
             return new WP_Error('sgap_no_wc', 'WooCommerce is not active.', ['status' => 501]);
         }
-        header('Content-Type: application/xml; charset=utf-8');
         $products = wc_get_products(['status' => 'publish', 'limit' => 500]);
-        echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
-        echo '<rss version="2.0" xmlns:g="http://base.google.com/ns/1.0"><channel>' . "\n";
-        echo '<title>' . esc_xml(get_bloginfo('name')) . '</title>' . "\n";
-        echo '<link>' . esc_url(home_url('/')) . '</link>' . "\n";
         $currency = function_exists('get_woocommerce_currency') ? get_woocommerce_currency() : 'EUR';
-        foreach ($products as $p) {
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+        $xml .= '<rss version="2.0" xmlns:g="http://base.google.com/ns/1.0"><channel>' . "\n";
+        $xml .= '<title>' . esc_xml(get_bloginfo('name')) . '</title>' . "\n";
+        $xml .= '<link>' . esc_url(home_url('/')) . '</link>' . "\n";
+        foreach ((array) $products as $p) {
             $img = wp_get_attachment_url($p->get_image_id());
             $price = $p->get_price();
             if (!$price || !$img) continue;
-            echo "<item>\n";
-            echo '  <g:id>' . esc_xml((string) ($p->get_sku() ?: $p->get_id())) . "</g:id>\n";
-            echo '  <g:title>' . esc_xml($p->get_name()) . "</g:title>\n";
-            echo '  <g:description>' . esc_xml(wp_strip_all_tags($p->get_short_description() ?: $p->get_description())) . "</g:description>\n";
-            echo '  <g:link>' . esc_url($p->get_permalink()) . "</g:link>\n";
-            echo '  <g:image_link>' . esc_url($img) . "</g:image_link>\n";
-            echo '  <g:availability>' . ($p->is_in_stock() ? 'in_stock' : 'out_of_stock') . "</g:availability>\n";
-            echo '  <g:price>' . esc_xml(number_format((float) $price, 2, '.', '') . ' ' . $currency) . "</g:price>\n";
-            echo '  <g:condition>new</g:condition>' . "\n";
-            echo "</item>\n";
+            $xml .= "<item>\n";
+            $xml .= '  <g:id>' . esc_xml((string) ($p->get_sku() ?: $p->get_id())) . "</g:id>\n";
+            $xml .= '  <g:title>' . esc_xml($p->get_name()) . "</g:title>\n";
+            $xml .= '  <g:description>' . esc_xml(wp_strip_all_tags($p->get_short_description() ?: $p->get_description())) . "</g:description>\n";
+            $xml .= '  <g:link>' . esc_url($p->get_permalink()) . "</g:link>\n";
+            $xml .= '  <g:image_link>' . esc_url($img) . "</g:image_link>\n";
+            $xml .= '  <g:availability>' . ($p->is_in_stock() ? 'in_stock' : 'out_of_stock') . "</g:availability>\n";
+            $xml .= '  <g:price>' . esc_xml(number_format((float) $price, 2, '.', '') . ' ' . $currency) . "</g:price>\n";
+            $xml .= '  <g:condition>new</g:condition>' . "\n";
+            $xml .= "</item>\n";
         }
-        echo '</channel></rss>';
-        exit;
+        $xml .= '</channel></rss>';
+        // Returned instead of echoed: the old version printed the body and called exit, so
+        // the feed could not be tested at all, and a header() after that output was already
+        // too late to matter. WordPress sends the string and the content type from here.
+        return new WP_HTTP_Response($xml, 200, ['Content-Type' => 'application/xml; charset=utf-8']);
     }
 
 }
