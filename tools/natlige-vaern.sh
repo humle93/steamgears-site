@@ -68,6 +68,8 @@ check "plugin-smoke"                         "$PHP_BIN" plugins/tests/smoke.php
 check "MCP REST-klient"                      python3 tools/test_mcp_rest.py
 check "MCP OAuth"                            python3 tools/test_mcp_oauth.py
 check "niche-scanner"                        python3 tools/test_niche_scanner.py
+check "link-plan-selftest"                  python3 tools/link_plan_check.py --selftest
+check "link-plan"                           python3 tools/link_plan_check.py
 check "guide-copy-selftest"                  python3 tools/guide_check.py --selftest
 check "guide-copy"                           python3 tools/guide_check.py
 
