@@ -290,6 +290,14 @@ def render(md_path: Path, pdf_path: Path, kicker: str):
 
         def put(fragment):
             width = doc.get_string_width(fragment)
+            # fpdf's egen sideombrydning må aldrig få lov at slå til midt i en linje: så
+            # flytter den indholdet til en ny side uden at state["y"] følger med, og resten
+            # af afsnittet bliver skrevet uden for papiret (en side pr. ord). Derfor tages
+            # sidebruddet her, hvor både y og x nulstilles.
+            if state["y"] + LEAD > doc.h - MARGIN_B:
+                doc.add_page()
+                state["y"] = MARGIN_T
+                state["x"] = origin
             doc.set_xy(state["x"], state["y"])
             doc.cell(width, LEAD, fragment)
             state["x"] += width
@@ -415,7 +423,15 @@ def render(md_path: Path, pdf_path: Path, kicker: str):
 
         elif kind == "code":
             doc.ln(0.8)
-            height = len(value) * CODE_LEAD + 4
+            # Højden måles pr. linje: en kodelinje der er bredere end spalten ombrydes af
+            # multi_cell og fylder mere end én CODE_LEAD, ellers løber teksten ud af boksen.
+            doc.set_font(MONO, "", CODE_SIZE)
+            line_heights = [
+                doc.multi_cell(CONTENT_W - 6, CODE_LEAD, san_mono(code_line), align="L",
+                               dry_run=True, output="HEIGHT")
+                for code_line in value
+            ]
+            height = sum(line_heights) + 4
             if doc.get_y() + height > 297 - MARGIN_B:
                 doc.add_page()
             y = doc.get_y()
