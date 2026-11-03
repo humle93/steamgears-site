@@ -60,10 +60,15 @@ så en CI-kørsel ikke melder grønt på en tom scanning.
 
 | Del | Status |
 | --- | --- |
-| Scoring, katalogmatch, rapport, CLI, tests | **Færdig** — 21 tests, kører offline |
+| Scoring, katalogmatch, rapport, CLI, tests | **Færdig** — 38 tests, kører offline |
+| Lavsæson, censur af nuller, tre-dages-gate | **Færdig** 3/11 — se [niche-scanner-lavsaeson-2026-11-03.md](niche-scanner-lavsaeson-2026-11-03.md) |
 | Pinterest-kilde | **Kode klar, blokeret** af `PINTEREST_ACCESS_TOKEN` (Standard-adgang + app-review) |
 | TikTok-kilde | **Kode klar, halvt blokeret** — virker ved manuel Creative Center-eksport, som ikke findes endnu |
 | Saturation/konkurrence | **Ikke muligt** med de officielle API'er |
+
+Momentum kommer nu fra kildens `mom`-felt, rapporten viser lavsæson og topmåned, og en række kaldes først
+«Anbefalet» efter tre måledage. Det er kodet 3/11; detaljerne står i
+[niche-scanner-lavsaeson-2026-11-03.md](niche-scanner-lavsaeson-2026-11-03.md).
 
 Næste skridt, når Pinterest-adgangen er på plads: kør med rigtige søgeord fra
 [`docs/seo.md`](../seo.md) og de seks kollektioner, og læg resultatet ind som kandidater til batch 4 og

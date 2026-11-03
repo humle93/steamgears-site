@@ -446,7 +446,9 @@ def render(md_path: Path, pdf_path: Path, kicker: str):
                 weights.append(min(longest, 62))
                 # Et ord må ikke brydes: kolonnen skal kunne rumme det længste token
                 longest_token = max((len(tok) for c in cells for tok in re.split(r"\s+", c) if tok), default=4)
-                floors.append(min(longest_token * 1.62 + 2.6, CONTENT_W * 0.42))
+                # Et enkelt-tegns-hoved (fx "#") må ikke gøre kolonnen smallere end et tegn:
+                # fpdf kaster "Not enough horizontal space to render a single character".
+                floors.append(min(max(longest_token * 1.62 + 2.6, 12.0), CONTENT_W * 0.42))
 
             if sum(floors) >= CONTENT_W:
                 scale = CONTENT_W / sum(floors)

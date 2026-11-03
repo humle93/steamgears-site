@@ -42,6 +42,7 @@ sidste commit-dato. Målt 2/11 2026.
 | [valuta-og-priser-2026-11-02.md](valuta-og-priser-2026-11-02.md) | Valuta og priser — forslag til S4.3 | 2026-11-02 |
 | [drive-watch-log.md](drive-watch-log.md) | Log over ændringer i Drive | 2026-11-02 |
 | [niche-produkt-scanner-2026-11-02.md](niche-produkt-scanner-2026-11-02.md) | Niche-scanner: kilder, score og hvad Pinterest/TikTok ikke kan levere | 2026-11-02 |
+| [niche-scanner-lavsaeson-2026-11-03.md](niche-scanner-lavsaeson-2026-11-03.md) | Niche-scanneren: lavsæson, censur af nuller og tre-dages-gaten — de tre §7-krav er kodet | 2026-11-03 |
 
 ## Butik og produkter
 

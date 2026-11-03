@@ -113,7 +113,8 @@ et lille annoncebudget — ikke flere scores.
 
 ## 7. Hvad det betyder for scanneren
 
-Tre konkrete ændringer følger af research'en (ikke udført endnu):
+Tre konkrete ændringer følger af research'en — **udført 3/11 2026**, se
+[niche-scanner-lavsaeson-2026-11-03.md](niche-scanner-lavsaeson-2026-11-03.md):
 
 1. **`momentum` må ikke udregnes som procent af Pinterests serie.** Serien er min-max-normaliseret pr. graf,
    så forholdet mellem to uger er skævt. Brug `yoy`/`mom`-felterne til retning og serien til at finde
@@ -123,8 +124,8 @@ Tre konkrete ændringer følger af research'en (ikke udført endnu):
 3. **Nuller skal markeres som censurerede** i stedet for at indgå i gennemsnit, og en kørsel bør kræve
    gentagne udtræk over mindst tre dage før den skriver «anbefalet».
 
-Indtil da: brug `reports/niche-scan-<dato>.md` som shortlist og skriv i beslutningen hvilke trin (§2) der
-faktisk blev kørt.
+Også efter ændringerne: brug `reports/niche-scan-<dato>.md` som shortlist og skriv i beslutningen hvilke
+trin (§2) der faktisk blev kørt. Tre-dages-gaten gør den første kørsel til en shortlist, ikke en dom.
 
 ## Referencer
 
