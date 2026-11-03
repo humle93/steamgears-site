@@ -7,9 +7,9 @@ guides skal have. Værnet kontrollerer at planen ikke kan indeholde noget der ik
 - hver guide-sti ser ud som en sti på sitet (`/noget/`)
 - hvert `/go/<id>/` findes i produkt-ID-mappingen (inkl. appendix for de seks produkter uden for de 39 designs)
 - linkteksten deler ord med mappingens titel, så et link ikke lover en corset og sælger goggles
-- hver pris findes i pristabellen — eller er `gratis` for den gratis PDF (809), eller `—` for de seks
-  produkter der beviseligt ikke har en prisrække i repoet
-- status er en af `indsat`, `klar` eller `pris mangler`
+- hver pris findes i pristabellen, i de målte priser fra butikken (3/11) — eller er `gratis` for den gratis
+  PDF (809). `—` er ikke en gyldig pris: hvert produkt i planen har en pris der kan slås op
+- status er en af `indsat` eller `klar`; `pris mangler` er afskaffet, fordi alle priser nu er målt
 - en række med status `indsat` kræver at `/go/<id>/` faktisk står i den fil guiden bor i — planen må ikke
   påstå at et link er anvendt, hvis det ikke er
 - ingen guide/produkt-par står to gange
@@ -27,8 +27,7 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PLAN = os.path.join(ROOT, "docs", "library", "guide-links-aeldre-2026-11-03.md")
 FREE_IDS = {"809"}          # den gratis tjekliste-PDF har ingen pris
-NO_PRICE_IDS = {"766", "767", "940", "941", "942", "968"}  # ingen prisrække i pristabellen, verificeret 3/11
-STATUSES = {"indsat", "klar", "pris mangler"}
+STATUSES = {"indsat", "klar"}
 REPO_FILES = {"/steampunk-outfit-ideas-for-women/": "docs/library/steampunk-outfit-ideas-for-women.md"}
 
 _spec = importlib.util.spec_from_file_location("guide_check", os.path.join(ROOT, "tools", "guide_check.py"))
@@ -86,8 +85,9 @@ def check_rows(rows: list, ids: set, titles: dict, prices: set, repo_texts: dict
         if len(gc.name_words(anchor)) < 1:
             problems.append(f"{guide}: linkteksten {anchor!r} er tom eller uden brugbare ord")
         if price == "—":
-            if pid not in NO_PRICE_IDS:
-                problems.append(f"{guide}: /go/{pid}/ har pris '—', men produktet har en prisrække i pristabellen")
+            problems.append(
+                f"{guide}: /go/{pid}/ har pris '—' — prisen skal måles (butikken, 3/11) i stedet for at stå tom"
+            )
         elif price.lower() == "gratis":
             if pid not in FREE_IDS:
                 problems.append(f"{guide}: /go/{pid}/ er markeret gratis, men er ikke den gratis PDF")
@@ -110,7 +110,7 @@ def check_rows(rows: list, ids: set, titles: dict, prices: set, repo_texts: dict
         f"{len(rows)} plan-rækker · {len(guides)} guides · {len({r['id'] for r in rows})} unikke produkter · "
         f"{sum(1 for r in rows if r['status'] == 'indsat')} indsat i repoet · "
         f"{sum(1 for r in rows if r['status'] == 'klar')} klar til adgang · "
-        f"{sum(1 for r in rows if r['status'] == 'pris mangler')} uden pris i repoet"
+        f"{sum(1 for r in rows if r['price'] == '—')} uden pris"
     )
     return problems
 
@@ -123,7 +123,7 @@ def selftest() -> int:
         "728": ["First Mate's Oath – Steampunk Pirate Poster", "First Mate's Oath — Vintage Maritime Print"],
         "766": ["Steampunk Leather Utility Belt & Holster"],
     }
-    prices = {"24.95", "34.95", "21.90"}
+    prices = {"24.95", "34.95", "21.90", "6.90"}
     repo = {"docs/library/steampunk-outfit-ideas-for-women.md": "[x](https://steamgears.eu/go/477/)"}
     files = {"/steampunk-outfit-ideas-for-women/": "docs/library/steampunk-outfit-ideas-for-women.md"}
     def row(guide, pid, anchor, price, status):
@@ -132,7 +132,7 @@ def selftest() -> int:
     good = [
         row("/steampunk-outfit-ideas-for-women/", "477", "Copper Pilot goggles", "$24.95", "indsat"),
         row("/best-steampunk-books/", "728", "First Mate's Oath print", "$21.90", "klar"),
-        row("/build/weathering/", "766", "Utility belt and holster", "—", "pris mangler"),
+        row("/build/weathering/", "766", "Utility belt and holster", "$6.90", "klar"),
     ]
     old_files = dict(globals().get("REPO_FILES", {}))
     globals()["REPO_FILES"] = files
@@ -141,7 +141,8 @@ def selftest() -> int:
         ("ukendt /go/-id fanges", [dict(good[0], id="9999")], 1),
         ("opdigtet pris fanges", [dict(good[0], price="$19.99")], 1),
         ("gratis på et betalt produkt fanges", [dict(good[0], price="gratis")], 1),
-        ("'—' på et produkt med pris fanges", [dict(good[0], price="—")], 1),
+        ("tom pris '—' fanges", [dict(good[0], price="—")], 1),
+        ("den afskaffede status 'pris mangler' fanges", [dict(good[0], status="pris mangler")], 1),
         ("forkert produktnavn fanges", [dict(good[0], anchor="Victorian corset")], 1),
         ("dubleret guide/produkt fanges", [good[0], dict(good[0])], 1),
         ("ugyldig guide-sti fanges", [dict(good[0], guide="how-to-make-a-steampunk-costume")], 1),
