@@ -5,6 +5,10 @@ MCP-listen** (se [driftsnoten om de ni spejle](woo-11-3-vaerktoejsliste-2026-11-
 produkt-URL'er og sitemap** og **kræve en databasebackup**. Tjeklisten er lavet så samme kommando køres før
 og efter, og så forskellen kan forklares med tal i stedet for med en fornemmelse.
 
+Søstertjeklisten [AI Engine-opdaterings-tjekliste](ai-engine-opdaterings-tjekliste-2026-11-03.md) dækker den
+anden halvdel: dér er det ikke Woo men MCP-serveren selv der opdateres, og spørgsmålet er om værktøjslisten
+stadig er den samme.
+
 **Hvem gør hvad:** sitet ligger hos Simply, og ingen i dette workspace kan opdatere det — opdateringen køres i
 wp-admin (eller over MCP når der er et credential, hvilket der ikke er). Tjeklisten her er det arbejde der
 ligger **før** og **efter** selve klikket, og det kan køres herfra for de kolonner der ikke kræver login.

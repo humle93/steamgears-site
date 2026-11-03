@@ -278,6 +278,11 @@ def render(md_path: Path, pdf_path: Path, kicker: str):
         """
         origin = left + indent
         x_max = doc.w - MARGIN_R
+        # Et tidligere blok (fx et kodehegn) kan have sat y forbi bundmargenen. Uden dette
+        # rykker fpdfs auto-sidebrydning en side pr. celle, mens state["y"] bliver stående
+        # — så blev ét afsnit til 13 sider.
+        if doc.get_y() + LEAD > doc.h - MARGIN_B:
+            doc.add_page()
         state = {"x": origin, "y": doc.get_y()}
         pending = [False]  # er der et mellemrum der venter på næste ord?
 
@@ -323,6 +328,8 @@ def render(md_path: Path, pdf_path: Path, kicker: str):
                 at_start = state["x"] <= origin + 0.01
                 unit = token if (at_start or not pending[0]) else " " + token
                 pending[0] = False
+                if state["y"] + LEAD > doc.h - MARGIN_B:
+                    newline()
                 if state["x"] + doc.get_string_width(unit) > x_max and not at_start:
                     newline()
                     unit = token
@@ -415,8 +422,15 @@ def render(md_path: Path, pdf_path: Path, kicker: str):
 
         elif kind == "code":
             doc.ln(0.8)
-            height = len(value) * CODE_LEAD + 4
-            if doc.get_y() + height > 297 - MARGIN_B:
+            # Højden skal regnes på de ombrudte linjer, ikke på antallet af linjer i
+            # kilden — ellers bliver boksen for kort og teksten løber ud over kanten.
+            usable = CONTENT_W - 6
+            doc.set_font(MONO, "", CODE_SIZE)
+            height = 4.0
+            for code_line in value:
+                height += max(CODE_LEAD, doc.multi_cell(usable, CODE_LEAD, san_mono(code_line),
+                                                        dry_run=True, output="HEIGHT"))
+            if doc.get_y() + height > doc.h - MARGIN_B:
                 doc.add_page()
             y = doc.get_y()
             doc.set_fill_color(*PALE)
@@ -432,6 +446,8 @@ def render(md_path: Path, pdf_path: Path, kicker: str):
                                new_x="LMARGIN", new_y="NEXT")
                 doc.set_x(left + 3)
             doc.set_y(y + height + 3.5)
+            if doc.get_y() > doc.h - MARGIN_B - LEAD:
+                doc.add_page()
 
         elif kind == "table":
             rows = value
