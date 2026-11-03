@@ -149,6 +149,9 @@ Derfor:
   dokument der endnu ikke var oprettet. Skriv først, verificér i næste kald.
 - Afvises et kald alligevel: gentag det uændret i samme tur sammen med en `AGENTS.md`-læsning. Det er ikke
   nødvendigt at ændre noget i repoet for at komme videre.
+- Reglerne i §1–2 og §6 findes også som **skill**: [`.agents/skills/projektstatus/SKILL.md`](.agents/skills/projektstatus/SKILL.md)
+  (`/skill:projektstatus`). Den indlæses kun når et pas skal melde procenter eller røre statusfilerne —
+  denne fil gælder stadig altid, og ved uenighed vinder den.
 
 ## 7. WordPress- og WooCommerce-pluginregler
 
