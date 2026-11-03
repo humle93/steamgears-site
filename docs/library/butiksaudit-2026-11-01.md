@@ -1,10 +1,10 @@
 # Butiksaudit — WooCommerce + Printify — 1/11 2026
 
-Fuld gennemgang af steamgears.eu som Printify-dropshippingbutik, målt mod gældende praksis for print-on-demand i WooCommerce og mod danske/EU-krav til netbutikker. Supplerer [indholdsaudit-2026-11-01.md](indholdsaudit-2026-11-01.md), [dode-links-2026-11-01.md](dode-links-2026-11-01.md) og [site-roadmap-2026-11-01.md](../site-roadmap-2026-11-01.md).
+Fuld gennemgang af steamgears.eu som Printify-dropshippingbutik, målt mod gældende praksis for print-on-demand i WooCommerce og mod danske/EU-krav til netbutikker. Supplerer [indholdsaudit-2026-11-01.md](indholdsaudit-2026-11-01.md), [dode-links-2026-11-01.md](dode-links-2026-11-01.md) og [roadmap.md](../roadmap.md).
 
 ## Metode
 
-Læst via Royal MCP og direkte HTTP: alle 37 aktive plugins, WooCommerce Store API (39 produkter), ordrehistorik, Complianz-konfiguration og -dokumenter, betalingsside-markering, produkt- og kurvside-HTML, load-tider, samt de 15 sider med døde links fra linkauditten. Juridisk og POD-fagligt grundlag er hentet fra Forbrugerombudsmanden, forbrug.dk, Sikkerhedsstyrelsen, Dansk Erhverv, Dansk Industri, Europa-Kommissionen, Printifys vilkår og Baymards nedbrudsdata.
+Læst via MCP og direkte HTTP: alle 37 aktive plugins, WooCommerce Store API (39 produkter), ordrehistorik, Complianz-konfiguration og -dokumenter, betalingsside-markering, produkt- og kurvside-HTML, load-tider, samt de 15 sider med døde links fra linkauditten. Juridisk og POD-fagligt grundlag er hentet fra Forbrugerombudsmanden, forbrug.dk, Sikkerhedsstyrelsen, Dansk Erhverv, Dansk Industri, Europa-Kommissionen, Printifys vilkår og Baymards nedbrudsdata.
 
 **Vigtig kontekst:** butikken har haft **2 ordrer i alt** (én gennemført på 0,00 USD, én refundert på 49,95 USD). Det er ikke en butik der skal optimeres — det er en butik der skal sættes rigtigt op, før der kommer trafik.
 

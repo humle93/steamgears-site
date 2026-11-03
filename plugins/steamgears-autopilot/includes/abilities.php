@@ -89,7 +89,12 @@ class SGAP_Abilities {
                     'text' => ['type' => 'string', 'minLength' => 1],
                     'destination_url' => ['type' => 'string', 'format' => 'uri'],
                     'image_url' => ['type' => 'string', 'format' => 'uri'],
-                    'scheduled_at' => ['type' => 'string', 'description' => 'Optional date/time in site time, e.g. 2026-11-02 18:00']
+                    'scheduled_at' => ['type' => 'string', 'description' => 'Optional date/time in site time, e.g. 2026-11-02 18:00'],
+                    'angle' => ['type' => 'string', 'maxLength' => 20, 'description' => 'Optional angle used by the learning table, e.g. angle_a. Empty = angle_a.'],
+                    'content_type' => ['type' => 'string', 'maxLength' => 40, 'description' => 'Optional content type, e.g. product or custom. Empty = custom.'],
+                    'format' => ['type' => 'string', 'maxLength' => 40, 'description' => 'Optional format, e.g. pin or post. Empty = post.'],
+                    'campaign' => ['type' => 'string', 'description' => 'Optional utm_campaign for this post, e.g. clockwork_punk_2026_11. Empty = the campaign name in Settings → General.'],
+                    'force' => ['type' => 'boolean', 'description' => 'Queue even when the quality gate blocks the post (a banned word, a dead link, a repeated caption). The problems come back as warnings.']
                 ], ['channel', 'title', 'text', 'destination_url'], [__CLASS__, 'queue_post'], false, false
             ],
             'generate' => [
@@ -121,10 +126,29 @@ class SGAP_Abilities {
                 'Installs the newest Steamgears Autopilot from GitHub (humle93/steamgears-site, main) over the installed version, if GitHub has a newer one. The plugin stays active. Returns the versions before and after.',
                 [], [], [__CLASS__, 'update'], false, true
             ],
+            'check-post' => [
+                'Check a post before queueing',
+                'Runs both gates on a post without queueing it. Pre-flight: caption length (with the tracking link counted in), hashtag ceiling, Instagram photo type/size/aspect, Pinterest board. Quality: banned words, dead links, missing alt text and a caption that already went out on this channel. Returns the problems that would make Publer refuse it or the quality gate stop it, the text after the mechanical repairs (shortened caption, surplus hashtags removed) and whether it would go through as-is.',
+                [
+                    'channel' => $channel,
+                    'title' => ['type' => 'string', 'minLength' => 1, 'maxLength' => 200],
+                    'text' => ['type' => 'string', 'minLength' => 1],
+                    'destination_url' => ['type' => 'string', 'format' => 'uri'],
+                    'image_url' => ['type' => 'string', 'format' => 'uri', 'description' => 'The photo the post would use, if it has one']
+                ], ['channel', 'title', 'text', 'destination_url'], [__CLASS__, 'check_post'], true, true
+            ],
             'check-publer' => [
                 'Check Publer connection',
                 'Tests the Publer API key: lists workspaces, connected social accounts, and configured channels that have no Publer account.',
                 [], [], [__CLASS__, 'check_publer'], true, true
+            ],
+            'meta-audit' => [
+                'Audit post meta',
+                'Audits titles and meta descriptions on published posts and pages: how many have no description, how many are outside the limits (title 60, description 70-155 characters), and which posts are worst. Read-only — it changes nothing.',
+                [
+                    'scan' => ['type' => 'integer', 'minimum' => 1, 'maximum' => 500, 'default' => 100, 'description' => 'How many of the newest published posts to check'],
+                    'limit' => ['type' => 'integer', 'minimum' => 1, 'maximum' => 100, 'default' => 20, 'description' => 'How many of the worst posts to return']
+                ], [], [__CLASS__, 'meta_audit'], true, true
             ]
         ];
     }
@@ -174,6 +198,8 @@ class SGAP_Abilities {
             'ai_model' => SGAP_AI::model(),
             'key_test' => get_option(SGAP_KeyCheck::RESULT) ?: null,
             'sending_paused_because' => SGAP_Queue::blocked_reason() !== '' ? SGAP_Queue::blocked_message() : null,
+            'blackout' => SGAP_Blackout::summary(),
+            'quality_gate' => ['mode' => SGAP_Quality::mode(), 'banned_words' => count(SGAP_Quality::words())],
             'can_send_now' => SGAP_Queue::capacity(),
             'limits' => [
                 'daily_cap' => (int) SGAP_Settings::get('daily_cap', 8),
@@ -267,11 +293,36 @@ class SGAP_Abilities {
             'body' => $input['text'] ?? '',
             'destination_url' => $input['destination_url'] ?? '',
             'image_url' => $input['image_url'] ?? '',
-            'content_type' => 'custom',
-            'format' => 'post',
-            'scheduled_at' => $scheduled
+            'angle' => $input['angle'] ?? '',
+            'content_type' => $input['content_type'] ?? 'custom',
+            'format' => $input['format'] ?? 'post',
+            'campaign' => $input['campaign'] ?? '',
+            'scheduled_at' => $scheduled,
+            'force' => !empty($input['force'])
         ]);
         return is_wp_error($result) ? $result : $result + ['status' => 'queued'];
+    }
+
+    /** Dry run of both gates — the publish-time pre-flight and the quality gate before queueing. Writes nothing. */
+    public static function check_post($input = null): array {
+        $input = (array) $input;
+        $channel = (string) ($input['channel'] ?? '');
+        $post = [
+            'title' => (string) ($input['title'] ?? ''),
+            'body' => (string) ($input['text'] ?? ''),
+            'image_url' => (string) ($input['image_url'] ?? ''),
+            'destination_url' => (string) ($input['destination_url'] ?? '')
+        ];
+        $check = SGAP_Preflight::check($channel, $post);
+        $quality = SGAP_Quality::check($post + ['channel' => $channel]);
+        return [
+            'channel' => $channel,
+            'ok' => $check['ok'] && $quality['ok'],
+            'problems' => $check['problems'],
+            'repairs' => $check['notes'],
+            'quality' => ['ok' => $quality['ok'], 'mode' => $quality['mode'], 'problems' => $quality['problems']],
+            'would_send' => ['title' => $check['row']['title'], 'text' => $check['row']['body']]
+        ];
     }
 
     public static function generate($input = null): array {
@@ -302,6 +353,11 @@ class SGAP_Abilities {
 
     public static function check_keys($input = null): array {
         return SGAP_KeyCheck::run();
+    }
+
+    /** Read-only audit of titles and meta descriptions. Delegates to SGAP_Meta_Audit so the logic can be tested. */
+    public static function meta_audit($input = null): array {
+        return SGAP_Meta_Audit::audit($input);
     }
 
     public static function check_publer($input = null) {

@@ -2,7 +2,7 @@
 
 **Short answer:** A complete steampunk outfit for women needs five things: a corset or fitted vest, a full or pencil skirt, goggles, and one brass accessory. Start at $75 (casual) or build the full Victorian airship look from ~$150. Below: 12 complete looks with real prices and everything linked.
 
-*Last updated: October 25, 2026*
+«Last updated: October 25, 2026»
 
 ## How to Read This Guide
 
@@ -149,4 +149,4 @@ Limit yourself to three steampunk elements and keep the rest in muted colours (b
 
 [sg-buy]
 
-*All prices are Steamgears catalog prices (USD, print-on-demand + AliExpress gear), verified October 25, 2026. EUR pricing is calculated in the cart (25% Danish VAT is configured).*
+«All prices are Steamgears catalog prices (USD, print-on-demand + AliExpress gear), verified October 25, 2026. EUR pricing is calculated in the cart (25% Danish VAT is configured).»

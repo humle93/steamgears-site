@@ -1,0 +1,18 @@
+# Søgeord til tools/niche_scanner.py — ét pr. linje, # er kommentar.
+#
+# Udgangspunktet er butikkens seks kollektioner (Dark Academia, Gothic & Victorian,
+# Natural History, Vintage Maritime Prints, Witchy & Tarot, Steampunk Capsule) plus de
+# huller roadmap'en allerede peger på: goggles, accessories og den upublicerede
+# Herbarium-linje. Skriv brede kundeord, ikke vores egne produktnavne — scanneren
+# matcher selv mod kataloget.
+dark academia outfit
+dark academia decor
+victorian corset top
+steampunk corset
+gothic corset
+herbarium print
+botanical wall art
+tarot poster
+vintage maritime print
+steampunk goggles
+steampunk accessories

@@ -53,6 +53,10 @@ def get_wp_headers():
 
 def load_seo_knowledge():
     kb_texts = []
+    # docs/seo.md er den eneste kilde til vores egne regler; den læses først.
+    if os.path.exists("docs/seo.md"):
+        with open("docs/seo.md", "r", encoding="utf-8") as f:
+            kb_texts.append(f"--- KILDE: docs/seo.md (site-regler) ---\n{f.read()[:8000]}")
     for path in sorted(glob.glob("knowledge_base/*.*")):
         with open(path, "r", encoding="utf-8") as f:
             kb_texts.append(f"--- KILDE: {os.path.basename(path)} ---\n{f.read()[:8000]}")
@@ -67,10 +71,15 @@ def fetch_wp_json(endpoint):
     except Exception as e:
         return {"error": str(e), "endpoint": endpoint}
 
-def call_royal_mcp(method, params=None):
-    url = f"{WP_SITE}/wp-json/royal-mcp/v1/mcp"
+def call_mcp(method, params=None):
+    url = os.environ.get("MCP_URL", "https://steamgears.eu/wp-json/mcp/v1/http")
     payload = json.dumps({"jsonrpc": "2.0", "method": method, "params": params or {}, "id": 1}).encode("utf-8")
-    req = urllib.request.Request(url, data=payload, headers=get_wp_headers(), method="POST")
+    headers = dict(get_wp_headers())
+    token = os.environ.get("MCP_ACCESS_TOKEN", "").strip()
+    if token:
+        headers["Authorization"] = "Bearer " + token
+    headers["Accept"] = "application/json, text/event-stream"
+    req = urllib.request.Request(url, data=payload, headers=headers, method="POST")
     try:
         with urllib.request.urlopen(req, timeout=20) as res:
             return json.loads(res.read().decode("utf-8"))
@@ -80,7 +89,7 @@ def call_royal_mcp(method, params=None):
 def gather_site_snapshot():
     print("[1/3] Henter live-data fra Steamgears.eu...")
     snapshot = {
-        "mcp_tools": call_royal_mcp("tools/list"),
+        "mcp_tools": call_mcp("tools/list"),
         "pages": [],
         "posts": [],
         "products": []
@@ -148,14 +157,47 @@ Lever en konkret, handlingsorienteret optimeringsplan på dansk opdelt i:
     }).encode("utf-8")
 
     req = urllib.request.Request(url, data=payload, headers={"Content-Type": "application/json"}, method="POST")
-    with urllib.request.urlopen(req, timeout=120) as res:
-        result = json.loads(res.read().decode("utf-8"))
-        return result["candidates"][0]["content"]["parts"][0]["text"]
+    try:
+        with urllib.request.urlopen(req, timeout=120) as res:
+            result = json.loads(res.read().decode("utf-8"))
+    except urllib.error.HTTPError as e:
+        body = e.read().decode("utf-8", errors="replace")[:300]
+        raise SystemExit(f"Gemini svarede HTTP {e.code}: {body}")
+    except urllib.error.URLError as e:
+        raise SystemExit(f"Kunne ikke nå Gemini: {e.reason}")
+
+    candidates = result.get("candidates") or []
+    if not candidates:
+        feedback = json.dumps(result.get("promptFeedback", {}))[:200]
+        raise SystemExit(f"Gemini returnerede intet svar (feedback: {feedback})")
+    parts = candidates[0].get("content", {}).get("parts") or []
+    if not parts or "text" not in parts[0]:
+        raise SystemExit(f"Gemini-svaret havde ingen tekst (finishReason: {candidates[0].get('finishReason')})")
+    return parts[0]["text"]
+
+def fail(message, title="SEO-audit fejlede"):
+    """Stopper med en GitHub-annotation, så fejlen kan læses uden at åbne loggen."""
+    print(f"::error title={title}::{message}")
+    raise SystemExit(1)
+
 
 if __name__ == "__main__":
+    if not GEMINI_API_KEY:
+        fail("GEMINI_API_KEY er ikke sat. Tilføj den under Settings → Secrets and variables → Actions "
+             "(eller kør lokalt med export GEMINI_API_KEY=...).")
+    if not WP_USER or not WP_APP_PASS:
+        print("::warning title=Ingen WP-credentials::WP_USER/WP_APP_PASS er ikke sat — auditten kører kun på offentlige endpoints.")
+
     os.makedirs("reports", exist_ok=True)
     kb = load_seo_knowledge()
+    if not kb.strip():
+        fail("knowledge_base/ er tom — kør seo_harvester.py først.")
     snapshot = gather_site_snapshot()
+    empty = [k for k in ("pages", "products") if not snapshot.get(k)]
+    if empty:
+        print(f"::warning title=Tomme datakilder::Ingen data fra {', '.join(empty)} — rapporten bygges på det der lykkedes.")
+    if not snapshot["pages"] and not snapshot["products"]:
+        fail("Kunne ikke hente hverken sider eller produkter fra steamgears.eu — tjek WAF/credentials.")
     report = generate_seo_plan(kb, snapshot)
 
     today = datetime.date.today().isoformat()

@@ -209,6 +209,16 @@ class SGAP_Publer {
         if (!in_array($channel, self::CHANNELS, true)) {
             return new WP_Error('sgap_channel', "Channel '{$channel}' is not supported by the Publer publisher.");
         }
+        // Pre-flight before anything leaves the site: a caption that is too long, a
+        // PNG on Instagram or a pin without a board is refused here, without a single
+        // API call, instead of coming back as a vague Publer failure that also burns
+        // one of the three attempts. What can be repaired mechanically (caption and
+        // hashtag limits) is repaired instead of refused.
+        $preflight = SGAP_Preflight::check($channel, $row);
+        if (!$preflight['ok']) {
+            return new WP_Error('sgap_preflight', SGAP_Preflight::message($preflight['problems']), ['status' => 422, 'problems' => $preflight['problems']]);
+        }
+        $row = $preflight['row'];
         $accounts = self::accounts();
         if (is_wp_error($accounts)) {
             return $accounts;
@@ -261,10 +271,14 @@ class SGAP_Publer {
      * Returns what happened, for the dashboard button and the Claude tool.
      */
     public static function tick(): array {
+        // Move queued posts out of a blackout first: a range added while the queue was
+        // full must not release tomorrow's posts today, and it must not hold them back
+        // when the range ends either.
+        $shifted = SGAP_Blackout::reschedule();
         if (SGAP_RSS::enabled()) {
-            return SGAP_RSS::release();
+            return SGAP_RSS::release() + ['shifted' => $shifted];
         }
-        $report = ['configured' => self::configured(), 'followed_up' => [], 'sent' => [], 'failed' => [], 'blocked' => ''];
+        $report = ['configured' => self::configured(), 'followed_up' => [], 'sent' => [], 'failed' => [], 'blocked' => '', 'shifted' => $shifted];
         if (!$report['configured']) {
             return $report;
         }
@@ -277,11 +291,14 @@ class SGAP_Publer {
         foreach (SGAP_Queue::claim(SGAP_Queue::capacity()) as $row) {
             $job = self::publish($row);
             if (is_wp_error($job)) {
-                SGAP_Queue::mark((int) $row['id'], 'failed', $job->get_error_message());
+                $state = SGAP_Queue::mark((int) $row['id'], 'failed', $job->get_error_message());
+                // The queue only remembers the last error; the log keeps every attempt.
+                SGAP_Audit::record_error((int) $row['id'], (string) $row['channel'], $job, $state === 'queued' ? 'requeued' : 'failed');
                 $report['failed'][] = ['id' => (int) $row['id'], 'channel' => $row['channel'], 'error' => $job->get_error_message()];
                 continue;
             }
             $wpdb->update($wpdb->prefix . 'sgap_queue', ['external_id' => $job, 'sent_at' => current_time('mysql')], ['id' => (int) $row['id']]);
+            SGAP_Audit::record((int) $row['id'], (string) $row['channel'], 'sent', 200, 'Publer job ' . $job);
             $report['sent'][] = ['id' => (int) $row['id'], 'channel' => $row['channel'], 'job_id' => $job];
         }
         return $report;
@@ -292,7 +309,7 @@ class SGAP_Publer {
         $outcomes = [];
         global $wpdb;
         $rows = $wpdb->get_results(
-            "SELECT id, external_id, sent_at FROM {$wpdb->prefix}sgap_queue WHERE status = 'sending' AND external_id <> '' ORDER BY id ASC LIMIT 50"
+            "SELECT id, channel, external_id, sent_at FROM {$wpdb->prefix}sgap_queue WHERE status = 'sending' AND external_id <> '' ORDER BY id ASC LIMIT 50"
         );
         foreach ($rows as $row) {
             $body = self::request('GET', 'job_status/' . rawurlencode($row->external_id));
@@ -302,10 +319,15 @@ class SGAP_Publer {
             $job = self::parse_job($body);
             if ($job['state'] === 'done') {
                 $outcomes[(int) $row->id] = SGAP_Queue::mark((int) $row->id, 'published');
+                SGAP_Audit::record((int) $row->id, (string) $row->channel, 'published', 200, 'Publer job ' . $row->external_id . ' completed');
             } elseif ($job['state'] === 'failed') {
-                $outcomes[(int) $row->id] = SGAP_Queue::mark((int) $row->id, 'failed', $job['error']);
+                $state = SGAP_Queue::mark((int) $row->id, 'failed', $job['error']);
+                $outcomes[(int) $row->id] = $state;
+                SGAP_Audit::record((int) $row->id, (string) $row->channel, $state === 'queued' ? 'requeued' : 'failed', 0, $job['error']);
             } elseif ($row->sent_at && strtotime($row->sent_at) < current_time('timestamp') - self::JOB_TIMEOUT) {
-                $outcomes[(int) $row->id] = SGAP_Queue::mark((int) $row->id, 'failed', 'Publer job still working after 2 hours.');
+                $state = SGAP_Queue::mark((int) $row->id, 'failed', 'Publer job still working after 2 hours.');
+                $outcomes[(int) $row->id] = $state;
+                SGAP_Audit::record((int) $row->id, (string) $row->channel, $state === 'queued' ? 'requeued' : 'failed', 0, 'Publer job ' . $row->external_id . ' still working after 2 hours');
             }
         }
         return $outcomes;

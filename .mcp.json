@@ -2,9 +2,9 @@
   "mcpServers": {
     "steamgears": {
       "type": "http",
-      "url": "https://steamgears.eu/wp-json/royal-mcp/v1/mcp",
+      "url": "https://steamgears.eu/wp-json/mcp/v1/http",
       "headers": {
-        "Authorization": "Bearer ${ROYAL_MCP_TOKEN}"
+        "Authorization": "Bearer ${MCP_ACCESS_TOKEN}"
       }
     },
     "publer": {
@@ -13,6 +13,15 @@
       "headers": {
         "Authorization": "Bearer ${PUBLER_API_KEY}"
       }
+    },
+    "steamgears-profil": {
+      "type": "stdio",
+      "command": "python3",
+      "args": ["tools/mcp_project_profile.py"]
+    },
+    "simplycom": {
+      "type": "http",
+      "url": "https://mcp.simply.com/v2"
     }
   }
 }

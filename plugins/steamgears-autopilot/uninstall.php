@@ -9,7 +9,8 @@ global $wpdb;
 
 foreach ([
     'sgap_queue', 'sgap_events', 'sgap_cro', 'sgap_learning',
-    'sgap_ai_drafts', 'sgap_reposts', 'sgap_suppression', 'sgap_etsy_orders'
+    'sgap_ai_drafts', 'sgap_reposts', 'sgap_suppression', 'sgap_etsy_orders',
+    'sgap_publish_log'
 ] as $table) {
     $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}{$table}");
 }

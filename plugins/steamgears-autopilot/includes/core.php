@@ -45,12 +45,17 @@ class SGAP_Install {
         'sgap_repost_max' => 3,
         'sgap_posts_per_day' => 2,
         'sgap_channels' => 'facebook,instagram,pinterest',
+        'sgap_utm_campaign' => 'steamgears_premium_evergreen',
         'sgap_ai_provider' => 'anthropic',
         'sgap_publish_mode' => 'rss',
         'sgap_auto_images' => 'yes',
         'sgap_auto_seo' => 'yes',
         'sgap_auto_publish_articles' => 'no',
         'sgap_weekly_report' => 'yes',
+        'sgap_alert_mode' => 'immediate',
+        'sgap_alert_email' => '',
+        'sgap_alert_dry_days' => 2,
+        'sgap_audit_keep_days' => 90,
         'sgap_articles_per_week' => 0,
         'sgap_rescue_hosts' => 'steamgears.juno.page'
     ];
@@ -242,6 +247,22 @@ class SGAP_Install {
         UNIQUE KEY etsy_order (etsy_order_id)
         ) $charset;");
 
+        dbDelta("CREATE TABLE {$wpdb->prefix}sgap_publish_log (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        queue_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+        channel VARCHAR(40) NOT NULL,
+        outcome VARCHAR(20) NOT NULL,
+        http_status SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+        actor VARCHAR(20) NOT NULL,
+        message VARCHAR(500) NOT NULL DEFAULT '',
+        created_at DATETIME NOT NULL,
+        PRIMARY KEY  (id),
+        KEY queue_id (queue_id),
+        KEY created_at (created_at),
+        KEY outcome_created (outcome,created_at),
+        KEY channel_created (channel,created_at)
+        ) $charset;");
+
         foreach (self::DEFAULTS as $key => $value) {
             add_option($key, $value);
         }
@@ -286,7 +307,7 @@ class SGAP_Settings {
     const HOUR_KEYS = ['quiet_start', 'quiet_end'];
     const INT_KEYS = [
         'daily_cap','batch_size','labor_rate','monthly_budget','target_roi',
-        'winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max','posts_per_day','articles_per_week'
+        'winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max','posts_per_day','articles_per_week','alert_dry_days','audit_keep_days'
     ];
     /** Never echoed back to the browser; can be overridden by SGAP_<KEY> constants in wp-config.php. */
     const SECRET_KEYS = [
@@ -294,23 +315,29 @@ class SGAP_Settings {
         'pinterest_token','instagram_token','telegram_bot_token','tiktok_token','youtube_token',
         'etsy_oauth_token','etsy_refresh_token','merchant_feed_secret'
     ];
+    /** Multi-line text settings, shown as a textarea. */
+    const TEXTAREA_KEYS = ['blackout_ranges', 'banned_words'];
     const TEXT_KEYS = [
         'publer_workspace_id','publer_pinterest_board','channels','ai_model','ai_base_url','image_model','content_language','rescue_hosts',
         'telegram_chat_id','email_test_recipient','youtube_channel_id','reddit_username',
-        'reddit_subreddit','etsy_shop_id','etsy_shipping_profile_id','etsy_return_policy_id','ai_mode'
+        'reddit_subreddit','etsy_shop_id','etsy_shipping_profile_id','etsy_return_policy_id','ai_mode','alert_email',
+        'blackout_ranges','banned_words','utm_campaign'
     ];
     /** Settings with a fixed list of values, shown as a select. */
     const CHOICE_KEYS = [
         'publish_mode' => ['rss' => 'RSS feeds (Publer Professional)', 'api' => 'Publer API (Publer Business)'],
-        'ai_provider' => ['anthropic' => 'Anthropic (Claude)', 'aimlapi' => 'AIMLAPI (Claude and 300+ other models)', 'openai_compatible' => 'Other OpenAI-compatible API (OpenAI, OpenRouter, ...)']
+        'ai_provider' => ['anthropic' => 'Anthropic (Claude)', 'aimlapi' => 'AIMLAPI (Claude and 300+ other models)', 'openai_compatible' => 'Other OpenAI-compatible API (OpenAI, OpenRouter, ...)'],
+        'quality_gate' => ['block' => 'Block — keep the post out of the queue until it is fixed', 'warn' => 'Warn — queue it and report what is wrong', 'off' => 'Off — do not check'],
+        'alert_mode' => ['immediate' => 'Immediate — one mail per failed post, plus one when the queue runs dry', 'daily' => 'Daily digest — one mail a day from the self-check', 'off' => 'Off — the dashboard still shows the problems']
     ];
 
     /** Shown in the settings page. Keys not listed here stay registered for older data but are unused. */
     const SECTIONS = [
-        'General' => ['autopilot_enabled','full_auto_enabled','daily_cap','batch_size','quiet_start','quiet_end'],
+        'General' => ['autopilot_enabled','full_auto_enabled','daily_cap','batch_size','quiet_start','quiet_end','blackout_ranges','quality_gate','banned_words','utm_campaign'],
         'Publer' => ['publish_mode','publer_api_key','publer_workspace_id','publer_pinterest_board','channels'],
         'AI content' => ['ai_provider','ai_api_key','ai_model','ai_base_url','posts_per_day','content_language','image_model','image_api_key','serpapi_key'],
         'Economics' => ['labor_rate','monthly_budget','target_roi','winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max'],
+        'Alerts and log' => ['alert_mode','alert_email','alert_dry_days','audit_keep_days'],
         'Etsy' => ['etsy_shop_id','etsy_oauth_token','etsy_refresh_token','etsy_shipping_profile_id','etsy_return_policy_id'],
         'Google Feed' => ['merchant_feed_secret']
     ];
@@ -336,13 +363,21 @@ class SGAP_Settings {
         'batch_size' => 'How many due posts are released per 15-minute run.',
         'quiet_start' => 'No posts are released from this hour …',
         'quiet_end' => '… until this hour (site time).',
+        'blackout_ranges' => 'Days where nothing is released, one range per line: 2026-12-24..2026-12-26 Christmas. Queued posts that land in a range are moved to the next free day at the same time of day — not dropped, and not saved up for one big day afterwards.',
+        'quality_gate' => 'Checked before a post joins the queue: banned words, dead links, a photo without alt text, and a caption that already went out on the same channel. Block: the post is refused with the reason, and you can queue it anyway from the tool that refused it. Warn: it joins the queue and the problems are reported.',
+        'banned_words' => 'Words that keep a post out of the queue, one per line or comma-separated. Whole words only, so “sale” does not catch “wholesale”; hashtags count.',
         'repost_cooldown_days' => 'A page is not promoted again within this many days.',
         'auto_images' => 'Instagram and Pinterest posts without a photo get the page\'s featured image or an AI photo (AIMLAPI, about $0.045 each).',
         'auto_seo' => 'New posts and products without a Rank Math description get a focus keyword, meta title and description from the AI when published.',
         'articles_per_week' => 'The AI picks topics the site does not cover yet and writes this many SEO articles a week. 0 = off.',
         'auto_publish_articles' => 'Off: weekly articles wait as drafts for you. On: they are published straight away.',
         'weekly_report' => 'A short e-mail every week: posts, clicks, orders per channel and anything that needs you.',
-        'rescue_hosts' => 'Images on these servers are copied into your media library and every link is rewritten (comma-separated).'
+        'alert_mode' => 'Immediate: a mail the moment a post gives up after three attempts, and one when the queue has less than the warning level left. Daily: the same information collected into one mail after the daily self-check. Off: nothing.',
+        'alert_email' => 'Where alerts go. Empty = the site admin address.',
+        'alert_dry_days' => 'Warn when the queue has fewer days of posts left than this, measured as queued posts divided by the daily cap. 0 = never warn.',
+        'audit_keep_days' => 'How long the publish log is kept: one row per attempt, with channel, HTTP status, response and who started it. 0 = keep everything.',
+        'rescue_hosts' => 'Images on these servers are copied into your media library and every link is rewritten (comma-separated).',
+        'utm_campaign' => 'The campaign name every link from this site carries as utm_campaign: set it once per campaign (e.g. clockwork_punk_2026_11) and GA4 can tell campaigns apart. A single post can override it with its own campaign. Letters, digits, - and _ only; empty = steamgears_premium_evergreen. Posts queued before the change keep the value they were queued with.'
     ];
 
     public static function get(string $key, $default = '') {
@@ -356,6 +391,10 @@ class SGAP_Settings {
     }
     public static function enabled(string $key): bool {
         return self::get($key, 'no') === 'yes';
+    }
+    /** Empty means "use the default", never an empty utm_campaign in the link. */
+    public static function sanitize_campaign($value): string {
+        return SGAP_UTM::campaign((string) $value, true);
     }
     /** Name of the wp-config.php constant overriding a secret, or '' when not defined. */
     public static function constant_name(string $key): string {
@@ -387,7 +426,15 @@ class SGAP_Settings {
         foreach (self::TEXT_KEYS as $key) {
             register_setting('sgap_settings', 'sgap_' . $key, [
                 'type' => 'string',
-                'sanitize_callback' => 'sanitize_text_field'
+                'sanitize_callback' => match (true) {
+                    // A campaign name ends up in a URL: strip everything a query
+                    // string would have to encode, and never save an empty one.
+                    $key === 'utm_campaign' => [__CLASS__, 'sanitize_campaign'],
+                    // sanitize_text_field would flatten the newlines that separate the
+                    // blackout ranges, leaving only the first range saved.
+                    in_array($key, self::TEXTAREA_KEYS, true) => 'sanitize_textarea_field',
+                    default => 'sanitize_text_field'
+                }
             ]);
         }
         foreach (self::CHOICE_KEYS as $key => $choices) {
@@ -415,20 +462,36 @@ class SGAP_Settings {
 
 /* ---------------- UTM ---------------- */
 class SGAP_UTM {
+    /** What every link carried before the campaign was a setting: kept so old links stay comparable. */
+    const DEFAULT_CAMPAIGN = 'steamgears_premium_evergreen';
+
     public static function build(array $args): string {
         $args = wp_parse_args($args, [
             'channel' => '',
             'angle' => 'angle_a',
             'content_type' => 'product',
             'format' => 'pin',
+            'campaign' => '',
             'destination_url' => home_url('/')
         ]);
         return add_query_arg(array_map('rawurlencode', [
             'utm_source' => $args['channel'],
             'utm_medium' => 'social',
-            'utm_campaign' => 'steamgears_premium_evergreen',
+            'utm_campaign' => self::campaign((string) $args['campaign']),
             'utm_content' => $args['angle'] . '_' . $args['content_type'] . '_' . $args['format']
         ]), $args['destination_url']);
+    }
+
+    /**
+     * The campaign name for one link: the post's own campaign, else the site-wide
+     * setting, else the historical default. Never empty, always URL-safe.
+     */
+    public static function campaign(string $campaign = '', bool $default_only = false): string {
+        $campaign = sanitize_key($campaign);
+        if ($campaign === '' && !$default_only) {
+            $campaign = sanitize_key((string) SGAP_Settings::get('utm_campaign', self::DEFAULT_CAMPAIGN));
+        }
+        return $campaign === '' ? self::DEFAULT_CAMPAIGN : substr($campaign, 0, 60);
     }
 }
 
@@ -614,6 +677,8 @@ class SGAP_Tracking {
 /* ---------------- QUEUE ---------------- */
 class SGAP_Queue {
     const MAX_ATTEMPTS = 3;
+    /** Minutes to wait before the next attempt, indexed by attempt number - 1. */
+    const BACKOFF_MINUTES = [5, 15, 45];
 
     private static function table(): string {
         global $wpdb;
@@ -647,6 +712,9 @@ class SGAP_Queue {
         $angle = self::key($item['angle'] ?? '', 'angle_a', 20);
         $content_type = self::key($item['content_type'] ?? '', 'product', 40);
         $format = self::key($item['format'] ?? '', 'pin', 40);
+        // Per-post campaign: a twelve-post campaign can be told apart from the
+        // evergreen stream in GA4 without changing the setting for everything else.
+        $campaign = self::key($item['campaign'] ?? '', '', 60);
         if (SGAP_Settings::enabled('full_auto_enabled') && self::suppressed($channel, $angle, $content_type, $format)) {
             return new WP_Error('sgap_suppressed', 'Combination is currently suppressed.', ['status' => 422]);
         }
@@ -657,6 +725,12 @@ class SGAP_Queue {
         ));
         if ($existing) {
             return new WP_Error('sgap_duplicate', 'Already queued.', ['status' => 409, 'id' => (int) $existing]);
+        }
+        // A blackout moves the post instead of refusing it: the owner asked for "not
+        // on these days", not "not at all".
+        $scheduled = (string) (($item['scheduled_at'] ?? '') ?: current_time('mysql'));
+        if (SGAP_Blackout::hits($scheduled)) {
+            $scheduled = SGAP_Blackout::next_free($scheduled);
         }
         $row = [
             'post_id' => absint($item['post_id'] ?? 0),
@@ -669,16 +743,34 @@ class SGAP_Queue {
             'body' => sanitize_textarea_field((string) ($item['body'] ?? '')),
             'image_url' => esc_url_raw((string) ($item['image_url'] ?? '')),
             'status' => ($item['status'] ?? '') === 'draft' ? 'draft' : 'queued',
-            'scheduled_at' => ($item['scheduled_at'] ?? null) ?: current_time('mysql'),
+            'scheduled_at' => $scheduled,
             'fingerprint' => $fingerprint
         ];
-        $row['utm_url'] = SGAP_UTM::build($row);
+        $row['utm_url'] = SGAP_UTM::build(['campaign' => $campaign] + $row);
+        // The quality gate sits here and not in the callers, so a new way into the
+        // queue cannot forget it. `force` queues the post anyway and reports the
+        // problems as warnings: a deliberate repost is the owner's call, not ours.
+        $gate = SGAP_Quality::check($row, !empty($item['force']));
+        if (!$gate['ok']) {
+            return new WP_Error('sgap_quality', SGAP_Quality::message(SGAP_Quality::blocking($gate['problems'])), [
+                'status' => 422,
+                'problems' => $gate['problems']
+            ]);
+        }
         if (!$wpdb->insert(self::table(), $row)) {
             return new WP_Error('sgap_db', 'Could not save.', ['status' => 500]);
         }
         $id = (int) $wpdb->insert_id;
         delete_transient('sgap_dashboard_stats');
-        return ['id' => $id, 'tracking_url' => SGAP_Tracking::url($id), 'utm_url' => $row['utm_url']];
+        // Say now what Publer would reject later: a missing photo, a PNG on Instagram,
+        // no Pinterest board. Warnings only — the photo can still arrive later (featured
+        // image or an AI photo), so nothing is refused at this point.
+        $warnings = array_column(SGAP_Preflight::problems($channel, $row), 'message');
+        // A forced post carries the gate's findings with it, so "queued anyway" is never silent.
+        foreach ($gate['problems'] as $problem) {
+            $warnings[] = (string) ($problem['message'] ?? '');
+        }
+        return ['id' => $id, 'tracking_url' => SGAP_Tracking::url($id), 'utm_url' => $row['utm_url'], 'warnings' => array_values(array_filter($warnings)), 'scheduled_at' => $scheduled];
     }
 
     /** True when Full Auto has blocked this channel/angle/type/format combination. */
@@ -698,6 +790,9 @@ class SGAP_Queue {
         if (!SGAP_Settings::enabled('autopilot_enabled')) {
             return 'autopilot_disabled';
         }
+        if (SGAP_Blackout::active() !== null) {
+            return 'blackout';
+        }
         if (self::in_quiet_hours((int) wp_date('G'), (int) SGAP_Settings::get('quiet_start', 23), (int) SGAP_Settings::get('quiet_end', 7))) {
             return 'quiet_hours';
         }
@@ -707,6 +802,13 @@ class SGAP_Queue {
     /** blocked_reason() in words, for the admin and the Claude tools. */
     public static function blocked_message(string $reason = ''): string {
         $reason = $reason !== '' ? $reason : self::blocked_reason();
+        if ($reason === 'blackout') {
+            $range = SGAP_Blackout::active();
+            return sprintf('blackout %s to %s%s: nothing is released, and queued posts inside the range move to %s',
+                (string) ($range['from'] ?? ''), (string) ($range['to'] ?? ''),
+                $range && $range['label'] !== '' ? ' (' . $range['label'] . ')' : '',
+                substr(SGAP_Blackout::next_free(current_time('mysql')), 0, 16));
+        }
         if ($reason === 'quiet_hours') {
             return sprintf('quiet hours %02d:00–%02d:00; queued posts are released from %02d:00 (site time is now %s). Set Quiet start and Quiet end to 0 in Settings to send at night',
                 (int) SGAP_Settings::get('quiet_start', 23), (int) SGAP_Settings::get('quiet_end', 7), (int) SGAP_Settings::get('quiet_end', 7), wp_date('H:i'));
@@ -754,6 +856,12 @@ class SGAP_Queue {
      * Records the outcome of a send. A failure goes back in the queue until it has
      * been tried MAX_ATTEMPTS times. Returns the new status, or null for an unknown id.
      */
+    /** Delay before the next attempt of a failed item: 5, then 15, then 45 minutes. */
+    public static function retry_delay_minutes(int $attempts): int {
+        $steps = self::BACKOFF_MINUTES;
+        return $steps[max(0, min(count($steps) - 1, $attempts - 1))];
+    }
+
     public static function mark(int $id, string $outcome, string $error = ''): ?string {
         global $wpdb;
         $item = $wpdb->get_row($wpdb->prepare('SELECT channel, angle, attempts FROM ' . self::table() . ' WHERE id = %d', $id));
@@ -763,15 +871,24 @@ class SGAP_Queue {
         if ($outcome === 'published') {
             $data = ['status' => 'published', 'published_at' => current_time('mysql'), 'error' => null];
         } else {
+            $retry = (int) $item->attempts < self::MAX_ATTEMPTS;
             $data = [
-                'status' => (int) $item->attempts < self::MAX_ATTEMPTS ? 'queued' : 'failed',
+                'status' => $retry ? 'queued' : 'failed',
                 'error' => sanitize_textarea_field($error),
                 'external_id' => ''
             ];
+            if ($retry) {
+                // Back off instead of spending every attempt inside the same 15-minute window:
+                // a token that expired at 09:00 is not fixed by 09:15.
+                $data['scheduled_at'] = wp_date('Y-m-d H:i:s', time() + self::retry_delay_minutes((int) $item->attempts) * MINUTE_IN_SECONDS);
+            }
         }
         $wpdb->update(self::table(), $data, ['id' => $id]);
         if ($data['status'] === 'published') {
             SGAP_ROI::record_event($id, $item->channel, $item->angle, 'publish');
+        } elseif ($data['status'] === 'failed') {
+            // Last attempt spent: tell someone now rather than leaving it on the Queue page.
+            do_action('sgap_queue_failed', $id, (string) $item->channel, (string) $error);
         }
         delete_transient('sgap_dashboard_stats');
         return $data['status'];
@@ -888,7 +1005,9 @@ class SGAP_REST {
             'body' => self::text($r->get_param('body')),
             'image_url' => $r->get_param('image_url'),
             'status' => $r->get_param('status'),
-            'scheduled_at' => self::datetime($r->get_param('scheduled_at'))
+            'scheduled_at' => self::datetime($r->get_param('scheduled_at')),
+            'campaign' => $r->get_param('campaign'),
+            'force' => (bool) $r->get_param('force')
         ]);
         if (is_wp_error($result)) {
             return $result;
@@ -1276,6 +1395,11 @@ class SGAP_Maintenance {
         // Items handed to Publer (external_id set) are followed up by SGAP_Publer instead.
         $wpdb->query("UPDATE {$wpdb->prefix}sgap_queue SET status = 'queued' WHERE status = 'sending' AND external_id = ''");
 
+        // The publish log keeps its own, shorter window (Settings → Alerts and log).
+        if (class_exists('SGAP_Audit')) {
+            SGAP_Audit::prune();
+        }
+
         $days = (int) apply_filters('sgap_event_retention_days', 180);
         if ($days < 1) {
             return;
@@ -1339,7 +1463,7 @@ class SGAP_Admin {
         }
     }
 
-    private static function table_exists(string $table): bool {
+    public static function table_exists(string $table): bool {
         global $wpdb;
         return $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $wpdb->esc_like($table))) === $table;
     }
@@ -1362,7 +1486,7 @@ class SGAP_Admin {
     }
 
     /** Stores a message for open() on the next page and goes there. */
-    private static function done(string $message, string $page = 'steamgears-autopilot'): void {
+    public static function done(string $message, string $page = 'steamgears-autopilot'): void {
         delete_transient('sgap_dashboard_stats');
         set_transient('sgap_run_result_' . get_current_user_id(), $message, 5 * MINUTE_IN_SECONDS);
         wp_safe_redirect(admin_url('admin.php?page=' . $page));
@@ -1670,6 +1794,9 @@ class SGAP_Admin {
     public static function queue(): void {
         global $wpdb;
         self::open('Queue', 'Posts waiting to go out, and what happened to the ones that did.');
+        if (SGAP_Blackout::active() !== null) {
+            echo '<p class="sgap-notice"><strong>Blackout.</strong> ' . esc_html(SGAP_Queue::blocked_message('blackout')) . '</p>';
+        }
         $table = $wpdb->prefix . 'sgap_queue';
         $rows = self::table_exists($table)
             ? $wpdb->get_results("SELECT id, channel, title, status, attempts, scheduled_at, published_at, error FROM {$table} ORDER BY id DESC LIMIT 50")

@@ -102,6 +102,14 @@ ta('cron lag detected and explained', SGAP_Auto::cron_lag() >= 59 && str_contain
 wp_clear_scheduled_hook(SGAP_Install::PUBLISH_CRON);
 wp_schedule_event(time() + 300, SGAP_Install::QUARTER_HOUR, SGAP_Install::PUBLISH_CRON);
 ta('no lag when on time', SGAP_Auto::cron_lag() === 0);
+$st = SGAP_Auto::site_status_tests(['direct' => []]);
+ta('site health: cron test registered', isset($st['direct']['sgap_wp_cron']));
+ta('site health: good when on time', SGAP_Auto::site_health_cron()['status'] === 'good');
+wp_clear_scheduled_hook(SGAP_Install::PUBLISH_CRON);
+wp_schedule_event(time() - 3600, SGAP_Install::QUARTER_HOUR, SGAP_Install::PUBLISH_CRON);
+ta('site health: critical when cron lags', SGAP_Auto::site_health_cron()['status'] === 'critical');
+wp_clear_scheduled_hook(SGAP_Install::PUBLISH_CRON);
+wp_schedule_event(time() + 300, SGAP_Install::QUARTER_HOUR, SGAP_Install::PUBLISH_CRON);
 ta('crons scheduled', wp_next_scheduled(SGAP_Auto::HEALTH_CRON) && wp_next_scheduled(SGAP_Auto::ARTICLE_CRON) && wp_next_scheduled(SGAP_Auto::REPORT_CRON) && wp_next_scheduled(SGAP_Rescue::CRON));
 if (function_exists('wp_get_ability')) {
     $r = wp_get_ability('steamgears-autopilot/rescue-images')->execute(['dry_run' => true]);

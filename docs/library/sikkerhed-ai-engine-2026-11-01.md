@@ -2,6 +2,12 @@
 
 _Undersøgt 1/11 2026 · kun læsende requests mod produktion · gælder siden steamgears.eu, ikke dette repo_
 
+> **Opdateret 2/11 2026 — to ting nedenfor gælder ikke længere.** AI Engine kører nu **3.9.0 og er aktiv**: den
+> er agentens MCP-server på `/wp-json/mcp/v1/http`, OAuth er godkendt, og 206 værktøjer svarer. "Inaktiv" og
+> "MCP-funktionen slået fra" beskriver 1/11. **CVE-konklusionen står uændret** (3.8.7+ lukker CVE-2026-110732,
+> og 3.9.0 er over den), men pluginnet må ikke slettes: det ville fjerne al agent-adgang til sitet. Se
+> [`plugin-audit-2026-11-02.md`](plugin-audit-2026-11-02.md) §4 og `docs/roadmap.md` §2b.
+
 ## TL;DR
 
 - Pluginnet **AI Engine (Meow Apps)** kører **3.8.9 og er inaktivt**, verificeret live 1/11 2026 (afsnit 0). Fix-versionen
@@ -77,7 +83,7 @@ Sitet er altså **kun** bagud på de to sager der blev rettet i 3.8.7 — men de
 ### Hvorfor CVE-2026-110732 er den vigtige
 
 Det er den eneste af de to der er **uautentificeret**, og den ender i **administrator**. Patchstack beskriver den som
-*high priority / forventet masseudnyttet*, kræver til gengæld at en privilegeret bruger udfører en handling
+«high priority / forventet masseudnyttet», kræver til gengæld at en privilegeret bruger udfører en handling
 (klikker på et craftet link til OAuth-consent-siden). OAuth-ruterne er live på sitet:
 
 ```

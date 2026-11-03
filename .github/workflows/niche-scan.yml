@@ -1,0 +1,141 @@
+name: Natlig niche-scanning
+
+# Tre-dages-gaten i tools/niche_scanner.py kræver at hvert søgeord bliver målt på
+# mindst tre forskellige dage. Denne kørsel er det der giver dagene: hver nat
+# kl. 02:30 dansk tid — en halv time efter den natlige push, så de to kørsler ikke
+# skriver i samme fil samtidig — scanner den tools/niche_seeds.txt og committer
+# rapporten plus kørselshistorikken (reports/niche-scan-history.json).
+#
+# Uden data findes der ingen måledag: mangler PINTEREST_ACCESS_TOKEN, springes
+# scanningen over med en ::notice, og dagens rapport overskrives ikke. Er tokenet
+# udløbet eller afvist (401/403), fejler jobbet rødt med en annotation, fordi det
+# kræver ejerens handling — det må ikke se ud som en stille nat.
+on:
+  schedule:
+    - cron: '30 0,1 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: niche-scan
+  cancel-in-progress: false
+
+jobs:
+  scan:
+    name: Mål søgeord og gem kørselsdagen
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Kun kl. 02 dansk tid (medmindre kørslen er startet i hånden)
+        id: gate
+        run: |
+          hour="$((10#$(TZ=Europe/Copenhagen date +%H)))"
+          # Samme gate som den natlige push: cron ligger på begge de UTC-timer der
+          # kan være kl. 02 lokalt, og kørslen springer selv over ellers.
+          if [ "${GITHUB_EVENT_NAME}" != "schedule" ] || [ "$hour" -eq 2 ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "Lokal tid er $(TZ=Europe/Copenhagen date +%H:%M) — denne kørsel springes over."
+          fi
+
+      - name: Er PINTEREST_ACCESS_TOKEN sat?
+        id: token
+        env:
+          PINTEREST_ACCESS_TOKEN: ${{ secrets.PINTEREST_ACCESS_TOKEN }}
+        run: |
+          if [ -n "${PINTEREST_ACCESS_TOKEN}" ]; then
+            echo "have=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "have=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=Niche-scanning sprunget over::PINTEREST_ACCESS_TOKEN er ikke sat som repository secret, så der er ingen data i nat. Gaten flyttes ikke — se docs/library/niche-scan-ci-2026-11-03.md."
+            {
+              echo "### Niche-scanning sprunget over"
+              echo
+              echo 'Secret `PINTEREST_ACCESS_TOKEN` mangler. Ingen måledag er skrevet, og gaten står stille.'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Tests (offline, ingen token)
+        if: steps.gate.outputs.run == 'true'
+        run: python3 tools/test_niche_scanner.py
+
+      - name: Scan Pinterest Trends × katalog
+        if: steps.gate.outputs.run == 'true' && steps.token.outputs.have == 'true'
+        env:
+          PINTEREST_ACCESS_TOKEN: ${{ secrets.PINTEREST_ACCESS_TOKEN }}
+        run: |
+          args=(--seeds-file tools/niche_seeds.txt --region "SE+DK+FI+NO" --trend-type seasonal)
+          # TikTok har ingen API; en manuel Creative Center-eksport kan lægges i repoet
+          # og bliver brugt automatisk når den findes.
+          if [ -f docs/library/tiktok-creative-center.csv ]; then
+            args+=(--tiktok-export docs/library/tiktok-creative-center.csv)
+          fi
+          set +e
+          python3 tools/niche_scanner.py "${args[@]}"
+          code=$?
+          set -e
+          if [ "$code" -eq 2 ]; then
+            echo "::error title=Niche-scanning uden data::Ingen kilde gav data — intet er skrevet, og gaten er urørt. Er PINTEREST_ACCESS_TOKEN udløbet (401), eller mangler appen Standard-adgang? Se docs/library/niche-scan-ci-2026-11-03.md."
+            exit 2
+          fi
+
+      - name: Måledage og gaten til job-summary
+        if: steps.gate.outputs.run == 'true' && steps.token.outputs.have == 'true'
+        run: |
+          python3 - <<'PY'
+          import datetime, json, os, pathlib
+
+          today = datetime.date.today().isoformat()
+          report = pathlib.Path("reports") / f"niche-scan-{today}.json"
+          history = json.loads((pathlib.Path("reports") / "niche-scan-history.json").read_text(encoding="utf-8"))
+          data = json.loads(report.read_text(encoding="utf-8"))
+          rows = data["rows"]
+          ready = [r for r in rows if r["days_seen"] >= history["min_days"]]
+          lines = [
+              f"## Niche-scanning {today}",
+              "",
+              f"{len(rows)} søgeord målt · {len(ready)} over tre-dages-gaten · "
+              f"{sum(1 for r in rows if not r['rankable'])} censurerede",
+              "",
+              "| Søgeord | Kilde | Mulighed | Måledage | Status |",
+              "| --- | --- | --- | --- | --- |",
+          ]
+          for row in rows[:12]:
+              lines.append(f"| {row['keyword']} | {row['source']} | {row['opportunity']:.0f} | "
+                           f"{row['days_seen']} | {row['status']} |")
+          lines += ["", f"Kilder: {json.dumps(data['sources'], ensure_ascii=False)}", ""]
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as handle:
+              handle.write("\n".join(lines) + "\n")
+          PY
+
+      - name: Commit rapport og kørselshistorik
+        if: steps.gate.outputs.run == 'true' && steps.token.outputs.have == 'true'
+        run: |
+          git config user.name "Steamgears Niche Bot"
+          git config user.email "bot@steamgears.eu"
+          git add reports/niche-scan-*.md reports/niche-scan-*.json
+          if git diff --staged --quiet; then
+            echo "Ingen nye målinger at gemme."
+            exit 0
+          fi
+          git commit -m "$(printf 'chore(niche): natlig niche-scanning %s\n\n🤖 Generated with Codebuff\nCo-Authored-By: Codebuff <noreply@codebuff.com>\n' "$(TZ=Europe/Copenhagen date +%F)")"
+          for attempt in 1 2 3; do
+            if git push; then
+              echo "Pushet til main."
+              exit 0
+            fi
+            echo "Push afvist (forsøg $attempt) — henter og prøver igen."
+            git pull --rebase --autostash
+          done
+          echo "::error title=Natlig niche-scanning fejlede::Kunne ikke pushe rapporten til main efter 3 forsøg."
+          exit 1

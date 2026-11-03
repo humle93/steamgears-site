@@ -74,12 +74,14 @@ class SGAP_RSS {
                 }
             }
             if ($error !== '') {
-                SGAP_Queue::mark($id, 'failed', $error);
+                $state = SGAP_Queue::mark($id, 'failed', $error);
+                SGAP_Audit::record($id, $channel, $state === 'queued' ? 'requeued' : 'failed', 0, $error);
                 $report['failed'][] = ['id' => $id, 'channel' => $channel, 'error' => $error];
                 continue;
             }
             $wpdb->update($wpdb->prefix . 'sgap_queue', ['external_id' => self::MARKER, 'sent_at' => current_time('mysql')], ['id' => $id]);
             SGAP_Queue::mark($id, 'published');
+            SGAP_Audit::record($id, $channel, 'rss', 200, 'Released in ' . self::url($channel));
             self::flush_cache($channel);
             $report['sent'][] = ['id' => $id, 'channel' => $channel, 'feed' => self::url($channel)];
         }

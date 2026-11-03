@@ -12,6 +12,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: seo-audit
+  cancel-in-progress: false
+
 jobs:
   audit:
     runs-on: ubuntu-latest
@@ -23,6 +27,22 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+
+      - name: Tjek at secrets er sat
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          WP_USER: ${{ secrets.WP_USER }}
+          WP_APP_PASS: ${{ secrets.WP_APP_PASS }}
+        run: |
+          missing=""
+          if [ -z "$GEMINI_API_KEY" ]; then missing="$missing GEMINI_API_KEY"; fi
+          if [ -z "$WP_USER" ]; then missing="$missing WP_USER"; fi
+          if [ -z "$WP_APP_PASS" ]; then missing="$missing WP_APP_PASS"; fi
+          if [ -n "$missing" ]; then
+            echo "::error title=Manglende secrets::Tilføj under Settings → Secrets and variables → Actions:$missing"
+            exit 1
+          fi
+          echo "Alle tre secrets er sat."
 
       - name: Høst ny SEO-viden fra seo_sources.txt
         env:
@@ -40,6 +60,19 @@ jobs:
         run: |
           git config user.name "Steamgears SEO Bot"
           git config user.email "bot@steamgears.eu"
-          git add knowledge_base/ reports/
-          git diff --staged --quiet || git commit -m "chore(seo): opdateret SEO-vidensbase og optimeringsplan"
-          git push
+          mkdir -p reports
+          git add -A knowledge_base reports
+          if git diff --staged --quiet; then
+            echo "Ingen ændringer — intet at committe."
+            exit 0
+          fi
+          git commit -m "chore(seo): opdateret SEO-vidensbase og optimeringsplan"
+          for attempt in 1 2 3; do
+            if git push; then
+              exit 0
+            fi
+            echo "Push afvist (forsøg $attempt) — henter og prøver igen."
+            git pull --rebase --autostash
+          done
+          echo "::error title=Push fejlede::Kunne ikke pushe SEO-planen efter 3 forsøg."
+          exit 1

@@ -106,9 +106,9 @@ Bemærk: den token, der blev delt i chatten, bør tilbagekaldes i AI Engine → 
 
 ## 8. Sådan afsluttes det med plugin v7.16
 
-Plugin 7.16.0 tilføjer 26 værktøjer i kategorien `steamgears-tools`, så alt det her kan gøres gennem MCP i stedet for wp-admin. Rækkefølgen:
+Plugin 7.26.0 tilføjer 26 værktøjer i kategorien `steamgears-tools`, så alt det her kan gøres gennem MCP i stedet for wp-admin. Rækkefølgen:
 
-1. **Opdatér pluginnet** til 7.16.0 (Plugins → Opdater, eller upload `plugins/steamgears-autopilot-v7.16.0.zip`). Værktøjerne dukker op i MCP-klienten som `steamgears-tools/...`.
+1. **Opdatér pluginnet** til 7.26.0 (Plugins → Opdater, eller upload `plugins/steamgears-autopilot-v7.26.0.zip`). Værktøjerne dukker op i MCP-klienten som `steamgears-tools/...`.
 2. **Gendan tagline:** `update-option` med `name=blogdescription`, `value=DIY steampunk costumes, goggles & gear — build it, wear it, own it.`, `dry_run=false`, `confirm=true`. Læs den efter med `get-option`.
 3. **Tjek nøglefilen:** `indexnow-status` — `key_url_served_correctly` skal være `true`. Er den ikke det, blokerer WAF'en IndexNow-crawleren, og så kan ingen IndeNow-indsendelse virke uanset nøgle.
 4. **Indsend de 18 URL'er:** `indexnow-submit` med listen fra `indexnow-urls-2026-11-02.txt`. 200 = nøglen blev fundet; 202 = kun modtaget.

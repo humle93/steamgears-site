@@ -2,7 +2,7 @@
 /**
 * Plugin Name: Steamgears Autopilot
 * Description: Premium multichannel growth autopilot for Steamgears.eu.
-* Version: 7.16.0
+* Version: 7.26.0
 * Requires at least: 6.4
 * Requires PHP: 8.0
 * Author: Steamgears.eu
@@ -26,13 +26,17 @@ if (defined('SGAP_VERSION')) {
     return;
 }
 
-define('SGAP_VERSION', '7.16.0');
+define('SGAP_VERSION', '7.26.0');
 define('SGAP_FILE', __FILE__);
 
 require_once __DIR__ . '/includes/admin-ui.php';
 require_once __DIR__ . '/includes/core.php';
 require_once __DIR__ . '/includes/publer.php';
+require_once __DIR__ . '/includes/preflight.php';
+require_once __DIR__ . '/includes/blackout.php';
+require_once __DIR__ . '/includes/quality.php';
 require_once __DIR__ . '/includes/generator.php';
+require_once __DIR__ . '/includes/meta-audit.php';
 require_once __DIR__ . '/includes/abilities.php';
 require_once __DIR__ . '/includes/mcp-tools.php';
 require_once __DIR__ . '/includes/keycheck.php';
@@ -41,20 +45,26 @@ require_once __DIR__ . '/includes/updater.php';
 require_once __DIR__ . '/includes/admin-tools.php';
 require_once __DIR__ . '/includes/chat.php';
 require_once __DIR__ . '/includes/studio.php';
+require_once __DIR__ . '/includes/site-seo.php';
 require_once __DIR__ . '/includes/setup.php';
 require_once __DIR__ . '/includes/automation.php';
+require_once __DIR__ . '/includes/alerts.php';
+require_once __DIR__ . '/includes/audit.php';
 
 SGAP_Publer::init();
 SGAP_Generator::init();
 SGAP_Abilities::init();
-SGAP_MCP_Tools::init();
-SGAP_MCP_Key::init();
 SGAP_KeyCheck::init();
 SGAP_RSS::init();
 SGAP_Updater::init();
 SGAP_AdminTools::init();
 SGAP_Chat::init();
 SGAP_Studio::init();
+SGAP_Site_SEO::init();
 SGAP_Setup::init();
 SGAP_Rescue::init();
 SGAP_Auto::init();
+SGAP_Alerts::init();
+SGAP_Audit::init();
+SGAP_MCP_Tools::init();
+SGAP_MCP_Key::init();

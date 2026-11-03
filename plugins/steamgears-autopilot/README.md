@@ -23,7 +23,9 @@ The whole social autopilot runs inside WordPress (Command Center is retired):
 4. **Measure** – every post links via `/go/<id>/`, so clicks (and WooCommerce
    orders) are counted per channel.
 
-Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.15.1.zip` → Activate.
+Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.24.0.zip` → Activate. On an existing
+install the same zip arrives through the self-updater (see *Updates*), so an upload is only needed for the
+first install or a recovery.
 
 ## Run it from Claude
 
@@ -37,18 +39,20 @@ all admin-only, none of them deleting anything:
 | `steamgears-autopilot/list-drafts` | AI drafts (default: waiting for approval) with the page they promote |
 | `steamgears-autopilot/review-draft` | `queue` (approve + queue), `approve` or `reject` one draft |
 | `steamgears-autopilot/list-queue` | Queue items with status, attempts, errors, tracking links |
-| `steamgears-autopilot/queue-post` | Queue a post Claude (or you) wrote |
+| `steamgears-autopilot/queue-post` | Queue a post Claude (or you) wrote. Takes `angle`, `content_type`, `format` and `campaign`, so a hand-written campaign post lands in the queue with the same dimensions the AI posts get (7.25) |
 | `steamgears-autopilot/generate` | Run the AI writer now |
 | `steamgears-autopilot/publish` | Run the Publer publisher now |
 | `steamgears-autopilot/set-mode` | Autopilot / Full Auto on or off |
 | `steamgears-autopilot/update` | Install the newest version from GitHub |
 | `steamgears-autopilot/check-keys` | Test the Publer and AI keys (see below) |
 | `steamgears-autopilot/check-publer` | Workspaces, accounts, channels without an account |
+| `steamgears-autopilot/meta-audit` | Title and meta-description audit on published posts: missing, too long, too short — read-only |
+| `steamgears-autopilot/optimize-site-seo` | Whole-site SEO/AEO/GEO scan in one pass; `fix=true` also writes the missing meta |
 
 Example: "Write today's posts and show them to me" → `generate`, then
 `list-drafts`, then `review-draft` for the ones you like.
 
-## General WordPress tools (from v7.16)
+## General WordPress tools (from v7.26)
 
 Twenty-six more abilities in the `steamgears-tools` category, so the site can be
 run end to end from an MCP client instead of a browser tab. All administrator-only.
@@ -103,6 +107,135 @@ ROAS against the budget, attributed orders), Etsy orders and profit, Full Auto
 (suppressed combinations, reposts) and an XML product feed for Google Merchant
 Center and Pinterest Catalogs (*Google Feed*, needs a feed secret and WooCommerce).
 
+## Whole-site SEO, GEO and AEO (7.19)
+
+*Content Studio → **Optimise the whole site*** replaces clicking through pages one at a time:
+
+| Button | What it does | Cost |
+|---|---|---|
+| **Scan the whole site** | Scores every published post, page and product in one pass against 20 rules, plus four whole-domain checks (llms.txt, sitemap, robots.txt, product feed) | Free — database and HTTP only |
+| **Scan and fix meta** | Runs the same scan, then writes Rank Math/Yoast title, description and focus keyword for the weakest URLs | One AI call per page, default 8 per round |
+
+Rules by group:
+
+- **SEO** — title and meta length, missing meta, focus keyword, keyword in title, one H1, enough text for the type (post 500 / page 400 / product 120 words), internal links, image alt text, featured image, slug, duplicate title and duplicate description across the site.
+- **AEO** (answer engines) — question-shaped H2/H3, an FAQ block with `FAQPage` schema, a direct answer in the first paragraph, lists or tables.
+- **GEO** (generative engines) — the brand named in the opening, quotable numbers, structured data, outbound citations, freshness.
+
+The scan is stored in one option (`sgap_seo_site`) and refreshed lazily once a week when an
+administrator opens wp-admin, because WP-Cron is not dependable on this cached host. Body text is
+never rewritten by this screen; content suggestions stay in *Optimise SEO of a page*.
+
+## Pre-flight per channel (7.20)
+
+Every post is checked against the destination network's own limits **before** anything is sent to
+Publer (`includes/preflight.php`, `SGAP_Preflight`). Publer's rejection arrives as a vague error after a
+failed upload and also spends one of the three attempts; this check runs on the site, first, and costs
+nothing.
+
+| Channel | Refused | Repaired automatically |
+|---|---|---|
+| Instagram | no photo; PNG/WebP/GIF instead of JPEG; width under 320 px; photo outside 4:5–1.91:1 | caption over 2 200 characters |
+| Pinterest | no photo; no board set in Settings | title over 100, description over 500 |
+| Threads | — | caption over 500 (the tracking link is counted in), more than one hashtag |
+| Facebook / LinkedIn | — | caption over 63 206 / 3 000 |
+| X | — | 280 characters, with any link counted as 23 |
+| Bluesky / Mastodon / Telegram / Google | — | caption over 300 / 500 / 1 024 / 1 500 including the link |
+
+Two safety valves. The checker never downloads the photo, so type and size are only judged when the image
+is in the media library (mime type and dimensions come from the attachment metadata) or the file extension
+is known — an image it cannot inspect is never blocked on a guess. And queueing a post reports the same
+problems as **warnings** in the API response (`warnings`), because a photo can still arrive later: the
+featured image, or the AI photo `SGAP_RSS` adds at release. The refusal happens at publish time, which is
+the moment before Publer.
+
+The ability `steamgears-autopilot/check-post` runs the same rules without queueing anything and returns
+`problems`, `repairs` and the text that would actually be sent.
+
+## Blackout calendar (7.21)
+
+Settings → *Schedule & limits* → **Blackout days** takes one range per line:
+
+```
+2026-12-24..2026-12-26 Christmas
+2026-12-31 New Year's Eve
+```
+
+Nothing is released on those days, and a post that is already queued inside a range is **moved to the
+next free day at the same time of day** — not dropped, and not saved up so the whole backlog lands at once
+when the range ends. The move runs from the publish tick every 15 minutes, so a range you add this morning
+is honoured before the next post goes out, and a post that was shifted is not shifted again on the next
+tick. The Queue page explains why nothing is going out, and the range label is carried into the message.
+
+Two details worth knowing. Only queued posts move: `published` and in-flight `sending` rows are never
+touched, so a blackout cannot rewrite history. And the calendar is a day filter, not a pause: the daily cap,
+quiet hours and the pre-flight checks still apply on the free day the post lands on. A post placed more
+than 60 days ahead of everything blocked is placed anyway, so a badly typed never-ending range cannot keep
+a post out of the queue forever.
+
+## Quality gate before queueing (7.22)
+
+Every post enters the queue through one function, so the gate sits there: a post that a person would have
+stopped gets stopped while it is still a draft, not after Instagram has it. Settings → *Publishing* →
+**Quality gate** and **Banned words**.
+
+It checks four things:
+
+- **Banned words.** Your own list, one per line or comma-separated. Whole words only, so `sale` does not fire
+  on `wholesale` — but a hashtag counts, because `#sale` is the same word in a different dress.
+- **Dead links.** Internal links are resolved against WordPress itself, so a link to a slug that no longer
+  exists, or to a post that is still a draft, is caught before it ships. Archives, feeds, search and the front
+  page are recognised and left alone. External hosts are **not** fetched — see the limitation below.
+- **Missing alt text.** A featured image with an empty *Alternative text* field is reported, so screen readers
+  and image search are not left with nothing.
+- **Near-duplicate captions.** The caption is compared with the last 40 posts on the same channel; 85 % word
+  overlap or more is the same caption in other words, and the message names the post it repeats.
+
+Three modes: **Block** (default) refuses the post and says why, **Warn** queues it and reports the problems,
+**Off** does not look. A refusal is not a dead end: pass `force`, or press *queue anyway* where the plugin
+shows the refusal, and the post is queued with its findings returned as warnings — a deliberate repost is
+your call, not the plugin's. Captions shorter than eight words are never called duplicates: "New drop" and
+"New drop!" are similar without being a repeat worth blocking.
+
+**The limitation, stated plainly:** external links are not probed. A HEAD request per link would put an
+outbound HTTP dependency in the queueing path — slow, rate-limited and wrong the one time the far site is
+briefly down. So the gate catches what it can prove without the network: placeholders (`example.com`),
+links with no domain, `http` instead of `https`, and internal addresses that do not resolve. A Pinterest pin
+that 404s is still only found by opening it.
+
+## Post meta audit (7.23)
+
+The ability `steamgears-autopilot/meta-audit` lets Claude run the meta round itself: it reads the published
+posts and pages and reports, per post: title length, meta-description
+length and what is outside the limits — **title 60 characters, description 70–155 characters**. Posts with no
+description at all are counted separately, because that is a different fix from shortening one.
+
+The description is read from Rank Math (`rank_math_description`) and, if that is empty, Yoast
+(`_yoast_wpseo_metadesc`); the report says which plugin answered, so a "0 missing" can be trusted. Nothing is
+written: the audit only reads, and the answer names the worst posts first (most problems, then the longest
+title) so the next meta round starts with the posts that matter.
+
+`meta-audit` takes two optional arguments: `scan` (how many of the newest posts to check, default 100, max
+500) and `limit` (how many of the worst to return, default 20, max 100).
+
+## Naming a campaign (7.24)
+
+Every link already carried `utm_campaign=steamgears_premium_evergreen`, hardcoded, so a named campaign could
+not be separated from the everyday stream in GA4. Now the name has two levels:
+
+- **Settings → General → Campaign name** (`utm_campaign`) sets the name for everything queued from now on.
+  Set it once at the start of a campaign and change it back afterwards — the old posts keep the name they were
+  queued with, because the value is baked into each link when the post joins the queue. Letters, digits, `-`
+  and `_` only; empty means `steamgears_premium_evergreen`, so nothing ever goes out with a blank campaign.
+- **Per post:** pass `campaign` to `POST /queue` (or the `queue-post` ability, which since 7.25 also takes
+  `angle`, `content_type` and `format`) for a single post, e.g.
+  `campaign=clockwork_punk_2026_11`. The post's own name wins over the setting, which is what a finite series
+  needs: twelve posts can be measured as one campaign while the evergreen posts run on the setting.
+
+In GA4 the campaign shows up under *Traffic acquisition → Session campaign* and in *Explore* as the dimension
+`Session campaign`. The plugin's own `/stats` still counts clicks and orders per channel and angle, so a
+campaign can be read from two independent sources instead of one.
+
 ## Updates
 
 From 7.6 the plugin updates itself from GitHub (`humle93/steamgears-site`, branch `main`):
@@ -110,7 +243,38 @@ a newer version shows up under *Plugins* and *Dashboard → Updates* like any pl
 can be switched on there), and the Steamgears dashboard has an **Update now** button. Claude can
 run it too (`steamgears-autopilot/update`). The installed zip is
 `plugins/steamgears-autopilot-v<version>.zip` from `main`, so a release is: bump the version, rebuild
-the zip, merge to `main`.
+the zip, merge to `main` — and then click update. The click is the deploy; nothing changes on the site
+before it, because the MCP surface can read plugins but cannot install or activate them.
+
+### Shipping a release
+
+1. Bump `Version:` in `steamgears-autopilot.php` and `SGAP_VERSION` — they must agree, CI fails otherwise.
+2. Rebuild the zip from the folder so the name and the contents match:
+   `cd plugins && rm -f steamgears-autopilot-*.zip && zip -qr steamgears-autopilot-v<version>.zip steamgears-autopilot`
+3. `php plugins/tests/smoke.php` (229 checks) and `diff -r` the zipped copy against the source. CI repeats
+   both, plus `php -l` on PHP 8.0–8.5 and WordPress 6.4 / 7.1 / latest.
+4. Commit code, zip, README and `ROADMAP.md` together and push to `main`.
+5. **Click *Plugins → Update*** (or *Dashboard → Updates*). Auto-updates can be switched on in the same
+   screen, which makes step 5 happen on its own after the next WP-Cron run.
+
+Check that the release landed, in this order — each step can hide the previous one:
+
+- `wp_get_plugins` reports the new version with `active: true`.
+- A feature from the release answers from the site. For 7.22: a post that fails a `block` check is refused
+  and the reason is named. `check-post` proves the decision without writing; a `queue-post` refusal also
+  proves the gate sits inside the queue, but needs the site's MCP access to allow writes.
+- A release with an ability answers too: `meta-audit` (7.23) returns the worst posts with their title and
+description lengths and writes nothing.
+- `steamgears-autopilot/status` shows the new setting — `quality_gate: {mode, banned_words}` for 7.22,
+  `utm_campaign` under *General* for 7.24 (and `check-post` still writes nothing).
+
+> **7.22.0 was the live release when this was written; 7.24.0 ships the campaign name (7.23.0 shipped the
+> `meta-audit` ability).** The proof steps below are unchanged, and the update click is still the deploy.
+>
+> **7.22.0 measured live.** Measured 2026-11-02 after the update click: both `wp_list_plugins` and
+> `steamgears-autopilot/status` report 7.22.0. Two owner-side settings limit what can be proven: *Banned words*
+> is empty (so that check cannot fire) and AI Engine's *Drafts Only* refuses `queue-post` before the gate sees it.
+> Site-side status and the measurements are in [`docs/roadmap.md`](../../docs/roadmap.md) §2b.
 
 ## Setup
 
@@ -139,8 +303,25 @@ every channel, Pinterest board set. Claude: key valid and model available via th
 Models API (no tokens used). OpenAI-compatible: key valid and model offered by
 `/models`.
 
-WP-Cron only runs when the site gets visits. For exact timing, add a real cron
-job on the host that calls `https://steamgears.eu/wp-cron.php` every 5 minutes.
+## Real cron (publishing on time)
+
+WP-Cron only runs when the site gets visits, so a quiet site or a full page cache
+can delay the 15-minute publisher. Add a real cron job on the host (or an external
+service such as cron-job.org) that calls the site every 5 minutes:
+
+```
+*/5 * * * * curl -s https://steamgears.eu/wp-cron.php?doing_wp_cron > /dev/null 2>&1
+```
+
+If `DISABLE_WP_CRON` is set in `wp-config.php`, WordPress never runs cron on page
+loads, so the external job is required.
+
+Tools → Site Health shows the check *Autopilot publishing cron*:
+
+- **Critical** when the publisher is 30 minutes or more overdue (the same warning
+  appears on the dashboard).
+- **Recommended** when `DISABLE_WP_CRON` is set, as a reminder to keep the external job running.
+- **Good** when the publisher is on time.
 
 ## API keys
 
@@ -182,7 +363,7 @@ add posts or read the numbers.
 
 | Method | Path | Purpose |
 |---|---|---|
-| POST | `/queue` | Add a post. Required: `channel`, `title`, `destination_url`. Optional: `body`, `image_url`, `angle`, `content_type`, `format`, `post_id`, `scheduled_at`, `status` (`queued`/`draft`). Returns `id`, `tracking_url`, `utm_url`. Same channel + URL + title again → `409`. |
+| POST | `/queue` | Add a post. Required: `channel`, `title`, `destination_url`. Optional: `body`, `image_url`, `angle`, `content_type`, `format`, `post_id`, `scheduled_at`, `campaign` (utm_campaign for this post; empty = the setting), `status` (`queued`/`draft`). Returns `id`, `tracking_url`, `utm_url`. Same channel + URL + title again → `409`. |
 | GET | `/queue/due` | Next posts to publish (optional `?channel=`). Respects Autopilot on/off, quiet hours, daily cap and batch size. Returned items are marked `sending`. |
 | POST | `/queue/<id>/status` | `status=published`, or `status=failed&error=...` (retried up to 3 times, then `failed`). |
 | POST | `/drafts` | Add an AI draft for approval in WP (fields as the `sgap_ai_drafts` table). |
@@ -214,11 +395,16 @@ Deleting the plugin (not just deactivating) removes all its tables and settings.
 ## Roadmap and known gaps
 
 The audit behind this release and the prioritised roadmap with effort estimates live in
-[docs/plugin-roadmap.md](../../docs/plugin-roadmap.md). Two things worth knowing before you rely on this
+[ROADMAP.md](ROADMAP.md). Two things worth knowing before you rely on this
 unattended:
 
-- A post that fails is retried up to three times the same day and then stays `failed` in the queue.
-  Nothing emails you - the weekly report is currently the only outgoing mail.
+- A post that fails is retried with backoff (5 → 15 → 45 minutes) and then stays `failed` in the queue.
+  Settings → Alerts mails you when that happens and when the queue is running dry; `daily` mode collects
+  both into one digest after the self-check.
+- Every attempt is also written to the **Publish log**: channel, outcome, HTTP status, a response excerpt and
+  the actor (cron, admin, REST, WP-CLI). The queue shows the current state; the log keeps the history the
+  `error` column overwrites. Rows are kept for `audit_keep_days` (default 90, `0` = forever) and pruned by
+  the daily maintenance job.
 - The Etsy API settings and the direct Instagram/Pinterest/TikTok/YouTube/Reddit/Telegram keys are
   registered but unused. Publishing goes through Publer (RSS feeds or API), and `/etsy/orders` takes a
   manual import.
