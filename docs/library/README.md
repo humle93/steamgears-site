@@ -52,6 +52,8 @@ lukkedes research-bibliotek.
 | [niche-produkt-scanner-2026-11-02.md](niche-produkt-scanner-2026-11-02.md) | Niche-scanner: kilder, score og hvad Pinterest/TikTok ikke kan levere — PDF i `reports/niche-produkt-scanner-2026-11-02.pdf` | 2026-11-02 |
 | [niche-scanner-lavsaeson-2026-11-03.md](niche-scanner-lavsaeson-2026-11-03.md) | Niche-scanneren: lavsæson, censur af nuller og tre-dages-gaten — de tre §7-krav er kodet — PDF i `reports/niche-scanner-lavsaeson-2026-11-03.pdf` | 2026-11-03 |
 | [niche-scan-ci-2026-11-03.md](niche-scan-ci-2026-11-03.md) | Natlig niche-scanning i CI: gaten der passer sig selv, de to gate-fejl og hvad et token kræver — PDF i `reports/niche-scan-ci-2026-11-03.pdf` | 2026-11-03 |
+| [drafts-udgivet-2026-11-02.md](drafts-udgivet-2026-11-02.md) | 17 kladde-produkter gjort færdige og udgivet 2/11: hvad der var galt, hvad der blev skrevet, og hvad der blev kontrolleret — PDF i `reports/drafts-udgivet-2026-11-02.pdf` | 2026-11-02 |
+| [steamgears-faerdig-2026-11-02.md](steamgears-faerdig-2026-11-02.md) | Vejen til færdig: status 2/11, 404-som-200-fundet og de beslutninger kun ejeren kan tage — PDF i `reports/steamgears-faerdig-2026-11-02.pdf` | 2026-11-02 |
 | [indeksering-2026-11-02.md](indeksering-2026-11-02.md) | Indeksering: status, hvad der blokerer, de 18 URL'er og afslutningssekvensen for værktøjerne — URL-listen ligger i [indexnow-urls-2026-11-02.txt](indexnow-urls-2026-11-02.txt) | 2026-11-02 |
 
 ## Butik og produkter
@@ -65,6 +67,12 @@ lukkedes research-bibliotek.
 | [niche-vurdering-2026-11-01.md](niche-vurdering-2026-11-01.md) | Niche-vurdering: fortsæt eller skift? — PDF i `reports/niche-vurdering-2026-11-01.pdf` | 2026-11-01 |
 | [pinterest-board-plan.md](pinterest-board-plan.md) | Pinterest board-plan (godkendt 25/10) — PDF i `reports/pinterest-board-plan.pdf` | 2026-10-25 |
 | [pirat-piger-prompts.md](pirat-piger-prompts.md) | Billedprompts til manglende motiver + Drive-navngivning — PDF i `reports/pirat-piger-prompts.pdf` | 2026-10-26 |
+| [herbarium-produkttekster-2026-11-02.md](herbarium-produkttekster-2026-11-02.md) | Clockwork Herbarium — produkttekster i husets struktur (hook, why, details, dispatch, care, GPSR) — PDF i `reports/herbarium-produkttekster-2026-11-02.pdf` | 2026-11-02 |
+| [warpstorm-2026-11-01.md](warpstorm-2026-11-01.md) | Warpstorm: hvad der er live, Games Workshop-begrænsningen, markedet og hvorfor 5 % affiliate ikke bliver en forretning — PDF i `reports/warpstorm-2026-11-01.pdf` | 2026-11-01 |
+| [punk-grene-2026-11-02.md](punk-grene-2026-11-02.md) | Punk-grene — 18 nye designs: clockpunk, dieselpunk, teslapunk — PDF i `reports/punk-grene-2026-11-02.pdf` | 2026-11-02 |
+| [punk-lancering-2026-11-02.md](punk-lancering-2026-11-02.md) | Punk-lancering — 6 SKU: produkttekster og mockup-plan — PDF i `reports/punk-lancering-2026-11-02.pdf` | 2026-11-02 |
+| [punk-prompts-2026-11-02.md](punk-prompts-2026-11-02.md) | Prompt-pack — clockpunk, dieselpunk, teslapunk — PDF i `reports/punk-prompts-2026-11-02.pdf` | 2026-11-02 |
+| [punk-upload-2026-11-02.md](punk-upload-2026-11-02.md) | Punk — upload klar: 31 filer, to destinationer — PDF i `reports/punk-upload-2026-11-02.pdf` | 2026-11-02 |
 
 ## Sikkerhed
 
@@ -96,6 +104,8 @@ lukkedes research-bibliotek.
 | [backlinks-backlink-log.md](backlinks-backlink-log.md) | Backlink Monitor — ugentlig log — PDF i `reports/backlinks-backlink-log.pdf` | 2026-10-27 |
 | [steampunk-outfit-ideas-for-women.md](steampunk-outfit-ideas-for-women.md) | Artikeludkast: steampunk outfit ideas for women — PDF i `reports/steampunk-outfit-ideas-for-women.pdf` | 2026-10-25 |
 | [plugin-audit-2026-11-02.md](plugin-audit-2026-11-02.md) | Plugin-audit: 36 plugins + 4 drop-ins, hvad der kan fjernes, og hvad der skal opdateres — PDF i `reports/plugin-audit-2026-11-02.pdf` | 2026-11-02 |
+| [niche-research-2026-11-01.md](niche-research-2026-11-01.md) | Niche-research: næste produktlinje — fem kandidater målt mod kravene, vinderen og hvorfor — PDF i `reports/niche-research-2026-11-01.pdf` | 2026-11-01 |
+| [tool-gaps-2026-11-02.md](tool-gaps-2026-11-02.md) | Hvilke værktøjer der mangler: de fem huller vi ramte i praksis, og hvad vi ikke skal gøre — PDF i `reports/tool-gaps-2026-11-02.pdf` | 2026-11-02 |
 
 ## Kilder
 
