@@ -23,7 +23,7 @@ Guiden har ingen eksisterende post-ID i repoet, så den skal oprettes som ny sid
 | **Meta description** | `How to choose a steampunk corset by structure, not size: three silhouettes, what to wear under and over, four complete looks and every price from our shop.` |
 | **Totals** | 451.50 = 44.95+59.95+64.95+24.95+34.95+39.95+39.95+64.95+49.95+26.95; 109.85 = 44.95+39.95+24.95; 159.85 = 59.95+64.95+34.95; 154.85 = 64.95+49.95+39.95; 71.90 = 44.95+26.95; 96.85 = 44.95+26.95+24.95 |
 | **Primary CTA** | `/go/487/` (brown lace-up), `/go/489/` (overbust), `/go/491/` (silver) |
-| **Guides linked** | `/womens-steampunk-essentials/` (samme batch), `/steampunk-halloween-costume-women/`, `/steampunk-costumes/` |
+| **Guides linked** | `/mens-steampunk-costume-essentials/`, `/steampunk-clothing-three-budgets/`, `/womens-steampunk-essentials/`, `/steampunk-corset-guide/`, `/steampunk-costumes/` (hub) |
 | **Products linked** | 487, 489, 491, 475, 481, 485, 497, 493, 411, 567 |
 
 ### Copy
@@ -161,6 +161,16 @@ character-by-character versions.
 **How do returns work?**
 EU consumers have 14 days to withdraw from the purchase. Check the return page before ordering if the fit
 matters — and it does with a corset.
+
+### Read next — the four-guide cluster
+
+**In one line:** these four guides share one wardrobe, so each links the others instead of repeating them.
+
+- [Men's steampunk costume essentials](https://steamgears.eu/mens-steampunk-costume-essentials/) — ten pieces that read as one outfit, from goggles to print.
+- [Steampunk clothing at three budgets](https://steamgears.eu/steampunk-clothing-three-budgets/) — what the three tiers actually buy, and which pieces survive the event.
+- [Women's steampunk essentials](https://steamgears.eu/womens-steampunk-essentials/) — the same ten-piece method with corset, coat and hat.
+
+The hub, [steampunk costumes](https://steamgears.eu/steampunk-costumes/), lists the capsules all four belong to.
 
 ### Publishing notes
 

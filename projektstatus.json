@@ -6,7 +6,7 @@
       "id": "site",
       "name": "steamgears.eu — site-optimering",
       "note": "roadmap S0–S4",
-      "next": "S1.1 Herbarium-varianter (kræver Printify-mapping); derefter S2.3 navigation og S4.3 valuta efter ejerbeslutning",
+      "next": "S2.6 sidste 0,15 d (links på ældre publicerede guides) og S2.2 /shipping/ + /returns/ når WordPress-adgang er der; derefter S2.3 navigation",
       "blocked_by": "S1.1 Herbarium kræver varianter i Printify; S0.4 5 vanity-301 kræver én Redirection-gruppe (ejer)",
       "modules": [
         {
@@ -29,10 +29,10 @@
         {
           "id": "s2",
           "name": "S2 — struktur og SEO",
-          "done": 4.45,
+          "done": 4.65,
           "total": 6,
           "unit": "d",
-          "note": "S2.1 9 af 13 planlagte sider live 2,08 (/inspiration/ id 1243 verificeret 2/11) + S2.5 meta-runde 1,4 + S2.6 hub-links 0,4 + S2.4 H1 0,25 + S2.3 nav-links 0,3; 11 meta-rettelser og /shipping/ + /returns/ mangler"
+          "note": "S2.1 9 af 13 planlagte sider live 2,08 (/inspiration/ id 1243 verificeret 2/11) + S2.5 meta-runde 1,4 + S2.6 hub-links 0,6 (0,4 tidligere + 0,2 for guide-klyngen 3/11: gensidige links mellem de fire guides og hubben, håndhævet af tre nye guide_check-værn med 4 nye selftest-fixtures) + S2.4 H1 0,25 + S2.3 nav-links 0,3; de sidste 0,15 d af S2.6 er samme links på de ældre publicerede guides, og 11 meta-rettelser og /shipping/ + /returns/ mangler"
         },
         {
           "id": "s3",
@@ -511,6 +511,15 @@
       "after": 57.1,
       "delta": 7.1,
       "basis": "4 af 7 guides (Publicerede guides (id 292, 296, 295) 0/3 · Guide-copy klar til publicering (292, 296, 295 + corset) 4/4)"
+    },
+    {
+      "date": "2026-11-03",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 55.4,
+      "after": 56.3,
+      "delta": 0.9,
+      "basis": "12,25 af 21,75 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,65/6 · S3 2,15/3,55 · S4 1,4/5)"
     }
   ]
 }
