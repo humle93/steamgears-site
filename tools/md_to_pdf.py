@@ -77,11 +77,74 @@ MONO_MAP = {**ASCII_MAP, "\u2014": "--", "\u2013": "-", "\u00b7": "|", "\u2026":
             "\u00ab": '"', "\u00bb": '"', "\u201e": '"', "\u2018": "'"}
 
 
+# Tegn der ikke findes i DejaVu, men som har en nær slægtning der gør. Uden dette forsvandt
+# de lydløst: fpdf skrev en advarsel til stderr og droppede tegnet, så en ✅ blev til ingenting.
+GLYPH_MAP = {
+    "\u2705": "\u2713",  # ✅ -> ✓
+    "\u274c": "\u2717",  # ❌ -> ✗
+    "\u26a0\ufe0f": "\u26a0",  # ⚠️ -> ⚠ (variationsvælgeren findes ikke)
+    "\ufe0f": "",  # usynlig variationsvælger
+}
+
+# Enkelt-stjerne kursiv (`*sådan*`) har DejaVu ikke en kursiv variant af her; den skrives med
+# husstilens citationstegn i stedet for at stå som stjerner i PDF'en. Mønstret tillader **fed**
+# inde i spændet, for det er præcis de tilfælde der ellers slap igennem som løse stjerner.
+# Spændet skal begynde og slutte som prosa (bogstav … bogstav/tegn), så glob-mønstre som
+# `*.php`, `*-grupper` og `name-*` i brødteksten ikke bliver til citationstegn.
+ITALIC_RE = re.compile(
+    r"(?<![\w*])\*(?=[A-Za-zÆØÅæøå])"
+    r"((?:[^*\n]|\*\*[^*\n]+\*\*)*?"
+    r"(?<=[A-Za-zÆØÅæøå0-9.!?,:;»)]))"
+    r"\*(?![\w*])"
+)
+
+
+def convert_italics(text: str) -> str:
+    """Kursiv til «...», men aldrig inde i kode (hvor * er glob eller multiplikation)."""
+    parts = re.split(r"(`[^`]+`)", str(text))
+    for i in range(0, len(parts), 2):
+        parts[i] = ITALIC_RE.sub(r"«\1»", parts[i])
+    return "".join(parts)
+
+_DROPPED: dict[str, int] = {}
+_CHARSET: tuple[set[int], set[int]] | None = None
+
+
+def _font_charset():
+    """Tegnsættet i de to skrifter, eller None hvis fontTools ikke er tilgængelig."""
+    global _CHARSET
+    if _CHARSET is None and UNICODE:
+        try:
+            from fontTools.ttLib import TTFont
+
+            _CHARSET = (set(TTFont(REG_FONT).getBestCmap()), set(TTFont(BOLD_FONT).getBestCmap()))
+        except Exception:
+            _CHARSET = None
+    return _CHARSET
+
+
+def _fix_glyphs(text: str) -> str:
+    """Erstat kendte tegn og fjern resten med en advarsel, så intet forsvinder i stilhed."""
+    for a, b in GLYPH_MAP.items():
+        text = text.replace(a, b)
+    charset = _font_charset()
+    if charset is None:
+        return text
+    regular, bold = charset
+    kept = []
+    for ch in text:
+        if ord(ch) < 128 or ord(ch) in regular or ord(ch) in bold:
+            kept.append(ch)
+        else:
+            _DROPPED[ch] = _DROPPED.get(ch, 0) + 1
+    return "".join(kept)
+
+
 def san(text) -> str:
     """Til Body-fonten: Unicode er fint med DejaVu, ellers ASCII-erstatning."""
-    text = str(text)
+    text = convert_italics(str(text))
     if UNICODE:
-        return text
+        return _fix_glyphs(text)
     for a, b in ASCII_MAP.items():
         text = text.replace(a, b)
     return text.encode("latin-1", "replace").decode("latin-1")
@@ -108,7 +171,7 @@ def plain(text: str) -> str:
 def segments(text: str):
     """Opdel i (tekst, stil) hvor stil er '', 'B', 'M' (kode), 'L' (link), 'S' (url)."""
     out = []
-    for part in INLINE_RE.split(text):
+    for part in INLINE_RE.split(convert_italics(text)):
         if not part:
             continue
         if part.startswith("**") and part.endswith("**") and len(part) > 4:
@@ -358,11 +421,11 @@ def render(md_path: Path, pdf_path: Path, kicker: str):
             doc.ln(2)
             doc.set_font(FONT, "B", 19)
             doc.set_text_color(*NAVY)
-            doc.multi_cell(CONTENT_W, 8.6, san(heading), align="L", new_x="LMARGIN", new_y="NEXT")
+            doc.multi_cell(CONTENT_W, 8.6, san(plain(heading)), align="L", new_x="LMARGIN", new_y="NEXT")
             if subtitle:
                 doc.set_font(FONT, "", 10.2)
                 doc.set_text_color(*GREY)
-                doc.multi_cell(CONTENT_W, 5.2, san(subtitle), align="L", new_x="LMARGIN", new_y="NEXT")
+                doc.multi_cell(CONTENT_W, 5.2, san(plain(subtitle)), align="L", new_x="LMARGIN", new_y="NEXT")
             doc.ln(3)
 
         elif kind == "h2":
@@ -372,7 +435,7 @@ def render(md_path: Path, pdf_path: Path, kicker: str):
             doc.set_font(FONT, "B", 12.4)
             doc.set_text_color(*NAVY)
             y = doc.get_y()
-            doc.multi_cell(CONTENT_W, 6.2, san(value), align="L", new_x="LMARGIN", new_y="NEXT")
+            doc.multi_cell(CONTENT_W, 6.2, san(plain(value)), align="L", new_x="LMARGIN", new_y="NEXT")
             doc.set_draw_color(*COPPER)
             doc.set_line_width(0.55)
             doc.line(left, y + 6.6, left + 24, y + 6.6)
@@ -384,7 +447,7 @@ def render(md_path: Path, pdf_path: Path, kicker: str):
                 doc.add_page()
             doc.set_font(FONT, "B", 10.3)
             doc.set_text_color(*INK)
-            doc.multi_cell(CONTENT_W, 5.4, san(value), align="L", new_x="LMARGIN", new_y="NEXT")
+            doc.multi_cell(CONTENT_W, 5.4, san(plain(value)), align="L", new_x="LMARGIN", new_y="NEXT")
             doc.ln(1.4)
 
         elif kind == "p":
@@ -536,6 +599,9 @@ def main(argv):
     size_kb = pdf_path.stat().st_size / 1024
     print(f"PDF:  {pdf_path.relative_to(Path.cwd()) if pdf_path.is_relative_to(Path.cwd()) else pdf_path}  "
           f"{size_kb:.0f} KB · {pages} sider · font: {'DejaVu' if UNICODE else 'Helvetica (ASCII)'}")
+    if _DROPPED:
+        dropped = ", ".join(f"U+{ord(ch):04X}×{n}" for ch, n in sorted(_DROPPED.items()))
+        print(f"advarsel: {sum(_DROPPED.values())} tegn uden glyf er fjernet: {dropped}")
     return 0
 
 

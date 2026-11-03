@@ -90,7 +90,8 @@ Reglen over holdes automatisk, så lidt som muligt afhænger af hukommelse:
   samme tur gælder stadig; nattens kørsel er sikkerhedsnettet, ikke en erstatning.
   Efter pushet kører kørslen **alle repoets værn** via [`tools/natlige-vaern.sh`](tools/natlige-vaern.sh):
   `php -l` på alle plugin-filer, `projektstatus.py --selftest` og `--check`, `load_campaign.py --selftest`,
-  `plugins/tests/smoke.php`, `test_mcp_rest.py`, `test_mcp_oauth.py` og `test_niche_scanner.py`. Et rødt værn
+  `plugins/tests/smoke.php`, `test_mcp_rest.py`, `test_mcp_oauth.py`, `test_niche_scanner.py` og en
+  PDF-render-kontrol af tre biblioteksdokumenter. Et rødt værn
   giver en `::error`-annotation, skriver en tabel og de fejlende linjer i job-summaryen og fejler jobbet. Det
   ligger bevidst efter pushet, så en testfejl ikke holder status-dokumenterne tilbage — men det kan ikke
   overses. Den samme kommando kan køres lokalt før et push: `bash tools/natlige-vaern.sh`.
@@ -124,10 +125,13 @@ Automationen dækker **den daglige status**. Det manuelle i §1 — at vurdere h
   ```
 
   Markdown-kilden er sandheden, PDF'en er eksporten, og **begge** skal stå i `docs/library/README.md`. Tjek siden
-  visuelt før den regnes som færdig (`pypdfium2` → PNG). Rendererens kendte grænse er enkelt-stjerne kursiv
-  (`*sådan*`), som vises som stjerner — brug `«citationstegn»` — og glyffer der ikke findes i DejaVu (fx `✅`),
-  som forsvinder lydløst: brug `✓`. Kodelinjer ombrydes nu inden for den grå boks, og et sidebrud midt i et
-  afsnit flytter korrekt resten med over (begge rettet 2/11, se `tools/md_to_pdf.py`).
+  visuelt før den regnes som færdig (`pypdfium2` → PNG). Rendereren klarer selv de tre ting der tidligere gik
+  galt: enkelt-stjerne kursiv (`*sådan*`, også med `**fed**` indeni) skrives som «sådan», glyffer DejaVu ikke har
+  oversættes (`✅`→`✓`, `❌`→`✗`) eller fjernes **med en advarselslinje** i stedet for i stilhed, og kodelinjer
+  ombrydes inden for den grå boks. Et sidebrud midt i et afsnit flytter resten korrekt med over — det gjorde det
+  ikke før 3/11, hvor en side fyldt til bunden kunne blive til 20 næsten tomme sider. Værnet `PDF-renderer` i
+  [`tools/natlige-vaern.sh`](tools/natlige-vaern.sh) renderer tre dokumenter og fejler på sideantal, glyf-advarsler
+  og tilbageværende stjerner.
 
 ## 6. Agent-kørsel og værktøjs-gaten
 

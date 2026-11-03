@@ -69,6 +69,41 @@ check "MCP REST-klient"                      python3 tools/test_mcp_rest.py
 check "MCP OAuth"                            python3 tools/test_mcp_oauth.py
 check "niche-scanner"                        python3 tools/test_niche_scanner.py
 
+# Rendereren fejlede 2/11 på to måder der ikke gav en fejlkode: et sidebrud midt i et afsnit
+# skrev resten af dokumentet uden for papiret (niche-vurderingen blev 20 sider), og glyffer
+# som ✅ forsvandt lydløst. Værnet tjekker derfor sideantal og at der ikke advares om glyffer.
+render_pdf() {
+  local out; out="$(mktemp -d)"
+  PYTHONPATH=tools/_deps python3 - "$out" <<'PY'
+import re, subprocess, sys, pathlib
+out = pathlib.Path(sys.argv[1])
+cases = {"niche-vurdering-2026-11-01": 6, "navigation-spec-2026-11-02": 5, "mcp-vaerktoejer-2026-11-02": 9}
+fejl = []
+for name, maks in cases.items():
+    pdf = out / f"{name}.pdf"
+    p = subprocess.run([sys.executable, "tools/md_to_pdf.py", f"docs/library/{name}.md", str(pdf)],
+                       capture_output=True, text=True)
+    if p.returncode != 0:
+        fejl.append(f"{name}: rendereren fejlede ({p.returncode}): {p.stderr.strip()[:200]}")
+        continue
+    if "advarsel" in p.stdout:
+        fejl.append(f"{name}: {p.stdout.strip().splitlines()[-1]}")
+    sys.path.insert(0, "tools/_deps")
+    import pypdfium2 as pdfium
+    sider = len(pdfium.PdfDocument(str(pdf)))
+    if sider > maks:
+        fejl.append(f"{name}: {sider} sider (forventet højst {maks}) — sidebrud eller tomme sider?")
+    tekst = "".join(pdfium.PdfDocument(str(pdf))[i].get_textpage().get_text_range() for i in range(sider))
+    if re.search(r"(?<![\w*])\*[A-Za-zÆØÅæøå]", tekst):
+        fejl.append(f"{name}: stjerner står stadig som kursiv i teksten")
+for f in fejl:
+    print("FAIL", f)
+sys.exit(1 if fejl else 0)
+PY
+}
+
+check "PDF-renderer"                         render_pdf
+
 passed=0
 for i in "${!NAMES[@]}"; do [ "${STATUS[$i]}" -eq 0 ] && passed=$((passed + 1)); done
 total="${#NAMES[@]}"
