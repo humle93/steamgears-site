@@ -60,7 +60,6 @@ lukkedes research-bibliotek.
 | [mockup-brief-2026-11-01.md](mockup-brief-2026-11-01.md) | Mockup-brief — 38 produkter — PDF i `reports/mockup-brief-2026-11-01.pdf` | 2026-11-01 |
 | [niche-vurdering-2026-11-01.md](niche-vurdering-2026-11-01.md) | Niche-vurdering: fortsæt eller skift? — PDF i `reports/niche-vurdering-2026-11-01.pdf` | 2026-11-01 |
 | [pinterest-board-plan.md](pinterest-board-plan.md) | Pinterest board-plan (godkendt 25/10) — PDF i `reports/pinterest-board-plan.pdf` | 2026-10-25 |
-
 | [pirat-piger-prompts.md](pirat-piger-prompts.md) | Billedprompts til manglende motiver + Drive-navngivning — PDF i `reports/pirat-piger-prompts.pdf` | 2026-10-26 |
 
 ## Sikkerhed
