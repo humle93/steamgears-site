@@ -24,6 +24,7 @@ lukkedes research-bibliotek.
 
 | Dokument | Indhold | Dato |
 | --- | --- | --- |
+| [hub-steampunk-costumes-2026-11-03.md](hub-steampunk-costumes-2026-11-03.md) | **Hub-copy 3/11:** `/steampunk-costumes/` (side 550) skrevet som indgang til de fire guides — quick answer, femten produktlinks, tre figurer og FAQ — PDF i `reports/hub-steampunk-costumes-2026-11-03.pdf` | 2026-11-03 |
 | [guide-hub-2026-11-03.md](guide-hub-2026-11-03.md) | **Guide-klyngen 3/11:** de fire guides som én hub — gensidige links, `guide_check.py`-værnene (hub, klynge, produktnavn) og rækkefølgen de skal indsættes i — PDF i `reports/guide-hub-2026-11-03.pdf` | 2026-11-03 |
 | [guides-2026-11-03-corset.md](guides-2026-11-03-corset.md) | **Corset-guiden 3/11:** "Steampunk Corset: How to Choose, Style and Wear One" — tre corsets, fire looks, budgettabel og otte FAQ; vest- og boot-guiderne kan ikke skrives uden produkter — PDF i `reports/guides-2026-11-03-corset.pdf` | 2026-11-03 |
 | [guides-2026-11-03.md](guides-2026-11-03.md) | **Tre guides klar til publicering 3/11:** men's essentials (292), tre budgetter (296) og women's essentials (295) — Rank Math-felter, FAQ, `/go/`-links og priser der kan slås op — PDF i `reports/guides-2026-11-03.pdf` | 2026-11-03 |
