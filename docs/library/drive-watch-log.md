@@ -252,35 +252,114 @@ ingen ændringer
 - ingen ændringer (token 42444 uændret)
 ## 2026-11-01 23:55 UTC (00:55 DK 2/11)
 - ingen ændringer (token 42444 uændret)
+- 2026-11-02 00:00 UTC (nightly run): ingen ændringer.
+## 2026-11-02 01:00 UTC — ingen ændringer (token 42444 uændret)
 
-## 2026-11-02 05:41 UTC — token 42444 → 42571
-- 8 poster siden 1/11 23:55, heraf 1 ny mappe; 1 fil i skraldespanden (dublet). Ingen permission-ændringer set.
-- **Ny mappe `cc-niche-scanner`** (05:33) med 5 filer: `CLAUDE_NICHE_SCANNER_SPEC.md` (v2.1, 5,3 KB),
-  `niche_engine.py`, `niche_routes.py`, `niche_deployer.py`, `cc-niche-bridge.php`.
-- **Ny `niche_harvester.py`** (05:34, 7,5 KB) — ligger i My Drive-roden, ikke i mappen.
-- **"Command Center — kilden er GitHub (denne mappe er ryddet)"** (04:27): command-center-main (v7.9),
-  v8.1/v8.2/v8.3-planer, Juno v8.0 og social-hook er flyttet til skraldespanden; GitHub
-  `humle93/command-center` v7.10 er master. Samme doc fra 04:22 ligger i skraldespanden som dublet.
+## 2026-11-02 02:00 (token 42444)
+- Ingen ændringer siden sidst.
+## 2026-11-02 03:00 — ingen ændringer siden sidst (token 42444 uændret)
+- 2026-11-02 05:00 (04:00Z): ingen ændringer (token 42444)
 
-### Review af cc-niche-scanner (læst, ikke udført)
-Spec'en er et Command Center-tillæg: et WP-plugin (`cc-bridge`) eksporterer produkter, kostpriser, salg og
-slugs via `/wp-json/cc-bridge/v1/telemetry`; FastAPI + SQLite WAL kører tre filtre (margin under 40 %,
-slug-kannibalisering, SERP-overlap ≥ 4 ens URLs) og deployer Hub-and-Spoke-artikler plus Woo-drafts via
-AIMLAPI. Tre forbehold:
+## 02-11-2026 05:00 (token 42444 → 42532)
+- ~43 ændringer 04:22–04:31 UTC, samlet i "command-center-main"-mapper + docs:
+  - Nye/Æ: command-center-kode (main.py, install.sh, docker-compose, dashboard/login.html, smoke_test.sh, screenshots) — iflg. "LÆS MIG" = v7.9-arkiv, FORÆLDET; GitHub humle93/command-center er master (v7.10, 31/10).
+  - Nye docs: Command_Center_v8_1_Pinterest_Update, v8_2_Social_Native_Update, v8_3_UI_Optimization, Juno_Implementeringsvejledning_v8.0, Velocity_Trading_Motor_Plan, v8_Dokumentation.
+  - 2× "Command Center — kilden er GitHub (denne mappe er ryddet)" + "LÆS MIG – status 31-10 (GitHub er master)".
+  - "Social Autopilot — Command Center spec v8 (2026-10-26).md" opdateret.
+  - command-center-social-hook.py ny (iflg LÆS MIG ikke taget med; accepterer alle kald uden secret).
+- Ingen slettede filer / tilladelses-ændringer i dette interval.
 
-1. **Tallene er syntetiske.** `niche_harvester.py` beregner `search_volume = max(150, 2400 − 320 × antal_ord)`
-   og `kd` ud fra hvor mange giganter (Amazon/Etsy/Wikipedia/Pinterest) der står i top 10, og skriver dem i
-   `niche_keywords` som om de var målt. `trend_slope` er hardcodet `1.2`, så `trend_mult` i opportunity-scoren
-   er konstant. Scoren `(volumen / kd) × margin × trend` arver dermed tre opdigtede input.
-2. **Kilden er scraping.** Google Suggest (uofficielt endpoint) og DuckDuckGo HTML med random user-agents og
-   1,5–2,8 s forsinkelse. Det kan blokeres uden varsel og har ingen SLA.
-3. **Deploy-stien kræver den adgang vi ikke har.** `WP_USER`/`WP_APP_PASS` + `AIMLAPI_KEY`; vores REST-forsøg
-   på sitet giver 401, og MCP-endpointet kræver `MCP_ACCESS_TOKEN`.
+## 2026-11-02 (kørt 06:00 UTC / 07:00 DK)
+Ny mappe **cc-niche-scanner** (oprettet 06:33 DK) med 7 filer:
+- `CLAUDE_NICHE_SCANNER_SPEC.md` — fuld dokumentation v2.1 (06:35)
+- `cc-niche-bridge.php` — WP/WooCommerce plugin: telemetry-eksport + deploy-cluster (06:33)
+- `niche_engine.py` — SQLite WAL eliminations-motor (06:33)
+- `niche_deployer.py` — AIMLAPI GEO/SEO generator + WP deployer (06:34)
+- `niche_routes.py` — FastAPI router/endpoints (06:33)
 
-Sammenlignet med [`tools/niche_scanner.py`](../../tools/niche_scanner.py) er formålet det samme, men princippet
-modsat: vores scanner læser Pinterests officielle trends-endpoint og skriver `utilgængelig` når en kilde
-mangler, frem for at fylde tal ind. To dele er værd at låne: SERP-overlap-clusteringen (≥ 4 fælles URLs i
-top 10) og margin-dræberen før der bruges AI-tokens. Se også
-[`niche-scan-procedure-2026-11-02.md`](niche-scan-procedure-2026-11-02.md).
+Ny token: 42571. Ingen sletninger eller tilladelses-ændringer.
 
-newStartPageToken: 42571
+## 2026-11-02 07:00 (CET)
+- Ingen ændringer siden sidst (token 42571 uændret).
+2026-11-02 08:00 UTC: ingen ændringer
+## 2026-11-02 09:00 UTC — ingen ændringer (token 42571 uændret)
+## 2026-11-02 10:00 — ingen ændringer siden 42571
+## 2026-11-02 11:00 — ingen ændringer (token 42571)
+2026-11-02T12:00Z — ingen ændringer (token 42571)
+2026-11-02 13:01 UTC — ingen ændringer (token 42571 uændret)
+
+## 2026-11-02 14:00 — ingen ændringer (token 42571)
+## 2026-11-02 15:00 UTC — ingen ændringer (token 42571)
+## 2026-11-02 16:00 UTC — ingen ændringer (token 42571)
+
+## 2026-11-02 17:00 (CET)
+- **NY fil:** "Command Center Niche Scanner - Complete Master Codebase & Assembly Guide" (markdown, 16:13) — v2.1, færdigt system: WP-plugin (cc-niche-bridge) + FastAPI backend til niche-analyse, margin-filtrering, SERP-clustering og AI-udrulning til Steamgears. Kildekode + installationsguide.
+- 2026-11-02 19:01 ingen ændringer
+
+## 2026-11-02 19:00 (EU/Cph)
+- Opdateret: "Master_Profile_and_Repository_Guide.md" (Google Doc, 18:54) — master-profil for predictive e-commerce/niche-arkitektur (WooCommerce, AEO/GEO, predictive niches) + komplet F-Droid-repo-reference. Del af sama dokumentfamilie.
+- Opdateret: "F-Droid Repositories List" (Google Doc, 18:48) — tilhørende liste-dokument (15 F-Droid-repos + anti-feature-referencer).
+- newStartPageToken: 42599
+
+## 2026-11-02 20:00 (token 42599→42600)
+- Master_Profile_and_Repository_Guide.md (Google Doc) — opdateret 19:02 UTC (indhold kortlæst af Juno).
+  Dokumentet er et "Master Profile: The Predictive E-Commerce & Micro-Niche Architect" — SEO/AEO/GEO-kompetenceprofil + 3 forudsagte micro-niches (ergonomiske remote-work værktøjer, longevity/biohacking tilbehør, smart pet gear) + F-Droid-repo-oversigt.
+- 2026-11-02 22:00 (DK): ingen ændringer
+## 2026-11-02 22:00 — ingen ændringer (token 42600)
+- 03/11 00:00 (DK): ingen ændringer siden sidst (token 42600)
+
+## 2026-11-03 00:00 (kørsel 1)
+- Ny mappe: **SteamgearsRedesign** (folder ID 1_-28AgaESdOpAP4aoXOWR29t0AEiuwSo) oprettet 02:25:29 (23:25 UTC 2/11). Tom ved tjek — ingen filer i den endnu. Ingen andre ændringer.
+## 2026-11-03 01:00 UTC (02:00 DK) — ingen ændringer (token 42603)
+## 2026-11-03 02:00 UTC — Drive-watch: ingen ændringer siden token 42603.
+
+## 03-11-2026 03:00 (UTC)
+- Ingen ændringer siden sidst.
+- 2026-11-03 04:00 UTC: ingen ændringer siden token 42603
+
+## 2026-11-03 05:00 (EU/Copenhagen)
+- Ingen ændringer siden sidst. Token uændret: 42603.
+## 2026-11-03 06:00 UTC (kl. 07:00 DK) — ingen ændringer siden token 42603
+## 2026-11-03 07:00 — ingen ændringer (token 42603)
+- 2026-11-03 08:00 UTC (09:00 DK): ingen ændringer (token 42603 uændret)
+
+## 2026-11-03 09:00
+Ny mappe **nightly-bot-knowledge** oprettet 08:27: mappen + 5 filer (extractor.py, main.py, illustrator.py, pdf_builder.py, nightly_digest.yml) + 3 docs (README.md, requirements.txt, MANUAL.md). Ingen sletninger eller tilladelses-ændringer.
+Kort: "Nightly Bot Knowledge Distiller" — Python-pipeline, der hver nat (GitHub Action 00:00 UTC) processerer chatbot-logs, filtrerer støj ud og bygger illustreret PDF-bog med kapitler af læringsfakta.
+## 2026-11-03 10:00 UTC — Drive-watch: ingen ændringer (token 42636)
+## 2026-11-03 11:00 DK — ingen ændringer (token 42636)
+
+## 2026-11-03 12:00 (token 42636 → 42681)
+Nye filer i en ny projektstruktur (mapper: library/workflows/output/logs/src):
+- `Command Center Niche Scanner - Complete Master Codebase & Assembly Guide` (md, ny) — fuldt v2.1-system: FastAPI-backend (niche_engine/harvester/deployer/routes), WP-plugin `cc-niche-bridge.php`, margin-filter + SERP-clustering + AI-udrulning, aims at Steamgears WP via app password + aimlapi.
+- `sample_bot.json` (ny), `illustrator.py`, `extractor.py`, `pdf_builder.py`, `__init__.py`, `main_v2.py` (nye Python-filer)
+- `nightly_digest.yml` (ny workflow)
+- Docs-dokumenter: `.env.example`, `.gitignore`, `ROADMAP_AND_DEPLOYMENT.md` (nye Google Docs)
+Ingen slettede filer eller tilladelses-ændringer registreret.
+## 2026-11-03 13:00 UTC — ingen ændringer (token 42681 uændret)
+
+## 2026-11-03 14:00
+- Ingen ændringer siden sidst (token 42681 uændret).
+## 2026-11-03 15:01 UTC — ingen ændringer (token 42681)
+
+## 2026-11-03 16:00
+Ingen ændringer (token 42681 uændret).
+## 2026-11-03 17:00 UTC — ingen ændringer (token 42681)
+
+## 2026-11-03 18:00 UTC — token 42681 → 42689
+- `Freebuff Optimization Manual - Strategy and Tools` (Google Docs, NY, oprettet 17:30, 7 KB) — manual til Freebuff (open-source multi-agent coding suite): 5 overflader (CLI/Desktop/Cloud/Web/Chat), 100 Freebucks/dag, model-routing (unmetered Flash-modeller til 80% af arbejdet, frontier-modeller kun til arkitektur), agents (browser-use, code-reviewer), AGENTS.md-template.
+- Ingen slettede filer eller tilladelses-ændringer.
+
+## 2026-11-03 19:00 (CET)
+- 18:03 Ny mappe: freebuff-guide
+- 18:07 Nyt doc: Freebuff Agent Instructions (AGENTS.md) — systeminstrukser til Freebuff/Codebuff AI-agent (model routing, 5-stegs workflow)
+- 18:20 Ny mappe: Freebuff Automation & Strategy (tom pt.)
+- 18:24 Ny mappe: NavBoost og AI Overviews - SEO-analyse
+- 18:26 Ny fil: navboost-opsummering.pdf (i SEO-analyse-mappen)
+- Token: 42689 → 42705
+## 2026-11-03 21:00 CET — ingen ændringer (token 42705 uændret)
+03-11-2026 22:00 (DK): ingen ændringer (token 42705)
+## 2026-11-03 22:00 (UTC 23:00? DK 23:00) — ingen ændringer siden sidst (token 42705)
+
+## 2026-11-04 00:00 (run for 2026-11-03T23:00Z)
+- Ingen ændringer siden sidst (token 42705 uændret).
