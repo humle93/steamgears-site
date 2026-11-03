@@ -13,7 +13,8 @@ and how long each missing piece takes.
 
 ## 0. Short version
 
-- **26 classes, 15 PHP files, ~6.3k lines.** Every subsystem is reachable from a real entry point (cron,
+- **33 classes, 22 PHP files, 8.464 lines** (measured 3/11 2026 on 7.25.0; the 7.15.0 audit counted 26 classes
+  and ~6.3k). Every subsystem is reachable from a real entry point (cron,
   REST, admin page, ability or AJAX) with **one** exception: `SGAP_Admin::get_setting_help_link()` is dead.
 - **17 settings are registered but never read.** Six of them are visible on the Settings screen (the five
   Etsy keys and `labor_rate`), which makes the screen promise an Etsy API connection that does not exist.

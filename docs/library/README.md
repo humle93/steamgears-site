@@ -8,6 +8,10 @@ hoveddokumenter står nederst.
 **Tilføjer du et dokument, så skriv det ind i den tabel det hører til.** Kolonnen »Dato« er dokumentets
 sidste commit-dato. Målt 2/11 2026.
 
+PDF-eksporterne af dokumenterne ligger i [`reports/`](../../reports/) med samme navn som kilden; rækkerne
+nedenfor peger på dem hvor der findes en. De er lavet med `tools/md_to_pdf.py` og er det der lægges i det
+lukkedes research-bibliotek.
+
 > Oprydning 2/11: SEO-dokumenterne er slået sammen til ét [`../seo.md`](../seo.md), roadmap'en til ét
 > [`../roadmap.md`](../roadmap.md), og de gamle 24/10-planer er slettet. De kan hentes frem med
 > `git show b7a0438:<sti>`.
@@ -20,6 +24,7 @@ sidste commit-dato. Målt 2/11 2026.
 
 | Dokument | Indhold | Dato |
 | --- | --- | --- |
+| [mcp-drafts-only-gaten-2026-11-03.md](mcp-drafts-only-gaten-2026-11-03.md) | **Drafts Only-gaten:** kildelæst i AI Engine 3.9.0 — hvilke 10+21 værktøjer der slipper igennem, hvorfor `wp_update_option` selv er spærret, hvorfor et gem kan se gennemført ud uden at være det, og de tre veje til 7.25.0 (PDF i `reports/mcp-drafts-only-gaten-2026-11-03.pdf`) | 2026-11-03 |
 | [mcp-skriveadgang-2026-11-02.md](mcp-skriveadgang-2026-11-02.md) | **MCP-skriveadgang og 7.25.0:** hvorfor REST-ruten svarer 401, hvad Drafts Only blokerer, hvordan `mcp_options` aflæses uden at skrive, og 12/12 forhåndsvaliderede kampagneposter (PDF i `reports/mcp-skriveadgang-2026-11-02.pdf`) | 2026-11-02 |
 | [clockwork-punk-kampagne-2026-11-02.md](clockwork-punk-kampagne-2026-11-02.md) | Clockwork Punk-kampagne 3.–14/11: koncept, 12 verificerede produkter, 3 vinkler, måling og blokeringer | 2026-11-02 |
 | [clockwork-punk-koe-2026-11-02.json](clockwork-punk-koe-2026-11-02.json) | Kø-payload til `POST /sgap/v1/queue` — 12 poster med captions, links og tidspunkter | 2026-11-02 |
@@ -42,17 +47,19 @@ sidste commit-dato. Målt 2/11 2026.
 | [valuta-og-priser-2026-11-02.md](valuta-og-priser-2026-11-02.md) | Valuta og priser — forslag til S4.3 | 2026-11-02 |
 | [drive-watch-log.md](drive-watch-log.md) | Log over ændringer i Drive | 2026-11-02 |
 | [niche-produkt-scanner-2026-11-02.md](niche-produkt-scanner-2026-11-02.md) | Niche-scanner: kilder, score og hvad Pinterest/TikTok ikke kan levere | 2026-11-02 |
+| [niche-scanner-lavsaeson-2026-11-03.md](niche-scanner-lavsaeson-2026-11-03.md) | Niche-scanneren: lavsæson, censur af nuller og tre-dages-gaten — de tre §7-krav er kodet | 2026-11-03 |
+| [niche-scan-ci-2026-11-03.md](niche-scan-ci-2026-11-03.md) | Natlig niche-scanning i CI: gaten der passer sig selv, de to gate-fejl og hvad et token kræver | 2026-11-03 |
 
 ## Butik og produkter
 
 | Dokument | Indhold | Dato |
 | --- | --- | --- |
-| [butiksaudit-2026-11-01.md](butiksaudit-2026-11-01.md) | Butiksaudit — WooCommerce + Printify | 2026-11-01 |
-| [om-maerkning-dark-academia-2026-11-01.md](om-maerkning-dark-academia-2026-11-01.md) | Om-mærkning mod dark academia — de 39 designs | 2026-11-01 |
-| [produkttekster-2026-11-01.md](produkttekster-2026-11-01.md) | Produkttekster — 39 produkter | 2026-11-01 |
-| [mockup-brief-2026-11-01.md](mockup-brief-2026-11-01.md) | Mockup-brief — 38 produkter | 2026-11-01 |
-| [niche-vurdering-2026-11-01.md](niche-vurdering-2026-11-01.md) | Niche-vurdering: fortsæt eller skift? | 2026-11-01 |
-| [pinterest-board-plan.md](pinterest-board-plan.md) | Pinterest board-plan (godkendt 25/10) | 2026-10-25 |
+| [butiksaudit-2026-11-01.md](butiksaudit-2026-11-01.md) | Butiksaudit — WooCommerce + Printify — PDF i `reports/butiksaudit-2026-11-01.pdf` | 2026-11-01 |
+| [om-maerkning-dark-academia-2026-11-01.md](om-maerkning-dark-academia-2026-11-01.md) | Om-mærkning mod dark academia — de 39 designs — PDF i `reports/om-maerkning-dark-academia-2026-11-01.pdf` | 2026-11-01 |
+| [produkttekster-2026-11-01.md](produkttekster-2026-11-01.md) | Produkttekster — 39 produkter — PDF i `reports/produkttekster-2026-11-01.pdf` | 2026-11-01 |
+| [mockup-brief-2026-11-01.md](mockup-brief-2026-11-01.md) | Mockup-brief — 38 produkter — PDF i `reports/mockup-brief-2026-11-01.pdf` | 2026-11-01 |
+| [niche-vurdering-2026-11-01.md](niche-vurdering-2026-11-01.md) | Niche-vurdering: fortsæt eller skift? — PDF i `reports/niche-vurdering-2026-11-01.pdf` | 2026-11-01 |
+| [pinterest-board-plan.md](pinterest-board-plan.md) | Pinterest board-plan (godkendt 25/10) — PDF i `reports/pinterest-board-plan.pdf` | 2026-10-25 |
 
 | [pirat-piger-prompts.md](pirat-piger-prompts.md) | Billedprompts til manglende motiver + Drive-navngivning | 2026-10-26 |
 
@@ -61,8 +68,8 @@ sidste commit-dato. Målt 2/11 2026.
 | Dokument | Indhold | Dato |
 | --- | --- | --- |
 | [sikkerhed-noegler-historik-2026-11-02.md](sikkerhed-noegler-historik-2026-11-02.md) | Lækkede nøgler i git-historikken: rotations-tjekliste og plan for historik-rensning | 2026-11-02 |
-| [sikkerhed-ai-engine-2026-11-01.md](sikkerhed-ai-engine-2026-11-01.md) | AI Engine CVE-2026-110732 (lukket 1/11) | 2026-11-01 |
-| [sikkerhed-plugin-versioner-2026-11-01.md](sikkerhed-plugin-versioner-2026-11-01.md) | Plugin-versioner — 48 plugins, 16 bagud | 2026-11-01 |
+| [sikkerhed-ai-engine-2026-11-01.md](sikkerhed-ai-engine-2026-11-01.md) | AI Engine CVE-2026-110732 (lukket 1/11) — PDF i `reports/sikkerhed-ai-engine-2026-11-01.pdf` | 2026-11-01 |
+| [sikkerhed-plugin-versioner-2026-11-01.md](sikkerhed-plugin-versioner-2026-11-01.md) | Plugin-versioner — 48 plugins, 16 bagud — PDF i `reports/sikkerhed-plugin-versioner-2026-11-01.pdf` | 2026-11-01 |
 
 ## Vedligehold og driftslogs
 
@@ -78,12 +85,12 @@ sidste commit-dato. Målt 2/11 2026.
 | --- | --- | --- |
 | [produkt-schema-fix-2026-11-02.md](produkt-schema-fix-2026-11-02.md) | Produkt-schema: brand, 14 dages returret og leveringstid — kode klar, ikke live (D2/D5) | 2026-11-02 |
 | [waf-diagnose-2026-11-02.md](waf-diagnose-2026-11-02.md) | WAF-diagnose: 455 rammer spoofede bot-UA'er, ikke Google — retter A1/S0.6; PDF i `reports/waf-diagnose-2026-11-02.pdf` | 2026-11-02 |
-| [indholdsaudit-2026-11-01.md](indholdsaudit-2026-11-01.md) | Indholdsudit — posts, sider og produkter | 2026-11-01 |
-| [dode-links-2026-11-01.md](dode-links-2026-11-01.md) | Døde interne links — 39 fund | 2026-11-01 |
-| [mangler-og-plan-25-10.md](mangler-og-plan-25-10.md) | Komplet mangel-liste og udførelsesplan (25/10) — stadig citeret som evidens i roadmap'en | 2026-10-26 |
+| [indholdsaudit-2026-11-01.md](indholdsaudit-2026-11-01.md) | Indholdsudit — posts, sider og produkter — PDF i `reports/indholdsaudit-2026-11-01.pdf` | 2026-11-01 |
+| [dode-links-2026-11-01.md](dode-links-2026-11-01.md) | Døde interne links — 39 fund — PDF i `reports/dode-links-2026-11-01.pdf` | 2026-11-01 |
+| [mangler-og-plan-25-10.md](mangler-og-plan-25-10.md) | Komplet mangel-liste og udførelsesplan (25/10) — stadig citeret som evidens i roadmap'en — PDF i `reports/mangler-og-plan-25-10.pdf` | 2026-10-26 |
 | [niche-scan-procedure-2026-11-02.md](niche-scan-procedure-2026-11-02.md) | Procedure for niche-scanning: 7 trin, tærskler, fem fælder og hvad kilderne ikke måler | 2026-11-02 |
 | [backlinks-backlink-log.md](backlinks-backlink-log.md) | Backlink Monitor — ugentlig log | 2026-10-27 |
-| [steampunk-outfit-ideas-for-women.md](steampunk-outfit-ideas-for-women.md) | Artikeludkast: steampunk outfit ideas for women | 2026-10-25 |
+| [steampunk-outfit-ideas-for-women.md](steampunk-outfit-ideas-for-women.md) | Artikeludkast: steampunk outfit ideas for women — PDF i `reports/steampunk-outfit-ideas-for-women.pdf` | 2026-10-25 |
 
 ## Kilder
 

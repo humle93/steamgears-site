@@ -17,9 +17,9 @@ MCP-ændringer i næsten hver mindre release, så næste gang er ikke et spørgs
 
 Alle linjenumre er fra 3.9.0's release-zip (`labs/`), læst 3/11 2026.
 
-**M1 · Nye, fjernede eller omdøbte indbyggede værktøjer.** De 74 navne står i `labs/mcp*.php` som
-`'name' =>`. Hver tilføjelse eller omdøbning flytter totalen — og kan fjerne et navn som et fast prompt eller
-en dokumenteret opskrift peger på.
+**M1 · Nye, fjernede eller omdøbte indbyggede værktøjer.** De 74 navne står i `labs/mcp*.php`, ét pr.
+værktøj, i de filer der bygger `tools/list`. Hver tilføjelse eller omdøbning flytter totalen — og kan fjerne et
+navn som et fast prompt eller en dokumenteret opskrift peger på.
 
 **M2 · Broen: hvilke abilities der eksponeres.** `labs/mcp-abilities.php:41-53` filtrerer: `mcp.public`
 sat til `false` → ude; ellers inde hvis `mcp.public` er `true` **eller** `show_in_rest` ikke er tomt. Ændres

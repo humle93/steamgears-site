@@ -95,6 +95,13 @@ Reglen over holdes automatisk, så lidt som muligt afhænger af hukommelse:
   ligger bevidst efter pushet, så en testfejl ikke holder status-dokumenterne tilbage — men det kan ikke
   overses. Den samme kommando kan køres lokalt før et push: `bash tools/natlige-vaern.sh`.
 
+- **Natlig niche-scanning** (`.github/workflows/niche-scan.yml`): kl. 02:30 dansk tid scanner de 11 søgeord
+  fra `tools/niche_seeds.txt` mod Pinterest Trends, skriver `reports/niche-scan-<dato>.md`/`.json` og
+  committer kørselsdagen i `reports/niche-scan-history.json` — så tre-dages-gaten passer sig selv. Kræver
+  repository-secret `PINTEREST_ACCESS_TOKEN`; mangler det, springes scanningen over med en `::notice`, og
+  gaten flyttes ikke. Er tokenet udløbet (401), fejler jobbet rødt. Hvad et token kræver, og hvad kørslen
+  ikke kan: se [`docs/library/niche-scan-ci-2026-11-03.md`](docs/library/niche-scan-ci-2026-11-03.md).
+
 Automationen dækker **den daglige status**. Det manuelle i §1 — at vurdere hvad der reelt blev udført og melde
 `% før → % efter` i svaret og commit-beskeden — kan scriptet ikke gøre og falder stadig på den der arbejder.
 
@@ -117,8 +124,10 @@ Automationen dækker **den daglige status**. Det manuelle i §1 — at vurdere h
   ```
 
   Markdown-kilden er sandheden, PDF'en er eksporten, og **begge** skal stå i `docs/library/README.md`. Tjek siden
-  visuelt før den regnes som færdig (`pypdfium2` → PNG), for rendereren har to grænser: enkelt-stjerne kursiv
-  (`*sådan*`) vises som stjerner — brug `«citationstegn»` — og kodelinjer over ca. 78 tegn løber ud over spalten.
+  visuelt før den regnes som færdig (`pypdfium2` → PNG). Rendererens kendte grænse er enkelt-stjerne kursiv
+  (`*sådan*`), som vises som stjerner — brug `«citationstegn»` — og glyffer der ikke findes i DejaVu (fx `✅`),
+  som forsvinder lydløst: brug `✓`. Kodelinjer ombrydes nu inden for den grå boks, og et sidebrud midt i et
+  afsnit flytter korrekt resten med over (begge rettet 2/11, se `tools/md_to_pdf.py`).
 
 ## 6. Agent-kørsel og værktøjs-gaten
 

@@ -278,11 +278,6 @@ def render(md_path: Path, pdf_path: Path, kicker: str):
         """
         origin = left + indent
         x_max = doc.w - MARGIN_R
-        # Et tidligere blok (fx et kodehegn) kan have sat y forbi bundmargenen. Uden dette
-        # rykker fpdfs auto-sidebrydning en side pr. celle, mens state["y"] bliver stående
-        # — så blev ét afsnit til 13 sider.
-        if doc.get_y() + LEAD > doc.h - MARGIN_B:
-            doc.add_page()
         state = {"x": origin, "y": doc.get_y()}
         pending = [False]  # er der et mellemrum der venter på næste ord?
 
@@ -295,6 +290,14 @@ def render(md_path: Path, pdf_path: Path, kicker: str):
 
         def put(fragment):
             width = doc.get_string_width(fragment)
+            # fpdf's egen sideombrydning må aldrig få lov at slå til midt i en linje: så
+            # flytter den indholdet til en ny side uden at state["y"] følger med, og resten
+            # af afsnittet bliver skrevet uden for papiret (en side pr. ord). Derfor tages
+            # sidebruddet her, hvor både y og x nulstilles.
+            if state["y"] + LEAD > doc.h - MARGIN_B:
+                doc.add_page()
+                state["y"] = MARGIN_T
+                state["x"] = origin
             doc.set_xy(state["x"], state["y"])
             doc.cell(width, LEAD, fragment)
             state["x"] += width
@@ -328,8 +331,6 @@ def render(md_path: Path, pdf_path: Path, kicker: str):
                 at_start = state["x"] <= origin + 0.01
                 unit = token if (at_start or not pending[0]) else " " + token
                 pending[0] = False
-                if state["y"] + LEAD > doc.h - MARGIN_B:
-                    newline()
                 if state["x"] + doc.get_string_width(unit) > x_max and not at_start:
                     newline()
                     unit = token
@@ -422,15 +423,16 @@ def render(md_path: Path, pdf_path: Path, kicker: str):
 
         elif kind == "code":
             doc.ln(0.8)
-            # Højden skal regnes på de ombrudte linjer, ikke på antallet af linjer i
-            # kilden — ellers bliver boksen for kort og teksten løber ud over kanten.
-            usable = CONTENT_W - 6
+            # Højden måles pr. linje: en kodelinje der er bredere end spalten ombrydes af
+            # multi_cell og fylder mere end én CODE_LEAD, ellers løber teksten ud af boksen.
             doc.set_font(MONO, "", CODE_SIZE)
-            height = 4.0
-            for code_line in value:
-                height += max(CODE_LEAD, doc.multi_cell(usable, CODE_LEAD, san_mono(code_line),
-                                                        dry_run=True, output="HEIGHT"))
-            if doc.get_y() + height > doc.h - MARGIN_B:
+            line_heights = [
+                doc.multi_cell(CONTENT_W - 6, CODE_LEAD, san_mono(code_line), align="L",
+                               dry_run=True, output="HEIGHT")
+                for code_line in value
+            ]
+            height = sum(line_heights) + 4
+            if doc.get_y() + height > 297 - MARGIN_B:
                 doc.add_page()
             y = doc.get_y()
             doc.set_fill_color(*PALE)
@@ -446,8 +448,6 @@ def render(md_path: Path, pdf_path: Path, kicker: str):
                                new_x="LMARGIN", new_y="NEXT")
                 doc.set_x(left + 3)
             doc.set_y(y + height + 3.5)
-            if doc.get_y() > doc.h - MARGIN_B - LEAD:
-                doc.add_page()
 
         elif kind == "table":
             rows = value
@@ -462,7 +462,9 @@ def render(md_path: Path, pdf_path: Path, kicker: str):
                 weights.append(min(longest, 62))
                 # Et ord må ikke brydes: kolonnen skal kunne rumme det længste token
                 longest_token = max((len(tok) for c in cells for tok in re.split(r"\s+", c) if tok), default=4)
-                floors.append(min(longest_token * 1.62 + 2.6, CONTENT_W * 0.42))
+                # Et enkelt-tegns-hoved (fx "#") må ikke gøre kolonnen smallere end et tegn:
+                # fpdf kaster "Not enough horizontal space to render a single character".
+                floors.append(min(max(longest_token * 1.62 + 2.6, 12.0), CONTENT_W * 0.42))
 
             if sum(floors) >= CONTENT_W:
                 scale = CONTENT_W / sum(floors)

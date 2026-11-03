@@ -137,8 +137,8 @@ Alle 39 produkter har i dag under 3 billeder. Det er den største enkeltmangel i
 | Batch | Indhold | Hvem | Estimat | Status |
 |---|---|---|---|---|
 | 0 | Valuta og pris (S4.3) — skal ske først, så priser kun røres én gang | Ejer + mig | 0,5 dag | **Afventer beslutning** |
-| 1 | Nye titler + SEO-titel/beskrivelse på **32** produkter (gruppe A + B) | Mig (via MCP) | 2,5–3 t | ✅ **Udført 1/11** — 32/32 omdøbt, SEO-titel + meta description + fokus-søgeord sat på alle |
-| 2 | Seks kollektioner + tildeling af produkter | Mig | 1 t | ✅ **Udført 1/11** — se nedenfor |
+| 1 | Nye titler + SEO-titel/beskrivelse på **32** produkter (gruppe A + B) | Mig (via MCP) | 2,5–3 t | ✓ **Udført 1/11** — 32/32 omdøbt, SEO-titel + meta description + fokus-søgeord sat på alle |
+| 2 | Seks kollektioner + tildeling af produkter | Mig | 1 t | ✓ **Udført 1/11** — se nedenfor |
 | 3 | Omskrivning af produkttekst: fit, produktionstid, levering, GPSR-blok | Mig | 3–4 t |
 | 4 | Mockups: 5 billeder pr. tøjprodukt, 4 pr. plakat — 39 produkter | Ejer i Printify | 4–6 t |
 | 5 | Krydsreferencer: dark academia-artikler linker dark academia-kollektionen, steampunk-artikler linker kapslen | Mig | 1–2 t |

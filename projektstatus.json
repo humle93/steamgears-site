@@ -37,10 +37,10 @@
         {
           "id": "s3",
           "name": "S3 — hygiejne",
-          "done": 1.7,
-          "total": 3.1,
+          "done": 1.9,
+          "total": 3.3,
           "unit": "d",
-          "note": "S3.1 0,25 + S3.2 0,1 + S3.3 alt-tekst 0,3 + S3.4 plugin-audit 0,35 + tidligere 0,6; plugin-oprydning (slet/fjern) og webp mangler stadig; + 0,1 d PDF-eksport til research-biblioteket (2 rapporter) og rettet ordombrydning i tools/md_to_pdf.py."
+          "note": "S3.1 0,25 + S3.2 0,1 + S3.3 alt-tekst 0,3 + S3.4 plugin-audit 0,35 + tidligere 0,6; plugin-oprydning (slet/fjern) og webp mangler stadig; + 0,1 d PDF-eksport til research-biblioteket (2 rapporter) og rettet ordombrydning i tools/md_to_pdf.py; + 0,2 d PDF-eksport af de 12 ældste biblioteksdokumenter og to renderer-fejl rettet (sidebrud midt i afsnit, kodeblok-højde)."
         },
         {
           "id": "s4",
@@ -55,8 +55,8 @@
     {
       "id": "plugin",
       "name": "Steamgears Autopilot — plugin",
-      "next": "P0.6 (kræver Command Center), derefter P1.2 \"remind me instead\" og P1.4 evergreen-recycling",
-      "blocked_by": "Intet for P0. P1.5 kræver Pinterest-token (401) og Meta-review; P0.6 kræver Command Center",
+      "next": "P1.2 \"remind me instead\" (1,0 d), derefter P3.1/P3.2-hygiejne; P0.6 er blokeret af Command Center",
+      "blocked_by": "7.25.0 kan ikke installeres af agenten, fordi AI Engines Drafts Only står slået til; P1.5 kræver Pinterest-token (401) og Meta-review; P0.6 kræver Command Center; P1.4 kræver P1.5",
       "modules": [
         {
           "id": "p0",
@@ -457,6 +457,15 @@
       "after": 100.0,
       "delta": 0,
       "basis": "39 af 39 links"
+    },
+    {
+      "date": "2026-11-03",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 54.5,
+      "after": 54.9,
+      "delta": 0.4,
+      "basis": "11,8 af 21,5 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,45/6 · S3 1,9/3,3 · S4 1,4/5)"
     }
   ]
 }

@@ -26,12 +26,25 @@ Kilder (og hvorfor kun disse):
 Ingen af kilderne opfinder tal: mangler token eller eksport, står kilden som
 "utilgængelig" i rapporten med årsagen, og scanningen kører videre på de andre.
 
+Tre grænser som koden respekterer (se docs/library/niche-scan-procedure-2026-11-02.md §7):
+
+  1. **Momentum kommer fra kildens egne felter** (`pct_growth_mom`, ellers `yoy`), ikke
+     fra tidsserien: Pinterest min-max-normaliserer hver graf, så et forhold mellem to
+     uger i serien er skævt. Serien bruges kun til **form** — top- og bundmåned.
+  2. **Lavsæson vises som indeksniveau**, ikke kun som vækst: det er lavsæsonen der
+     afgør om en sæsonniche kan bære lager.
+  3. **Nuller er censur, ikke nul efterspørgsel.** De tælles og holdes ude af
+     gennemsnittene; en række der kun består af nuller rangeres ikke. Og en kørsel skal
+     have set søgeordet på **mindst tre forskellige dage** før rækken kaldes «Anbefalet».
+
 Kør:
     PINTEREST_ACCESS_TOKEN=... python3 tools/niche_scanner.py --seeds "steampunk corset,dark academia outfit"
     python3 tools/niche_scanner.py --offline            # fixtures, ingen netværk/token
     python3 tools/test_niche_scanner.py                 # tests
 
-Ud: reports/niche-scan-<dato>.md + .json
+Ud: reports/niche-scan-<dato>.md + .json og reports/niche-scan-history.json (kørselsdage).
+En kørsel uden data skriver intet og rykker ikke tre-dages-gaten — den natlige CI-kørsel
+(.github/workflows/niche-scan.yml) bruger netop det til at skelne «målt» fra «forsøgt».
 """
 
 from __future__ import annotations
@@ -41,6 +54,8 @@ import csv
 import json
 import os
 import sys
+import time
+import urllib.error
 import urllib.parse
 import urllib.request
 from dataclasses import dataclass, field
@@ -61,6 +76,14 @@ REGIONS = (
 )
 TREND_TYPES = ("growing", "monthly", "yearly", "seasonal")
 
+# Hvor mange forskellige dage et søgeord skal være målt på, før rækken kaldes «Anbefalet».
+MIN_DAYS = 3
+# Hvor mange gange et 429/5xx-svar på Pinterest forsøges før kilden meldes fejlet.
+RETRIES = 3
+HISTORY_NAME = "niche-scan-history.json"
+
+DA_MONTHS = ("jan", "feb", "mar", "apr", "maj", "jun", "jul", "aug", "sep", "okt", "nov", "dec")
+
 STOPWORDS = {
     "the", "and", "for", "with", "your", "you", "from", "that", "this", "into",
     "out", "are", "how", "best", "ideas", "idea", "new", "per", "til", "og", "med",
@@ -79,9 +102,37 @@ class Signal:
     source: str
     growth_yoy: float | None = None
     growth_mom: float | None = None
-    momentum: float | None = None
     volume_hint: float | None = None  # TikTok views, kun til visning
-    series: list[float] = field(default_factory=list)
+    points: list[tuple[str, float]] = field(default_factory=list)  # (dato/indeks, værdi)
+
+    @property
+    def momentum(self) -> float | None:
+        """Retning fra kildens eget `mom`-felt — aldrig udregnet af den normaliserede serie.
+
+        Mangler feltet (TikTok-eksporten har kun én vækstkolonne), er retningen ukendt og
+        vægtes neutralt. At genbruge `yoy` her ville tælle samme tal to gange i efterspørgslen.
+        """
+        return self.growth_mom
+
+
+@dataclass
+class Season:
+    """Form og lavsæson udledt af tidsserien, med nuller behandlet som censur."""
+    observed: int = 0      # punkter over nul
+    censored: int = 0      # nuller = under kildens tærskel, ikke "ingen efterspørgsel"
+    has_series: bool = False         # False = kilden giver ingen tidsserie (TikTok-eksporten)
+    low_level: float | None = None   # gennemsnit af den nederste kvartil
+    peak_label: str | None = None
+    trough_label: str | None = None
+
+    @property
+    def all_censored(self) -> bool:
+        """Kun censur når serien *findes* og udelukkende består af nuller."""
+        return self.has_series and self.observed == 0
+
+    @property
+    def low_text(self) -> str:
+        return "–" if self.low_level is None else f"{self.low_level:.0f}"
 
 
 @dataclass
@@ -93,10 +144,24 @@ class Row:
     momentum: float | None
     matches: list[str]
     opportunity: float
+    season: Season = field(default_factory=Season)
+    days_seen: int = 1
 
     @property
     def coverage(self) -> float:
         return min(len(self.matches), 3) / 3 * 100
+
+    @property
+    def rankable(self) -> bool:
+        return not self.season.all_censored
+
+    @property
+    def status(self) -> str:
+        if self.season.all_censored:
+            return "Censureret"
+        if self.days_seen >= MIN_DAYS:
+            return f"Anbefalet ({self.days_seen} dage)"
+        return f"For tidlig ({self.days_seen}/{MIN_DAYS} dage)"
 
 
 # --------------------------------------------------------------------- scoring
@@ -107,19 +172,56 @@ def clamp_pct(value: float | None) -> float:
     return max(0.0, min(100.0, (float(value) + 50) / 250 * 100))
 
 
-def slope_momentum(series: list[float]) -> float | None:
-    """Ændring fra de fire ældste til de fire nyeste uger, i procent."""
-    if len(series) < 8:
+def parse_points(raw) -> list[tuple[str, float]]:
+    """Tidsserie fra API'et (dict med datonøgler) eller fixture (liste) → sorteret liste."""
+    if isinstance(raw, dict):
+        pairs = [(str(k), float(v)) for k, v in raw.items()]
+    elif isinstance(raw, list):
+        pairs = [(str(i), float(v)) for i, v in enumerate(raw)]
+    else:
+        return []
+    return sorted(pairs, key=lambda kv: kv[0])
+
+
+def month_label(key: str) -> str | None:
+    """«2026-10-06» → «okt». Indeksnøgler (uden dato) giver None."""
+    parts = key.split("-")
+    if len(parts) < 2:
         return None
-    old = sum(series[-8:-4]) / 4
-    new = sum(series[-4:]) / 4
-    if old <= 0:
-        return 100.0 if new > 0 else 0.0
-    return (new - old) / old * 100
+    try:
+        month = int(parts[1])
+    except ValueError:
+        return None
+    return DA_MONTHS[month - 1] if 1 <= month <= 12 else None
+
+
+def season_shape(points: list[tuple[str, float]]) -> Season:
+    """Lavsæson-niveau, top- og bundmåned — med nuller holdt ude som censur.
+
+    Lavsæson er gennemsnittet af den nederste fjerdedel af de målte punkter. Det er et
+    indeks inden for samme graf, ikke et søgetal: det kan sammenlignes med de andre
+    søgeord i samme kørsel, ikke på tværs af kørsler.
+    """
+    season = Season()
+    if not points:
+        return season
+    season.has_series = True
+    live = [(key, value) for key, value in points if value > 0]
+    season.observed = len(live)
+    season.censored = len(points) - len(live)
+    if not live:
+        return season
+
+    ordered = sorted(value for _, value in live)
+    count = max(1, round(len(ordered) * 0.25))
+    season.low_level = sum(ordered[:count]) / count
+    season.peak_label = month_label(max(live, key=lambda kv: kv[1])[0])
+    season.trough_label = month_label(min(live, key=lambda kv: kv[1])[0])
+    return season
 
 
 def demand_score(growth_yoy: float | None, momentum: float | None) -> float:
-    """60 % årlig vækst + 40 % seneste fire ugers retning. Dokumenteret, ikke finjusteret."""
+    """60 % årlig vækst + 40 % seneste måneds retning, hvor ukendt retning vejer neutralt (50)."""
     return round(0.6 * clamp_pct(growth_yoy) + 0.4 * clamp_pct(momentum), 1)
 
 
@@ -132,6 +234,50 @@ def opportunity_score(demand: float, matches: int) -> float:
     """
     coverage = min(matches, 3) / 3
     return round(demand * (1 - coverage), 1)
+
+
+# ------------------------------------------------------------ kørselshistorik
+def history_path(out_dir: Path) -> Path:
+    return Path(out_dir) / HISTORY_NAME
+
+
+def load_history(out_dir: Path) -> dict[str, list[str]]:
+    """Søgeord → de datoer det er målt på. Bruges til tre-dages-gaten."""
+    path = history_path(out_dir)
+    if not path.exists():
+        return {}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return {}
+    keywords = data.get("keywords")
+    if not isinstance(keywords, dict):
+        return {}
+    return {key: sorted({str(day) for day in days}) for key, days in keywords.items() if isinstance(days, list)}
+
+
+def days_seen(keyword: str, history: dict[str, list[str]], today: str) -> int:
+    days = set(history.get(keyword.strip().lower(), []))
+    days.add(today)
+    return len(days)
+
+
+def record_run(out_dir: Path, history: dict[str, list[str]], keywords: list[str],
+               today: str) -> dict[str, list[str]]:
+    """Skriver dagens udtræk ind i historikken (idempotent pr. dag)."""
+    merged = {key: list(days) for key, days in history.items()}
+    for keyword in keywords:
+        key = keyword.strip().lower()
+        if not key:
+            continue
+        days = set(merged.get(key, []))
+        days.add(today)
+        merged[key] = sorted(days)
+    path = history_path(out_dir)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps({"min_days": MIN_DAYS, "keywords": merged},
+                               ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return merged
 
 
 # --------------------------------------------------------------------- kilder
@@ -190,6 +336,31 @@ def match_products(keyword: str, catalog: list[dict]) -> list[str]:
     ]
 
 
+def _fetch_trends(url: str, token: str) -> dict:
+    """GET mod Pinterest Trends med genforsøg på 429/5xx — raten skal ikke dræbe kørslen."""
+    last: Exception | None = None
+    for attempt in range(1, RETRIES + 1):
+        req = urllib.request.Request(url, headers={
+            "Authorization": f"Bearer {token}",
+            "Accept": "application/json",
+            "User-Agent": "steamgears-niche-scanner/1.0",
+        })
+        try:
+            with urllib.request.urlopen(req, timeout=25) as res:
+                return json.loads(res.read().decode("utf-8"))
+        except urllib.error.HTTPError as exc:
+            last = exc
+            if exc.code not in (429, 500, 502, 503, 504) or attempt == RETRIES:
+                raise
+            time.sleep(2 ** attempt)
+        except Exception as exc:  # netværksfejl: ét genforsøg er nok til at afgøre det
+            last = exc
+            if attempt == RETRIES:
+                raise
+            time.sleep(2 ** attempt)
+    raise last if last else RuntimeError("Pinterest-kald fejlede uden undtagelse")
+
+
 def pinterest_signals(terms: list[str], region: str, trend_type: str, token: str | None,
                       offline: bool = False) -> tuple[list[Signal], str]:
     """Returnerer (signaler, status). Status er menneskelæsbar og havner i rapporten."""
@@ -203,28 +374,20 @@ def pinterest_signals(terms: list[str], region: str, trend_type: str, token: str
             "limit": 50,
         })
         url = f"{PINTEREST_API}/trends/keywords/{urllib.parse.quote(region)}/top/{trend_type}?{query}"
-        req = urllib.request.Request(url, headers={
-            "Authorization": f"Bearer {token}",
-            "Accept": "application/json",
-            "User-Agent": "steamgears-niche-scanner/1.0",
-        })
         try:
-            with urllib.request.urlopen(req, timeout=25) as res:
-                payload = json.loads(res.read().decode("utf-8"))
+            payload = _fetch_trends(url, token)
         except Exception as exc:  # 401/403/429 skal stå i rapporten, ikke dræbe kørslen
             return [], f"fejl: {exc}"
 
     items = payload.get("items") or payload.get("data") or []
     signals = []
     for item in items:
-        series = [float(v) for v in (item.get("time_series") or {}).values()]
         signals.append(Signal(
-            keyword=item.get("keyword", "").strip(),
+            keyword=(item.get("keyword") or "").strip(),
             source="pinterest",
             growth_yoy=item.get("pct_growth_yoy"),
             growth_mom=item.get("pct_growth_mom"),
-            momentum=slope_momentum(series),
-            series=series,
+            points=parse_points(item.get("time_series") or []),
         ))
     return [s for s in signals if s.keyword], f"ok: {len(signals)} søgeord ({region}, {trend_type})"
 
@@ -252,39 +415,49 @@ def tiktok_signals(export_path: str | None, offline: bool = False) -> tuple[list
                 views = float(row.get("views") or 0)
             except ValueError:
                 views = 0.0
+            # Eksporten har ingen tidsserie: form og lavsæson kan ikke udledes, og rækken
+            # får derfor ingen top-/bundmåned. Det står i rapporten frem for at blive gættet.
             signals.append(Signal(keyword=keyword, source="tiktok", growth_yoy=growth,
                                   volume_hint=views))
     return signals, f"ok: {len(signals)} søgeord (manuel eksport: {path.name})"
 
 
 # --------------------------------------------------------------------- rapport
-def score_rows(signals: list[Signal], catalog: list[dict]) -> list[Row]:
+def score_rows(signals: list[Signal], catalog: list[dict],
+               history: dict[str, list[str]] | None = None,
+               today: str | None = None) -> list[Row]:
     rows = []
     for signal in signals:
-        demand = demand_score(signal.growth_yoy, signal.momentum)
+        momentum = signal.momentum
+        demand = demand_score(signal.growth_yoy, momentum)
         matches = match_products(signal.keyword, catalog)
         rows.append(Row(
             keyword=signal.keyword,
             source=signal.source,
             demand=demand,
             growth_yoy=signal.growth_yoy,
-            momentum=signal.momentum,
+            momentum=momentum,
             matches=matches,
             opportunity=opportunity_score(demand, len(matches)),
+            season=season_shape(signal.points),
+            days_seen=days_seen(signal.keyword, history or {}, today) if today else 1,
         ))
-    return sorted(rows, key=lambda r: (-r.opportunity, -r.demand, r.keyword))
+    # Censurerede rækker rangeres ikke — de har ingen målbar efterspørgsel at rangere på.
+    return sorted(rows, key=lambda r: (not r.rankable, -r.opportunity, -r.demand, r.keyword))
 
 
 def fmt(value: float | None, suffix: str = "") -> str:
     if value is None:
         return "–"
-    text = f"{value:+.0f}".replace("+", "+") if suffix == "%" else f"{value:.0f}"
+    text = f"{value:+.0f}" if suffix == "%" else f"{value:.0f}"
     return f"{text}{suffix}".replace(".", ",")
 
 
 def render(rows: list[Row], sources: dict[str, str], meta: dict) -> str:
-    gaps = [r for r in rows if not r.matches]
-    covered = [r for r in rows if r.matches]
+    rankable = [r for r in rows if r.rankable]
+    censored = [r for r in rows if not r.rankable]
+    gaps = [r for r in rankable if not r.matches]
+    covered = [r for r in rankable if r.matches]
 
     lines = [
         f"# Niche-produkt-scanning — {meta['date']}",
@@ -304,36 +477,73 @@ def render(rows: list[Row], sources: dict[str, str], meta: dict) -> str:
         "",
         "## Rangerede huller — efterspørgsel vi ikke dækker",
         "",
-        "| Søgeord | Kilde | Efterspørgsel | Vækst YoY | Momentum | Match i katalog | Mulighed |",
-        "| --- | --- | --- | --- | --- | --- | --- |",
+        "| Søgeord | Kilde | Efterspørgsel | Vækst YoY | Momentum | Lavsæson | Top | Match | Mulighed | Status |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
     ]
     if not gaps:
-        lines.append("| (ingen huller i dette udtræk) | | | | | | |")
+        lines.append("| (ingen huller i dette udtræk) | | | | | | | | | |")
     for row in gaps:
         lines.append(
             f"| {row.keyword} | {row.source} | {row.demand:.0f} | {fmt(row.growth_yoy, '%')} | "
-            f"{fmt(row.momentum, '%')} | 0 | **{row.opportunity:.0f}** |"
+            f"{fmt(row.momentum, '%')} | {row.season.low_text} | {row.season.peak_label or '–'} | 0 | "
+            f"**{row.opportunity:.0f}** | {row.status} |"
         )
 
     lines += [
         "",
         "## Dækket i forvejen",
         "",
-        "| Søgeord | Kilde | Efterspørgsel | Match | Mulighed |",
-        "| --- | --- | --- | --- | --- |",
+        "| Søgeord | Kilde | Efterspørgsel | Lavsæson | Match | Mulighed | Status |",
+        "| --- | --- | --- | --- | --- | --- | --- |",
     ]
     if not covered:
-        lines.append("| (ingen af søgeordene matcher kataloget) | | | | |")
+        lines.append("| (ingen af søgeordene matcher kataloget) | | | | | | |")
     for row in covered:
         names = ", ".join(row.matches[:3]) + (" …" if len(row.matches) > 3 else "")
-        lines.append(f"| {row.keyword} | {row.source} | {row.demand:.0f} | {names} | {row.opportunity:.0f} |")
+        lines.append(f"| {row.keyword} | {row.source} | {row.demand:.0f} | {row.season.low_text} | "
+                     f"{names} | {row.opportunity:.0f} | {row.status} |")
+
+    if censored:
+        lines += [
+            "",
+            "## Censurerede rækker — ikke rangeret",
+            "",
+            "Kilden rapporterer nul for hele serien. Det er censur (under tærsklen), ikke nul",
+            "efterspørgsel, og rækken indgår derfor hverken i rangeringen eller i gennemsnit.",
+            "",
+            "| Søgeord | Kilde | Nul-punkter | Status |",
+            "| --- | --- | --- | --- |",
+        ]
+        for row in censored:
+            lines.append(f"| {row.keyword} | {row.source} | {row.season.censored} | {row.status} |")
+
+    if meta.get("history"):
+        lines += [
+            "",
+            "## Kørselshistorik",
+            "",
+            f"Et søgeord skal være målt på mindst **{MIN_DAYS} dage** før rækken kaldes «Anbefalet».",
+            "",
+            "| Søgeord | Dage | Datoer |",
+            "| --- | --- | --- |",
+        ]
+        for keyword, days in sorted(meta["history"].items()):
+            lines.append(f"| {keyword} | {len(days)} | {', '.join(days)} |")
 
     lines += [
         "",
         "## Sådan læses tallene",
         "",
-        "- **Efterspørgsel** = 60 % årlig vækst + 40 % retning de seneste fire uger, hver klippet til 0-100.",
+        "- **Efterspørgsel** = 60 % årlig vækst + 40 % seneste måned, hver klippet til 0-100.",
         "  Pinterest giver *relativ* interesse (0-100 pr. søgeord), ikke absolutte søgetal.",
+        "- **Momentum** er kildens eget `mom`-felt, **ikke** udregnet af tidsserien:",
+        "  Pinterest min-max-normaliserer hver graf, så et forhold mellem to uger i serien er skævt.",
+        "  Mangler feltet (TikTok-eksporten), står rækken neutralt i efterspørgslen.",
+        "- **Lavsæson** er gennemsnittet af den nederste fjerdedel af de målte punkter — et indeks,",
+        "  ikke et søgetal. Det er lavsæsonen der afgør om en sæsonniche kan bære lager.",
+        "- **Top** er den måned serien topper i. TikTok-eksporten har ingen serie og får «–».",
+        "- **Nuller** er censur og holdes ude af gennemsnittene; en række med kun nuller rangeres ikke.",
+        f"- **Status** kræver mindst {MIN_DAYS} måledage før «Anbefalet»; ellers står rækken som «For tidlig».",
         "- **Mulighed** = efterspørgsel × (1 − dækning), hvor dækning er 0/1/2/3+ matchende produkter.",
         "  Høj mulighed betyder \"efterspurgt, men vi sælger det ikke\" — ikke \"det sælger godt\".",
         "- **Match** er søgeords-overlap mod produktnavne og -kategorier. Et ord er generisk — og tæller",
@@ -348,6 +558,7 @@ def render(rows: list[Row], sources: dict[str, str], meta: dict) -> str:
         "  på et søgeord (`/v5/search/partner/pins` er closed beta, giver top 10 og ingen gem/kommentar-tal).",
         "- **TikTok-søgning.** Display API læser kun egne videoer, Research API er forbeholdt akademiske",
         "  institutioner, og Shop API ser kun egen katalog. Creative Center-eksporten er den eneste vej.",
+        "- **Absolut volumen.** Ingen af kilderne tæller søgninger for Norden, så skala kan ikke aflæses her.",
         "",
         f"_Genereret af `tools/niche_scanner.py`. Rå data: `reports/niche-scan-{meta['date']}.json`._",
     ]
@@ -355,7 +566,8 @@ def render(rows: list[Row], sources: dict[str, str], meta: dict) -> str:
 
 
 def run(terms: list[str], region: str, trend_type: str, offline: bool,
-        tiktok_export: str | None) -> tuple[list[Row], dict[str, str], list[dict], int]:
+        tiktok_export: str | None, history: dict[str, list[str]] | None = None,
+        today: str | None = None) -> tuple[list[Row], dict[str, str], list[dict], int]:
     catalog = load_catalog(offline=offline)
     signals: list[Signal] = []
     sources: dict[str, str] = {}
@@ -369,7 +581,7 @@ def run(terms: list[str], region: str, trend_type: str, offline: bool,
     sources["TikTok Creative Center (eksport)"] = tt_status
     signals += tt
 
-    rows = score_rows(signals, catalog)
+    rows = score_rows(signals, catalog, history=history, today=today)
     exit_code = 0 if rows else 2
     return rows, sources, catalog, exit_code
 
@@ -392,34 +604,47 @@ def main(argv: list[str] | None = None) -> int:
     if not terms:
         parser.error("giv mindst ét søgeord med --seeds eller --seeds-file")
 
-    rows, sources, catalog, code = run(terms, args.region, args.trend_type, args.offline, args.tiktok_export)
-
-    meta = {"date": date.today().isoformat(), "region": args.region, "trend_type": args.trend_type,
-            "catalog_count": len(catalog), "seeds": terms}
+    today = date.today().isoformat()
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
-    md_path = out_dir / f"niche-scan-{meta['date']}.md"
-    json_path = out_dir / f"niche-scan-{meta['date']}.json"
+    history = load_history(out_dir)
+
+    rows, sources, catalog, code = run(terms, args.region, args.trend_type, args.offline,
+                                       args.tiktok_export, history=history, today=today)
+    if not rows:
+        # Uden data overskrives dagens rapport ikke, og dagen tæller ikke som måledag: en
+        # natlig kørsel der ikke kunne hente noget må ikke flytte tre-dages-gaten.
+        print("  [FEJL] ingen kilde gav data — ingen rapport skrevet, gaten er urørt", file=sys.stderr)
+        for name, status in sources.items():
+            print(f"    {name}: {status}", file=sys.stderr)
+        return code or 2
+    history = record_run(out_dir, history, [r.keyword for r in rows], today)
+
+    meta = {"date": today, "region": args.region, "trend_type": args.trend_type,
+            "catalog_count": len(catalog), "seeds": terms, "history": history}
+    md_path = out_dir / f"niche-scan-{today}.md"
+    json_path = out_dir / f"niche-scan-{today}.json"
 
     md_path.write_text(render(rows, sources, meta), encoding="utf-8")
     json_path.write_text(json.dumps({
-        "meta": meta,
+        "meta": {k: v for k, v in meta.items() if k != "history"},
         "sources": sources,
         "rows": [{"keyword": r.keyword, "source": r.source, "demand": r.demand,
                   "growth_yoy": r.growth_yoy, "momentum": r.momentum,
-                  "matches": r.matches, "opportunity": r.opportunity} for r in rows],
+                  "matches": r.matches, "opportunity": r.opportunity,
+                  "low_season": r.season.low_level, "peak_month": r.season.peak_label,
+                  "censored_points": r.season.censored, "rankable": r.rankable,
+                  "days_seen": r.days_seen, "status": r.status} for r in rows],
     }, ensure_ascii=False, indent=2), encoding="utf-8")
 
     print(f"  kilder: {sources}")
-    print(f"  søgeord: {len(rows)} · huller: {sum(1 for r in rows if not r.matches)}")
+    print(f"  søgeord: {len(rows)} · huller: {sum(1 for r in rows if r.rankable and not r.matches)}"
+          f" · censurerede: {sum(1 for r in rows if not r.rankable)}")
     for row in rows[:8]:
-        print(f"    {row.opportunity:>5.0f}  {row.source:<9} {row.keyword:<32} match={len(row.matches)}")
+        print(f"    {row.opportunity:>5.0f}  {row.source:<9} {row.keyword:<32} "
+              f"lav={row.season.low_text:<4} match={len(row.matches)}  {row.status}")
     shown = md_path.relative_to(ROOT) if md_path.is_relative_to(ROOT) else md_path
-    print(f"  skrev {shown} og {json_path.name}")
-
-    if code == 2:
-        print("  [FEJL] ingen kilde gav data — sæt PINTEREST_ACCESS_TOKEN eller giv --tiktok-export / --offline",
-              file=sys.stderr)
+    print(f"  skrev {shown}, {json_path.name} og {HISTORY_NAME}")
     return code
 
 

@@ -1,5 +1,5 @@
 # Steamgears + Warpstorm — komplet mangel-liste og udførelsesplan
-*Dato: 25/10 2026. Kilder: wiki/fuld projektlog + live-verificering af steamgears.eu samme dag.*
+«Dato: 25/10 2026. Kilder: wiki/fuld projektlog + live-verificering af steamgears.eu samme dag.»
 
 ## 1. Kontekst (til ekstern læser)
 - steamgears.eu = steampunk cosplay/merch (WooCommerce, 86 produkter: Printify tees/hoodies + AliExpress gear + ny posters-linje), genopbygget fra bunden 23/10 2026 på Simply-hosting (Extendable theme, Rank Math, GA4 via GTM, Stripe live, Complianz).
@@ -71,7 +71,7 @@
 1. **Deploy Grimdark-pakken** (klar i /workspace/warpstorm/deploy/: RUNBOOK, deploy.sh, payloads til 7 kategorier + 9 sider + 4 plugins + 17 posts, CSS v1.1) — WAF POST-quarantinen er udløbet
 2. 17/34 artikler skrevet → 17 resterende (liste + bekræftelse fra Henning)
 3. Billedvej: fal.ai tom balance; aimlapi mangler image-endpoint fra CLI — beslutning: top-up / all_images_ai / andet
-4. warpstorm.dk SSL afventer (warpstorm.online har SSL ✅)
+4. warpstorm.dk SSL afventer (warpstorm.online har SSL ✓)
 5. 35 Printify-designkoncepter indeholder tekst → text-free-regel: Printify-tekstlag i stedet for AI-tekst
 6. grimdark-site repo har deploy-filer; .wp-auth-filer må ALDRIG committes
 
