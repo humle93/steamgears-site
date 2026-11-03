@@ -120,15 +120,16 @@
     {
       "id": "seo",
       "name": "SEO-indholdsproduktion",
-      "next": "Skriv guide id 292 (men's steampunk essentials)",
-      "blocked_by": null,
+      "next": "Publicér de tre guides (292, 296, 295) — copy, FAQ og links er klar",
+      "blocked_by": "Publicering kræver WordPress-adgang: to egne fotos pr. guide, HowTo/FAQPage-schema i Rank Math og selve publish. Copy er skrevet og verificeret i repoet (tools/guide_check.py).",
       "modules": [
         {
           "id": "batch",
-          "name": "Dagens TOP 3-guides (id 292, 296, 295)",
+          "name": "Publicerede guides (id 292, 296, 295)",
           "done": 0,
           "total": 3,
-          "unit": "guides"
+          "unit": "guides",
+          "note": "copy klar 3/11; 0 publiceret — venter på fotos, schema og adgang"
         },
         {
           "id": "loop",
@@ -138,6 +139,14 @@
           "unit": "kørsler",
           "recurring": true,
           "note": "kørt 1/11"
+        },
+        {
+          "id": "copy",
+          "name": "Guide-copy klar til publicering (292, 296, 295)",
+          "done": 3,
+          "total": 3,
+          "unit": "guides",
+          "note": "skrevet og verificeret 3/11 i docs/library/guides-2026-11-03.md; 3/3 bestod tools/guide_check.py (7 selftest-fixtures)"
         }
       ]
     },
@@ -484,6 +493,15 @@
       "after": 34.1,
       "delta": 4.1,
       "basis": "8,3 af 24,35 d (P0 3,2/4 · P1 4,85/11,35 · P2 0/7 · P3 0,25/2)"
+    },
+    {
+      "date": "2026-11-03",
+      "project": "SEO-indholdsproduktion",
+      "module": "daglig måling",
+      "before": 0.0,
+      "after": 50.0,
+      "delta": 50.0,
+      "basis": "3 af 6 guides (Publicerede guides (id 292, 296, 295) 0/3 · Guide-copy klar til publicering (292, 296, 295) 3/3)"
     }
   ]
 }
