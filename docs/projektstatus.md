@@ -35,7 +35,7 @@ Status pr. **2026-11-03** · beregnet af `projektstatus.py` · kilder: [`projekt
 | Projekt | Næste skridt | Blokering |
 | --- | --- | --- |
 | steamgears.eu — site-optimering (54,5 %) | S1.1 Herbarium-varianter (kræver Printify-mapping); derefter S2.3 navigation og S4.3 valuta efter ejerbeslutning | S1.1 Herbarium kræver varianter i Printify; S0.4 5 vanity-301 kræver én Redirection-gruppe (ejer) |
-| Steamgears Autopilot — plugin (30 %) | P0.6 (kræver Command Center), derefter P1.2 "remind me instead" og P1.4 evergreen-recycling | Intet for P0. P1.5 kræver Pinterest-token (401) og Meta-review; P0.6 kræver Command Center |
+| Steamgears Autopilot — plugin (30 %) | P1.2 "remind me instead" (1,0 d), derefter P3.1/P3.2-hygiejne; P0.6 er blokeret af Command Center | 7.25.0 kan ikke installeres af agenten, fordi AI Engines Drafts Only står slået til; P1.5 kræver Pinterest-token (401) og Meta-review; P0.6 kræver Command Center; P1.4 kræver P1.5 |
 | Dark academia-rebrand (63 %) | Batch 4 — mockups (~130 billeder) | Printify-adgang |
 | SEO-indholdsproduktion (0 %) | Skriv guide id 292 (men's steampunk essentials) | ingen |
 | Døde internlinks (100 %) | Vedligehold: tjek nye indlæg mod live-URL'er | ingen |

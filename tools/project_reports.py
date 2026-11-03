@@ -2,7 +2,7 @@
 """project_reports.py — én PDF pr. projekt: status, roadmap-indeks, udviklingsvej, virker/virker ikke.
 
 Kør:  python3 tools/project_reports.py
-Ud:   reports/<projekt>-2026-11-02.pdf
+Ud:   reports/<projekt>-2026-11-03.pdf
 
 Tallene kommer fra projektstatus.json (samme kilde som den daglige status) og
 roadmap'erne i docs/roadmap.md og plugins/steamgears-autopilot/ROADMAP.md.
@@ -20,7 +20,7 @@ from fpdf import FPDF
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "reports"
-DATE = "2026-11-02"
+DATE = "2026-11-03"
 
 NAVY = (31, 42, 55)
 COPPER = (184, 115, 51)
@@ -140,22 +140,24 @@ SITE_ROADMAP = [
 ]
 
 PLUGIN_ROADMAP = [
-    ("P0.1", "Fejl-alarmering: mail ved failed + dagligt digest", "Åben", "0,5 d"),
-    ("P0.2", "\"Køen løber tør\"-alarm pr. kanal", "Åben", "0,5 d"),
-    ("P0.3", "Retry med backoff (5 min → 30 min → 2 t)", "Åben", "1,0 d"),
+    ("P0.1", "Fejl-alarmering: mail ved failed + dagligt digest", "Færdig", "0,5 d"),
+    ("P0.2", "\"Køen løber tør\"-alarm pr. kanal", "Færdig", "0,5 d"),
+    ("P0.3", "Retry med backoff (5 min → 30 min → 2 t)", "Færdig", "1,0 d"),
     ("P0.4", "Cron-honesty: Site Health-test + dokumentation", "Delvis", "0,5 d"),
-    ("P0.5", "Publish-auditlog pr. forsøg", "Åben", "1,0 d"),
+    ("P0.5", "Publish-auditlog pr. forsøg", "Færdig", "1,0 d"),
     ("P0.6", "Duplicate-guard mod Command Center", "Blokeret", "0,5 d"),
-    ("P1.1", "Pre-flight-validering pr. kanal", "Åben", "1,0 d"),
+    ("P1.1", "Pre-flight-validering pr. kanal", "Færdig", "1,0 d"),
     ("P1.2", "\"Påmind mig\" i stedet for at poste", "Åben", "1,0 d"),
-    ("P1.3", "Blackout-kalender", "Åben", "0,5 d"),
+    ("P1.3", "Blackout-kalender", "Færdig", "0,5 d"),
     ("P1.4", "Evergreen-recycling", "Blokeret", "2,5 d"),
     ("P1.5", "Platforms-analytics ind i sgap_events", "Blokeret", "4,0 d"),
-    ("P1.6", "Kvalitetsgate før kø", "Åben", "1,0 d"),
+    ("P1.6", "Kvalitetsgate før kø", "Færdig", "1,0 d"),
+    ("P1.7", "Hel-side SEO/GEO/AEO-audit", "Færdig", "1,0 d"),
+    ("P1.8", "utm_campaign som indstilling og pr. post", "Færdig", "0,25 d"),
     ("P2.1", "Bluesky direkte posting", "Åben", "1,0 d"),
     ("P2.2", "Mastodon direkte posting", "Åben", "0,5 d"),
     ("P2.3", "Telegram-kanal (også ekstra alarmkanal)", "Åben", "0,5 d"),
-    ("P2.4", "Etsy: byg OAuth eller skjul de fem felter", "Beslutning", "2,5 / 0,25 d"),
+    ("P2.4", "Etsy: byg OAuth eller skjul de fem felter", "Beslutning", "2,5 / 0,25"),
     ("P2.5", "Sprogvarianter pr. post", "Åben", "2,5 d"),
     ("P3.1", "Slet død metode + ryd de 15 ubrugte indstillinger", "Åben", "0,5 d"),
     ("P3.2", "Tests for /feed og /reposts, auth på /snapshot", "Åben", "0,5 d"),
@@ -245,33 +247,35 @@ PROJECTS = [
         "pid": "plugin",
         "slug": "autopilot-plugin",
         "name": "Steamgears Autopilot — plugin",
-        "kicker": "Roadmap P0–P3 · 23,0 developer-dage · v7.15.1",
+        "kicker": "Roadmap P0–P3 · 24,35 developer-dage · live 7.22.0 · repo 7.25.0",
         "intro": "Social autopilot som WordPress-plugin: AI-udkast, kø, publicering via Publer, "
-                 "klik-tracking og ROI. 6.273 PHP-linjer i 15 filer, 20 af 21 subsystemer live.",
+                 "klik-tracking og ROI. 8.464 PHP-linjer i 22 filer, 20 af 21 subsystemer live.",
         "roadmap": PLUGIN_ROADMAP,
-        "roadmap_note": "P0 = reliability og må komme først. P1.5 og P0.6 er eksternt blokeret "
-                        "(Pinterest-token, Meta-review, Command Center).",
+        "roadmap_note": "P0 er shippet i 7.16–7.18. Det næste er P1.2 og P3-hygiejne; P1.5 og P0.6 er "
+                        "eksternt blokeret (Pinterest-token, Meta-review, Command Center).",
         "path": [
-            ("1", "P0.1 Fejl-alarmering (wp_mail findes allerede ét sted)", "0,5 d", "Ingen", "Agent"),
-            ("2", "P0.2 Kø-udtørrings-alarm i samme digest", "0,5 d", "P0.1", "Agent"),
-            ("3", "P0.3 Retry med backoff + dead-letter-liste", "1,0 d", "Ingen", "Agent"),
-            ("4", "P0.5 Publish-auditlog bag en Log-fane", "1,0 d", "Ingen", "Agent"),
-            ("5", "P0.4 resten: Site Health-test + docs", "0,3 d", "Detektion findes", "Agent"),
-            ("6", "P3.1 Slet død metode + skjul 15 ubrugte indstillinger", "0,5 d", "Ejer-beslutning", "Agent"),
-            ("7", "P1.1 Pre-flight-validering pr. kanal", "1,0 d", "P0.1 hjælper", "Agent"),
-            ("8", "P1.3 Blackout-kalender + P2.3 Telegram", "1,0 d", "Ingen", "Agent"),
+            ("1", "P1.2 \"Påmind mig\" i stedet for at poste", "1,0 d", "Ingen", "Agent"),
+            ("2", "P3.1 Slet død metode + skjul 15 ubrugte indstillinger", "0,5 d", "Ejer-beslutning", "Agent"),
+            ("3", "P3.2 Tests for /feed og /reposts, auth på /snapshot", "0,5 d", "Ingen", "Agent"),
+            ("4", "P3.4 Release notes i update-modalen", "0,5 d", "Ingen", "Agent"),
+            ("5", "P3.5 Verificér at uninstall rydder alt", "0,25 d", "Ingen", "Agent"),
+            ("6", "P0.6 Duplicate-guard mod Command Center", "0,5 d", "Command Center", "Ejer"),
+            ("7", "P2.4 Etsy: byg OAuth eller skjul de fem felter", "0,25 d", "Ejer-beslutning", "Ejer"),
+            ("8", "P1.4 Evergreen-recycling", "2,5 d", "P1.5-analytics", "Agent"),
         ],
         "works": [
             "Hele kæden virker: generér → godkend → publicér (RSS eller Publer API) → mål.",
             "20 af 21 subsystemer er live og nået fra cron, REST, admin, ability eller AJAX.",
-            "Self-updateren virker: zip i repoet er byte-identisk med kilden til 7.15.1.",
+            "Self-updateren virker: 7.25.0-zippen er byte-identisk med kilden (22 filer, 0 afvigelser).",
             "Klik-tracking via /go/<id>/ med cookie og WooCommerce-attribution.",
-            "904 linjer tests; CI grøn på PHP 8.0–8.5 og WP 6.4/7.1/latest.",
+            "1.217 linjer tests i 6 filer; CI grøn på PHP 8.0–8.5 og WP 6.4/7.1/latest.",
             "9 AJAX- og 5 admin_post-handlere har capability + nonce.",
             "uninstall.php fjerner 8 tabeller, alle sgap_% options/transients og 9 cron-hooks.",
             "RSS-feeden er cache-sikker: query-streng, DONOTCACHEPAGE, purge pr. kanal, ETag/304.",
         ],
         "fails": [
+            "Opdateringen til 7.25.0 kan ikke køres af agenten: AI Engines «Drafts Only» står slået til i databasen,"
+            " og dens gate afviser også wp_update_option. Kræver ejerens Update-klik under Plugins.",
             "Ingen fejl-mail: hele pluginnet har præcis ét wp_mail-kald (ugerapporten).",
             "Ingen backoff: tre forsøg samme dag kan alle brænde under én udfaldstime.",
             "Ingen auditlog — kun en error-tekst pr. kø-element.",
