@@ -78,10 +78,10 @@
         {
           "id": "p2",
           "name": "P2 — kanaler",
-          "done": 2.0,
+          "done": 4.5,
           "total": 7.0,
           "unit": "d",
-          "note": "2 af 5: Bluesky (P2.1) i 7.29.0 og Mastodon + Telegram (P2.2/P2.3) i 7.30.0; Etsy (P2.4) og multi-sprog (P2.5) ikke afgjort"
+          "note": "3 af 5: Bluesky (P2.1) i 7.29.0, Mastodon + Telegram (P2.2/P2.3) i 7.30.0 og multi-sprog (P2.5) i 7.31.0 (includes/locales.php, 35 smoke-checks); Etsy (P2.4) ikke afgjort og venter på ejeren"
         },
         {
           "id": "p3",
@@ -585,6 +585,15 @@
       "after": 45.4,
       "delta": 4.1,
       "basis": "11,05 af 24,35 d (P0 3,2/4 · P1 4,85/11,35 · P2 2/7 · P3 1/2)"
+    },
+    {
+      "date": "2026-11-03",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 45.4,
+      "after": 55.6,
+      "delta": 10.2,
+      "basis": "13,55 af 24,35 d (P0 3,2/4 · P1 4,85/11,35 · P2 4,5/7 · P3 1/2)"
     }
   ]
 }

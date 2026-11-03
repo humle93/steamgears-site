@@ -307,6 +307,23 @@ Telegram answers **HTTP 200 with `{"ok": false}`** when it refuses a message, so
 anything else and reports `description` as the error — a refusal never looks like a published post. The limit is
 4096 characters, trimmed the same way as the others, and the bot token never appears in an error message.
 
+## Multi-language variants
+
+One source post can carry a caption per language. Under **Settings → AI content**, set the language the posts
+are written in (*Source language*, default `en`) and the languages you want (*Languages*, e.g. `da,sv,de`).
+When the list is not empty, every post that enters the queue also queues one translated caption per language.
+
+The translated page comes from **WPML or Polylang** — the plugin never guesses a URL. A language only gets a
+variant when the post has a translation in that language, and the variant points at that translation instead
+of the original. The caption is translated by the configured model through the same HTTP API as the rest of
+the plugin, and the `sgap_locale_translator` filter can hand that job to DeepL or to a human instead.
+
+Nothing is dropped silently: a language without a translated page, without an AI key, with an API error or
+with an empty answer is reported back in `locale_errors` on the queue result, while the source post stays
+queued. Variants are ordinary queue rows — same channel, angle, format, image, quality gate and blackout
+rules — carrying their language and the id of the post they came from, and a variant never spawns variants
+of its own.
+
 ## Updates
 
 From 7.6 the plugin updates itself from GitHub (`humle93/steamgears-site`, branch `main`):
@@ -322,7 +339,7 @@ before it, because the MCP surface can read plugins but cannot install or activa
 1. Bump `Version:` in `steamgears-autopilot.php` and `SGAP_VERSION` — they must agree, CI fails otherwise.
 2. Rebuild the zip from the folder so the name and the contents match:
    `cd plugins && rm -f steamgears-autopilot-*.zip && zip -qr steamgears-autopilot-v<version>.zip steamgears-autopilot`
-3. `php plugins/tests/smoke.php` (364 checks) and `diff -r` the zipped copy against the source. CI repeats
+3. `php plugins/tests/smoke.php` (399 checks) and `diff -r` the zipped copy against the source. CI repeats
    both, plus `php -l` on PHP 8.0–8.5 and WordPress 6.4 / 7.1 / latest.
 4. Commit code, zip, README and `ROADMAP.md` together and push to `main`.
 5. **Click *Plugins → Update*** (or *Dashboard → Updates*). Auto-updates can be switched on in the same

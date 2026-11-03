@@ -7,7 +7,7 @@
 define('ABSPATH', __DIR__.'/fixtures/'); define('DAY_IN_SECONDS',86400); define('HOUR_IN_SECONDS',3600); define('MINUTE_IN_SECONDS',60); define('ARRAY_A','ARRAY_A');
 $GLOBALS['actions']=[]; $opts=[]; $settings=[];
 function add_action($h,$cb){ $GLOBALS['actions'][$h][]=$cb; } function add_filter($h,$cb){ $GLOBALS['actions'][$h][]=$cb; }
-function apply_filters($h,$v){return $v;}
+function apply_filters($h,$v,...$a){return isset($GLOBALS['filters'][$h])?($GLOBALS['filters'][$h])($v,...$a):$v;}
 function do_action($h,...$a){ foreach($GLOBALS['actions'][$h]??[] as $cb) call_user_func_array($cb,$a); }
 function register_activation_hook(...$a){} function register_deactivation_hook(...$a){}
 function is_admin(){return true;} function get_option($k,$d=false){return $GLOBALS['opts'][$k]??$d;}
@@ -17,7 +17,7 @@ function add_menu_page($t,$m,$c,$slug,$cb){ add_action('page_'.$slug,$cb);} func
 function esc_html($s){return htmlspecialchars((string)$s);} function esc_attr($s){return htmlspecialchars((string)$s);} function esc_url($s){return $s;} function esc_textarea($s){return htmlspecialchars((string)$s);}
 function get_transient($k){return false;} function set_transient(...$a){} function delete_transient($k){} function settings_fields($g){} function submit_button(){}
 function admin_url($p=''){return '/wp-admin/'.$p;} function rest_url($p=''){return '/wp-json/'.$p;} function home_url($p=''){return 'https://steamgears.eu'.$p;}
-function get_bloginfo($k=''){return 'Steamgears';} function wp_timezone_string(){return 'UTC';} function get_the_title($id){return 'Post '.$id;} function get_permalink($id){return 'https://steamgears.eu/?p='.$id;} function has_post_thumbnail($id){return false;}
+function get_bloginfo($k=''){return 'Steamgears';} function wp_timezone_string(){return 'UTC';} function get_the_title($id){return 'Post '.$id;} function get_permalink($id){return 'https://steamgears.eu/?p='.$id;} function has_post_thumbnail($id){return false;} function get_post_type($id){return 'post';} function pll_get_post($id,$locale=''){return (int)($GLOBALS['pll_map'][$locale]??0);}
 function get_posts($a=[]){ $r=$GLOBALS['posts_result']??[]; return array_slice($r,0,(int)($a['numberposts']??(count($r)?:1))); } function post_type_exists($t){return in_array($t,['post','page'],true);} function get_post($id){return null;} function get_user_meta($u,$k,$s=false){return '';} function update_user_meta($u,$k,$v){return true;} function get_edit_post_link($id,$c=''){return '/edit/'.$id;} function get_preview_post_link($id){return '/preview/'.$id;}
 function wp_nonce_field(...$a){return '';} function wp_create_nonce($a=''){return 'n';} function selected($a,$b,$e){return $a===$b?' selected':'';} function checked($a,$b=true,$e=true){return $a===$b?' checked':'';}
 function sanitize_text_field($s){return trim(strip_tags((string)$s));} function sanitize_textarea_field($s){return trim(strip_tags((string)$s));}
@@ -794,6 +794,90 @@ $pubsrc2=file_get_contents(__DIR__.'/../steamgears-autopilot/includes/publer.php
 check('mastodon: routed through the same publish loop', str_contains($pubsrc2,'SGAP_Mastodon::handles(') && str_contains($pubsrc2,'SGAP_Mastodon::publish($row)'));
 check('telegram: routed through the same publish loop', str_contains($pubsrc2,'SGAP_Telegram::handles(') && str_contains($pubsrc2,'SGAP_Telegram::publish($row)'));
 check('direct channels: all three are marked published at once, not polled', str_contains($pubsrc2, "'bluesky' => 'Bluesky post '") && str_contains($pubsrc2, "'mastodon' => 'Mastodon post '") && str_contains($pubsrc2, "'telegram' => 'Telegram message '"));
+
+// ---------------- P2.5: multi-sprog — én kilde-post, én caption pr. locale ----------------
+$GLOBALS['opts']['sgap_locale_source']='en'; $GLOBALS['opts']['sgap_locales']='da, SV ,da,xx1';
+check('locales: the list is normalised, de-duplicated and validated', SGAP_Locales::locales()===['da','sv']);
+check('locales: enabled when a language differs from the source', SGAP_Locales::enabled());
+$GLOBALS['opts']['sgap_locales']='en';
+check('locales: the source language never gets a variant', SGAP_Locales::locales()===[] && !SGAP_Locales::enabled());
+check('locales: saving the list normalises it', SGAP_Settings::sanitize_locales('DA, sv ,da')==='da,sv');
+check('locales: a nonsense source falls back to en', SGAP_Settings::sanitize_locale_code('nope')==='en');
+$GLOBALS['opts']['sgap_locale_source']=''; $GLOBALS['opts']['sgap_locales']='da';
+check('locales: an empty source counts as en', SGAP_Locales::source()==='en' && SGAP_Locales::enabled());
+$GLOBALS['opts']['sgap_locale_source']='en'; $GLOBALS['opts']['sgap_locales']='da,sv,de,fr,es,it,pl,nl';
+check('locales: at most six languages per post', count(SGAP_Locales::locales())===6);
+check('locales: the settings page shows both fields with help', isset(SGAP_Settings::HELP['locales']) && in_array('locales', SGAP_Settings::SECTIONS['AI content'], true) && in_array('locale_source', SGAP_Settings::TEXT_KEYS, true));
+$GLOBALS['opts']['sgap_locales']='da,sv';
+
+// Oversat side: uden en oversættelse laves ingen variant — og fejlen siges højt.
+$row_l = ['post_id'=>42,'channel'=>'pinterest','angle'=>'angle_a','content_type'=>'product','format'=>'pin','title'=>'Brass goggles','body'=>'Look sharp.','image_url'=>'https://x/y.jpg'];
+$GLOBALS['pll_map']=[]; $GLOBALS['translated']=[];
+$exp = SGAP_Locales::expand($row_l, 100, function($r,$l){ $GLOBALS['translated'][]=$l; return ['title'=>'T','body'=>'B']; });
+check('locales: a language without a translated page is an error, not a variant', $exp['items']===[] && count($exp['errors'])===2);
+check('locales: the error names the language and the reason', ($exp['errors'][0]['locale']??'')==='da' && str_contains($exp['errors'][0]['error'],'no translated page'));
+check('locales: nothing is translated when the page has no translation', $GLOBALS['translated']===[]);
+
+$GLOBALS['pll_map']=['da'=>421,'sv'=>422]; $GLOBALS['translated']=[];
+$exp = SGAP_Locales::expand($row_l, 100, function($r,$l){ $GLOBALS['translated'][]=$l; return ['title'=>'Titel ' . $l,'body'=>'Body ' . $l]; });
+check('locales: one variant per language', count($exp['items'])===2 && $exp['items'][0]['locale']==='da' && $exp['items'][1]['locale']==='sv');
+check('locales: each variant points at its own translated page', $exp['items'][0]['destination_url']==='https://steamgears.eu/?p=421' && $exp['items'][1]['destination_url']==='https://steamgears.eu/?p=422');
+check('locales: the variant keeps channel, angle, format and image', $exp['items'][0]['channel']==='pinterest' && $exp['items'][0]['angle']==='angle_a' && $exp['items'][0]['format']==='pin' && $exp['items'][0]['image_url']==='https://x/y.jpg');
+check('locales: the variant knows its source post and queue id', $exp['items'][0]['post_id']===42 && $exp['items'][0]['source_id']===100);
+check('locales: the caption is the translated one', $exp['items'][0]['title']==='Titel da' && $exp['items'][0]['body']==='Body da');
+check('locales: every language is translated once', $GLOBALS['translated']===['da','sv']);
+
+$exp = SGAP_Locales::expand($row_l, 100, fn()=>new WP_Error('sgap_ai','The model refused'));
+check('locales: a translator failure is reported per language', $exp['items']===[] && str_contains($exp['errors'][0]['error'],'The model refused'));
+$exp = SGAP_Locales::expand($row_l, 100, fn()=>['title'=>'','body'=>'']);
+check('locales: an empty translation is an error, not an empty post', $exp['items']===[] && str_contains($exp['errors'][0]['error'],'empty'));
+$exp = SGAP_Locales::expand($row_l, 100, fn()=>'not a caption');
+check('locales: a non-caption answer is an error', $exp['items']===[] && str_contains($exp['errors'][0]['error'],'not a caption'));
+
+// AI-stien: alle kald gennem WordPress-HTTP-API'et, så den kan stubbes.
+$GLOBALS['opts']['sgap_ai_provider']='anthropic'; $GLOBALS['opts']['sgap_ai_api_key']=''; $GLOBALS['http_calls']=[];
+$exp = SGAP_Locales::expand($row_l, 100);
+check('locales: a missing AI key is an error, not a PHP warning', $exp['items']===[] && count($exp['errors'])===2 && str_contains($exp['errors'][0]['error'],'AI API key'));
+check('locales: no HTTP call without a key', $GLOBALS['http_calls']===[]);
+$GLOBALS['opts']['sgap_ai_api_key']='k'; $GLOBALS['http_calls']=[];
+$GLOBALS['http_queue']=[sgap_http(200,['content'=>[['type'=>'text','text'=>'{"title":"Messingbrille","body":"Se skarp ud."}']]])];
+$t = SGAP_Locales::ai_translate($row_l,'da');
+check('locales: a translated caption is read from the model answer', is_array($t) && $t['title']==='Messingbrille' && $t['body']==='Se skarp ud.');
+check('locales: the translation is exactly one stubbed HTTP call', count($GLOBALS['http_calls'])===1);
+$GLOBALS['http_queue']=[sgap_http(500,['error'=>['message'=>'upstream is down']]),sgap_http(500,['error'=>['message'=>'upstream is down']])];
+$exp = SGAP_Locales::expand($row_l, 100);
+check('locales: an API error is reported per language', $exp['items']===[] && str_contains($exp['errors'][0]['error'],'upstream is down'));
+$GLOBALS['http_queue']=[sgap_http(200,['content'=>[['type'=>'text','text'=>'not json']]]),sgap_http(200,['content'=>[['type'=>'text','text'=>'not json']]])];
+$exp = SGAP_Locales::expand($row_l, 100);
+check('locales: a non-JSON model answer is an error', $exp['items']===[] && count($exp['errors'])===2);
+
+// Køen: kilden lægger varianterne i køen, og en variant arver ikke videre.
+$GLOBALS['opts']['sgap_quality_gate']='off'; $GLOBALS['opts']['sgap_full_auto_enabled']='no'; $wpdb->next=null;
+$GLOBALS['filters']['sgap_locale_translator']=fn($d)=>fn($r,$l)=>['title'=>'Titel ' . $l,'body'=>'Body ' . $l];
+$wpdb->log=[];
+$q = SGAP_Queue::add(['channel'=>'facebook','title'=>'Brass goggles','destination_url'=>'https://steamgears.eu/p/','post_id'=>42,'body'=>'A body long enough to pass.']);
+$log = implode("\n", $wpdb->log);
+check('locales: queueing a post also queues one variant per language', is_array($q) && count($q['locales'])===2 && $q['locale_errors']===[]);
+check('locales: the variants are separate queue rows with their own language', substr_count($log,'INSERT wp_sgap_queue')===3 && str_contains($log,'"locale":"da"') && str_contains($log,'"locale":"sv"'));
+check('locales: a variant carries the id of the post it came from', str_contains($log,'"source_id":42'));
+
+$GLOBALS['filters']['sgap_locale_translator']=fn($d)=>fn()=>new WP_Error('sgap_ai','no answer');
+$q = SGAP_Queue::add(['channel'=>'facebook','title'=>'Brass goggles','destination_url'=>'https://steamgears.eu/p/2/','post_id'=>42,'body'=>'A body long enough to pass.']);
+check('locales: the source post is still queued when a translation fails', is_array($q) && $q['id']>0 && count($q['locale_errors'])===2 && $q['locales']===[]);
+check('locales: the failed language is named in the result', ($q['locale_errors'][0]['locale']??'')==='da');
+
+$wpdb->log=[];
+SGAP_Queue::add(['channel'=>'facebook','title'=>'T','destination_url'=>'https://steamgears.eu/p/3/','post_id'=>42,'body'=>'A body long enough to pass.','locale'=>'da','source_id'=>100]);
+check('locales: a variant never spawns variants of its own', substr_count(implode("\n",$wpdb->log),'INSERT wp_sgap_queue')===1);
+
+$GLOBALS['opts']['sgap_locales']=''; $wpdb->log=[];
+$q = SGAP_Queue::add(['channel'=>'facebook','title'=>'Brass goggles','destination_url'=>'https://steamgears.eu/p/4/','body'=>'A body long enough to pass.']);
+check('locales: with no languages the queue behaves as before', is_array($q) && $q['locales']===[] && $q['locale_errors']===[] && substr_count(implode("\n",$wpdb->log),'INSERT wp_sgap_queue')===1);
+unset($GLOBALS['filters']['sgap_locale_translator']);
+
+$core_src = file_get_contents(__DIR__.'/../steamgears-autopilot/includes/core.php');
+check('locales: the queue table stores language and source id', str_contains($core_src,'locale VARCHAR(10)') && str_contains($core_src,'source_id BIGINT UNSIGNED'));
+check('locales: every caption is translated through the AI module', str_contains(file_get_contents(__DIR__.'/../steamgears-autopilot/includes/locales.php'),'SGAP_AI::json_call('));
 
 // P3.2/P3.5-slut
 exit(empty($GLOBALS['fail'])?0:1);

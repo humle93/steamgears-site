@@ -45,6 +45,8 @@ class SGAP_Install {
         'sgap_repost_max' => 3,
         'sgap_posts_per_day' => 2,
         'sgap_channels' => 'facebook,instagram,pinterest',
+        'sgap_locale_source' => 'en',
+        'sgap_locales' => '',
         'sgap_bluesky_handle' => '',
         'sgap_bluesky_app_password' => '',
         'sgap_mastodon_instance' => '',
@@ -124,6 +126,8 @@ class SGAP_Install {
         content_type VARCHAR(40) NOT NULL DEFAULT 'product',
         format VARCHAR(40) NOT NULL DEFAULT 'pin',
         remind TINYINT(1) NOT NULL DEFAULT 0,
+        locale VARCHAR(10) NOT NULL DEFAULT '',
+        source_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
         destination_url TEXT NOT NULL,
         title TEXT NOT NULL,
         body LONGTEXT NULL,
@@ -144,7 +148,8 @@ class SGAP_Install {
         KEY status_scheduled (status,scheduled_at),
         KEY status_sent (status,sent_at),
         KEY published_at (published_at),
-        KEY fingerprint (fingerprint)
+        KEY fingerprint (fingerprint),
+        KEY source_locale (source_id,locale)
         ) $charset;");
 
         dbDelta("CREATE TABLE {$wpdb->prefix}sgap_events (
@@ -329,7 +334,8 @@ class SGAP_Settings {
         'publer_workspace_id','publer_pinterest_board','channels','ai_model','ai_base_url','image_model','content_language','rescue_hosts',
         'telegram_chat_id','email_test_recipient','youtube_channel_id','reddit_username',
         'reddit_subreddit','etsy_shop_id','etsy_shipping_profile_id','etsy_return_policy_id','ai_mode','alert_email',
-        'blackout_ranges','banned_words','utm_campaign','bluesky_handle','mastodon_instance'
+        'blackout_ranges','banned_words','utm_campaign','bluesky_handle','mastodon_instance',
+        'locale_source','locales'
     ];
     /** Settings with a fixed list of values, shown as a select. */
     const CHOICE_KEYS = [
@@ -343,7 +349,7 @@ class SGAP_Settings {
     const SECTIONS = [
         'General' => ['autopilot_enabled','full_auto_enabled','daily_cap','batch_size','quiet_start','quiet_end','blackout_ranges','quality_gate','banned_words','utm_campaign'],
         'Publer' => ['publish_mode','publer_api_key','publer_workspace_id','publer_pinterest_board','channels','bluesky_handle','bluesky_app_password','mastodon_instance','mastodon_token','mastodon_limit','telegram_bot_token','telegram_chat_id'],
-        'AI content' => ['ai_provider','ai_api_key','ai_model','ai_base_url','posts_per_day','content_language','image_model','image_api_key','serpapi_key'],
+        'AI content' => ['ai_provider','ai_api_key','ai_model','ai_base_url','posts_per_day','content_language','locale_source','locales','image_model','image_api_key','serpapi_key'],
         'Economics' => ['labor_rate','monthly_budget','target_roi','winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max'],
         'Alerts and log' => ['alert_mode','alert_email','alert_dry_days','audit_keep_days'],
         'Etsy' => ['etsy_shop_id','etsy_oauth_token','etsy_refresh_token','etsy_shipping_profile_id','etsy_return_policy_id'],
@@ -351,6 +357,8 @@ class SGAP_Settings {
     ];
 
     const HELP = [
+        'locale_source' => 'The language the source posts are written in. Every other language in the list gets its own translated caption.',
+        'locales' => 'Comma-separated languages, e.g. da,sv,de. A queued post also queues one translated caption per language, linking to that language\'s version of the page (WPML or Polylang). Languages without a translated page are reported, not posted. Needs an AI API key.',
         'autopilot_enabled' => 'Master switch: generate posts daily and publish the queue via Publer.',
         'full_auto_enabled' => 'On: AI posts go straight to the queue. Off: they wait under AI Drafts for your approval.',
         'publish_mode' => 'RSS: posts are released into one feed per channel; in Publer add each feed (Explore → RSS Feeds) and set it to Auto-post. API: posts are sent straight to Publer (needs a Business plan API key).',
@@ -444,6 +452,8 @@ class SGAP_Settings {
                 'sanitize_callback' => match (true) {
                     // A campaign name ends up in a URL: strip everything a query
                     // string would have to encode, and never save an empty one.
+                    $key === 'locales' => [__CLASS__, 'sanitize_locales'],
+                    $key === 'locale_source' => [__CLASS__, 'sanitize_locale_code'],
                     $key === 'utm_campaign' => [__CLASS__, 'sanitize_campaign'],
                     // sanitize_text_field would flatten the newlines that separate the
                     // blackout ranges, leaving only the first range saved.
@@ -472,6 +482,15 @@ class SGAP_Settings {
                 }
             ]);
         }
+    }
+    /** 'DA, sv ,da' becomes 'da,sv': no junk, no duplicates, never the source language. */
+    public static function sanitize_locales($value): string {
+        return implode(',', SGAP_Locales::codes((string) $value));
+    }
+
+    /** A language code, or the source language when the value is not one. */
+    public static function sanitize_locale_code($value): string {
+        return SGAP_Locales::code((string) $value, SGAP_Locales::DEFAULT_SOURCE);
     }
 }
 
@@ -730,6 +749,10 @@ class SGAP_Queue {
         // Per-post campaign: a twelve-post campaign can be told apart from the
         // evergreen stream in GA4 without changing the setting for everything else.
         $campaign = self::key($item['campaign'] ?? '', '', 60);
+        // P2.5: a variant knows its language and the queued post it was made from,
+        // so a translated caption never looks like an independent post.
+        $locale = self::key($item['locale'] ?? '', '', 10);
+        $source_id = absint($item['source_id'] ?? 0);
         if (SGAP_Settings::enabled('full_auto_enabled') && self::suppressed($channel, $angle, $content_type, $format)) {
             return new WP_Error('sgap_suppressed', 'Combination is currently suppressed.', ['status' => 422]);
         }
@@ -755,6 +778,8 @@ class SGAP_Queue {
             'format' => $format,
             // P1.2: hand this one to the owner instead of trying to post a format the API rejects.
             'remind' => !empty($item['remind']) ? 1 : 0,
+            'locale' => $locale,
+            'source_id' => $source_id,
             'destination_url' => $destination,
             'title' => $title,
             'body' => sanitize_textarea_field((string) ($item['body'] ?? '')),
@@ -787,7 +812,24 @@ class SGAP_Queue {
         foreach ($gate['problems'] as $problem) {
             $warnings[] = (string) ($problem['message'] ?? '');
         }
-        return ['id' => $id, 'tracking_url' => SGAP_Tracking::url($id), 'utm_url' => $row['utm_url'], 'warnings' => array_values(array_filter($warnings)), 'scheduled_at' => $scheduled, 'remind' => (int) $row['remind']];
+        // P2.5: the source post also queues one translated caption per locale. A variant
+        // never expands again (source_id is set), and a language that cannot be translated
+        // is reported here instead of vanishing: the source post stays queued.
+        $variants = [];
+        $locale_errors = [];
+        if ($source_id === 0 && SGAP_Locales::enabled()) {
+            $expanded = SGAP_Locales::expand($row, $id);
+            foreach ($expanded['items'] as $variant) {
+                $created = self::add($variant);
+                if (is_wp_error($created)) {
+                    $locale_errors[] = ['locale' => $variant['locale'], 'error' => $created->get_error_message()];
+                    continue;
+                }
+                $variants[] = ['locale' => $variant['locale'], 'id' => (int) $created['id']];
+            }
+            $locale_errors = array_merge($locale_errors, $expanded['errors']);
+        }
+        return ['id' => $id, 'tracking_url' => SGAP_Tracking::url($id), 'utm_url' => $row['utm_url'], 'warnings' => array_values(array_filter($warnings)), 'scheduled_at' => $scheduled, 'remind' => (int) $row['remind'], 'locales' => $variants, 'locale_errors' => $locale_errors];
     }
 
     /** True when Full Auto has blocked this channel/angle/type/format combination. */
