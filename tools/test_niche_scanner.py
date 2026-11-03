@@ -6,10 +6,12 @@
 
 from __future__ import annotations
 
+import base64
 import json
 import sys
 import tempfile
 import unittest
+import urllib.error
 from pathlib import Path
 from unittest import mock
 
@@ -267,6 +269,137 @@ class RenderTests(unittest.TestCase):
         report = ns.render(self.rows, self.sources, self.meta({"herbarium art": ["2026-11-03"]}))
         self.assertIn("## Kørselshistorik", report)
         self.assertIn("| herbarium art | 1 | 2026-11-03 |", report)
+
+
+class FakeResponse:
+    """Det eneste urlopen-svaret bruges til: read() af JSON og brug som context manager."""
+
+    def __init__(self, payload: dict):
+        self._body = json.dumps(payload).encode("utf-8")
+
+    def read(self) -> bytes:
+        return self._body
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+
+class TokenRefreshTests(unittest.TestCase):
+    def test_refresh_uses_basic_auth_and_form_body(self):
+        sent = {}
+
+        def fake_urlopen(req, timeout=None):
+            sent["req"] = req
+            return FakeResponse({"access_token": "at-2", "refresh_token": "rt-2",
+                                 "expires_in": 2592000})
+
+        with mock.patch.object(ns.urllib.request, "urlopen", fake_urlopen):
+            tokens = ns.refresh_pinterest_token("rt-1", "cid", "hemmelig")
+
+        self.assertEqual(tokens["access_token"], "at-2")
+        req = sent["req"]
+        self.assertEqual(req.get_method(), "POST")
+        basic = base64.b64encode(b"cid:hemmelig").decode("ascii")
+        self.assertEqual(req.get_header("Authorization"), f"Basic {basic}")
+        self.assertEqual(req.get_header("Content-type"), "application/x-www-form-urlencoded")
+        self.assertEqual(req.data, b"grant_type=refresh_token&refresh_token=rt-1")
+
+    def test_response_without_access_token_is_an_error(self):
+        with mock.patch.object(ns.urllib.request, "urlopen",
+                               lambda req, timeout=None: FakeResponse({"error": "invalid_grant"})):
+            with self.assertRaises(RuntimeError):
+                ns.refresh_pinterest_token("rt-1", "cid", "hemmelig")
+
+    def test_refresher_needs_all_parts_and_a_place_to_store(self):
+        env = {"PINTEREST_CLIENT_ID": "cid", "PINTEREST_CLIENT_SECRET": "hemmelig",
+               "PINTEREST_REFRESH_TOKEN": "rt-1"}
+        self.assertIsNone(ns.pinterest_refresher(None, env))  # intet sted at gemme det nye token
+        self.assertIsNotNone(ns.pinterest_refresher(Path("/tmp/tokens.json"), env))
+        for missing in ("PINTEREST_CLIENT_ID", "PINTEREST_CLIENT_SECRET", "PINTEREST_REFRESH_TOKEN"):
+            part = dict(env)
+            part.pop(missing)
+            self.assertIsNone(ns.pinterest_refresher(Path("/tmp/tokens.json"), part), missing)
+
+    def test_refresher_stores_rotated_token_before_returning(self):
+        seen = []
+
+        def fake_refresh(refresh_token, client_id, client_secret, token_url=ns.PINTEREST_TOKEN_URL):
+            seen.append(refresh_token)
+            return {"access_token": f"at-{len(seen)}", "refresh_token": f"rt-{len(seen) + 1}"}
+
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "tokens.json"
+            refresh = ns.pinterest_refresher(out, {"PINTEREST_CLIENT_ID": "cid",
+                                                   "PINTEREST_CLIENT_SECRET": "hemmelig",
+                                                   "PINTEREST_REFRESH_TOKEN": "rt-1"})
+            with mock.patch.object(ns, "refresh_pinterest_token", fake_refresh):
+                self.assertEqual(refresh(), "at-1")
+                saved = json.loads(out.read_text(encoding="utf-8"))
+                self.assertEqual(saved["access_token"], "at-1")
+                self.assertEqual(saved["refresh_token"], "rt-2")
+                self.assertEqual(out.stat().st_mode & 0o777, 0o600)
+                self.assertEqual(refresh(), "at-2")  # næste kørsel bruger det roterede token
+            self.assertEqual(seen, ["rt-1", "rt-2"])
+
+    def test_401_refreshes_once_and_retries(self):
+        calls = []
+
+        def fake_fetch(url, token):
+            calls.append(token)
+            if token == "gammelt":
+                raise urllib.error.HTTPError(url, 401, "Unauthorized", {}, None)
+            return {"items": [{"keyword": "herbarium print", "pct_growth_yoy": 120}]}
+
+        with mock.patch.object(ns, "_fetch_trends", fake_fetch):
+            signals, status = ns.pinterest_signals(["herbarium print"], "SE+DK+FI+NO", "seasonal",
+                                                   token="gammelt", refresh=lambda: "nyt")
+        self.assertEqual([s.keyword for s in signals], ["herbarium print"])
+        self.assertIn("fornyet", status)
+        self.assertEqual(calls, ["gammelt", "nyt"])
+
+    def test_403_is_not_an_expired_token(self):
+        refreshed = []
+
+        def fake_fetch(url, token):
+            raise urllib.error.HTTPError(url, 403, "Forbidden", {}, None)
+
+        with mock.patch.object(ns, "_fetch_trends", fake_fetch):
+            signals, status = ns.pinterest_signals(["x"], "SE+DK+FI+NO", "seasonal", token="t",
+                                                   refresh=lambda: refreshed.append(1) or "nyt")
+        self.assertEqual(signals, [])
+        self.assertIn("403", status)
+        self.assertEqual(refreshed, [], "en 403 er manglende adgang — fornyelse ville brændes forgæves")
+
+    def test_failed_refresh_is_reported_not_raised(self):
+        def fake_fetch(url, token):
+            raise urllib.error.HTTPError(url, 401, "Unauthorized", {}, None)
+
+        def broken():
+            raise urllib.error.HTTPError(ns.PINTEREST_TOKEN_URL, 400, "Bad Request", {}, None)
+
+        with mock.patch.object(ns, "_fetch_trends", fake_fetch):
+            signals, status = ns.pinterest_signals(["x"], "SE+DK+FI+NO", "seasonal",
+                                                   token="t", refresh=broken)
+        self.assertEqual(signals, [])
+        self.assertIn("fornyelsen fejlede", status)
+        self.assertIn("PINTEREST_REFRESH_TOKEN", status)
+
+    def test_refresh_token_can_bootstrap_a_missing_access_token(self):
+        fetched = []
+
+        def fake_fetch(url, token):
+            fetched.append(token)
+            return {"items": [{"keyword": "herbarium print"}]}
+
+        with mock.patch.object(ns, "_fetch_trends", fake_fetch):
+            signals, status = ns.pinterest_signals(["x"], "SE+DK+FI+NO", "seasonal", token=None,
+                                                   refresh=lambda: "frisk")
+        self.assertEqual([s.keyword for s in signals], ["herbarium print"])
+        self.assertEqual(fetched, ["frisk"])
+        self.assertIn("hentet med refresh-token", status)
 
 
 class CliTests(unittest.TestCase):

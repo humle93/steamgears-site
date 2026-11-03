@@ -98,9 +98,11 @@ Reglen over holdes automatisk, så lidt som muligt afhænger af hukommelse:
 - **Natlig niche-scanning** (`.github/workflows/niche-scan.yml`): kl. 02:30 dansk tid scanner de 11 søgeord
   fra `tools/niche_seeds.txt` mod Pinterest Trends, skriver `reports/niche-scan-<dato>.md`/`.json` og
   committer kørselsdagen i `reports/niche-scan-history.json` — så tre-dages-gaten passer sig selv. Kræver
-  repository-secret `PINTEREST_ACCESS_TOKEN`; mangler det, springes scanningen over med en `::notice`, og
-  gaten flyttes ikke. Er tokenet udløbet (401), fejler jobbet rødt. Hvad et token kræver, og hvad kørslen
-  ikke kan: se [`docs/library/niche-scan-ci-2026-11-03.md`](docs/library/niche-scan-ci-2026-11-03.md).
+  adgang til Pinterest: et access-token eller refresh-oplysninger; mangler begge, springes scanningen over
+  med en `::notice`, og gaten flyttes ikke. Er access-tokenet udløbet (401), fornyes det med
+  refresh-tokenet, og det nye par gemmes tilbage i repository-secrets via `gh secret set` — Pinterest
+  roterer refresh-tokenet, så det gamle er dødt bagefter. Hvad der kræves, og hvad kørslen ikke kan: se
+  [`docs/library/pinterest-token-fornyelse-2026-11-03.md`](docs/library/pinterest-token-fornyelse-2026-11-03.md).
 
 Automationen dækker **den daglige status**. Det manuelle i §1 — at vurdere hvad der reelt blev udført og melde
 `% før → % efter` i svaret og commit-beskeden — kan scriptet ikke gøre og falder stadig på den der arbejder.

@@ -44,6 +44,7 @@ sidste commit-dato. Målt 2/11 2026.
 | [niche-produkt-scanner-2026-11-02.md](niche-produkt-scanner-2026-11-02.md) | Niche-scanner: kilder, score og hvad Pinterest/TikTok ikke kan levere | 2026-11-02 |
 | [niche-scanner-lavsaeson-2026-11-03.md](niche-scanner-lavsaeson-2026-11-03.md) | Niche-scanneren: lavsæson, censur af nuller og tre-dages-gaten — de tre §7-krav er kodet | 2026-11-03 |
 | [niche-scan-ci-2026-11-03.md](niche-scan-ci-2026-11-03.md) | Natlig niche-scanning i CI: gaten der passer sig selv, de to gate-fejl og hvad et token kræver | 2026-11-03 |
+| [pinterest-token-fornyelse-2026-11-03.md](pinterest-token-fornyelse-2026-11-03.md) | Automatisk fornyelse af Pinterest-tokenet: rotationen, de fem secrets, hvorfor kun 401 fornyes og 60-dages-grænsen (PDF i `reports/pinterest-token-fornyelse-2026-11-03.pdf`) | 2026-11-03 |
 
 ## Butik og produkter
 
