@@ -48,6 +48,53 @@ all admin-only, none of them deleting anything:
 Example: "Write today's posts and show them to me" → `generate`, then
 `list-drafts`, then `review-draft` for the ones you like.
 
+## General WordPress tools (from v7.16)
+
+Twenty-six more abilities in the `steamgears-tools` category, so the site can be
+run end to end from an MCP client instead of a browser tab. All administrator-only.
+
+| Tool | What it does |
+|---|---|
+| `steamgears-tools/site-info` | WordPress, PHP, theme, permalinks, timezone, plugin versions, sitemap URLs, content and ability counts |
+| `steamgears-tools/get-option` | Read one option — refused for any name that looks like a credential |
+| `steamgears-tools/update-option` | Write one option from an allowlist; dry run by default, needs `confirm`, returns a 72-hour undo token |
+| `steamgears-tools/undo` | Put back the previous value using that token |
+| `steamgears-tools/list-plugins` | Installed plugins with version, active state and available updates |
+| `steamgears-tools/set-plugin-state` | Activate or deactivate one plugin (nothing is ever deleted) |
+| `steamgears-tools/list-themes` | Installed themes and which one is active |
+| `steamgears-tools/flush-rewrites` | Rebuild permalink rules |
+| `steamgears-tools/flush-caches` | Object cache, Rank Math sitemap cache, LiteSpeed/WP Rocket/W3TC/Autoptimize |
+| `steamgears-tools/list-cron` | Scheduled events with next run and recurrence |
+| `steamgears-tools/run-cron` | Run one scheduled hook now |
+| `steamgears-tools/list-posts` | Any post type with status, date, URL, and price/stock for products |
+| `steamgears-tools/get-post` | One post with content, SEO meta and product fields |
+| `steamgears-tools/create-post` | Create a post, page or product (draft by default) with SEO meta |
+| `steamgears-tools/update-post` | Change content, status, slug, SEO meta or featured image |
+| `steamgears-tools/trash-post` | Move to trash; permanent deletion only for something already trashed |
+| `steamgears-tools/list-media` | Media library with id, MIME, URL, alt text |
+| `steamgears-tools/upload-media` | Upload from a URL or base64, set alt text and featured image |
+| `steamgears-tools/list-products` | WooCommerce products with price and stock |
+| `steamgears-tools/get-product` | One product with SEO, categories, gallery |
+| `steamgears-tools/update-product` | Price, sale price, stock, name, description, status |
+| `steamgears-tools/indexnow-submit` | Ping IndexNow with up to 100 URLs |
+| `steamgears-tools/indexnow-status` | The key file URL, whether it currently serves the key, and Rank Math's log tail |
+| `steamgears-tools/sitemap-audit` | Reads `sitemap_index.xml`, follows every child sitemap, counts URLs, checks one URL |
+| `steamgears-tools/list-abilities` | **Every** ability on the site, from every plugin, with its input schema |
+| `steamgears-tools/call-ability` | Run any ability by name, after its own permission check |
+
+The last two are the point: `list-abilities` shows what exists — WordPress core,
+WooCommerce, Rank Math, AI Engine, this plugin — and `call-ability` runs it. New
+plugins that register abilities become reachable without another code change.
+
+### IndexNow key
+
+`indexnow-submit` serves its own key rather than borrowing Rank Math's (that key
+lives in an option no MCP client may read). The key is generated on first use and
+served at `/?sgap_indexnow_key=<key>` and `/sgap-indexnow-<key>.txt`. If the host
+firewall blocks the IndexNow crawler, `indexnow-status` reports the probe result
+so the failure is visible instead of silent. A 202 from the API only means
+"accepted, validation pending"; 200 means the key was found.
+
 ## Also in the admin (from v7.4)
 
 Queue page with Re-queue / Delete, *Approve & Queue* / *Approve only* / *Reject*
