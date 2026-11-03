@@ -8,7 +8,7 @@ Reglerne der kontrolleres, står i docs/seo.md §1 og §3:
 - mindst ét produktlink gennem /go/<id>/ og mindst to egne guides plus hub
 - mindst fire FAQ-spørgsmål
 - ingen pladsholdere (TODO, TBD, [EJER, XXX, lorem)
-- hvert /go/<id>/ findes i produkt-ID-mappingen, og hvert $beløb findes i pristabellen
+- hvert /go/<id>/ findes i produkt-ID-mappingen, og hvert $beløb findes i pristabellen eller i de målte priser
 - linkteksten på et /go/<id>/ deler mindst to ord med mappingens titel for samme id
 - klyngen: hver guide linker hubben OG hver af de andre guides (ingen envejs-links)
 
@@ -26,6 +26,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LIB = os.path.join(ROOT, "docs", "library")
 ID_DOC = os.path.join(LIB, "om-maerkning-dark-academia-2026-11-01.md")
 PRICE_DOC = os.path.join(LIB, "valuta-og-priser-2026-11-02.md")
+MEASURED_DOC = os.path.join(LIB, "priser-fra-store-api-2026-11-03.md")
 
 TITLE_MAX = 62
 META_MIN, META_MAX = 140, 155
@@ -106,12 +107,16 @@ def known_ids() -> set:
 
 
 def known_prices() -> set:
+    """Priser fra pristabellen 2/11 plus de priser der blev målt i butikken 3/11."""
     prices = set()
-    with open(PRICE_DOC, encoding="utf-8") as fh:
-        for line in fh:
-            m = re.search(r"\|\s*\$(\d+\.\d{2})\s*\|", line)
-            if m:
-                prices.add(m.group(1))
+    for path in (PRICE_DOC, MEASURED_DOC):
+        if not os.path.exists(path):
+            continue
+        with open(path, encoding="utf-8") as fh:
+            for line in fh:
+                m = re.search(r"\|\s*\$(\d+\.\d{2})\s*\|", line)
+                if m:
+                    prices.add(m.group(1))
     return prices
 
 

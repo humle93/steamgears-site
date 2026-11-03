@@ -2,9 +2,11 @@
 
 De fire nye guides fik `/go/<id>/`-links og en fast struktur. De ældre publicerede guides har ikke fået samme
 behandling. **Tyve af linkene er nu indsat i den ene ældre guide der findes som fil i repoet**
-([`steampunk-outfit-ideas-for-women.md`](steampunk-outfit-ideas-for-women.md)), og tolv står klar til de guides
-der kun findes i WordPress. Otte rækker har et kortlagt produkt-ID men ingen prisrække i repoet — de er mærket
-`pris mangler` i stedet for at få en opdigtet pris.
+([`steampunk-outfit-ideas-for-women.md`](steampunk-outfit-ideas-for-women.md)), og tyve står klar til de guides
+der kun findes i WordPress. **Alle fyrre rækker har både ID og pris:** de otte der før stod som `pris mangler`,
+fik deres pris målt i den levende butik 3/11 2026 — se
+[`priser-fra-store-api-2026-11-03.md`](priser-fra-store-api-2026-11-03.md). Der er intet tilbage at slå op;
+det der mangler er adgangen til at indsætte dem.
 
 Link-kolonnen er stien på sitet (`/go/<id>/`). Produkt-ID'er: [`om-maerkning-dark-academia-2026-11-01.md`](om-maerkning-dark-academia-2026-11-01.md) (39 designs
 plus appendix med de seks produkter uden for dem). Priser:
@@ -71,57 +73,58 @@ og i rapporten er nu det samme.
 | --- | ---: | --- | --- | --- |
 | `/steampunk-outfit-ideas-for-women/` | 20 | 399, 403, 409, 475, 477, 479, 481, 483, 485, 487, 489, 491, 493, 495, 497, 555, 559, 561, 567, 719 | `indsat` | mapping (39 designs) |
 | `/how-to-make-a-steampunk-costume/` | 3 | 477, 481, 809 | `klar` | mapping |
-| `/3d-print-steampunk-parts/` | 2 | 479 `klar` · 766 `pris mangler` | delvis | 766: appendix |
+| `/3d-print-steampunk-parts/` | 2 | 479, 766 | `klar` | 766: appendix + målt pris |
 | `/best-steampunk-books/` | 2 | 728, 721 | `klar` | mapping |
 | `/casual-steampunk-outfits/` | 2 | 563, 405 | `klar` | mapping |
 | `/closet-steampunk-outfits/` | 2 | 561, 483 | `klar` | mapping |
-| `/sustainable-steampunk/` | 2 | 809 `klar` · 767 `pris mangler` | delvis | 767: appendix |
-| `/build/tools-and-materials/` | 2 | 809 `klar` · 767 `pris mangler` | delvis | 767: appendix |
-| `/build/weathering/` | 1 | 767 `pris mangler` | **navngivet blokering** | 767: appendix |
-| `/steampunk-gift-guide-2026/` | 4 | 940, 941, 942, 968 — alle `pris mangler` | **navngivet blokering** | appendix |
+| `/sustainable-steampunk/` | 2 | 809, 767 | `klar` | 767: appendix + målt pris |
+| `/build/tools-and-materials/` | 2 | 809, 767 | `klar` | 767: appendix + målt pris |
+| `/build/weathering/` | 1 | 767 | `klar` | 767: appendix + målt pris |
+| `/steampunk-gift-guide-2026/` | 4 | 940, 941, 942, 968 | `klar` | appendix + målte priser |
 
 20 + 3 + 2 + 2 + 2 + 2 + 2 + 2 + 1 + 4 = **40 rækker**, som er det `link_plan_check` rapporterer.
 
-### De to stier der kræver et ejer-opslag, ikke et gæt
+### De to stier: fra «pris mangler» til «klar»
 
 - **`/build/weathering/`** har `/go/767/` (Digital Blueprint: Victorian Corset & Vest PDF). ID'et er sporet til
   [`drafts-udgivet-2026-11-02.md`](drafts-udgivet-2026-11-02.md) og
-  [`meta-fixes-og-produktlinks-2026-11-02.md`](meta-fixes-og-produktlinks-2026-11-02.md) §3 og står nu i
-  appendix i mappingen. **Blokeringen er prisen og adgangen, ikke ID'et:** produktet blev udgivet 2/11 2026 og
-  har ingen række i pristabellen fra samme dag, så teksten kan ikke få en kontrolleret pris, og siden kan ikke
-  redigeres uden WordPress-adgang.
-- **`/steampunk-gift-guide-2026/`** har fire links — 940 (Clockwork Seer pendant), 941 (The Aeronaut pocket
-  watch), 942 (Ink and Steam bracelet) og 968 (Nightshade Apothecary art print). Alle fire er sporet til
-  `meta-fixes-og-produktlinks-2026-11-02.md` §3 (og 968 også til
-  [`butik-fund-2026-11-02.md`](butik-fund-2026-11-02.md)) og står i appendix. Samme to blokeringer som ovenfor:
-  ingen prisrække i repoet, og ingen adgang til at indsætte dem.
+  [`meta-fixes-og-produktlinks-2026-11-02.md`](meta-fixes-og-produktlinks-2026-11-02.md) §3 og står i appendix
+  i mappingen. Prisen — **$6.90** — blev målt i butikken 3/11, så rækken er nu `klar` som de andre.
+- **`/steampunk-gift-guide-2026/`** har fire links — 940 (Clockwork Seer pendant, **$89.00**), 941 (The Aeronaut
+  pocket watch, **$149.00**), 942 (Ink and Steam bracelet, **$69.00**) og 968 (Nightshade Apothecary art print,
+  **$29.95**). Alle fire er sporet til `meta-fixes-og-produktlinks-2026-11-02.md` §3 (og 968 også til
+  [`butik-fund-2026-11-02.md`](butik-fund-2026-11-02.md)) og står i appendix med målt pris.
 
-**Ingen række i planen er uden ID.** Alle ti guides har mindst ét `/go/<id>/`, og hvert ID peger på en fil i
-repoet. Det der mangler for de to stier er en pris og en redigering — ikke en kortlægning.
+**Ingen række i planen er uden ID eller pris.** Alle ti guides har mindst ét `/go/<id>/`, hvert ID peger på en
+fil i repoet, og hver pris kan slås op i butikken. Det der mangler er en redigering — ikke en kortlægning og
+ikke et opslag.
 
-## 3. Kortlagt, men uden pris i repoet
+## 3. Priser målt i butikken — de seks produkter uden for de 39 designs
 
 De seks produkter nedenfor var ikke i ID-mappingen; de er lagt ind i
 [appendix i mappingen](om-maerkning-dark-academia-2026-11-01.md#appendix--produkter-uden-for-de-39-designs-tilføjet-311-2026)
-med den kilde i repoet der nævner dem. **Ingen af dem har en prisrække i pristabellen**, så rækkerne står med
-`—` og status `pris mangler`: linket kan godt sættes, men teksten må ikke love en pris jeg ikke kan slå op.
+med den kilde i repoet der nævner dem. De havde ingen række i pristabellen fra 2/11, så rækkerne stod først med
+`—`. **3/11 blev priserne målt i den levende butik** gennem Store API (offentlig læsning, 200 uden credential),
+så rækkerne er nu `klar` som de øvrige — målingen og hele produkttabellen står i
+[`priser-fra-store-api-2026-11-03.md`](priser-fra-store-api-2026-11-03.md).
 
 | Guide | Link | Linktekst | Pris | Status |
 | --- | --- | --- | --- | --- |
-| `/3d-print-steampunk-parts/` | /go/766/ | Utility belt and holster | — | `pris mangler` |
-| `/build/weathering/` | /go/767/ | Victorian corset blueprint PDF | — | `pris mangler` |
-| `/build/tools-and-materials/` | /go/767/ | Victorian corset blueprint PDF | — | `pris mangler` |
-| `/sustainable-steampunk/` | /go/767/ | Victorian corset blueprint PDF | — | `pris mangler` |
-| `/steampunk-gift-guide-2026/` | /go/940/ | Clockwork Seer pendant | — | `pris mangler` |
-| `/steampunk-gift-guide-2026/` | /go/941/ | The Aeronaut pocket watch | — | `pris mangler` |
-| `/steampunk-gift-guide-2026/` | /go/942/ | Ink and Steam bracelet | — | `pris mangler` |
-| `/steampunk-gift-guide-2026/` | /go/968/ | Nightshade Apothecary print | — | `pris mangler` |
+| `/3d-print-steampunk-parts/` | /go/766/ | Utility belt and holster | $24.90 | `klar` |
+| `/build/weathering/` | /go/767/ | Victorian corset blueprint PDF | $6.90 | `klar` |
+| `/build/tools-and-materials/` | /go/767/ | Victorian corset blueprint PDF | $6.90 | `klar` |
+| `/sustainable-steampunk/` | /go/767/ | Victorian corset blueprint PDF | $6.90 | `klar` |
+| `/steampunk-gift-guide-2026/` | /go/940/ | Clockwork Seer pendant | $89.00 | `klar` |
+| `/steampunk-gift-guide-2026/` | /go/941/ | The Aeronaut pocket watch | $149.00 | `klar` |
+| `/steampunk-gift-guide-2026/` | /go/942/ | Ink and Steam bracelet | $69.00 | `klar` |
+| `/steampunk-gift-guide-2026/` | /go/968/ | Nightshade Apothecary print | $29.95 | `klar` |
 
-Det er ikke længere en tavs mangel: hvert ID har en række i mappingen med en kilde, og hullet er prisen — som
-kræver et opslag i butikken, ikke en gætning her.
+Priserne er ikke gættet: `prices.price` fra Store API er minor units, så **2995 → $29.95**. Alle 31 produkter i
+planen findes i butikken, og de 25 priser der allerede stod i pristabellen stemte **25 af 25** — målingen
+bekræfter altså også det der var skrevet før.
 
-**Status pr. guide:** se dækningstabellen i §2b — ti guides, fyrre rækker, hvoraf de to
-(`/build/weathering/` og `/steampunk-gift-guide-2026/`) er navngivne blokeringer med årsag.
+**Status pr. guide:** se dækningstabellen i §2b — ti guides, fyrre rækker, alle med ID og pris. De tyve `klar`
+rækker venter kun på, at nogen kan skrive på siderne.
 
 
 ## 4. Strukturen der følger med
@@ -135,11 +138,12 @@ kræver et opslag i butikken, ikke en gætning her.
 ## 5. Verifikation
 
 `python3 tools/link_plan_check.py` tjekker hver række: guide-stien, at `/go/<id>/` findes i mappingen (inkl.
-appendix), at linkteksten deler ord med produktnavnet, at prisen findes i pristabellen (eller er `gratis` for
-809, eller `—` for de seks produkter der beviseligt ikke har en prisrække), at status er gyldig, og at en række
-mærket `indsat` **faktisk har sit `/go/<id>/` i den fil guiden bor i**. `--selftest` har tolv fixtures, der
-beviser at værnene fanger en opdigtet pris, et ukendt id, et forkert produktnavn, en dublering, en ukendt status,
-en tom plan og et påstået-indsat link der ikke står i filen.
+appendix), at linkteksten deler ord med produktnavnet, at prisen findes i pristabellen **eller i de målte
+priser** (eller er `gratis` for 809), at status er gyldig, og at en række mærket `indsat` **faktisk har sit
+`/go/<id>/` i den fil guiden bor i**. `—` er ikke længere en gyldig pris, og `pris mangler` er ikke længere en
+gyldig status: begge er afløst af målingen 3/11. `--selftest` har tretten fixtures, der beviser at værnene fanger
+en opdigtet pris, en tom pris, den afskaffede status, et ukendt id, et forkert produktnavn, en dublering, en
+ukendt status, en tom plan og et påstået-indsat link der ikke står i filen.
 
-**Det der venter på WordPress-adgang:** de tolv indsættelser i §2, de otte i §3, og at `/go/`-ruten selv virker
-(Redirection-gruppe eller Royal Links — ejer).
+**Det der venter på WordPress-adgang:** de tyve `klar`-rækker i §2 og §3, og at `/go/`-ruten selv virker
+(Redirection-gruppe eller Royal Links — ejer). Det er den eneste blokering tilbage i S2.6.
