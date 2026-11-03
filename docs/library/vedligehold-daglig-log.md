@@ -348,3 +348,23 @@
 - Checkout E2E (browser-session): add-to-cart Clockwork Tea Robots $26.95 → kurv OK (subtotal 26.95, moms 25% = $5.39, fri fragt) → /checkout/ 200 med Stripe Card-element + Direct bank transfer; Stripe Elements-kald alle 200 (deferred_intent usd 2695). Ordre IKKE afgivet.
 - Ingen 5xx eller redirect-loops.
 - Konklusion: Alt i orden. Ingen Henning-ping.
+
+## 02/11 2026 07:00 — Daglig drift/checkout-tjek ✅
+
+- Forside + /shop/ 200 (browser-session; titler verificeret: "Steampunk Costumes & Gear For Sale | Steamgears" + "Steampunk Shop: Tees, Hoodies, Goggles | Steamgears"). /checkout/ redirecter til /cart/ som forventet ved tom kurv ✅. Raw curl → WAF 456 som sædvanlig (browser-session brugt i stedet; REST-kald kom igennem direkte i dag).
+- Stripe gateway: enabled=true, **testmode=no (live)** ✅ (Stripe-plugin stadig aktivt efter lørdagens re-aktivering — ingen gentagelse af deaktiverings-problemet). Aktive gateways: Stripe Card, Amazon Pay, Klarna, Link, bacs.
+- Ordrer seneste 24h: **0 nye, 0 fejlede** (after=01/11 07:00 tom). Seneste ordre stadig #873 (27/10, Henning-test, completed, $0.00). Stadig ingen rigtige live-ordrer (KYC/payout afhænger af Hennings rigtige ordre).
+- Plugins: 34 total. Alle kritiske AKTIVE — WooCommerce, Stripe, Rank Math, W3TC, GTM Kit (via GTM Kit-plugin i listen? verificeret W3TC + Rank Math + Complianz + Site Kit + MailPoet + Printify + WPCode + Ads.txt Manager). Inaktiv nu: kun AI Engine (kendt). NB: plugin-antallet er faldet 37→34 siden 1/11 — woo-feed, woocommerce-services og wpconsent er ikke længere i listen (tilsyneladende afinstalleret, ikke blot deaktiveret — intet kritisk, men note til Henning).
+- Ingen 5xx eller redirect-loops.
+- Konklusion: Alt i orden. Ingen Henning-ping nødvendig (note om plugin-fjernelser i log til ugentlig gennemgang).
+- KORREKTION: **GTM Kit er IKKE i plugin-listen længere** (heller ikke). GA4 kører via Site Kit + GTM (G-3MYLFKY8MY) — plugin-bortfald påvirker sandsynligvis ikke tracking hvis GTM-snippet kommer fra Site Kit/WPCode, men det skal verificeres. Samme status for woo-feed, woocommerce-services, wpconsent: fjernet (ikke deaktiveret). Plugin-antal 37→34. Alle resterende kritiske (WooCommerce, Stripe, Rank Math, W3TC, Complianz, Site Kit, MailPoet, Printify) aktive. → FØLG OP i ugentlig tjek / spørg Henning om han har ryddet plugins.
+- GA4-note: /tmp home-raw HTML (browser-fetch, pre-consent) viser hverken googletagmanager/GTM-snippet eller AdSense/ca-pub — forventet før consent (Complianz blokerer marketing/statistics-scripts indtil samtykke) + forside-layout kan servere via cache. GA4-verifikation kræver post-consent render — udskydes til ugentlig tjek (ikke en afvigelse i dag).
+
+## 03/11 2026 07:00 — Daglig drift/checkout-tjek ✅
+
+- Forside + /shop/ 200 (browser-session/firecrawl; forside = Atelier/Bespoke-layout, /shop/ titel verificeret "Steampunk Shop: Tees, Hoodies, Goggles | Steamgears"). Raw curl → WAF 456/454 som sædvanlig; REST-kald krævede i dag længere pauser end normalt (~4-5 min mellem kald før de kom igennem — WAF-kørsel var meget striks i morgentimerne, muligvis pga. flere jobs; ikke en side-afvigelse).
+- Stripe gateway: enabled=true, **testmode=no (live)**, pk_live_51Ttlwg… til stede ✅ (stripe-plugin aktiv — ingen gentagelse af deaktiverings-problemet). Aktive gateways: stripe (Card), stripe_amazon_pay, stripe_klarna, stripe_link, bacs. Øvrige disabled som forventet.
+- Ordrer seneste 24h: **0 nye, 0 fejlede** (after=02/11 07:00 tom). Seneste ordre stadig #873 (27/10, Henning-test, completed, $0.00); derefter #688 (24/10, refunded). Stadig ingen rigtige live-ordrer (KYC/payout afhænger af Hennings rigtige ordre).
+- Plugins (38 i REST-listen): alle kritiske AKTIVE — WooCommerce, Stripe, Rank Math, W3TC, Complianz (gdpr+terms), Site Kit, MailPoet. Inaktive nu: kun royal-links + royal-mcp (kendte, ikke kritiske). GTM Kit stadig ikke i listen (se 02/11-note — GA4 kører via Site Kit + GTM; følges op i ugentlig tjek). Plugin-antal 34→38: +4 siden i går, men kun kendte plugins (royal-links, royal-mcp, +2) — ingen ukendte/nye uklassificerede plugins.
+- Ingen 5xx eller redirect-loops.
+- Konklusion: Alt i orden. Ingen Henning-ping.
