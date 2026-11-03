@@ -120,8 +120,8 @@
     {
       "id": "seo",
       "name": "SEO-indholdsproduktion",
-      "next": "Publicér de tre guides (292, 296, 295) — copy, FAQ og links er klar",
-      "blocked_by": "Publicering kræver WordPress-adgang: to egne fotos pr. guide, HowTo/FAQPage-schema i Rank Math og selve publish. Copy er skrevet og verificeret i repoet (tools/guide_check.py).",
+      "next": "Publicér de fire guides — copy, FAQ og links er klar (292, 296, 295 + ny side /steampunk-corset-guide/)",
+      "blocked_by": "Publicering kræver WordPress-adgang. Filer der nu venter kun på det: docs/library/guides-2026-11-03.md (post 292, 296, 295) og docs/library/guides-2026-11-03-corset.md (ny side), plus fotos, HowTo/FAQPage-schema i Rank Math og selve publish. Copy er skrevet og verificeret i repoet (tools/guide_check.py).",
       "modules": [
         {
           "id": "batch",
@@ -142,11 +142,11 @@
         },
         {
           "id": "copy",
-          "name": "Guide-copy klar til publicering (292, 296, 295)",
-          "done": 3,
-          "total": 3,
+          "name": "Guide-copy klar til publicering (292, 296, 295 + corset)",
+          "done": 4,
+          "total": 4,
           "unit": "guides",
-          "note": "skrevet og verificeret 3/11 i docs/library/guides-2026-11-03.md; 3/3 bestod tools/guide_check.py (7 selftest-fixtures)"
+          "note": "fire guides skrevet og verificeret 3/11 i docs/library/guides-2026-11-03.md og guides-2026-11-03-corset.md; 4/4 bestod tools/guide_check.py (7 selftest-fixtures). Corset-guiden er det sidste brief-mål kataloget kan bære — vest og boots har ingen produkter"
         }
       ]
     },
@@ -502,6 +502,15 @@
       "after": 50.0,
       "delta": 50.0,
       "basis": "3 af 6 guides (Publicerede guides (id 292, 296, 295) 0/3 · Guide-copy klar til publicering (292, 296, 295) 3/3)"
+    },
+    {
+      "date": "2026-11-03",
+      "project": "SEO-indholdsproduktion",
+      "module": "daglig måling",
+      "before": 50.0,
+      "after": 57.1,
+      "delta": 7.1,
+      "basis": "4 af 7 guides (Publicerede guides (id 292, 296, 295) 0/3 · Guide-copy klar til publicering (292, 296, 295 + corset) 4/4)"
     }
   ]
 }

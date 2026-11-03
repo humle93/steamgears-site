@@ -24,6 +24,7 @@ lukkedes research-bibliotek.
 
 | Dokument | Indhold | Dato |
 | --- | --- | --- |
+| [guides-2026-11-03-corset.md](guides-2026-11-03-corset.md) | **Corset-guiden 3/11:** "Steampunk Corset: How to Choose, Style and Wear One" — tre corsets, fire looks, budgettabel og otte FAQ; vest- og boot-guiderne kan ikke skrives uden produkter — PDF i `reports/guides-2026-11-03-corset.pdf` | 2026-11-03 |
 | [guides-2026-11-03.md](guides-2026-11-03.md) | **Tre guides klar til publicering 3/11:** men's essentials (292), tre budgetter (296) og women's essentials (295) — Rank Math-felter, FAQ, `/go/`-links og priser der kan slås op — PDF i `reports/guides-2026-11-03.pdf` | 2026-11-03 |
 | [phase-0-baseline-2026-11-03.md](phase-0-baseline-2026-11-03.md) | **Fase 0-baseline 3/11:** friske read-only-målinger — USD-priser, `/shipping/` og `/returns/` 404, ingen CVR, 450–475 KB HTML, schema uden fragt/retur — PDF i `reports/phase-0-baseline-2026-11-03.pdf` | 2026-11-03 |
 | [sitewide-audit-2026-11-03.md](sitewide-audit-2026-11-03.md) | **Sitewide-audit 3/11:** P0/P1-fund for juridisk identitet, consent, valuta og checkout, anbefalede funktioner og målepunkter — dokumentbaseret, så hvert live-fund skal genmåles før en ændring — PDF i `reports/sitewide-audit-2026-11-03.pdf` | 2026-11-03 |
