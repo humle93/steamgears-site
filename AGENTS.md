@@ -16,6 +16,9 @@
 
 ## 3. Automatisk Test & Pakning (.zip)
 - Efter hver PHP-fil er skrevet, SKAL du køre syntakstjek i terminalen:
-  `find . -name "*.php" -not -path "./vendor/*" -exec php -l {} +`
+  `find . -name "*.php" -not -path "./vendor/*" -not -path "./.git/*" -exec php -l {} +`
+- Findes der ingen `php` i miljøet (gælder Freebuff/cloud), brug den statiske binær i `.tools/php` (PHP 8.3, hentes fra `https://dl.static-php.dev/static-php-cli/common/php-8.3.14-cli-linux-x86_64.tar.gz` og pakkes ud, så binæren ligger som `.tools/php`). `.tools/` er ikke i git:
+  `find . -name "*.php" -not -path "./vendor/*" -not -path "./.git/*" -exec ./.tools/php -l {} +`
 - Hvis `php -l` melder fejl, skal du rette fejlen med det samme, før du går videre.
-- Som sidste trin (100%): Pak hele pluginnet i en installationsklar `.zip`-fil i rodmappen (udelad `.git`, `AGENTS.md` og `node_modules`), så den kan uploades direkte under *Plugins -> Tilføj nyt* i WordPress.
+- Som sidste trin (100%): Pak hele pluginnet i en installationsklar `.zip`-fil i `plugins/` (udelad `.git`, `AGENTS.md`, `node_modules` og `.tools`), så den kan uploades direkte under *Plugins -> Tilføj nyt* i WordPress.
+- ZIP-filen SKAL ligge i `plugins/` på `main` og hedde `steamgears-autopilot-v<version>.zip`. Selvopdateringen henter præcis `https://raw.githubusercontent.com/humle93/steamgears-site/main/plugins/steamgears-autopilot-v<version>.zip` (`SGAP_Updater::package_url()`), så en zip i rodmappen eller på en sidegren bliver aldrig fundet.
