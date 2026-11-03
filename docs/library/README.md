@@ -24,7 +24,7 @@ lukkedes research-bibliotek.
 
 | Dokument | Indhold | Dato |
 | --- | --- | --- |
-| [guide-links-aeldre-2026-11-03.md](guide-links-aeldre-2026-11-03.md) | **Link-plan for de ældre guides 3/11:** tolv `/go/<id>/`-links på syv publicerede guides, kontrolleret mod mapping og pristabel; seks ID'er mangler i mappingen og er navngivet frem for gættet — PDF i `reports/guide-links-aeldre-2026-11-03.pdf` | 2026-11-03 |
+| [guide-links-aeldre-2026-11-03.md](guide-links-aeldre-2026-11-03.md) | **Link-plan for de ældre guides 3/11:** **20 `/go/`-links indsat** i den repo-ejede outfit-guide (verificeret ved læs-tilbage af filen), 12 klar til de guides der kun findes i WordPress, og 8 rækker med kortlagt ID men uden prisrække i repoet — PDF i `reports/guide-links-aeldre-2026-11-03.pdf` | 2026-11-03 |
 | [hub-steampunk-costumes-2026-11-03.md](hub-steampunk-costumes-2026-11-03.md) | **Hub-copy 3/11:** `/steampunk-costumes/` (side 550) skrevet som indgang til de fire guides — quick answer, femten produktlinks, tre figurer og FAQ — PDF i `reports/hub-steampunk-costumes-2026-11-03.pdf` | 2026-11-03 |
 | [guide-hub-2026-11-03.md](guide-hub-2026-11-03.md) | **Guide-klyngen 3/11:** de fire guides som én hub — gensidige links, `guide_check.py`-værnene (hub, klynge, produktnavn) og rækkefølgen de skal indsættes i — PDF i `reports/guide-hub-2026-11-03.pdf` | 2026-11-03 |
 | [guides-2026-11-03-corset.md](guides-2026-11-03-corset.md) | **Corset-guiden 3/11:** "Steampunk Corset: How to Choose, Style and Wear One" — tre corsets, fire looks, budgettabel og otte FAQ; vest- og boot-guiderne kan ikke skrives uden produkter — PDF i `reports/guides-2026-11-03-corset.pdf` | 2026-11-03 |
