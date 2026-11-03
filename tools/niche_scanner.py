@@ -42,6 +42,10 @@ Kør:
     python3 tools/niche_scanner.py --offline            # fixtures, ingen netværk/token
     python3 tools/test_niche_scanner.py                 # tests
 
+Pinterest-tokenet holder 30 dage. Er PINTEREST_REFRESH_TOKEN, PINTEREST_CLIENT_ID og
+PINTEREST_CLIENT_SECRET sat, byttes det automatisk når Pinterest svarer 401, og det nye
+par gemmes i filen fra `--token-out`, så næste kørsel kan bruge det.
+
 Ud: reports/niche-scan-<dato>.md + .json og reports/niche-scan-history.json (kørselsdage).
 En kørsel uden data skriver intet og rykker ikke tre-dages-gaten — den natlige CI-kørsel
 (.github/workflows/niche-scan.yml) bruger netop det til at skelne «målt» fra «forsøgt».
@@ -50,6 +54,7 @@ En kørsel uden data skriver intet og rykker ikke tre-dages-gaten — den natlig
 from __future__ import annotations
 
 import argparse
+import base64
 import csv
 import json
 import os
@@ -336,6 +341,74 @@ def match_products(keyword: str, catalog: list[dict]) -> list[str]:
     ]
 
 
+PINTEREST_TOKEN_URL = "https://api.pinterest.com/v5/oauth/token"
+
+
+def refresh_pinterest_token(refresh_token: str, client_id: str, client_secret: str,
+                            token_url: str = PINTEREST_TOKEN_URL) -> dict:
+    """Byt et refresh-token til et nyt access-token (Pinterest v5, refresh_token-grant).
+
+    Pinterest roterer refresh-tokenet: svaret indeholder et nyt, og det man sendte er brugt
+    op i samme øjeblik. Kalderen skal derfor gemme svaret, før access-tokenet bruges — ellers
+    er nøglen til næste fornyelse væk, og kun en fuld re-autorisering bringer adgangen tilbage.
+    """
+    body = urllib.parse.urlencode({
+        "grant_type": "refresh_token",
+        "refresh_token": refresh_token,
+    }).encode("utf-8")
+    basic = base64.b64encode(f"{client_id}:{client_secret}".encode("utf-8")).decode("ascii")
+    req = urllib.request.Request(token_url, data=body, method="POST", headers={
+        "Authorization": f"Basic {basic}",
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Accept": "application/json",
+        "User-Agent": "steamgears-niche-scanner/1.0",
+    })
+    with urllib.request.urlopen(req, timeout=25) as res:
+        tokens = json.loads(res.read().decode("utf-8"))
+    if not isinstance(tokens, dict) or not tokens.get("access_token"):
+        raise RuntimeError("Pinterest svarede uden access_token")
+    return tokens
+
+
+def _write_secret(path: Path, data: dict) -> None:
+    """Skriv tokens atomisk med mode 600 — en afbrudt kørsel må ikke efterlade halve data."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_name(path.name + ".tmp")
+    tmp.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+    tmp.chmod(0o600)
+    os.replace(tmp, path)
+
+
+def pinterest_refresher(token_out, env: dict | None = None):
+    """Forny-funktion fra miljøet, eller None hvis fornyelse ikke er sat op.
+
+    Kræver PINTEREST_CLIENT_ID, PINTEREST_CLIENT_SECRET og PINTEREST_REFRESH_TOKEN — og et
+    sted at gemme det roterede token (`--token-out`). Uden det sidste returneres None med
+    vilje: en fornyelse ville bruge det gamle token op og efterlade næste nat uden adgang.
+    """
+    env = os.environ if env is None else env
+    client_id = (env.get("PINTEREST_CLIENT_ID") or "").strip()
+    client_secret = (env.get("PINTEREST_CLIENT_SECRET") or "").strip()
+    refresh_token = (env.get("PINTEREST_REFRESH_TOKEN") or "").strip()
+    if not (client_id and client_secret and refresh_token and token_out):
+        return None
+
+    state = {"refresh_token": refresh_token}
+
+    def refresh() -> str:
+        tokens = refresh_pinterest_token(state["refresh_token"], client_id, client_secret)
+        # Gem først, brug bagefter: det gamle refresh-token er dødt, uanset hvad der sker nu.
+        _write_secret(Path(token_out), {
+            "access_token": tokens["access_token"],
+            "refresh_token": tokens.get("refresh_token") or "",
+        })
+        if tokens.get("refresh_token"):
+            state["refresh_token"] = tokens["refresh_token"]
+        return tokens["access_token"]
+
+    return refresh
+
+
 def _fetch_trends(url: str, token: str) -> dict:
     """GET mod Pinterest Trends med genforsøg på 429/5xx — raten skal ikke dræbe kørslen."""
     last: Exception | None = None
@@ -362,21 +435,46 @@ def _fetch_trends(url: str, token: str) -> dict:
 
 
 def pinterest_signals(terms: list[str], region: str, trend_type: str, token: str | None,
-                      offline: bool = False) -> tuple[list[Signal], str]:
-    """Returnerer (signaler, status). Status er menneskelæsbar og havner i rapporten."""
+                      offline: bool = False, refresh=None) -> tuple[list[Signal], str]:
+    """Returnerer (signaler, status). Status er menneskelæsbar og havner i rapporten.
+
+    Svarer Pinterest 401, byttes refresh-tokenet én gang og kaldet gentages — det er den
+    eneste måde en natlig kørsel overlever 30-dages-udløbet uden hænder. Kun 401: en 403 er
+    manglende adgang, ikke et udløbet token, og en fornyelse ville bare brænde et rotation.
+    """
+    note = ""
     if offline:
         payload = json.loads((FIXTURES / "pinterest_trends_dk.json").read_text(encoding="utf-8"))
-    elif not token:
-        return [], "utilgængelig: PINTEREST_ACCESS_TOKEN er ikke sat (kræver Standard-adgang)"
     else:
         query = urllib.parse.urlencode({
             "include_keywords": ",".join(terms),
             "limit": 50,
         })
         url = f"{PINTEREST_API}/trends/keywords/{urllib.parse.quote(region)}/top/{trend_type}?{query}"
+        if not token and refresh is not None:
+            try:
+                token = refresh()
+                note = " · token hentet med refresh-token"
+            except Exception as exc:
+                return [], f"fejl: intet access-token, og fornyelsen fejlede: {exc}"
+        if not token:
+            return [], "utilgængelig: PINTEREST_ACCESS_TOKEN er ikke sat (kræver Standard-adgang)"
         try:
             payload = _fetch_trends(url, token)
-        except Exception as exc:  # 401/403/429 skal stå i rapporten, ikke dræbe kørslen
+        except urllib.error.HTTPError as exc:
+            if exc.code != 401 or refresh is None:
+                return [], f"fejl: {exc}"
+            try:
+                token = refresh()
+                note = " · token fornyet efter 401"
+            except Exception as refresh_exc:
+                return [], (f"fejl: tokenet er udløbet (401), og fornyelsen fejlede: {refresh_exc}"
+                            " — kør OAuth-flowet igen og sæt PINTEREST_REFRESH_TOKEN")
+            try:
+                payload = _fetch_trends(url, token)
+            except Exception as exc:  # efter en fornyelse er der ingen vej videre
+                return [], f"fejl: {exc} (selv efter fornyelse)"
+        except Exception as exc:  # 403/429 efter genforsøg eller netværk: i rapporten, ikke dødeligt
             return [], f"fejl: {exc}"
 
     items = payload.get("items") or payload.get("data") or []
@@ -389,7 +487,7 @@ def pinterest_signals(terms: list[str], region: str, trend_type: str, token: str
             growth_mom=item.get("pct_growth_mom"),
             points=parse_points(item.get("time_series") or []),
         ))
-    return [s for s in signals if s.keyword], f"ok: {len(signals)} søgeord ({region}, {trend_type})"
+    return [s for s in signals if s.keyword], f"ok: {len(signals)} søgeord ({region}, {trend_type}){note}"
 
 
 def tiktok_signals(export_path: str | None, offline: bool = False) -> tuple[list[Signal], str]:
@@ -567,13 +665,14 @@ def render(rows: list[Row], sources: dict[str, str], meta: dict) -> str:
 
 def run(terms: list[str], region: str, trend_type: str, offline: bool,
         tiktok_export: str | None, history: dict[str, list[str]] | None = None,
-        today: str | None = None) -> tuple[list[Row], dict[str, str], list[dict], int]:
+        today: str | None = None, refresh=None) -> tuple[list[Row], dict[str, str], list[dict], int]:
     catalog = load_catalog(offline=offline)
     signals: list[Signal] = []
     sources: dict[str, str] = {}
 
     pin, pin_status = pinterest_signals(terms, region, trend_type,
-                                        os.getenv("PINTEREST_ACCESS_TOKEN"), offline=offline)
+                                        os.getenv("PINTEREST_ACCESS_TOKEN"), offline=offline,
+                                        refresh=refresh)
     sources["Pinterest Trends (API v5)"] = pin_status
     signals += pin
 
@@ -594,6 +693,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--trend-type", default="seasonal", choices=TREND_TYPES)
     parser.add_argument("--tiktok-export", help="CSV fra TikTok Creative Center (keyword,views,posts,growth_pct)")
     parser.add_argument("--offline", action="store_true", help="brug fixtures, ingen netværk eller token")
+    parser.add_argument("--token-out", metavar="FIL",
+                        help="fil hvor et fornyet access/refresh-token gemmes (mode 600)")
     parser.add_argument("--out-dir", default=str(REPORTS))
     args = parser.parse_args(argv)
 
@@ -609,8 +710,10 @@ def main(argv: list[str] | None = None) -> int:
     out_dir.mkdir(parents=True, exist_ok=True)
     history = load_history(out_dir)
 
+    refresh = pinterest_refresher(Path(args.token_out) if args.token_out else None)
     rows, sources, catalog, code = run(terms, args.region, args.trend_type, args.offline,
-                                       args.tiktok_export, history=history, today=today)
+                                       args.tiktok_export, history=history, today=today,
+                                       refresh=refresh)
     if not rows:
         # Uden data overskrives dagens rapport ikke, og dagen tæller ikke som måledag: en
         # natlig kørsel der ikke kunne hente noget må ikke flytte tre-dages-gaten.

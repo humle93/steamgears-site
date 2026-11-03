@@ -63,6 +63,7 @@ lint_php() {
 check "php -l (plugins)"                     lint_php
 check "projektstatus --selftest"             python3 projektstatus.py --selftest
 check "projektstatus --check"                python3 projektstatus.py --check
+check "commit-besked --selftest"             python3 tools/commit_check.py --selftest
 check "kampagne-indlæser --selftest"         python3 tools/load_campaign.py --selftest
 check "plugin-smoke"                         "$PHP_BIN" plugins/tests/smoke.php
 check "MCP REST-klient"                      python3 tools/test_mcp_rest.py

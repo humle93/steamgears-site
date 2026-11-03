@@ -6,10 +6,12 @@ name: Natlig niche-scanning
 # skriver i samme fil samtidig — scanner den tools/niche_seeds.txt og committer
 # rapporten plus kørselshistorikken (reports/niche-scan-history.json).
 #
-# Uden data findes der ingen måledag: mangler PINTEREST_ACCESS_TOKEN, springes
-# scanningen over med en ::notice, og dagens rapport overskrives ikke. Er tokenet
-# udløbet eller afvist (401/403), fejler jobbet rødt med en annotation, fordi det
-# kræver ejerens handling — det må ikke se ud som en stille nat.
+# Uden data findes der ingen måledag: mangler der både et access-token og
+# refresh-oplysninger, springes scanningen over med en ::notice, og dagens rapport
+# overskrives ikke. Er access-tokenet udløbet (401), fornyes det med
+# refresh-tokenet, og det nye par gemmes tilbage i secrets — Pinterest roterer
+# refresh-tokenet, så det gamle er dødt bagefter. Kan det nye ikke gemmes, fejler
+# jobbet rødt med en annotation: så kræver adgangen ejerens hænder.
 on:
   schedule:
     - cron: '30 0,1 * * *'
@@ -48,20 +50,28 @@ jobs:
             echo "Lokal tid er $(TZ=Europe/Copenhagen date +%H:%M) — denne kørsel springes over."
           fi
 
-      - name: Er PINTEREST_ACCESS_TOKEN sat?
+      - name: Er der et token — nu eller via refresh-token?
         id: token
         env:
           PINTEREST_ACCESS_TOKEN: ${{ secrets.PINTEREST_ACCESS_TOKEN }}
+          PINTEREST_REFRESH_TOKEN: ${{ secrets.PINTEREST_REFRESH_TOKEN }}
+          PINTEREST_CLIENT_ID: ${{ secrets.PINTEREST_CLIENT_ID }}
+          PINTEREST_CLIENT_SECRET: ${{ secrets.PINTEREST_CLIENT_SECRET }}
         run: |
           if [ -n "${PINTEREST_ACCESS_TOKEN}" ]; then
             echo "have=true" >> "$GITHUB_OUTPUT"
+          elif [ -n "${PINTEREST_REFRESH_TOKEN}" ] && [ -n "${PINTEREST_CLIENT_ID}" ] \
+               && [ -n "${PINTEREST_CLIENT_SECRET}" ]; then
+            # Intet access-token: scanneren henter et med refresh-tokenet, før den kalder Trends.
+            echo "have=true" >> "$GITHUB_OUTPUT"
+            echo "Intet access-token — henter et med refresh-tokenet."
           else
             echo "have=false" >> "$GITHUB_OUTPUT"
-            echo "::notice title=Niche-scanning sprunget over::PINTEREST_ACCESS_TOKEN er ikke sat som repository secret, så der er ingen data i nat. Gaten flyttes ikke — se docs/library/niche-scan-ci-2026-11-03.md."
+            echo "::notice title=Niche-scanning sprunget over::Der er hverken PINTEREST_ACCESS_TOKEN eller et komplet sæt refresh-oplysninger (PINTEREST_REFRESH_TOKEN + PINTEREST_CLIENT_ID + PINTEREST_CLIENT_SECRET), så der er ingen data i nat. Gaten flyttes ikke — se docs/library/pinterest-token-fornyelse-2026-11-03.md."
             {
               echo "### Niche-scanning sprunget over"
               echo
-              echo 'Secret `PINTEREST_ACCESS_TOKEN` mangler. Ingen måledag er skrevet, og gaten står stille.'
+              echo 'Ingen adgang til Pinterest Trends: sæt enten `PINTEREST_ACCESS_TOKEN` eller refresh-oplysningerne. Ingen måledag er skrevet, og gaten står stille.'
             } >> "$GITHUB_STEP_SUMMARY"
           fi
 
@@ -73,8 +83,14 @@ jobs:
         if: steps.gate.outputs.run == 'true' && steps.token.outputs.have == 'true'
         env:
           PINTEREST_ACCESS_TOKEN: ${{ secrets.PINTEREST_ACCESS_TOKEN }}
+          PINTEREST_REFRESH_TOKEN: ${{ secrets.PINTEREST_REFRESH_TOKEN }}
+          PINTEREST_CLIENT_ID: ${{ secrets.PINTEREST_CLIENT_ID }}
+          PINTEREST_CLIENT_SECRET: ${{ secrets.PINTEREST_CLIENT_SECRET }}
         run: |
           args=(--seeds-file tools/niche_seeds.txt --region "SE+DK+FI+NO" --trend-type seasonal)
+          # Svarer Pinterest 401, fornyes tokenet og det nye par gemmes her; næste trin
+          # lægger det i secrets. Filen ligger i RUNNER_TEMP, ikke i repoet.
+          args+=(--token-out "$RUNNER_TEMP/pinterest-tokens.json")
           # TikTok har ingen API; en manuel Creative Center-eksport kan lægges i repoet
           # og bliver brugt automatisk når den findes.
           if [ -f docs/library/tiktok-creative-center.csv ]; then
@@ -85,9 +101,35 @@ jobs:
           code=$?
           set -e
           if [ "$code" -eq 2 ]; then
-            echo "::error title=Niche-scanning uden data::Ingen kilde gav data — intet er skrevet, og gaten er urørt. Er PINTEREST_ACCESS_TOKEN udløbet (401), eller mangler appen Standard-adgang? Se docs/library/niche-scan-ci-2026-11-03.md."
+            echo "::error title=Niche-scanning uden data::Ingen kilde gav data — intet er skrevet, og gaten er urørt. Er access-tokenet udløbet (401) og refresh-tokenet også dødt (det holder 60 dage), eller mangler appen Standard-adgang? Se docs/library/pinterest-token-fornyelse-2026-11-03.md."
             exit 2
           fi
+
+      - name: Gem fornyet token som secret
+        # Kører også når scanningen fejlede: et roteret refresh-token er brugt op, og det nye
+        # findes kun i filen — mistes den, kræver adgangen en fuld re-autorisering i hånden.
+        if: always() && steps.gate.outputs.run == 'true' && steps.token.outputs.have == 'true'
+        env:
+          PINTEREST_SECRETS_TOKEN: ${{ secrets.PINTEREST_SECRETS_TOKEN }}
+          GH_TOKEN: ${{ secrets.PINTEREST_SECRETS_TOKEN }}
+          TOKEN_FILE: ${{ runner.temp }}/pinterest-tokens.json
+        run: |
+          if [ ! -s "$TOKEN_FILE" ]; then
+            echo "Tokenet blev ikke fornyet i nat — secret er uændret."
+            exit 0
+          fi
+          access="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1])).get("access_token", ""))' "$TOKEN_FILE")"
+          refresh="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1])).get("refresh_token", ""))' "$TOKEN_FILE")"
+          rm -f "$TOKEN_FILE"
+          if [ -n "$access" ]; then echo "::add-mask::$access"; fi
+          if [ -n "$refresh" ]; then echo "::add-mask::$refresh"; fi
+          if [ -z "${PINTEREST_SECRETS_TOKEN}" ]; then
+            echo "::error title=Roteret Pinterest-token kunne ikke gemmes::Pinterest roterede refresh-tokenet, men repository-secret PINTEREST_SECRETS_TOKEN mangler, så det nye token kan ikke gemmes — og det gamle er brugt op. Sæt en fine-grained PAT med Secrets: write som PINTEREST_SECRETS_TOKEN, eller lav et nyt refresh-token i hånden. Se docs/library/pinterest-token-fornyelse-2026-11-03.md."
+            exit 1
+          fi
+          printf '%s' "$access" | gh secret set PINTEREST_ACCESS_TOKEN --repo "$GITHUB_REPOSITORY"
+          printf '%s' "$refresh" | gh secret set PINTEREST_REFRESH_TOKEN --repo "$GITHUB_REPOSITORY"
+          echo "Nyt access- og refresh-token gemt som repository-secrets."
 
       - name: Måledage og gaten til job-summary
         if: steps.gate.outputs.run == 'true' && steps.token.outputs.have == 'true'

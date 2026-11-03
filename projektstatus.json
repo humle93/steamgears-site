@@ -38,10 +38,10 @@
         {
           "id": "s3",
           "name": "S3 — hygiejne",
-          "done": 2.15,
+          "done": 2.45,
           "total": 3.55,
           "unit": "d",
-          "note": "S3.1 0,25 + S3.2 0,1 + S3.3 alt-tekst 0,3 + S3.4 plugin-audit 0,35 + tidligere 0,6; plugin-oprydning (slet/fjern) og webp mangler stadig; + 0,1 d PDF-eksport til research-biblioteket (2 rapporter) og rettet ordombrydning i tools/md_to_pdf.py; + 0,2 d PDF-eksport af de 12 ældste biblioteksdokumenter og to renderer-fejl rettet (sidebrud midt i afsnit, kodeblok-højde); + 0,25 d PDF-eksport af resten af biblioteket (26 dokumenter), renderer-retning af kursiv/glyffer/overskrifter og nyt PDF-værn."
+          "note": "S3.1 0,25 + S3.2 0,1 + S3.3 alt-tekst 0,3 + S3.4 plugin-audit 0,35 + tidligere 0,6; plugin-oprydning (slet/fjern) og webp mangler stadig; + 0,1 d PDF-eksport til research-biblioteket (2 rapporter) og rettet ordombrydning i tools/md_to_pdf.py; + 0,2 d PDF-eksport af de 12 ældste biblioteksdokumenter og to renderer-fejl rettet (sidebrud midt i afsnit, kodeblok-højde); + 0,25 d PDF-eksport af resten af biblioteket (26 dokumenter), renderer-retning af kursiv/glyffer/overskrifter og nyt PDF-værn; + 0,3 d commit-besked-værn (tools/commit_check.py med 24 fixtures, commit-msg-hook, CI-workflow)."
         },
         {
           "id": "s4",
@@ -543,11 +543,20 @@
     {
       "date": "2026-11-03",
       "project": "steamgears.eu — site-optimering",
-      "module": "scope-korrektion S2.6",
+      "module": "daglig måling",
       "before": 57.0,
-      "after": 56.6,
-      "delta": -0.4,
-      "basis": "12,3 af 21,75 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,7/6 · S3 2,15/3,55 · S4 1,4/5) — S2.6 var meldt 0,75, men 12 af 40 planlagte /go/-links ligger stadig kun i planen; kun de 20 i steampunk-outfit-ideas-for-women.md er anvendt",
+      "after": 58.4,
+      "delta": 1.4,
+      "basis": "12,7 af 21,75 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,8/6 · S3 2,45/3,55 · S4 1,4/5)"
+    },
+    {
+      "date": "2026-11-03",
+      "project": "steamgears.eu — site-optimering",
+      "module": "scope-korrektion S2.6",
+      "before": 58.4,
+      "after": 57.9,
+      "delta": -0.5,
+      "basis": "12,60 af 21,75 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,7/6 · S3 2,45/3,55 · S4 1,4/5) — S2.6 var meldt 0,75, men 12 af 40 planlagte /go/-links ligger stadig kun i planen; kun de 20 i steampunk-outfit-ideas-for-women.md er anvendt",
       "scope_change": true
     }
   ]
