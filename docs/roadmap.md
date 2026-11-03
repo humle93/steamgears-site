@@ -13,16 +13,20 @@ dependency so there is one place to read the whole plan.
 - **The 25/10 hub structure is still missing.** `/start-here/`, `/build/`, `/inspiration/`, `/shipping/` and
   `/returns/` all return **404** today, seven days after `mangler-og-plan-25-10.md` flagged them. This is the
   single biggest structural gap on the site.
-- **The AI Engine security case can be closed.** Production now runs **AI Engine 3.8.9** (fix version for
-  CVE-2026-110732 is 3.8.7) and the plugin is **inactive**. The open case in
-  `docs/library/sikkerhed-ai-engine-2026-11-01.md` no longer describes the site.
+- **AI Engine is now the agent's only way into the site.** Production runs **3.9.0, active**, and it serves
+  the MCP endpoint `/wp-json/mcp/v1/http` (OAuth approved 2/11 2026, 206 tools). The earlier note — "3.8.9,
+  inactive, MCP surface removed" — described 1/11 and is superseded (measured 2/11 2026 with
+  `wp_list_plugins` and `tools/list`). The CVE history in `docs/library/sikkerhed-ai-engine-2026-11-01.md`
+  still stands; deleting the plugin would remove agent access (see §2b).
 - **The plugin's CI matrix is behind production.** The site runs PHP **8.5.12** and WP **7.1.4**; CI lints
   8.0–8.4 and tests WP 6.4 + latest. Imported item P3.3 is therefore not hygiene any more — it is the one
   change that verifies the code we actually ship to the runtime we actually run.
 - **The store is behind the content pipeline:** 23 products in draft (including a complete 12-SKU Herbarium
   line) and 8 draft posts against 39 published products. See `docs/library/indholdsaudit-2026-11-01.md`.
-- **The page cache is stale.** The homepage and `/faq/` still serve `mwai-popup-container` and
-  `ai-engine/themes/glass.css` for a plugin that is inactive — a cache-busted request has neither. Purge needed.
+- **The page cache should be re-measured.** The homepage and `/faq/` were serving `mwai-popup-container` and
+  `ai-engine/themes/glass.css` while AI Engine was reported inactive. AI Engine is active again, so that
+  markup may now be legitimate: check a cache-busted request before purging (S0.8), or the purge hides a
+  real difference.
 - **Effort: S0 2.6 d · S1 4.5 d · S2 6.0 d · S3 3.0 d = 16.1 developer-days**, before external approvals.
 
 ---
@@ -100,6 +104,11 @@ done"*. Two owner-side settings therefore stand between the gate and its real te
   bypassed), with `mcp_role: admin`, `mcp_approvals: off` and `mcp_dynamic_rest: true`. So the token is strong
   enough and nothing else is in the way — the switch simply is not saved yet. Recipe in
   [`mcp-auth.md`](mcp-auth.md#sådan-tjekkes-spærren-uden-at-skrive).
+
+  **Re-measured 3/11 2026:** `mcp_drafts_only` is still `true` in `mwai_options`, and
+  `steamgears-autopilot_update` still answers *"This site lets assistants work on drafts only, so this was not
+  done. It would change the live site; ask the owner to do it."* Nothing is different from 2/11 — the switch has
+  not been saved, so 7.25.0 stays one version behind and the campaign fields it carries stay unused.
 - **Settings → General → Banned words is empty** (`banned_words: 0`), so the headline check of 7.22 cannot fire
   on anything until the owner adds at least one word. The other three checks (dead links, missing alt text,
   duplicate captions) work without it.
@@ -146,9 +155,10 @@ make, not a bug.
 
 ### 3.3 Plugins worth attention
 
-- **AI Engine 3.8.9, inactive** — chatbot off, MCP surface removed (`/wp-json/mwai/v1/*` and the AI Engine
-  OAuth routes all answer 404). Its markup still comes out of the page cache; see S0.8. `changelog.txt` still
-  reports 3.8.1, so it is no longer a reliable way to read the installed version.
+- **AI Engine 3.9.0, active** — it *is* the MCP server: `/wp-json/mcp/v1/http` answers `401` with
+  `WWW-Authenticate: Bearer realm="MCP"` until OAuth (working since 2/11 2026), and `/wp-json/mwai/v1/*`
+  answers `401 rest_forbidden`, not `404`. The chatbot is off. `changelog.txt` still reports an old number, so
+  it is not a reliable way to read the installed version — use `wp_list_plugins`.
 - **Two Health Check entries** active ("Health Check & Troubleshooting" 1.7.1 and "Health Check
   Troubleshooting Mode" 1.9.2) — one is redundant.
 - **Coming Soon / Maintenance 6.20.10 active** — confirm it never serves a holding page to crawlers.
@@ -177,7 +187,7 @@ S0.3, which is a repo change.
 
 | # | Item | Why | Effort |
 | --- | --- | --- | --- |
-| S0.1 | ✅ **Done 1/11** — AI Engine case closed in `sikkerhed-ai-engine-2026-11-01.md` (new §0) and in `README.md`; confirmed 3.8.9, inactive, `/wp-json/mwai/v1/*` 404 | A security doc that describes an old state trains people to ignore it | 0.25 d |
+| S0.1 | ✅ **Done 1/11** — AI Engine case closed in `sikkerhed-ai-engine-2026-11-01.md` (new §0) and in `README.md`; confirmed 3.8.9 at the time — **superseded 2/11 2026: 3.9.0, active, serving MCP over OAuth** | A security doc that describes an old state trains people to ignore it | 0.25 d |
 | S0.2 | Resolve the two `User-agent: *` groups in robots.txt and record which plugin owns the file | Conflicting robots directives can silently deindex paths | 0.5 d |
 | S0.3 | ✅ **Done 1/11** — CI matrix now lints PHP 8.0–8.5 and tests WP 6.4 / 7.1 / latest (imported P3.3) | Production runs 8.5.12 / 7.1.4, CI stopped at 8.4 | 0.25 d |
 | S0.4 | Stop the 404 bleed: 301 map for `/start-here/`, `/build/`, `/inspiration/`, `/shipping/`, `/returns/` to the closest live page until S2.1 lands them. ⚠ **Blocked 1/11** — targets chosen (`/steampunk-cosplay-for-beginners/`, `/how-to-make-a-steampunk-costume/`, `/steampunk-cosplay-gallery/`, `/delivery/`, `/refund_returns/`), but Redirection has **no groups** (`wp_redirection_groups` is empty → `Red_Item::create` fails with "Invalid group") and the MCP surface cannot create one. **Unblock: create one group in Tools → Redirection (group dropdown → "Add Group")**, or add the five rows by hand. Note: merely opening the screen does *not* help — Redirection 5.10.1 is active but its installer only seeds groups on activation/upgrade, so `wp_redirection_groups` stayed empty and `group_id` 1/2 are rejected too. Once a group exists the five redirects take one call | Any nav, pin or ad pointing there loses the visitor entirely | 0.5 d |

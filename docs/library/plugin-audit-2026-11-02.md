@@ -1,17 +1,20 @@
 # Plugin-audit 2/11 2026
 
-**Kort:** 36 plugins installeret, 33 aktive, 4 drop-ins. **5 er bagud** ift. WordPress.org, 3 kan ikke
+**Kort:** 38 plugins installeret, 36 aktive, 4 drop-ins. **3 er bagud** ift. WordPress.org, 3 kan ikke
 tjekkes udefra (to er premium, én er egenudviklet). Den største gevinst er ikke opdateringer, men
 **fem overlap** hvor to plugins gør det samme — og ét inaktivt plugin der kan løse en blokeret
 roadmap-opgave.
+
+_Målt igen 2/11 2026 om aftenen, efter at Autopilot 7.22.0 og AI Engine 3.9.0 kom på sitet: 38 installeret,
+36 aktive, og to færre bagud end om eftermiddagen. Ændringerne står i §1, §2 og §4._
 
 ## Metode
 
 | Hvad | Hvordan |
 | --- | --- |
-| Installeret stand | `wp_get_plugins` over MCP 2/11 2026 (navn, version, aktiv, fil, forfatter) |
-| Seneste version | WordPress.org plugin-API pr. slug, samme dag |
-| Runtime | `wp_get_site_status`: WP 7.1.4, PHP 8.5.12, MySQL 8.4.11, 33 aktive plugins |
+| Installeret stand | `steamgears-autopilot/list-plugins` og `wp_list_plugins` over MCP 2/11 2026, sent (navn, version, aktiv, fil) |
+| Seneste version | WordPress.org plugin-API pr. slug, samme dag (`custom-css-js` er det rigtige slug for Simple Custom CSS and JS) |
+| Runtime | `wp_get_diagnostics`: WP 7.1.4, PHP 8.5.12, MySQL 8.4.11, 36 aktive plugins, 2048M, `DISABLE_WP_CRON` slået til (server-cron) |
 | Cache og HTTPS | HTTP-kald udefra: `http://` → 301 til https, `/cart/` og `/checkout/` svarer `private, no-cache` |
 
 **Ikke verificeret:** plugin-indstillingerne er ikke eksponeret over MCP (`wp_get_plugin_settings`
@@ -19,24 +22,27 @@ returnerer tomme `options` for alle seks forsøgte), så alt om *konfiguration* 
 adfærd udefra, ikke af indstillingssider. Premium-plugins' versionsnumre kan ikke sammenlignes med
 WordPress.org, fordi deres opdateringskanal er sælgerens.
 
-## 1. Bagud (5)
+## 1. Bagud (3)
 
 | Plugin | Installeret | Seneste | Kommentar |
 | --- | --- | --- | --- |
-| AI Engine | 3.8.9 | 3.9.0 | **Ikke inaktiv — den er MCP-serveren.** `mwai/v1/simpleAuthCheck` svarer `401` og `mcp/v1/http` svarer `401` med `Bearer realm="MCP"` (målt 2/11 2026). Se §4 |
-| MCP-server (tidligere) | 1.5.13 | 1.5.14 | Ikke længere agentens vej ind — afløst af AI Engine på `/wp-json/mcp/v1/http` |
-| Simple Custom CSS and JS | 3.54.3 | 3.55 | Se overlap §3.4 |
+| Simple Custom CSS and JS | 3.54.3 | 3.55 | Se overlap §3.4. Slug i wp.org er `custom-css-js`, ikke `simple-custom-css-js` |
 | Site Kit by Google | 1.190.0 | 1.191.0 | Minor |
 | Smash Balloon TikTok Feed | 1.9.0 | 1.9.1 | Se overlap §3.3 |
 
-Alle fem er minor-opdateringer; ingen af dem er sikkerhedsrettelser, så de kan lægges i et batch.
-MCP har ikke skriveadgang til plugin-filer, så opdateringen sker i WP-admin → Plugins → Opdateringer.
+Alle tre er minor-opdateringer; ingen af dem er sikkerhedsrettelser, så de kan lægges i et batch.
+
+**To forlod listen 2/11 om aftenen:** AI Engine blev opdateret 3.8.9 → **3.9.0** og er nu på seneste
+version (og er stadig MCP-serveren, se §4), og Royal MCP står nu i **1.5.14**, som også er seneste — men
+den er inaktiv og dermed i §4 i stedet. MCP-adgangen kan læse plugin-listen men ikke skrive plugin-filer,
+heller ikke nu hvor OAuth virker (AI Engines *Drafts Only* tillader kun læsning), så opdateringen sker i
+WP-admin → Plugins → Opdateringer.
 
 **Bemærkning til de "16 plugins bagud".** Tallet stammer fra
 `plugin-opdateringer-triage-2026-11-02.md`, som bygger på **`backup-2026-10-23/plugins.json`** og
 eksplicit skriver, at der ikke var live-adgang. Det snapshot indeholder plugins, der **ikke findes på
 det live site**: `seo-engine`, `vibe-ai`, `wplr-sync`, `mainwp`, `mainwp-child`, `media-file-renamer`.
-Den live målte liste har 36 plugins, og dér er 5 bagud. De to tal beskriver altså ikke samme site-tilstand.
+Den live målte liste har 38 plugins, og dér er 3 bagud (§1). De to tal beskriver altså ikke samme site-tilstand.
 
 Hvor de to dokumenter er uenige, gælder denne måling, fordi den er læst af det kørende site 2/11.
 Triage-dokumentets **risikovurderinger pr. plugin** er stadig brugbare for de plugins, der faktisk er
@@ -47,7 +53,7 @@ versioner i wp-admin før en batch er stadig den rigtige arbejdsgang.
 
 | Plugin | Version | Status | Hvorfor |
 | --- | --- | --- | --- |
-| Steamgears Autopilot | 7.18.0 | aktiv | Egenudviklet, ingen wp.org-liste |
+| Steamgears Autopilot | 7.22.0 | aktiv | Egenudviklet, ingen wp.org-liste. Live-verificeret 2/11 2026 via både `wp_list_plugins` og `status` |
 | WooCommerce.com Update Manager | 1.0.3 | aktiv | Følger med WooCommerce-abonnementet |
 | WP Pusher | 3.0.20 | aktiv | Premium, sælgerens kanal |
 
@@ -61,13 +67,21 @@ versioner i wp-admin før en batch er stadig den rigtige arbejdsgang.
 | 3.4 | **Simple Custom CSS and JS** 3.54.3 + **WPCode Lite** 2.4.1 | To snippet-managere. Kode i databasen uden for git — den slags forsvinder ved et host-skift | Vælg WPCode (aktivt vedligeholdt, har revisionshistorik), flyt indholdet, fjern den anden |
 | 3.5 | **Site Kit by Google** 1.190.0 + **Google for WooCommerce** 3.10.0 | Begge indsætter Google-tags; `/shop/` indeholder 14 `gtag(`-kald. Dobbelt sporing giver dobbelte sidevisninger i GA4 | Behold Site Kit til Analytics, Google for WooCommerce til Merchant Center-feeds, og slå tag-indsættelsen fra i den ene |
 
-## 4. Inaktive plugins (3) — beslut, ikke lad dem ligge
+## 4. Inaktive plugins (2) — beslut, ikke lad dem ligge
 
 | Plugin | Anbefaling | Grund |
 | --- | --- | --- |
-| **AI Engine** 3.8.9 | **Behold — den er agentens eneste kanal** | Rettet 2/11 2026: `/wp-json/mwai/v1/*` svarer `401`, ikke `404`, og `/wp-json/mcp/v1/http` er den MCP-server `.mcp.json` nu peger på; en sletning fjerner agent-adgangen til sitet. Har en CVE-historik (CVE-2026-110732), chatboten er slået fra, og `/wp-json/mwai/v1/*` svarer 404. Et inaktivt plugin er stadig filer på serveren og stadig en fil der kan rammes hvis det genaktiveres ved et uheld |
-| **Royal Access** 1.0.7 | Aktivér eller slet | Accessibility-toolbar. Enten er den en del af tilbuddet (og skal op på siden), eller den er død vægt |
+| **Royal MCP** 1.5.14 | Slet, eller lad den ligge urørt | Agentens tidligere vej ind, slukket 2/11 (svarer `404 rest_no_route`). Nu afløst af AI Engine på `/wp-json/mcp/v1/http`, så den gør ingen nytte — men en inaktiv connector er stadig filer og stadig en attack surface, hvis nogen genaktiverer den ved et uheld |
 | **Royal Links** 2.0.15 | **Prøv den til S1.5** | Se nedenfor — det er det mest interessante fund i auditten |
+
+**AI Engine er aktiv, ikke inaktiv** (rettet 2/11 2026, den stod tidligere i denne tabel). `/wp-json/mwai/v1/*`
+svarer `401`, ikke `404`, og `/wp-json/mcp/v1/http` er den MCP-server `.mcp.json` peger på — den er agentens
+eneste kanal og skal blive. Den har en CVE-historik (CVE-2026-16954 i Public API-selvtesten, CVE-2026-110732 i
+chatboten), men chatboten er slået fra og den offentlige API-selvtest kræver et token. Efter 2/11 2026 er
+status: OAuth virker, 206 værktøjer, **læsning tilladt og skrivning spærret af *Drafts Only***.
+
+**Royal Access 1.0.7 er ikke længere installeret** — den stod i den første måling som "aktivér eller slet", og
+den er nu væk af sig selv. Listen ovenfor er den målte, ikke den antagede.
 
 ### Royal Links løser en blokeret roadmap-opgave
 
@@ -95,13 +109,14 @@ fra "blokeret af ejerens klik" til "kan gøres nu".
 
 | Trin | Handling | Tid |
 | --- | --- | --- |
-| 1 | Slet AI Engine og Health Check | 10 min |
+| 1 | Slet Health Check (drop-in'en forsvinder med den) | 10 min |
 | 2 | Fjern Easy HTTPS Redirection; bekræft at http stadig 301'er | 10 min |
 | 3 | Beslut TikTok-feed; fjern den ene | 10 min |
 | 4 | Flyt snippets til WPCode, fjern Simple Custom CSS and JS | 30 min |
 | 5 | Slå Google-tag fra i den ene af Site Kit / Google for WooCommerce | 10 min |
 | 6 | Test Royal Links på ét link som `/go/`-sti | 30 min |
-| 7 | Batch-opdater de 4 reelle opdateringer (spring AI Engine over, den slettes) | 15 min |
+| 7 | Batch-opdater de 3 resterende (§1) | 15 min |
 
 I alt cirka **1,75 time** — mindre end roadmap'ens 1,0 developer-dag, fordi oprydningen er enklere end
-antaget. Det er stadig ejerens klik: MCP kan læse plugins, ikke slette eller opdatere dem.
+antaget. Det er stadig ejerens klik: MCP kan læse plugins, ikke slette eller opdatere dem — og selv hvis
+den kunne, ville *Drafts Only* stoppe det.

@@ -107,6 +107,18 @@ Automationen dækker **den daglige status**. Det manuelle i §1 — at vurdere h
 - Sproget i commits og dokumentation er dansk, med tekniske termer på engelsk.
 - Nye dokumenter lægges i `docs/` (audits og research i `docs/library/`), og refereres fra `README.md` eller
   roadmap'en, så de ikke bliver forældreløse.
+- **Ny viden skal ud som PDF.** Viden der er værd at gemme — målte fakta, diagnoser, opskrifter, fejl der kostede
+  en runde — skrives som dokument i `docs/library/` og renderes til en PDF i `reports/`, som lægges i det lukkede
+  research-bibliotek:
+
+  ```bash
+  PYTHONPATH=tools/_deps python3 tools/md_to_pdf.py docs/library/<emne>-<dato>.md \
+      reports/<emne>-<dato>.pdf --kicker "STEAMGEARS.EU · <EMNE>"
+  ```
+
+  Markdown-kilden er sandheden, PDF'en er eksporten, og **begge** skal stå i `docs/library/README.md`. Tjek siden
+  visuelt før den regnes som færdig (`pypdfium2` → PNG), for rendereren har to grænser: enkelt-stjerne kursiv
+  (`*sådan*`) vises som stjerner — brug `«citationstegn»` — og kodelinjer over ca. 78 tegn løber ud over spalten.
 
 ## 6. Agent-kørsel og værktøjs-gaten
 

@@ -270,9 +270,30 @@ def render(md_path: Path, pdf_path: Path, kicker: str):
     first_h1 = True
 
     def write_runs(text, indent=0.0):
-        """Skriver inline-runs med hængende indrykning: ombrudte linjer starter ved indent."""
-        doc.set_left_margin(left + indent)
-        doc.set_x(left + indent)
+        """Skriver inline-runs med hængende indrykning og egen ordvis ombrydning.
+
+        fpdf2's write() bryder et ord midt over når skriften skiftes undervejs (fx **fed**
+        inde i en sætning) og mister mellemrum mellem to runs. Her styres x/y selv, så et
+        ord kun flyttes — aldrig deles, medmindre det er bredere end hele spalten.
+        """
+        origin = left + indent
+        x_max = doc.w - MARGIN_R
+        state = {"x": origin, "y": doc.get_y()}
+        pending = [False]  # er der et mellemrum der venter på næste ord?
+
+        def newline():
+            state["x"] = origin
+            state["y"] += LEAD
+            if state["y"] + LEAD > doc.h - MARGIN_B:
+                doc.add_page()
+                state["y"] = MARGIN_T
+
+        def put(fragment):
+            width = doc.get_string_width(fragment)
+            doc.set_xy(state["x"], state["y"])
+            doc.cell(width, LEAD, fragment)
+            state["x"] += width
+
         for chunk, style in segments(text):
             if style == "B":
                 doc.set_font(FONT, "B", BODY)
@@ -290,17 +311,30 @@ def render(md_path: Path, pdf_path: Path, kicker: str):
             else:
                 doc.set_font(FONT, "", BODY)
                 doc.set_text_color(*INK)
-            piece = san_mono(chunk) if style == "M" else san(chunk)
-            # Kodeord må ikke brydes midt i ordet: flyt hele ordet til næste linje hvis det kan være der.
-            if style == "M" and piece:
-                need = doc.get_string_width(piece)
-                remaining = doc.w - doc.r_margin - doc.get_x()
-                if need > remaining and need < CONTENT_W - indent:
-                    doc.ln(LEAD)
-                    doc.set_x(left + indent)
-            doc.write(LEAD, piece)
-        doc.set_left_margin(left)
-        doc.ln(LEAD + 0.9)
+            parts = re.split(r"(\s+)", san_mono(chunk) if style == "M" else san(chunk))
+            for token in parts:
+                if not token:
+                    continue
+                if token.isspace():
+                    # Mellemrum hører til det følgende ord — også når ordet ligger i næste
+                    # run, ellers smelter to runs sammen ("kø-payloadenclockwork-punk…").
+                    pending[0] = True
+                    continue
+                at_start = state["x"] <= origin + 0.01
+                unit = token if (at_start or not pending[0]) else " " + token
+                pending[0] = False
+                if state["x"] + doc.get_string_width(unit) > x_max and not at_start:
+                    newline()
+                    unit = token
+                while state["x"] + doc.get_string_width(unit) > x_max and len(unit) > 1:
+                    cut = 1
+                    while cut < len(unit) and state["x"] + doc.get_string_width(unit[:cut + 1]) <= x_max:
+                        cut += 1
+                    put(unit[:cut])
+                    unit = unit[cut:]
+                    newline()
+                put(unit)
+        doc.set_xy(left, state["y"] + LEAD + 0.9)
 
     for kind, value in blocks:
         if kind == "h1":

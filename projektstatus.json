@@ -37,10 +37,10 @@
         {
           "id": "s3",
           "name": "S3 — hygiejne",
-          "done": 1.6,
-          "total": 3,
+          "done": 1.7,
+          "total": 3.1,
           "unit": "d",
-          "note": "S3.1 0,25 + S3.2 0,1 + S3.3 alt-tekst 0,3 + S3.4 plugin-audit 0,35 + tidligere 0,6; plugin-oprydning (slet/fjern) og webp mangler stadig"
+          "note": "S3.1 0,25 + S3.2 0,1 + S3.3 alt-tekst 0,3 + S3.4 plugin-audit 0,35 + tidligere 0,6; plugin-oprydning (slet/fjern) og webp mangler stadig; + 0,1 d PDF-eksport til research-biblioteket (2 rapporter) og rettet ordombrydning i tools/md_to_pdf.py."
         },
         {
           "id": "s4",
@@ -405,13 +405,22 @@
       "basis": "11,5 af 21,2 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,45/6 · S3 1,6/3 · S4 1,4/5)"
     },
     {
+      "date": "2026-11-02",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 54.2,
+      "after": 54.5,
+      "delta": 0.3,
+      "basis": "11,6 af 21,3 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,45/6 · S3 1,7/3,1 · S4 1,4/5)"
+    },
+    {
       "date": "2026-11-03",
       "project": "steamgears.eu — site-optimering",
       "module": "ingen ændring",
-      "before": 54.2,
-      "after": 54.2,
+      "before": 54.5,
+      "after": 54.5,
       "delta": 0,
-      "basis": "11,5 af 21,2 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,45/6 · S3 1,6/3 · S4 1,4/5)"
+      "basis": "11,6 af 21,3 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,45/6 · S3 1,7/3,1 · S4 1,4/5)"
     },
     {
       "date": "2026-11-03",

@@ -100,7 +100,7 @@ def n(value: float, dec: int = 2) -> str:
 
 
 SITE_ROADMAP = [
-    ("S0.1", "AI Engine-sagen lukket (3.8.9, inaktiv, OAuth-ruter 404)", "Færdig", "0,25 d"),
+    ("S0.1", "AI Engine-sagen lukket (CVE-fix kravet var 3.8.7; 3.9.0 kører)", "Færdig", "0,25 d"),
     ("S0.2", "To `User-agent: *`-grupper i robots.txt afklares", "Åben", "0,5 d"),
     ("S0.3", "CI matrix PHP 8.0–8.5 + WP 6.4/7.1/latest", "Færdig", "0,25 d"),
     ("S0.4", "301-map for de fem vanity-URL'er", "Blokeret", "0,5 d"),
@@ -221,7 +221,7 @@ PROJECTS = [
             "To hubs (/start-here/, /build/) plus fem undersider er live med 0 dårlige links.",
             "Alle 30 publicerede indlæg linker butikken (28 unikke produktmål).",
             "39 produkter er publiceret og alle in stock; soft-404-produkterne er væk.",
-            "AI Engine-sagen er lukket: 3.8.9, inaktiv, OAuth-ruter 404, cache purget.",
+            "AI Engine-sagen er lukket: CVE-fix kravet var 3.8.7, sitet kører 3.9.0, som nu også er MCP-serveren.",
         ],
         "fails": [
             "Navigationen er stadig en page-list: alle 29 sider i headeren, inkl. kurv og kasse.",
