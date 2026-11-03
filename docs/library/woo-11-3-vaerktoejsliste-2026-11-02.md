@@ -47,6 +47,9 @@ til omkring **197**, og `ability_bridge`-spanden falder tilsvarende. Vores 32 og
 4. Rækkerne i [`mcp-adapter-abilities.csv`](mcp-adapter-abilities.csv) bliver stående med nytte 1 — de er
    allerede markeret som udfasede, så ingen bruger dem ved en fejl.
 
+Den fulde før/efter-rutine omkring selve opdateringen — hvad der måles uden credential, og hvad der
+kræver login — står i [Woo-tjeklisten](woo-opdaterings-tjekliste-2026-11-03.md).
+
 Der er intet at rette i koden: vi kalder ingen af spejlene, og vores egne 32 abilities er upåvirkede.
 Kontrollen kræver det samme credential som resten af målingerne — `/wp-json/wp-abilities/v1/abilities`
 svarer stadig 401 anonymt, så listen kan ikke tjekkes uden login.
