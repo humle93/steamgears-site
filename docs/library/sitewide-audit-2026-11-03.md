@@ -28,7 +28,7 @@ Gennemgangen bygger på de nyeste tilgængelige repo-dokumenter pr. 2026-11-03:
 | --- | --- | --- | --- |
 | P0 | Juridisk identitet og EU-tillid | Butiksauditten fandt manglende CVR/firmanavn, adresse og telefon; imprint stod til `none`. | Afklar virksomhedens registrerede oplysninger med ejeren. Udgiv korrekte kontakt-, handels-, retur- og privatlivsoplysninger; publicér aldrig gættede felter. Få juridisk gennemgang ved tvivl. |
 | P0 | Cookie-samtykke og måling | Butiksauditten fandt US/opt-out-konfiguration; SEO-dokumentationen beskrev dobbelt GA4 pageview fra to installationer. | Revider consent-regioner, kategorier og script-gating for relevante markeder. Behold én GA4-installation og test consent-tilstande før trafikmåling. |
-| P0 | Valuta, moms og samlet pris | Butiksauditten ja; USD blev observeret i produktdata, mens butikken henvender sig til danske/EU-kunder. | Vælg DKK eller EUR, genberegn produktpriser ud fra Printify-kostpris, fragt, moms og margin. Test den faktiske pris og valuta gennem checkout — skift ikke kun valutakoden. |
+| P0 | Valuta, moms og samlet pris | Butiksauditten fandt USD i produktdata i produktdata, mens butikken henvender sig til danske/EU-kunder. | Vælg DKK eller EUR, genberegn produktpriser ud fra Printify-kostpris, fragt, moms og margin. Test den faktiske pris og valuta gennem checkout — skift ikke kun valutakoden. |
 | P0 | Checkout og levering | Printify live rates, zoner og cache-undtagelser var ikke bekræftet. | Test kurv til ordre i et sikkert testflow for mindst DK og et EU-land. Kontrollér fragt, skat, lager, e-mails, mobilvisning og at kurv/checkout ikke serveres fra cache. |
 | P1 | Produktkøb og katalogkvalitet | Tidligere audit: 39 produkter med højst to billeder; størrelsestabeller manglede på produktsider; variantmapping var en kendt blokering. | Prioritér topsælgende/strategiske produkter. Sørg for korrekte varianter/SKU'er, størrelsesguide, materialer, fit, produktion/leveringstid, returbetingelser, GPSR-oplysninger og flere repræsentative billeder. |
 | P1 | Performance | Tidligere måling af `/shop/`: ca. 5,8 s / 470 KB i butiksaudit; SEO-audit målte 3,1 s / 448 KB. Målemetoder/tidspunkter varierer. | Etabler en ensartet mobil-baseline. Optimer produktbilleder og billedstørrelser, fjern unødvendige scripts, gennemgå cache/minificering og database/object-cache. Undgå ændringer i checkout-cache. |
@@ -54,7 +54,7 @@ Gennemgangen bygger på de nyeste tilgængelige repo-dokumenter pr. 2026-11-03:
 7. **Størrelses- og pasformhjælp** på alle relevante beklædningsprodukter, både cm og tommer.
 8. **Komplet look / relaterede produkter** på guides og produktsider med lagerkontrol og relevante, ikke tilfældige, forslag.
 9. **Søgning med gode tomme resultater**, forslag og stavetolerance, hvis den nuværende katalogstørrelse og søgedata retfærdiggør funktionen.
-10. **Ønskeliste** kun efter checkout-, tracking- ja performance-forbedringer; kontroller konto-/cookieafhængigheder og GDPR-konsekvenser.
+10. **Ønskeliste** kun efter checkout-, tracking- og performance-forbedringer; kontroller konto-/cookieafhængigheder og GDPR-konsekvenser.
 
 ### Mål og forbedr løbende
 

@@ -1,96 +1,96 @@
 # Deploy-roadmap — steamgears.eu
 
-**Dato:** 2026-11-03  
-**Formål:** sikker, målbar rækkefølge for at omsætte [`sitewide-audit-2026-11-03.md`](sitewide-audit-2026-11-03.md) til ændringer på den hostede WordPress/WooCommerce-butik.  
-**Estimater:** udviklingstid for én person; ventetid på ejer, host, betalingsudbyder eller Printify er ikke medregnet.  
+**Dato:** 2026-11-03
+**Formål:** sikker, målbar rækkefølge for at omsætte [`sitewide-audit-2026-11-03.md`](sitewide-audit-2026-11-03.md) til ændringer på den hostede WordPress/WooCommerce-butik.
+**Estimater:** udviklingstid for én person; ventetid på ejer, host, betalingsudbyder eller Printify er ikke medregnet.
 **Samlet indsats:** ca. **6–9 udviklerdage**, plus eksterne godkendelser og ejerbeslutninger. Dette er et nyt, separat scope-estimat og ændrer ikke den autoritative status i `projektstatus.json`.
 
 ## Deploy-model og sikkerhedsgrænser
 
 WordPress-kernen og databasen ligger hos Simply. Dette GitHub-repo er ikke en komplet WordPress-installation og er ikke en direkte produktions-deploypipeline. Siteændringer skal foretages gennem godkendt WordPress-adgang/MCP eller WordPress-admin; CSS/assets/plugins i repoet følger hver deres releaseproces.
 
-Tilgængelighedsnotat [`../agent-profil.md`](../agent-profil.md) dokumenterer, at live-skriveadgang, staging og browserbaseret Lighthouse ikke nødvendigvis er til rådighed i agentmiljøet. **Ikke deployer automatisk** til production. Hvis write access mangler, leveres ændringsspecifikation, testpayload og owner checklist — live-arbejde markeres blokeret, ei verifioiduksi.
+Tilgængelighedsnotatet [`../agent-profil.md`](../agent-profil.md) dokumenterer, at live-skriveadgang, staging og browserbaseret Lighthouse ikke nødvendigvis er til rådighed i agentmiljøet. **Der deployes ikke automatisk** til production. Mangler skriveadgang, leveres ændringsspecifikation, testpayload og owner-checklist — og live-arbejdet markeres blokeret og ikke verificeret.
 
-### Jokaisen tuotantovaiheen portti
+### Porten for hver produktionsfase
 
-1. **Valtuutus:** muutoksen omistaja ja kohde (staging/production) on hyväksytty.
-2. **Palautuminen:** tuore, palautettavissa oleva tiedosto- ja tietokantavarmistus; muutokselle on täsmällinen peruutustapa.
-3. **Vertailutaso:** ennen-mittaus ja muuttuvat URL:t/asetukset on kirjattu.
-4. **Rajattu toimitus:** yksi looginen muutoskori kerrallaan; ei laajoja plugin-päivityksiä samalla kertaa.
-5. **Tarkistus:** muutos todetaan WordPress REST/API- tai admin-näkymästä sekä käyttäjän näkyvästä näkymästä, kun pääsy sallii.
-6. **Go/no-go:** jos checkout, suostumus tai maksu hajoaa, julkaisu pysäytetään ja palautetaan.
+1. **Bemyndigelse:** ændringens ejer og mål (staging/production) er godkendt.
+2. **Tilbagerulning:** frisk, gendanbar fil- og databasebackup; ændringen har en præcis fortrydelsesmåde.
+3. **Sammenligningsgrundlag:** før-måling og de berørte URL'er/indstillinger er skrevet ned.
+4. **Afgrænset levering:** én logisk ændringskurv ad gangen; ingen brede plugin-opdateringer samtidig.
+5. **Kontrol:** ændringen konstateres i WordPress REST/API eller admin-visningen og i den brugervendte visning, hvor adgang tillader det.
+6. **Go/no-go:** hvis checkout, samtykke eller betaling brækker, stoppes udrulningen og rulles tilbage.
 
-## Vaiheistus
+## Faseopdeling
 
-| Vaihe | Työ | Arvio | Valmis kun |
+| Fase | Arbejde | Estimat | Færdig når |
 | --- | --- | ---: | --- |
-| 0. Varmista nykytilanne | Vahvista auditin kriittiset havainnot, teknologiat, omistajuus, live-URL:t ja pääsy; ota uudet mittarit. | 0,5–1 päivä | Jokaisella P0-havainnolla on tuore näyttö, omistaja ja päätös; vanhaa tietoa ei käsitellä nykytilana. |
-| 1. Turvallinen julkaisupohja | Varmistus/palautusharjoitus, staging tai vastaava testitapa, käyttöoikeusrajat, muutosloki, ylläpitoikkuna ja palautusmenettely. | 0,5–1 päivä | Varmistuksesta palautus on testattu tai dokumentoidusti todettu palautettavaksi; live-muutos voidaan perua. |
-| 2. Compliance ja analytiikan perusta | Ejer bekræfter oplysninger, cookie-/consent-konfiguration, GA4-duplikering og checkout-politikker; korrigér kun godkendte forhold. | 1–1,5 dage | Juridiske data er autoriserede; samtykke er testet; hver analytikhændelse fyrer én gang; intet kritisk checkout-fund. |
-| 3. Pris, fragt og betaling | Afklar valuta, genberegn priser, bekræft moms, Printify-zoner/rater, gateways og cache-undtagelser. Testordre i kontrolleret flow. | 1–1,5 dage + udbyderventetid | Totalpris og levering stemmer gennem hele flowet for DK/EU; betaling, e-mail og refund-/cancel-procedure er testet. |
-| 4. Produktoplevelse | Prioriterede produkter først: varianter, SKU, billeder, størrelse, fit, levering, retur, GPSR og relationer/kollektioner. | 1–2 dage | Testkatalog dækker hver produkttype; ingen uoverensstemmelse mellem produkttekst, variantdata, varianter, feed og checkout. |
-| 5. Ydelse, SEO ja saavutettavuus | Mobil-baseline, kuvat/CWV, H1/meta/alt/schema, kriittiset URL:t, näppäimistö ja kontrasti. Fixit rajatusti. | 1–1,5 päivää | Uudet mittaukset kirjattu; checkout ei ole cachetettu; schema vastaa näkyvää tuotetietoa; ei kriittisiä regressioita. |
-| 6. Hyväksyminen ja asteittainen julkaisu | Staging-testit, hyväksyntä, julkaisu tuotantoon pienissä koreissa, smoke test jokaisen jälkeen, seuranta ja handoff. | 0,5–1 päivä | Kaikki hyväksymiskriteerit läpäisty; seuranta käynnissä; palautusvalmius ja omistaja vahvistettu. |
+| 0. Bekræft nuværende tilstand | Bekræft audittens kritiske fund, teknologier, ejerskab, live-URL'er og adgang; tag nye målinger. | 0,5–1 dag | Hvert P0-fund har frisk bevis, ejer og beslutning; gammel viden behandles ikke som nuværende tilstand. |
+| 1. Sikkert udrulningsgrundlag | Backup/gendannelsesøvelse, staging eller tilsvarende testvej, adgangsgrænser, ændringslog, vedligeholdelsesvindue og tilbagerulningsprocedure. | 0,5–1 dag | Gendannelse fra backup er testet eller dokumenteret gendanbar; en live-ændring kan fortrydes. |
+| 2. Compliance og analysemæssigt grundlag | Ejer bekræfter virksomhedsoplysninger, cookie-/consent-konfiguration, GA4-dublettering og checkout-politikker; der rettes kun godkendte forhold. | 1–1,5 dag | Juridiske data er autoriserede; samtykke er testet; hver analytikhændelse fyrer én gang; intet kritisk checkout-fund. |
+| 3. Pris, fragt og betaling | Afklar valuta, genberegn priser, bekræft moms, Printify-zoner/-rater, gateways og cache-undtagelser. Testordre i kontrolleret flow. | 1–1,5 dag + udbyderventetid | Totalpris og levering stemmer gennem hele flowet for DK/EU; betaling, e-mail og refund-/annulleringsprocedure er testet. |
+| 4. Produktoplevelse | Prioritér produkter først: varianter, SKU, billeder, størrelse, fit, levering, retur, GPSR og relationer/kollektioner. | 1–2 dage | Testkataloget dækker hver produkttype; ingen uoverensstemmelse mellem produkttekst, variantdata, feed og checkout. |
+| 5. Ydeevne, SEO og tilgængelighed | Mobil-baseline, billeder/CWV, H1/meta/alt/schema, kritiske URL'er, tastatur og kontrast. Ret afgrænset. | 1–1,5 dag | Nye målinger er skrevet ned; checkout er ikke cachet; schema svarer til den synlige produktoplysning; ingen kritiske regressioner. |
+| 6. Accept og gradvis udrulning | Staging-test, accept, udrulning til production i små kurve, smoke-test efter hver, overvågning og overdragelse. | 0,5–1 dag | Alle acceptkriterier er gennemført; overvågning kører; tilbagerulningsberedskab og ejer er bekræftet. |
 
-**Yhteensä: 6–9 kehittäjäpäivää.** Vaiheet 2–4 voivat viivästyä ulkoisista hyväksynnöistä tai omistajan tiedoista. Aikaa ei lasketa valmiiksi työnä, jos live-toteutusta ei voida verifioida.
+**I alt: 6–9 udviklerdage.** Fase 2–4 kan blive forsinket af eksterne godkendelser eller ejerens oplysninger. Tid tælles ikke som færdigt arbejde, hvis live-udførelsen ikke kan verificeres.
 
-## Ehdotettu julkaisu- ja palautusjärjestys
+## Foreslået udrulnings- og rollback-rækkefølge
 
-### Julkaisuerä A — mittaus ja riskien pienentäminen
+### Udrulningskurv A — måling og risikoreduktion
 
-- Ota tuore varmistus ja tallenna asetusten nykyarvot.
-- Mittaa tärkeät funnel-URL:t (etusivu, shop, tuote, kori, checkout, politiikat) ja tallenna tulokset.
-- Korjaa GA4:n kaksoislaukaisu vasta kun molemmat asennuslähteet on tunnistettu.
-- Testaa suostumuspolku ja checkout stagingissa.
-- Palautus: palauta aiemmat tagi-/consent-asetukset ja varmista ettei kaksinkertainen mittaus tai luvaton skripti palaa.
+- Tag en frisk backup og gem indstillingernes nuværende værdier.
+- Mål de vigtige funnel-URL'er (forside, shop, produkt, kurv, checkout, politikker) og gem resultaterne.
+- Ret GA4's dobbeltaffyring først når begge installationskilder er identificeret.
+- Test samtykkeflowet og checkout på staging.
+- Rollback: gendan de tidligere tag-/consent-indstillinger, og bekræft at dobbeltmåling eller ikke-godkendt script ikke vender tilbage.
 
-### Julkaisuerä B — kaupalliset perustat
+### Udrulningskurv B — kommercielle grundlag
 
-- Päätä valuutta ja hinnat, varmista vero- ja toimitusehdot.
-- Testaa shipping zones, Printify rate ja cache exclusion.
-- Ota gateway-muutokset käyttöön vasta provider-hyväksynnällä ja testimaksulla.
-- Palautus: palauta aiemmat hinnat/gateway-/shipping-asetukset; keskeytä liikenneohjaus, jos kokonaishinta tai maksu on epäselvä.
+- Beslut valuta og priser, og bekræft moms- og leveringsvilkår.
+- Test shipping zones, Printify-rater og cache-undtagelser.
+- Slå først gateway-ændringer til efter udbydergodkendelse og en testbetaling.
+- Rollback: gendan de tidligere priser/gateway-/shipping-indstillinger; stands trafikstyringen hvis totalpris eller betaling er uklar.
 
-### Julkaisuerä C — tuotekatalogi
+### Udrulningskurv C — produktkatalog
 
-- Aloita 3–5 prioriteettituotteella, mukaan lukien relevantit tuotetyypit (apparel/poster/accessory).
-- Varmista SKU-, varasto-, variantti- ja Printify-kytkentä ennen tekstien ja kuvien massamuokkausta.
-- Kun mallikierros hyväksytään, vie sama tarkistuslista katalogin muihin tuotteisiin.
-- Palautus: palauta kyseisten tuotteiden vanha sisältö/tila, jos ostettavuus tai tuotantokytkentä rikkoutuu.
+- Start med 3–5 prioritetsprodukter, inkl. de relevante produkttyper (apparel/poster/accessory).
+- Bekræft SKU-, lager-, variant- og Printify-kobling før masseredigering af tekster og billeder.
+- Når modelrunden er godkendt, føres samme tjekliste videre til katalogets øvrige produkter.
+- Rollback: gendan de pågældende produkters tidligere indhold/tilstand, hvis købsmulighed eller produktionskobling brækker.
 
-### Julkaisuerä D — suorituskyky ja löydettävyys
+### Udrulningskurv D — ydeevne og findbarhed
 
-- Muuta ensin kuvien kokoa/formaatteja ja sivukohtaisia assetteja, mittaa uudelleen.
-- Tee välimuisti/minifiointi-muutoksia yksi kerrallaan; checkout, kori ja henkilökohtaiset näkymät ohitetaan välimuistista.
-- Tarkista robots/sitemap ja yhden edustavan URL:n schema kunkin muutoksen jälkeen.
-- Palautus: peru viimeisin cache-/asset-muutos ja purge cache vasta kontrolloidusti.
+- Ret først billedstørrelser/-formater og sideafhængige assets, og mål igen.
+- Lav cache-/minificeringsændringer én ad gangen; checkout, kurv og personlige visninger holdes uden for cachen.
+- Kontrollér robots/sitemap og schema på én repræsentativ URL efter hver ændring.
+- Rollback: fortryd den seneste cache-/asset-ændring, og purge cachen først kontrolleret.
 
-## Testauslista ennen liveä ja sen jälkeen
+## Testliste før og efter live
 
-- [ ] Etusivu, shop, tuotekategoria, tuote, kori, checkout, tili ja tärkeimmät politiikkasivut avautuvat ja toimivat.
-- [ ] Tuote: valinta, SKU, hinta, valuutta, saatavuus, kuva, määrä ja ostoskori vastaavat toisiaan.
-- [ ] Kassan kokonaisuus: tuotteet + toimitus + verot; vähintään DK ja yksi EU-kohde.
-- [ ] Onnistunut ja hylätty testimaksu sekä vahvistus-/virhesähköposti.
-- [ ] Kuponki, guest checkout, mobiilikäyttö, validointivirheet ja tilauksen tila, jos ne kuuluvat nykyiseen myyntipolkuun.
-- [ ] Peruutus/palautusprosessi vastaa julkaistuja ehtoja; juridiset faktat ovat omistajan vahvistamia.
-- [ ] Consent: hylkääksessä ei-välttämättömät tagit eivät käynnisty; hyväksyessä asetukset toimivat kuten dokumentoitu.
-- [ ] GA4: tapahtumat eivät tuplaannu ja `purchase`-arvo/valuutta täsmää WooCommerce-tilaukseen.
-- [ ] Sitemaps/robots/canonical/indexing sekä Product/Offer/Shipping/Return schema tarkistetaan, kun soveltuu.
-- [ ] Lighthouse/CWV mitataan samalla testiasetuksella ennen/jälkeen; ei väitetä parannusta ilman mittausta.
-- [ ] Lokit, cron, kassasähköposti ja mahdolliset turvallisuusvaroitukset tarkistettu.
+- [ ] Forside, shop, produktkategori, produkt, kurv, checkout, konto og de vigtigste politik-sider åbner og virker.
+- [ ] Produkt: valg, SKU, pris, valuta, lager, billede, antal og kurv stemmer overens.
+- [ ] Kassens total: produkter + levering + moms; mindst DK og ét EU-land.
+- [ ] Gennemført og afvist testbetaling samt bekræftelses-/fejlmail.
+- [ ] Kupon, gæstekøb, mobilbrug, valideringsfejl og ordrestatus, hvis de hører til den nuværende salgsvej.
+- [ ] Annullerings-/returproces svarer til de publicerede vilkår; juridiske fakta er bekræftet af ejeren.
+- [ ] Consent: ved afvisning starter ikke-nødvendige tags ikke; ved accept virker indstillingerne som dokumenteret.
+- [ ] GA4: hændelser dubleres ikke, og `purchase`-værdi/valuta stemmer med WooCommerce-ordren.
+- [ ] Sitemaps/robots/canonical/indexing samt Product/Offer/Shipping/Return-schema kontrolleres, hvor det er relevant.
+- [ ] Lighthouse/CWV måles med samme testopsætning før/efter; der påstås ingen forbedring uden en måling.
+- [ ] Logs, cron, kassemail og eventuelle sikkerhedsadvarsler er gennemgået.
 
-## Owner-gated riippuvuudet
+## Afhængigheder der kræver ejeren
 
-Älä arvaa tai julkaise placeholder-tietoja. Tarvitaan:
+Der gættes ikke, og der udgives ikke placeholder-oplysninger. Der skal bruges:
 
-1. Yrityksen virallinen nimi, CVR, osoite, puhelin ja oikea asiakaspalveluosoite.
-2. Päätös valuutasta ja hyväksytty hintalaskelma veroineen/marginaaleineen.
-3. Printifyn aktiivinen variantti-/SKU-kartta ja toimitusehdot tärkeimmille tuotteille.
-4. Palautus-/peruutusehdot ja juridinen hyväksyntä tarvittaessa.
-5. Maksupalveluiden merchant-/sandbox-hyväksyntä.
-6. Varmuuskopio-, staging-, WordPress-admin- ja analytiikka-/GSC-pääsy.
-7. Nimetty julkaisija ja lupa production-muutoksille.
+1. Virksomhedens officielle navn, CVR, adresse, telefon og korrekte kundeserviceadresse.
+2. Beslutning om valuta og en godkendt prisberegning med moms/marginer.
+3. Printifys aktive variant-/SKU-kort og leveringsvilkår for de vigtigste produkter.
+4. Retur-/annulleringsvilkår og juridisk godkendelse ved tvivl.
+5. Merchant-/sandbox-godkendelse hos betalingsudbyderne.
+6. Backup-, staging-, WordPress-admin- og analytics-/GSC-adgang.
+7. En navngivet udgiver og tilladelse til production-ændringer.
 
-## Rajaus: mitä roadmap ei tee
+## Afgrænsning: hvad roadmappen ikke gør
 
-Tämä dokumentti ei muuta live-sivua, hyväksy oikeudellisia ehtoja, tilaa palveluita, tee oikeita maksutapahtumia tai väitä deployta suoritetuksi. Repo ei sisällä koko live-WP-koodia. Plugin-zipin julkaisu ja asentaminen on erillinen prosessi: ks. [`../../plugins/steamgears-autopilot/README.md`](../../plugins/steamgears-autopilot/README.md) ja [`../roadmap.md`](../roadmap.md) §2b. Jokaisen production-toteutuksen jälkeen on kirjattava mitattu tulos, muutettu asia, palautusvalmius ja mahdolliset avoimet estot.
+Dette dokument ændrer ikke live-siden, godkender ikke juridiske vilkår, bestiller ikke tjenester, laver ikke rigtige betalingstransaktioner og påstår ikke at et deploy er udført. Repoet indeholder ikke hele live-WP-koden. Udgivelse og installering af plugin-zippen er en separat proces: se [`../../plugins/steamgears-autopilot/README.md`](../../plugins/steamgears-autopilot/README.md) og [`../roadmap.md`](../roadmap.md) §2b. Efter hver production-udførelse skal det målte resultat, det ændrede, tilbagerulningsberedskabet og eventuelle åbne blokeringer skrives ned.
