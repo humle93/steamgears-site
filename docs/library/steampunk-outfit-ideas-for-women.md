@@ -13,31 +13,31 @@ Every look below is a **complete outfit** — the pieces listed add up to a wear
 ### 1. The Airship Captain (hero look)
 
 Fitted brown lace-up corset + long split coat + aviator goggles pushed up on a top hat.
-- Victorian Corset Top (Brown Lace-Up) — $44.95
-- Medieval Assassin Coat — $39.95
-- Steampunk Top Hat with Removable Goggles — $34.95
+- [Victorian Corset Top (Brown Lace-Up)](https://steamgears.eu/go/487/) — $44.95
+- [Medieval Assassin Coat](https://steamgears.eu/go/497/) — $39.95
+- [Steampunk Top Hat with Removable Goggles](https://steamgears.eu/go/481/) — $34.95
 - **Total: ~$120**
 
 ### 2. The Clockwork Duchess
 
 Overbust leather corset + velvet tailcoat + vintage driver goggles.
-- Steampunk Overbust Corset (Leather Lace-Up) — $59.95
-- Wine Red Velvet Tailcoat — $64.95
-- Vintage Driver Goggles — $29.95
+- [Steampunk Overbust Corset (Leather Lace-Up)](https://steamgears.eu/go/489/) — $59.95
+- [Wine Red Velvet Tailcoat](https://steamgears.eu/go/493/) — $64.95
+- [Vintage Driver Goggles](https://steamgears.eu/go/479/) — $29.95
 - **Total: ~$155**
 
 ### 3. The Gothic Aviator
 
 Gothic PU overbust corset (silver) + bowler hat with goggles + copper pilot goggles as neckwear.
-- Gothic PU Leather Overbust Corset — $64.95
-- Gothic Bowler Top Hat with Goggles — $39.95
-- Copper Pilot Goggles — $24.95
+- [Gothic PU Leather Overbust Corset](https://steamgears.eu/go/491/) — $64.95
+- [Gothic Bowler Top Hat with Goggles](https://steamgears.eu/go/485/) — $39.95
+- [Copper Pilot Goggles](https://steamgears.eu/go/477/) — $24.95
 - **Total: ~$130**
 
 ### 4. The Casual Everyday Steampunk (budget favourite)
 
 Graphic steampunk tee + brown corset belt + everyday jeans/boots. The look that works on a Tuesday.
-- Steampunk Unisex T-Shirt (fx Clockwork Fox / Nautilus Voyage) — $26.95
+- [Clockwork Fox tee](https://steamgears.eu/go/559/) or [Nautilus Voyage tee](https://steamgears.eu/go/555/) — $26.95
 - Victorian Corset Top worn open as a layer — $44.95
 - **Total: ~$72**
 
@@ -46,28 +46,28 @@ Graphic steampunk tee + brown corset belt + everyday jeans/boots. The look that 
 Pirate-inspired poster tee + leather corset + goggles.
 - The Kraken Widow T-Shirt or Poster — $26.95
 - Steampunk Overbust Corset — $59.95
-- Steampunk Aviator Goggles — $24.95
+- [Steampunk Aviator Goggles](https://steamgears.eu/go/475/) — $24.95
 - **Total: ~$112**
 
 ### 6. The Winter Airship Mechanic
 
 Gear-corset hoodie + beanie/scarf + driver goggles.
-- Gear Corset Lady Hoodie — $49.95
+- [Gear Corset Lady Hoodie](https://steamgears.eu/go/409/) — $49.95
 - Vintage Driver Goggles — $29.95
 - **Total: ~$80**
 
 ### 7. The Vampire Aristocrat
 
 Victorian vampire tailcoat + gothic corset + top hat.
-- Victorian Vampire Tailcoat (Brocade) — $39.95
+- [Victorian Vampire Tailcoat (Brocade)](https://steamgears.eu/go/495/) — $39.95
 - Gothic PU Leather Overbust Corset — $64.95
-- Time Traveler Top Hat with Goggles — $49.95
+- [Time Traveler Top Hat with Goggles](https://steamgears.eu/go/483/) — $49.95
 - **Total: ~$155**
 
 ### 8. The Sky Corsair (pirate vibe)
 
 Pirate poster line + corset + goggles — our fastest-growing look.
-- Sky Corsair Poster/tee — $21.90
+- [Sky Corsair print](https://steamgears.eu/go/719/) — $21.90
 - Victorian Corset Top — $44.95
 - Copper Pilot Goggles — $24.95
 - **Total: ~$92**
@@ -75,14 +75,14 @@ Pirate poster line + corset + goggles — our fastest-growing look.
 ### 9. The Tarot Seer
 
 Clockwork Seer Tarot tee + velvet tailcoat + pocket watch-style accessories.
-- The Clockwork Seer Tarot T-Shirt — $26.95
+- [The Clockwork Seer Tarot T-Shirt](https://steamgears.eu/go/567/) — $26.95
 - Wine Red Velvet Tailcoat — $64.95
 - **Total: ~$92**
 
 ### 10. The Museum Curator
 
 Cabinet of Curiosities tee + long coat + bowler hat.
-- Cabinet of Curiosities T-Shirt — $26.95
+- [Cabinet of Curiosities T-Shirt](https://steamgears.eu/go/561/) — $26.95
 - Medieval Assassin Coat — $39.95
 - Gothic Bowler Top Hat — $39.95
 - **Total: ~$107**
@@ -90,14 +90,14 @@ Cabinet of Curiosities tee + long coat + bowler hat.
 ### 11. The Automaton Engineer
 
 Mechanical Elephant hoodie + goggles + cargo trousers.
-- Mechanical Elephant Hoodie — $49.95
+- [Mechanical Elephant Hoodie](https://steamgears.eu/go/403/) — $49.95
 - Steampunk Aviator Goggles — $24.95
 - **Total: ~$75**
 
 ### 12. The Octopus Navigator
 
 Clockwork Octopus hoodie + captain's hat + goggles on head.
-- Clockwork Octopus Hoodie — $49.95
+- [Clockwork Octopus Hoodie](https://steamgears.eu/go/399/) — $49.95
 - Steampunk Top Hat with Removable Goggles — $34.95
 - **Total: ~$85**
 
@@ -125,6 +125,17 @@ Clockwork Octopus hoodie + captain's hat + goggles on head.
 3. **Goggles** — on your hat, around your neck or pushed up on your head
 4. **One brass accessory** — pocket watch, ring or coat buttons
 5. **Shoes you can actually walk in** — boots beat heels at cons
+
+## Read Next: The Guide Cluster
+
+**In one line:** the four 2026 guides take one question each, so this page can stay a lookbook.
+
+- [Men's steampunk costume essentials](https://steamgears.eu/mens-steampunk-costume-essentials/) — the same ten-piece method with the budget table in full.
+- [Women's steampunk essentials](https://steamgears.eu/womens-steampunk-essentials/) — ten pieces, none over $65, with the minimum outfit worked out.
+- [Steampunk clothing at three budgets](https://steamgears.eu/steampunk-clothing-three-budgets/) — what the three tiers actually buy.
+- [Steampunk corset guide](https://steamgears.eu/steampunk-corset-guide/) — choosing by structure, and what to wear under and over it.
+
+Everything here sits in the [steampunk costumes hub](https://steamgears.eu/steampunk-costumes/).
 
 ## FAQ
 
