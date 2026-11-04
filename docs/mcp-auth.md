@@ -9,12 +9,17 @@ uden credential.
 | `publer` | `https://mcp.publer.com/` | `Bearer ${PUBLER_API_KEY}` | Publer MCP API key (Business/Enterprise) |
 | `steamgears-profil` | `tools/mcp_project_profile.py` (stdio) | ingen | ingen — læser kun repoet |
 
-**Status 2/11 2026, sent: forbindelsen virker.** OAuth-klienten blev godkendt af ejeren, tokenet lever 3600 s med
-refresh, og `python3 tools/mcp_rest.py --check` svarer `ok: true` med serveren `AI Engine - Steamgears` og
-**206 værktøjer**. Læsning virker hele vejen (`wp_list_plugins`, `list-queue`, `check-post`). Skrivning gør
-**ikke**: AI Engine har *Drafts Only* slået til, så `queue-post` afvises med »This site lets assistants work on
-drafts only«, før plugin'et ser kaldet. Skal agenten skrive, skal den switch slås fra i
-*Meow Apps → AI Engine → Settings → MCP* — det er en beslutning om risikoprofil, ikke en fejl.
+**Status 4/11 2026: både læsning og skrivning virker.** OAuth-klienten blev godkendt af ejeren i browseren,
+tokenet lever 3600 s med refresh, og `python3 tools/mcp_rest.py --check` svarer `ok: true` med serveren
+`AI Engine - Steamgears` og **236 værktøjer**, rolle `admin`. `mcp_drafts_only` er nu **`false`** (målt i
+`mwai_options` 4/11), så skrivende kald går igennem: 4/11 blev 20 `/go/`-links indsat i ni guides med
+`wp_alter_post`, og 14 hrefs blev konverteret med `wp_update_post`. Opskriften og fælderne står i
+[`library/mcp-skriveadgang-2026-11-04.md`](library/mcp-skriveadgang-2026-11-04.md).
+
+Indtil 4/11 var svaret det modsatte: *Drafts Only* var slået til, så `queue-post` blev afvist med »This site lets
+assistants work on drafts only«, før plugin'et så kaldet. Den switch slås til og fra i
+*Meow Apps → AI Engine → Settings → MCP*, og den er den eneste der holder et admin-token tilbage — den kan ikke
+slås fra over MCP, fordi spærren også dækker `wp_update_option`. Det er med vilje.
 
 **Sådan tjekkes spærren uden at skrive** (målt 2/11 2026, efter ejeren havde slået den fra — den var stadig
 til): AI Engines indstillinger ligger i option `mwai_options`, og læsende værktøjer må gerne læse den. Med
@@ -26,8 +31,8 @@ python3 tools/mcp_rest.py --call wp_get_option '{"key":"mwai_options","raw":true
 
 | Nøgle | Målt 2/11 | Betydning |
 | --- | --- | --- |
-| `mcp_drafts_only` | **true** | spærren: alle skrivende kald afvises, også plugin'ets egne |
-| `mcp_role` | `admin` | tokenet har administratorkraft, så kun Drafts Only holder det tilbage |
+| `mcp_drafts_only` | 2/11: true · **4/11: false** | spærren: da den var `true`, blev alle skrivende kald afvist, også plugin'ets egne |
+| `mcp_role` | `admin` | tokenet har administratorkraft, så kun Drafts Only holdt det tilbage |
 | `mcp_approvals` | `off` | ingen godkendelse pr. værktøj — spærren er den eneste |
 | `mcp_default_readonly` | false | læse-only er ikke slået til |
 | `mcp_dynamic_rest` | true | Dynamic REST er allerede tændt, så `wp_update_option` m.fl. er tilgængelige |

@@ -1,4 +1,4 @@
-# `/go/<id>/` var en kø-rute, ikke et produktlink — og det er rettet i 7.30.0
+# `/go/<id>/` var en kø-rute, ikke et produktlink — og det er rettet i 7.32.0
 
 Link-planen for de ældre guides bruger `/go/<id>/` som kortlink for produkter. Den 3/11 blev ruten målt
 mod det levende site, og den gjorde **ikke** det planen gik ud fra: alle fire prøvede produkt-ID'er svarede
@@ -11,7 +11,7 @@ ikke på produktet. Det er den slags fejl der ser ud som en 302 og føles som et
 curl -sS -o /dev/null -A 'Mozilla/5.0' -w '%{http_code} %{redirect_url}\n' https://steamgears.eu/go/477/
 ```
 
-| ID | Produkt | Svar før 7.30.0 | Landede på |
+| ID | Produkt | Svar før 7.32.0 | Landede på |
 | --- | --- | --- | --- |
 | 477 | Copper Pilot Goggles | `302` | `https://steamgears.eu/` |
 | 767 | Victorian Corset & Vest PDF | `302` | `https://steamgears.eu/` |
@@ -43,7 +43,10 @@ Det er værd at bemærke hvad der **ikke** var galt: rewrite-reglen matchede, `t
 og der var ingen 404. Alt så rigtigt ud i en statusbaseret crawl. Først da svaret blev læst — `location:
 https://steamgears.eu/` — stod fejlen tydeligt.
 
-## 3. Rettelsen (plugin 7.30.0)
+## 3. Rettelsen (plugin 7.32.0)
+
+> Rettelsen blev skrevet som 7.30.0, men upstream tog 7.31.0 (P2.5 multi-sprog) imens, så den udkom som
+> **7.32.0**. Indholdet er det samme; det er kun versionsnummeret der flyttede sig. Målt 4/11 kører sitet 7.32.0.
 
 Mangler kø-posten, forsøger ruten nu et produktopslag:
 
@@ -74,12 +77,12 @@ public static function product_target(int $id): string {
 ## 4. Virkningen for S2.6
 
 Planen for de ældre guides kan nu bruges som den er: **`/go/<id>/` peger på produktet** så snart
-7.30.0 er aktiv på sitet. Det gælder også de fire guide-kladder i repoet
+7.32.0 er aktiv på sitet (målt 4/11). Det gælder også de fire guide-kladder i repoet
 (`docs/library/guides-2026-11-03-*.md`), der allerede bruger `/go/411/`, `/go/475/`, `/go/481/` osv.
 
 To ting skal stadig ske på sitet, og begge kræver ejeren:
 
-1. **Plugins → Update** til 7.30.0 (zip'en ligger på `main`, selvopdateringen henter den).
+1. ~~**Plugins → Update** til 7.30.0~~ — gjort: sitet kører **7.32.0** (målt 4/11), og alle `/go/`-links svarer nu 302 til det rigtige produkt.
 2. De **20 `klar`-links** i link-planen skal indsættes på de guides der kun findes i WordPress.
 
 Målt 3/11 har de publicerede guides **nul** `/go/`-links — `/how-to-make-a-steampunk-costume/`,

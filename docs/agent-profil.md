@@ -125,8 +125,8 @@ Alt her er målt mod den live side eller læst i kilden. Er noget ændret siden 
 | Læse live HTML + REST (`wp-json`) | ✅ | strukturelle tjek, linkcrawl, produktdata |
 | Python 3.12 + PDF-biblioteker | ✅ i `tools/_deps` | rapporter i `reports/` |
 | PHP 8.5.8 (statisk binær) | ✅ i `tools/_deps/bin/php` | `php -l`, ikke tests |
-| **Skrive til sitet** | ❌ 401 | S2.3, S4.1, S4.3, S0.4 kan forberedes, ikke udføres |
-| MCP mod sitet | ⚪ **ny server, venter på ejerens godkendelse** | `/wp-json/mcp/v1/http` (AI Engine) svarer `401 rest_forbidden` uden credential og har OAuth med PKCE. `python3 tools/mcp_oauth.py --start` giver linket, `--finish '<kode>'` gemmer token uden for repoet; `tools/mcp_rest.py --check` tester det. Application password (Basic) er fallback og ikke målt endnu — se `docs/mcp-auth.md` |
+| **Skrive til sitet** | ✅ **virker (målt 4/11 2026)** | `wp_alter_post`, `wp_update_post` og plugin-værktøjerne skriver; 20 links indsat i ni guides og 14 hrefs konverteret på outfit-guiden. `mcp_drafts_only` er `false` — er den `true`, afvises alle skrivende kald, og den kan ikke slås fra over MCP med vilje |
+| MCP mod sitet | ✅ **forbundet** | `/wp-json/mcp/v1/http` (AI Engine), **236** værktøjer, rolle `admin`, Bearer-token fra OAuth med PKCE. `python3 tools/mcp_oauth.py --start` giver linket, `--finish '<kode>'` gemmer token uden for repoet; `tools/mcp_rest.py --check` tester det. Redirecten er `127.0.0.1:8765` **uden lytter**: kopiér hele adressen fra browserens adresselinje. Application password (Basic) er fallback og ikke målt endnu — se `docs/mcp-auth.md` |
 | Publer MCP | ❌ ingen `PUBLER_API_KEY` | kan ikke planlægge opslag |
 | Browser / Lighthouse | ❌ | ingen visuel eller ydelsesverifikation |
 | Root / `apt` | ❌ | brug statiske binærer (se opskrifter) |
@@ -171,7 +171,8 @@ hvidliste noget. Det der stadig venter:
 
 Crawl og verifikation kører med **neutral UA** ([`tools/waf_check.sh`](../tools/waf_check.sh) bekræfter at den
 giver 200). At efterligne Googlebot er både unødvendigt og det der udløser 455. Alt andet i auditten — titler,
-schema, intern linkning, ydeevne — kræver WordPress-skriveadgang eller en ejerbeslutning.
+schema, intern linkning, ydeevne — kræver WordPress-skriveadgang (findes nu over MCP, se `docs/mcp-auth.md`)
+eller en ejerbeslutning.
 
 ---
 

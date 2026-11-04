@@ -1,24 +1,37 @@
 # Link-plan: de ældre publicerede guides — 3/11 2026
 
 De fire nye guides fik `/go/<id>/`-links og en fast struktur. De ældre publicerede guides har ikke fået samme
-behandling. **Tyve af linkene er nu indsat i den ene ældre guide der findes som fil i repoet**
-([`steampunk-outfit-ideas-for-women.md`](steampunk-outfit-ideas-for-women.md)), og tyve står klar til de guides
-der kun findes i WordPress. **Alle fyrre rækker har både ID og pris:** de otte der før stod som `pris mangler`,
-fik deres pris målt i den levende butik 3/11 2026 — se
-[`priser-fra-store-api-2026-11-03.md`](priser-fra-store-api-2026-11-03.md). Der er intet tilbage at slå op;
-det der mangler er adgangen til at indsætte dem.
+behandling. **4/11 2026 er alle fyrre rækker afgjort:** 34 links står nu på en publiceret side og er målt der,
+og 6 findes kun i den omskrivning af outfit-guiden der ligger som fil i repoet og aldrig blev publiceret. Hver
+række har stadig både ID og pris — de otte der før stod som `pris mangler`, fik deres pris målt i den levende
+butik 3/11 2026, se [`priser-fra-store-api-2026-11-03.md`](priser-fra-store-api-2026-11-03.md).
+
+Målingen ligger i [`guide-links-live-2026-11-04.md`](guide-links-live-2026-11-04.md): hver guide er hentet, hvert
+link fundet i HTML'en, og hvert `/go/<id>/` fulgt til det produkt det lander på. Det er den fil
+`link_plan_check` holder `indsat`-rækkerne op imod, så et "indsat" her altid har et opslag bag sig.
 
 Link-kolonnen er stien på sitet (`/go/<id>/`). Produkt-ID'er: [`om-maerkning-dark-academia-2026-11-01.md`](om-maerkning-dark-academia-2026-11-01.md) (39 designs
 plus appendix med de seks produkter uden for dem). Priser:
 [`valuta-og-priser-2026-11-02.md`](valuta-og-priser-2026-11-02.md). Intet er gættet; hver række nedenfor er
-kontrolleret af `tools/link_plan_check.py`, og rækker mærket `indsat` tjekkes **mod filen selv**.
+kontrolleret af `tools/link_plan_check.py`, og rækker mærket `indsat` tjekkes **mod målingen af det levende
+site**, mens `kladde` tjekkes mod filen i repoet.
 
-## 1. Indsat i repoet — `/steampunk-outfit-ideas-for-women/`
+## 1. Outfit-guiden — den publicerede artikel og kladden i repoet
 
-Guiden er en lookbook med 12 looks og priser, men uden ét eneste produktlink. Alle 20 produkter er nu linket på
-den linje hvor de allerede stod, plus en "Read Next"-sektion med de fire nye guides og hubben. Fire produkter
-står to gange i guiden (corset-top i look 1 og 4, overbust i 3 og 7, driver goggles i 2 og 6); de er linket ved
-første omtale og bevidst ikke igen — ét link pr. produkt pr. guide.
+Her var planen skrevet mod den forkerte tekst. `/steampunk-outfit-ideas-for-women/` findes nemlig **to steder**,
+og de er ikke samme artikel:
+
+- **Den publicerede artikel** (post 699, "12 Complete Looks (With Prices)") har 12 andre looks — Airship Captain,
+  Victorian Inventress, Cosy Engineer — og 34 direkte `/product/`-links, men **nul** `/go/`-links. Den har 14 af
+  planens 20 produkter. 4/11 blev de 14 konverteret til `/go/<id>/` ved første omtale: samme synlige tekst,
+  samme mål, nu med sporing.
+- **Omskrivningen i repoet** ([`steampunk-outfit-ideas-for-women.md`](steampunk-outfit-ideas-for-women.md)) er en
+  anden tekst med 12 andre looks og alle 20 produkter linket, men den er aldrig publiceret.
+
+De 6 produkter der kun står i kladden — 559 Clockwork Fox tee, 719 Sky Corsair print, 567 Clockwork Seer tee,
+561 Cabinet of Curiosities tee, 403 Mechanical Elephant hoodie og 399 Clockwork Octopus hoodie — har derfor
+status `kladde`: linket findes i filen i repoet, men ikke på en side nogen læser. De bliver `indsat` den dag
+omskrivningen publiceres. Kladden har desuden en "Read Next"-sektion med de fire nye guides og hubben.
 
 | Guide | Link | Linktekst | Pris | Status |
 | --- | --- | --- | --- | --- |
@@ -31,56 +44,57 @@ første omtale og bevidst ikke igen — ét link pr. produkt pr. guide.
 | `/steampunk-outfit-ideas-for-women/` | /go/491/ | Gothic PU overbust corset | $64.95 | `indsat` |
 | `/steampunk-outfit-ideas-for-women/` | /go/485/ | Gothic bowler top hat | $39.95 | `indsat` |
 | `/steampunk-outfit-ideas-for-women/` | /go/477/ | Copper Pilot goggles | $24.95 | `indsat` |
-| `/steampunk-outfit-ideas-for-women/` | /go/559/ | Clockwork Fox tee | $26.95 | `indsat` |
+| `/steampunk-outfit-ideas-for-women/` | /go/559/ | Clockwork Fox tee | $26.95 | `kladde` |
 | `/steampunk-outfit-ideas-for-women/` | /go/555/ | Nautilus Voyage tee | $26.95 | `indsat` |
 | `/steampunk-outfit-ideas-for-women/` | /go/475/ | Steampunk Aviator goggles | $24.95 | `indsat` |
 | `/steampunk-outfit-ideas-for-women/` | /go/409/ | Gear Corset Lady hoodie | $49.95 | `indsat` |
 | `/steampunk-outfit-ideas-for-women/` | /go/495/ | Victorian Vampire tailcoat | $39.95 | `indsat` |
 | `/steampunk-outfit-ideas-for-women/` | /go/483/ | Time Traveler top hat | $49.95 | `indsat` |
-| `/steampunk-outfit-ideas-for-women/` | /go/719/ | Sky Corsair print | $21.90 | `indsat` |
-| `/steampunk-outfit-ideas-for-women/` | /go/567/ | Clockwork Seer tee | $26.95 | `indsat` |
-| `/steampunk-outfit-ideas-for-women/` | /go/561/ | Cabinet of Curiosities tee | $26.95 | `indsat` |
-| `/steampunk-outfit-ideas-for-women/` | /go/403/ | Mechanical Elephant hoodie | $49.95 | `indsat` |
-| `/steampunk-outfit-ideas-for-women/` | /go/399/ | Clockwork Octopus hoodie | $49.95 | `indsat` |
+| `/steampunk-outfit-ideas-for-women/` | /go/719/ | Sky Corsair print | $21.90 | `kladde` |
+| `/steampunk-outfit-ideas-for-women/` | /go/567/ | Clockwork Seer tee | $26.95 | `kladde` |
+| `/steampunk-outfit-ideas-for-women/` | /go/561/ | Cabinet of Curiosities tee | $26.95 | `kladde` |
+| `/steampunk-outfit-ideas-for-women/` | /go/403/ | Mechanical Elephant hoodie | $49.95 | `kladde` |
+| `/steampunk-outfit-ideas-for-women/` | /go/399/ | Clockwork Octopus hoodie | $49.95 | `kladde` |
 
-## 2. Klar til WordPress-adgang — syv guides der kun findes på sitet
+## 2. Indsat i de syv guides der kun findes på sitet
 
-Ingen af disse guides har en fil i repoet. Derfor er der **ikke** skrevet på dem: rækkerne er den redigering
-der skal laves, med den linktekst der skal bruges.
+Ingen af disse guides har en fil i repoet, så der er ikke noget at tjekke mod — kun det levende site. Alle
+tolv rækker blev 4/11 indsat i brødteksten ved første omtale af stykket, og hver af dem står i
+målingen med `ja`.
 
 | Guide | Link | Linktekst | Pris | Status |
 | --- | --- | --- | --- | --- |
-| `/how-to-make-a-steampunk-costume/` | /go/477/ | Copper Pilot goggles | $24.95 | `klar` |
-| `/how-to-make-a-steampunk-costume/` | /go/481/ | Steampunk top hat with removable goggles | $34.95 | `klar` |
-| `/how-to-make-a-steampunk-costume/` | /go/809/ | Steampunk costume checklist | gratis | `klar` |
-| `/3d-print-steampunk-parts/` | /go/479/ | Vintage Driver goggles | $29.95 | `klar` |
-| `/best-steampunk-books/` | /go/728/ | First Mate's Oath print | $21.90 | `klar` |
-| `/best-steampunk-books/` | /go/721/ | Kraken Widow print | $21.90 | `klar` |
-| `/casual-steampunk-outfits/` | /go/563/ | Ink and Steam Muse tee | $26.95 | `klar` |
-| `/casual-steampunk-outfits/` | /go/405/ | Clockwork Owl hoodie | $49.95 | `klar` |
-| `/closet-steampunk-outfits/` | /go/561/ | Cabinet of Curiosities tee | $26.95 | `klar` |
-| `/closet-steampunk-outfits/` | /go/483/ | Time Traveler top hat | $49.95 | `klar` |
-| `/sustainable-steampunk/` | /go/809/ | Steampunk costume checklist | gratis | `klar` |
-| `/build/tools-and-materials/` | /go/809/ | Steampunk costume checklist | gratis | `klar` |
+| `/how-to-make-a-steampunk-costume/` | /go/477/ | Copper Pilot goggles | $24.95 | `indsat` |
+| `/how-to-make-a-steampunk-costume/` | /go/481/ | Steampunk top hat with removable goggles | $34.95 | `indsat` |
+| `/how-to-make-a-steampunk-costume/` | /go/809/ | Steampunk costume checklist | gratis | `indsat` |
+| `/3d-print-steampunk-parts/` | /go/479/ | Vintage Driver goggles | $29.95 | `indsat` |
+| `/best-steampunk-books/` | /go/728/ | First Mate's Oath print | $21.90 | `indsat` |
+| `/best-steampunk-books/` | /go/721/ | Kraken Widow print | $21.90 | `indsat` |
+| `/casual-steampunk-outfits/` | /go/563/ | Ink and Steam Muse tee | $26.95 | `indsat` |
+| `/casual-steampunk-outfits/` | /go/405/ | Clockwork Owl hoodie | $49.95 | `indsat` |
+| `/closet-steampunk-outfits/` | /go/561/ | Cabinet of Curiosities tee | $26.95 | `indsat` |
+| `/closet-steampunk-outfits/` | /go/483/ | Time Traveler top hat | $49.95 | `indsat` |
+| `/sustainable-steampunk/` | /go/809/ | Steampunk costume checklist | gratis | `indsat` |
+| `/build/tools-and-materials/` | /go/809/ | Steampunk costume checklist | gratis | `indsat` |
 
 ## 2b. Dækning pr. guide — ti guides, fyrre rækker
 
-Planen har **ti** guides: **ni** fra 2/11-planen plus outfit-guiden, som er den ene ældre guide der findes som fil
-i repoet. Det er de samme ti som `link_plan_check` tæller i sin første linje — antallet i tabellen her, i værnet
-og i rapporten er nu det samme.
+Planen har **ti** guides: **ni** fra 2/11-planen plus outfit-guiden. Det er de samme ti som `link_plan_check`
+tæller i sin første linje — antallet i tabellen her, i værnet og i rapporten er det samme. Kolonnen Status tæller
+de enkelte rækker, så outfit-guidens 20 er delt: 14 `indsat` på den publicerede side, 6 `kladde` i omskrivningen.
 
 | Guide | Antal | Produkt-ID'er | Status | ID-kilde |
 | --- | ---: | --- | --- | --- |
-| `/steampunk-outfit-ideas-for-women/` | 20 | 399, 403, 409, 475, 477, 479, 481, 483, 485, 487, 489, 491, 493, 495, 497, 555, 559, 561, 567, 719 | `indsat` | mapping (39 designs) |
-| `/how-to-make-a-steampunk-costume/` | 3 | 477, 481, 809 | `klar` | mapping |
-| `/3d-print-steampunk-parts/` | 2 | 479, 766 | `klar` | 766: appendix + målt pris |
-| `/best-steampunk-books/` | 2 | 728, 721 | `klar` | mapping |
-| `/casual-steampunk-outfits/` | 2 | 563, 405 | `klar` | mapping |
-| `/closet-steampunk-outfits/` | 2 | 561, 483 | `klar` | mapping |
-| `/sustainable-steampunk/` | 2 | 809, 767 | `klar` | 767: appendix + målt pris |
-| `/build/tools-and-materials/` | 2 | 809, 767 | `klar` | 767: appendix + målt pris |
-| `/build/weathering/` | 1 | 767 | `klar` | 767: appendix + målt pris |
-| `/steampunk-gift-guide-2026/` | 4 | 940, 941, 942, 968 | `klar` | appendix + målte priser |
+| `/steampunk-outfit-ideas-for-women/` | 20 | 399, 403, 409, 475, 477, 479, 481, 483, 485, 487, 489, 491, 493, 495, 497, 555, 559, 561, 567, 719 | `14 indsat + 6 kladde` | mapping (39 designs) |
+| `/how-to-make-a-steampunk-costume/` | 3 | 477, 481, 809 | `indsat` | mapping |
+| `/3d-print-steampunk-parts/` | 2 | 479, 766 | `indsat` | 766: appendix + målt pris |
+| `/best-steampunk-books/` | 2 | 728, 721 | `indsat` | mapping |
+| `/casual-steampunk-outfits/` | 2 | 563, 405 | `indsat` | mapping |
+| `/closet-steampunk-outfits/` | 2 | 561, 483 | `indsat` | mapping |
+| `/sustainable-steampunk/` | 2 | 809, 767 | `indsat` | 767: appendix + målt pris |
+| `/build/tools-and-materials/` | 2 | 809, 767 | `indsat` | 767: appendix + målt pris |
+| `/build/weathering/` | 1 | 767 | `indsat` | 767: appendix + målt pris |
+| `/steampunk-gift-guide-2026/` | 4 | 940, 941, 942, 968 | `indsat` | appendix + målte priser |
 
 20 + 3 + 2 + 2 + 2 + 2 + 2 + 2 + 1 + 4 = **40 rækker**, som er det `link_plan_check` rapporterer.
 
@@ -110,21 +124,21 @@ så rækkerne er nu `klar` som de øvrige — målingen og hele produkttabellen 
 
 | Guide | Link | Linktekst | Pris | Status |
 | --- | --- | --- | --- | --- |
-| `/3d-print-steampunk-parts/` | /go/766/ | Utility belt and holster | $24.90 | `klar` |
-| `/build/weathering/` | /go/767/ | Victorian corset blueprint PDF | $6.90 | `klar` |
-| `/build/tools-and-materials/` | /go/767/ | Victorian corset blueprint PDF | $6.90 | `klar` |
-| `/sustainable-steampunk/` | /go/767/ | Victorian corset blueprint PDF | $6.90 | `klar` |
-| `/steampunk-gift-guide-2026/` | /go/940/ | Clockwork Seer pendant | $89.00 | `klar` |
-| `/steampunk-gift-guide-2026/` | /go/941/ | The Aeronaut pocket watch | $149.00 | `klar` |
-| `/steampunk-gift-guide-2026/` | /go/942/ | Ink and Steam bracelet | $69.00 | `klar` |
-| `/steampunk-gift-guide-2026/` | /go/968/ | Nightshade Apothecary print | $29.95 | `klar` |
+| `/3d-print-steampunk-parts/` | /go/766/ | Utility belt and holster | $24.90 | `indsat` |
+| `/build/weathering/` | /go/767/ | Victorian corset blueprint PDF | $6.90 | `indsat` |
+| `/build/tools-and-materials/` | /go/767/ | Victorian corset blueprint PDF | $6.90 | `indsat` |
+| `/sustainable-steampunk/` | /go/767/ | Victorian corset blueprint PDF | $6.90 | `indsat` |
+| `/steampunk-gift-guide-2026/` | /go/940/ | Clockwork Seer pendant | $89.00 | `indsat` |
+| `/steampunk-gift-guide-2026/` | /go/941/ | The Aeronaut pocket watch | $149.00 | `indsat` |
+| `/steampunk-gift-guide-2026/` | /go/942/ | Ink and Steam bracelet | $69.00 | `indsat` |
+| `/steampunk-gift-guide-2026/` | /go/968/ | Nightshade Apothecary print | $29.95 | `indsat` |
 
 Priserne er ikke gættet: `prices.price` fra Store API er minor units, så **2995 → $29.95**. Alle 31 produkter i
 planen findes i butikken, og de 25 priser der allerede stod i pristabellen stemte **25 af 25** — målingen
 bekræfter altså også det der var skrevet før.
 
-**Status pr. guide:** se dækningstabellen i §2b — ti guides, fyrre rækker, alle med ID og pris. De tyve `klar`
-rækker venter kun på, at nogen kan skrive på siderne.
+**Status pr. guide:** se dækningstabellen i §2b — ti guides, fyrre rækker, alle med ID og pris. 34 er `indsat`
+og målt på siden; 6 er `kladde` og står kun i den upublicerede omskrivning.
 
 
 ## 4. Strukturen der følger med
@@ -139,23 +153,31 @@ rækker venter kun på, at nogen kan skrive på siderne.
 
 `python3 tools/link_plan_check.py` tjekker hver række: guide-stien, at `/go/<id>/` findes i mappingen (inkl.
 appendix), at linkteksten deler ord med produktnavnet, at prisen findes i pristabellen **eller i de målte
-priser** (eller er `gratis` for 809), at status er gyldig, og at en række mærket `indsat` **faktisk har sit
-`/go/<id>/` i den fil guiden bor i**. `—` er ikke længere en gyldig pris, og `pris mangler` er ikke længere en
-gyldig status: begge er afløst af målingen 3/11. `--selftest` har tretten fixtures, der beviser at værnene fanger
-en opdigtet pris, en tom pris, den afskaffede status, et ukendt id, et forkert produktnavn, en dublering, en
-ukendt status, en tom plan og et påstået-indsat link der ikke står i filen.
+priser** (eller er `gratis` for 809), og at status er gyldig. Status betyder nu noget forskelligt:
 
-**Det der venter på WordPress-adgang:** de tyve `klar`-rækker i §2 og §3. Det er den eneste blokering tilbage
-i S2.6.
+| Status | Kravet |
+| --- | --- |
+| `indsat` | `/go/<id>/` står i målingen for den guide — altså på den publicerede side |
+| `kladde` | `/go/<id>/` står i den fil guiden bor i repoet, og guiden er ikke publiceret |
+| `klar` | ingen af delene — rækken venter stadig |
 
-## 6. Ruten `/go/<id>/` — målt 3/11, rettet i plugin 7.30.0
+`—` er ikke længere en gyldig pris, og `pris mangler` er ikke længere en gyldig status: begge er afløst af
+målingen 3/11. `--selftest` har seksten fixtures, der beviser at værnene fanger en opdigtet pris, en tom pris,
+den afskaffede status, et ukendt id, et forkert produktnavn, en dublering, en ukendt status, en tom plan, et
+påstået-indsat link der ikke står i filen, og et `indsat` der ikke står i målingen.
+
+Målingen laves om med `python3 tools/live_link_report.py --dato "<dato>"`; `--check` fejler, hvis dokumentet
+ikke længere matcher det levende site. Det er med vilje: redigeres en side, skal målingen laves om, før planen
+må kalde linket indsat.
+
+## 6. Ruten `/go/<id>/` — målt 3/11, rettet i plugin 7.32.0
 
 Ruten fandtes allerede, men den slog kun op i `sgap_queue`. Produkt-ID'er gav derfor `302` til **forsiden**:
 `/go/477/`, `/go/767/`, `/go/940/` og `/go/809/` landede alle på `https://steamgears.eu/` med `x-redirect-by:
-Steamgears`. Det er rettet i plugin **7.30.0**, hvor et ID uden kø-post slås op som produkt og redirecter til
-permalinken; ukendte ID'er går stadig til forsiden.
+Steamgears`. Det er rettet i plugin **7.32.0**, hvor et ID uden kø-post slås op som produkt og redirecter til
+permalinken; ukendte ID'er går stadig til forsiden. Versionen er aktiv på sitet (målt 4/11), og alle 34
+indsatte links svarer `302` til det rigtige produkt — se målingen.
 
-Derfor bliver linkformatet i denne plan stående: `/go/<id>/` virker som produktkortlink, så snart 7.30.0 er
-aktiv på sitet — uden at der skal oprettes en Redirection-gruppe. Diagnosen, kilden og kontrolkommandoen står i
-[`go-ruten-produktlinks-2026-11-03.md`](go-ruten-produktlinks-2026-11-03.md). Målt 3/11 har de publicerede
-guides **nul** `/go/`-links, så intet live-link peger forkert imens.
+Derfor bliver linkformatet i denne plan stående: `/go/<id>/` virker som produktkortlink uden at der skal
+oprettes en Redirection-gruppe. Diagnosen, kilden og kontrolkommandoen står i
+[`go-ruten-produktlinks-2026-11-03.md`](go-ruten-produktlinks-2026-11-03.md).

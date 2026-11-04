@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "updated": "2026-11-03",
+  "updated": "2026-11-04",
   "projects": [
     {
       "id": "site",
@@ -29,10 +29,10 @@
         {
           "id": "s2",
           "name": "S2 — struktur og SEO",
-          "done": 4.7,
+          "done": 4.75,
           "total": 6,
           "unit": "d",
-          "note": "S2.1 9 af 13 planlagte sider live 2,08 + S2.5 meta-runde 1,4 + S2.6 0,7 af 0,75 (0,4 hub-links + 0,2 guide-klynge + 0,1 hub-copy; 20 /go/-links faktisk indsat i steampunk-outfit-ideas-for-women.md, mens 12 links på WordPress-only-guides kræver adgang; 3/11 blev de sidste 8 priser målt i butikken via Store API (31 af 31 produkter fundet, 25 af 25 kendte priser uden drift), så 20 rækker står nu `klar` og kun adgang mangler) + S2.4 H1 0,25 + S2.3 nav-links 0,3. Scope-korrektion 3/11: S2.6 blev først meldt 0,75, men 12 af 40 planlagte links ligger stadig kun i planen",
+          "note": "S2.1 9 af 13 planlagte sider live 2,08 + S2.5 meta-runde 1,4 + S2.6 0,75 af 0,75 (0,4 hub-links + 0,2 guide-klynge + 0,1 hub-copy + 0,05 målt linkindsats 4/11: 34 af 40 planlagte /go/-links står nu på en publiceret side og er målt der, og 6 er kladde i den upublicerede omskrivning af outfit-guiden; de ni WordPress-guides fik 20 links indsat i brødteksten, og outfit-guidens 14 direkte produktlinks blev konverteret til /go/, så alle ti ældre guides er sporet) + S2.4 H1 0,25 + S2.3 nav-links 0,3. Scope-korrektion 3/11: S2.6 blev først meldt 0,75, men 12 af 40 planlagte links lå stadig kun i planen — det er lukket 4/11 og målt i docs/library/guide-links-live-2026-11-04.md",
           "scope_change": true
         },
         {
@@ -603,6 +603,51 @@
       "after": 56.3,
       "delta": 0.7,
       "basis": "13,7 af 24,35 d (P0 3,35/4 · P1 4,85/11,35 · P2 4,5/7 · P3 1/2)"
+    },
+    {
+      "date": "2026-11-04",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 57.9,
+      "after": 58.2,
+      "delta": 0.3,
+      "basis": "12,65 af 21,75 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,75/6 · S3 2,45/3,55 · S4 1,4/5)"
+    },
+    {
+      "date": "2026-11-04",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "ingen ændring",
+      "before": 56.3,
+      "after": 56.3,
+      "delta": 0,
+      "basis": "13,7 af 24,35 d (P0 3,35/4 · P1 4,85/11,35 · P2 4,5/7 · P3 1/2)"
+    },
+    {
+      "date": "2026-11-04",
+      "project": "Dark academia-rebrand",
+      "module": "ingen ændring",
+      "before": 63.0,
+      "after": 63.0,
+      "delta": 0,
+      "basis": "8,5 af 13,5 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5)"
+    },
+    {
+      "date": "2026-11-04",
+      "project": "SEO-indholdsproduktion",
+      "module": "ingen ændring",
+      "before": 57.1,
+      "after": 57.1,
+      "delta": 0,
+      "basis": "4 af 7 guides (Publicerede guides (id 292, 296, 295) 0/3 · Guide-copy klar til publicering (292, 296, 295 + corset) 4/4)"
+    },
+    {
+      "date": "2026-11-04",
+      "project": "Døde internlinks",
+      "module": "ingen ændring",
+      "before": 100.0,
+      "after": 100.0,
+      "delta": 0,
+      "basis": "39 af 39 links"
     }
   ]
 }

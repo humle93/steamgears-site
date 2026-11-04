@@ -411,7 +411,9 @@ class CliTests(unittest.TestCase):
             self.assertEqual(len(files), 3, files)
             self.assertTrue(any(f.endswith(".md") for f in files))
             self.assertIn(ns.HISTORY_NAME, files)
-            data = json.loads(next(Path(tmp).glob("niche-scan-*.json")).read_text(encoding="utf-8"))
+            # Mappe-rækkefølgen er ikke garanteret: vaelg dagens rapport, ikke historik-filen
+            report = next(p for p in Path(tmp).glob("niche-scan-*.json") if p.name != ns.HISTORY_NAME)
+            data = json.loads(report.read_text(encoding="utf-8"))
             self.assertEqual(len(data["rows"]), 10)
             self.assertIn("Pinterest Trends (API v5)", data["sources"])
             self.assertIn("low_season", data["rows"][0])
