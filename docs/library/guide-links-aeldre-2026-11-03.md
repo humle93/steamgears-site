@@ -2,7 +2,7 @@
 
 De fire nye guides fik `/go/<id>/`-links og en fast struktur. De ældre publicerede guides har ikke fået samme
 behandling. **4/11 2026 er alle fyrre rækker afgjort:** 34 links står nu på en publiceret side og er målt der,
-og 6 findes kun i den omskrivning af outfit-guiden der ligger som fil i repoet og aldrig blev publiceret. Hver
+og 6 af planens produkter nævnes slet ikke i den publicerede artikel og afventer en omskrivning af den. Hver
 række har stadig både ID og pris — de otte der før stod som `pris mangler`, fik deres pris målt i den levende
 butik 3/11 2026, se [`priser-fra-store-api-2026-11-03.md`](priser-fra-store-api-2026-11-03.md).
 
@@ -16,7 +16,7 @@ plus appendix med de seks produkter uden for dem). Priser:
 kontrolleret af `tools/link_plan_check.py`, og rækker mærket `indsat` tjekkes **mod målingen af det levende
 site**, mens `kladde` tjekkes mod filen i repoet.
 
-## 1. Outfit-guiden — den publicerede artikel og kladden i repoet
+## 1. Outfit-guiden — den publicerede artikel og filen i repoet
 
 Her var planen skrevet mod den forkerte tekst. `/steampunk-outfit-ideas-for-women/` findes nemlig **to steder**,
 og de er ikke samme artikel:
@@ -28,10 +28,12 @@ og de er ikke samme artikel:
 - **Omskrivningen i repoet** ([`steampunk-outfit-ideas-for-women.md`](steampunk-outfit-ideas-for-women.md)) er en
   anden tekst med 12 andre looks og alle 20 produkter linket, men den er aldrig publiceret.
 
-De 6 produkter der kun står i kladden — 559 Clockwork Fox tee, 719 Sky Corsair print, 567 Clockwork Seer tee,
-561 Cabinet of Curiosities tee, 403 Mechanical Elephant hoodie og 399 Clockwork Octopus hoodie — har derfor
-status `kladde`: linket findes i filen i repoet, men ikke på en side nogen læser. De bliver `indsat` den dag
-omskrivningen publiceres. Kladden har desuden en "Read Next"-sektion med de fire nye guides og hubben.
+De 6 produkter — 559 Clockwork Fox tee, 719 Sky Corsair print, 567 Clockwork Seer tee, 561 Cabinet of
+Curiosities tee, 403 Mechanical Elephant hoodie og 399 Clockwork Octopus hoodie — nævnes hverken i den
+publicerede artikel eller i det snapshot af guiden der ligger i repoet (upstream erstattede 4/11 filen med en
+kildefil uden links). De har derfor status `klar`: der er intet sted at sætte linket hen. Den gamle omskrivning
+med alle 20 links findes kun i git-historikken. De bliver `indsat` den dag guiden omskrives og produkterne
+kommer med — indtil da tæller de hverken som indsatte eller som blokerede.
 
 | Guide | Link | Linktekst | Pris | Status |
 | --- | --- | --- | --- | --- |
@@ -44,17 +46,17 @@ omskrivningen publiceres. Kladden har desuden en "Read Next"-sektion med de fire
 | `/steampunk-outfit-ideas-for-women/` | /go/491/ | Gothic PU overbust corset | $64.95 | `indsat` |
 | `/steampunk-outfit-ideas-for-women/` | /go/485/ | Gothic bowler top hat | $39.95 | `indsat` |
 | `/steampunk-outfit-ideas-for-women/` | /go/477/ | Copper Pilot goggles | $24.95 | `indsat` |
-| `/steampunk-outfit-ideas-for-women/` | /go/559/ | Clockwork Fox tee | $26.95 | `kladde` |
+| `/steampunk-outfit-ideas-for-women/` | /go/559/ | Clockwork Fox tee | $26.95 | `klar` |
 | `/steampunk-outfit-ideas-for-women/` | /go/555/ | Nautilus Voyage tee | $26.95 | `indsat` |
 | `/steampunk-outfit-ideas-for-women/` | /go/475/ | Steampunk Aviator goggles | $24.95 | `indsat` |
 | `/steampunk-outfit-ideas-for-women/` | /go/409/ | Gear Corset Lady hoodie | $49.95 | `indsat` |
 | `/steampunk-outfit-ideas-for-women/` | /go/495/ | Victorian Vampire tailcoat | $39.95 | `indsat` |
 | `/steampunk-outfit-ideas-for-women/` | /go/483/ | Time Traveler top hat | $49.95 | `indsat` |
-| `/steampunk-outfit-ideas-for-women/` | /go/719/ | Sky Corsair print | $21.90 | `kladde` |
-| `/steampunk-outfit-ideas-for-women/` | /go/567/ | Clockwork Seer tee | $26.95 | `kladde` |
-| `/steampunk-outfit-ideas-for-women/` | /go/561/ | Cabinet of Curiosities tee | $26.95 | `kladde` |
-| `/steampunk-outfit-ideas-for-women/` | /go/403/ | Mechanical Elephant hoodie | $49.95 | `kladde` |
-| `/steampunk-outfit-ideas-for-women/` | /go/399/ | Clockwork Octopus hoodie | $49.95 | `kladde` |
+| `/steampunk-outfit-ideas-for-women/` | /go/719/ | Sky Corsair print | $21.90 | `klar` |
+| `/steampunk-outfit-ideas-for-women/` | /go/567/ | Clockwork Seer tee | $26.95 | `klar` |
+| `/steampunk-outfit-ideas-for-women/` | /go/561/ | Cabinet of Curiosities tee | $26.95 | `klar` |
+| `/steampunk-outfit-ideas-for-women/` | /go/403/ | Mechanical Elephant hoodie | $49.95 | `klar` |
+| `/steampunk-outfit-ideas-for-women/` | /go/399/ | Clockwork Octopus hoodie | $49.95 | `klar` |
 
 ## 2. Indsat i de syv guides der kun findes på sitet
 
@@ -85,7 +87,7 @@ de enkelte rækker, så outfit-guidens 20 er delt: 14 `indsat` på den publicere
 
 | Guide | Antal | Produkt-ID'er | Status | ID-kilde |
 | --- | ---: | --- | --- | --- |
-| `/steampunk-outfit-ideas-for-women/` | 20 | 399, 403, 409, 475, 477, 479, 481, 483, 485, 487, 489, 491, 493, 495, 497, 555, 559, 561, 567, 719 | `14 indsat + 6 kladde` | mapping (39 designs) |
+| `/steampunk-outfit-ideas-for-women/` | 20 | 399, 403, 409, 475, 477, 479, 481, 483, 485, 487, 489, 491, 493, 495, 497, 555, 559, 561, 567, 719 | `14 indsat + 6 klar` | mapping (39 designs) |
 | `/how-to-make-a-steampunk-costume/` | 3 | 477, 481, 809 | `indsat` | mapping |
 | `/3d-print-steampunk-parts/` | 2 | 479, 766 | `indsat` | 766: appendix + målt pris |
 | `/best-steampunk-books/` | 2 | 728, 721 | `indsat` | mapping |
@@ -138,7 +140,7 @@ planen findes i butikken, og de 25 priser der allerede stod i pristabellen stemt
 bekræfter altså også det der var skrevet før.
 
 **Status pr. guide:** se dækningstabellen i §2b — ti guides, fyrre rækker, alle med ID og pris. 34 er `indsat`
-og målt på siden; 6 er `kladde` og står kun i den upublicerede omskrivning.
+og målt på siden; 6 er `klar`, fordi artiklen ikke nævner de produkter (se §1).
 
 
 ## 4. Strukturen der følger med
@@ -158,8 +160,8 @@ priser** (eller er `gratis` for 809), og at status er gyldig. Status betyder nu 
 | Status | Kravet |
 | --- | --- |
 | `indsat` | `/go/<id>/` står i målingen for den guide — altså på den publicerede side |
-| `kladde` | `/go/<id>/` står i den fil guiden bor i repoet, og guiden er ikke publiceret |
-| `klar` | ingen af delene — rækken venter stadig |
+| `kladde` | `/go/<id>/` står i den fil guiden bor i repoet, og guiden er ikke publiceret (ingen rækker bruger den nu — se §1) |
+| `klar` | ingen af delene — rækken venter på at guiden nævner produktet, eller på adgang |
 
 `—` er ikke længere en gyldig pris, og `pris mangler` er ikke længere en gyldig status: begge er afløst af
 målingen 3/11. `--selftest` har seksten fixtures, der beviser at værnene fanger en opdigtet pris, en tom pris,

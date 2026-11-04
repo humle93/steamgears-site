@@ -82,7 +82,7 @@ kontrol der gør en fuld genskivning forsvarlig.
 | Kilde | Hvad den er | `/go/`-links |
 | --- | --- | --- |
 | Post 699, publiceret | "12 Complete Looks (With Prices)", 34 direkte `/product/`-links | **0** |
-| `docs/library/steampunk-outfit-ideas-for-women.md` | omskrivning med 12 andre looks, alle 20 produkter linket | 20, men **aldrig publiceret** |
+| `docs/library/steampunk-outfit-ideas-for-women.md` | omskrivning med 12 andre looks, alle 20 produkter linket — **erstattet 4/11 af et snapshot uden links** | 0 nu (20 i git-historikken) |
 
 Planen havde kaldt de 20 for `indsat`, fordi de stod i filen. På sitet stod der nul. Det er præcis den slags
 påstand et værn skal fange, og det gjorde det: målingen viste `nej` på alle 20. Løsningen blev at konvertere de
@@ -94,7 +94,7 @@ findes i omskrivningen status `kladde`.
 ```bash
 python3 tools/live_link_report.py --dato "4/11 2026"   # måler hver guide, følger hvert /go/, skriver dokumentet
 python3 tools/live_link_report.py --dato "4/11 2026" --check   # fejler hvis dokumentet ikke matcher sitet
-python3 tools/link_plan_check.py            # 40 rækker · 34 indsat · 6 kladde · 0 klar · 0 uden pris
+python3 tools/link_plan_check.py            # 40 rækker · 34 indsat · 6 klar · 0 uden pris
 python3 tools/link_plan_check.py --selftest # 15 fixtures
 ```
 
@@ -106,5 +106,5 @@ er en påstand, ikke en status.
 
 - **Godkendelsen** af OAuth-flowet: én browser-klikning pr. token. Resten kan en agent gøre.
 - **`drafts_only`**: kun ejeren kan slå den til eller fra, og det er med vilje.
-- **Publicering af omskrivningen** af outfit-guiden: de 6 `kladde`-links bliver først `indsat` den dag teksten
-  erstatter post 699 — det er en redaktionel beslutning, ikke en teknisk.
+- **En omskrivning** af outfit-guiden: de 6 produkter der ikke nævnes i artiklen bliver først `indsat` hvis
+  teksten skrives om, så de kommer med — det er en redaktionel beslutning, ikke en teknisk.
