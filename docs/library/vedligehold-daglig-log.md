@@ -368,3 +368,13 @@
 - Plugins (38 i REST-listen): alle kritiske AKTIVE — WooCommerce, Stripe, Rank Math, W3TC, Complianz (gdpr+terms), Site Kit, MailPoet. Inaktive nu: kun royal-links + royal-mcp (kendte, ikke kritiske). GTM Kit stadig ikke i listen (se 02/11-note — GA4 kører via Site Kit + GTM; følges op i ugentlig tjek). Plugin-antal 34→38: +4 siden i går, men kun kendte plugins (royal-links, royal-mcp, +2) — ingen ukendte/nye uklassificerede plugins.
 - Ingen 5xx eller redirect-loops.
 - Konklusion: Alt i orden. Ingen Henning-ping.
+
+## 04/11 2026 07:00 — Daglig drift/checkout-tjek ✅
+
+- Forside + /shop/ 200 (browser-fetch; titler verificeret: "Steampunk Costumes & Gear For Sale" + "Steampunk Shop: Tees, Hoodies, Goggles"). /checkout/ → tom kurv → viser /cart/ "Your cart is currently empty", 200 — forventet adfærd.
+- Stripe gateway: enabled=true, **testmode=no (live)**, sk_live_51… + pk_live_51Ttlwg… til stede ✅. Aktive gateways: stripe (Card), amazon_pay, klarna + bacs (ikke i dagens dump, men Stripe-familien aktive). Inaktive: ACH, Alipay, BLIK, Affirm, Clearpay, EPS, Bancontact m.fl. — som forventet.
+- Ordrer seneste 24h: **0 nye, 0 fejlede** (after=03/11 07:00 tom). Seneste ordre stadig #873 (27/10). Stadig ingen rigtige live-ordrer (KYC/payout afhænger af Hennings rigtige ordre).
+- Plugins (38 i REST-listen, samme som 03/11): alle kritiske AKTIVE — WooCommerce, Stripe, Rank Math, W3TC, Complianz (gdpr+terms), Site Kit, MailPoet, Printify, WPCode (ihaf), Ads.txt Manager. Inaktive: kun royal-links + royal-mcp (kendte). Ingen nye/ukendte plugins.
+- Raw curl → WAF 456/454 som sædvanlig (browser-fetch + REST med UA-header og 3-4 min pauser løste det; REST-kald kom igennem: gateways, plugins, orders).
+- Ingen 5xx eller redirect-loops.
+- Konklusion: Alt i orden. Ingen Henning-ping.
