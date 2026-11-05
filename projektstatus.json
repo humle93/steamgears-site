@@ -56,8 +56,8 @@
     {
       "id": "plugin",
       "name": "Steamgears Autopilot — plugin",
-      "next": "P0.6 kan nu bygges oven på CC-broen (snapshot + drafts); P0.4 mangler rigtig host-cron; P3.1/P3.2-hygiejne",
-      "blocked_by": "7.27.0 kan ikke installeres af agenten (OAuth-token tilbagekaldt, intet application password); P1.5 kræver Pinterest-token (401) og Meta-review; P1.4 kræver P1.5",
+      "next": "P0.6 kan nu bygges oven på CC-broen (snapshot + drafts); Command Center skal opdateres og have WP-creds på serveren; P3.1/P3.2-hygiejne",
+      "blocked_by": "P1.5 kræver Pinterest-token (401) og Meta-review; P1.4 kræver P1.5",
       "modules": [
         {
           "id": "p0",
@@ -89,7 +89,7 @@
           "done": 1.1,
           "total": 2.0,
           "unit": "d",
-          "note": "P3.3 (CI 8.0-8.5 + WP 7.1) udført som S0.3 i site-repoet; P3.2 (REST-tests for /feed og /reposts) og P3.5 (uninstall dækket) i 7.28.0; + 0,1 d CI på main repareret 5/11 (6 gamle zips fjernet, kvalitetsgaten blokerede sitets egne localhost-links, testdata fulgt med backoff/JPEG-preflight/32 abilities): integration 109, admin-tools 49, automation 27 PASS lokalt"
+          "note": "P3.3 (CI 8.0-8.5 + WP 7.1) udført som S0.3 i site-repoet; P3.2 (REST-tests for /feed og /reposts) og P3.5 (uninstall dækket) i 7.28.0; + 0,1 d CI på main repareret 5/11 (6 gamle zips fjernet, kvalitetsgaten blokerede sitets egne localhost-links, testdata fulgt med backoff/JPEG-preflight/32 abilities): integration 109, admin-tools 49, automation 27 PASS lokalt; 5/11: live-sitet opdateret af agenten via MCP 7.6.0 → 7.33.0 → 7.33.1 (abilities uden input crashede på WP 7.1, rettet i #16); sidste Juno-billede (corset.webp, 404) i guide 699 erstattet af medie 932"
         }
       ],
       "total": 24.35

@@ -35,7 +35,7 @@ Status pr. **2026-11-05** · beregnet af `projektstatus.py` · kilder: [`projekt
 | Projekt | Næste skridt | Blokering |
 | --- | --- | --- |
 | steamgears.eu — site-optimering (58,2 %) | Publicér de fire guides + hub-copyen og S2.2 /shipping/ + /returns/ når WordPress-adgang er der; S1.1 Herbarium kræver varianter i Printify; S0.4 kræver én Redirection-gruppe (ejer) | S1.1 Herbarium kræver varianter i Printify; S0.4 5 vanity-301 kræver én Redirection-gruppe (ejer) |
-| Steamgears Autopilot — plugin (57,5 %) | P0.6 kan nu bygges oven på CC-broen (snapshot + drafts); P0.4 mangler rigtig host-cron; P3.1/P3.2-hygiejne | 7.27.0 kan ikke installeres af agenten (OAuth-token tilbagekaldt, intet application password); P1.5 kræver Pinterest-token (401) og Meta-review; P1.4 kræver P1.5 |
+| Steamgears Autopilot — plugin (57,5 %) | P0.6 kan nu bygges oven på CC-broen (snapshot + drafts); Command Center skal opdateres og have WP-creds på serveren; P3.1/P3.2-hygiejne | P1.5 kræver Pinterest-token (401) og Meta-review; P1.4 kræver P1.5 |
 | Dark academia-rebrand (63 %) | Batch 4 — mockups (~130 billeder) | Printify-adgang |
 | SEO-indholdsproduktion (57,1 %) | Publicér de fire guides — copy, FAQ og links er klar (292, 296, 295 + ny side /steampunk-corset-guide/) | Publicering kræver WordPress-adgang. Filer der nu venter kun på det: docs/library/guides-2026-11-03.md (post 292, 296, 295) og docs/library/guides-2026-11-03-corset.md (ny side), plus fotos, HowTo/FAQPage-schema i Rank Math og selve publish. Copy er skrevet og verificeret i repoet (tools/guide_check.py). |
 | Døde internlinks (100 %) | Vedligehold: tjek nye indlæg mod live-URL'er | ingen |
