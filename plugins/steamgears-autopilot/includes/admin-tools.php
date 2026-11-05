@@ -110,7 +110,7 @@ class SGAP_AdminTools {
                 'description' => $description,
                 'category' => SGAP_Abilities::CATEGORY,
                 'output_schema' => ['type' => 'object'],
-                'execute_callback' => $execute,
+                'execute_callback' => static fn($input = null) => call_user_func($execute, $input),
                 'permission_callback' => [SGAP_Abilities::class, 'can_manage'],
                 'meta' => SGAP_Abilities::meta($readonly, $idempotent, $destructive)
             ];

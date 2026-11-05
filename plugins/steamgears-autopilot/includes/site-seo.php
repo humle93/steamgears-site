@@ -492,7 +492,7 @@ class SGAP_Site_SEO {
                 'report_only' => ['type' => 'boolean', 'default' => true, 'description' => 'When false the full per-check detail is returned instead of the summary.']
             ], []),
             'output_schema' => ['type' => 'object'],
-            'execute_callback' => function ($input) {
+            'execute_callback' => function ($input = null) {
                 $in = (array) $input;
                 $scan = self::scan();
                 if (!empty($in['fix'])) {

@@ -164,7 +164,7 @@ class SGAP_Abilities {
                 'description' => $description,
                 'category' => self::CATEGORY,
                 'output_schema' => ['type' => 'object'],
-                'execute_callback' => $execute,
+                'execute_callback' => static fn($input = null) => call_user_func($execute, $input),
                 'permission_callback' => [__CLASS__, 'can_manage'],
                 'meta' => self::meta($readonly, $idempotent)
             ];

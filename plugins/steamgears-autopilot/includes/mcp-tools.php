@@ -321,7 +321,7 @@ class SGAP_MCP_Tools {
                 'description' => $description,
                 'category' => self::CATEGORY,
                 'output_schema' => ['type' => 'object'],
-                'execute_callback' => $execute,
+                'execute_callback' => static fn($input = null) => call_user_func($execute, $input),
                 'permission_callback' => [__CLASS__, 'can_manage'],
                 'meta' => class_exists('SGAP_Abilities')
                     ? SGAP_Abilities::meta($readonly, $idempotent, $destructive)
