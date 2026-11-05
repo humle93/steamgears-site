@@ -324,6 +324,21 @@ queued. Variants are ordinary queue rows — same channel, angle, format, image,
 rules — carrying their language and the id of the post they came from, and a variant never spawns variants
 of its own.
 
+## Command Center link (7.33)
+
+Command Center (the self-hosted dashboard) talks to this plugin **one way**: it reads `GET /wp-json/sgap/v1/snapshot`
+every 30 minutes and sends posts as drafts with `POST /drafts`, using an administrator application password.
+Nothing on the site calls Command Center.
+
+- Every Command Center call carries `X-Command-Center: <version>`. The plugin notes it (option `sgap_cc_seen`,
+  at most once a minute, only for administrators on the `sgap/v1` routes).
+- The Self-check card shows **"Command Center … connected · last sync N min ago"**; `status` and `/snapshot`
+  report it as `command_center` (`connected` / `stale` / `never`).
+- If a Command Center that used to call has been silent for **more than 2 hours**, the daily self-check lists it
+  as a problem (and so the alerts fire). A site that never had Command Center is not nagged.
+- Command Center 7.19+ also calls `wp-cron.php` every 5 minutes, so the publishing cron runs on time even on a
+  quiet site. A real host cron (below) is still the better fix.
+
 ## Updates
 
 From 7.6 the plugin updates itself from GitHub (`humle93/steamgears-site`, branch `main`):

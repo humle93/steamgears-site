@@ -56,16 +56,16 @@
     {
       "id": "plugin",
       "name": "Steamgears Autopilot — plugin",
-      "next": "P3.1/P3.2-hygiejne; P0.6 er blokeret af Command Center",
-      "blocked_by": "7.27.0 kan ikke installeres af agenten (OAuth-token tilbagekaldt, intet application password); P1.5 kræver Pinterest-token (401) og Meta-review; P0.6 kræver Command Center; P1.4 kræver P1.5",
+      "next": "P0.6 kan nu bygges oven på CC-broen (snapshot + drafts); P0.4 mangler rigtig host-cron; P3.1/P3.2-hygiejne",
+      "blocked_by": "7.27.0 kan ikke installeres af agenten (OAuth-token tilbagekaldt, intet application password); P1.5 kræver Pinterest-token (401) og Meta-review; P1.4 kræver P1.5",
       "modules": [
         {
           "id": "p0",
           "name": "P0 — reliability",
-          "done": 3.35,
+          "done": 3.55,
           "total": 4.0,
           "unit": "d",
-          "note": "P0.1 0,5 + P0.2 0,5 + P0.3 1,0 + P0.5 1,0 (alarmer i includes/alerts.php, backoff 5/15/45, auditlog i includes/audit.php) + P0.4-detektion 0,2; + 0,15 d /go-ruten: produktlink uden kø-post gik til forsiden, nu produkt-fallback i 7.32.0 med 5 checks (404 PASS); P0.6 mangler"
+          "note": "P0.1 0,5 + P0.2 0,5 + P0.3 1,0 + P0.5 1,0 (alarmer i includes/alerts.php, backoff 5/15/45, auditlog i includes/audit.php) + P0.4-detektion 0,2; + 0,15 d /go-ruten: produktlink uden kø-post gik til forsiden, nu produkt-fallback i 7.32.0 med 5 checks (404 PASS); P0.6 mangler; + 0,2 d P0.4/CC-link (7.33.0): pluginnet registrerer Command Centers kald (X-Command-Center), viser forbindelsen og melder i selvtjekket når CC har været tavs > 2 t, og CC 7.19.0 kalder wp-cron.php hvert 5. min (integration: 8 cc-checks PASS). P0.4 0,2 → 0,4 af 0,5 d — rigtig host-cron mangler stadig"
         },
         {
           "id": "p1",
@@ -86,10 +86,10 @@
         {
           "id": "p3",
           "name": "P3 — hygiejne",
-          "done": 1.0,
+          "done": 1.1,
           "total": 2.0,
           "unit": "d",
-          "note": "P3.3 (CI 8.0-8.5 + WP 7.1) udført som S0.3 i site-repoet; P3.2 (REST-tests for /feed og /reposts) og P3.5 (uninstall dækket) i 7.28.0"
+          "note": "P3.3 (CI 8.0-8.5 + WP 7.1) udført som S0.3 i site-repoet; P3.2 (REST-tests for /feed og /reposts) og P3.5 (uninstall dækket) i 7.28.0; + 0,1 d CI på main repareret 5/11 (6 gamle zips fjernet, kvalitetsgaten blokerede sitets egne localhost-links, testdata fulgt med backoff/JPEG-preflight/32 abilities): integration 109, admin-tools 49, automation 27 PASS lokalt"
         }
       ],
       "total": 24.35
@@ -660,15 +660,6 @@
     },
     {
       "date": "2026-11-05",
-      "project": "Steamgears Autopilot — plugin",
-      "module": "ingen ændring",
-      "before": 56.3,
-      "after": 56.3,
-      "delta": 0,
-      "basis": "13,7 af 24,35 d (P0 3,35/4 · P1 4,85/11,35 · P2 4,5/7 · P3 1/2)"
-    },
-    {
-      "date": "2026-11-05",
       "project": "Dark academia-rebrand",
       "module": "ingen ændring",
       "before": 63.0,
@@ -693,6 +684,15 @@
       "after": 100.0,
       "delta": 0,
       "basis": "39 af 39 links"
+    },
+    {
+      "date": "2026-11-05",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 56.3,
+      "after": 57.5,
+      "delta": 1.2,
+      "basis": "14 af 24,35 d (P0 3,55/4 · P1 4,85/11,35 · P2 4,5/7 · P3 1,1/2)"
     }
   ]
 }

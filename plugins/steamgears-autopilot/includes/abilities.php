@@ -200,6 +200,7 @@ class SGAP_Abilities {
             'key_test' => get_option(SGAP_KeyCheck::RESULT) ?: null,
             'sending_paused_because' => SGAP_Queue::blocked_reason() !== '' ? SGAP_Queue::blocked_message() : null,
             'blackout' => SGAP_Blackout::summary(),
+            'command_center' => class_exists('SGAP_CC') ? SGAP_CC::status() : null,
             'quality_gate' => ['mode' => SGAP_Quality::mode(), 'banned_words' => count(SGAP_Quality::words())],
             'can_send_now' => SGAP_Queue::capacity(),
             'limits' => [

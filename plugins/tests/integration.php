@@ -81,6 +81,8 @@ sgci_check('due: item claimed as sending', $status() === 'sending', $status());
 sgci_check('due: second poll empty', count(sgci_rest('GET', '/queue/due')->get_data()['items'] ?? [1]) === 0);
 
 sgci_check('status: failed is retried', sgci_rest('POST', "/queue/{$qid}/status", ['status' => 'failed', 'error' => 'CI'])->get_data()['status'] === 'queued');
+// A failure is retried after a back-off (5, 15, 45 min); pretend the wait is over.
+$wpdb->update($wpdb->prefix . 'sgap_queue', ['scheduled_at' => wp_date('Y-m-d H:i:s', time() - 60)], ['id' => $qid]);
 sgci_check('due: retried item comes back', count(sgci_rest('GET', '/queue/due')->get_data()['items'] ?? []) === 1);
 sgci_check('status: published', sgci_rest('POST', "/queue/{$qid}/status", ['status' => 'published'])->get_data()['status'] === 'published');
 sgci_check('status: bad value 400', sgci_rest('POST', "/queue/{$qid}/status", ['status' => 'x'])->get_status() === 400);
@@ -138,7 +140,8 @@ update_option('sgap_quiet_start', 0);
 /* --- AI generation + Publer publishing, with Anthropic and Publer mocked --- */
 $GLOBALS['sgci_http'] = [];
 $GLOBALS['sgci_job_state'] = 'working';
-$png = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==');
+// A real JPEG: Instagram's preflight only accepts JPEG, so a PNG would keep those posts out of the run.
+$png = file_get_contents(__DIR__ . '/fixtures/ai-image.jpg');
 add_filter('pre_http_request', function ($pre, $args, $url) use ($png) {
     $GLOBALS['sgci_http'][] = ['url' => $url, 'args' => $args];
     $reply = fn(int $code, $body, string $type = 'application/json') => [
@@ -175,7 +178,7 @@ add_filter('pre_http_request', function ($pre, $args, $url) use ($png) {
         return $reply(200, ['success' => true, 'data' => ['status' => $GLOBALS['sgci_job_state'], 'result' => ['payload' => ['failures' => []]]]]);
     }
     if (str_contains($url, '/ci-image')) {
-        return $reply(200, $png, 'image/png');
+        return $reply(200, $png, 'image/jpeg');
     }
     return $pre;
 }, 10, 3);
@@ -187,8 +190,8 @@ foreach (get_posts(['post_type' => 'any', 'posts_per_page' => -1, 'fields' => 'i
 }
 $make_post = function (string $title) use ($png) {
     $post_id = wp_insert_post(['post_title' => $title, 'post_content' => 'Brass goggles with leather straps. ' . str_repeat('Steam. ', 50), 'post_status' => 'publish']);
-    $upload = wp_upload_bits('ci-image.png', null, $png);
-    $attachment = wp_insert_attachment(['post_mime_type' => 'image/png', 'post_title' => 'ci', 'post_status' => 'inherit'], $upload['file'], $post_id);
+    $upload = wp_upload_bits('ci-image.jpg', null, $png);
+    $attachment = wp_insert_attachment(['post_mime_type' => 'image/jpeg', 'post_title' => 'ci', 'post_status' => 'inherit'], $upload['file'], $post_id);
     set_post_thumbnail($post_id, $attachment);
     return $post_id;
 };
@@ -427,6 +430,31 @@ sgci_check('rss: key check needs no Publer key', SGAP_KeyCheck::check_publer()['
 update_option('sgap_ci_rss_id', (int) $rss_fb['id']);
 $wpdb->delete($wpdb->prefix . 'sgap_queue', ['id' => (int) $rss_ig['id']]);
 update_option('sgap_autopilot_enabled', 'no');
+
+/* --- Command Center link (one-way: CC calls us with X-Command-Center) --- */
+delete_option(SGAP_CC::SEEN);
+sgci_check('cc: never seen before any call', SGAP_CC::status()['state'] === 'never' && SGAP_CC::problem() === '');
+$req = new WP_REST_Request('GET', '/sgap/v1/snapshot');
+$req->set_param('days', 7);
+$res = rest_do_request($req);
+sgci_check('cc: a call without the header is not counted', $res->get_status() === 200 && get_option(SGAP_CC::SEEN) === false);
+$req = new WP_REST_Request('GET', '/sgap/v1/snapshot');
+$req->set_header('X-Command-Center', '7.19.0');
+$res = rest_do_request($req);
+$cc = SGAP_CC::status();
+sgci_check('cc: snapshot call with the header marks it connected', $res->get_status() === 200 && $cc['state'] === 'connected' && $cc['version'] === '7.19.0' && $cc['last_route'] === '/sgap/v1/snapshot', $cc);
+sgci_check('cc: snapshot reports the link', ($res->get_data()['status']['command_center']['state'] ?? '') === 'connected');
+sgci_check('cc: dashboard line shows it', str_contains(SGAP_CC::line(), 'connected'));
+wp_set_current_user(0);
+delete_option(SGAP_CC::SEEN);
+$req = new WP_REST_Request('GET', '/sgap/v1/snapshot');
+$req->set_header('X-Command-Center', '7.19.0');
+sgci_check('cc: an anonymous call is refused and not counted', rest_do_request($req)->get_status() === 401 && get_option(SGAP_CC::SEEN) === false);
+wp_set_current_user((int) $admin[0]);
+update_option(SGAP_CC::SEEN, ['ts' => time() - 5 * HOUR_IN_SECONDS, 'version' => '7.19.0', 'route' => '/sgap/v1/snapshot'], false);
+sgci_check('cc: silent for 5 h is stale', SGAP_CC::status()['state'] === 'stale' && str_contains(SGAP_CC::problem(), 'has not called for 5 h'));
+sgci_check('cc: self-check reports the silence', in_array(SGAP_CC::problem(), SGAP_Auto::health()['problems'], true));
+delete_option(SGAP_CC::SEEN);
 
 /* --- Self-update from GitHub (GitHub mocked; the "new" version is this plugin relabelled 9.9.9) --- */
 $plugin_dir = WP_PLUGIN_DIR . '/steamgears-autopilot';
