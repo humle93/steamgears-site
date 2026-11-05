@@ -24,6 +24,7 @@ lukkedes research-bibliotek.
 
 | Dokument | Indhold | Dato |
 | --- | --- | --- |
+| [mcp-kategorier-2026-11-05.md](mcp-kategorier-2026-11-05.md) | **MCP-kategorier og eksponering 5/11:** planen for at give site-botten alle 301 værktøjer — otte kategorier, fire risikoklasser (R0–R3), tre eksponeringsprofiler (læs/arbejde/fuld), de fire knapper der faktisk spærrer, og hvorfor de 28 synlige snarere er pagination eller public-filter end en rettighed — PDF i `reports/mcp-kategorier-2026-11-05.pdf` | 2026-11-05 |
 | [guide-links-aeldre-2026-11-03.md](guide-links-aeldre-2026-11-03.md) | **Link-plan for de ældre guides 3/11:** **20 `/go/`-links indsat** i den repo-ejede outfit-guide (verificeret ved læs-tilbage af filen), 12 klar til de guides der kun findes i WordPress, og 8 rækker med kortlagt ID men uden prisrække i repoet — PDF i `reports/guide-links-aeldre-2026-11-03.pdf` | 2026-11-03 |
 | [hub-steampunk-costumes-2026-11-03.md](hub-steampunk-costumes-2026-11-03.md) | **Hub-copy 3/11:** `/steampunk-costumes/` (side 550) skrevet som indgang til de fire guides — quick answer, femten produktlinks, tre figurer og FAQ — PDF i `reports/hub-steampunk-costumes-2026-11-03.pdf` | 2026-11-03 |
 | [guide-hub-2026-11-03.md](guide-hub-2026-11-03.md) | **Guide-klyngen 3/11:** de fire guides som én hub — gensidige links, `guide_check.py`-værnene (hub, klynge, produktnavn) og rækkefølgen de skal indsættes i — PDF i `reports/guide-hub-2026-11-03.pdf` | 2026-11-03 |
