@@ -140,7 +140,8 @@ class SGAP_Quality {
         if ($host === '') {
             return self::finding('bad_link', 'block', "\"{$url}\" has no domain, so it will not open for anyone.");
         }
-        if (in_array($host, self::PLACEHOLDERS, true) || (bool) preg_match('/\.(test|invalid|local|example)$/', $host)) {
+        // A link to this site itself is never a placeholder, even when the site runs on localhost (dev, CI).
+        if ($host !== self::site_host() && (in_array($host, self::PLACEHOLDERS, true) || (bool) preg_match('/\.(test|invalid|local|example)$/', $host))) {
             return self::finding('placeholder_link', 'block', "\"{$url}\" points at a placeholder ({$host}), so it will not open for anyone.");
         }
         if (str_starts_with($url, 'http://')) {
