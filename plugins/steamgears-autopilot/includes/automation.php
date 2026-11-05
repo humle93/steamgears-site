@@ -566,7 +566,7 @@ add_action('wp_abilities_api_init', function () {
     foreach ($defs as $name => [$label, $description, $props, $cb]) {
         $args = [
             'label' => $label, 'description' => $description, 'category' => SGAP_Abilities::CATEGORY,
-            'output_schema' => ['type' => 'object'], 'execute_callback' => $cb,
+            'output_schema' => ['type' => 'object'], 'execute_callback' => static fn($input = null) => call_user_func($cb, $input),
             'permission_callback' => [SGAP_Abilities::class, 'can_manage'], 'meta' => SGAP_Abilities::meta(false, false, false)
         ];
         if ($props) {

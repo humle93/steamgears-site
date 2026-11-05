@@ -176,6 +176,21 @@ t('chat (Anthropic): tool loop answers from the status tool', !is_wp_error($r) &
 t('chat (Anthropic): empty tool input goes back as an object', str_contains($GLOBALS['sgci_anthropic_raw'][1] ?? '', '"input":{}'), substr($GLOBALS['sgci_anthropic_raw'][1] ?? '', 0, 0));
 t('chat (Anthropic): thinking block sent back unchanged, then the tool result', ($second['messages'][3]['content'][0]['type'] ?? '') === 'thinking' && ($second['messages'][4]['content'][0]['tool_use_id'] ?? '') === 'toolu_1', $second['messages'] ?? null);
 update_option('sgap_ai_provider', 'aimlapi');
+// WordPress 7.1 calls an ability that has no input schema with NO argument (live 5/11: self-check threw
+// "Too few arguments"). Every callback must therefore accept being called with zero arguments.
+$strict = [];
+foreach (wp_get_abilities() as $a) {
+    if (!str_starts_with($a->get_name(), 'steamgears-')) continue;
+    $prop = (new ReflectionClass($a))->getProperty('execute_callback');
+    $prop->setAccessible(true);
+    $cb = $prop->getValue($a);
+    $ref = is_array($cb) ? new ReflectionMethod($cb[0], $cb[1]) : new ReflectionFunction(Closure::fromCallable($cb));
+    if ($ref->getNumberOfRequiredParameters() > 0) $strict[] = $a->get_name();
+}
+t('every ability callback can be called without arguments (WordPress 7.1)', !$strict, $strict);
+$cb = (function () { return $this->execute_callback; })->call(wp_get_ability('steamgears-autopilot/self-check'));
+$h = $cb();
+t('self-check runs when called with no argument at all', is_array($h) && isset($h['problems']), $h);
 wp_set_current_user(0);
 $r = wp_get_ability('steamgears-autopilot/list-plugins')->execute(); t('logged-out user is refused', is_wp_error($r));
 if ($fail) { WP_CLI::error("admin tools: some checks failed"); }
