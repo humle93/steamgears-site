@@ -98,3 +98,38 @@ Top-signaler: 40K 11th ed. launch (Armageddon-box, warhammer-community 26/3), co
 - https://missionmedia.asia/google-ai-performance-insights-merchant-center/
 
 **Kørsel:** web_search (7 søgninger, qdr:w/qdr:d + live fetch af developers.google.com/search/updates, status dashboard og seroundtable) → Gemini 3.8 Flash (4.039 tokens totalt, 2.996 completion inkl. 1.744 reasoning-tokens — maks på 3000 ramt, sidste handling let afkortet; hæv max_tokens til 3500 næste gang) — Gemini fungerede, ingen fallback. Ny i denne uge vs. 23/10-log: AIPREF + UGC-spam-guidance; Universal Cart/volatility kun nævnt som opfølgning.
+
+## 2026-11-05 (uge 46) — Ugentlig SEO-research ✅
+
+**Top 3 ændringer (29/10–5/11):**
+1. **Google indskrænker AI-indhold: "effort & originality"-test kodificeret (1/10, eskaleret i nov-rapport):** Gen-AI-guidancen kræver nu manuel factcheck af ALT AI-indhold — inkl. meta descriptions, structured data og alt-tekster — og henviser direkte til Quality Rater Guidelines 4.6.5 (scaled content abuse) og 4.6.6 (main content with little effort, little originality). Fake forfatterprofiler og misinformation er ligeledes i sigte (https://developers.google.com/search/docs/fundamentals/using-gen-ai-content, https://technicalseonews.com/latest/google-adds-rater-effort-originality-test-to-content-docs).
+2. **Core update er overhængende:** Ingen bekræftet update siden maj 2026 (seneste = September spam update, afsluttet 8/10), men SEJ-model estimerer 96,8% sandsynlighed for stor core update inden for en måned; SERP'er har været ustabile gennem oktober (https://www.seoforjournalism.com/p/google-updates-october-news-ai-overviews, https://www.redefineyourmarketing.com/blog/google-algorithm-update-running-list).
+3. **AI Overviews oversvømmer kommercielle søgninger:** AIO nu på 80%+ af alle Google-søgninger inkl. brand-søgninger; 88% af kommercielle modifier-keywords; e-handel-queries 33%→85% på ét år; "review"-søgninger 90%; shopping-queries 2,1%→14% (5,6x). Kaiser-studie (7.083 e-commerce-domæner): AIO koster ~2,8% organisk sessions, men transaktioner/revenue er stort set upåvirkede (konvertering +2,6%) — position 4-10 rammes hårdest (https://www.semrush.com/blog/ai-overviews-commercial-modifiers-study/, https://searchengineland.com/google-ai-overviews-shopping-queries-report-471981, https://www.maximiliankaiser.org/publication/ai-overviews-ecommerce/, https://distinctly.co/blog/latest-organic-search-news-november-26/).
+
+**Effekt for steamgears.eu:**
+- Guides med flad/generisk AI-tone eller manglende forfatteridentitet risikerer devaluering i den forestående core update (QRG 4.6.5/4.6.6).
+- US kommercielle keywords ("best steampunk goggles", "steampunk corset review"-agtigt) vil næsten sikkert trække AIO — organisk CTR presset, men købende trafik klarer sig relativt bedre.
+- Google Merchant data (feeds + Product Reviews via Merchant API, min. 50 reviews) er nu en officiel vej ind i AI-responser — steampunk-produkter kan citeres direkte i AIO/AI Mode.
+- Eksperiment-dokumentation: konkrete kunde-outcomes på sider løftede AI-citation-rate 23%→54%; 5+ credibility statements på forside = +62% AI-visibility for mid-authority brands.
+
+**Handlinger:**
+1. Manuel audit af guides + metadata (meta descriptions, schema, alt-tekster): fjern generisk AI-sprog, tilføj original indsigt/fotos, ægte forfattersignatur (E-E-A-T) — FØR core update rammer.
+2. Berig guides/produkttekster med konkrete "outcomes" (testresultater, materialer, måltider, what broke) for at maksimere AI-citation.
+3. Forsiden: sikr 5+ tydelige credibility-statements (levering, retur, trust, firmaoplysninger).
+4. Merchant Center: tjek produkt-feed-kvalitet; plan for Product Reviews (min. 50 reviews via ny Merchant API).
+
+**Kilder:**
+- https://developers.google.com/search/docs/fundamentals/using-gen-ai-content
+- https://technicalseonews.com/latest/google-adds-rater-effort-originality-test-to-content-docs
+- https://www.seroundtable.com/november-2026-google-webmaster-report-42431.html
+- https://www.redefineyourmarketing.com/blog/google-algorithm-update-running-list
+- https://www.seoforjournalism.com/p/google-updates-october-news-ai-overviews
+- https://www.semrush.com/blog/ai-overviews-commercial-modifiers-study/
+- https://searchengineland.com/google-ai-overviews-shopping-queries-report-471981
+- https://www.maximiliankaiser.org/publication/ai-overviews-ecommerce/
+- https://distinctly.co/blog/latest-organic-search-news-november-26/
+- https://developers.google.com/search/docs/fundamentals/ai-optimization-guide
+- https://searchengineland.com/google-merchant-center-adds-api-support-for-product-reviews-489716
+- https://support.google.com/merchants/answer/6098512?hl=en
+
+**Kørsel:** web_search (4 søgninger) → Gemini 3.8 Flash via aimlapi (max_tokens 9000 pga. reasoning-tokens; 2. kald gav komplet svar, finish=stop) — Gemini fungerede, ingen fallback. Ny i denne uge vs. uge 45: effort/originality-kravet inkl. metadata, overhængende core update (96,8%-estimat), AIO-dækningstal for kommercielle/e-commerce-queries + Kaiser causal-studie. AIPREF/UGC-spam fra uge 45 ikke gentaget.

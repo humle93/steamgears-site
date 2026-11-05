@@ -383,3 +383,37 @@ Seed list:
 1. **"Men's Steampunk Costume Essentials: 10 Pieces"** — 6. gentagelse, vinduet er VIDE nu: MSS (7-pieces, 16/10) rangerer ikke, HC er ude af top-3, VD holder #3 med død guide-URL. Publiser med Vol 2 Artist Series + AE-gear + sg-buy.
 2. **"DIY Steampunk Goggles: 5 Builds Ranked by Time and Budget (+ Ready-Made Upgrade)"** — YouTube ejer nu 2/3 top-slots på DIY-query; et tekst-format med pris/rang-tabel er modsætningsvindende indhold og kan fange både DIY- og commercial-intent via sg-buy.
 3. **"Steampunk Clothing: The Outfit at Three Budgets ($50/$120/$250)"** — steampunkary's tiers-vinkel (19/10) stadig i top-layout uden rigtige priser; vores USD-katalog er det reelle differentiator. November-vindue åbent med HC/MSS fokus på jul.
+
+## Scan 2026-11-05
+### Frontend-observationer (fetch ~01:00-01:12 UTC, UA SteamgearsSiteBuilder/1.0)
+- **my-steampunk-style.com** — 19. dag uden ny content: forside-linksene viser stadig de samme 4 blog-slugs (7-pieces, maximalism, under-100, retro-futurism); nyeste pub tilbage 16/10. /blog/ = 404 (korrekt path er /blogs/steampunk-blog). Ingen kampagne-signal.
+- **steampunkoutfits.com** — uændret: samme 3 blogposts på forsiden (how-to-dress, is-mad-max, who-created-steampunk, nyeste ~jul). 9. dag uden content. Kun 1 datostreng i HTML (2026-08-25, shopify-meta). EMD-clusteret sover fortsat.
+- **steampunkary.com** — forside uændret; samme H2'er (vs. Dieselpunk/Cyberpunk, Movies, Hats, Reading List). 8. dag uden forsideændring. Ny observation: affiliate-disclosure + editorial-policy-sider = trust-signal vi mangler.
+- **halloweencostumes.com** (/steampunk-costumes.html, 200) — kategorien uændret (Men/Women/Kids H2'er, samme SKUs). Sale-frekvens høj (47 "sale"-forekomster, op til 50% off) men ingen steampunk-specifik nyhed. Halloween-overgang til jul fortsætter.
+- **vintagedancer.com** — www-host stadig Cloudflare Error 1000 (dag 13+). Uændret død.
+- **museumreplicas.com/steampunk** — uændret: 10% off signup, Last Chance ×20, "New Products" ×96 = generisk nav-label. Ingen nye steampunk-varer.
+- **darkknightarmoury.com** — steampunk-kategori 200, uændret, ingen 2026-uploads.
+- **costumesandcollectibles.com** — live, uændret; men's/women's-kollektioner + enkelte produkter (aramis-doublet, blackthorn-walking-stick). Ingen BF/Christmas-signal.
+- Observer-status uændret: steampunkjournal.org (parked), brassgoggles.co.uk (TCP no route), steampunk.com (omdøbt), steampunkgoggles.com/blog (død 2017), airshipambassador.com (statisk).
+
+### SERP top-3 (web_search gl=us, 05/11)
+- **"steampunk costume guide"**: 1) writerlesleydonaldson.com 2) steampunkhub.uk "Dressing for your first steampunk event" (NY) 3) historicalemporium men's guide. Også steampunk.cnbeyer.com, steampunksetting.com style-guide, steampunkfashionguide.com tutorials, hc.com, psylofashion, fandom, YouTube. Rotationen fortsætter — stadig ingen dedikeret 2026-mega-guide, og to små content-sites holder top-slots.
+- **"diy steampunk goggles"**: 1) upcycledesignlab.com (aluminium-dåser) 2) thewoodlandelf.com (cardboard) 3) amaco.com tutorial. Også geekdad (2013), WIRED (2012!), instructables, **steamgears.eu/diy-steampunk-goggles/ (#7)**, gyakuyoga, YouTube ×2. Vores guide er inde i top-10; DIY-muren er stadig lav (2012-2013-dated indhold vinder).
+- **"steampunk accessories"**: 1) otherworldfashion.com samling (NY #1) 2) my-steampunk-style samling 3) steampunkstyler.com. Også lilyvow.com (NY), kinkyangel.co.uk, peacemonkeygifts.com, Amazon, antredesyria.com, steampunkwonders.com, shop.vermilion.cc. Kategorisider holder — og EMD-clusteret er backfill.
+
+### Nye domæner → watchlist (5 logget i DB)
+- steampunkhub.uk — UK event/etiquette-guide, #2 costume guide
+- steampunksetting.com — evergreen style guide, top-5
+- steampunkfashionguide.com — tutorials-index, top-5
+- otherworldfashion.com — alt-retailer, NY #1 accessories (Punk Rave-brand)
+- lilyvow.com — dropship-retailer (samme AE-profil som os), top-5 accessories
+
+### Keyword-signaler
+- "steampunk costume guide"-toppen er nu små content-sites + event-vinkler (first-event-etiquette) — store retailers er faldet ud. Beginner/first-time-intent vinder.
+- DIY-goggles: 10+ år gamle tutorials holder top-5; tekst-format + kommerciel kobling er stadig et åbent hul (steamgears #7 bekræfter at vi kan ryge op).
+- Accessories-SERP: ren retailer-cluster; Punk Rave-brandforhandlere (otherworldfashion) tager #1. EMD-cluster (styler/wonders) backfiller slots.
+
+### 3 indholdsmuligheder for steamgears.eu
+1. **"Your First Steampunk Event: What to Wear, What to Expect"** — steampunkhub.uk's event-vinkel er NYT i top-3 og direkte i linje med vores 5 Complete Looks; kobl til sg-buy med "complete the look"-blokke. Ingen anden i top-10 dækker beginner-event-intent med shop.
+2. **"How to Make Steampunk Goggles: 5 Methods Ranked (Cardboard to Brass)"** — DIY-SERP's top-5 er 2012-2013-indhold; en dateret, rangeret tutorial med materialer-tabel + AE-goggles "ready-made upgrade"-CTA kan tage top-3 (vi er allerede #7 med den nuværende guide — opdater + udvid i stedet for ny URL).
+3. **"Steampunk Accessories: The Complete Checklist (What to Buy vs. DIY)"** — accessories-SERP er 100% kategorisider uden checklist/listicle med pris-tabel; thepiratedressing's gamle listicle viser at formatet rangerer. Byg det som hub-side med sg-buy pr. item.

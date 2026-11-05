@@ -378,3 +378,12 @@
 - Raw curl → WAF 456/454 som sædvanlig (browser-fetch + REST med UA-header og 3-4 min pauser løste det; REST-kald kom igennem: gateways, plugins, orders).
 - Ingen 5xx eller redirect-loops.
 - Konklusion: Alt i orden. Ingen Henning-ping.
+
+## 05/11 2026 07:00 — Daglig drift/checkout-tjek ✅
+
+- Forside + /shop/ 200 (browser-fetch/firecrawl; forside "Steampunk Gear & Costumes – Shop the Looks" med produkter, /shop/ med produktgrid + Add to cart). Raw curl → WAF 454 som sævanlig.
+- Stripe gateway: enabled=true, **testmode=no (live)**, pk_live_51Ttlwg + sk_live_51Ttlwg til stede ✅. Aktive gateways: stripe (Card), stripe_amazon_pay, stripe_klarna, stripe_link, bacs.
+- Ordrer seneste 24h: **0 nye, 0 fejlede** (after=04/11 07:00 tom; bekræftet 2x). Seneste ordre stadig #873 (27/10, Henning-test, completed, $0.00). Stadig ingen rigtige live-ordrer.
+- Plugins (38 total): alle kritiske AKTIVE — WooCommerce, Stripe, Rank Math, W3TC, Complianz (gdpr+terms), Site Kit, MailPoet, Printify, WPCode (ihaf), Ads.txt Manager. Inaktive: kun royal-links + royal-mcp (kendte). Ingen nye/ukendte plugins. GTM Kit fortsat ikke i listen (kendt fra 02/11; GA4 via Site Kit + GTM — følges op i ugentlig tjek).
+- Ingen 5xx eller redirect-loops.
+- Konklusion: Alt i orden. Ingen Henning-ping.

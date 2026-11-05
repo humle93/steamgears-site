@@ -411,3 +411,68 @@ Token 42749 -> 42866 (2 sider). Ca. 52 ændringer 21:58-22:01 UTC, alle nye/upda
 
 ## 2026-11-05 00:00 (23:00 UTC 04/11) — token 42866 -> 43001 (2 sider)
 - 71 ændringer 22:01-22:05 UTC, alle opdateringer/nye i "CommandCenter"-repoet (fuld sync af git-internals: .git-objekter/pack-filer, hooks-samples, mapper tests/app/__pycache__/docs/.github), screenshots cc-*.png (cockpit, login, seo, social m.fl.) + dashboard.html, login.html, main.py, SKILL.md. Ingen slettede, ingen tilladelses-ændringer.
+05/11 00:00 UTC — ingen ændringer
+
+## 2026-11-05 01:00 (token 43001→43023)
+- `https://github..txt` (NY, 00:20) — indhold: https://github.com/humle93/steamgears-site
+- `steamgears-autopilot-7.33.0.zip` (NY, 00:49) — zip-fil
+- Mappe "Billeder" + 16 undermapper (kreative/foto-events m.m.) oprettet/syncet 00:59–01:00
+
+## 2026-11-05 02:00 (kørsel kl. 02:00 CET)
+- 71 ændringer fra token 43023 → 43095. Alle tidsstemplede 01:00:45–01:02:52 UTC — samlet bulk-upload/sync.
+- Mapper (10): personlige arrangementer 260124–260614 (håndboldstævne, triatlon, lejlighedsweekender, kampdag, brude weekend) + Google Photos-mappe.
+- Billeder (3): 2× Borgstuens lejlighedsweekend jpg, 1× hash-navngivet jpg.
+- Torrent-filer (19): film/serier via IPT.
+- Software/installer (9): plezy tar.gz, termux/apk'er, APKTime, platform-tools, Total_Football bdcfg.
+- Zip/HTML/PHP (5): interaktiv-diaetberegner-2026.zip, beregner.html, ia-diaetberegner-2026.php, getgenie.4.4.3.zip, gemini-code-*.html ×2.
+- Shortcuts (8): SEO/ værktøjs-zips, PDFs (Amir Video Marketing, Hawk One, autopilot-guide).
+- PDFs/dokumenter (12): ansøgning Rema 1000 Rugkobbel ×2, ansættelseskontrakt, ugeseddel uge 18, vikarspørgeskema M.J. Eriksson, opgørelse over lønkrav, thor jørgensen skabelon, Command Center Niche Scanner master guide (md), WordPress.xml, diverse untitled.
+- Øvrigt: client.ovpn, Free All.txt, StopSpillet + VideoSlots gemte mailsider, "projekt one" email.
+- Ingen Warhammer/grimdarkbuilds-filer. Ingen slettede filer. Ingen Juno-genererede filer.
+- Nævneværdig fil: "Command Center Niche Scanner - Complete Master Codebase & Assembly Guide" (markdown, 01:02) — komplet v2.1-kodebase og installationsguide til selvstændigt niche-scanner-system (FastAPI-backend + WordPress bridge-plugin, AI-udrulning via aimlapi). Status: afsluttet.
+
+## 2026-11-05 03:00 (CET ~04:00)
+- Ingen ændringer siden sidst (token 43095 uændret).
+## 2026-11-05 04:00 UTC — ingen ændringer (token 43095)
+## 2026-11-05 05:00 UTC — ingen ændringer (token 43095)
+- 2026-11-05 06:00 UTC: ingen ændringer
+- 2026-11-05 07:00 UTC: ingen ændringer (token 43095)
+2026-11-05 08:00 UTC — token 43095, ingen ændringer
+
+## 2026-11-05 09:00 (token 43095 → 43286)
+- **Masse-sync (ca. 139 ændringer) kl. 08:47–09:01 UTC** — ser ud som en fuld ny Drive-integration/sync: 30+ mapper (Dokumenter, Kode og websites, Steamgears billeder, Warpstorm, CommandCenter, Gemini m.fl.) + ~60 billeder (v2-01…v2-30 design-illustrationer, guide-fotos costume/goggles/budget/beginner, about/acc-fotos) + ~65 Google Docs (Juno master-briefs, Steamgears/Warpstorm SEO-rapporter, TikTok/YouTube-strategier, Warpstorm lore, Nordisk Orden, M.J. Eriksson-ugsesedler og personlige PDF'er: ansættelseskontrakt, ansøgninger, rejseafregning) + steamgears-autopilot-v7.33.0.zip.
+- Ingen slettede filer eller tilladelses-ændringer.
+
+## 2026-11-05 10:00 (token 43286 → 43330)
+- 44 ændringer kl. 09:01–09:02 UTC — forlængelse af morgendagens masse-sync (resten af fil-sættet).
+- PDF'er (8): RBJ Mandskab ugeseddel(10), binders blank uge-seddel, TubeTrooper System, Thor Jørgensen skabelon, export 1/8–6/11 2023, doc003492...kopi, The Clapback Engine, interaktiv_diaetberegner_2026.
+- Kode (9): budgets.py, backup.py, jobs.py, quality_gate.py, wp_bridge.py, steamgears-social-autopilot.php/v3/v5, ia-diaetberegner-2026.php, script.js.
+- HTML/md (5): nummer.html, beregner.html, index.html (diaetberegner), Command Center Niche Scanner master guide (ny kopi), Warhammer 40K — Site Kickoff (2026-10-21).md (NY på Drive).
+- Docs/Sheets (9): Optimerede Produkttekster (Steamgears+Warpstorm), Samlede Ugesedler, RBJ Mandskab ugeseddel, teamheadesign dashboard-rapport, Ugeskema V2 + V1, MS Industri og Rail SEO Matrix, MS_Ugeseddel_Database, Ugeskema mj Eriksson uge 33 ×2.
+- Øvrigt (10): WordPress.xml, Opgørelse lønkrav docx, Opgørelse rejsegodtgørelse xlsx, "Juno styrer — Samlet Drejebog & YouTube Strategi v2.1" docx, gemini_generated_video mp4, client.ovpn ×2, SafeInCloud.db, edgekode.kdbx, MicrosoftAutofillData.csv, Social_media_hacking PDF.
+- Ingen slettede filer. Ingen tilladelses-ændringer. Ingen Juno-genererede filer.
+- Vigtigst: Warhammer 40K Site Kickoff-md (IP-juridisk ramme: sikkert spor = cosplay/DIY-guides + generiske sci-fi-props uden GW-navne; Fase 0 venter på domain/hosting-beslutning fra Henning).
+- OBS: følsomme filer syncet til Drive (SafeInCloud.db, edgekode.kdbx, client.ovpn, MicrosoftAutofillData.csv) — Henning-egne, nævnes i opsummering.
+## 2026-11-05 12:00 CET — ingen ændringer (token 43330 uændret)
+## 2026-11-05 12:00
+Ingen ændringer siden sidst (token 43330 uændret).
+## 2026-11-05 13:00 — ingen ændringer (token 43330 uændret)
+- 2026-11-05 14:00 UTC: ingen ændringer (token 43330 uændret)
+
+## 2026-11-05 15:00 UTC
+- Ny fil: "Custom MCP Server Roadmap" (Google Doc, redigeret 14:55 UTC) — indhold ikke læsbart med nuværende connector-værktøjer (kun metadata). Link: https://docs.google.com/document/d/1GXmoV9ghfcuIuRNb5cbtWHjczJpQkeLf2qPTWpFJl4Y/edit
+- Token opdateret: 43330 → 43339
+## 05-11-2026 16:00 UTC — ingen ændringer
+
+## 05-11-2026 17:00
+- NY: "Generer Modular MCP Struktur" (Google Doc, 16:25) — bash-script til modulær MCP-server (~/mcp-command-center): tools/db_tools.py (SQLite tasks + social_queue), tools/wp_tools.py (WP drafts til steamgears/warpstorm + GEO-audit), tools/prompts.py (content_brief GEO-prompt), mcp_server.py + .env-skabelon.
+## 2026-11-05 18:00 UTC — ingen ændringer (token 43346)
+## 2026-11-05 19:00 (UTC) — ingen ændringer (token 43346)
+## 2026-11-05 20:00 UTC - Drive-watch: ingen ændringer (token 43346)
+
+## 2026-11-05 21:00
+- Ingen ændringer siden sidst (token 43346 uændret).
+
+## 2026-11-05 22:00 (tokens 43346→43353)
+- NY: "AIMLAPI_APIkey_badb337b" (Google Doc, 21:28) — AIMLAPI key til WordPress-konto. Indhold læst; key ikke gemt i log af sikkerhedshensyn. Ingen andre ændringer.
+## 2026-11-06 00:00 DK (run 2026-11-05T23:00Z): ingen ændringer siden token 43353.
