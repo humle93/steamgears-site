@@ -148,7 +148,7 @@ Høstede Google-kilder i [`knowledge_base/`](../../knowledge_base/) (indlæses a
 - [`command-center/`](command-center/) — Command Centers egen dokumentation hentet 2/11 2026 (roadmap, arkitektur/sikkerhed, bruger- og systemmanual) fra `humle93/command-center` @ `ac7dd53`
 - [`command-center-opdatering-2026-11-02.md`](command-center-opdatering-2026-11-02.md) — opdatering af CC på Ultra.cc til 7.14 med bruger-login (tjek, backup, tre opdateringsveje, fejlsøgning); PDF i `reports/command-center-opdatering-2026-11-02.pdf`
 - [`mcp-skriveadgang-2026-11-04.md`](mcp-skriveadgang-2026-11-04.md) — MCP-skriveadgang fra en cloud-worktree: OAuth uden lytter, `drafts_only` aflæst, `wp_alter_post`/`wp_update_post`, og de fire fælder (isError-teksten, tilføjelser der kan køres to gange, en anden agent der skriver, tomt svar fra `wp_get_post`); PDF i `reports/mcp-skriveadgang-2026-11-04.pdf`
-- [`guide-links-live-2026-11-04.md`](guide-links-live-2026-11-04.md) — målingen af alle 40 planlagte `/go/<id>/`-links mod det levende site: 34 `indsat`, 6 `kladde`, 0 afvigelser; skrives af `tools/live_link_report.py` og læses af `link_plan_check`; PDF i `reports/guide-links-live-2026-11-04.pdf`
+- [`guide-links-live-2026-11-05.md`](guide-links-live-2026-11-05.md) — målingen af alle 40 planlagte `/go/<id>/`-links mod det levende site: 34 `indsat`, 6 `klar`, 0 afvigelser — plus **54 sporede links i alt** på de ti guides efter at outfit-guidens sidste 20 direkte produktlinks blev konverteret 5/11; skrives af `tools/live_link_report.py` og læses af `link_plan_check`; PDF i `reports/guide-links-live-2026-11-05.pdf`
 
 ## Arkiv
 

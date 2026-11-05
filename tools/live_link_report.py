@@ -8,8 +8,11 @@ om det redirecter til det produkt ID'et hører til. Resultatet skrives som en m�
 "indsat" i planen altid har en måling bag sig.
 
 Brug:
-    python3 tools/live_link_report.py --dato 4/11 2026
-    python3 tools/live_link_report.py --dato 4/11 2026 --check   # fejler hvis dokumentet ikke matcher
+    python3 tools/live_link_report.py --dato 5/11 2026
+    python3 tools/live_link_report.py --dato 5/11 2026 --check   # fejler hvis dokumentet ikke matcher
+
+Filen navngives efter måledagen (`guide-links-live-<iso-dato>.md`), så en ny måling ikke overskriver den
+forrige dags bevis. Sidste tabel tæller også *alle* `/go/`-links på hver side — ikke kun planens rækker.
 
 Intet gættes: sider der ikke svarer 200, og links der ikke redirecter til et produkt, skrives som
 `nej`/`ikke produkt` i tabellen i stedet for at blive talt med.
@@ -23,9 +26,19 @@ import urllib.request
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PLAN = os.path.join(ROOT, "docs", "library", "guide-links-aeldre-2026-11-03.md")
-OUT = os.path.join(ROOT, "docs", "library", "guide-links-live-2026-11-04.md")
+OUT_DIR = os.path.join(ROOT, "docs", "library")
+OUT_NAME = "guide-links-live-{dato}.md"
 SITE = "https://steamgears.eu"
 UA = "Mozilla/5.0 (compatible; steamgears-link-check/1.0)"
+
+
+def iso_date(dato: str) -> str:
+    """'5/11 2026' -> '2026-11-05', så filnavnet følger måledagen i stedet for at være låst."""
+    m = re.match(r"\s*(\d{1,2})/(\d{1,2})\s+(\d{4})\s*$", dato)
+    if not m:
+        raise SystemExit(f"datoen '{dato}' skal skrives som 5/11 2026")
+    day, month, year = (int(part) for part in m.groups())
+    return f"{year:04d}-{month:02d}-{day:02d}"
 
 
 class NoRedirect(urllib.request.HTTPRedirectHandler):
@@ -76,7 +89,7 @@ def plan_rows() -> dict:
     return guides
 
 
-def measure(dato: str) -> tuple[str, int]:
+def measure(dato: str, out: str) -> tuple[str, int]:
     guides = plan_rows()
     lines = [
         "# Målt: /go/-links i de ældre guides — " + dato,
@@ -119,15 +132,24 @@ def measure(dato: str) -> tuple[str, int]:
         f"{problems} afvigelser. Rækker med status `kladde` og `klar` må stå med `nej` — de er ikke publiceret endnu.",
         "Sider der ikke svarer 200, tælles som afvigelse — også når linket findes.",
         "",
-        "| Guide | Svarer | /go/-links fundet på siden |",
-        "| --- | ---: | ---: |",
+        "| Guide | Svarer | Plan-rækker fundet | /go/-links i alt |",
+        "| --- | ---: | ---: | ---: |",
     ]
+    total_links = 0
     for guide, rows in guides.items():
         status, html = fetch(SITE + guide)
-        found = len(set(re.findall(r'href="(?:%s)?/go/(\d+)/"' % re.escape(SITE), html)))
-        on_page = sum(1 for pid, _ in rows if pid in set(re.findall(r'href="(?:%s)?/go/(\d+)/"' % re.escape(SITE), html)))
-        lines.append(f"| `{guide}` | {status} | {on_page} af {len(rows)} |")
-    lines.append("")
+        hrefs = re.findall(r'href="(?:%s)?/go/(\d+)/"' % re.escape(SITE), html)
+        found = set(hrefs)
+        total_links += len(hrefs)
+        on_page = sum(1 for pid, _ in rows if pid in found)
+        lines.append(f"| `{guide}` | {status} | {on_page} af {len(rows)} | {len(hrefs)} |")
+    lines += [
+        "",
+        f"**Sporet dækning:** {total_links} `/go/`-links står i alt på de ti guides. Kolonnen `Plan-rækker fundet` tæller",
+        "kun planens egne rækker; `/go/-links i alt` tæller hvert eneste sporet produktlink i HTML'en — også dem der",
+        "ikke stod i planen, fx de 20 direkte produktlinks der blev konverteret på outfit-guiden 5/11.",
+        "",
+    ]
     return "\n".join(lines), problems
 
 
@@ -137,23 +159,24 @@ def main() -> int:
         if flag in sys.argv:
             dato = sys.argv[sys.argv.index(flag) + 1]
     if not dato:
-        print("brug: python3 tools/live_link_report.py --dato '4/11 2026' [--check]")
+        print("brug: python3 tools/live_link_report.py --dato '5/11 2026' [--check]")
         return 2
-    text, problems = measure(dato)
+    out = os.path.join(OUT_DIR, OUT_NAME.format(dato=iso_date(dato)))
+    text, problems = measure(dato, out)
     if "--check" in sys.argv:
-        if not os.path.exists(OUT):
-            print(f"FAIL {os.path.relpath(OUT, ROOT)} findes ikke — mål igen")
+        if not os.path.exists(out):
+            print(f"FAIL {os.path.relpath(out, ROOT)} findes ikke — mål igen")
             return 1
-        with open(OUT, encoding="utf-8") as fh:
+        with open(out, encoding="utf-8") as fh:
             saved = fh.read()
         if saved.strip() != text.strip():
             print("FAIL målingen i dokumentet matcher ikke det levende site — kør uden --check for at opdatere")
             return 1
         print("PASS målingen i dokumentet matcher det levende site")
         return 1 if problems else 0
-    with open(OUT, "w", encoding="utf-8") as fh:
+    with open(out, "w", encoding="utf-8") as fh:
         fh.write(text)
-    print(f"skrev {os.path.relpath(OUT, ROOT)} — {problems} afvigelser")
+    print(f"skrev {os.path.relpath(out, ROOT)} — {problems} afvigelser")
     return 1 if problems else 0
 
 

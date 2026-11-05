@@ -29,7 +29,7 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PLAN = os.path.join(ROOT, "docs", "library", "guide-links-aeldre-2026-11-03.md")
-LIVE = os.path.join(ROOT, "docs", "library", "guide-links-live-2026-11-04.md")
+LIVE = os.path.join(ROOT, "docs", "library", "guide-links-live-2026-11-05.md")
 FREE_IDS = {"809"}          # den gratis tjekliste-PDF har ingen pris
 STATUSES = {"indsat", "kladde", "klar"}
 REPO_FILES = {"/steampunk-outfit-ideas-for-women/": "docs/library/steampunk-outfit-ideas-for-women.md"}

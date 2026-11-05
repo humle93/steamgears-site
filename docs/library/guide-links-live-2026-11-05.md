@@ -1,6 +1,6 @@
-# Målt: /go/-links i de ældre guides — 4/11 2026
+# Målt: /go/-links i de ældre guides — 5/11 2026
 
-**Målt:** 4/11 2026 mod det levende site. Hver række er et opslag, ikke en påstand: siden er hentet,
+**Målt:** 5/11 2026 mod det levende site. Hver række er et opslag, ikke en påstand: siden er hentet,
 linket er fundet i HTML'en, og `/go/<id>/` er fulgt for at se hvor det lander. Rækkefølgen følger
 [`guide-links-aeldre-2026-11-03.md`](guide-links-aeldre-2026-11-03.md), som er planen.
 
@@ -55,15 +55,19 @@ med `ja` — ellers fejler værnene. Målingen skal altså laves om, hvis en sid
 0 afvigelser. Rækker med status `kladde` og `klar` må stå med `nej` — de er ikke publiceret endnu.
 Sider der ikke svarer 200, tælles som afvigelse — også når linket findes.
 
-| Guide | Svarer | /go/-links fundet på siden |
-| --- | ---: | ---: |
-| `/steampunk-outfit-ideas-for-women/` | 200 | 14 af 20 |
-| `/how-to-make-a-steampunk-costume/` | 200 | 3 af 3 |
-| `/3d-print-steampunk-parts/` | 200 | 2 af 2 |
-| `/best-steampunk-books/` | 200 | 2 af 2 |
-| `/casual-steampunk-outfits/` | 200 | 2 af 2 |
-| `/closet-steampunk-outfits/` | 200 | 2 af 2 |
-| `/sustainable-steampunk/` | 200 | 2 af 2 |
-| `/build/tools-and-materials/` | 200 | 2 af 2 |
-| `/build/weathering/` | 200 | 1 af 1 |
-| `/steampunk-gift-guide-2026/` | 200 | 4 af 4 |
+| Guide | Svarer | Plan-rækker fundet | /go/-links i alt |
+| --- | ---: | ---: | ---: |
+| `/steampunk-outfit-ideas-for-women/` | 200 | 14 af 20 | 34 |
+| `/how-to-make-a-steampunk-costume/` | 200 | 3 af 3 | 3 |
+| `/3d-print-steampunk-parts/` | 200 | 2 af 2 | 2 |
+| `/best-steampunk-books/` | 200 | 2 af 2 | 2 |
+| `/casual-steampunk-outfits/` | 200 | 2 af 2 | 2 |
+| `/closet-steampunk-outfits/` | 200 | 2 af 2 | 2 |
+| `/sustainable-steampunk/` | 200 | 2 af 2 | 2 |
+| `/build/tools-and-materials/` | 200 | 2 af 2 | 2 |
+| `/build/weathering/` | 200 | 1 af 1 | 1 |
+| `/steampunk-gift-guide-2026/` | 200 | 4 af 4 | 4 |
+
+**Sporet dækning:** 54 `/go/`-links står i alt på de ti guides. Kolonnen `Plan-rækker fundet` tæller
+kun planens egne rækker; `/go/-links i alt` tæller hvert eneste sporet produktlink i HTML'en — også dem der
+ikke stod i planen, fx de 20 direkte produktlinks der blev konverteret på outfit-guiden 5/11.

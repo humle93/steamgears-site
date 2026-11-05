@@ -6,9 +6,11 @@ og 6 af planens produkter nævnes slet ikke i den publicerede artikel og afvente
 række har stadig både ID og pris — de otte der før stod som `pris mangler`, fik deres pris målt i den levende
 butik 3/11 2026, se [`priser-fra-store-api-2026-11-03.md`](priser-fra-store-api-2026-11-03.md).
 
-Målingen ligger i [`guide-links-live-2026-11-04.md`](guide-links-live-2026-11-04.md): hver guide er hentet, hvert
+Målingen ligger i [`guide-links-live-2026-11-05.md`](guide-links-live-2026-11-05.md): hver guide er hentet, hvert
 link fundet i HTML'en, og hvert `/go/<id>/` fulgt til det produkt det lander på. Det er den fil
-`link_plan_check` holder `indsat`-rækkerne op imod, så et "indsat" her altid har et opslag bag sig.
+`link_plan_check` holder `indsat`-rækkerne op imod, så et "indsat" her altid har et opslag bag sig. **5/11**
+blev de sidste direkte produktlinks konverteret, så der nu står **54 sporede links** på de ti guides — planens
+40 rækker er altså et mindre udsnit end det arbejde der faktisk er gjort (se §1).
 
 Link-kolonnen er stien på sitet (`/go/<id>/`). Produkt-ID'er: [`om-maerkning-dark-academia-2026-11-01.md`](om-maerkning-dark-academia-2026-11-01.md) (39 designs
 plus appendix med de seks produkter uden for dem). Priser:
@@ -24,7 +26,10 @@ og de er ikke samme artikel:
 - **Den publicerede artikel** (post 699, "12 Complete Looks (With Prices)") har 12 andre looks — Airship Captain,
   Victorian Inventress, Cosy Engineer — og 34 direkte `/product/`-links, men **nul** `/go/`-links. Den har 14 af
   planens 20 produkter. 4/11 blev de 14 konverteret til `/go/<id>/` ved første omtale: samme synlige tekst,
-  samme mål, nu med sporing.
+  samme mål, nu med sporing. **5/11 blev de resterende 20 hrefs konverteret** (15 produkter, 21 unikke
+  produkt-ID'er i alt på siden), så **hele siden er sporet: 34 af 34 produktlinks**. Kun `href`-værdierne blev
+  ændret — resten af HTML'en er byte-identisk, og ejerens billedbyt samme dag (juno.page-CDN → lokal upload af
+  `victorian-underbust-corset.jpg`) blev bevaret, fordi indholdet blev læst før det blev skrevet.
 - **Omskrivningen i repoet** ([`steampunk-outfit-ideas-for-women.md`](steampunk-outfit-ideas-for-women.md)) er en
   anden tekst med 12 andre looks og alle 20 produkter linket, men den er aldrig publiceret.
 
