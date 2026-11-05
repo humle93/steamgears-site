@@ -63,8 +63,10 @@ class SGAP_Audit {
 
     /** HTTP status carried by a WP_Error from the Publer client, or 0 when the failure was local. */
     public static function status_of($error): int {
-        if (is_wp_error($error) && is_array($error->data) && isset($error->data['status'])) {
-            return self::clamp_status((int) $error->data['status']);
+        // WP_Error has no public $data: read it through get_error_data() (the real class warns otherwise).
+        $data = is_wp_error($error) ? $error->get_error_data() : null;
+        if (is_array($data) && isset($data['status'])) {
+            return self::clamp_status((int) $data['status']);
         }
         return 0;
     }
