@@ -23,7 +23,7 @@ Status pr. **2026-11-06** · beregnet af `projektstatus.py` · kilder: [`projekt
 | Projekt | Status i dag | Grundlag |
 | --- | --- | --- |
 | **steamgears.eu — site-optimering** *(roadmap S0–S4)* | **58,3 %** | 12,7 af 21,8 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,8/6,05 · S3 2,45/3,55 · S4 1,4/5) |
-| **Steamgears Autopilot — plugin** | **63,6 %** | 16,6 af 26,1 d (P0 3,55/4 · P1 6,6/13,1 · P2 4,5/7 · P3 1,95/2) |
+| **Steamgears Autopilot — plugin** | **64 %** | 16,9 af 26,4 d (P0 3,55/4 · P1 6,9/13,4 · P2 4,5/7 · P3 1,95/2) |
 | **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5) |
 | **SEO-indholdsproduktion** | **57,1 %** | 4 af 7 guides (Publicerede guides (id 292, 296, 295) 0/3 · Guide-copy klar til publicering (292, 296, 295 + corset) 4/4) · drift: Daglig loop kører |
 | **Døde internlinks** | **100 %** | 39 af 39 links |
@@ -35,7 +35,7 @@ Status pr. **2026-11-06** · beregnet af `projektstatus.py` · kilder: [`projekt
 | Projekt | Næste skridt | Blokering |
 | --- | --- | --- |
 | steamgears.eu — site-optimering (58,3 %) | Publicér de fire guides + hub-copyen og S2.2 /shipping/ + /returns/ når WordPress-adgang er der; S1.1 Herbarium kræver varianter i Printify; S0.4 kræver én Redirection-gruppe (ejer) | S1.1 Herbarium kræver varianter i Printify; S0.4 5 vanity-301 kræver én Redirection-gruppe (ejer) |
-| Steamgears Autopilot — plugin (63,6 %) | P0.6 kan nu bygges oven på CC-broen (snapshot + drafts); Command Center skal opdateres og have WP-creds på serveren; P3.1/P3.2-hygiejne | P1.5 kræver Pinterest-token (401) og Meta-review; P1.4 kræver P1.5 |
+| Steamgears Autopilot — plugin (64 %) | P0.6 kan nu bygges oven på CC-broen (snapshot + drafts); Command Center skal opdateres og have WP-creds på serveren; P3.1/P3.2-hygiejne | P1.5 kræver Pinterest-token (401) og Meta-review; P1.4 kræver P1.5 |
 | Dark academia-rebrand (63 %) | Batch 4 — mockups (~130 billeder) | Printify-adgang |
 | SEO-indholdsproduktion (57,1 %) | Publicér de fire guides — copy, FAQ og links er klar (292, 296, 295 + ny side /steampunk-corset-guide/) | Publicering kræver WordPress-adgang. Filer der nu venter kun på det: docs/library/guides-2026-11-03.md (post 292, 296, 295) og docs/library/guides-2026-11-03-corset.md (ny side), plus fotos, HowTo/FAQPage-schema i Rank Math og selve publish. Copy er skrevet og verificeret i repoet (tools/guide_check.py). |
 | Døde internlinks (100 %) | Vedligehold: tjek nye indlæg mod live-URL'er | ingen |
@@ -50,6 +50,7 @@ Nyeste først. Append-only — rækker må ikke slettes eller ændres.
 
 | Dato | Projekt | Modul | Før → Efter | Δ | Grundlag |
 | --- | --- | --- | --- | --- | --- |
+| 2026-11-06 | Steamgears Autopilot — plugin | daglig måling | 63,6 % → 64 % | +0,4 | 16,9 af 26,4 d (P0 3,55/4 · P1 6,9/13,4 · P2 4,5/7 · P3 1,95/2) |
 | 2026-11-06 | Steamgears Autopilot — plugin | daglig måling | 62,5 % → 63,6 % | +1,1 | 16,6 af 26,1 d (P0 3,55/4 · P1 6,6/13,1 · P2 4,5/7 · P3 1,95/2) |
 | 2026-11-06 | Steamgears Autopilot — plugin | daglig måling | 61,8 % → 62,5 % | +0,7 | 15,85 af 25,35 d (P0 3,55/4 · P1 5,85/12,35 · P2 4,5/7 · P3 1,95/2) |
 | 2026-11-06 | Steamgears Autopilot — plugin | daglig måling | 61,4 % → 61,8 % | +0,4 | 15,35 af 24,85 d (P0 3,55/4 · P1 5,35/11,85 · P2 4,5/7 · P3 1,95/2) |

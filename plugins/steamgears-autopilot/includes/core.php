@@ -456,6 +456,9 @@ class SGAP_Settings {
                     $key === 'locales' => [__CLASS__, 'sanitize_locales'],
                     $key === 'locale_source' => [__CLASS__, 'sanitize_locale_code'],
                     $key === 'utm_campaign' => [__CLASS__, 'sanitize_campaign'],
+                    // A model the provider does not offer is what broke the chat once: refuse it
+                    // at the door, and let the owner pick one from the dropdown instead.
+                    $key === 'ai_model' => [__CLASS__, 'sanitize_model'],
                     // sanitize_text_field would flatten the newlines that separate the
                     // blackout ranges, leaving only the first range saved.
                     in_array($key, self::TEXTAREA_KEYS, true) => 'sanitize_textarea_field',
@@ -492,6 +495,31 @@ class SGAP_Settings {
     /** A language code, or the source language when the value is not one. */
     public static function sanitize_locale_code($value): string {
         return SGAP_Locales::code((string) $value, SGAP_Locales::DEFAULT_SOURCE);
+    }
+
+    /**
+     * Only a model the provider actually lists may be stored; empty means "provider default".
+     * When the list cannot be read at all, the typed name is kept, so a provider that is briefly
+     * unreachable never blocks saving the rest of the form.
+     */
+    public static function sanitize_model($value): string {
+        $value = trim(sanitize_text_field((string) $value));
+        if ($value === '') {
+            return '';
+        }
+        $models = SGAP_AI::catalog();
+        if ($models === [] || in_array($value, $models, true)) {
+            return $value;
+        }
+        $previous = trim((string) get_option('sgap_ai_model', ''));
+        if (function_exists('add_settings_error')) {
+            add_settings_error('sgap_ai_model', 'sgap_model_unknown', sprintf(
+                '%s does not offer "%s", so the model was left unchanged. Pick one from the list.',
+                SGAP_AI::provider_name(),
+                $value
+            ));
+        }
+        return $previous;
     }
 }
 

@@ -175,6 +175,52 @@ class SGAP_Setup {
         return $html . '</select>';
     }
 
+    /**
+     * The model dropdown: only what the provider lists right now can be picked, so a retired or
+     * guessed model name can no longer be saved. Without a list the field stays free text, so an
+     * unreachable provider never blocks the rest of the form.
+     */
+    public static function model_field(string $name): string {
+        $id = 'sgap_ai_model';
+        $current = trim((string) SGAP_Settings::get('ai_model'));
+        $default = SGAP_AI::default_model();
+        $models = SGAP_AI::catalog();
+        if ($models === []) {
+            return '<input type="text" id="' . esc_attr($id) . '" name="' . esc_attr($name) . '" value="' . esc_attr($current)
+                . '" class="sgap-text" spellcheck="false" placeholder="' . esc_attr($default !== '' ? $default : 'model id') . '">'
+                . '<p class="sgap-hint">Could not read the model list from ' . esc_html(SGAP_AI::provider_name())
+                . ' right now, so the name is free text. Leave it empty for the default'
+                . ($default !== '' ? ' (' . esc_html($default) . ')' : '') . '.</p>';
+        }
+        $html = '<select id="' . esc_attr($id) . '" name="' . esc_attr($name) . '" class="sgap-model">'
+            . '<option value=""' . selected($current, '', false) . '>'
+            . esc_html($default !== '' ? 'Provider default: ' . $default : 'Provider default') . '</option>';
+        if ($current !== '' && !in_array($current, $models, true)) {
+            // Never hide what is saved: the owner has to see that it is gone.
+            $html .= '<option value="' . esc_attr($current) . '" selected>' . esc_html($current) . ' (not offered any more)</option>';
+        }
+        foreach (self::group_models($models) as $vendor => $ids) {
+            $html .= '<optgroup label="' . esc_attr($vendor) . '">';
+            foreach ($ids as $model) {
+                $html .= '<option value="' . esc_attr($model) . '"' . selected($current, $model, false) . '>' . esc_html($model) . '</option>';
+            }
+            $html .= '</optgroup>';
+        }
+        return $html . '</select><p class="sgap-hint">' . count($models) . ' model(s) that ' . esc_html(SGAP_AI::provider_name())
+            . ' offers right now. The list is refreshed every 12 hours, so a retired model cannot be picked, and saving checks it again.</p>';
+    }
+
+    /** Model ids by their vendor prefix, so hundreds of ids stay navigable in one dropdown. */
+    public static function group_models(array $models): array {
+        $groups = [];
+        foreach ($models as $model) {
+            $vendor = strpos($model, '/') !== false ? (string) strstr($model, '/', true) : 'other';
+            $groups[$vendor][] = $model;
+        }
+        ksort($groups);
+        return $groups;
+    }
+
     /** One settings field, named for options.php (sgap_<key>) or for the wizard (settings[<key>]). */
     public static function field(string $key, bool $wizard = false): string {
         $name = $wizard ? "settings[{$key}]" : 'sgap_' . $key;
@@ -207,6 +253,9 @@ class SGAP_Setup {
                 $html .= '<label class="sgap-clear"><input type="checkbox" name="sgap_clear[' . esc_attr($key) . ']" value="1"> Remove saved key</label>';
             }
             return $html;
+        }
+        if ($key === 'ai_model') {
+            return self::model_field($name);
         }
         if (in_array($key, SGAP_Settings::TEXTAREA_KEYS, true)) {
             return '<textarea id="' . esc_attr($id) . '" name="' . esc_attr($name) . '" rows="4" class="sgap-text" spellcheck="false">' . esc_textarea((string) SGAP_Settings::get($key)) . '</textarea>';

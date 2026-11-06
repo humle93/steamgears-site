@@ -761,6 +761,27 @@ $answer=SGAP_Chat::reply([], 'Hej');
 check('chat: a rate limit error is reported, not retried on another model', $answer instanceof WP_Error && count($GLOBALS['http_calls'])===1 && get_option('sgap_ai_model')==='claude-3-5-sonnet');
 foreach($ai_keep as $k=>$v){ if($v===null){ unset($GLOBALS['opts'][$k]); } else { $GLOBALS['opts'][$k]=$v; } }
 
+// 7.39.0 — model-dropdown: kun det provideren faktisk udbyder kan vælges, og et gemt navn
+// der er udgået vises som udgået i stedet for at forsvinde.
+if (!function_exists('add_settings_error')) { function add_settings_error($setting,$code,$message,$type='error'){ $GLOBALS['settings_errors'][]=[$setting,$code,$message,$type]; } }
+$GLOBALS['settings_errors']=[];
+$GLOBALS['filters']['sgap_ai_model_catalog']=fn($list,$provider)=>['openai/gpt-x','anthropic/claude-opus-5.5','openai/gpt-x','anthropic/claude-sonnet-5.5'];
+$GLOBALS['opts']['sgap_ai_provider']='aimlapi'; $GLOBALS['opts']['sgap_ai_model']='';
+check('models: the catalogue dedupes, sorts and groups by vendor', SGAP_AI::catalog()===['anthropic/claude-opus-5.5','anthropic/claude-sonnet-5.5','openai/gpt-x'] && array_keys(SGAP_Setup::group_models(SGAP_AI::catalog()))===['anthropic','openai']);
+$mf=SGAP_Setup::field('ai_model');
+check('models: the field is a grouped dropdown with the default first', str_contains($mf,'<select id="sgap_ai_model"') && str_contains($mf,'<optgroup label="anthropic">') && substr_count($mf,'<option')===4);
+update_option('sgap_ai_model','anthropic/claude-3-5-sonnet');
+check('models: a stored model that is gone is shown as retired, not hidden', str_contains(SGAP_Setup::field('ai_model'),'(not offered any more)'));
+check('models: a listed model may be saved', SGAP_Settings::sanitize_model('anthropic/claude-sonnet-5.5')==='anthropic/claude-sonnet-5.5');
+check('models: an unlisted model is refused and the stored one kept', SGAP_Settings::sanitize_model('claude-3-5-sonnet')==='anthropic/claude-3-5-sonnet' && ($GLOBALS['settings_errors'][0][1]??'')==='sgap_model_unknown');
+check('models: empty still means the provider default', SGAP_Settings::sanitize_model('')==='');
+ob_start(); do_action('page_sgap-settings'); $settings_html=ob_get_clean();
+check('models: the settings page renders the dropdown', str_contains($settings_html,'id="sgap_ai_model"') && str_contains($settings_html,'<optgroup label="anthropic">'));
+unset($GLOBALS['filters']['sgap_ai_model_catalog']);
+$GLOBALS['opts']['sgap_ai_model']='';
+check('models: without a catalogue the field is free text again', str_contains(SGAP_Setup::field('ai_model'),'type="text"') && !str_contains(SGAP_Setup::field('ai_model'),'<select'));
+check('models: without a catalogue the typed name is kept', SGAP_Settings::sanitize_model('some/custom')==='some/custom');
+
 $GLOBALS['opts']['sgap_bluesky_handle']='@steamgears.bsky.social';
 $GLOBALS['opts']['sgap_bluesky_app_password']='abcd-efgh-ijkl-mnop';
 $GLOBALS['opts']['sgap_channels']='facebook,bluesky';

@@ -85,6 +85,72 @@ class SGAP_AI {
     }
 
     /**
+     * The model ids the provider lists right now, cached for 12 hours: the Settings dropdown
+     * and the save-time check then cost at most one request per half-day. A site whose provider
+     * is reached through a proxy can replace the list with the `sgap_ai_model_catalog` filter.
+     * @return string[]
+     */
+    public static function catalog(bool $fresh = false): array {
+        $supplied = apply_filters('sgap_ai_model_catalog', null, self::provider());
+        if (is_array($supplied)) {
+            return self::catalog_ids($supplied);
+        }
+        $cache = 'sgap_ai_catalog_' . self::provider();
+        $cached = get_site_transient($cache);
+        if (!$fresh && is_array($cached)) {
+            return $cached;
+        }
+        $ids = self::fetch_catalog();
+        // A failure is cached briefly too, so an unreachable provider never slows the settings page.
+        set_site_transient($cache, $ids, $ids !== [] ? 12 * HOUR_IN_SECONDS : 30 * MINUTE_IN_SECONDS);
+        return $ids;
+    }
+
+    /**
+     * Model ids from a /models answer — AIMLAPI and OpenAI use data[].id, Anthropic data[].id,
+     * and a plain list is accepted too. Deduped and sorted, because AIMLAPI repeats ids.
+     * @return string[]
+     */
+    public static function catalog_ids(array $body): array {
+        $rows = isset($body['data']) || isset($body['models']) ? (array) ($body['data'] ?? $body['models']) : $body;
+        $ids = [];
+        foreach ($rows as $row) {
+            $id = is_array($row) ? (string) ($row['id'] ?? '') : (is_string($row) ? $row : '');
+            $id = trim($id);
+            if ($id !== '') {
+                $ids[$id] = true;
+            }
+        }
+        $ids = array_keys($ids);
+        sort($ids, SORT_STRING);
+        return $ids;
+    }
+
+    /** @return string[] Empty when the provider cannot be asked (no key yet, or offline). */
+    private static function fetch_catalog(): array {
+        if (self::provider() === 'aimlapi') {
+            // AIMLAPI lists its catalogue without a key. The URL is fixed, never ai_base_url.
+            $response = wp_remote_get(self::DEFAULT_BASE_URL . '/models', ['timeout' => 20]);
+        } else {
+            $key = (string) SGAP_Settings::get('ai_api_key');
+            if ($key === '') {
+                return [];
+            }
+            $response = self::provider() === 'anthropic'
+                ? wp_remote_get('https://api.anthropic.com/v1/models?limit=100', [
+                    'timeout' => 20,
+                    'headers' => ['x-api-key' => $key, 'anthropic-version' => self::ANTHROPIC_VERSION]
+                ])
+                : wp_remote_get(self::base_url() . '/models', ['timeout' => 20, 'headers' => ['Authorization' => 'Bearer ' . $key]]);
+        }
+        if (is_wp_error($response) || (int) wp_remote_retrieve_response_code($response) !== 200) {
+            return [];
+        }
+        $body = json_decode((string) wp_remote_retrieve_body($response), true);
+        return is_array($body) ? self::catalog_ids($body) : [];
+    }
+
+    /**
      * POST /chat/completions and decode it. A model name the provider does not know is
      * retried once on the provider default, and Settings is repaired so the next call works
      * too; every other error is returned unchanged, so nothing loops and nothing hides.
