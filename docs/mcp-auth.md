@@ -164,6 +164,19 @@ python3 tools/mcp_keepalive.py          # lokalt: forny + verificér + gem
 python3 tools/mcp_keepalive.py --ci --emit-refresh-file /tmp/refresh   # CI: skriv det roterede token til fil
 ```
 
+**Løbende fornyelse i sandkassen (hvert 58. minut):**
+[`tools/keepalive-loop.sh`](../tools/keepalive-loop.sh) kalder keep-alive hvert 3480 s, så access-tokenet aldrig
+når at udløbe, og logger hver kørsel i `.tools/keepalive-loop.log`. Den tåler enkelte netværksfejl (prøver igen
+efter 5 min, op til 5 gange i træk) og stopper selv med en klar besked, hvis tokenet er dødt.
+
+```bash
+setsid nohup bash tools/keepalive-loop.sh 3480 >/dev/null 2>&1 < /dev/null &   # start
+kill "$(cat .tools/keepalive-loop.pid)"                                        # stop
+```
+
+Grænsen er arkivering: processen lever kun, mens worktreen kører, og efter en genstart skal kommandoen køres
+igen. Det dækker arbejdsdage, ikke 30 dage uden at nogen åbner chatten — det gør kun CI-varianten nedenfor.
+
 **Planlagt fornyelse (30+ dage uden ejerens hænder):**
 [`novamira-keepalive.yml`](../.github/workflows/novamira-keepalive.yml) kører dagligt kl. 03 dansk tid,
 fornyer og gemmer det roterede token tilbage som repository-secret. Den springer sig selv over med en

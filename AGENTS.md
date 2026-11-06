@@ -110,6 +110,8 @@ Reglen over holdes automatisk, så lidt som muligt afhænger af hukommelse:
   fornyelse. Kørslen fornyer dagligt kl. 03 dansk tid med [`tools/mcp_keepalive.py`](tools/mcp_keepalive.py),
   verificerer med `initialize` + `tools/list` og gemmer det nye token tilbage som repository-secret. Uden
   `NOVAMIRA_REFRESH_TOKEN` og en PAT med Secrets: write springer den sig selv over med en `::notice`.
+  I en sandkasse kan [`tools/keepalive-loop.sh`](tools/keepalive-loop.sh) i stedet forny hvert 58. minut
+  (`setsid nohup bash tools/keepalive-loop.sh 3480 &`) — den dækker kun mens worktreen kører.
   Opsætning og fælder: [`docs/mcp-auth.md`](docs/mcp-auth.md) → Novamira.
 
 - **Commit-besked-værnet** ([`tools/commit_check.py`](tools/commit_check.py)): reglen i §1 bliver kontrolleret
