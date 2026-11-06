@@ -77,11 +77,13 @@ class SGAP_AI {
      * in the meantime is theirs and is left alone.
      */
     public static function repair_model(string $asked): bool {
-        if ($asked === '' || trim((string) SGAP_Settings::get('ai_model')) !== $asked) {
+        $repaired = self::default_model();
+        if ($asked === '' || $repaired === '' || trim((string) SGAP_Settings::get('ai_model')) !== $asked) {
             return false;
         }
-        SGAP_Settings::set('ai_model', '');
-        return trim((string) SGAP_Settings::get('ai_model')) === '';
+        // Store the concrete model, not an empty field: what is used is then visible in Settings.
+        SGAP_Settings::set('ai_model', $repaired);
+        return trim((string) SGAP_Settings::get('ai_model')) === $repaired;
     }
 
     /**

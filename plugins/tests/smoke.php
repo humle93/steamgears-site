@@ -746,8 +746,9 @@ $GLOBALS['http_queue']=[
 $answer=SGAP_Chat::reply([], 'Hej');
 check('chat: a stored model AIMLAPI rejects still answers', is_array($answer) && str_contains((string)($answer['text']??''),'Hej fra standardmodellen'));
 check('chat: the retry runs on the default model, exactly once', count($GLOBALS['http_calls'])===2 && (json_decode((string)($GLOBALS['http_calls'][1][1]['body']??''),true)['model']??'')==='anthropic/claude-opus-5.5');
-check('chat: the rejected model is repaired in Settings', get_option('sgap_ai_model','')==='' && SGAP_AI::model()==='anthropic/claude-opus-5.5');
+check('chat: the rejected model is repaired to the model that answers', get_option('sgap_ai_model','')==='anthropic/claude-opus-5.5' && SGAP_AI::model()==='anthropic/claude-opus-5.5');
 check('chat: the owner is told which model was replaced', str_contains((string)($answer['text']??''),'claude-3-5-sonnet'));
+check('chat: the answer also names the model it now uses', str_contains((string)($answer['text']??''),'anthropic/claude-opus-5.5'));
 $GLOBALS['opts']['sgap_ai_model']='claude-3-5-sonnet'; $GLOBALS['http_calls']=[];
 $GLOBALS['http_queue']=[sgap_http(401,['error'=>['message'=>'Incorrect API key provided']])];
 $answer=SGAP_Chat::reply([], 'Hej');
@@ -774,13 +775,55 @@ update_option('sgap_ai_model','anthropic/claude-3-5-sonnet');
 check('models: a stored model that is gone is shown as retired, not hidden', str_contains(SGAP_Setup::field('ai_model'),'(not offered any more)'));
 check('models: a listed model may be saved', SGAP_Settings::sanitize_model('anthropic/claude-sonnet-5.5')==='anthropic/claude-sonnet-5.5');
 check('models: an unlisted model is refused and the stored one kept', SGAP_Settings::sanitize_model('claude-3-5-sonnet')==='anthropic/claude-3-5-sonnet' && ($GLOBALS['settings_errors'][0][1]??'')==='sgap_model_unknown');
-check('models: empty still means the provider default', SGAP_Settings::sanitize_model('')==='');
+// Punktet der blev fanget her: "Provider default" må ikke gemmes som et tomt felt.
+$model_san=$GLOBALS['settings']['sgap_ai_model']['sanitize_callback'] ?? null;
+check('models: the save path is the registered sanitizer', is_callable($model_san));
+$picked_default=$model_san('');
+check('models: Provider default is stored as the model it resolves to', $picked_default==='anthropic/claude-opus-5.5');
+update_option('sgap_ai_model',$picked_default);
+check('models: after saving, the field holds the model and is not empty', get_option('sgap_ai_model')==='anthropic/claude-opus-5.5' && SGAP_AI::model()==='anthropic/claude-opus-5.5');
+check('models: the stored default is the option the dropdown marks as selected', str_contains(SGAP_Setup::field('ai_model'),'<option value="anthropic/claude-opus-5.5" selected'));
+check('models: the retired name cannot be saved back after that', $model_san('claude-3-5-sonnet')==='anthropic/claude-opus-5.5');
+update_option('sgap_ai_model','');
 ob_start(); do_action('page_sgap-settings'); $settings_html=ob_get_clean();
 check('models: the settings page renders the dropdown', str_contains($settings_html,'id="sgap_ai_model"') && str_contains($settings_html,'<optgroup label="anthropic">'));
 unset($GLOBALS['filters']['sgap_ai_model_catalog']);
 $GLOBALS['opts']['sgap_ai_model']='';
 check('models: without a catalogue the field is free text again', str_contains(SGAP_Setup::field('ai_model'),'type="text"') && !str_contains(SGAP_Setup::field('ai_model'),'<select'));
 check('models: without a catalogue the typed name is kept', SGAP_Settings::sanitize_model('some/custom')==='some/custom');
+
+// Punkt 4 mod den rigtige verden: kør med SGAP_LIVE_CATALOG=1, så hentes AIMLAPI's eget
+// katalog og hver eneste <option> sammenlignes med de id'er provideren faktisk udbyder.
+if (($live_src = (string) getenv('SGAP_LIVE_CATALOG')) !== '') {
+    if ($live_src !== '1' && is_file($live_src)) {
+        // En PHP uden allow_url_fopen kan få kataloget serveret som en fil hentet med curl.
+        $raw = (string) file_get_contents($live_src);
+    } else {
+        $ctx = stream_context_create(['http' => ['timeout' => 25, 'header' => "User-Agent: steamgears-smoke\r\n"]]);
+        $raw = @file_get_contents('https://api.aimlapi.com/v1/models', false, $ctx);
+    }
+    $live_body = is_string($raw) ? json_decode($raw, true) : null;
+    if (is_array($live_body)) {
+        $live_ids = SGAP_AI::catalog_ids($live_body);
+        $GLOBALS['filters']['sgap_ai_model_catalog'] = fn() => $live_ids;
+        $GLOBALS['opts']['sgap_ai_provider'] = 'aimlapi';
+        $GLOBALS['opts']['sgap_ai_model'] = 'anthropic/claude-opus-5.5';
+        $live_html = SGAP_Setup::field('ai_model');
+        preg_match_all('/<option value="([^"]*)"/', $live_html, $om);
+        $picked = array_values(array_diff($om[1], ['']));
+        $expect = $live_ids;
+        sort($picked); sort($expect);
+        check('live: AIMLAPI lists a usable catalogue', count($live_ids) > 100);
+        check('live: every dropdown option is a model AIMLAPI offers (and no other)', $picked === $expect && count($om[1]) === count($live_ids) + 1);
+        check('live: Provider default is the first option and names the default model', str_starts_with($live_html, '<select') && str_contains(substr($live_html, 0, strpos($live_html, '</option>') + 9), 'Provider default: anthropic/claude-opus-5.5'));
+        check('live: the default model is one AIMLAPI offers', in_array('anthropic/claude-opus-5.5', $live_ids, true));
+        echo 'LIVE: ' . count($live_ids) . " modeller fra AIMLAPI, alle valgbare i dropdownen\n";
+        $GLOBALS['opts']['sgap_ai_model'] = '';
+        unset($GLOBALS['filters']['sgap_ai_model_catalog']);
+    } else {
+        echo "SKIP live: AIMLAPI /models kunne ikke læses\n";
+    }
+}
 
 $GLOBALS['opts']['sgap_bluesky_handle']='@steamgears.bsky.social';
 $GLOBALS['opts']['sgap_bluesky_app_password']='abcd-efgh-ijkl-mnop';

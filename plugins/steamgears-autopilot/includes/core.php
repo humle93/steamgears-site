@@ -505,7 +505,9 @@ class SGAP_Settings {
     public static function sanitize_model($value): string {
         $value = trim(sanitize_text_field((string) $value));
         if ($value === '') {
-            return '';
+            // "Provider default" is stored as the model it resolves to, so the field says what is
+            // actually used instead of depending on a later change of provider or of that default.
+            return SGAP_AI::default_model();
         }
         $models = SGAP_AI::catalog();
         if ($models === [] || in_array($value, $models, true)) {
