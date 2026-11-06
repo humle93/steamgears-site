@@ -17,6 +17,9 @@ class SGAP_Chat {
     const MAX_BOUND = 80;
     /** Add or change chat tools from another plugin: add_filter('sgap_chat_tools', fn($tools) => $tools + [...]); */
     const TOOLS_FILTER = 'sgap_chat_tools';
+    /** Ring buffer of the last calls, so a provider rejection can be read without guessing. */
+    const LOG_CACHE = 'sgap_chat_tool_log';
+    const LOG_KEEP = 3;
     /** Abilities the chat may not use: they change the site beyond the autopilot. */
     const EXCLUDED = ['manage-plugin', 'enable-full-access', 'update', 'run-cron'];
 
@@ -322,6 +325,52 @@ class SGAP_Chat {
         return strlen($json) > 12000 ? substr($json, 0, 12000) . '… (truncated)' : $json;
     }
 
+    /* ---- diagnostics ---- */
+
+    /**
+     * Which tool sits at the index the provider complained about.
+     * AIMLAPI answers e.g. `tools[0].function_declarations[30].name: Invalid function name.`
+     */
+    public static function culprit(string $error, array $names): ?array {
+        // Gemini's message contains both `tools[0]` and `function_declarations[30]`; the
+        // tool index is the second one, so it must be matched first.
+        if (!preg_match('/function_declarations\[(\d+)\]/', $error, $m)
+            && !preg_match('/tools\[(\d+)\]/', $error, $m)) {
+            return null;
+        }
+        $index = (int) $m[1];
+        return ['index' => $index, 'name' => (string) ($names[$index] ?? '(outside the list)')];
+    }
+
+    /** Keeps the last few provider calls (names only — never a key) and resolves the culprit. */
+    public static function remember_call(string $provider, string $model, int $round, array $names, ?string $error = null): array {
+        $names = array_values(array_map('strval', $names));
+        $entry = [
+            'at' => function_exists('current_time') ? current_time('mysql') : gmdate('Y-m-d H:i:s'),
+            'provider' => $provider,
+            'model' => $model,
+            'round' => $round,
+            'count' => count($names),
+            'names' => array_slice($names, 0, 300),
+            'error' => $error,
+            'culprit' => $error !== null ? self::culprit($error, $names) : null
+        ];
+        $log = get_site_transient(self::LOG_CACHE);
+        $log = is_array($log) ? $log : [];
+        array_unshift($log, $entry);
+        set_site_transient(self::LOG_CACHE, array_slice($log, 0, self::LOG_KEEP), DAY_IN_SECONDS);
+        if ($error !== null && defined('WP_DEBUG') && WP_DEBUG && function_exists('error_log')) {
+            error_log('SGAP chat ' . $provider . ': ' . $error . ($entry['culprit'] ? ' [tool #' . $entry['culprit']['index'] . ' ' . $entry['culprit']['name'] . ']' : ''));
+        }
+        return $entry;
+    }
+
+    /** The recent calls, newest first. */
+    public static function call_log(): array {
+        $log = get_site_transient(self::LOG_CACHE);
+        return is_array($log) ? $log : [];
+    }
+
     /* ---- conversation ---- */
 
     public static function system_prompt(): string {
@@ -394,9 +443,16 @@ class SGAP_Chat {
                 'body' => wp_json_encode($body)
             ]);
             $decoded = SGAP_AI::decode($response, SGAP_AI::provider_name());
+            $names = array_keys($tools);
             if (is_wp_error($decoded)) {
+                $entry = self::remember_call(SGAP_AI::provider_name(), $model, $round, $names, $decoded->get_error_message());
+                if ($entry['culprit']) {
+                    return new WP_Error($decoded->get_error_code(), $decoded->get_error_message()
+                        . ' — tool #' . $entry['culprit']['index'] . ' is `' . $entry['culprit']['name'] . '`.');
+                }
                 return $decoded;
             }
+            self::remember_call(SGAP_AI::provider_name(), $model, $round, $names);
             $msg = $decoded['choices'][0]['message'] ?? [];
             $calls = is_array($msg['tool_calls'] ?? null) ? $msg['tool_calls'] : [];
             if (!$calls) {
@@ -446,9 +502,16 @@ class SGAP_Chat {
                 'body' => wp_json_encode($body)
             ]);
             $decoded = SGAP_AI::decode($response, 'Anthropic');
+            $names = array_keys($tools);
             if (is_wp_error($decoded)) {
+                $entry = self::remember_call('Anthropic', $model, $round, $names, $decoded->get_error_message());
+                if ($entry['culprit']) {
+                    return new WP_Error($decoded->get_error_code(), $decoded->get_error_message()
+                        . ' — tool #' . $entry['culprit']['index'] . ' is `' . $entry['culprit']['name'] . '`.');
+                }
                 return $decoded;
             }
+            self::remember_call('Anthropic', $model, $round, $names);
             $content = (array) ($decoded['content'] ?? []);
             if (($decoded['stop_reason'] ?? '') !== 'tool_use') {
                 if (($decoded['stop_reason'] ?? '') === 'refusal') {
@@ -575,6 +638,33 @@ class SGAP_Chat {
         }
         echo '</div><div class="sgap-toolgrid" id="sgap-toolgrid"></div>'
             . '<p class="sgap-toolempty" id="sgap-tool-empty" hidden>No tool matches that search.</p>';
+        $log = self::call_log();
+        echo '<h2 class="sgap-calls-h">Last calls to the AI provider</h2>'
+            . '<p class="description">The last three calls, kept for 24 hours — tool names only, never a key. A rejected name is resolved to the tool that was refused.</p>';
+        if (!$log) {
+            echo '<p class="description"><em>Nothing logged yet.</em></p>';
+        } else {
+            echo '<div class="sgap-calls">';
+            foreach ($log as $call) {
+                $bad = !empty($call['error']);
+                echo '<div class="sgap-call' . ($bad ? ' is-bad' : '') . '">'
+                    . '<div class="sgap-call-top"><strong>' . esc_html((string) ($call['at'] ?? '')) . '</strong> '
+                    . '<span>' . esc_html(trim((string) ($call['provider'] ?? '') . ' · ' . (string) ($call['model'] ?? ''), ' ·')) . '</span> '
+                    . '<span class="sgap-badge mute">round ' . (int) ($call['round'] ?? 0) . '</span> '
+                    . '<span class="sgap-badge ' . ($bad ? 'write' : 'read') . '">' . (int) ($call['count'] ?? 0) . ' tools</span></div>';
+                if (!empty($call['culprit'])) {
+                    echo '<div class="sgap-call-culprit">Rejected tool #' . (int) $call['culprit']['index'] . ': <code>' . esc_html((string) $call['culprit']['name']) . '</code></div>';
+                }
+                if ($bad) {
+                    echo '<code class="sgap-call-err">' . esc_html(substr((string) $call['error'], 0, 300)) . '</code>';
+                }
+                if (!empty($call['names'])) {
+                    echo '<details><summary>Names sent</summary><code>' . esc_html(implode(' · ', (array) $call['names'])) . '</code></details>';
+                }
+                echo '</div>';
+            }
+            echo '</div>';
+        }
         echo '<script>(function(){var T=' . wp_json_encode($rows) . ';'
             . 'var grid=document.getElementById("sgap-toolgrid"),search=document.getElementById("sgap-tool-search"),count=document.getElementById("sgap-toolcount"),empty=document.getElementById("sgap-tool-empty"),cats=document.getElementById("sgap-tool-cats");'
             . 'var active="";'

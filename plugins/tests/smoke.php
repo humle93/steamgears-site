@@ -585,6 +585,14 @@ check('chat: tool names are provider-safe', (function($t){ foreach(array_keys($t
 check('chat: a name with a space and a digit still becomes callable', isset($ct3['x_y']) && !isset($ct3['9 lives/x y']));
 check('chat: safe_name repairs what providers reject', SGAP_Chat::safe_name('9lives')==='t_9lives' && SGAP_Chat::safe_name('core/list posts')==='core_list_posts' && SGAP_Chat::safe_name('/ /')==='tool' && strlen(SGAP_Chat::safe_name(str_repeat('a',200)))===64);
 check('chat: unique_name never collides', SGAP_Chat::unique_name('list-posts',['list-posts'=>[]])==='list-posts__2');
+// Diagnostik: providerens indeks skal kunne oversættes til det konkrete værktøj.
+$aimlapi='* GenerateContentRequest.tools[0].function_declarations[30].name: Invalid function name. Must start with a letter or an underscore.';
+$names=array_map(fn($i)=>'tool-'.$i, range(0,40));
+check('chat: a rejected index resolves to the tool name', (SGAP_Chat::culprit($aimlapi,$names)['name']??'')==='tool-30');
+check('chat: an error without an index has no culprit', SGAP_Chat::culprit('quota exceeded',$names)===null);
+$call=SGAP_Chat::remember_call('AIMLAPI','m',0,$names,$aimlapi);
+check('chat: a failed call is remembered with its culprit', ($call['culprit']['index']??-1)===30 && $call['count']===41 && ($call['error']??'')!=='');
+check('chat: the log never holds a key', !str_contains((string) wp_json_encode($call['names']),'key'));
 unset($GLOBALS['ability_objects']);
 
 // ---- P1.2: remind me instead of posting ----

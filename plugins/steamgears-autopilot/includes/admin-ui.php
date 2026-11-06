@@ -234,6 +234,17 @@ class SGAP_UI {
 .sgap .sgap-toolmeta{margin:0 0 6px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
 .sgap .sgap-tool-desc{margin:0;font-size:13px;line-height:1.5;color:var(--ink);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .sgap .sgap-toolempty{padding:18px;text-align:center;color:var(--muted)}
+.sgap .sgap-calls-h{margin:22px 0 6px;font-size:15px;color:var(--ink)}
+.sgap .sgap-calls{display:grid;gap:10px}
+.sgap .sgap-call{border:1px solid var(--line);border-left:3px solid var(--ok);border-radius:10px;padding:10px 12px;background:var(--card)}
+.sgap .sgap-call.is-bad{border-left-color:var(--bad);background:#fffdfd}
+.sgap .sgap-call-top{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+.sgap .sgap-call-top strong{color:var(--ink);font-variant-numeric:tabular-nums}
+.sgap .sgap-call-culprit{margin:6px 0;font-size:13px;color:var(--bad);font-weight:600}
+.sgap .sgap-call-err{display:block;margin:6px 0;padding:8px;background:#fbf3f3;border-radius:8px;font-size:12px;white-space:pre-wrap;word-break:break-word;color:#7a1f20}
+.sgap .sgap-call details{margin-top:6px}
+.sgap .sgap-call summary{cursor:pointer;font-size:12px;color:var(--brass-d)}
+.sgap .sgap-call details code{display:block;margin-top:6px;font-size:11px;line-height:1.6;white-space:pre-wrap;word-break:break-word;color:var(--muted)}
 @media (max-width:782px){.sgap .sgap-toolsbar{top:0;border-radius:10px}.sgap .sgap-toolgrid{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){.sgap .sgap-toolcard,.sgap .sgap-cat{transition:none}}
 </style>';
