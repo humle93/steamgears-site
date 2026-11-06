@@ -409,8 +409,9 @@ before it, because the MCP surface can read plugins but cannot install or activa
    a real WordPress: `bash plugins/tests/integration.sh` (needs `php` with `mysqli`, `wp-cli`, `curl` and a
    reachable MySQL; 244 checks, including the four model rules and evergreen recycling) — it installs
    WordPress, activates the plugin, runs the in-process, admin-tool and automation suites, then hits `/go/`,
-   the feeds, the REST routes and uninstall over HTTP. The model dropdown is proven against
-   the real catalogue with `curl -s -o /tmp/models.json https://api.aimlapi.com/v1/models` and
+   the feeds, the REST routes and uninstall over HTTP. On WordPress 6.4 the same run passes 179 checks;
+   the ability groups are skipped because the Abilities API starts at 6.9. The model dropdown is proven
+   against the real catalogue with `curl -s -o /tmp/models.json https://api.aimlapi.com/v1/models` and
    `SGAP_LIVE_CATALOG=/tmp/models.json php plugins/tests/smoke.php` — every `<option>` must match an id AIMLAPI
    actually offers.
 4. Commit code, zip, README and `ROADMAP.md` together and push to `main`.

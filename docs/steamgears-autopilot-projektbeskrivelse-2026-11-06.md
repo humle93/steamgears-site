@@ -72,9 +72,10 @@ brug den statiske binær i `.tools/php` (ikke i git). I Termux findes `php` norm
 | WordPress-krav | 6.4+ (abilities kræver 6.9+) |
 | Seneste release | 7.41.0 — evergreen-recycling med egen cron, metabox, admin-side og tre abilities |
 
-Testfilerne: `smoke.php` (stubbet WordPress, kører overalt), `admin-tools.php` (49 checks, kræver
-`wp eval-file`), `automation.php`, `integration.php` + `integration.sh` (rigtig WordPress + MySQL, CI og
-kørt lokalt 6/11 mod WordPress 7.1.4 + MySQL 8.0.36, 244 PASS), `router.php` og `fixtures/`.
+Testfilerne: `smoke.php` (stubbet WordPress, kører overalt), `admin-tools.php` (51 checks, kræver
+`wp eval-file` og Abilities API), `automation.php`, `integration.php` + `integration.sh` (rigtig WordPress +
+MySQL, CI og kørt lokalt 6/11: 244 PASS på 7.1.4, 179 på 6.4 hvor ability-grupperne springes over),
+`router.php` og `fixtures/`.
 
 ---
 
@@ -349,8 +350,11 @@ Derefter `git add` de konkrete filer, commit og push til `main` i samme arbejdsp
 | Graph API / X-priser | Direkte X-posting er økonomisk meningsløs med link | Ikke anbefalet |
 
 **Verificeret 6/11:** `integration.php` og `admin-tools.php` blev kørt lokalt i cloud-sandkassen mod
-WordPress 7.1.4 + MySQL 8.0.36 (PHP 8.5.8, wp-cli) — **244 PASS / 0 FAIL**. Der er stadig ikke kaldt live
-mod AIMLAPI (koster credit og kræver nøgle), og intet er kørt mod den rigtige steamgears.eu-database.
+WordPress 7.1.4 + MySQL 8.0.36 (PHP 8.2.32, CI's kombination, wp-cli) — **244 PASS / 0 FAIL** — og mod
+WordPress 6.4: **179 PASS / 0 FAIL**, hvor de 65 ability-checks ikke kører, fordi Abilities API først findes
+fra 6.9. Der er
+stadig ikke kaldt live mod AIMLAPI (koster credit og kræver nøgle), og intet er kørt mod den rigtige
+steamgears.eu-database.
 
 ---
 
