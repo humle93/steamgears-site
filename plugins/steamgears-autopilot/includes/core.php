@@ -65,6 +65,7 @@ class SGAP_Install {
         'sgap_alert_email' => '',
         'sgap_alert_dry_days' => 2,
         'sgap_audit_keep_days' => 90,
+        'sgap_dupe_days' => 30,
         'sgap_articles_per_week' => 0,
         'sgap_rescue_hosts' => 'steamgears.juno.page'
     ];
@@ -320,7 +321,7 @@ class SGAP_Settings {
     const HOUR_KEYS = ['quiet_start', 'quiet_end'];
     const INT_KEYS = [
         'daily_cap','batch_size','labor_rate','monthly_budget','target_roi',
-        'winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max','posts_per_day','articles_per_week','alert_dry_days','audit_keep_days','mastodon_limit'
+        'winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max','posts_per_day','articles_per_week','alert_dry_days','audit_keep_days','dupe_days','mastodon_limit'
     ];
     /** Never echoed back to the browser; can be overridden by SGAP_<KEY> constants in wp-config.php. */
     const SECRET_KEYS = [
@@ -347,7 +348,7 @@ class SGAP_Settings {
 
     /** Shown in the settings page. Keys not listed here stay registered for older data but are unused. */
     const SECTIONS = [
-        'General' => ['autopilot_enabled','full_auto_enabled','daily_cap','batch_size','quiet_start','quiet_end','blackout_ranges','quality_gate','banned_words','utm_campaign','command_center_url'],
+        'General' => ['autopilot_enabled','full_auto_enabled','daily_cap','batch_size','quiet_start','quiet_end','blackout_ranges','quality_gate','banned_words','dupe_days','utm_campaign','command_center_url'],
         'Publer' => ['publish_mode','publer_api_key','publer_workspace_id','publer_pinterest_board','channels','bluesky_handle','bluesky_app_password','mastodon_instance','mastodon_token','mastodon_limit','telegram_bot_token','telegram_chat_id'],
         'AI content' => ['ai_provider','ai_api_key','ai_model','ai_base_url','posts_per_day','content_language','locale_source','locales','image_model','image_api_key','serpapi_key'],
         'Economics' => ['labor_rate','monthly_budget','target_roi','winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max'],
@@ -357,6 +358,7 @@ class SGAP_Settings {
 
     const HELP = [
         'command_center_url' => 'Address of your Steamgears Command Center dashboard, e.g. https://cc.example.com. Adds a Log ind button to the dashboard. Empty = no button.',
+        'dupe_days' => 'How far back an identical post blocks a new one: same channel, destination and title. 30 days by default, 0 = the whole history. A post that is still queued always blocks, however old it is.',
         'locale_source' => 'The language the source posts are written in. Every other language in the list gets its own translated caption.',
         'locales' => 'Comma-separated languages, e.g. da,sv,de. A queued post also queues one translated caption per language, linking to that language\'s version of the page (WPML or Polylang). Languages without a translated page are reported, not posted. Needs an AI API key.',
         'autopilot_enabled' => 'Master switch: generate posts daily and publish the queue via Publer.',
@@ -829,13 +831,16 @@ class SGAP_Queue {
         if (SGAP_Settings::enabled('full_auto_enabled') && self::suppressed($channel, $angle, $content_type, $format)) {
             return new WP_Error('sgap_suppressed', 'Combination is currently suppressed.', ['status' => 422]);
         }
-        $fingerprint = hash('sha256', $channel . '|' . $destination . '|' . $title);
-        $existing = $wpdb->get_var($wpdb->prepare(
-            'SELECT id FROM ' . self::table() . " WHERE fingerprint = %s AND status <> 'failed' LIMIT 1",
-            $fingerprint
-        ));
-        if ($existing) {
-            return new WP_Error('sgap_duplicate', 'Already queued.', ['status' => 409, 'id' => (int) $existing]);
+        // P0.6: the fingerprint is channel + destination + title, so a second writer
+        // (Command Center, a script, an MCP client) cannot queue the same post twice.
+        $fingerprint = SGAP_Duplicate::fingerprint($channel, $destination, $title);
+        $existing = SGAP_Duplicate::find($fingerprint);
+        if ($existing !== null) {
+            return new WP_Error('sgap_duplicate', SGAP_Duplicate::message($existing), [
+                'status' => 409,
+                'id' => (int) $existing['id'],
+                'fingerprint' => $fingerprint
+            ]);
         }
         // A blackout moves the post instead of refusing it: the owner asked for "not
         // on these days", not "not at all".

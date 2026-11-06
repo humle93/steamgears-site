@@ -23,7 +23,7 @@ The whole social autopilot runs inside WordPress (Command Center is retired):
 4. **Measure** – every post links via `/go/<id>/`, so clicks (and WooCommerce
    orders) are counted per channel.
 
-Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.40.0.zip` → Activate. On an existing
+Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.40.1.zip` → Activate. On an existing
 install the same zip arrives through the self-updater (see *Updates*), so an upload is only needed for the
 first install or a recovery.
 
@@ -203,6 +203,26 @@ briefly down. So the gate catches what it can prove without the network: placeho
 links with no domain, `http` instead of `https`, and internal addresses that do not resolve. A Pinterest pin
 that 404s is still only found by opening it.
 
+## Duplicate guard across systems (7.40.1)
+
+The queue has more than one writer: the AI generator, the Studio, the REST API, an MCP client and
+Command Center can all add a post, and two of them can hand over the same one. Command Center syncs
+every 30 minutes, so a dashboard that retries a hand-over would post twice.
+
+`includes/duplicate.php` (`SGAP_Duplicate`) keys on the fingerprint the database already indexes —
+`channel|destination_url|title`, sha256 — and refuses the second one with **409** and a message that
+names the row it collided with:
+
+> Already queued as #412 (queued, 2026-11-08 10:00). The same channel, destination and title went in
+> in the last 30 days — change the title, or delete the old row if this repeat is deliberate.
+
+- **Still queued always blocks**, however old the row is: it is about to go out.
+- **A published post blocks for `dupe_days`** (Settings → Publishing, default **30**, `0` = the whole
+  history), so an evergreen campaign can legitimately repeat a title next quarter.
+- **Failed rows never block** — a post that gave up is the owner's to retry.
+- `/snapshot` carries `fingerprint` on every queue row, so an outside dashboard can recognise its own
+  hand-over instead of learning from a 409.
+
 ## Post meta audit (7.23)
 
 The ability `steamgears-autopilot/meta-audit` lets Claude run the meta round itself: it reads the published
@@ -356,7 +376,7 @@ before it, because the MCP surface can read plugins but cannot install or activa
 1. Bump `Version:` in `steamgears-autopilot.php` and `SGAP_VERSION` — they must agree, CI fails otherwise.
 2. Rebuild the zip from the folder so the name and the contents match:
    `cd plugins && rm -f steamgears-autopilot-*.zip && zip -qr steamgears-autopilot-v<version>.zip steamgears-autopilot`
-3. `php plugins/tests/smoke.php` (478 checks) and `diff -r` the zipped copy against the source. CI repeats
+3. `php plugins/tests/smoke.php` (494 checks) and `diff -r` the zipped copy against the source. CI repeats
    both, plus `php -l` on PHP 8.0–8.5 and WordPress 6.4 / 7.1 / latest. The plugin is also exercised inside
    a real WordPress: `bash plugins/tests/integration.sh` (needs `php` with `mysqli`, `wp-cli`, `curl` and a
    reachable MySQL; 222 checks, including the four model rules) — it installs WordPress, activates the

@@ -24,3 +24,6 @@ node_modules/
 .projektstatus.lock
 tools/_deps/
 artifacts/
+
+# Lokal PHP-binær til php -l (AGENTS §7.3) — hentes med tools/setup-agent-tools.sh
+.tools/
