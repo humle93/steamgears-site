@@ -1,9 +1,9 @@
 # Steamgears Autopilot — audit, roadmap and effort estimates
 
-_Last audited: 2026-11-01 · audit was of **7.15.0** (`ab676db` on `main`); current release **7.33.2**, and
+_Last audited: 2026-11-01 · audit was of **7.15.0** (`ab676db` on `main`); current release **7.33.4**, and
 **7.22.0 is what steamgears.eu runs** (measured 2026-11-02 after the update click, with `wp_list_plugins`
-and `steamgears-autopilot/status`; see `docs/roadmap.md` §2b) — 7.25.0 ships in the zip and waits for the
-same one click · update this file in the same commit as any release._
+and `steamgears-autopilot/status`; see `docs/roadmap.md` §2b) — the zip that waits for that click is
+**7.33.4** · update this file in the same commit as any release._
 
 This is the working roadmap for `plugins/steamgears-autopilot`. It answers three questions: does every
 function in the plugin actually do something, what is missing before the plugin can truly run unattended,
@@ -16,12 +16,11 @@ and how long each missing piece takes.
 - **42 classes, 30 PHP files, 10.754 lines** (measured 6/11 2026 on 7.33.2). Every subsystem is reachable
   from a real entry point (cron, REST, admin page, ability or AJAX); the last dead method,
   `SGAP_Admin::get_setting_help_link()`, was deleted in 7.33.3.
-- **6 settings are registered but never read** (down from 17). Nine invisible leftovers
-  (`pinterest_token`, `instagram_token`, `tiktok_token`, `youtube_token`, `youtube_channel_id`,
-  `reddit_username`, `reddit_subreddit`, `email_test_recipient`, `ai_mode`) were removed in 7.33.3, and
-  `telegram_bot_token`/`telegram_chat_id` became live with P2.3. The six that remain are visible on the
-  Settings screen — the five Etsy keys and `labor_rate` — and still promise an Etsy connection that does not
-  exist, pending the owner decision in section 8.
+- **1 setting is registered but never read** (down from 17). Nine invisible leftovers were removed in
+  7.33.3 (`pinterest_token`, `instagram_token`, `tiktok_token`, `youtube_token`, `youtube_channel_id`,
+  `reddit_username`, `reddit_subreddit`, `email_test_recipient`, `ai_mode`) and the five Etsy keys were
+  hidden in 7.33.4, so the Settings screen no longer promises an Etsy connection that does not exist. Only
+  `labor_rate` is left, and it is a pricing question rather than a code question (section 8).
 - **The plugin publishes well when everything is healthy, and tells nobody when it isn't.** There is no
   failure email, no "queue is running dry" alert, no retry backoff, and no publish audit trail. Those are
   the four things standing between "works" and "set and forget".
@@ -83,20 +82,14 @@ behaviour below comes from reading code and docs, not from a live run.
   references; it was removed together with its link table, which also carried the last references to the
   removed network tokens.
 
-### 3.2 Registered but unused settings (6 after 7.33.3)
+### 3.2 Registered but unused settings (1 after 7.33.4)
 
-Nine invisible leftovers were removed in 7.33.3 (see section 0). These six are still registered and still
-read nowhere — they are exactly the ones a user can see:
+The five Etsy keys were hidden in 7.33.4 and nine invisible leftovers were removed in 7.33.3 (section 0).
+One is left, and it is the only one whose removal is a pricing decision rather than a code change:
 
 | Setting | Visible to the user? | Why it exists |
 | --- | --- | --- |
-| `etsy_shop_id`, `etsy_oauth_token`, `etsy_refresh_token`, `etsy_shipping_profile_id`, `etsy_return_policy_id` | **Yes** — Settings tab + setup guide | Planned Etsy OAuth import that was never built. `/etsy/orders` is a manual import. |
-| `labor_rate` | **Yes** — Settings | Planned cost-of-time in ROI; ROI uses `monthly_budget` and `target_roi` instead. |
-| `pinterest_token`, `instagram_token`, `tiktok_token`, `youtube_token`, `youtube_channel_id` | No (constants only) | Left over from direct-posting plans; all publishing goes through Publer. |
-| `telegram_bot_token`, `telegram_chat_id` | No | Notification channel that never shipped — and is exactly what P0.1 below needs. |
-| `reddit_username`, `reddit_subreddit` | No | Reddit posting that never shipped. |
-| `ai_mode` | No | Superseded by `ai_provider`. |
-| `email_test_recipient` | No | Would be useful for P0.1. |
+| `labor_rate` | **Yes** — Settings → Economics | Planned cost-of-time in ROI; ROI uses `monthly_budget` and `target_roi` instead. Hiding it is the last 0.05 d of P3.1. |
 
 Two decisions are needed (section 8): **build or hide** the Etsy block, and **remove or repurpose** the
 direct-network tokens. Leaving them visible is the worst option — the screen implies an integration that
@@ -243,7 +236,7 @@ Threads and LinkedIn stay behind Publer.
 
 | # | Item | Effort |
 | --- | --- | --- |
-| P3.1 | ⏳ **Half done 6/11 (7.33.3)** — the dead method `get_setting_help_link()` is deleted, and the nine invisible leftovers (`pinterest_token`, `instagram_token`, `tiktok_token`, `youtube_token`, `youtube_channel_id`, `reddit_username`, `reddit_subreddit`, `email_test_recipient`, `ai_mode`) are gone from `SECRET_KEYS`/`TEXT_KEYS`. **Remaining (0.25 d, owner-blocked):** the five visible Etsy keys and `labor_rate` — build the Etsy import or hide the EBay/Etsy block (section 8, decision 1). | 0.5 d (0.25 done) |
+| P3.1 | 🟢 **Done 6/11 except 0.05 d (7.33.3 + 7.33.4)** — the dead method `get_setting_help_link()` is deleted, nine invisible leftovers are gone from `SECRET_KEYS`/`TEXT_KEYS`, and the five visible Etsy keys are hidden: they are no longer registered, the Etsy tab section is gone, and the Etsy page says *manual import* with the `/etsy/orders` route instead of promising an API. Four smoke-checks guard it (no Etsy fields in the Settings HTML, shop tab still renders the feed secret, manual-import text present, dead keys rejected by `update_settings`). **Only `labor_rate` is left (0.05 d):** it is visible under Economics, and hiding it changes what ROI promises, so it waits for the owner (section 8). | 0.5 d (0.45 done) |
 | P3.2 | ✅ **Done 3/11 (7.28.0)** — tests for `/feed` and `/reposts`. `merchant_feed()` printed the XML and called `exit`, so the feed could not be tested at all; it now returns a `WP_HTTP_Response` with `Content-Type: application/xml` (and stops calling `header()` after output). 12 checks cover the secret gate (missing secret, wrong key), the 501 without WooCommerce, the Google namespace, SKU falling back to the product id, price with the store currency, XML-escaped titles, stripped HTML in the description, skipped products without price or image, both availability states and the content type; 5 cover the reposts (list, 400 without ids, numbering, 422 at the cap, the insert); 5 cover the uninstall (table list, drops, options, post meta). `assert /snapshot` auth is still open — it needs a WordPress user in `integration.php` | 0.5 d |
 | P3.3 | ✅ **Done as S0.3** — PHP 8.0–8.5 and WordPress 6.4 / 7.1 / latest are in the CI matrix | 0.25 d |
 | P3.4 | Release notes in the update modal (changelog from the zip's `readme.txt`/release body) | 0.5 d |
@@ -300,10 +293,11 @@ Platform limits: [Instagram content publishing](https://developers.facebook.com/
 
 ## 8. Open decisions for the owner
 
-1. **Etsy** — build the OAuth import (2.5 d + review) or hide the five settings and label the page
-   "manual import" (15 min)?
-2. **Direct network tokens** — remove `pinterest_token`, `instagram_token`, `tiktok_token`, `youtube_*`,
-   `reddit_*`, `ai_mode` entirely, or keep them for a future direct-posting mode?
+1. **Etsy** — ✅ **decided 2026-11-06: hidden, not built** (7.33.4). The five fields are gone from Settings and
+   the Etsy page labels itself a manual import; `POST /wp-json/sgap/v1/etsy/orders` is still the way in. Revisit
+   only if Etsy volume justifies the 2.5 d OAuth import.
+2. **Direct network tokens** — ✅ **decided 2026-11-06: removed** (7.33.3). All publishing goes through Publer,
+   so `pinterest_token`, `instagram_token`, `tiktok_token`, `youtube_*`, `reddit_*` and `ai_mode` are gone.
 3. **Action Scheduler** — accept the 2 d migration, or stay on WP-Cron with detection and documentation
    (P0.4)?
 4. **Analytics** — is platform-side reach/engagement worth 4 d plus API review, or are click and revenue
@@ -317,6 +311,7 @@ Platform limits: [Instagram content publishing](https://developers.facebook.com/
 
 | Date | Plugin | Change |
 | --- | --- | --- |
+| 2026-11-06 | 7.33.4 | **Etsy skjult: indstillingerne lover ikke længere en integration der ikke findes.** De fem Etsy-nøgler er afregistreret (`SECRET_KEYS`/`TEXT_KEYS`), Etsy-sektionen er fjernet fra indstillingerne, og Shop-fanen viser nu kun feed-hemmeligheden. Etsy-siden har fået en ærlig tekst: ordrer kommer ind manuelt via `POST /wp-json/sgap/v1/etsy/orders`, pluginnet taler aldrig med Etsy og holder ingen Etsy-credentials. Fire nye smoke-checks (408 → 412 PASS) holder skjulningen fast, så felterne ikke kan snige sig tilbage. Ejerbeslutning 1 i §8 er hermed taget: skjul, ikke byg. Tilbage af P3.1 er kun `labor_rate`, som er en prismæssig beslutning. |
 | 2026-11-06 | 7.33.3 | **P3.1, first half: død kode og usynlige rester væk.** `SGAP_Admin::get_setting_help_link()` er slettet (nul kald, nul strenge-referencer), og ni indstillinger der aldrig blev læst, er fjernet fra `SECRET_KEYS`/`TEXT_KEYS`: `pinterest_token`, `instagram_token`, `tiktok_token`, `youtube_token`, `youtube_channel_id`, `reddit_username`, `reddit_subreddit`, `email_test_recipient`, `ai_mode`. Målingen er lavet forfra 6/11, ikke kopieret fra 7.15-auditten: `telegram_bot_token`/`telegram_chat_id` er live siden P2.3 og tæller derfor ikke længere som ubrugte, så tallet er 15 → 6 i stedet for 17 → 6. De seks tilbageværende er de synlige (fem Etsy-felter + `labor_rate`) og kræver ejerens byg-eller-skjul-beslutning. 408 smoke-checks, 0 FAIL. |
 | 2026-11-06 | 7.33.2 | **Nøgler autoloades ikke længere, og et tomt felt sletter dem ikke.** `SGAP_Settings::set()` skrev alle optioner med standard-autoload, også `ai_api_key` og `image_api_key`; skrivevejen bag abilities, chat og wizard (`SGAP_AdminTools::update_settings()`) skrev nøgler direkte med `update_option()`, så en tom værdi slettede den gemte nøgle, en ny option blev autoloadet, og en nøgle fra `wp-config.php` blev "gemt" uden effekt. Begge følger nu formularens regler, og en `wp-config`-nøgle rapporteres i stedet for at blive overskrevet. 4 nye smoke-checks (404 → 408 PASS). Rettelsen gjorde den udgivne zip stale i forhold til kilden — CI's zip-værn ville fejle — så denne release genopbygger zippen. |
 | 2026-11-05 | 7.33.1 | **Abilities uden input crashede på WordPress 7.1.** Målt live efter opdateringen 7.6.0 → 7.33.0: `self-check` kastede *Too few arguments*, fordi WordPress 7.1 kalder en ability uden input-schema med **nul** argumenter, mens closurerne krævede ét. Testene så det ikke, fordi de altid sendte `null`. Alle fem registreringssteder (abilities, admin-tools, mcp-tools, automation, studio + site-seo) pakker nu callbacken ind, så den altid får `$input` (null uden input). Nyt tjek i `admin-tools.php` kræver, at hver `steamgears-*`-callback kan kaldes uden argumenter (fejlede for 8+ abilities før rettelsen), og at self-check kører kaldt uden argument. |

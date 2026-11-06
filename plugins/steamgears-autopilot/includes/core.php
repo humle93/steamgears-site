@@ -326,14 +326,14 @@ class SGAP_Settings {
     const SECRET_KEYS = [
         'publer_api_key','ai_api_key','image_api_key','serpapi_key',
         'telegram_bot_token',
-        'etsy_oauth_token','etsy_refresh_token','merchant_feed_secret','bluesky_app_password','mastodon_token'
+        'merchant_feed_secret','bluesky_app_password','mastodon_token'
     ];
     /** Multi-line text settings, shown as a textarea. */
     const TEXTAREA_KEYS = ['blackout_ranges', 'banned_words'];
     const TEXT_KEYS = [
         'publer_workspace_id','publer_pinterest_board','channels','ai_model','ai_base_url','image_model','content_language','rescue_hosts',
         'telegram_chat_id',
-        'etsy_shop_id','etsy_shipping_profile_id','etsy_return_policy_id','alert_email',
+        'alert_email',
         'blackout_ranges','banned_words','utm_campaign','bluesky_handle','mastodon_instance',
         'locale_source','locales'
     ];
@@ -352,7 +352,6 @@ class SGAP_Settings {
         'AI content' => ['ai_provider','ai_api_key','ai_model','ai_base_url','posts_per_day','content_language','locale_source','locales','image_model','image_api_key','serpapi_key'],
         'Economics' => ['labor_rate','monthly_budget','target_roi','winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max'],
         'Alerts and log' => ['alert_mode','alert_email','alert_dry_days','audit_keep_days'],
-        'Etsy' => ['etsy_shop_id','etsy_oauth_token','etsy_refresh_token','etsy_shipping_profile_id','etsy_return_policy_id'],
         'Google Feed' => ['merchant_feed_secret']
     ];
 
@@ -2023,7 +2022,11 @@ class SGAP_Admin {
 
     public static function etsy(): void {
         global $wpdb;
-        self::open('Etsy Orders & Profit');
+        self::open('Etsy Orders & Profit', 'Imported by hand — the plugin has no Etsy API client.');
+        echo '<div class="notice notice-info inline"><p><strong>Manual import.</strong> Orders arrive through '
+            . '<code>POST /wp-json/sgap/v1/etsy/orders</code> with <code>etsy_order_id</code> and the amounts. '
+            . 'The plugin never talks to Etsy and holds no Etsy credentials; the five Etsy fields were removed from '
+            . 'Settings in 7.33.4 so the screen no longer promises an integration that does not exist.</p></div>';
         $table = $wpdb->prefix . 'sgap_etsy_orders';
         $totals = $wpdb->get_row("SELECT COUNT(*) AS orders, SUM(revenue) AS revenue, SUM(fees) AS fees, SUM(shipping) AS shipping, SUM(profit) AS profit FROM {$table}");
         if ($totals && (int) $totals->orders > 0) {

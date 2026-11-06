@@ -44,6 +44,13 @@ function check($name,$ok){ echo ($ok?'PASS ':'FAIL ')."$name\n"; if(!$ok) $GLOBA
 do_action('init'); do_action('admin_init'); do_action('admin_menu');
 check('install: 9 tables', count($GLOBALS['ddl']??[])===9); check('install: publish log table', str_contains(implode("\n",$GLOBALS['ddl']??[]),'sgap_publish_log')); check('install: cleanup cron', in_array('sgap_daily_cleanup',$GLOBALS['cron']??[])); check('install: /go/ rule + flush', ($GLOBALS['rules'][0]??'')==='^go/([0-9]+)/?$' && !empty($GLOBALS['flushed'])); check('install: secrets not autoloaded', isset($GLOBALS['noauto']['sgap_ai_api_key'])); check('version stored', $opts['sgap_version']===SGAP_VERSION);
 foreach(['steamgears-autopilot','sgap-settings','sgap-queue','sgap-ai','sgap-campaigns','sgap-etsy','sgap-reports','sgap-fullauto','sgap-merchant','sgap-setup','sgap-studio','sgap-chat','sgap-log'] as $p){ ob_start(); do_action('page_'.$p); $html=ob_get_clean(); check("page $p renders", strlen($html)>20); }
+// Etsy er manuel import: felterne er væk fra indstillingerne, og siden lover ikke en API der ikke findes.
+ob_start(); do_action('page_sgap-settings'); $set_html=ob_get_clean();
+check('etsy: no credential fields in Settings', !str_contains($set_html,'etsy_shop_id') && !str_contains($set_html,'etsy_oauth_token') && !str_contains($set_html,'Etsy shop ID'));
+check('etsy: shop tab still renders the feed secret', str_contains($set_html,'merchant_feed_secret'));
+ob_start(); do_action('page_sgap-etsy'); $etsy_html=ob_get_clean();
+check('etsy: page says manual import', str_contains($etsy_html,'Manual import') && str_contains($etsy_html,'/etsy/orders'));
+check('etsy: dead credential keys rejected', SGAP_AdminTools::update_settings(['settings'=>['etsy_shop_id'=>'x']]) instanceof WP_Error);
 // secrets never echoed
 $opts['sgap_ai_api_key']='SECRET123'; ob_start(); do_action('page_sgap-settings'); $html=ob_get_clean();
 check('secret not in settings html', !str_contains($html,'SECRET123') && str_contains($html,'Saved'));
