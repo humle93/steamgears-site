@@ -67,14 +67,14 @@ comes from reading code and docs, not from a live run.
 | Chat assistant | `chat.php` | admin page, AJAX | Live; render smoke-tested, and since 7.35.0 it also reads the site through the 13 read-only MCP tools |
 | Setup wizard | `setup.php` | admin page `sgap-setup` | Live; page render now smoke-tested |
 | Abilities (agent tools) | `abilities.php`, `studio.php` | `wp-abilities/v1` | Live when WP 6.9+ |
-| Admin tools (29 ops) | `admin-tools.php` | abilities | Live, covered |
-| Self-updater | `updater.php` | `Update URI` + `update_plugins_github.com` | Live; parsing and package URL covered |
+| Admin tools (35 ops) | `admin-tools.php` | abilities | Live, covered |
+| Self-updater | `updater.php` | `Update URI` + `update_plugins_github.com` | Live; parsing, package URL and the install path are covered |
 | Maintenance + health | `core.php` `SGAP_Maintenance`, `admin-tools.php` | cron `sgap_daily_cleanup`, `sgap_daily_health` | Live, covered |
-| Merchant feed (`/feed` products) | `core.php` `SGAP_REST::merchant_feed` | REST `/feed` | Live, **no test** |
+| Merchant feed (`/feed` products) | `core.php` `SGAP_REST::merchant_feed` | REST `/feed` | Live, covered (P3.2) |
 | Suppression list | `core.php` | REST `/suppression` | Live, thin test |
-| Reposts | `core.php` | REST `/reposts` | Live, **no test** |
+| Reposts | `core.php` | REST `/reposts` | Live, covered (P3.2) |
 | Etsy reporting | `core.php` `SGAP_REST::import_etsy_order` | REST `/etsy/orders`, admin **Etsy** | Manual/REST import only — no API client |
-| Snapshot for outside dashboards | `core.php` `SGAP_REST::snapshot` | REST `/snapshot` | Live (7.15.0), smoke-tested |
+| Snapshot for outside dashboards | `core.php` `SGAP_REST::snapshot` | REST `/snapshot` | Live (7.15.0), smoke- and auth-tested |
 
 ---
 
@@ -107,13 +107,11 @@ have reached production unnoticed; adding them immediately surfaced one missing 
 
 Still untested:
 
-- `GET /feed` (merchant product feed) — zero assertions.
-- `GET/POST /reposts` — zero assertions.
-- `SGAP_Updater::run()` — only header parsing and the package URL are covered, not the install path.
 - `SGAP_KeyCheck` for the non-AIMLAPI providers.
 - The chat conversation loop (only the page render).
-- `/snapshot` is smoke-tested but not asserted in `integration.php` (its auth path is the same
-  `manage_options` callback that `/stats` already covers anonymously).
+
+Four gaps from the audit are closed: P3.2 asserts `/feed` and `/reposts`, `integration.php` installs a mocked
+GitHub release through `SGAP_Updater::run()`, and `/snapshot` is tested both signed in and signed out.
 
 ### 3.4 Compatibility
 
@@ -246,7 +244,7 @@ Threads and LinkedIn stay behind Publer.
 | # | Item | Effort |
 | --- | --- | --- |
 | P3.1 | 🟢 **Done 6/11 except 0.05 d (7.33.3 + 7.33.4)** — the dead method `get_setting_help_link()` is deleted, nine invisible leftovers are gone from `SECRET_KEYS`/`TEXT_KEYS`, and the five visible Etsy keys are hidden: they are no longer registered, the Etsy tab section is gone, and the Etsy page says *manual import* with the `/etsy/orders` route instead of promising an API. Four smoke-checks guard it (no Etsy fields in the Settings HTML, shop tab still renders the feed secret, manual-import text present, dead keys rejected by `update_settings`). **Only `labor_rate` is left (0.05 d):** it is visible under Economics, and hiding it changes what ROI promises, so it waits for the owner (section 8). | 0.5 d (0.45 done) |
-| P3.2 | ✅ **Done 3/11 (7.28.0)** — tests for `/feed` and `/reposts`. `merchant_feed()` printed the XML and called `exit`, so the feed could not be tested at all; it now returns a `WP_HTTP_Response` with `Content-Type: application/xml` (and stops calling `header()` after output). 12 checks cover the secret gate (missing secret, wrong key), the 501 without WooCommerce, the Google namespace, SKU falling back to the product id, price with the store currency, XML-escaped titles, stripped HTML in the description, skipped products without price or image, both availability states and the content type; 5 cover the reposts (list, 400 without ids, numbering, 422 at the cap, the insert); 5 cover the uninstall (table list, drops, options, post meta). `assert /snapshot` auth is still open — it needs a WordPress user in `integration.php` | 0.5 d |
+| P3.2 | ✅ **Done 3/11 (7.28.0)** — tests for `/feed` and `/reposts`. `merchant_feed()` printed the XML and called `exit`, so the feed could not be tested at all; it now returns a `WP_HTTP_Response` with `Content-Type: application/xml` (and stops calling `header()` after output). 12 checks cover the secret gate (missing secret, wrong key), the 501 without WooCommerce, the Google namespace, SKU falling back to the product id, price with the store currency, XML-escaped titles, stripped HTML in the description, skipped products without price or image, both availability states and the content type; 5 cover the reposts (list, 400 without ids, numbering, 422 at the cap, the insert); 5 cover the uninstall (table list, drops, options, post meta). The `/snapshot` auth gap is closed too: `integration.php` signs out and asserts **401**, and that the refused call is not counted as a Command Center call. | 0.5 d |
 | P3.3 | ✅ **Done as S0.3** — PHP 8.0–8.5 and WordPress 6.4 / 7.1 / latest are in the CI matrix | 0.25 d |
 | P3.4 | ✅ **Done 6/11 (7.34.0)** — the “View details”/update modal now shows the three newest rows from this file's changelog instead of a bare GitHub link. `SGAP_Updater::changelog_notes()` is a pure parser (regex on the `| date | version | change |` table, newest first, `**bold**` and backticked code converted) and `remote_changelog()` fetches `ROADMAP.md` from `main` behind a 6-hour site transient; when GitHub is unreachable the modal falls back to a link rather than an empty tab. Note text is escaped, so nothing in the repo can inject markup. Six smoke-checks cover the parser, the escaping, the limit, the empty case and the modal contract | 0.5 d |
 | P3.5 | ✅ **Done 3/11 (7.28.0)** — `uninstall.php` is now checked against the `dbDelta` DDL instead of memory: the test extracts every table `SGAP_Install::install()` creates, asserts the uninstall file declares all nine, then includes `uninstall.php` with a stubbed `$wpdb` and requires a `DROP TABLE IF EXISTS` for each, the option/transient delete and the post-meta cleanup. The file was correct; the check is what was missing | 0.25 d |
