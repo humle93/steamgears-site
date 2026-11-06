@@ -24,7 +24,7 @@ _Opdateret 2026-11-06 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 | Projekt | Status | Grundlag |
 | --- | --- | --- |
-| **steamgears.eu — site-optimering** | **60,6 %** | 13,2 af 21,8 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 5,3/6,05 · S3 2,45/3,55 · S4 1,4/5) |
+| **steamgears.eu — site-optimering** | **56,3 %** | 13,4 af 23,8 d (S0 1,9/2,85 · S1 2,15/4,6 · S2 5,5/7,55 · S3 2,45/3,55 · S4 1,4/5,25) |
 | **Steamgears Autopilot — plugin** | **74 %** | 19,9 af 26,9 d (P0 4,05/4,5 · P1 9,4/13,4 · P2 4,5/7 · P3 1,95/2) |
 | **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5) |
 | **SEO-indholdsproduktion** | **62,5 %** | 5 af 8 guides (BATCH 0/3 · COPY 4/4 · CORSET 1/1) |
@@ -39,7 +39,7 @@ _Opdateret 2026-11-06 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Næste skridt
 
-- **steamgears.eu — site-optimering** — Skriv de tre manglende guides fra den verificerede copy (S2.5-meta-runde og S2.6-links er kørt; S2.2 og corset-guiden er lukket 6/11); S1.1 Herbarium kræver varianter i Printify; S0.4 kræver én Redirection-gruppe (ejer)
+- **steamgears.eu — site-optimering** — Skriv de tre manglende guides fra den verificerede copy (S2.5-meta-runde og S2.6-links er kørt; S2.2 og corset-guiden er lukket 6/11); S1.1 Herbarium kræver varianter i Printify; S0.4 kræver én Redirection-gruppe (ejer); S0.9 kræver en browser-session med GA4 DebugView (to page_view i samme session)
 - **Steamgears Autopilot — plugin** — P0.4 rigtig host-cron (ejer); P3.1 labor_rate (ejer); P1.5 er eksternt blokeret (Pinterest-token + Meta-review)
 - **Dark academia-rebrand** — Batch 4 — mockups (~130 billeder)
 - **SEO-indholdsproduktion** — Skriv de tre manglende guides (mens-steampunk-costume-essentials, steampunk-clothing-three-budgets, womens-steampunk-essentials) fra den verificerede copy — corset-guiden er publiceret 6/11
@@ -47,12 +47,12 @@ _Opdateret 2026-11-06 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
-- `692fb3e Modul: Samtalepunkter — check tåler sin egen commit Før: 60,6 % → Efter: 60,6 % (Δ 0) Grundlag: 0 roadmap-poster berørt — 11 af 11 selftest-fixtures, ingen ændring i 13,2 af 21,8 d`
-- `d7cfd7d Modul: Samtalepunkter + Cirlas dokumentation Før: 60,6 % → Efter: 60,6 % (Δ 0) Grundlag: 0 roadmap-poster berørt — dokumentation og værktøj, ingen ændring i 13,2 af 21,8 d`
-- `33c022a Modul: Plugin P1.4 — evergreen-kørslen i integrationstesten Før: 74,0 % → Efter: 74,0 % (Δ +0) Grundlag: 19,9 af 26,9 d — testdækning styrket, ingen ændring i estimatet`
-- `f47ba22 style: fjern Inter-preloadet og skriv typografien ind i design.md`
-- `9e1be40 chore: anden og sidste del af typografi-oprydningen`
-- `4beb61f style: to skrifter i stedet for tredive — Marcellus i overskrifterne`
+- `3473e4f Merge branch 'main' of https://github.com/humle93/steamgears-site into freebuff/d96c797cb28964a7f8fb9d78`
+- `6a77774 Modul: S2.3 navigation — footer-links til /shipping/ og /returns/ målt Før: 55,5 %  →  Efter: 56,3 %  (Δ +0,8) Grundlag: 13,4 af 23,8 d (S0 1,9/2,85 · S1 2,15/4,6 · S2 5,5/7,55 · S3 2,45/3,55 · S4 1,4/5,25)`
+- `d78b50d Modul: Plugin P3.2 — keycheck-test for Anthropic og custom OpenAI-kompatibel provider Før: 74,0 % → Efter: 74,0 % (Δ +0) Grundlag: 19,9 af 26,9 d — test- og cachefix, ingen ændring i estimatet`
+- `49a27a2 Modul: site S0–S4 — §9 P2–P5 indarbejdet oven på main Før: 60,6 %  →  Efter: 55,5 %  (Δ -5,1) Grundlag: 13,2 af 23,8 d (S0 1,9/2,85 · S1 2,15/4,6 · S2 5,3/7,55 · S3 2,45/3,55 · S4 1,4/5,25)`
+- `aed1411 Modul: site S0–S4 — §9 P2–P5 indarbejdet som scope_change Før: 58,4 %  →  Efter: 53,5 %  (Δ -4,9) Grundlag: 12,7 af 23,75 d (S0 1,9/2,85 · S1 2,15/4,6 · S2 4,8/7,5 · S3 2,45/3,55 · S4 1,4/5,25)`
+- `3c581b5 Modul: commit-besked-værnet — krydstjek mod historik-rækkerne Før: —  →  Efter: —  (Δ —) Grundlag: ingen ændring`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
