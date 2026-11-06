@@ -6,8 +6,8 @@
       "id": "site",
       "name": "steamgears.eu — site-optimering",
       "note": "roadmap S0–S4",
-      "next": "Skriv de tre manglende guides + færdiggør corset-kladden (post 1394), opret S2.2 /shipping/ + /returns/ (copy klar, siderne findes ikke) og kør meta-/schema-runden; S1.1 Herbarium kræver varianter i Printify; S0.4 kræver én Redirection-gruppe (ejer)",
-      "blocked_by": "S1.1 Herbarium kræver varianter i Printify; S0.4 5 vanity-301 kræver én Redirection-gruppe (ejer). MCP-adgang virker (målt 6/11), så guides og trust-sider er ikke længere blokeret af adgang — kun af selve skrivningen",
+      "next": "Færdiggør /steampunk-corset-guide/ (kladde 1394: /go/-links + Rank Math-meta) og skriv de tre manglende guides fra den verificerede copy; S1.1 Herbarium kræver varianter i Printify; S0.4 kræver én Redirection-gruppe (ejer)",
+      "blocked_by": "S1.1 Herbarium kræver varianter i Printify; S0.4 5 vanity-301 kræver én Redirection-gruppe (ejer). S2.2 er lukket 6/11 — trust-siderne findes og er linket ind",
       "modules": [
         {
           "id": "s0",
@@ -29,10 +29,10 @@
         {
           "id": "s2",
           "name": "S2 — struktur og SEO",
-          "done": 4.8,
+          "done": 5.3,
           "total": 6.05,
           "unit": "d",
-          "note": "S2.1 9 af 13 planlagte sider live 2,08 + S2.5 meta-runde 1,4 + S2.6 0,8 af 0,8 (0,4 hub-links + 0,2 guide-klynge + 0,1 hub-copy + 0,05 målt linkindsats 4/11 + 0,05 sporing 5/11: 34 af 40 planlagte /go/-links står nu på en publiceret side og er målt der, og 6 produkter nævnes slet ikke i den publicerede outfit-guide og afventer en omskrivning (de tæller hverken som indsatte eller blokerede); de ni WordPress-guides fik 20 links indsat i brødteksten, og outfit-guidens 14 direkte produktlinks blev konverteret til /go/, så alle ti ældre guides er sporet. 5/11 blev outfit-guidens sidste 20 hrefs konverteret (15 produkter, alle 21 /go/ verificeret 302 mod butikkens API), så siden nu har 34 /go/-links og 0 direkte produktlink — målt i docs/library/guide-links-live-2026-11-05.md: 54 sporede links på de ti guides, 0 afvigelser) + S2.4 H1 0,25 + S2.3 nav-links 0,3. Scope-korrektion 3/11: S2.6 blev først meldt 0,75, men 12 af 40 planlagte links lå stadig kun i planen — det er lukket 4/11 og målt i docs/library/guide-links-live-2026-11-05.md",
+          "note": "S2.1 9 af 13 planlagte sider live 2,08 + S2.5 meta-runde 1,4 + S2.6 0,8 af 0,8 (0,4 hub-links + 0,2 guide-klynge + 0,1 hub-copy + 0,05 målt linkindsats 4/11 + 0,05 sporing 5/11: 34 af 40 planlagte /go/-links står nu på en publiceret side og er målt der, og 6 produkter nævnes slet ikke i den publicerede outfit-guide og afventer en omskrivning (de tæller hverken som indsatte eller blokerede); de ni WordPress-guides fik 20 links indsat i brødteksten, og outfit-guidens 14 direkte produktlinks blev konverteret til /go/, så alle ti ældre guides er sporet. 5/11 blev outfit-guidens sidste 20 hrefs konverteret (15 produkter, alle 21 /go/ verificeret 302 mod butikkens API), så siden nu har 34 /go/-links og 0 direkte produktlink — målt i docs/library/guide-links-live-2026-11-05.md: 54 sporede links på de ti guides, 0 afvigelser) + S2.4 H1 0,25 + S2.3 nav-links 0,3. Scope-korrektion 3/11: S2.6 blev først meldt 0,75, men 12 af 40 planlagte links lå stadig kun i planen — det er lukket 4/11 og målt i docs/library/guide-links-live-2026-11-05.md; + 0,5 d S2.2 (6/11): /shipping/ (1396) og /returns/ (1397) oprettet og publiceret — bygget af sitets egne publicerede politikfakta, med Rank Math-meta, canonical og indbyrdes links, og linket ind fra /delivery/ og /refund_returns/. Redirection har stadig ingen gruppe, så 301-vejen var ikke mulig; siderne er skrevet opgave-orienteret for ikke at blive tynde dubletter.",
           "scope_change": true
         },
         {
@@ -847,6 +847,15 @@
       "after": 74.0,
       "delta": 9.3,
       "basis": "19,9 af 26,9 d (P0 4,05/4,5 · P1 9,4/13,4 · P2 4,5/7 · P3 1,95/2) — P1.4 2,5 d færdig i 7.41.0"
+    },
+    {
+      "date": "2026-11-06",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 58.3,
+      "after": 60.6,
+      "delta": 2.3,
+      "basis": "13,2 af 21,8 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 5,3/6,05 · S3 2,45/3,55 · S4 1,4/5)"
     }
   ]
 }

@@ -22,7 +22,7 @@ Status pr. **2026-11-06** · beregnet af `projektstatus.py` · kilder: [`projekt
 
 | Projekt | Status i dag | Grundlag |
 | --- | --- | --- |
-| **steamgears.eu — site-optimering** *(roadmap S0–S4)* | **58,3 %** | 12,7 af 21,8 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,8/6,05 · S3 2,45/3,55 · S4 1,4/5) |
+| **steamgears.eu — site-optimering** *(roadmap S0–S4)* | **60,6 %** | 13,2 af 21,8 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 5,3/6,05 · S3 2,45/3,55 · S4 1,4/5) |
 | **Steamgears Autopilot — plugin** | **74 %** | 19,9 af 26,9 d (P0 4,05/4,5 · P1 9,4/13,4 · P2 4,5/7 · P3 1,95/2) |
 | **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5) |
 | **SEO-indholdsproduktion** | **57,1 %** | 4 af 7 guides (Publicerede guides (id 292, 296, 295) 0/3 · Guide-copy klar til publicering (292, 296, 295 + corset) 4/4) · drift: Daglig loop kører |
@@ -34,7 +34,7 @@ Status pr. **2026-11-06** · beregnet af `projektstatus.py` · kilder: [`projekt
 <!-- AUTO:BLOKERINGER:START -->
 | Projekt | Næste skridt | Blokering |
 | --- | --- | --- |
-| steamgears.eu — site-optimering (58,3 %) | Skriv de tre manglende guides + færdiggør corset-kladden (post 1394), opret S2.2 /shipping/ + /returns/ (copy klar, siderne findes ikke) og kør meta-/schema-runden; S1.1 Herbarium kræver varianter i Printify; S0.4 kræver én Redirection-gruppe (ejer) | S1.1 Herbarium kræver varianter i Printify; S0.4 5 vanity-301 kræver én Redirection-gruppe (ejer). MCP-adgang virker (målt 6/11), så guides og trust-sider er ikke længere blokeret af adgang — kun af selve skrivningen |
+| steamgears.eu — site-optimering (60,6 %) | Færdiggør /steampunk-corset-guide/ (kladde 1394: /go/-links + Rank Math-meta) og skriv de tre manglende guides fra den verificerede copy; S1.1 Herbarium kræver varianter i Printify; S0.4 kræver én Redirection-gruppe (ejer) | S1.1 Herbarium kræver varianter i Printify; S0.4 5 vanity-301 kræver én Redirection-gruppe (ejer). S2.2 er lukket 6/11 — trust-siderne findes og er linket ind |
 | Steamgears Autopilot — plugin (74 %) | P0.4 rigtig host-cron (ejer); P3.1 labor_rate (ejer); P1.5 er eksternt blokeret (Pinterest-token + Meta-review) | P1.5 kræver Pinterest-token (401) og Meta-review; P0.4 kræver host-cron (ejer); P3.1 mangler ejerens labor_rate-beslutning |
 | Dark academia-rebrand (63 %) | Batch 4 — mockups (~130 billeder) | Printify-adgang |
 | SEO-indholdsproduktion (57,1 %) | Opret de tre manglende guides (mens-steampunk-costume-essentials, steampunk-clothing-three-budgets, womens-steampunk-essentials) fra den verificerede copy og færdiggør /steampunk-corset-guide/ (kladde 1394) | Intet eksternt længere — MCP-adgang virker (målt 6/11 2026). Det, der mangler, er skrivningen: id 292/296/295 i den gamle note er **skraldespands-produktvariationer**, ikke guides, og kun /steampunk-corset-guide/ findes (kladde 1394, 11.351 tegn, 8 H2'er, fremhævet billede 1395, men 0 /go/-links og ingen Rank Math-meta). Copy, FAQ, priser og links ligger klar i docs/library/guides-2026-11-03.md og -corset.md |
@@ -50,6 +50,7 @@ Nyeste først. Append-only — rækker må ikke slettes eller ændres.
 
 | Dato | Projekt | Modul | Før → Efter | Δ | Grundlag |
 | --- | --- | --- | --- | --- | --- |
+| 2026-11-06 | steamgears.eu — site-optimering | daglig måling | 58,3 % → 60,6 % | +2,3 | 13,2 af 21,8 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 5,3/6,05 · S3 2,45/3,55 · S4 1,4/5) |
 | 2026-11-06 | Steamgears Autopilot — plugin | P1.4 — evergreen recycling | 64,7 % → 74 % | +9,3 | 19,9 af 26,9 d (P0 4,05/4,5 · P1 9,4/13,4 · P2 4,5/7 · P3 1,95/2) — P1.4 2,5 d færdig i 7.41.0 |
 | 2026-11-06 | Steamgears Autopilot — plugin | P0.6 færdig + P0-budget rettet | 65 % → 64,7 % | -0,3 | 17,4 af 26,9 d (P0 4,05/4,5 · P1 6,9/13,4 · P2 4,5/7 · P3 1,95/2); P0-budgettet 4,0 → 4,5 d fordi P0.6 aldrig var budgetteret, og P0.6 gik 0,25 → 0,5 d |
 | 2026-11-06 | Steamgears Autopilot — plugin | daglig måling | 64 % → 65 % | +1 | 17,15 af 26,4 d (P0 3,8/4 · P1 6,9/13,4 · P2 4,5/7 · P3 1,95/2) |
