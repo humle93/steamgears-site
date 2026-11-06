@@ -1,6 +1,6 @@
 # design.md — Steamgears' visuelle identitet
 
-**Status:** specifikation. Målt på den live side 5/11-2026; ingen CSS er ændret endnu.
+**Status:** specifikation. Målt på den live side 5/11-2026. CSS'en ligger i [`css/sg-design-system.css`](css/sg-design-system.css), men er ikke indlæst på sitet endnu.
 **Omfatter:** steamgears.eu — temaet `extendable`, template-delene `css/header-dark-clockwork-active.html` og `css/footer-active.html`.
 
 Dokumentet er skrevet som en måling af, hvad der faktisk er på siden i dag, ikke som en ønskeliste. Hvor der står et tal, er det aflæst; hvor der står et token, er det en beslutning, der skal lægges ind i fase 1.
@@ -151,13 +151,15 @@ Regler for stemmen: konkret før stemningsfuld, håndværk før tema, korte sæt
 4. **Spacing og komponenter.** 4 px-grid, knapper, produktkort, fokusmarkering.
 5. **Billedstandarden.** Kræver nye fotos; kan først gøres ordentligt, når kataloget er kurateret.
 
+Fase 3 har en fælde, som CSS-filen dokumenterer øverst: temaets header erklærer allerede `--sg-brass: #c9963f`, og den værdi bærer tekst i overskrifterne i dag. Skal navnet skifte betydning til `#B08D57` (messing der *ikke* må bære tekst), bliver alle messing-kanter mørkere på hele sitet. Det er hensigten, men det skal ske sammen med font-oprydningen, ikke som et selvstændigt indgreb.
+
 Hvert trin skal kunne måles bagefter. Et trin uden en måling er et trin, vi ikke ved om virkede.
 
 ---
 
 ## 12. Det dokumentet ikke dækker
 
-- Selve CSS-filen. Den skal skrives som `css/`-del eller som temaets override, og den findes ikke endnu.
+- Selve CSS-filen er skrevet og ligger som [`css/sg-design-system.css`](css/sg-design-system.css). Den er **ikke indlæst**: `css/` indeholder template-dele, så den skal enqueues eller indsættes som dem — og indtil det sker, er der intet ændret på den live side.
 - Navigationens informationsarkitektur — hører i katalog- og taksonomiplanen.
 - Konvertering. Dette er identitet, ikke salgsoptimering; de to skal måles hver for sig.
 
