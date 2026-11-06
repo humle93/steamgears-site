@@ -13,6 +13,8 @@ class SGAP_Chat {
     const META = 'sgap_chat_history';
     const MAX_HISTORY = 40;
     const MAX_ROUNDS = 6;
+    /** Add or change chat tools from another plugin: add_filter('sgap_chat_tools', fn($tools) => $tools + [...]); */
+    const TOOLS_FILTER = 'sgap_chat_tools';
     /** Abilities the chat may not use: they change the site beyond the autopilot. */
     const EXCLUDED = ['manage-plugin', 'enable-full-access', 'update', 'run-cron'];
 
@@ -20,6 +22,7 @@ class SGAP_Chat {
         add_action('admin_menu', [__CLASS__, 'menu'], 20);
         add_action('wp_ajax_sgap_chat', [__CLASS__, 'ajax_send']);
         add_action('wp_ajax_sgap_chat_clear', [__CLASS__, 'ajax_clear']);
+        add_action('wp_ajax_sgap_chat_tools', [__CLASS__, 'ajax_tools']);
     }
 
     public static function menu(): void {
@@ -64,7 +67,45 @@ class SGAP_Chat {
             }
             $tools[$name] = [$ability->get_description() ?: $ability->get_label(), $schema, $ability];
         }
-        return $tools;
+        $filtered = apply_filters(self::TOOLS_FILTER, $tools);
+        return is_array($filtered) ? self::normalise($filtered) : $tools;
+    }
+
+    /**
+     * Keeps only entries shaped like a tool, so a filter or a changed registry cannot
+     * hand the model something it cannot call.
+     */
+    private static function normalise(array $tools): array {
+        $clean = [];
+        foreach ($tools as $name => $tool) {
+            $name = (string) $name;
+            if ($name === '' || !is_array($tool) || !isset($tool[0], $tool[1]) || !is_array($tool[1])) {
+                continue;
+            }
+            $schema = $tool[1];
+            if (($schema['type'] ?? 'object') !== 'object') {
+                $schema = ['type' => 'object', 'properties' => new stdClass()];
+            } elseif (empty($schema['properties'])) {
+                $schema['properties'] = new stdClass();
+            }
+            $clean[$name] = [(string) $tool[0], $schema, $tool[2] ?? null];
+        }
+        return $clean;
+    }
+
+    /** md5 of the sorted tool names; changes exactly when the catalogue changes. */
+    public static function tools_signature(?array $tools = null): string {
+        $names = array_keys($tools ?? self::tools());
+        sort($names);
+        return md5(implode(',', $names));
+    }
+
+    /** What the page and the refresh button report. */
+    public static function tool_catalog(): array {
+        $tools = self::tools();
+        $names = array_keys($tools);
+        sort($names);
+        return ['count' => count($tools), 'names' => $names, 'signature' => self::tools_signature($tools)];
     }
 
     /** Runs one tool; always returns a JSON string for the model. */
@@ -72,9 +113,12 @@ class SGAP_Chat {
         if (!isset($tools[$name])) {
             return wp_json_encode(['error' => "Unknown tool {$name}."]);
         }
-        $ability = $tools[$name][2];
+        $ability = $tools[$name][2] ?? null;
+        if (!is_object($ability) || !method_exists($ability, 'execute')) {
+            return wp_json_encode(['error' => "The tool {$name} has no runner in this installation."]);
+        }
         $args = is_array($args) ? $args : [];
-        $input = $args ?: ($ability->get_input_schema() ? [] : null);
+        $input = $args ?: ((method_exists($ability, 'get_input_schema') && $ability->get_input_schema()) ? [] : null);
         $result = $ability->execute($input);
         if (is_wp_error($result)) {
             return wp_json_encode(['error' => $result->get_error_message()]);
@@ -271,6 +315,15 @@ class SGAP_Chat {
         wp_send_json_success();
     }
 
+    /** Current tool catalogue, so the page can pick up tools added after it was rendered. */
+    public static function ajax_tools(): void {
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('Forbidden', 403);
+        }
+        check_ajax_referer('sgap_chat', 'nonce');
+        wp_send_json_success(self::tool_catalog());
+    }
+
     /* ---- page ---- */
 
     public static function page(): void {
@@ -284,12 +337,14 @@ class SGAP_Chat {
             'nonce' => wp_create_nonce('sgap_chat'),
             'history' => array_map(fn($t) => ['role' => $t['role'], 'content' => $t['content'], 'tools' => $t['tools'] ?? []], self::history()),
             'model' => SGAP_AI::provider_name() . ' · ' . SGAP_AI::model(),
-            'tools' => count(self::tools())
+            'tools' => count(self::tools()),
+            'signature' => self::tools_signature()
         ];
         $suggestions = ['Hvordan går det med autopiloten?', 'Vis kladderne der venter', 'Skriv nye opslag nu', 'Hvorfor er der ikke sendt noget?', 'Hvilken kanal giver flest klik?'];
         echo '<div class="sgap-card sgap-chat"><div class="sgap-chat-top"><span>' . SGAP_UI::pill($config['model'], 'brass') . ' '
-            . SGAP_UI::pill($config['tools'] . ' tools', $config['tools'] ? 'ok' : 'warn') . '</span>'
-            . '<button type="button" class="button button-small" id="sgap-chat-clear"><span class="dashicons dashicons-trash"></span>New chat</button></div>'
+            . '<span id="sgap-chat-tools-pill">' . SGAP_UI::pill($config['tools'] . ' tools', $config['tools'] ? 'ok' : 'warn') . '</span></span>'
+            . '<span class="sgap-chat-top-btns"><button type="button" class="button button-small" id="sgap-chat-refresh-tools" title="Read the tool catalogue again — new abilities show up without a reload"><span class="dashicons dashicons-update"></span>Refresh tools</button>'
+            . '<button type="button" class="button button-small" id="sgap-chat-clear"><span class="dashicons dashicons-trash"></span>New chat</button></span></div>'
             . '<div id="sgap-chat-log" class="sgap-chat-log" aria-live="polite"></div>'
             . '<div class="sgap-chat-suggest" id="sgap-chat-suggest">';
         foreach ($suggestions as $s) {
@@ -317,6 +372,12 @@ class SGAP_Chat {
             . 'input.addEventListener("keydown",function(e){if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();ask(input.value);}});'
             . 'sug.addEventListener("click",function(e){if(e.target.classList.contains("sgap-chip"))ask(e.target.textContent);});'
             . 'document.getElementById("sgap-chat-clear").addEventListener("click",function(){post("sgap_chat_clear").then(function(){log.innerHTML="";sug.style.display="";add("assistant","Ny samtale. Hvad skal vi lave?");});});'
+            . 'var tBtn=document.getElementById("sgap-chat-refresh-tools"),tPill=document.getElementById("sgap-chat-tools-pill");'
+            . 'tBtn.addEventListener("click",function(){tBtn.disabled=true;post("sgap_chat_tools").then(function(j){tBtn.disabled=false;if(!j||!j.success)return;'
+            . 'var d=j.data;if(tPill)tPill.textContent=d.count+" tools";'
+            . 'if(d.signature!==C.signature){var add_n=d.count-C.tools;C.tools=d.count;C.signature=d.signature;'
+            . 'add("assistant",add_n>0?("Værktøjskataloget er opdateret: "+add_n+" nyt værktøj"+(add_n===1?"":"er")+" ("+d.count+" i alt)."):("Værktøjskataloget ændrede sig ("+d.count+" værktøjer nu)."));}})'
+            . '.catch(function(){tBtn.disabled=false;});});'
             . '})();</script>';
         SGAP_Admin::close();
     }

@@ -531,7 +531,15 @@ check('chat: the assistant reaches the site lookups', isset($ct['list-posts']) &
 check('chat: the assistant cannot write through a site tool', !isset($ct['create-post']) && !isset($ct['update-option']) && !isset($ct['set-plugin-state']) && !isset($ct['run-cron']));
 check('chat: its own tools are still there', count($ct)>2 && !isset($ct['manage-plugin']));
 check('chat: every tool has a schema object', (function($t){ foreach($t as $v){ if(!is_array($v[1]) || ($v[1]['type']??'')!=='object') return false; } return true; })($ct));
-unset($GLOBALS['ability_objects']);
+// Nye værktøjer: et filter kan lægge dem til, og siden kan hente kataloget igen.
+$GLOBALS['filters']['sgap_chat_tools']=fn($t)=>$t+['my-tool'=>['Does my thing',['type'=>'object','properties'=>[]],null],'bad-tool'=>'not a tool'];
+$ct2=SGAP_Chat::tools();
+check('chat: another plugin can add a tool through the filter', isset($ct2['my-tool']) && !isset($ct2['bad-tool']));
+check('chat: the signature follows the catalogue', SGAP_Chat::tools_signature($ct2)!==SGAP_Chat::tools_signature($ct));
+$cat=SGAP_Chat::tool_catalog();
+check('chat: the catalogue reports count, names and signature', $cat['count']===count($ct2) && in_array('my-tool',$cat['names'],true) && strlen($cat['signature'])===32);
+check('chat: a tool without a runner fails cleanly', str_contains(SGAP_Chat::run_tool('my-tool',[],$ct2),'no runner'));
+unset($GLOBALS['filters']['sgap_chat_tools'], $GLOBALS['ability_objects']);
 
 // ---- P1.2: remind me instead of posting ----
 if (!function_exists('is_email')) { function is_email($e){ return (bool) filter_var((string)$e, FILTER_VALIDATE_EMAIL); } }
