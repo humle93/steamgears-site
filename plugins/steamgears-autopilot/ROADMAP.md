@@ -21,12 +21,14 @@ and how long each missing piece takes.
   `reddit_username`, `reddit_subreddit`, `email_test_recipient`, `ai_mode`) and the five Etsy keys were
   hidden in 7.33.4, so the Settings screen no longer promises an Etsy connection that does not exist. Only
   `labor_rate` is left, and it is a pricing question rather than a code question (section 8).
-- **The plugin publishes well when everything is healthy, and tells nobody when it isn't.** There is no
-  failure email, no "queue is running dry" alert, no retry backoff, and no publish audit trail. Those are
-  the four things standing between "works" and "set and forget".
+- **It now tells you when something is wrong.** Failure mail, a "queue is running dry" alert, retry backoff
+  (5 → 15 → 45 min), a publish audit log and the cross-system duplicate guard all shipped (P0.1–P0.3, P0.5,
+  P0.6). What still stands between "works" and "set and forget": a real host cron (P0.4, owner-side), analytics
+  ingestion (P1.5, blocked on Pinterest/Meta) and one unused setting (`labor_rate`, an owner decision).
 - **Estimated effort to a credible set-and-forget v1: 11 developer-days** (all of P0, P1 without analytics,
-  and the two test-hygiene items). Full parity with hosted schedulers, including analytics ingestion and
-  evergreen recycling, is **18–21 developer-days**, before external API approvals that take calendar weeks.
+  and the two test-hygiene items). Full parity with hosted schedulers is **18–21 developer-days**, before
+  external API approvals that take calendar weeks; with evergreen recycling shipped 6/11, analytics ingestion
+  (P1.5) is the only large item left in that scope.
 
 ---
 
