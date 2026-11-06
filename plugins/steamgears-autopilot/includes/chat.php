@@ -113,8 +113,9 @@ class SGAP_Chat {
         }
         usort($ranked, static fn($a, $b) => $a[0] <=> $b[0]);
         $tools = [];
+        $max_bound = max(1, (int) apply_filters('sgap_chat_max_bound', self::MAX_BOUND));
         foreach ($ranked as [, $entry]) {
-            if (count($tools) >= self::MAX_BOUND) {
+            if (count($tools) >= $max_bound) {
                 break;
             }
             $schema = method_exists($entry['ability'], 'get_input_schema') ? $entry['ability']->get_input_schema() : null;
@@ -125,12 +126,7 @@ class SGAP_Chat {
             }
             $label = $entry['description'] !== '' ? $entry['description']
                 : (method_exists($entry['ability'], 'get_label') ? (string) $entry['ability']->get_label() : $entry['name']);
-            $existing = $tools[$entry['short']] ?? null;
-            if ($existing !== null && $existing[2] !== $entry['ability']) {
-                $tools[$entry['name']] = [$label, $schema, $entry['ability']]; // collision: keep both, full name wins
-                continue;
-            }
-            $tools[$entry['short']] = [$label, $schema, $entry['ability']];
+            $tools[self::unique_name($entry['short'], $tools)] = [$label, $schema, $entry['ability']];
         }
         $tools += self::meta_tools();
         $filtered = apply_filters(self::TOOLS_FILTER, $tools);
@@ -226,6 +222,38 @@ class SGAP_Chat {
     }
 
     /**
+     * A tool name every provider accepts. AIMLAPI (Gemini) rejects anything that does not
+     * start with a letter or underscore and is not alphanumeric, underscore, dot, colon or
+     * dash — so `core/list posts` or a leading digit must never reach the API.
+     */
+    public static function safe_name(string $name): string {
+        $name = (string) preg_replace('/[^A-Za-z0-9_.:-]+/', '_', trim($name));
+        $name = trim($name, '_.:-');
+        if ($name === '') {
+            $name = 'tool';
+        }
+        if (!preg_match('/^[A-Za-z_]/', $name)) {
+            $name = 't_' . $name;
+        }
+        return substr($name, 0, 64);
+    }
+
+    /** safe_name plus a counter, so two abilities with the same short name never collide. */
+    public static function unique_name(string $name, array $taken): string {
+        $base = self::safe_name($name);
+        if (!isset($taken[$base])) {
+            return $base;
+        }
+        for ($i = 2; $i < 1000; $i++) {
+            $candidate = substr($base, 0, 60) . '__' . $i;
+            if (!isset($taken[$candidate])) {
+                return $candidate;
+            }
+        }
+        return 'tool_' . substr(md5($base . microtime(true)), 0, 12);
+    }
+
+    /**
      * Keeps only entries shaped like a tool, so a filter or a changed registry cannot
      * hand the model something it cannot call.
      */
@@ -242,7 +270,7 @@ class SGAP_Chat {
             } elseif (empty($schema['properties'])) {
                 $schema['properties'] = new stdClass();
             }
-            $clean[$name] = [(string) $tool[0], $schema, $tool[2] ?? null];
+            $clean[self::unique_name($name, $clean)] = [(string) $tool[0], $schema, $tool[2] ?? null];
         }
         return $clean;
     }
@@ -590,7 +618,7 @@ class SGAP_Chat {
         ];
         $suggestions = ['Hvordan går det med autopiloten?', 'Vis kladderne der venter', 'Skriv nye opslag nu', 'Hvorfor er der ikke sendt noget?', 'Hvilken kanal giver flest klik?'];
         echo '<div class="sgap-card sgap-chat"><div class="sgap-chat-top"><span>' . SGAP_UI::pill($config['model'], 'brass') . ' '
-            . '<span id="sgap-chat-tools-pill">' . SGAP_UI::pill($config['tools'] . ' of ' . $config['available'] . ' tools', $config['tools'] ? 'ok' : 'warn') . '</span></span>'
+            . '<span id="sgap-chat-tools-pill">' . SGAP_UI::pill($config['tools'] . ' of ' . $config['available'] . ' bound', $config['tools'] ? 'ok' : 'warn') . '</span></span>'
             . '<span class="sgap-chat-top-btns"><button type="button" class="button button-small" id="sgap-chat-refresh-tools" title="Read the tool catalogue again — new abilities show up without a reload"><span class="dashicons dashicons-update"></span>Refresh tools</button>'
             . '<button type="button" class="button button-small" id="sgap-chat-clear"><span class="dashicons dashicons-trash"></span>New chat</button></span></div>'
             . '<div id="sgap-chat-log" class="sgap-chat-log" aria-live="polite"></div>'
@@ -622,7 +650,7 @@ class SGAP_Chat {
             . 'document.getElementById("sgap-chat-clear").addEventListener("click",function(){post("sgap_chat_clear").then(function(){log.innerHTML="";sug.style.display="";add("assistant","Ny samtale. Hvad skal vi lave?");});});'
             . 'var tBtn=document.getElementById("sgap-chat-refresh-tools"),tPill=document.getElementById("sgap-chat-tools-pill");'
             . 'tBtn.addEventListener("click",function(){tBtn.disabled=true;post("sgap_chat_tools").then(function(j){tBtn.disabled=false;if(!j||!j.success)return;'
-            . 'var d=j.data;if(tPill)tPill.textContent=d.count+" of "+d.available+" tools";'
+            . 'var d=j.data;if(tPill)tPill.textContent=d.count+" of "+d.available+" bound";'
             . 'if(d.signature!==C.signature){var add_n=d.count-C.tools;C.tools=d.count;C.signature=d.signature;'
             . 'add("assistant",add_n>0?("Værktøjskataloget er opdateret: "+add_n+" nyt værktøj"+(add_n===1?"":"er")+" ("+d.count+" i alt)."):("Værktøjskataloget ændrede sig ("+d.count+" værktøjer nu)."));}})'
             . '.catch(function(){tBtn.disabled=false;});});'

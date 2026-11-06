@@ -565,20 +565,26 @@ $GLOBALS['ability_objects']=[
  'core/delete-all'=>new SGAP_Fake_Ability('core/delete-all',['category'=>'core']),
  'woo/product-report'=>new SGAP_Fake_Ability('woo/product-report',['category'=>'woo','meta'=>['annotations'=>['readonly'=>true]]]),
  'steamgears-autopilot/manage-plugin'=>new SGAP_Fake_Ability('steamgears-autopilot/manage-plugin',['category'=>'steamgears-autopilot']),
+ '9 lives/x y'=>new SGAP_Fake_Ability('9 lives/x y',['category'=>'odd','meta'=>['annotations'=>['readonly'=>true]]]),
 ];
 $ct3=SGAP_Chat::tools();
 check('chat: read-only abilities from other plugins are bound', isset($ct3['analyse']) && isset($ct3['product-report']));
 check('chat: writers from other plugins are not bound', !isset($ct3['delete-all']));
 check('chat: the three meta tools are always bound', isset($ct3['find-tools'],$ct3['describe-tool'],$ct3['run-tool']));
 $found=SGAP_Chat::find_tools(['query'=>'product']);
-check('chat: find-tools reaches the whole site catalogue', ($found['total_available']??0)===4 && ($found['matched']??0)===1 && ($found['tools'][0]['name']??'')==='woo/product-report');
+check('chat: find-tools reaches the whole site catalogue', ($found['total_available']??0)===5 && ($found['matched']??0)===1 && ($found['tools'][0]['name']??'')==='woo/product-report');
 check('chat: find-tools hides the excluded tools', SGAP_Chat::find_tools(['query'=>'manage']??[])['matched']===0);
 $desc=SGAP_Chat::describe_tool(['name'=>'product-report']);
 check('chat: describe-tool answers by short name', ($desc['name']??'')==='woo/product-report' && array_key_exists('input_schema',$desc));
 check('chat: run-tool runs an unbound ability', (SGAP_Chat::run_named(['name'=>'delete-all','input'=>['x'=>1]])['ran']??'')==='core/delete-all');
 check('chat: run-tool refuses an excluded name', str_contains(SGAP_Chat::run_tool('run-tool',['name'=>'manage-plugin'],$ct3),'may not use'));
 $cat3=SGAP_Chat::tool_catalog();
-check('chat: the catalogue counts what the site registers', ($cat3['available']??0)===4 && ($cat3['categories']['core']??0)===2);
+check('chat: the catalogue counts what the site registers', ($cat3['available']??0)===5 && ($cat3['categories']['core']??0)===2);
+// AIMLAPI/Gemini afviser ugyldige funktionsnavne — hvert bundet navn skal være provider-sikkert.
+check('chat: tool names are provider-safe', (function($t){ foreach(array_keys($t) as $n){ if(!preg_match('/^[A-Za-z_][A-Za-z0-9_.:-]{0,63}$/',$n)) return false; } return true; })($ct3));
+check('chat: a name with a space and a digit still becomes callable', isset($ct3['x_y']) && !isset($ct3['9 lives/x y']));
+check('chat: safe_name repairs what providers reject', SGAP_Chat::safe_name('9lives')==='t_9lives' && SGAP_Chat::safe_name('core/list posts')==='core_list_posts' && SGAP_Chat::safe_name('/ /')==='tool' && strlen(SGAP_Chat::safe_name(str_repeat('a',200)))===64);
+check('chat: unique_name never collides', SGAP_Chat::unique_name('list-posts',['list-posts'=>[]])==='list-posts__2');
 unset($GLOBALS['ability_objects']);
 
 // ---- P1.2: remind me instead of posting ----

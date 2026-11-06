@@ -1,6 +1,6 @@
 # Steamgears Autopilot — projektbeskrivelse til eksterne AI-værktøjer
 
-**Dato:** 6. november 2026 · **Plugin:** 7.38.0 · **Status:** 63,6 % (16,60 af 26,10 developer-dage)
+**Dato:** 6. november 2026 · **Plugin:** 7.38.1 · **Status:** 63,6 % (16,60 af 26,10 developer-dage)
 
 Dette dokument er skrevet, så det kan kopieres **som én blok** ind i ChatGPT, Claude eller et andet
 værktøj, der skal arbejde videre på pluginnet. Alt nedenfor er målt eller læst i repoet 6/11 2026 —
@@ -64,13 +64,13 @@ brug den statiske binær i `.tools/php` (ikke i git). I Termux findes `php` norm
 | Måling | Resultat |
 | --- | --- |
 | `php -l` på alle PHP-filer | 0 syntaksfejl (PHP 8.3.14) |
-| `php plugins/tests/smoke.php` | **445 PASS, 0 FAIL**, exit 0 |
+| `php plugins/tests/smoke.php` | **449 PASS, 0 FAIL**, exit 0 |
 | PHP-filer i pluginnet | 30 (28 i `includes/` + hovedfil + `uninstall.php`) |
 | Linjer PHP | 10.754 |
 | Klasser | 42 |
 | PHP-krav | 8.0+ i headeren; CI linter 8.0–8.5 |
 | WordPress-krav | 6.4+ (abilities kræver 6.9+) |
-| Seneste release | 7.38.0 — ability-indeks, kategorisøgning og en moderne Tools-side |
+| Seneste release | 7.38.1 — provider-sikre værktøjsnavne (AIMLAPI/Gemini afviste skråstreg og cifre) |
 
 Testfilerne: `smoke.php` (stubbet WordPress, kører overalt), `admin-tools.php` (49 checks, kræver
 `wp eval-file`), `automation.php`, `integration.php` + `integration.sh` (rigtig WordPress + MySQL, CI),
@@ -364,7 +364,7 @@ Disse punkter har været forkerte i tidligere briefing-udkast og skal ikke genta
    indstillingslaget.
 3. **`sync_id` findes ikke.** Bed ikke en AI om at "rette sync-ID-logikken"; der er intet at rette.
    Idempotens er P0.6 (fingerprint) og er en beslutning, ikke en fejlretning.
-4. **Testtal:** smoke-suiten er 445 PASS / 0 FAIL (6/11), ikke "ukendt".
+4. **Testtal:** smoke-suiten er 449 PASS / 0 FAIL (6/11), ikke "ukendt".
 5. **Plugin-mappen** er `plugins/steamgears-autopilot`; `ROADMAP.md` og `README.md` ligger i den.
 6. **`php` findes ikke altid** i cloud-miljøet — brug `.tools/php`, som AGENTS.md foreskriver.
 7. **Commit-formatet** kræver Modul/Før/Efter/Δ/Grundlag; en fri commit-besked fejler i CI.
@@ -385,7 +385,7 @@ Disse punkter har været forkerte i tidligere briefing-udkast og skal ikke genta
 > læses med `SGAP_Settings::get()` og kan overstyres med `SGAP_AI_API_KEY` i `wp-config.php`.
 > Nøglen sendes som `Authorization: Bearer`, aldrig i URL eller HTML, og skrives med `autoload = false`.
 > Der findes **ingen** `sync_id`/`_cc_sync_id` i koden. Test er `php plugins/tests/smoke.php`
-> (445 PASS, 0 FAIL). Commit-beskeder skal indeholde Modul/Før/Efter/Δ/Grundlag.
+> (449 PASS, 0 FAIL). Commit-beskeder skal indeholde Modul/Før/Efter/Δ/Grundlag.
 >
 > **Sådan arbejder du:**
 > 1. Ét trin ad gangen, med konkrete filstier og linjenumre.
