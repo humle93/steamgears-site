@@ -211,3 +211,21 @@ Gælder alt arbejde i `plugins/`.
 - Zip-filen **skal** ligge i `plugins/` på `main` og hedde `steamgears-autopilot-v<version>.zip`. Selvopdateringen
   henter præcis `https://raw.githubusercontent.com/humle93/steamgears-site/main/plugins/steamgears-autopilot-v<version>.zip`
   (`SGAP_Updater::package_url()`), så en zip i rodmappen eller på en sidegren bliver aldrig fundet.
+
+## 8. Context-håndtering — samtalens vigtigste punkter
+
+Når klientens **context meter nærmer sig 95 %**, eller når samtalen står foran en komprimering, skal det
+vigtigste fra samtalen over i [`docs/samtalepunkter.md`](docs/samtalepunkter.md) — ellers forsvinder
+begrundelserne, når historikken komprimeres, og næste pas skal gætte dem igen.
+
+- **Skriv først prosaen:** beslutninger, fund og fælder i "Beslutninger og fund" (nyeste først) og det der
+  stadig mangler i "Næste skridt". Kort og konkret — hvad blev besluttet, hvad blev målt, hvad var fælden.
+- **Opdatér derefter de maskinelle dele:** `python3 tools/samtalepunkter.py --update` skriver AUTO-blokken ud
+  fra [`projektstatus.json`](projektstatus.json) og git-historikken; `--check` bekræfter at den matcher.
+  Blokken må ikke håndredigeres, og den indeholder dagens dato og de seneste commits — derfor skal den
+  **opdateres, ikke bare tjekkes**.
+- **Commit og push i samme tur**, som §5 kræver. Filen er kun værd noget, hvis den ligger på `main`.
+- Filen er **hukommelse om hvorfor**, ikke en kopi af [`docs/projektstatus.md`](docs/projektstatus.md), der har
+  tallene. Står de to uenige, vinder `projektstatus.json`.
+- Værktøjet har 10 selftest-fixtures og kører som værn i [`tools/natlige-vaern.sh`](tools/natlige-vaern.sh).
+  Det regner procenter som `projektstatus.py` — undtagen `recurring`-moduler, som ikke tæller med.

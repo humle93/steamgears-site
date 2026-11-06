@@ -14,6 +14,7 @@ design/CSS, backup-data, dokumentation og status.
 | [`docs/seo.md`](docs/seo.md) | SEO-regler, GEO-skabelon og måling |
 | [`docs/library/seo-audit-2026-11-02.md`](docs/library/seo-audit-2026-11-02.md) | **Bred SEO-audit 2/11** — score 56,5/100, 21 fund med bevis, roadmap og tid til 100 % (PDF i `reports/seo-audit-2026-11-02.pdf`) |
 | [`docs/projektstatus.md`](docs/projektstatus.md) | Daglig procentstatus pr. projekt, beregnet af `projektstatus.py` |
+| [`docs/samtalepunkter.md`](docs/samtalepunkter.md) | Samtalens vigtigste punkter — beslutninger, fund og næste skridt, opdateret ved ~95 % context af `tools/samtalepunkter.py` |
 | [`AGENTS.md`](AGENTS.md) | Arbejdsregler: hvert pass melder % før → efter med grundlag, og §7 dækker plugin-arbejdet |
 | [`docs/agent-profil.md`](docs/agent-profil.md) | **Agentprofil** — alt en bot skal vide: fakta, adgang, opskrifter, fælder. Kan også hentes over MCP |
 | [`docs/steamgears-autopilot-projektbeskrivelse-2026-11-06.md`](docs/steamgears-autopilot-projektbeskrivelse-2026-11-06.md) | **Projektbeskrivelse af Autopilot-pluginnet** (7.38.2): filstruktur, roadmap, AIMLAPI- og nøglehåndtering — copy-paste-klar til et eksternt AI-værktøj |

@@ -75,6 +75,7 @@ check "link-plan-selftest"                  python3 tools/link_plan_check.py --s
 check "link-plan"                           python3 tools/link_plan_check.py
 check "guide-copy-selftest"                  python3 tools/guide_check.py --selftest
 check "guide-copy"                           python3 tools/guide_check.py
+check "samtalepunkter-selftest"              python3 tools/samtalepunkter.py --selftest
 
 # Rendereren fejlede 2/11 på to måder der ikke gav en fejlkode: et sidebrud midt i et afsnit
 # skrev resten af dokumentet uden for papiret (niche-vurderingen blev 20 sider), og glyffer
