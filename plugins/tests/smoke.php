@@ -302,6 +302,8 @@ check('site seo: numbers are quotable facts', $sgap_check(SGAP_Site_SEO::evaluat
 $sum = SGAP_Site_SEO::summarize([['fails' => ['a'], 'warns' => ['b'], 'checks' => [1, 2, 3], 'fixed_at' => ''], ['fails' => [], 'warns' => [], 'checks' => [], 'fixed_at' => '']]);
 check('site seo: the summary counts fails, warns and pages needing work', $sum['fail'] === 1 && $sum['warn'] === 1 && $sum['needs_work'] === 1 && $sum['pass'] === 1);
 check('site seo: ids() picks one status only', SGAP_Site_SEO::ids([['id' => 'a', 'status' => 'fail'], ['id' => 'b', 'status' => 'pass']], 'fail') === ['a']);
+// 6/11: site_checks() skrev «home» uden $ og gav en fatal error midt i en admin-request.
+check('site seo: the domain checks run without a fatal error', count(SGAP_Site_SEO::site_checks()) === 4);
 ob_start(); do_action('page_sgap-studio'); $studio = ob_get_clean();
 check('site seo: the studio page carries the whole-site card and its script', str_contains($studio, 'sgap-seo-site-out') && str_contains($studio, 'Scan the whole site') && str_contains($studio, 'sgap_seo_site'));
 /* --- pre-flight per channel (P1.1) --- */

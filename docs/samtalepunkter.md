@@ -47,15 +47,40 @@ _Opdateret 2026-11-06 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `de9cd1b CSS snapshot 07/11`
+- `1678bf2 Modul: roadmap-kørsel — S0.9 målt, resten blokeret af manglende skriveadgang Før: —  →  Efter: —  (Δ —) Grundlag: ingen ændring`
 - `3473e4f Merge branch 'main' of https://github.com/humle93/steamgears-site into freebuff/d96c797cb28964a7f8fb9d78`
 - `6a77774 Modul: S2.3 navigation — footer-links til /shipping/ og /returns/ målt Før: 55,5 %  →  Efter: 56,3 %  (Δ +0,8) Grundlag: 13,4 af 23,8 d (S0 1,9/2,85 · S1 2,15/4,6 · S2 5,5/7,55 · S3 2,45/3,55 · S4 1,4/5,25)`
 - `d78b50d Modul: Plugin P3.2 — keycheck-test for Anthropic og custom OpenAI-kompatibel provider Før: 74,0 % → Efter: 74,0 % (Δ +0) Grundlag: 19,9 af 26,9 d — test- og cachefix, ingen ændring i estimatet`
 - `49a27a2 Modul: site S0–S4 — §9 P2–P5 indarbejdet oven på main Før: 60,6 %  →  Efter: 55,5 %  (Δ -5,1) Grundlag: 13,2 af 23,8 d (S0 1,9/2,85 · S1 2,15/4,6 · S2 5,3/7,55 · S3 2,45/3,55 · S4 1,4/5,25)`
-- `aed1411 Modul: site S0–S4 — §9 P2–P5 indarbejdet som scope_change Før: 58,4 %  →  Efter: 53,5 %  (Δ -4,9) Grundlag: 12,7 af 23,75 d (S0 1,9/2,85 · S1 2,15/4,6 · S2 4,8/7,5 · S3 2,45/3,55 · S4 1,4/5,25)`
-- `3c581b5 Modul: commit-besked-værnet — krydstjek mod historik-rækkerne Før: —  →  Efter: —  (Δ —) Grundlag: ingen ændring`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 6/11 — hvorfor faldt butikken: vores egen fatale fejl, og nu en log der fanger næste gang
+
+Tidslinjen er nu målt til sekundet: fire plugins skrevet på disken 19:56:11–19:57:04, alle fire
+deaktiveret **i samme sekund** kl. 19:57:14 (ét kald med fire plugins — ikke fire uheld), W3TC kl.
+19:59:30. WP's egen opdateringsrutine er **udelukket med kilden som bevis**:
+`Plugin_Upgrader::deactivate_plugin_before_upgrade()` slår fra *før* installationen og springer helt
+over i cron, så mønstret passer hverken på en bulk-opdatering eller en natlig auto-opdatering.
+MainWP-tabellerne er fra 23/10, Royal MCP-loggen holder op 2/11 — **hvem** kan ikke aflæses, og det
+står der i dokumentet.
+
+**Det vigtigste fund: den fatale fejl var vores egen.** `Undefined constant "home"` i
+`site-seo.php:354` kl. 19:55:00, kastet i `admin_init` fra `wp-admin/index.php` — altså en kritisk
+fejl på en vilkårlig admin-side, **én gang i døgnet**, fordi `maybe_scan()` sætter sin guard før den
+scanner. Rettet til `$home` på fire linjer; ny smoke-check dør med præcis samme fejl hvis den
+genindføres (verificeret i en kopi: 168 PASS derefter `Fatal error`, exit 255). Live kører stadig
+7.40.1 med fejlen, indtil ejeren klikker *Plugins → Update*.
+
+Logningen er sat op som en **log-only vagt** i `wp-content/novamira-sandbox/steamgears-site-events.php`:
+deaktivering, aktivering, opdatering, admin-login, fatale fejl — med bruger, IP, URI og kaldstak — til
+`/var/www/steamgears.eu/steamgears-logs/` (0700/0600, uden for webroden). Verificeret med en syntetisk
+`do_action('deactivated_plugin', …)`, og `/`, `/shop/`, en produkt-URL og `/wp-login.php` svarer
+stadig 200. Filen ligger også i repoet som `library/hjalpefiler/steamgears-site-events.php`.
+
+Dokument: [`library/hvorfor-butikken-faldt-2026-11-06.md`](library/hvorfor-butikken-faldt-2026-11-06.md).
 
 ### 6/11 — butikken var nede i 1 t 38 min (den vigtigste hændelse i dag)
 

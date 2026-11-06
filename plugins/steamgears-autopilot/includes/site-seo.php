@@ -351,13 +351,13 @@ class SGAP_Site_SEO {
     public static function site_checks(): array {
         $home = home_url('/');
         $out = [];
-        $out[] = self::remote_check('llms_txt', 'GEO', 'llms.txt', home . 'llms.txt',
+        $out[] = self::remote_check('llms_txt', 'GEO', 'llms.txt', $home . 'llms.txt',
             'An llms.txt tells AI crawlers what the site is and which pages matter.');
-        $out[] = self::remote_check('sitemap', 'SEO', 'Sitemap index', home . 'sitemap_index.xml',
+        $out[] = self::remote_check('sitemap', 'SEO', 'Sitemap index', $home . 'sitemap_index.xml',
             'The sitemap is how crawlers find the pages you did not link.');
-        $out[] = self::remote_check('robots', 'SEO', 'robots.txt', home . 'robots.txt',
+        $out[] = self::remote_check('robots', 'SEO', 'robots.txt', $home . 'robots.txt',
             'robots.txt must not block the pages you want indexed.');
-        $out[] = self::remote_check('feed', 'AEO', 'Product feed', home . 'feed/merchant',
+        $out[] = self::remote_check('feed', 'AEO', 'Product feed', $home . 'feed/merchant',
             'A machine-readable product feed is what shopping and AI agents read.');
         return $out;
     }
