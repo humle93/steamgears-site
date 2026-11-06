@@ -338,6 +338,8 @@ Nothing on the site calls Command Center.
   as a problem (and so the alerts fire). A site that never had Command Center is not nagged.
 - Command Center 7.19+ also calls `wp-cron.php` every 5 minutes, so the publishing cron runs on time even on a
   quiet site. A real host cron (below) is still the better fix.
+- The **Command Center URL** setting (General) adds a "Log ind i Command Center" button to the dashboard. It opens
+  the dashboard in a new tab. Leave it empty to hide the button. The plugin does not call Command Center; the link is only a shortcut.
 
 ## Updates
 
