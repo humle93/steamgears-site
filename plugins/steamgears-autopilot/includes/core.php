@@ -335,7 +335,7 @@ class SGAP_Settings {
         'telegram_chat_id',
         'alert_email',
         'blackout_ranges','banned_words','utm_campaign','bluesky_handle','mastodon_instance',
-        'locale_source','locales'
+        'locale_source','locales','command_center_url'
     ];
     /** Settings with a fixed list of values, shown as a select. */
     const CHOICE_KEYS = [
@@ -347,7 +347,7 @@ class SGAP_Settings {
 
     /** Shown in the settings page. Keys not listed here stay registered for older data but are unused. */
     const SECTIONS = [
-        'General' => ['autopilot_enabled','full_auto_enabled','daily_cap','batch_size','quiet_start','quiet_end','blackout_ranges','quality_gate','banned_words','utm_campaign'],
+        'General' => ['autopilot_enabled','full_auto_enabled','daily_cap','batch_size','quiet_start','quiet_end','blackout_ranges','quality_gate','banned_words','utm_campaign','command_center_url'],
         'Publer' => ['publish_mode','publer_api_key','publer_workspace_id','publer_pinterest_board','channels','bluesky_handle','bluesky_app_password','mastodon_instance','mastodon_token','mastodon_limit','telegram_bot_token','telegram_chat_id'],
         'AI content' => ['ai_provider','ai_api_key','ai_model','ai_base_url','posts_per_day','content_language','locale_source','locales','image_model','image_api_key','serpapi_key'],
         'Economics' => ['labor_rate','monthly_budget','target_roi','winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max'],
@@ -356,6 +356,7 @@ class SGAP_Settings {
     ];
 
     const HELP = [
+        'command_center_url' => 'Address of your Steamgears Command Center dashboard, e.g. https://cc.example.com. Adds a Log ind button to the dashboard. Empty = no button.',
         'locale_source' => 'The language the source posts are written in. Every other language in the list gets its own translated caption.',
         'locales' => 'Comma-separated languages, e.g. da,sv,de. A queued post also queues one translated caption per language, linking to that language\'s version of the page (WPML or Polylang). Languages without a translated page are reported, not posted. Needs an AI API key.',
         'autopilot_enabled' => 'Master switch: generate posts daily and publish the queue via Publer.',
@@ -456,6 +457,7 @@ class SGAP_Settings {
                     $key === 'locales' => [__CLASS__, 'sanitize_locales'],
                     $key === 'locale_source' => [__CLASS__, 'sanitize_locale_code'],
                     $key === 'utm_campaign' => [__CLASS__, 'sanitize_campaign'],
+                    $key === 'command_center_url' => 'esc_url_raw',
                     // A model the provider does not offer is what broke the chat once: refuse it
                     // at the door, and let the owner pick one from the dropdown instead.
                     $key === 'ai_model' => [__CLASS__, 'sanitize_model'],
@@ -1706,6 +1708,7 @@ class SGAP_Admin {
         echo '<p class="description" style="margin-top:0">Ask how things are going or tell the AI what to do: write posts, approve, release the queue, change settings.</p>'
             . '<p><a class="button button-primary" href="' . esc_url(admin_url('admin.php?page=sgap-chat')) . '"><span class="dashicons dashicons-format-chat"></span>Open AI Chat</a></p>';
         SGAP_UI::card_close();
+        echo SGAP_CC::dashboard_button();
         SGAP_Auto::health_card();
         self::feeds_panel();
         self::keys_panel();

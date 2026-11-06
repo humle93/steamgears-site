@@ -70,6 +70,16 @@ class SGAP_CC {
         return "Command Center has not called for {$hours} h (last {$s['last_seen']}): check that it is running and that its application password is still valid.";
     }
 
+    /** Log ind button to the Command Center dashboard; empty until its address is set in Settings. */
+    public static function dashboard_button(): string {
+        $url = esc_url(SGAP_Settings::get('command_center_url'));
+        if ($url === '') {
+            return '';
+        }
+        return '<p><a class="button button-secondary" href="' . $url . '" target="_blank" rel="noopener noreferrer">'
+            . '<span class="dashicons dashicons-external"></span>Log ind i Command Center</a></p>';
+    }
+
     /** One line for the dashboard. */
     public static function line(): string {
         $s = self::status();
