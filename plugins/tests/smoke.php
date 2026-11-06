@@ -120,6 +120,7 @@ check('snapshot: every section present', is_array($snap) && isset($snap['generat
 check('snapshot: reports the installed version', ($snap['version']??'')===SGAP_VERSION);
 check('snapshot: secrets only as set/not set', !str_contains(wp_json_encode($snap),'TOPSECRET') && ($snap['settings']['AI content']['ai_api_key']['value']??'')==='set');
 check('snapshot: window echoes the requested days', ($snap['window']['days']??0)===30);
+check('snapshot: queue rows expose the duplicate fingerprint', array_key_exists('fingerprint', (array)($snap['queue'][0] ?? ['fingerprint'=>null])) || empty($snap['queue']));
 
 // --- Publer payloads ---
 $row=['title'=>'Brass goggles','body'=>'Look sharp.','tracking_url'=>'https://steamgears.eu/go/5/','image_url'=>'https://steamgears.eu/img.jpg'];

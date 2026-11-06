@@ -1282,7 +1282,7 @@ class SGAP_REST {
 
         $queue = $wpdb->get_results($wpdb->prepare(
             "SELECT id, post_id, channel, angle, content_type, format, destination_url, title, body,
-                    image_url, status, attempts, scheduled_at, sent_at, published_at, error
+                    image_url, status, attempts, scheduled_at, sent_at, published_at, error, fingerprint
              FROM {$prefix}sgap_queue ORDER BY id DESC LIMIT %d",
             $limit
         ), ARRAY_A);
