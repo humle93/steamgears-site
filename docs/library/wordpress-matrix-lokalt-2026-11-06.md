@@ -19,7 +19,9 @@ dem, og **ingen rettelse var nødvendig i plugin-koden eller i scriptet for at f
 kørt på ny efter 7.41.1's fem keycheck-checks; `latest` er WordPress 7.1.4.
 
 Miljø for alle tre: **PHP 8.2.32** (static-php-cli bulk) og **MySQL 8.0.36** — samme PHP- og MySQL-hovedversioner
-som CI. Kørslerne er derfor sammenlignelige med CI på versionsniveau; kun runneren og dens opsætning mangler.
+som CI. Kørslerne er derfor sammenlignelige med CI på versionsniveau; kun runneren og dens opsætning
+mangler. Opskriften på miljøet og fælderne undervejs står i
+[`integrationstest-ci-parity-2026-11-06.md`](integrationstest-ci-parity-2026-11-06.md).
 
 ## 2. Hvorfor 6.4 har færre checks
 
