@@ -37,7 +37,9 @@ De er derfor ikke soft-404'er. **Ingen af dem linkes fra forsiden:** forsidens H
 
 1. **S2.2 blev lukket 6/11 i round 30** (siderne 1396 og 1397 publiceret). Målingen her siger det samme om
    indholdet — rigtig titel, H1, canonical, i sitemappen — men den viser også, at forsiden ikke linker dem: der er
-   **nul footer-links**. Det sidste stykke hører derfor under navigation (S2.3), ikke under en genåbnet S2.2.
+   **nul footer-links**. Det sidste stykke hørte derfor under navigation (S2.3), ikke under en genåbnet S2.2.
+   **Rettelse senere samme dag:** linkene blev sat i footeren i round 31 og er målt i
+   [`footer-og-navigation-2026-11-06.md`](footer-og-navigation-2026-11-06.md) — 1 forekomst hver pr. side, begge 200.
 2. **Payload er den næste strukturelle omkostning, ikke hub-404'erne.** Hver målt side er 200–216 KB HTML, og
    forsiden henter 33 scripts. Det er P2 (nyt S2.7).
 3. **Merchant-schema kan udfyldes nu.** `phase-0-baseline-2026-11-03.md` konstaterede, at `shippingDetails` og
