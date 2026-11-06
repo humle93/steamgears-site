@@ -12,8 +12,30 @@ påstand om at linkene virker: hvert link er talt i den HTML, WordPress selv lev
   Et link der står to gange i samme tekst tæller altså én gang.
 - Et indlæg kaldes en **guide**, når det er vejledende indhold. Tre short stories (973, 993, 994) og
   produktlanceringen 572 holdes ude af guide-tallet, men står i tabellen for gennemsigtighed.
-- Målingen følger ikke redirects. `/go/`-ruten er målt separat 4.–5/11 og redirecter til produktet;
-  denne måling siger kun om linket **står** på siden.
+- Tabeldelen følger ikke redirects. Opfølgningen 6/11 fulgte derimod alle **31 unikke** `/go/<id>/`
+  (53 forekomster; de 40 i tabellen er unikke pr. indlæg).
+
+## Kritisk fund: `/go/`-ruten redirecter ikke
+
+Alle **31 unikke** `/go/<id>/` svarede **HTTP 200** uden `Location`, med titlen
+*Workshop Journal — Build Guides & Field Notes* og canonical `https://steamgears.eu/journal/`. Kunden
+ender altså i journalen i stedet for på produktet.
+
+Det er ikke produktopslaget der fejler. Den direkte query-variabel virker:
+
+```text
+GET /?sgap_go=405        -> 302  Location: /?post_type=product&p=405
+GET /go/405              -> 301  Location: /go/405/
+GET /go/405/             -> 200  Workshop Journal, canonical /journal/
+```
+
+Det peger på at **rewrite-reglen for `/go/` mangler i den kørende installation** — ikke at
+`SGAP_Tracking::redirect()` er død. Fixen er et rewrite-flush: **Settings → Permalinks → Save**, eller
+deaktivér/genaktivér pluginnet. Purge W3TC bagefter, hvis journalen ligger i sidecachen. Test med
+`/go/405/`: den skal give **302** til produktet, ikke 200.
+
+Indtil det er gjort, er alle ni guides der allerede bruger `/go/`, også ramt. Det gør fixen til det
+første skridt — før nye links konverteres.
 
 ## Resultat
 
@@ -40,56 +62,58 @@ Tabellen er delt efter status, så hver gruppe starter med sin egen header.
 
 **Fuldt sporede — kun `/go/` (7)**
 
-| ID | Slug | Titel | `/go/` | `/product/` | Status |
-| ---: | --- | --- | ---: | ---: | --- |
-| 699 | `steampunk-outfit-ideas-for-women` | Steampunk Outfit Ideas for Women: 12 Complete Looks (With Prices) | 21 | 0 | kun `/go/` |
-| 805 | `3d-print-steampunk-parts` | 3D-Print Steampunk Parts: Gears, Goggle Frames and Props for Beginners | 2 | 0 | kun `/go/` |
-| 988 | `best-steampunk-books` | The Best Steampunk Books: A Reading Guide for Every Kind of Reader | 2 | 0 | kun `/go/` |
-| 615 | `casual-steampunk-outfits` | Casual Steampunk Outfits: Wear the Look Every Day | 2 | 0 | kun `/go/` |
-| 803 | `closet-steampunk-outfits` | Closet Steampunk: Steampunk Accessories You Can Wear to Work | 2 | 0 | kun `/go/` |
-| 1394 | `steampunk-corset-guide` | Steampunk Corset Guide: Underbust vs Overbust, Fit & Styling | 2 | 0 | kun `/go/` |
-| 806 | `sustainable-steampunk` | Sustainable Steampunk: Thrift and Upcycle Your Costume | 2 | 0 | kun `/go/` |
+| ID | Slug | Titel | `/go/` | `/product/` |
+| ---: | --- | --- | ---: | ---: |
+| 699 | `steampunk-outfit-ideas-for-women` | Steampunk Outfit Ideas for Women: 12 Complete Looks (With Prices) | 21 | 0 |
+| 805 | `3d-print-steampunk-parts` | 3D-Print Steampunk Parts: Gears, Goggle Frames and Props for Beginners | 2 | 0 |
+| 988 | `best-steampunk-books` | The Best Steampunk Books: A Reading Guide for Every Kind of Reader | 2 | 0 |
+| 615 | `casual-steampunk-outfits` | Casual Steampunk Outfits: Wear the Look Every Day | 2 | 0 |
+| 803 | `closet-steampunk-outfits` | Closet Steampunk: Steampunk Accessories You Can Wear to Work | 2 | 0 |
+| 1394 | `steampunk-corset-guide` | Steampunk Corset Guide: Underbust vs Overbust, Fit & Styling | 2 | 0 |
+| 806 | `sustainable-steampunk` | Sustainable Steampunk: Thrift and Upcycle Your Costume | 2 | 0 |
 
 **Blandet — både `/go/` og direkte links (2)**
 
-| ID | Slug | Titel | `/go/` | `/product/` | Status |
-| ---: | --- | --- | ---: | ---: | --- |
-| 804 | `steampunk-gift-guide-2026` | Steampunk Gift Guide 2026: Gifts for Every Kind of Steampunk Fan | 4 | 5 | blandet |
-| 8 | `how-to-make-a-steampunk-costume` | How to Make a Steampunk Costume in a Weekend (2026) | 3 | 1 | blandet |
+| ID | Slug | Titel | `/go/` | `/product/` |
+| ---: | --- | --- | ---: | ---: |
+| 804 | `steampunk-gift-guide-2026` | Steampunk Gift Guide 2026: Gifts for Every Kind of Steampunk Fan | 4 | 5 |
+| 8 | `how-to-make-a-steampunk-costume` | How to Make a Steampunk Costume in a Weekend (2026) | 3 | 1 |
 
 **Kun direkte `/product/`-links (13)**
 
-| ID | Slug | Titel | `/go/` | `/product/` | Status |
-| ---: | --- | --- | ---: | ---: | --- |
-| 897 | `steampunk-outfit-ideas-men` | Steampunk Outfit Ideas for Men: 12 Complete Looks (2026) | 0 | 17 | kun `/product/` |
-| 791 | `steampunk-halloween-costume-women` | Steampunk Halloween Costumes for Women: 12 Last-Minute Looks | 0 | 14 | kun `/product/` |
-| 891 | `steampunk-halloween-costume-men` | Steampunk Halloween Costumes for Men: 10 Last-Minute Looks (2026) | 0 | 12 | kun `/product/` |
-| 973 | `the-clockwork-herbarium-short-story` | The Clockwork Herbarium: A Short Story | 0 | 12 | kun `/product/` (story) |
-| 572 | `curiosities-vol-3-live` | Curiosities Vol. 3 Is Live — 8 New Clockwork Tees | 0 | 8 | kun `/product/` (lancering) |
-| 913 | `steampunk-costume-for-women` | Steampunk Costume for Women: Complete Look Guide (2026) | 0 | 8 | kun `/product/` |
-| 751 | `pirate-cosplay-for-beginners` | Pirate Cosplay for Beginners: Build a Steampunk Pirate Look | 0 | 6 | kun `/product/` |
-| 757 | `how-to-build-a-steampunk-costume-for-under-100-complete-2027-workshop-plan` | How to Build a Steampunk Costume for Under $100 (Complete 2027 Workshop Plan) | 0 | 5 | kun `/product/` |
-| 875 | `dieselpunk-costume` | How to Build a Dieselpunk Costume: The Complete DIY Guide (2026) | 0 | 4 | kun `/product/` |
-| 798 | `steampunk-vs-dieselpunk` | Steampunk vs. Dieselpunk: How to Pick Your Look (2026 Guide) | 0 | 4 | kun `/product/` |
-| 17 | `steampunk-cosplay-on-a-budget` | Steampunk Cosplay on a Budget: The $40 Full Outfit Formula | 0 | 2 | kun `/product/` |
-| 614 | `diy-vs-buy-steampunk-goggles` | DIY vs. Buy: Steampunk Goggles Compared (2026) | 0 | 1 | kun `/product/` |
-| 993 | `the-clockwork-seer-short-story` | The Clockwork Seer: A Steampunk Short Story | 0 | 1 | kun `/product/` (story) |
+| ID | Slug | Titel | `/go/` | `/product/` |
+| ---: | --- | --- | ---: | ---: |
+| 897 | `steampunk-outfit-ideas-men` | Steampunk Outfit Ideas for Men: 12 Complete Looks (2026) | 0 | 17 |
+| 791 | `steampunk-halloween-costume-women` | Steampunk Halloween Costumes for Women: 12 Last-Minute Looks | 0 | 14 |
+| 891 | `steampunk-halloween-costume-men` | Steampunk Halloween Costumes for Men: 10 Last-Minute Looks (2026) | 0 | 12 |
+| 973 | `the-clockwork-herbarium-short-story` | The Clockwork Herbarium: A Short Story | 0 | 12 |
+| 572 | `curiosities-vol-3-live` | Curiosities Vol. 3 Is Live — 8 New Clockwork Tees | 0 | 8 |
+| 913 | `steampunk-costume-for-women` | Steampunk Costume for Women: Complete Look Guide (2026) | 0 | 8 |
+| 751 | `pirate-cosplay-for-beginners` | Pirate Cosplay for Beginners: Build a Steampunk Pirate Look | 0 | 6 |
+| 757 | `how-to-build-a-steampunk-costume-for-under-100-complete-2027-workshop-plan` | How to Build a Steampunk Costume for Under $100 (Complete 2027 Workshop Plan) | 0 | 5 |
+| 875 | `dieselpunk-costume` | How to Build a Dieselpunk Costume: The Complete DIY Guide (2026) | 0 | 4 |
+| 798 | `steampunk-vs-dieselpunk` | Steampunk vs. Dieselpunk: How to Pick Your Look (2026 Guide) | 0 | 4 |
+| 17 | `steampunk-cosplay-on-a-budget` | Steampunk Cosplay on a Budget: The $40 Full Outfit Formula | 0 | 2 |
+| 614 | `diy-vs-buy-steampunk-goggles` | DIY vs. Buy: Steampunk Goggles Compared (2026) | 0 | 1 |
+| 993 | `the-clockwork-seer-short-story` | The Clockwork Seer: A Steampunk Short Story | 0 | 1 |
 
 **Ingen produktlink (8)**
 
-| ID | Slug | Titel | `/go/` | `/product/` | Status |
-| ---: | --- | --- | ---: | ---: | --- |
-| 10 | `diy-steampunk-goggles` | DIY Steampunk Goggles: Build Your Own in 30 Minutes | 0 | 0 | ingen produktlink |
-| 30 | `steampunk-accessories` | Steampunk Accessories: 25+ Must-Have Pieces (DIY + Where to Find Them) | 0 | 0 | ingen produktlink |
-| 14 | `steampunk-cosplay-for-beginners` | Steampunk Cosplay for Beginners: Your First Outfit, Explained | 0 | 0 | ingen produktlink |
-| 15 | `steampunk-costume-ideas` | 30+ Steampunk Costume Ideas: Airship Captains, Inventors & Explorers | 0 | 0 | ingen produktlink |
-| 898 | `steampunk-couple-costumes` | Steampunk Couple Costumes: 10 Pairs Ready to Buy (2026) | 0 | 0 | ingen produktlink |
-| 994 | `the-last-flight-of-the-meridian-short-story` | The Last Flight of the Meridian: A Dieselpunk Short Story | 0 | 0 | ingen produktlink (story) |
-| 974 | `what-is-dieselpunk` | What Is Dieselpunk? A Guide to the Diesel & Deco Aesthetic | 0 | 0 | ingen produktlink |
-| 989 | `what-is-gaslamp-fantasy` | What Is Gaslamp Fantasy? Victorian Magic, Explained | 0 | 0 | ingen produktlink |
+| ID | Slug | Titel | `/go/` | `/product/` |
+| ---: | --- | --- | ---: | ---: |
+| 10 | `diy-steampunk-goggles` | DIY Steampunk Goggles: Build Your Own in 30 Minutes | 0 | 0 |
+| 30 | `steampunk-accessories` | Steampunk Accessories: 25+ Must-Have Pieces (DIY + Where to Find Them) | 0 | 0 |
+| 14 | `steampunk-cosplay-for-beginners` | Steampunk Cosplay for Beginners: Your First Outfit, Explained | 0 | 0 |
+| 15 | `steampunk-costume-ideas` | 30+ Steampunk Costume Ideas: Airship Captains, Inventors & Explorers | 0 | 0 |
+| 898 | `steampunk-couple-costumes` | Steampunk Couple Costumes: 10 Pairs Ready to Buy (2026) | 0 | 0 |
+| 994 | `the-last-flight-of-the-meridian-short-story` | The Last Flight of the Meridian: A Dieselpunk Short Story | 0 | 0 |
+| 974 | `what-is-dieselpunk` | What Is Dieselpunk? A Guide to the Diesel & Deco Aesthetic | 0 | 0 |
+| 989 | `what-is-gaslamp-fantasy` | What Is Gaslamp Fantasy? Victorian Magic, Explained | 0 | 0 |
 
 ## Rækkefølge for rettelsen
 
+0. **Fix `/go/`-ruten først:** flush rewrite-reglerne og mål `/go/405/` til 302. Uden det virker
+   hverken de nye eller de eksisterende tracking-links.
 1. **Konvertér de 73 direkte links i de 10 guides** til `/go/<produkt-id>/`. Produkt-id'et slås op i
    butikkens eget API, ikke gættes. Det er den største gevinst: alle linkene findes allerede, og kun
    `href`-værdien skal ændres.
@@ -102,8 +126,6 @@ Tabellen er delt efter status, så hver gruppe starter med sin egen header.
 
 ## Hvad målingen ikke beviser
 
-- At hvert `/go/`-link redirecter til det rigtige produkt. Det er målt for de ti ældre guides 4.–5/11,
-  men ikke for alle 40 links i denne tabel.
 - At et produkt stadig er publiceret og på lager. Målingen tæller links, ikke produktstatus.
 - At de 17 guides uden `/go/` er dårlige. Flere af dem kan med vilje være historiefortælling; derfor
   står short stories og lanceringen separat.
