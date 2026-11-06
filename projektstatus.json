@@ -86,10 +86,10 @@
         {
           "id": "p3",
           "name": "P3 — hygiejne",
-          "done": 1.1,
+          "done": 1.35,
           "total": 2.0,
           "unit": "d",
-          "note": "P3.3 (CI 8.0-8.5 + WP 7.1) udført som S0.3 i site-repoet; P3.2 (REST-tests for /feed og /reposts) og P3.5 (uninstall dækket) i 7.28.0; + 0,1 d CI på main repareret 5/11 (6 gamle zips fjernet, kvalitetsgaten blokerede sitets egne localhost-links, testdata fulgt med backoff/JPEG-preflight/32 abilities): integration 109, admin-tools 49, automation 27 PASS lokalt; 5/11: live-sitet opdateret af agenten via MCP 7.6.0 → 7.33.0 → 7.33.1 (abilities uden input crashede på WP 7.1, rettet i #16); sidste Juno-billede (corset.webp, 404) i guide 699 erstattet af medie 932"
+          "note": "P3.3 (CI 8.0-8.5 + WP 7.1) udført som S0.3 i site-repoet; P3.2 (REST-tests for /feed og /reposts) og P3.5 (uninstall dækket) i 7.28.0; + 0,1 d CI på main repareret 5/11 (6 gamle zips fjernet, kvalitetsgaten blokerede sitets egne localhost-links, testdata fulgt med backoff/JPEG-preflight/32 abilities): integration 109, admin-tools 49, automation 27 PASS lokalt; 5/11: live-sitet opdateret af agenten via MCP 7.6.0 → 7.33.0 → 7.33.1 (abilities uden input crashede på WP 7.1, rettet i #16); sidste Juno-billede (corset.webp, 404) i guide 699 erstattet af medie 932; 6/11: P3.1 halvt — død metode get_setting_help_link() slettet og 9 usynlige rester fjernet (pinterest_token, instagram_token, tiktok_token, youtube_token, youtube_channel_id, reddit_username, reddit_subreddit, email_test_recipient, ai_mode); de 6 synlige (5 Etsy-felter + labor_rate) venter på ejerens byg-eller-skjul-beslutning"
         }
       ],
       "total": 24.35
@@ -747,6 +747,15 @@
       "after": 100.0,
       "delta": 0,
       "basis": "39 af 39 links"
+    },
+    {
+      "date": "2026-11-06",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 57.5,
+      "after": 58.5,
+      "delta": 1.0,
+      "basis": "14,25 af 24,35 d (P0 3,55/4 · P1 4,85/11,35 · P2 4,5/7 · P3 1,35/2)"
     }
   ]
 }

@@ -13,11 +13,15 @@ and how long each missing piece takes.
 
 ## 0. Short version
 
-- **33 classes, 22 PHP files, 8.464 lines** (measured 3/11 2026 on 7.25.0; the 7.15.0 audit counted 26 classes
-  and ~6.3k). Every subsystem is reachable from a real entry point (cron,
-  REST, admin page, ability or AJAX) with **one** exception: `SGAP_Admin::get_setting_help_link()` is dead.
-- **17 settings are registered but never read.** Six of them are visible on the Settings screen (the five
-  Etsy keys and `labor_rate`), which makes the screen promise an Etsy API connection that does not exist.
+- **42 classes, 30 PHP files, 10.754 lines** (measured 6/11 2026 on 7.33.2). Every subsystem is reachable
+  from a real entry point (cron, REST, admin page, ability or AJAX); the last dead method,
+  `SGAP_Admin::get_setting_help_link()`, was deleted in 7.33.3.
+- **6 settings are registered but never read** (down from 17). Nine invisible leftovers
+  (`pinterest_token`, `instagram_token`, `tiktok_token`, `youtube_token`, `youtube_channel_id`,
+  `reddit_username`, `reddit_subreddit`, `email_test_recipient`, `ai_mode`) were removed in 7.33.3, and
+  `telegram_bot_token`/`telegram_chat_id` became live with P2.3. The six that remain are visible on the
+  Settings screen — the five Etsy keys and `labor_rate` — and still promise an Etsy connection that does not
+  exist, pending the owner decision in section 8.
 - **The plugin publishes well when everything is healthy, and tells nobody when it isn't.** There is no
   failure email, no "queue is running dry" alert, no retry backoff, and no publish audit trail. Those are
   the four things standing between "works" and "set and forget".
@@ -73,15 +77,16 @@ behaviour below comes from reading code and docs, not from a live run.
 
 ## 3. Findings from this audit
 
-### 3.1 Dead code (1 method)
+### 3.1 Dead code (0 methods)
 
-- `SGAP_Admin::get_setting_help_link()` (`includes/core.php:1609`) — zero call sites and zero string
-  references. It returns a docs link that no template uses. **Delete it** (10 minutes) or wire it into the
-  settings rows.
+- ✅ **Deleted in 7.33.3** — `SGAP_Admin::get_setting_help_link()` had zero call sites and zero string
+  references; it was removed together with its link table, which also carried the last references to the
+  removed network tokens.
 
-### 3.2 Registered but unused settings (17)
+### 3.2 Registered but unused settings (6 after 7.33.3)
 
-None of these are read or written anywhere in the plugin:
+Nine invisible leftovers were removed in 7.33.3 (see section 0). These six are still registered and still
+read nowhere — they are exactly the ones a user can see:
 
 | Setting | Visible to the user? | Why it exists |
 | --- | --- | --- |
@@ -238,7 +243,7 @@ Threads and LinkedIn stay behind Publer.
 
 | # | Item | Effort |
 | --- | --- | --- |
-| P3.1 | Delete `get_setting_help_link()`; remove or wire the 17 unused settings | 0.5 d |
+| P3.1 | ⏳ **Half done 6/11 (7.33.3)** — the dead method `get_setting_help_link()` is deleted, and the nine invisible leftovers (`pinterest_token`, `instagram_token`, `tiktok_token`, `youtube_token`, `youtube_channel_id`, `reddit_username`, `reddit_subreddit`, `email_test_recipient`, `ai_mode`) are gone from `SECRET_KEYS`/`TEXT_KEYS`. **Remaining (0.25 d, owner-blocked):** the five visible Etsy keys and `labor_rate` — build the Etsy import or hide the EBay/Etsy block (section 8, decision 1). | 0.5 d (0.25 done) |
 | P3.2 | ✅ **Done 3/11 (7.28.0)** — tests for `/feed` and `/reposts`. `merchant_feed()` printed the XML and called `exit`, so the feed could not be tested at all; it now returns a `WP_HTTP_Response` with `Content-Type: application/xml` (and stops calling `header()` after output). 12 checks cover the secret gate (missing secret, wrong key), the 501 without WooCommerce, the Google namespace, SKU falling back to the product id, price with the store currency, XML-escaped titles, stripped HTML in the description, skipped products without price or image, both availability states and the content type; 5 cover the reposts (list, 400 without ids, numbering, 422 at the cap, the insert); 5 cover the uninstall (table list, drops, options, post meta). `assert /snapshot` auth is still open — it needs a WordPress user in `integration.php` | 0.5 d |
 | P3.3 | ✅ **Done as S0.3** — PHP 8.0–8.5 and WordPress 6.4 / 7.1 / latest are in the CI matrix | 0.25 d |
 | P3.4 | Release notes in the update modal (changelog from the zip's `readme.txt`/release body) | 0.5 d |
@@ -312,6 +317,7 @@ Platform limits: [Instagram content publishing](https://developers.facebook.com/
 
 | Date | Plugin | Change |
 | --- | --- | --- |
+| 2026-11-06 | 7.33.3 | **P3.1, first half: død kode og usynlige rester væk.** `SGAP_Admin::get_setting_help_link()` er slettet (nul kald, nul strenge-referencer), og ni indstillinger der aldrig blev læst, er fjernet fra `SECRET_KEYS`/`TEXT_KEYS`: `pinterest_token`, `instagram_token`, `tiktok_token`, `youtube_token`, `youtube_channel_id`, `reddit_username`, `reddit_subreddit`, `email_test_recipient`, `ai_mode`. Målingen er lavet forfra 6/11, ikke kopieret fra 7.15-auditten: `telegram_bot_token`/`telegram_chat_id` er live siden P2.3 og tæller derfor ikke længere som ubrugte, så tallet er 15 → 6 i stedet for 17 → 6. De seks tilbageværende er de synlige (fem Etsy-felter + `labor_rate`) og kræver ejerens byg-eller-skjul-beslutning. 408 smoke-checks, 0 FAIL. |
 | 2026-11-06 | 7.33.2 | **Nøgler autoloades ikke længere, og et tomt felt sletter dem ikke.** `SGAP_Settings::set()` skrev alle optioner med standard-autoload, også `ai_api_key` og `image_api_key`; skrivevejen bag abilities, chat og wizard (`SGAP_AdminTools::update_settings()`) skrev nøgler direkte med `update_option()`, så en tom værdi slettede den gemte nøgle, en ny option blev autoloadet, og en nøgle fra `wp-config.php` blev "gemt" uden effekt. Begge følger nu formularens regler, og en `wp-config`-nøgle rapporteres i stedet for at blive overskrevet. 4 nye smoke-checks (404 → 408 PASS). Rettelsen gjorde den udgivne zip stale i forhold til kilden — CI's zip-værn ville fejle — så denne release genopbygger zippen. |
 | 2026-11-05 | 7.33.1 | **Abilities uden input crashede på WordPress 7.1.** Målt live efter opdateringen 7.6.0 → 7.33.0: `self-check` kastede *Too few arguments*, fordi WordPress 7.1 kalder en ability uden input-schema med **nul** argumenter, mens closurerne krævede ét. Testene så det ikke, fordi de altid sendte `null`. Alle fem registreringssteder (abilities, admin-tools, mcp-tools, automation, studio + site-seo) pakker nu callbacken ind, så den altid får `$input` (null uden input). Nyt tjek i `admin-tools.php` kræver, at hver `steamgears-*`-callback kan kaldes uden argumenter (fejlede for 8+ abilities før rettelsen), og at self-check kører kaldt uden argument. |
 | 2026-11-05 | 7.33.0 | **Command Center-linket (envejs) gjort færdigt.** `includes/command-center.php` (`SGAP_CC`) noterer kald med `X-Command-Center` på `sgap/v1`-ruterne (kun administratorer, højst én skrivning i minuttet), viser forbindelsen i Self-check-kortet, i `status` og i `/snapshot` (`command_center`), og selvtjekket melder et problem, når et CC der plejede at kalde har været tavst i over 2 timer. Modstykket er Command Center 7.19.0 (læser hele `/snapshot`, viser selvtjek/cron/pause og kalder `wp-cron.php` hvert 5. min). Samtidig er **CI på `main` repareret**: seks gamle zips fjernet (jobbet kræver én), quality gaten blokerer ikke længere sitets **egne** links når sitet kører på localhost/127.0.0.1 (CI og dev — et link til sitet selv er aldrig en placeholder), og testdata er fulgt med koden (JPEG-testbillede til Instagram-preflight, backoff før genforsøg, 32 abilities). Lokalt: integration 109, admin-tools 49, automation 27, smoke 404 PASS. |

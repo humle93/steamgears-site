@@ -325,15 +325,15 @@ class SGAP_Settings {
     /** Never echoed back to the browser; can be overridden by SGAP_<KEY> constants in wp-config.php. */
     const SECRET_KEYS = [
         'publer_api_key','ai_api_key','image_api_key','serpapi_key',
-        'pinterest_token','instagram_token','telegram_bot_token','tiktok_token','youtube_token',
+        'telegram_bot_token',
         'etsy_oauth_token','etsy_refresh_token','merchant_feed_secret','bluesky_app_password','mastodon_token'
     ];
     /** Multi-line text settings, shown as a textarea. */
     const TEXTAREA_KEYS = ['blackout_ranges', 'banned_words'];
     const TEXT_KEYS = [
         'publer_workspace_id','publer_pinterest_board','channels','ai_model','ai_base_url','image_model','content_language','rescue_hosts',
-        'telegram_chat_id','email_test_recipient','youtube_channel_id','reddit_username',
-        'reddit_subreddit','etsy_shop_id','etsy_shipping_profile_id','etsy_return_policy_id','ai_mode','alert_email',
+        'telegram_chat_id',
+        'etsy_shop_id','etsy_shipping_profile_id','etsy_return_policy_id','alert_email',
         'blackout_ranges','banned_words','utm_campaign','bluesky_handle','mastodon_instance',
         'locale_source','locales'
     ];
@@ -1815,22 +1815,6 @@ class SGAP_Admin {
 
     public static function settings(): void {
         SGAP_Setup::settings_page();
-    }
-
-    private static function get_setting_help_link(string $key): ?array {
-        $links = [
-            'pinterest_token' => ['url' => 'https://developers.pinterest.com/', 'text' => 'Pinterest Developers'],
-            'instagram_token' => ['url' => 'https://developers.facebook.com/', 'text' => 'Meta App Dashboard'],
-            'telegram_bot_token' => ['url' => 'https://t.me/BotFather', 'text' => 'Telegram BotFather'],
-            'tiktok_token' => ['url' => 'https://developers.tiktok.com/', 'text' => 'TikTok Developers'],
-            'youtube_token' => ['url' => 'https://console.cloud.google.com/', 'text' => 'Google Cloud Console'],
-            'youtube_channel_id' => ['url' => 'https://www.youtube.com/account_advanced', 'text' => 'Find Channel ID'],
-            'reddit_username' => ['url' => 'https://www.reddit.com/prefs/apps', 'text' => 'Reddit App Preferences'],
-            'etsy_shop_id' => ['url' => 'https://www.etsy.com/your/shops/me', 'text' => 'Etsy Shop Manager'],
-            'etsy_oauth_token' => ['url' => 'https://www.etsy.com/developers/your-apps', 'text' => 'Etsy Developer Portal'],
-            'publer_api_key' => ['url' => 'https://publer.com/help/en/article/how-to-access-the-publer-api-1w08edo/', 'text' => 'Publer API keys'],
-        ];
-        return $links[$key] ?? null;
     }
 
     private static function field(string $key): void {
