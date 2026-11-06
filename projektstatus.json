@@ -6,8 +6,8 @@
       "id": "site",
       "name": "steamgears.eu — site-optimering",
       "note": "roadmap S0–S4",
-      "next": "Publicér de fire guides + hub-copyen og S2.2 /shipping/ + /returns/ når WordPress-adgang er der; S1.1 Herbarium kræver varianter i Printify; S0.4 kræver én Redirection-gruppe (ejer)",
-      "blocked_by": "S1.1 Herbarium kræver varianter i Printify; S0.4 5 vanity-301 kræver én Redirection-gruppe (ejer)",
+      "next": "Skriv de tre manglende guides + færdiggør corset-kladden (post 1394), opret S2.2 /shipping/ + /returns/ (copy klar, siderne findes ikke) og kør meta-/schema-runden; S1.1 Herbarium kræver varianter i Printify; S0.4 kræver én Redirection-gruppe (ejer)",
+      "blocked_by": "S1.1 Herbarium kræver varianter i Printify; S0.4 5 vanity-301 kræver én Redirection-gruppe (ejer). MCP-adgang virker (målt 6/11), så guides og trust-sider er ikke længere blokeret af adgang — kun af selve skrivningen",
       "modules": [
         {
           "id": "s0",
@@ -121,8 +121,8 @@
     {
       "id": "seo",
       "name": "SEO-indholdsproduktion",
-      "next": "Publicér de fire guides — copy, FAQ og links er klar (292, 296, 295 + ny side /steampunk-corset-guide/)",
-      "blocked_by": "Publicering kræver WordPress-adgang. Filer der nu venter kun på det: docs/library/guides-2026-11-03.md (post 292, 296, 295) og docs/library/guides-2026-11-03-corset.md (ny side), plus fotos, HowTo/FAQPage-schema i Rank Math og selve publish. Copy er skrevet og verificeret i repoet (tools/guide_check.py).",
+      "next": "Opret de tre manglende guides (mens-steampunk-costume-essentials, steampunk-clothing-three-budgets, womens-steampunk-essentials) fra den verificerede copy og færdiggør /steampunk-corset-guide/ (kladde 1394)",
+      "blocked_by": "Intet eksternt længere — MCP-adgang virker (målt 6/11 2026). Det, der mangler, er skrivningen: id 292/296/295 i den gamle note er **skraldespands-produktvariationer**, ikke guides, og kun /steampunk-corset-guide/ findes (kladde 1394, 11.351 tegn, 8 H2'er, fremhævet billede 1395, men 0 /go/-links og ingen Rank Math-meta). Copy, FAQ, priser og links ligger klar i docs/library/guides-2026-11-03.md og -corset.md",
       "modules": [
         {
           "id": "batch",

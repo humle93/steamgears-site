@@ -85,7 +85,7 @@ Alt her er målt mod den live side eller læst i kilden. Er noget ændret siden 
 
 **Pluginnet** (`plugins/steamgears-autopilot/`, v7.41.0)
 
-- **Version i repo mod live:** repo **7.41.0**, sitet **7.22.0** (senest målt 2/11 med `wp_get_plugins`) — et
+- **Version i repo mod live:** repo **7.41.0**, sitet **7.40.1** (målt 6/11 via Novamira MCP) — et
   plugin-folder kan kun skiftes af WordPress selv, så en release slutter med ejerens *Plugins → Update*-klik,
   ikke med et push. Status: `docs/roadmap.md` §2b; procedure og efterkontrol: plugin-README §Updates.
 - 44 klasser, 30 PHP-filer, 12.356 linjer (målt 6/11 på 7.41.0); hvert subsystem kan nås fra en rigtig
@@ -129,7 +129,7 @@ Alt her er målt mod den live side eller læst i kilden. Er noget ændret siden 
 | Python 3.12 + PDF-biblioteker | ✅ i `tools/_deps` | rapporter i `reports/` |
 | PHP 8.5.8 (statisk binær) | ✅ i `tools/_deps/bin/php` | `php -l`, ikke tests |
 | **Skrive til sitet** | ✅ **virker (målt 4/11 2026)** | `wp_alter_post`, `wp_update_post` og plugin-værktøjerne skriver; 20 links indsat i ni guides og 14 hrefs konverteret på outfit-guiden. `mcp_drafts_only` er `false` — er den `true`, afvises alle skrivende kald, og den kan ikke slås fra over MCP med vilje |
-| MCP mod sitet | ⚠️ **forbundet fra ejerens maskine, ikke fra en frisk sandkasse** (målt 6/11: `python3 tools/mcp_oauth.py --status` svarer »Ingen klient registreret endnu«, og `mcp_rest.py --check` svarer »ingen credential«) | `/wp-json/mcp/v1/http` (AI Engine), **236** værktøjer, rolle `admin`, Bearer-token fra OAuth med PKCE. `python3 tools/mcp_oauth.py --start` giver linket, `--finish '<kode>'` gemmer token uden for repoet; `tools/mcp_rest.py --check` tester det. Redirecten er `127.0.0.1:8765` **uden lytter**: kopiér hele adressen fra browserens adresselinje. Application password (Basic) er fallback og ikke målt endnu — se `docs/mcp-auth.md` |
+| MCP mod sitet | ✅ **to flader, begge virker** — AI Engine `/wp-json/mcp/v1/http` og **Novamira** `/wp-json/mcp/novamira-oauth` (1.12.14, OAuth 2.1 + PKCE, `full_access`, 3 meta-værktøjer over **207 abilities**, heraf 60 fra plugin'et). Målt 6/11 2026. Tokenet ligger i `~/.config/steamgears-mcp/` (mode 600), aldrig i repoet, og **hver ny sandkasse skal godkende igen** | `/wp-json/mcp/v1/http` (AI Engine), **236** værktøjer, rolle `admin`, Bearer-token fra OAuth med PKCE. `python3 tools/mcp_oauth.py --start` giver linket, `--finish '<kode>'` gemmer token uden for repoet; `tools/mcp_rest.py --check` tester det. Redirecten er `127.0.0.1:8765` **uden lytter**: kopiér hele adressen fra browserens adresselinje. Application password (Basic) er fallback og ikke målt endnu — se `docs/mcp-auth.md` |
 | Publer MCP | ❌ ingen `PUBLER_API_KEY` | kan ikke planlægge opslag |
 | Browser / Lighthouse | ❌ | ingen visuel eller ydelsesverifikation |
 | Root / `apt` | ❌ | brug statiske binærer (se opskrifter) |

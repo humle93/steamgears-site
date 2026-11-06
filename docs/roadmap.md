@@ -69,7 +69,7 @@ from the site itself (`wp_get_plugins`), never inferred from this repo, so it ca
 
 | What | In this repo | Live on steamgears.eu | Gap |
 | --- | --- | --- | --- |
-| Steamgears Autopilot | **7.41.0** (`plugins/steamgears-autopilot-v7.41.0.zip`, byte-identical to source) | **7.22.0**, active (last measured 2/11 2026) | Repo is far ahead of the last live measurement; re-read `wp_get_plugins` before claiming what the site runs. The zip waits for *Plugins → Update* |
+| Steamgears Autopilot | **7.41.0** (`plugins/steamgears-autopilot-v7.41.0.zip`, byte-identical to source) | **7.40.1**, active (målt 6/11 2026 via Novamira MCP, `steamgears-tools/list-plugins`) | Én release bagud: 7.41.0 ligger på `main`, og plugin'ets egen opdatering rapporterer `latest_on_github: 7.40.1` (6-timers cache), så *Plugins → Update* henter den, når cachen er udløbet |
 | MCP server | AI Engine 3.9.0 (site-side, not in this repo) | `/wp-json/mcp/v1/http`, OAuth approved 2/11 2026, 206 tools | **Read access only** — AI Engine's *Drafts Only* is on, so `queue-post` is refused |
 
 **Measured 2/11 2026, after the owner approved the OAuth client:** `wp_list_plugins` returns
