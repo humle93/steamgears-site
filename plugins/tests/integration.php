@@ -349,10 +349,20 @@ add_filter('pre_http_request', function ($pre, $args, $url) {
         }
     }
     if (str_starts_with($url, 'https://api.anthropic.com/v1/models/')) {
+        $GLOBALS['sgci_anthropic_models'][] = ['url' => $url, 'args' => $args];
         if (($args['headers']['x-api-key'] ?? '') !== 'good-ai-key') {
             return $reply(401, ['type' => 'error', 'error' => ['type' => 'authentication_error', 'message' => 'invalid x-api-key']]);
         }
         return str_ends_with($url, '/claude-opus-5-5') ? $reply(200, ['id' => 'claude-opus-5-5', 'type' => 'model']) : $reply(404, ['type' => 'error']);
+    }
+    if ($url === 'https://ai.example.test/v1/models') {
+        // A custom OpenAI-compatible endpoint: the same key test as a real provider, but the
+        // list and the auth header are what prove it went to the configured address.
+        $GLOBALS['sgci_custom_models'][] = ['url' => $url, 'auth' => $auth, 'args' => $args];
+        if ($auth !== 'Bearer good-custom-key') {
+            return $reply(401, ['error' => ['message' => 'Invalid API key']]);
+        }
+        return $reply(200, ['data' => [['id' => 'custom-model'], ['id' => 'legacy-model']]]);
     }
     if ($url === 'https://api.aimlapi.com/v1/models') {
         // The dropdown asks what this provider offers; provider switching resolves ai_model
@@ -383,10 +393,17 @@ sgci_check('keycheck: saving a key flags a test', (bool) get_transient(SGAP_KeyC
 update_option('sgap_ai_provider', 'anthropic');
 update_option('sgap_ai_model', '');
 update_option('sgap_ai_api_key', 'good-ai-key');
+$GLOBALS['sgci_anthropic_models'] = [];
 $r = SGAP_KeyCheck::run();
 sgci_check('keycheck: good Publer key passes', $r['publer']['ok'] === true, $r['publer']);
 sgci_check('keycheck: single workspace filled in', get_option('sgap_publer_workspace_id') === 'ws_only');
 sgci_check('keycheck: good Claude key + default model passes', $r['ai']['ok'] === true && str_contains($r['ai']['message'], 'claude-opus-5-5'), $r['ai']);
+$anthropic_probe = $GLOBALS['sgci_anthropic_models'][0] ?? [];
+sgci_check('keycheck: Anthropic check asks the Models API with key and version',
+    str_ends_with((string) ($anthropic_probe['url'] ?? ''), '/v1/models/claude-opus-5-5')
+    && ($anthropic_probe['args']['headers']['x-api-key'] ?? '') === 'good-ai-key'
+    && ($anthropic_probe['args']['headers']['anthropic-version'] ?? '') === SGAP_AI::ANTHROPIC_VERSION,
+    $anthropic_probe);
 sgci_check('keycheck: result stored, flag cleared', is_array(get_option(SGAP_KeyCheck::RESULT)) && !get_transient(SGAP_KeyCheck::PENDING));
 update_option('sgap_channels', 'facebook, instagram, pinterest');
 $r = SGAP_KeyCheck::run();
@@ -408,6 +425,27 @@ update_option('sgap_ai_model', '');
 update_option('sgap_ai_api_key', 'wrong-ai-key');
 $r = SGAP_KeyCheck::run();
 sgci_check('keycheck: invalid Claude key is reported', $r['ai']['ok'] === false && str_contains($r['ai']['message'], 'refused'), $r['ai']);
+// Custom OpenAI-compatible provider: the key is tested with GET /models, never a chat call.
+update_option('sgap_ai_provider', 'openai_compatible');
+update_option('sgap_ai_base_url', 'https://ai.example.test/v1');
+update_option('sgap_ai_api_key', 'good-custom-key');
+update_option('sgap_ai_model', 'custom-model');
+sgci_check('keycheck: custom provider accepts a listed model', get_option('sgap_ai_model') === 'custom-model', get_option('sgap_ai_model'));
+$GLOBALS['sgci_custom_models'] = [];
+$r = SGAP_KeyCheck::run();
+sgci_check('keycheck: good custom OpenAI-compatible key and listed model pass',
+    $r['ai']['ok'] === true && str_contains($r['ai']['message'], 'custom-model'), $r['ai']);
+$custom_probe = $GLOBALS['sgci_custom_models'][0] ?? [];
+sgci_check('keycheck: custom check reads /models with Bearer auth',
+    ($custom_probe['url'] ?? '') === 'https://ai.example.test/v1/models'
+    && ($custom_probe['auth'] ?? '') === 'Bearer good-custom-key', $custom_probe);
+update_option('sgap_ai_api_key', 'wrong-custom-key');
+$r = SGAP_KeyCheck::run();
+sgci_check('keycheck: invalid custom key is reported',
+    $r['ai']['ok'] === false && str_contains($r['ai']['message'], 'refused'), $r['ai']);
+update_option('sgap_ai_model', '');
+update_option('sgap_ai_base_url', '');
+update_option('sgap_ai_provider', 'aimlapi');
 // AIMLAPI: key test with a one-token request, then a real generation through /chat/completions.
 update_option('sgap_ai_provider', 'aimlapi');
 update_option('sgap_ai_api_key', 'good-aiml-key');

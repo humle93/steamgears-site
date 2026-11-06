@@ -507,6 +507,18 @@ class SGAP_Settings {
         // before the fallback repaired it. Re-resolve it to the new provider's default instead.
         add_action('update_option_sgap_ai_provider', [__CLASS__, 'keep_provider_model']);
         add_action('add_option_sgap_ai_provider', [__CLASS__, 'keep_provider_model']);
+        // The catalogue belongs to the endpoint: keeping a list fetched from the old address
+        // would reject a model the new provider offers for up to 12 hours. The key is left
+        // alone on purpose — an invalid key must not turn an empty list into "accept anything".
+        add_action('update_option_sgap_ai_base_url', [__CLASS__, 'clear_model_catalog']);
+        add_action('add_option_sgap_ai_base_url', [__CLASS__, 'clear_model_catalog']);
+    }
+
+    /** Drops the cached model lists so the next read asks the provider that is configured now. */
+    public static function clear_model_catalog(): void {
+        foreach (['anthropic', 'aimlapi', 'openai_compatible'] as $provider) {
+            delete_site_transient('sgap_ai_catalog_' . $provider);
+        }
     }
 
     /**

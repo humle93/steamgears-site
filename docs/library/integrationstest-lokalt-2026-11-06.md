@@ -2,9 +2,9 @@
 
 6/11 2026. `plugins/tests/integration.sh` har ligget i repoet og kørt i CI, men var **aldrig blevet afviklet
 her**. Denne fil er opskriften der fik den til at køre i en cloud-worktree uden Docker, og listen over hvad
-kørslen afslørede. Resultat efter rettelserne og P1.4: **244 PASS / 0 FAIL** mod WordPress 7.1.4 med PHP
+kørslen afslørede. Resultat efter rettelserne og 7.41.1: **249 PASS / 0 FAIL** mod WordPress 7.1.4 med PHP
 8.2.32 + MySQL 8.0.36, og smoke-suiten **523 PASS**. Samme script er kørt mod hele CI-matrixen (6.4, 7.1,
-latest); 6.4 giver 179 PASS, fordi ability-grupperne springes over. Opskriften nedenfor bruger MariaDB; de
+latest); 6.4 giver 184 PASS, fordi ability-grupperne springes over. Opskriften nedenfor bruger MariaDB; de
 nyeste matrix-kørsler brugte MySQL 8.0.36, men scriptet og resultaterne er de samme. Se
 [`wordpress-matrix-lokalt-2026-11-06.md`](wordpress-matrix-lokalt-2026-11-06.md).
 
@@ -109,7 +109,7 @@ Første gennemløb: 1 fatal og 12 røde checks. Det vigtigste fund var ikke i sc
 ## 5. Sådan læses resultatet
 
 ```
-INTEGRATION EXIT=0   PASS=244 FAIL=0
+INTEGRATION EXIT=0   PASS=249 FAIL=0
 SMOKE       EXIT=0   PASS=523 FAIL=0
 php -l på alle plugin-filer: rent
 ```
