@@ -1,6 +1,6 @@
 # Steamgears Autopilot — projektbeskrivelse til eksterne AI-værktøjer
 
-**Dato:** 6. november 2026 · **Plugin:** 7.33.1 · **Status:** 57,5 % (14 af 24,35 developer-dage)
+**Dato:** 6. november 2026 · **Plugin:** 7.33.2 · **Status:** 57,5 % (14 af 24,35 developer-dage)
 
 Dette dokument er skrevet, så det kan kopieres **som én blok** ind i ChatGPT, Claude eller et andet
 værktøj, der skal arbejde videre på pluginnet. Alt nedenfor er målt eller læst i repoet 6/11 2026 —
@@ -70,7 +70,7 @@ brug den statiske binær i `.tools/php` (ikke i git). I Termux findes `php` norm
 | Klasser | 42 |
 | PHP-krav | 8.0+ i headeren; CI linter 8.0–8.5 |
 | WordPress-krav | 6.4+ (abilities kræver 6.9+) |
-| Seneste commit | `fbe6f9d` — nøgler autoloades ikke og slettes ikke af et tomt felt |
+| Seneste release | 7.33.2 — nøgler autoloades ikke og slettes ikke af et tomt felt |
 
 Testfilerne: `smoke.php` (stubbet WordPress, kører overalt), `admin-tools.php` (49 checks, kræver
 `wp eval-file`), `automation.php`, `integration.php` + `integration.sh` (rigtig WordPress + MySQL, CI),

@@ -16,7 +16,7 @@ design/CSS, backup-data, dokumentation og status.
 | [`docs/projektstatus.md`](docs/projektstatus.md) | Daglig procentstatus pr. projekt, beregnet af `projektstatus.py` |
 | [`AGENTS.md`](AGENTS.md) | Arbejdsregler: hvert pass melder % før → efter med grundlag, og §7 dækker plugin-arbejdet |
 | [`docs/agent-profil.md`](docs/agent-profil.md) | **Agentprofil** — alt en bot skal vide: fakta, adgang, opskrifter, fælder. Kan også hentes over MCP |
-| [`docs/steamgears-autopilot-projektbeskrivelse-2026-11-06.md`](docs/steamgears-autopilot-projektbeskrivelse-2026-11-06.md) | **Projektbeskrivelse af Autopilot-pluginnet** (7.33.1): filstruktur, roadmap, AIMLAPI- og nøglehåndtering — copy-paste-klar til et eksternt AI-værktøj |
+| [`docs/steamgears-autopilot-projektbeskrivelse-2026-11-06.md`](docs/steamgears-autopilot-projektbeskrivelse-2026-11-06.md) | **Projektbeskrivelse af Autopilot-pluginnet** (7.33.2): filstruktur, roadmap, AIMLAPI- og nøglehåndtering — copy-paste-klar til et eksternt AI-værktøj |
 
 Nye audits og research lægges i `docs/library/` og skrives ind i [dokumentindekset](docs/library/README.md),
 så de ikke bliver forældreløse (`AGENTS.md` §5).
