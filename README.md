@@ -16,6 +16,7 @@ design/CSS, backup-data, dokumentation og status.
 | [`docs/projektstatus.md`](docs/projektstatus.md) | Daglig procentstatus pr. projekt, beregnet af `projektstatus.py` |
 | [`AGENTS.md`](AGENTS.md) | Arbejdsregler: hvert pass melder % før → efter med grundlag, og §7 dækker plugin-arbejdet |
 | [`docs/agent-profil.md`](docs/agent-profil.md) | **Agentprofil** — alt en bot skal vide: fakta, adgang, opskrifter, fælder. Kan også hentes over MCP |
+| [`design.md`](design.md) | **Designsystem (spec)** — typografi, farver, spacing, komponenter, billedstandard og stemme; målt på den live side 5/11, CSS ikke lagt ind endnu |
 
 Nye audits og research lægges i `docs/library/` og skrives ind i [dokumentindekset](docs/library/README.md),
 så de ikke bliver forældreløse (`AGENTS.md` §5).
