@@ -47,7 +47,7 @@ _Opdateret 2026-11-06 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
-- `52bad1c Modul: Samtalepunkter + Cirlas dokumentation Før: 60,6 % → Efter: 60,6 % (Δ 0) Grundlag: 0 roadmap-poster berørt — dokumentation og værktøj, ingen ændring i 13,2 af 21,8 d`
+- `d7cfd7d Modul: Samtalepunkter + Cirlas dokumentation Før: 60,6 % → Efter: 60,6 % (Δ 0) Grundlag: 0 roadmap-poster berørt — dokumentation og værktøj, ingen ændring i 13,2 af 21,8 d`
 - `33c022a Modul: Plugin P1.4 — evergreen-kørslen i integrationstesten Før: 74,0 % → Efter: 74,0 % (Δ +0) Grundlag: 19,9 af 26,9 d — testdækning styrket, ingen ændring i estimatet`
 - `f47ba22 style: fjern Inter-preloadet og skriv typografien ind i design.md`
 - `9e1be40 chore: anden og sidste del af typografi-oprydningen`

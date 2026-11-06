@@ -198,6 +198,17 @@ def update(today: str, dry_run: bool = False) -> int:
     return 0
 
 
+def comparable(block: str) -> str:
+    """Alt i blokken undtagen commit-listen.
+
+    Commit-listen kan ikke sammenlignes meningsfuldt: i det øjeblik filen committes, ændrer det
+    seneste commit-hash sig selv, så en streng sammenligning ville altid melde drift. Dato, status,
+    blokeringer og næste skridt er derimod stabile inden for samme dag og er det, der betyder noget.
+    """
+    marker = "### Seneste commits"
+    return block.split(marker, 1)[0].strip()
+
+
 def check(today: str) -> int:
     if not TARGET.exists():
         print(f"[FEJL] {TARGET.name} findes ikke")
@@ -205,10 +216,10 @@ def check(today: str) -> int:
     text = TARGET.read_text(encoding="utf-8")
     _, block, _ = split_document(text)
     expected = render_block(load_status(), recent_commits(), today)
-    if block.strip() != expected.strip():
+    if comparable(block) != comparable(expected):
         print("[FEJL] AUTO-blokken er bagud — kør: python3 tools/samtalepunkter.py --update")
         return 1
-    print(f"[OK] {TARGET.name}: AUTO-blokken matcher status og git-historik")
+    print(f"[OK] {TARGET.name}: status, blokeringer og næste skridt matcher projektstatus.json")
     return 0
 
 
@@ -240,6 +251,8 @@ def selftest() -> int:
     ok("blok har alle tre afsnit", all(h in block for h in ("### Status", "### Åbne blokeringer", "### Næste skridt")))
     ok("blok viser blokering", "venter på ejer" in block)
     ok("blok udelader tom next", block.count("- **B**") == 0)
+    ok("commit-listen holdes uden for sammenligningen",
+       comparable(block + "\n### Seneste commits\n- `x`") == comparable(block + "\n### Seneste commits\n- `y`"))
     doc = "# Titel\n\n" + START + "\ngammel\n" + END + "\n\nProsa\n"
     ok("assemble bevarer prosa", assemble(doc, "ny") == "# Titel\n\n" + START + "\nny\n" + END + "\n\nProsa\n")
     try:
