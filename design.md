@@ -1,6 +1,6 @@
 # design.md — Steamgears' visuelle identitet
 
-**Status:** specifikation. Målt på den live side 5/11-2026. CSS'en ligger i [`css/sg-design-system.css`](css/sg-design-system.css), men er ikke indlæst på sitet endnu.
+**Status:** specifikation. Målt på den live side 5/11-2026. CSS'en ligger i [`css/sg-design-system.css`](css/sg-design-system.css), men er ikke indlæst på sitet endnu. Skrifterne i header-delen er skiftet 6/11 — se §13.
 **Omfatter:** steamgears.eu — temaet `extendable`, template-delene `css/header-dark-clockwork-active.html` og `css/footer-active.html`.
 
 Dokumentet er skrevet som en måling af, hvad der faktisk er på siden i dag, ikke som en ønskeliste. Hvor der står et tal, er det aflæst; hvor der står et token, er det en beslutning, der skal lægges ind i fase 1.
@@ -166,3 +166,35 @@ Hvert trin skal kunne måles bagefter. Et trin uden en måling er et trin, vi ik
 ---
 
 *Målt 5/11-2026. Ret dokumentet, når CSS'en er lagt ind — ikke før, ellers beskriver det en intention i stedet for en virkelighed.*
+
+
+---
+
+## 13. Udført 6/11-2026 — typografien
+
+Skiftet i §2 er gennemført i `css/header-dark-clockwork-active.html`.
+
+| | Før | Efter |
+| --- | --- | --- |
+| `@font-face`-erklæringer | 33 | 5 |
+| Overskrifter, ordmærke, produkttitler | Georgia 700 | Marcellus 400 |
+| Brødtekst (blev tvunget med `!important`) | Georgia | IBM Plex Sans |
+| Knapper | Georgia 800 | IBM Plex Sans 700 |
+| Preload af Inter i `<head>` | 1 fil ved hver sidevisning | fjernet |
+| Filstørrelse | 50 819 bytes | 44 403 bytes |
+
+Beholdt: Marcellus (400) og IBM Plex Sans (400, 500, 600, 700). Fjernet: Archivo, Arsenal,
+Baloo Tamma 2, Geom, Gotu, Heebo, Hind (×2), Inconsolata, Inter, Jost, Karla, Koulen, Manrope,
+Montserrat, Mulish, Noto Serif Display, Oswald, Radio Canada, Roboto Flex, Rubik,
+Source Serif Pro, Space Mono (×2) samt Plex 100/200/300.
+
+Georgia står tilbage som reserve i serif-stakken. Den findes på alle enheder, bliver ikke
+hentet, og sikrer at overskrifterne ikke falder til en systemfont, hvis Marcellus svigter.
+
+Overskrifterne er sat til vægt 400, fordi Marcellus kun findes i 400. En kunstig 700 ville
+sløre stavelserne — og på et display-ansigt er det tydeligt.
+
+**Verificeret:** filen er byte-identisk med den lokalt gennemgåede version (sha256-kontrol i
+arbejdsgangen), klammer 333/333 → 305/305, `@font-face` 33 → 5.
+**Ikke verificeret:** hvordan det ser ud på den live side. Header-delen skal stadig ind i
+WordPress, før en besøgende ser forskellen.
