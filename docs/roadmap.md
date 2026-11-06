@@ -69,7 +69,7 @@ from the site itself (`wp_get_plugins`), never inferred from this repo, so it ca
 
 | What | In this repo | Live on steamgears.eu | Gap |
 | --- | --- | --- | --- |
-| Steamgears Autopilot | **7.25.0** (`plugins/steamgears-autopilot-v7.25.0.zip`, byte-identical to source) | **7.22.0**, active (measured 2/11 2026) | **One version** — 7.25.0 waits for the update; the plugin's own `steamgears-autopilot/update` ability can run it from MCP; nothing else is missing |
+| Steamgears Autopilot | **7.41.0** (`plugins/steamgears-autopilot-v7.41.0.zip`, byte-identical to source) | **7.22.0**, active (last measured 2/11 2026) | Repo is far ahead of the last live measurement; re-read `wp_get_plugins` before claiming what the site runs. The zip waits for *Plugins → Update* |
 | MCP server | AI Engine 3.9.0 (site-side, not in this repo) | `/wp-json/mcp/v1/http`, OAuth approved 2/11 2026, 206 tools | **Read access only** — AI Engine's *Drafts Only* is on, so `queue-post` is refused |
 
 **Measured 2/11 2026, after the owner approved the OAuth client:** `wp_list_plugins` returns
@@ -277,7 +277,7 @@ this document knows what is blocked, by what, and who fixes it. Effort stays as 
 | P0.6 Cross-system duplicate guard | 0.5 d | None | **Done 6/11 in 7.40.1** — `includes/duplicate.php` (`SGAP_Duplicate`) refuses a second hand-over with 409 and names the row it collided with; a post that is still queued blocks whatever its age, a published one only inside `dupe_days` (default 30), `failed` rows never block, and `/snapshot` carries `fingerprint` |
 | P1.1 Pre-flight channel validation | 1.0 d | None | **Done 2/11 in 7.20.0** — `includes/preflight.php` refuses an invalid post before the first Publer call (Instagram JPEG/size/aspect, Pinterest board, caption and hashtag ceilings) and repairs what is mechanical |
 | P1.3 Blackout calendar | 0.5 d | None | **Done 2/11 in 7.21.0** — `includes/blackout.php` holder poster ude i angivne datointervaller og flytter dem til næste frie dag samme klokkeslæt |
-| P1.4 Evergreen recycling | 2.5 d | P0.6 | Blocked on P0.6 |
+| P1.4 Evergreen recycling | 2.5 d | P0.6 ✅ | **Done 6/11 in 7.41.0** — `includes/evergreen.php` marks a post/product with its own share budget and expiry date and recycles it after 60 days with a fresh AI variation on the next channel; own cron, editor metabox, **Evergreen** admin page and three abilities. 29 smoke checks (494 → 523) |
 | P1.5 Platform analytics ingestion | 4.0 d | **Pinterest API token still 401** (see `mangler-og-plan-25-10.md`) + Meta App Review | Blocked externally |
 | P2.1–P2.3 Bluesky / Mastodon / Telegram | 2.0 d | Telegram needs a BotFather token; WP Mail SMTP already covers P0.1 | Needs tokens |
 | P2.4 Etsy import or hide the settings | 2.5 d / 0.25 d | Owner decision (§6.2) | **Awaiting decision** |

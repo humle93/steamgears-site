@@ -83,9 +83,9 @@ Alt her er målt mod den live side eller læst i kilden. Er noget ændret siden 
 - `/shop/` tager ~5,8 s og ~470 KB; produktside har ~151 KB inline CSS og ~105 scripts.
 - GA4 fyrer **dobbelt** på hvert pageview, så konverteringer kan ikke aflæses sikkert.
 
-**Pluginnet** (`plugins/steamgears-autopilot/`, v7.25.0)
+**Pluginnet** (`plugins/steamgears-autopilot/`, v7.41.0)
 
-- **Version i repo mod live:** repo **7.25.0**, sitet **7.22.0** (målt 2/11 med `wp_get_plugins`) — et
+- **Version i repo mod live:** repo **7.41.0**, sitet **7.22.0** (senest målt 2/11 med `wp_get_plugins`) — et
   plugin-folder kan kun skiftes af WordPress selv, så en release slutter med ejerens *Plugins → Update*-klik,
   ikke med et push. Status: `docs/roadmap.md` §2b; procedure og efterkontrol: plugin-README §Updates.
 - 22 PHP-filer, 8.460 linjer, 1.203 linjer tests; **21 af 22 subsystemer er live**. Version **7.19.0** tilføjede

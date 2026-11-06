@@ -17,8 +17,9 @@ function add_menu_page($t,$m,$c,$slug,$cb){ add_action('page_'.$slug,$cb);} func
 function esc_html($s){return htmlspecialchars((string)$s);} function esc_attr($s){return htmlspecialchars((string)$s);} function esc_url($s){return $s;} function esc_textarea($s){return htmlspecialchars((string)$s);}
 function get_transient($k){return false;} function set_transient(...$a){} function delete_transient($k){} function settings_fields($g){} function submit_button(){}
 function admin_url($p=''){return '/wp-admin/'.$p;} function rest_url($p=''){return '/wp-json/'.$p;} function home_url($p=''){return 'https://steamgears.eu'.$p;}
-function get_bloginfo($k=''){return 'Steamgears';} function wp_timezone_string(){return 'UTC';} function get_the_title($id){return 'Post '.$id;} function get_permalink($id){return 'https://steamgears.eu/?p='.$id;} function has_post_thumbnail($id){return false;} function get_post_type($id){return 'post';} function pll_get_post($id,$locale=''){return (int)($GLOBALS['pll_map'][$locale]??0);}
-function get_posts($a=[]){ $r=$GLOBALS['posts_result']??[]; return array_slice($r,0,(int)($a['numberposts']??(count($r)?:1))); } function post_type_exists($t){return in_array($t,['post','page'],true);} function get_post($id){return null;} function get_user_meta($u,$k,$s=false){return '';} function update_user_meta($u,$k,$v){return true;} function get_edit_post_link($id,$c=''){return '/edit/'.$id;} function get_preview_post_link($id){return '/preview/'.$id;}
+function get_bloginfo($k=''){return 'Steamgears';} function wp_timezone_string(){return 'UTC';} function get_the_title($id){ if(is_object($id)){return (string)($id->post_title!==''?$id->post_title:'Post '.($id->ID??0));} $p=$GLOBALS['post_by_id'][(int)$id]??null; return $p? (string)$p->post_title : 'Post '.$id; } function get_permalink($id){return 'https://steamgears.eu/?p='.$id;} function has_post_thumbnail($id){return false;} function get_post_type($id){return 'post';} function pll_get_post($id,$locale=''){return (int)($GLOBALS['pll_map'][$locale]??0);}
+function get_posts($a=[]){ $r=$GLOBALS['posts_result']??[]; return array_slice($r,0,(int)($a['numberposts']??(count($r)?:1))); } function post_type_exists($t){return in_array($t,['post','page'],true);} function get_post($id){return $GLOBALS['post_by_id'][(int)$id]??null;}
+function update_post_meta($id,$k,$v){ $GLOBALS['postmeta'][(int)$id][$k]=$v; return true; } function delete_post_meta($id,$k){ unset($GLOBALS['postmeta'][(int)$id][$k]); return true; } function get_the_post_thumbnail_url($id,$s=''){ return $GLOBALS['thumb'][(int)$id]??''; } function add_meta_box(...$a){ $GLOBALS['metaboxes'][]=$a; } function wp_is_post_revision($id){ return false; } function wp_verify_nonce($n,$a=''){ return true; } function has_excerpt($p){ return is_object($p) && !empty($p->post_excerpt); } function strip_shortcodes($t){ return (string)$t; } function wp_trim_words($t,$n=55,$more='…'){ $w=preg_split('/\s+/',trim((string)$t)); return implode(' ',array_slice($w,0,$n)).(count($w)>$n?$more:''); } function get_user_meta($u,$k,$s=false){return '';} function update_user_meta($u,$k,$v){return true;} function get_edit_post_link($id,$c=''){return '/edit/'.$id;} function get_preview_post_link($id){return '/preview/'.$id;}
 function wp_nonce_field(...$a){return '';} function wp_create_nonce($a=''){return 'n';} function selected($a,$b,$e){return $a===$b?' selected':'';} function checked($a,$b=true,$e=true){return $a===$b?' checked':'';}
 function sanitize_text_field($s){return trim(strip_tags((string)$s));} function sanitize_textarea_field($s){return trim(strip_tags((string)$s));}
 function sanitize_key($s){return preg_replace('/[^a-z0-9_\-]/','',strtolower((string)$s));} function absint($v){return abs((int)$v);}
@@ -29,6 +30,11 @@ function current_user_can($c){return true;} function get_current_user_id(){retur
 function wp_strip_all_tags($s){return strip_tags((string)$s);} function attachment_url_to_postid($u){return (int)($GLOBALS['attachment_for'][$u]??0);} function get_post_meta($id,$k='',$s=false){return $GLOBALS['postmeta'][$id][$k]??'';} function url_to_postid($u){return (int)($GLOBALS['postid_for'][$u]??0);} function get_post_status($id){return (string)($GLOBALS['poststatus'][$id]??'publish');} function wp_get_attachment_metadata($id){return $GLOBALS['attachment_meta'][$id]??[];} function get_post_mime_type($id){return (string)($GLOBALS['attachment_mime'][$id]??'');} function wp_die($m=''){throw new RuntimeException((string)$m);} function check_admin_referer($a=''){return true;}
 $GLOBALS['abilities']=[]; $GLOBALS['ability_categories']=[];
 function wp_register_ability($n,$a=[]){ $GLOBALS['abilities'][$n]=$a; return true; } function wp_register_ability_category($s,$a=[]){ $GLOBALS['ability_categories'][$s]=$a; return true; }
+if (!class_exists('WP_Post')) { class WP_Post {
+    public $ID=0; public $post_type='post'; public $post_status='publish';
+    public $post_title=''; public $post_content=''; public $post_excerpt='';
+    function __construct($a=[]){ foreach($a as $k=>$v){ $this->$k=$v; } }
+} }
 class WP_Error{ function __construct(public $code,public $msg,public $data=[]){} function get_error_message(){return $this->msg;} function get_error_data(){return $this->data;} }
 class WP_REST_Response{ function __construct(public $data,public $status=200){} }
 class WP_REST_Request implements ArrayAccess{ function __construct(public array $p){} function get_param($k){return $this->p[$k]??null;}
@@ -1122,5 +1128,62 @@ $coresrc=file_get_contents(__DIR__.'/../steamgears-autopilot/includes/core.php')
 check('product link: the missing-row branch uses the product fallback', str_contains($coresrc,'wp_redirect(self::product_target($id), 302, \'Steamgears\')'));
 check('product link: the product lookup is guarded, so the route cannot fatal without WooCommerce', str_contains($coresrc,"function_exists('wc_get_product')"));
 
+// P1.4 — evergreen recycling: mark, variation, share budget, expiry, queue integration.
+$GLOBALS['opts']['sgap_evergreen_enabled']='yes'; $GLOBALS['opts']['sgap_evergreen_after_days']=60;
+$GLOBALS['opts']['sgap_evergreen_max_shares']=3; $GLOBALS['opts']['sgap_evergreen_batch']=1;
+$GLOBALS['opts']['sgap_channels']='facebook,instagram,pinterest'; $GLOBALS['opts']['sgap_quality_gate']='off';
+$GLOBALS['opts']['sgap_ai_api_key']=''; $GLOBALS['opts']['sgap_ai_provider']='anthropic'; $GLOBALS['opts']['sgap_ai_model']='';
+$GLOBALS['postmeta']=[]; $GLOBALS['post_by_id']=[]; $GLOBALS['posts_result']=[]; $wpdb->row=null; $wpdb->next=null; $wpdb->log=[];
+$ev1=new WP_Post(['ID'=>501,'post_type'=>'post','post_status'=>'publish','post_title'=>'Brass Goggles Guide','post_content'=>'A long guide about brass goggles and how to wear them well.','post_excerpt'=>'']);
+$ev2=new WP_Post(['ID'=>502,'post_type'=>'post','post_status'=>'publish','post_title'=>'Corset Fitting Guide','post_content'=>'How a corset should fit, and what to do when it does not.','post_excerpt'=>'']);
+$GLOBALS['post_by_id']=[501=>$ev1,502=>$ev2]; $GLOBALS['posts_result']=[$ev1,$ev2];
+check('evergreen: the daily cron is scheduled', in_array('sgap_evergreen',$GLOBALS['cron']??[],true));
+$marked=SGAP_Evergreen::mark(501,['max'=>2,'until'=>'2027-01-31']);
+check('evergreen: mark stores the budget and expiry date', is_array($marked) && $marked['marked'] && $marked['max']===2 && $marked['until']==='2027-01-31');
+check('evergreen: a marked page with no shares is ready', SGAP_Evergreen::status(501)['eligible'] && SGAP_Evergreen::shares(501)===0);
+check('evergreen: a past expiry date is refused', SGAP_Evergreen::mark(502,['until'=>'2020-01-01']) instanceof WP_Error);
+check('evergreen: an unsupported post type is refused', SGAP_Evergreen::mark(999) instanceof WP_Error);
+check('evergreen: the marked page is a candidate', in_array(501,SGAP_Evergreen::candidates(10),true));
+check('evergreen: the summary counts the mark', SGAP_Evergreen::summary()['marked']===1);
+
+$GLOBALS['ev_counter']=0;
+$GLOBALS['filters']['sgap_evergreen_variation']=function($v,$post,$channel,$angle,$history){ $GLOBALS['ev_counter']++; return ['title'=>'Fresh angle '.$GLOBALS['ev_counter'],'text'=>'A new way into the guide, written for '.$channel.'.','hashtags'=>['steampunk','brass'],'alt_text'=>'Brass goggles']; };
+$first=SGAP_Evergreen::queue_one(501);
+check('evergreen: the first share is queued through the normal queue', is_array($first) && $first['channel']==='facebook' && $first['share']===1 && $first['max']===2);
+$evlog=implode("\n",$wpdb->log);
+check('evergreen: the queue row carries the page, the angle and the variation', str_contains($evlog,'INSERT wp_sgap_queue') && str_contains($evlog,'"post_id":501') && str_contains($evlog,'"angle":"angle_a"') && str_contains($evlog,'"content_type":"guide"'));
+check('evergreen: hashtags become part of the caption', str_contains($evlog,'#steampunk #brass'));
+check('evergreen: the share is counted and the page is put on cooldown', SGAP_Evergreen::shares(501)===1 && SGAP_Evergreen::last_share(501)>0 && !SGAP_Evergreen::status(501)['eligible']);
+check('evergreen: the waiting period is named', str_contains(SGAP_Evergreen::status(501)['reason'],'next share from'));
+$tooSoon=SGAP_Evergreen::queue_one(501);
+check('evergreen: a page cannot be recycled twice in the same week', is_wp_error($tooSoon) && ($tooSoon->data['status']??0)===409 && str_contains($tooSoon->get_error_message(),'next share'));
+update_post_meta(501,SGAP_Evergreen::LAST,time()-100*DAY_IN_SECONDS); $wpdb->log=[];
+$second=SGAP_Evergreen::queue_one(501);
+check('evergreen: the next share rotates channel and angle', is_array($second) && $second['channel']==='instagram' && $second['share']===2);
+check('evergreen: the rotated angle is in the queue row', str_contains(implode("\n",$wpdb->log),'"angle":"angle_b"'));
+$full=SGAP_Evergreen::status(501);
+check('evergreen: the budget closes the page', $full['shares']===2 && !$full['eligible'] && str_contains($full['reason'],'all 2 shares used'));
+$over=SGAP_Evergreen::queue_one(501);
+check('evergreen: a page over its budget is refused', is_wp_error($over) && str_contains($over->get_error_message(),'all 2 shares used'));
+
+$GLOBALS['filters']['sgap_evergreen_variation']=fn()=>['title'=>'T','text'=>'Body for the second evergreen page.','hashtags'=>[],'alt_text'=>''];
+update_post_meta(502,SGAP_Evergreen::MARK,'1'); update_post_meta(502,SGAP_Evergreen::UNTIL,'2026-01-01');
+$expired=SGAP_Evergreen::status(502);
+check('evergreen: an expired page is not ready and says why', !$expired['eligible'] && str_contains($expired['reason'],'expired on'));
+update_post_meta(502,SGAP_Evergreen::UNTIL,wp_date('Y-m-d',time()+DAY_IN_SECONDS)); $wpdb->next=null;
+check('evergreen: a page inside its expiry window is ready again', SGAP_Evergreen::status(502)['eligible']);
+SGAP_Evergreen::unmark(502);
+check('evergreen: unmark removes the mark and the budget', !SGAP_Evergreen::status(502)['marked'] && get_post_meta(502,SGAP_Evergreen::MAX,true)==='' && get_post_meta(502,SGAP_Evergreen::SHARES,true)==='');
+
+// AI-stien: variationsprompten går gennem det konfigurerede AI-kald og kan stubbes.
+unset($GLOBALS['filters']['sgap_evergreen_variation']);
+SGAP_Evergreen::mark(502,['max'=>1]); $GLOBALS['opts']['sgap_ai_api_key']='k'; $wpdb->log=[]; $GLOBALS['http_calls']=[];
+$GLOBALS['http_queue']=[sgap_http(200,['content'=>[['type'=>'text','text'=>json_encode(['title'=>'A second look at the corset','text'=>'The fit guide, revisited.','hashtags'=>['#corset'],'alt_text'=>'Corset on a mannequin'])]]])];
+$ai=SGAP_Evergreen::queue_one(502);
+check('evergreen: the AI variation is one structured call', is_array($ai) && count($GLOBALS['http_calls'])===1);
+check('evergreen: the prompt asks for a new angle and forbids invented offers', str_contains((string)$GLOBALS['http_calls'][0][1]['body'],'genuinely different angle') && str_contains((string)$GLOBALS['http_calls'][0][1]['body'],'do not invent a discount'));
+check('evergreen: the AI answer is what reaches the queue', str_contains(implode("\n",$wpdb->log),'A second look at the corset') && str_contains(implode("\n",$wpdb->log),'#corset'));
+$GLOBALS['opts']['sgap_ai_api_key']='';
+require __DIR__.'/evergreen.php';
 // P3.2/P3.5-slut
 exit(empty($GLOBALS['fail'])?0:1);

@@ -23,7 +23,7 @@ The whole social autopilot runs inside WordPress (Command Center is retired):
 4. **Measure** – every post links via `/go/<id>/`, so clicks (and WooCommerce
    orders) are counted per channel.
 
-Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.40.1.zip` → Activate. On an existing
+Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.41.0.zip` → Activate. On an existing
 install the same zip arrives through the self-updater (see *Updates*), so an upload is only needed for the
 first install or a recovery.
 
@@ -46,6 +46,9 @@ all admin-only, none of them deleting anything:
 | `steamgears-autopilot/update` | Install the newest version from GitHub |
 | `steamgears-autopilot/check-keys` | Test the Publer and AI keys (see below) |
 | `steamgears-autopilot/check-publer` | Workspaces, accounts, channels without an account |
+| `steamgears-autopilot/list-evergreen` | Evergreen pages with budget, expiry, last share and whether they are ready — read-only |
+| `steamgears-autopilot/mark-evergreen` | Mark or unmark a post/product, with an optional budget and expiry date |
+| `steamgears-autopilot/recycle-evergreen` | Write and queue the next variation for the due pages now |
 | `steamgears-autopilot/meta-audit` | Title and meta-description audit on published posts: missing, too long, too short — read-only |
 | `steamgears-autopilot/optimize-site-seo` | Whole-site SEO/AEO/GEO scan in one pass; `fix=true` also writes the missing meta |
 
@@ -103,9 +106,10 @@ so the failure is visible instead of silent. A 202 from the API only means
 
 Queue page with Re-queue / Delete, *Approve & Queue* / *Approve only* / *Reject*
 on drafts, Campaigns (learning matrix, winners and losers), Reports (30-day ROI and
-ROAS against the budget, attributed orders), Etsy orders and profit, Full Auto
-(suppressed combinations, reposts) and an XML product feed for Google Merchant
-Center and Pinterest Catalogs (*Google Feed*, needs a feed secret and WooCommerce).
+ROAS against the budget, attributed orders), **Evergreen** (mark a page, see its
+budget and next share, recycle now), Etsy orders and profit, Full Auto (suppressed
+combinations, reposts) and an XML product feed for Google Merchant Center and
+Pinterest Catalogs (*Google Feed*, needs a feed secret and WooCommerce).
 
 ## Whole-site SEO, GEO and AEO (7.19)
 
@@ -222,6 +226,30 @@ names the row it collided with:
 - **Failed rows never block** — a post that gave up is the owner's to retry.
 - `/snapshot` carries `fingerprint` on every queue row, so an outside dashboard can recognise its own
   hand-over instead of learning from a 409.
+
+## Evergreen recycling (7.41)
+
+Some pages keep earning long after their first post: a fitting guide, the goggles everyone searches for,
+the corset explainer. Mark one as **evergreen** — in the editor sidebar, on the **Evergreen** page, or with
+the `mark-evergreen` ability — and the plugin brings it back on a schedule with a **freshly written
+caption**, not the same one again.
+
+- **Settings → Evergreen** holds the four numbers: the switch, the days between two shares (default 60),
+the default share budget per page (default 3) and how many pages may be recycled per day (default 1).
+- A page can override the budget and set an **expiry date** in the editor; `0` shares and an empty date mean
+"use the setting" and "never expires".
+- Each share rotates to the next channel (and the next angle) and goes through the normal queue, so the
+  quality gate, pre-flight, blackout calendar and duplicate guard all apply. A share is counted when the
+  post reaches the queue; a page with a post still queued is skipped, not doubled.
+- The variation prompt gets the page, the channel, the angle and the last captions for that page, and is
+  told what not to repeat. The `sgap_evergreen_variation` filter replaces the AI call with a human editor or
+  another model.
+- An expired page or one that has used its budget stays marked but stops; the Evergreen page says which
+  of the two it is, in words.
+
+The daily cron runs the recycler after the normal generator (20 minutes past the hour), and the **Evergreen**
+page has a *Recycle now* button plus `recycle-evergreen` for an MCP client. Nothing is published by the
+recycler itself: it only queues, exactly like the AI writer.
 
 ## Post meta audit (7.23)
 
@@ -376,7 +404,7 @@ before it, because the MCP surface can read plugins but cannot install or activa
 1. Bump `Version:` in `steamgears-autopilot.php` and `SGAP_VERSION` — they must agree, CI fails otherwise.
 2. Rebuild the zip from the folder so the name and the contents match:
    `cd plugins && rm -f steamgears-autopilot-*.zip && zip -qr steamgears-autopilot-v<version>.zip steamgears-autopilot`
-3. `php plugins/tests/smoke.php` (494 checks) and `diff -r` the zipped copy against the source. CI repeats
+3. `php plugins/tests/smoke.php` (523 checks) and `diff -r` the zipped copy against the source. CI repeats
    both, plus `php -l` on PHP 8.0–8.5 and WordPress 6.4 / 7.1 / latest. The plugin is also exercised inside
    a real WordPress: `bash plugins/tests/integration.sh` (needs `php` with `mysqli`, `wp-cli`, `curl` and a
    reachable MySQL; 222 checks, including the four model rules) — it installs WordPress, activates the
@@ -541,6 +569,5 @@ unattended:
   the actor (cron, admin, REST, WP-CLI). The queue shows the current state; the log keeps the history the
   `error` column overwrites. Rows are kept for `audit_keep_days` (default 90, `0` = forever) and pruned by
   the daily maintenance job.
-- The Etsy API settings and the direct Instagram/Pinterest/TikTok/YouTube/Reddit/Telegram keys are
-  registered but unused. Publishing goes through Publer (RSS feeds or API), and `/etsy/orders` takes a
-  manual import.
+- Etsy is a manual import: there is no Etsy API client, and the five Etsy fields were removed from Settings
+  in 7.33.4. Publishing goes through Publer (RSS feeds or API), and `/etsy/orders` takes the import.

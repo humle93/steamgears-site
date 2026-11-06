@@ -22,6 +22,7 @@ class SGAP_Install {
     const CLEANUP_CRON = 'sgap_daily_cleanup';
     const PUBLISH_CRON = 'sgap_publish_tick';
     const GENERATE_CRON = 'sgap_generate';
+    const EVERGREEN_CRON = 'sgap_evergreen';
     const QUARTER_HOUR = 'sgap_quarter_hour';
 
     const TABLES = [
@@ -67,7 +68,11 @@ class SGAP_Install {
         'sgap_audit_keep_days' => 90,
         'sgap_dupe_days' => 30,
         'sgap_articles_per_week' => 0,
-        'sgap_rescue_hosts' => 'steamgears.juno.page'
+        'sgap_rescue_hosts' => 'steamgears.juno.page',
+        'sgap_evergreen_enabled' => 'no',
+        'sgap_evergreen_after_days' => 60,
+        'sgap_evergreen_max_shares' => 3,
+        'sgap_evergreen_batch' => 1
     ];
 
     public static function activate(): void {
@@ -76,7 +81,7 @@ class SGAP_Install {
 
     public static function deactivate(): void {
         self::clear_legacy_cron();
-        foreach ([self::CLEANUP_CRON, self::PUBLISH_CRON, self::GENERATE_CRON] as $hook) {
+        foreach ([self::CLEANUP_CRON, self::PUBLISH_CRON, self::GENERATE_CRON, self::EVERGREEN_CRON] as $hook) {
             wp_clear_scheduled_hook($hook);
         }
         if (class_exists('SGAP_Auto')) {
@@ -298,6 +303,7 @@ class SGAP_Install {
         foreach ([
             self::CLEANUP_CRON => ['daily', HOUR_IN_SECONDS],
             self::GENERATE_CRON => ['daily', 10 * MINUTE_IN_SECONDS],
+            self::EVERGREEN_CRON => ['daily', 20 * MINUTE_IN_SECONDS],
             self::PUBLISH_CRON => [self::QUARTER_HOUR, 5 * MINUTE_IN_SECONDS]
         ] as $hook => [$recurrence, $delay]) {
             if (!wp_next_scheduled($hook)) {
@@ -317,11 +323,12 @@ register_deactivation_hook(SGAP_FILE, ['SGAP_Install', 'deactivate']);
 
 /* ---------------- SETTINGS ---------------- */
 class SGAP_Settings {
-    const BOOL_KEYS = ['autopilot_enabled', 'full_auto_enabled', 'auto_images', 'auto_seo', 'auto_publish_articles', 'weekly_report'];
+    const BOOL_KEYS = ['autopilot_enabled', 'full_auto_enabled', 'auto_images', 'auto_seo', 'auto_publish_articles', 'weekly_report', 'evergreen_enabled'];
     const HOUR_KEYS = ['quiet_start', 'quiet_end'];
     const INT_KEYS = [
         'daily_cap','batch_size','labor_rate','monthly_budget','target_roi',
-        'winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max','posts_per_day','articles_per_week','alert_dry_days','audit_keep_days','dupe_days','mastodon_limit'
+        'winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max','posts_per_day','articles_per_week','alert_dry_days','audit_keep_days','dupe_days','mastodon_limit',
+        'evergreen_after_days','evergreen_max_shares','evergreen_batch'
     ];
     /** Never echoed back to the browser; can be overridden by SGAP_<KEY> constants in wp-config.php. */
     const SECRET_KEYS = [
@@ -352,11 +359,16 @@ class SGAP_Settings {
         'Publer' => ['publish_mode','publer_api_key','publer_workspace_id','publer_pinterest_board','channels','bluesky_handle','bluesky_app_password','mastodon_instance','mastodon_token','mastodon_limit','telegram_bot_token','telegram_chat_id'],
         'AI content' => ['ai_provider','ai_api_key','ai_model','ai_base_url','posts_per_day','content_language','locale_source','locales','image_model','image_api_key','serpapi_key'],
         'Economics' => ['labor_rate','monthly_budget','target_roi','winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max'],
+        'Evergreen' => ['evergreen_enabled','evergreen_after_days','evergreen_max_shares','evergreen_batch'],
         'Alerts and log' => ['alert_mode','alert_email','alert_dry_days','audit_keep_days'],
         'Google Feed' => ['merchant_feed_secret']
     ];
 
     const HELP = [
+        'evergreen_enabled' => 'Keep promoting pages that keep earning: once a page is marked, it is recycled with a freshly written caption after the waiting period, until it has used its share budget or reached its expiry date.',
+        'evergreen_after_days' => 'How long a page waits between two shares. The same clock the normal generator uses, so a recycled page is not also promoted as new the same week.',
+        'evergreen_max_shares' => 'Default budget per page: how many recycled posts it may produce. A page can override it in the editor, and 0 there means this number.',
+        'evergreen_batch' => 'How many evergreen pages may be recycled per day, each on its own channel in rotation. 1 keeps the queue balanced; the button on the Evergreen page can recycle more at once.',
         'command_center_url' => 'Address of your Steamgears Command Center dashboard, e.g. https://cc.example.com. Adds a Log ind button to the dashboard. Empty = no button.',
         'dupe_days' => 'How far back an identical post blocks a new one: same channel, destination and title. 30 days by default, 0 = the whole history. A post that is still queued always blocks, however old it is.',
         'locale_source' => 'The language the source posts are written in. Every other language in the list gets its own translated caption.',
@@ -1574,6 +1586,7 @@ class SGAP_Admin {
         ['Campaigns', 'sgap-campaigns', 'campaigns'],
         ['Etsy', 'sgap-etsy', 'etsy'],
         ['Reports', 'sgap-reports', 'reports'],
+        ['Evergreen', 'sgap-evergreen', 'evergreen'],
         ['Full Auto', 'sgap-fullauto', 'fullauto'],
         ['Google Feed', 'sgap-merchant', 'merchant']
     ];
@@ -1583,6 +1596,7 @@ class SGAP_Admin {
         add_action('admin_post_sgap_approve_ai', [__CLASS__, 'approve_ai']);
         add_action('admin_post_sgap_run', [__CLASS__, 'run_action']);
         add_action('admin_post_sgap_queue_action', [__CLASS__, 'queue_action']);
+        add_action('admin_post_sgap_evergreen', [__CLASS__, 'evergreen_action']);
         add_action('admin_post_sgap_suppression_action', [__CLASS__, 'suppression_action']);
     }
 
@@ -2164,6 +2178,95 @@ class SGAP_Admin {
         $reposts = $wpdb->get_results("SELECT original_queue_id, repost_queue_id, repost_number, new_angle, new_hook, created_at FROM {$wpdb->prefix}sgap_reposts ORDER BY id DESC LIMIT 50");
         self::render_rows($reposts, ['original_queue_id', 'repost_queue_id', 'repost_number', 'new_angle', 'new_hook', 'created_at']);
         self::close();
+    }
+
+    public static function evergreen(): void {
+        self::open('Evergreen recycling', 'Pages that keep earning come back with a new caption — until the budget or the expiry date says stop.');
+        $summary = SGAP_Evergreen::summary();
+        echo '<div class="sgap-pills">'
+            . SGAP_UI::pill('Recycling ' . ($summary['enabled'] ? 'on' : 'off'), $summary['enabled'] ? 'ok' : 'bad')
+            . SGAP_UI::pill($summary['marked'] . ' marked')
+            . SGAP_UI::pill($summary['ready'] . ' ready now', $summary['ready'] > 0 ? 'ok' : 'warn')
+            . SGAP_UI::pill($summary['shares_used'] . ' shares used')
+            . SGAP_UI::pill('Wait ' . $summary['after_days'] . ' days')
+            . '</div>';
+        echo '<div class="sgap-card"><h2><span class="dashicons dashicons-update"></span>How it works</h2>'
+            . '<p>Mark a post or product as evergreen — here, or in the editor sidebar. After <strong>' . esc_html((string) $summary['after_days']) . ' days</strong> it is recycled with a variation written for the next channel in rotation, until it has had <strong>' . esc_html((string) $summary['default_max']) . ' shares</strong> (unless the page has its own budget) or reaches its expiry date. A share is counted when the post reaches the queue, and the quality gate, preflight, blackout and duplicate guard all still apply.</p>'
+            . ($summary['enabled'] ? '' : '<p><strong>Recycling is off.</strong> Turn it on under <a href="' . esc_url(admin_url('admin.php?page=sgap-settings#evergreen')) . '">Settings → Evergreen</a>.</p>')
+            . '<div class="sgap-actions">'
+            . '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '">'
+            . '<input type="hidden" name="action" value="sgap_evergreen"><input type="hidden" name="cmd" value="run">'
+            . wp_nonce_field('sgap_evergreen', '_wpnonce', true, false)
+            . '<button class="button button-primary"' . ($summary['ready'] > 0 ? '' : ' disabled') . '>Recycle ' . esc_html((string) min($summary['ready'], $summary['batch'])) . ' now</button></form>'
+            . '</div></div>';
+
+        echo '<div class="sgap-card"><h2><span class="dashicons dashicons-plus-alt2"></span>Mark a page</h2>'
+            . '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '" class="sgap-inline">'
+            . '<input type="hidden" name="action" value="sgap_evergreen"><input type="hidden" name="cmd" value="mark">'
+            . wp_nonce_field('sgap_evergreen', '_wpnonce', true, false)
+            . '<label>Post or product ID <input type="number" min="1" name="post_id" required class="small-text"></label>'
+            . '<label>Max shares <input type="number" min="0" name="max" value="0" class="small-text"></label>'
+            . '<label>Until <input type="date" name="until"></label>'
+            . '<button class="button">Mark evergreen</button></form>'
+            . '<p class="description">The ID is the number in the editor URL. Max shares 0 uses the setting; an empty date never expires.</p></div>';
+
+        $ids = SGAP_Evergreen::marked();
+        if (!$ids) {
+            SGAP_UI::empty_state('update-alt', 'Nothing is marked yet. Mark a page here or in its editor sidebar.');
+            self::close();
+            return;
+        }
+        echo '<div class="sgap-scroll"><table class="widefat striped"><thead><tr><th>Page</th><th>Type</th><th>Shares</th><th>Until</th><th>Last share</th><th>Next</th><th>Status</th><th></th></tr></thead><tbody>';
+        foreach ($ids as $id) {
+            $status = SGAP_Evergreen::status($id);
+            echo '<tr><td><a href="' . esc_url((string) get_edit_post_link($id)) . '">' . esc_html(get_the_title($id)) . '</a></td>'
+                . '<td>' . esc_html((string) get_post_type($id)) . '</td>'
+                . '<td>' . esc_html($status['shares'] . ' / ' . $status['max']) . '</td>'
+                . '<td>' . esc_html($status['until'] !== '' ? $status['until'] : '—') . '</td>'
+                . '<td>' . esc_html($status['last_share'] ?? '—') . '</td>'
+                . '<td>' . esc_html($status['next_share'] ?? '—') . '</td>'
+                . '<td>' . ($status['eligible'] ? SGAP_UI::pill('ready', 'ok') : SGAP_UI::pill($status['reason'], 'warn')) . '</td>'
+                . '<td><form method="post" action="' . esc_url(admin_url('admin-post.php')) . '">'
+                . '<input type="hidden" name="action" value="sgap_evergreen"><input type="hidden" name="cmd" value="unmark">'
+                . '<input type="hidden" name="post_id" value="' . esc_attr((string) $id) . '">'
+                . wp_nonce_field('sgap_evergreen', '_wpnonce', true, false)
+                . '<button class="button button-small sgap-danger">Stop</button></form></td></tr>';
+        }
+        echo '</tbody></table></div>';
+        self::close();
+    }
+
+    public static function evergreen_action(): void {
+        if (!current_user_can('manage_options')) wp_die('Forbidden', 403);
+        check_admin_referer('sgap_evergreen');
+        $cmd = isset($_POST['cmd']) ? sanitize_key($_POST['cmd']) : '';
+        $id = isset($_POST['post_id']) ? absint($_POST['post_id']) : 0;
+        if ($cmd === 'run') {
+            $report = SGAP_Evergreen::run();
+            $lines = [sprintf('Recycled %d page(s).', $report['recycled'])];
+            foreach ($report['items'] as $item) {
+                $lines[] = sprintf('#%d %s → %s (%d of %d shares)', $item['post_id'], $item['title'], $item['channel'], $item['share'], $item['max']);
+            }
+            if (!empty($report['note'])) {
+                $lines[] = $report['note'];
+            }
+            foreach ($report['errors'] as $error) {
+                $lines[] = 'Error: ' . $error;
+            }
+            self::done(implode("\n", $lines), 'sgap-evergreen');
+        }
+        if ($cmd === 'mark') {
+            $result = SGAP_Evergreen::mark($id, [
+                'max' => isset($_POST['max']) ? absint($_POST['max']) : 0,
+                'until' => isset($_POST['until']) ? sanitize_text_field(wp_unslash((string) $_POST['until'])) : ''
+            ]);
+            self::done(is_wp_error($result) ? $result->get_error_message() : 'Page #' . $id . ' is now evergreen.', 'sgap-evergreen');
+        }
+        if ($cmd === 'unmark') {
+            SGAP_Evergreen::unmark($id);
+            self::done('Page #' . $id . ' is no longer recycled.', 'sgap-evergreen');
+        }
+        self::done('Nothing changed.', 'sgap-evergreen');
     }
 
     public static function suppression_action(): void {

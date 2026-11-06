@@ -134,7 +134,7 @@ Konkret pr. punkt:
 - **P0.5 ✅** publish log. **P0.6 ✗** cross-system dublet-værn — **åben**, afhænger af Command Center-siden.
 - **P1.1 ✅** pre-flight, **P1.2 ✅** remind, **P1.3 ✅** blackout, **P1.6 ✅** quality gate,
   **P1.7 ✅** helsides SEO, **P1.8 ✅** `utm_campaign`.
-- **P1.4 ✗** evergreen-recycling (2,5 d, afhænger af P0.6). **P1.5 ✗** platform-analytics (4,0 d) —
+- **P1.4 ✅** evergreen-recycling (2,5 d, 7.41.0): markér et indlæg/produkt, få en frisk variation efter 60 dage til næste kanal, indtil budgettet eller udløbsdatoen stopper det — egen cron, metabox, admin-side og tre abilities (523 smoke-checks). **P1.5 ✗** platform-analytics (4,0 d) —
   blokeret af Pinterest-token (401) og Meta-review.
 - **P2.1 ✅** Bluesky, **P2.2 ✅** Mastodon, **P2.3 ✅** Telegram, **P2.5 ✅** multi-sprog.
   **P2.4 ✗** Etsy (byg 2,5 d eller skjul de fem indstillinger på 15 min — ejerens beslutning).
@@ -343,7 +343,7 @@ Derefter `git add` de konkrete filer, commit og push til `main` i samme arbejdsp
 | P0.6 dublet-værn | Command Center kan aflevere samme opslag to gange | Åben |
 | P0.4 rigtig host-cron | WP-Cron kan sove på en cachet side; opslag kommer for sent | Detektion findes, cron mangler |
 | P1.5 analytics | Ingen platform-reach/engagement, kun egne klik | Blokeret (Pinterest 401, Meta-review) |
-| P1.4 evergreen | Ingen genbrug af bevist indhold | Afhænger af P0.6 |
+| P1.4 evergreen | ✅ Lukket 6/11 i 7.41.0 | `SGAP_Evergreen` + daglig cron + Evergreen-side |
 | Etsy | Fem synlige indstillinger lover en integration, der ikke findes | Beslutning mangler |
 | P3.1 død kode | `SGAP_Admin::get_setting_help_link()` har nul kald | Åben |
 | Graph API / X-priser | Direkte X-posting er økonomisk meningsløs med link | Ikke anbefalet |
