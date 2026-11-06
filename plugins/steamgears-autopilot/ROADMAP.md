@@ -101,17 +101,20 @@ does not exist.
 
 ### 3.3 Test coverage
 
-904 lines of tests across 5 files. As of this audit the smoke suite renders **all 12 admin pages**
+2.341 lines of tests across 5 files. As of this audit the smoke suite renders **all 12 admin pages**
 (`sgap-setup`, `sgap-studio` and `sgap-chat` were previously never rendered — a fatal in any of them would
 have reached production unnoticed; adding them immediately surfaced one missing test stub).
 
-Still untested:
+**Nothing from this audit remains untested.** The chat conversation loop was the last gap; six smoke checks
+now run it in both wire formats. The OpenAI-compatible path must send the tool schema, execute `analyse`, and
+return the result under the same `tool_call_id` before the model gives its final answer. The Anthropic path
+must do the same with `x-api-key`, `anthropic-version`, an assistant turn carrying the `tool_use` block and a
+user turn carrying the matching `tool_result`. Both tests assert exactly two rounds, so a loop that silently
+stops after the tool call — or keeps calling — fails. 524 → **530 PASS**.
 
-- The chat conversation loop (only the page render).
-
-All but one of the audit gaps are closed: P3.2 asserts `/feed` and `/reposts`, `integration.php` installs a
-mocked GitHub release through `SGAP_Updater::run()`, `/snapshot` is tested both signed in and signed out, and
-the Anthropic and custom OpenAI-compatible key checks assert the exact endpoint, header and result.
+Every audit gap is closed: P3.2 asserts `/feed` and `/reposts`, `integration.php` installs a mocked GitHub
+release through `SGAP_Updater::run()`, `/snapshot` is tested both signed in and signed out, and the Anthropic
+and custom OpenAI-compatible key checks assert the exact endpoint, header and result.
 
 ### 3.4 Compatibility
 
@@ -319,7 +322,7 @@ Platform limits: [Instagram content publishing](https://developers.facebook.com/
 | Date | Plugin | Change |
 | --- | --- | --- |
 | 2026-11-06 | 7.41.1 | **Fatal fejl i den ugentlige site-scanning rettet.** `SGAP_Site_SEO::site_checks()` byggede fire URL'er med `home . '…'` i stedet for `$home . '…'`; i PHP 8 er en ukendt konstant en `Error`, så `admin_init`-hooket dræbte hele wp-admin-requesten. Det ramte **én admin-request i døgnet** (guarden sættes før scanningen), og det skete på live-sitet 6/11 kl. 19:55:00 — to minutter før butikkens fire plugins blev deaktiveret. Rettet på fire linjer; ny smoke-check `site seo: the domain checks run without a fatal error` dør med samme fejl hvis den genindføres. Zip 7.41.0 genopbygget. |
-| 2026-11-06 | 7.41.1 | **Nøgletest for Anthropic og egne OpenAI-kompatible endpoints — og en cachefejl fundet af testen.** Fem nye integrationstests: Anthropic-kaldet skal gå til Models API med `x-api-key` og `anthropic-version`, og en custom provider skal gemme et modelnavn fra sit eget katalog, bestå med `Bearer`-nøglen mod `/models`, og afvise en forkert nøgle. Testen afslørede at `ai_base_url` skiftede endpoint, mens modelkataloget blev liggende i 12-timers cachen under provideren; et gyldigt modelnavn blev derfor afvist mod den gamle listes id'er. `SGAP_Settings::clear_model_catalog()` rydder nu de tre katalog-transients når base-URL'en ændres. API-nøglen rydder bevidst ikke: en ugyldig nøgle giver en tom liste, og så må modelvalideringen ikke begynde at acceptere hvad som helst. 5 nye checks (244 → **249 PASS**; 6.4: 179 → **184 PASS**), 0 FAIL. Smoke stadig 523. |
+| 2026-11-06 | 7.41.1 | **Nøgletest for Anthropic og egne OpenAI-kompatible endpoints — og en cachefejl fundet af testen.** Fem nye integrationstests: Anthropic-kaldet skal gå til Models API med `x-api-key` og `anthropic-version`, og en custom provider skal gemme et modelnavn fra sit eget katalog, bestå med `Bearer`-nøglen mod `/models`, og afvise en forkert nøgle. Testen afslørede at `ai_base_url` skiftede endpoint, mens modelkataloget blev liggende i 12-timers cachen under provideren; et gyldigt modelnavn blev derfor afvist mod den gamle listes id'er. `SGAP_Settings::clear_model_catalog()` rydder nu de tre katalog-transients når base-URL'en ændres. API-nøglen rydder bevidst ikke: en ugyldig nøgle giver en tom liste, og så må modelvalideringen ikke begynde at acceptere hvad som helst. 5 nye checks (244 → **249 PASS**; 6.4: 179 → **184 PASS**), 0 FAIL. **Chat-loopet er også dækket:** seks nye smoke-checks kører både det OpenAI-kompatible og det Anthropic wire-format med et rigtigt værktøjskald, kræver resultatet tilbage under samme call-id og præcis to runder. Smoke 524 → **530 PASS**. |
 | 2026-11-06 | 7.41.0 | **WordPress 6.4 kører også grønt.** Integrationstesten er kørt på ny mod 6.4 og 7.1 efter P1.4: 6.4 giver **179 PASS / 0 FAIL**, 7.1 og latest (7.1.4) giver **244 PASS / 0 FAIL**. De 65 checks der ikke kører på 6.4, er præcis ability-grupperne: 51 i `admin-tools.php`, 9 i `integration.php`'s abilities-gruppe, 4 ability-gated checks i `check-keys`/`update`/evergreen og 1 i `automation.php`; de springes over fordi Abilities API først findes fra 6.9. Ingen plugin- eller scriptrettelse var nødvendig. Kørt med CI's PHP 8.2.32 + MySQL 8.0.36; 6.4 er også kørt på PHP 8.5.8 med samme resultat, men med deprecations fra kernen og wp-cli, mens `PASS no plugin notices in debug.log` bestod. Matrixdokumentet er opdateret. |
 | 2026-11-06 | 7.41.0 | **Evergreen-kørslen er nu dækket i integrationstesten mod rigtigt WordPress.** 20 nye checks i `plugins/tests/integration.php` markerer to rigtige indlæg, kører `SGAP_Evergreen::run()` med en mocked Anthropic-model og beviser at begge shares rammer køen på facebook/angle_a med caption og hashtags; at share-tallet og datoen gemmes; at en anden kørsel samme dag ikke gør noget; at næste share efter 61 dage roterer til instagram/angle_b og får den nye AI-tekst; at prompten bærer de tidligere captions som *do-not-repeat*; at budgettet lukker siden med en grund; at opsummeringen og `sgap_last_evergreen` stemmer; og at unmark rydder mark, budget og tal. `integration.sh` tjekker også at deaktivering fjerner `sgap_evergreen`-cron'en. Kørt lokalt mod WordPress 7.1.4 + MySQL 8.0.36 (PHP 8.5.8): **244 PASS / 0 FAIL**. Testen fandt to ting undervejs: den brugte `SGAP_Generator::ANTHROPIC_URL` (konstanten ligger på `SGAP_AI`), og `admin-tools.php` forventede stadig 32 abilities efter P1.4's tre nye — nu 35. Smoke stadig 523 PASS. |
 | 2026-11-06 | 7.41.0 | **Evergreen-sider kommer tilbage med en ny vinkel (P1.4).** `includes/evergreen.php` (`SGAP_Evergreen`) markerer et indlæg eller produkt som evergreen — i editor-sidebaren, på den nye **Evergreen**-side eller med `mark-evergreen` — og genbruger det efter `evergreen_after_days` (standard 60) med en frisk variation til næste kanal og vinkel. Budgettet er pr. side (standard 3) og kan udløbe på en dato; begge kan overstyres i editoren. Variationsprompten får sidens titel, kanal, vinkel og de sidste captions og bliver bedt om ikke at gentage kroge eller opfinde tilbud; filtret `sgap_evergreen_variation` kan sætte et menneske eller en anden model i stedet. Hver share går gennem den almindelige kø, så quality gate, pre-flight, blackout og dublet-værn gælder, og en side med en post i køen springes over i stedet for at blive dobbeltpostet. Egen daglig cron, metabox, admin-side med *Recycle now* og tre abilities. 29 nye smoke-checks (494 → **523 PASS**, 0 FAIL). |

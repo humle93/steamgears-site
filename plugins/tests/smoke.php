@@ -637,6 +637,43 @@ check('chat: a failed call is remembered with its culprit', ($call['culprit']['i
 check('chat: the log never holds a key', !str_contains((string) wp_json_encode($call['names']),'key'));
 unset($GLOBALS['ability_objects']);
 
+// Chat-loopet: modellen skal kunne kalde et værktøj, få resultatet tilbage og bruge det
+// i næste runde. Begge provider-formater testes, fordi de har hver sin wire-format.
+$chat_keep=[]; foreach(['sgap_ai_provider','sgap_ai_model','sgap_ai_api_key'] as $k){ $chat_keep[$k]=$GLOBALS['opts'][$k]??null; }
+$abilities_keep=$GLOBALS['ability_objects']??null;
+$GLOBALS['ability_objects']=['core/analyse'=>new SGAP_Fake_Ability('core/analyse',['category'=>'core','meta'=>['annotations'=>['readonly'=>true]]])];
+$GLOBALS['opts']['sgap_ai_provider']='aimlapi'; $GLOBALS['opts']['sgap_ai_model']='anthropic/claude-opus-5.5'; $GLOBALS['opts']['sgap_ai_api_key']='KEY';
+$GLOBALS['http_calls']=[];
+$GLOBALS['http_queue']=[
+ sgap_http(200,['choices'=>[['message'=>['content'=>'','tool_calls'=>[['id'=>'call_1','type'=>'function','function'=>['name'=>'analyse','arguments'=>'{"topic":"corsets"}']]]],'finish_reason'=>'tool_calls']]]),
+ sgap_http(200,['choices'=>[['message'=>['content'=>'Endeligt svar fra værktøjet'],'finish_reason'=>'stop']]])
+];
+$loop=SGAP_Chat::reply([], 'Analysér corsets');
+$first=json_decode((string)($GLOBALS['http_calls'][0][1]['body']??''),true); $second=json_decode((string)($GLOBALS['http_calls'][1][1]['body']??''),true);
+$tool_msg=null; foreach(($second['messages']??[]) as $m){ if(($m['role']??'')==='tool'){ $tool_msg=$m; break; } }
+$tool_result=json_decode((string)($tool_msg['content']??''),true);
+check('chat loop: OpenAI-compatible runs the tool and answers', is_array($loop) && ($loop['text']??'')==='Endeligt svar fra værktøjet' && ($loop['tools']??[])===['analyse'] && count($GLOBALS['http_calls'])===2);
+check('chat loop: OpenAI-compatible sends the tool schema', in_array('analyse',array_column(array_column($first['tools']??[],'function'),'name'),true));
+check('chat loop: OpenAI-compatible returns the tool result under its call id', ($tool_msg['tool_call_id']??'')==='call_1' && ($tool_result['ran']??'')==='core/analyse' && ($tool_result['input']['topic']??'')==='corsets');
+
+$GLOBALS['opts']['sgap_ai_provider']='anthropic'; $GLOBALS['opts']['sgap_ai_model']='claude-opus-5-5'; $GLOBALS['http_calls']=[];
+$GLOBALS['http_queue']=[
+ sgap_http(200,['content'=>[['type'=>'text','text'=>'Jeg slår det op.'],['type'=>'tool_use','id'=>'toolu_1','name'=>'analyse','input'=>['topic'=>'corsets']]],'stop_reason'=>'tool_use']),
+ sgap_http(200,['content'=>[['type'=>'text','text'=>'Endeligt Anthropic-svar']],'stop_reason'=>'end_turn'])
+];
+$loop=SGAP_Chat::reply([], 'Analysér corsets');
+$first_body=json_decode((string)($GLOBALS['http_calls'][0][1]['body']??''),true);
+$second_body=json_decode((string)($GLOBALS['http_calls'][1][1]['body']??''),true);
+$tool_result=null; foreach(($second_body['messages']??[]) as $m){ foreach((array)($m['content']??[]) as $b){ if(is_array($b) && ($b['type']??'')==='tool_result'){ $tool_result=$b; break 2; } } }
+$tool_json=json_decode((string)($tool_result['content']??''),true);
+check('chat loop: Anthropic runs the tool and answers', is_array($loop) && ($loop['text']??'')==='Endeligt Anthropic-svar' && ($loop['tools']??[])===['analyse'] && count($GLOBALS['http_calls'])===2);
+check('chat loop: Anthropic uses native headers and sends the tool schema', ($GLOBALS['http_calls'][0][1]['headers']['x-api-key']??'')==='KEY' && ($GLOBALS['http_calls'][0][1]['headers']['anthropic-version']??'')===SGAP_AI::ANTHROPIC_VERSION && in_array('analyse',array_column($first_body['tools']??[],'name'),true));
+check('chat loop: Anthropic returns the tool result under its tool_use id', ($tool_result['tool_use_id']??'')==='toolu_1' && ($tool_json['ran']??'')==='core/analyse' && ($tool_json['input']['topic']??'')==='corsets');
+
+foreach($chat_keep as $k=>$v){ if($v===null){ unset($GLOBALS['opts'][$k]); } else { $GLOBALS['opts'][$k]=$v; } }
+if($abilities_keep===null){ unset($GLOBALS['ability_objects']); } else { $GLOBALS['ability_objects']=$abilities_keep; }
+$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[];
+
 // ---- P1.2: remind me instead of posting ----
 if (!function_exists('is_email')) { function is_email($e){ return (bool) filter_var((string)$e, FILTER_VALIDATE_EMAIL); } }
 $GLOBALS['opts']['sgap_alert_email']='owner@steamgears.eu';
