@@ -464,7 +464,7 @@ if (!function_exists('wp_remote_retrieve_response_code')) { function wp_remote_r
 if (!function_exists('wp_remote_retrieve_body')) { function wp_remote_retrieve_body($r){ return ''; } }
 if (!function_exists('wp_get_abilities')) { function wp_get_abilities(){ return $GLOBALS['ability_objects']??[]; } }
 if (!function_exists('wp_get_ability')) { function wp_get_ability($n){ return $GLOBALS['ability_objects'][$n]??null; } }
-class SGAP_Fake_Ability { function __construct(public string $n, public array $a=[]){} function get_name(){return $this->n;} function get_label(){return 'Label '.$this->n;} function get_description(){return 'Does '.$this->n;} function get_category(){return $this->a['category']??'cat';} function get_input_schema(){return $this->a['input_schema']??null;} function get_meta(){return ['mcp'=>['public'=>true,'type'=>'tool']];} function check_permissions($x=[]){return true;} function execute($x=[]){return ['ran'=>$this->n,'input'=>$x];} }
+class SGAP_Fake_Ability { function __construct(public string $n, public array $a=[]){} function get_name(){return $this->n;} function get_label(){return 'Label '.$this->n;} function get_description(){return 'Does '.$this->n;} function get_category(){return $this->a['category']??'cat';} function get_input_schema(){return $this->a['input_schema']??null;} function get_meta(){return $this->a['meta']??['mcp'=>['public'=>true,'type'=>'tool']];} function check_permissions($x=[]){return true;} function execute($x=[]){return ['ran'=>$this->n,'input'=>$x];} }
 do_action('wp_abilities_api_categories_init'); do_action('wp_abilities_api_init');
 $tools=array_filter($GLOBALS['abilities'],fn($k)=>str_starts_with($k,'steamgears-tools/'),ARRAY_FILTER_USE_KEY);
 check('tools: category registered', isset($GLOBALS['ability_categories']['steamgears-tools']));
@@ -540,6 +540,27 @@ $cat=SGAP_Chat::tool_catalog();
 check('chat: the catalogue reports count, names and signature', $cat['count']===count($ct2) && in_array('my-tool',$cat['names'],true) && strlen($cat['signature'])===32);
 check('chat: a tool without a runner fails cleanly', str_contains(SGAP_Chat::run_tool('my-tool',[],$ct2),'no runner'));
 unset($GLOBALS['filters']['sgap_chat_tools'], $GLOBALS['ability_objects']);
+// Alt registreret på sitet skal kunne ses, ikke kun vores egne kataloger (7.37.0).
+$GLOBALS['ability_objects']=[
+ 'core/analyse'=>new SGAP_Fake_Ability('core/analyse',['meta'=>['annotations'=>['readonly'=>true]]]),
+ 'core/delete-all'=>new SGAP_Fake_Ability('core/delete-all'),
+ 'woo/product-report'=>new SGAP_Fake_Ability('woo/product-report',['meta'=>['annotations'=>['readonly'=>true]]]),
+ 'steamgears-autopilot/manage-plugin'=>new SGAP_Fake_Ability('steamgears-autopilot/manage-plugin'),
+];
+$ct3=SGAP_Chat::tools();
+check('chat: read-only abilities from other plugins are bound', isset($ct3['analyse']) && isset($ct3['product-report']));
+check('chat: writers from other plugins are not bound', !isset($ct3['delete-all']));
+check('chat: the three meta tools are always bound', isset($ct3['find-tools'],$ct3['describe-tool'],$ct3['run-tool']));
+$found=SGAP_Chat::find_tools(['query'=>'product']);
+check('chat: find-tools reaches the whole site catalogue', ($found['total_available']??0)===4 && ($found['matched']??0)===1 && ($found['tools'][0]['name']??'')==='woo/product-report');
+check('chat: find-tools hides the excluded tools', SGAP_Chat::find_tools(['query'=>'manage']??[])['matched']===0);
+$desc=SGAP_Chat::describe_tool(['name'=>'product-report']);
+check('chat: describe-tool answers by short name', ($desc['name']??'')==='woo/product-report' && array_key_exists('input_schema',$desc));
+check('chat: run-tool runs an unbound ability', (SGAP_Chat::run_named(['name'=>'delete-all','input'=>['x'=>1]])['ran']??'')==='core/delete-all');
+check('chat: run-tool refuses an excluded name', str_contains(SGAP_Chat::run_tool('run-tool',['name'=>'manage-plugin'],$ct3),'may not use'));
+$cat3=SGAP_Chat::tool_catalog();
+check('chat: the catalogue counts what the site registers', ($cat3['available']??0)===4 && ($cat3['categories']['core']??0)===2);
+unset($GLOBALS['ability_objects']);
 
 // ---- P1.2: remind me instead of posting ----
 if (!function_exists('is_email')) { function is_email($e){ return (bool) filter_var((string)$e, FILTER_VALIDATE_EMAIL); } }

@@ -13,6 +13,8 @@ class SGAP_Chat {
     const META = 'sgap_chat_history';
     const MAX_HISTORY = 40;
     const MAX_ROUNDS = 6;
+    /** Tools handed to the model directly; the rest stay reachable through run-tool. */
+    const MAX_BOUND = 80;
     /** Add or change chat tools from another plugin: add_filter('sgap_chat_tools', fn($tools) => $tools + [...]); */
     const TOOLS_FILTER = 'sgap_chat_tools';
     /** Abilities the chat may not use: they change the site beyond the autopilot. */
@@ -32,43 +34,192 @@ class SGAP_Chat {
     /* ---- tools ---- */
 
     /**
-     * name => [description, JSON schema, WP_Ability] for the abilities the chat may call.
-     * Its own abilities first, then the read-only half of the MCP tool surface, so the
-     * assistant can look at posts, products, plugins and options without being handed
-     * the tools that write (those keep their dry_run/confirm step on the MCP side).
+     * Every registered ability, normalised — the chat's own catalogue, this plugin's MCP
+     * tools, and whatever WordPress core, WooCommerce or another plugin registered.
+     * @return array<int, array{name: string, short: string, category: string, description: string, readonly: bool, ability: object}>
+     */
+    public static function available(): array {
+        if (!function_exists('wp_get_abilities')) {
+            return [];
+        }
+        $out = [];
+        foreach (wp_get_abilities() as $ability) {
+            if (!is_object($ability) || !method_exists($ability, 'get_name')) {
+                continue;
+            }
+            $full = (string) $ability->get_name();
+            if ($full === '') {
+                continue;
+            }
+            $category = strpos($full, '/') !== false ? strstr($full, '/', true) : '';
+            $short = $category !== '' ? substr($full, strlen($category) + 1) : $full;
+            $out[] = [
+                'name' => $full,
+                'short' => $short,
+                'category' => (string) $category,
+                'description' => (string) (method_exists($ability, 'get_description') ? $ability->get_description() : ''),
+                'readonly' => self::is_readonly($ability),
+                'ability' => $ability,
+            ];
+        }
+        return $out;
+    }
+
+    /** True when an ability says, in its own metadata, that it only reads. */
+    public static function is_readonly($ability): bool {
+        if (!method_exists($ability, 'get_meta')) {
+            return false;
+        }
+        $meta = $ability->get_meta();
+        $annotations = is_array($meta) ? ($meta['annotations'] ?? []) : [];
+        return is_array($annotations) && !empty($annotations['readonly']) && empty($annotations['destructive']);
+    }
+
+    /**
+     * name => [description, JSON schema, runner]. Bound tools are the model's shortcut:
+     * this plugin's own abilities, the read-only MCP tools, and every other read-only
+     * ability on the site — up to MAX_BOUND. Everything else stays reachable through the
+     * find/describe/run meta tools, so a 300-tool site does not blow up every request.
      */
     public static function tools(): array {
         if (!function_exists('wp_get_abilities')) {
             return [];
         }
-        $site_category = class_exists('SGAP_MCP_Tools') ? SGAP_MCP_Tools::CATEGORY . '/' : '';
-        $readonly = $site_category !== '' ? SGAP_MCP_Tools::readonly_names() : [];
-        $tools = [];
-        foreach (wp_get_abilities() as $ability) {
-            $full = $ability->get_name();
-            if (strpos($full, SGAP_Abilities::CATEGORY . '/') === 0) {
-                $name = substr($full, strlen(SGAP_Abilities::CATEGORY) + 1);
-            } elseif ($site_category !== '' && strpos($full, $site_category) === 0) {
-                $name = substr($full, strlen($site_category));
-                if (!in_array($name, $readonly, true)) {
+        $own = SGAP_Abilities::CATEGORY;
+        $site = class_exists('SGAP_MCP_Tools') ? SGAP_MCP_Tools::CATEGORY : '';
+        $site_readonly = $site !== '' ? SGAP_MCP_Tools::readonly_names() : [];
+        $ranked = [];
+        foreach (self::available() as $entry) {
+            $name = $entry['short'];
+            if (in_array($name, self::EXCLUDED, true)) {
+                continue;
+            }
+            if ($entry['category'] === $own) {
+                $rank = 1;
+            } elseif ($site !== '' && $entry['category'] === $site) {
+                if (!in_array($entry['short'], $site_readonly, true)) {
                     continue;
                 }
+                $rank = 2;
+            } elseif ($entry['readonly']) {
+                $rank = 3;
             } else {
                 continue;
             }
-            if (in_array($name, self::EXCLUDED, true) || isset($tools[$name])) {
-                continue;
+            $ranked[] = [$rank, $entry];
+        }
+        usort($ranked, static fn($a, $b) => $a[0] <=> $b[0]);
+        $tools = [];
+        foreach ($ranked as [, $entry]) {
+            if (count($tools) >= self::MAX_BOUND) {
+                break;
             }
-            $schema = $ability->get_input_schema();
+            $schema = method_exists($entry['ability'], 'get_input_schema') ? $entry['ability']->get_input_schema() : null;
             if (empty($schema) || ($schema['type'] ?? 'object') !== 'object') {
                 $schema = ['type' => 'object', 'properties' => new stdClass()];
             } elseif (empty($schema['properties'])) {
                 $schema['properties'] = new stdClass();
             }
-            $tools[$name] = [$ability->get_description() ?: $ability->get_label(), $schema, $ability];
+            $label = $entry['description'] !== '' ? $entry['description']
+                : (method_exists($entry['ability'], 'get_label') ? (string) $entry['ability']->get_label() : $entry['name']);
+            $existing = $tools[$entry['short']] ?? null;
+            if ($existing !== null && $existing[2] !== $entry['ability']) {
+                $tools[$entry['name']] = [$label, $schema, $entry['ability']]; // collision: keep both, full name wins
+                continue;
+            }
+            $tools[$entry['short']] = [$label, $schema, $entry['ability']];
         }
+        $tools += self::meta_tools();
         $filtered = apply_filters(self::TOOLS_FILTER, $tools);
         return is_array($filtered) ? self::normalise($filtered) : $tools;
+    }
+
+    /** The three tools that make the rest of the site's catalogue reachable. */
+    private static function meta_tools(): array {
+        return [
+            'find-tools' => [
+                'Search every ability and MCP tool on this site by keyword. Use it when you need to know whether a tool exists before acting; it also returns the total count.',
+                ['type' => 'object', 'properties' => [
+                    'query' => ['type' => 'string', 'description' => 'Word to look for in the name, description or category.'],
+                    'limit' => ['type' => 'integer', 'minimum' => 1, 'maximum' => 50, 'default' => 20]
+                ]],
+                new SGAP_Chat_Runner([__CLASS__, 'find_tools'])
+            ],
+            'describe-tool' => [
+                'Full name, category, description and input schema of one tool, by name or short name.',
+                ['type' => 'object', 'properties' => ['name' => ['type' => 'string', 'minLength' => 1]], 'required' => ['name']],
+                new SGAP_Chat_Runner([__CLASS__, 'describe_tool'])
+            ],
+            'run-tool' => [
+                'Run any registered ability or MCP tool by name with an input object — for tools that are not already bound here. Refuses the tools the chat may not use.',
+                ['type' => 'object', 'properties' => [
+                    'name' => ['type' => 'string', 'minLength' => 1],
+                    'input' => ['type' => 'object', 'description' => 'Arguments for the tool, matching its schema.']
+                ], 'required' => ['name']],
+                new SGAP_Chat_Runner([__CLASS__, 'run_named'])
+            ],
+        ];
+    }
+
+    /** find-tools: keyword search across everything registered on the site. */
+    public static function find_tools($input = null): array {
+        $input = is_array($input) ? $input : [];
+        $query = strtolower(trim((string) ($input['query'] ?? '')));
+        $limit = max(1, min(50, (int) ($input['limit'] ?? 20)));
+        $all = self::available();
+        $hits = [];
+        foreach ($all as $entry) {
+            $haystack = strtolower($entry['name'] . ' ' . $entry['description'] . ' ' . $entry['category']);
+            if ($query !== '' && strpos($haystack, $query) === false) {
+                continue;
+            }
+            if (in_array($entry['short'], self::EXCLUDED, true)) {
+                continue;
+            }
+            $hits[] = ['name' => $entry['name'], 'category' => $entry['category'], 'readonly' => $entry['readonly'], 'description' => $entry['description']];
+        }
+        $total = count($hits);
+        return ['total_available' => count($all), 'matched' => $total, 'tools' => array_slice($hits, 0, $limit)];
+    }
+
+    /** describe-tool: one tool's schema, by full or short name. */
+    public static function describe_tool($input = null) {
+        $input = is_array($input) ? $input : [];
+        $want = (string) ($input['name'] ?? '');
+        foreach (self::available() as $entry) {
+            if ($want === $entry['name'] || $want === $entry['short']) {
+                return [
+                    'name' => $entry['name'],
+                    'category' => $entry['category'],
+                    'readonly' => $entry['readonly'],
+                    'description' => $entry['description'],
+                    'input_schema' => method_exists($entry['ability'], 'get_input_schema') ? $entry['ability']->get_input_schema() : null
+                ];
+            }
+        }
+        return ['error' => "No tool named {$want}."];
+    }
+
+    /** run-tool: execute any registered ability, with the chat's exclusions still applied. */
+    public static function run_named($input = null) {
+        $input = is_array($input) ? $input : [];
+        $want = (string) ($input['name'] ?? '');
+        $args = is_array($input['input'] ?? null) ? $input['input'] : [];
+        foreach (self::available() as $entry) {
+            if ($want !== $entry['name'] && $want !== $entry['short']) {
+                continue;
+            }
+            if (in_array($entry['short'], self::EXCLUDED, true)) {
+                return ['error' => "The chat may not use {$entry['name']}."];
+            }
+            if (!method_exists($entry['ability'], 'execute')) {
+                return ['error' => "The tool {$entry['name']} has no runner."];
+            }
+            $schema = method_exists($entry['ability'], 'get_input_schema') ? $entry['ability']->get_input_schema() : null;
+            $result = $entry['ability']->execute($args ?: ($schema ? [] : null));
+            return is_wp_error($result) ? ['error' => $result->get_error_message()] : $result;
+        }
+        return ['error' => "No tool named {$want}."];
     }
 
     /**
@@ -105,7 +256,20 @@ class SGAP_Chat {
         $tools = self::tools();
         $names = array_keys($tools);
         sort($names);
-        return ['count' => count($tools), 'names' => $names, 'signature' => self::tools_signature($tools)];
+        $all = self::available();
+        $categories = [];
+        foreach ($all as $entry) {
+            $key = $entry['category'] !== '' ? $entry['category'] : '(none)';
+            $categories[$key] = ($categories[$key] ?? 0) + 1;
+        }
+        ksort($categories);
+        return [
+            'count' => count($tools),
+            'available' => count($all),
+            'categories' => $categories,
+            'names' => $names,
+            'signature' => self::tools_signature($tools)
+        ];
     }
 
     /** Runs one tool; always returns a JSON string for the model. */
@@ -136,7 +300,8 @@ class SGAP_Chat {
             . 'to per-channel RSS feeds that Publer auto-posts from (or straight to Publer on its API plan); clicks and orders are tracked per channel. '
             . 'Use the tools to look things up and to act instead of guessing. The site tools can read posts, products, media, plugins, cron '
             . 'and options (never credentials) — reading is always allowed; changing a post, a product or an option happens on the site\'s MCP '
-            . 'surface, not here, so say what you would change and let the owner do it. Before deleting anything, rejecting drafts in bulk or '
+            . 'surface, not here, so say what you would change and let the owner do it. Only a subset of the site\'s abilities is bound here; when you '
+            . 'are unsure whether a tool exists, call find-tools first, describe-tool for its arguments, and run-tool to run it by name. Before deleting anything, rejecting drafts in bulk or '
             . 'changing settings, say what you are about to do and ask, unless the owner already asked for exactly that. Never reveal API keys. '
             . 'Answer in the language the owner writes in (usually Danish), short and practical, with Markdown lists where they help. '
             . 'Site time now: ' . wp_date('Y-m-d H:i (l)') . '.';
@@ -338,11 +503,12 @@ class SGAP_Chat {
             'history' => array_map(fn($t) => ['role' => $t['role'], 'content' => $t['content'], 'tools' => $t['tools'] ?? []], self::history()),
             'model' => SGAP_AI::provider_name() . ' · ' . SGAP_AI::model(),
             'tools' => count(self::tools()),
+            'available' => count(self::available()),
             'signature' => self::tools_signature()
         ];
         $suggestions = ['Hvordan går det med autopiloten?', 'Vis kladderne der venter', 'Skriv nye opslag nu', 'Hvorfor er der ikke sendt noget?', 'Hvilken kanal giver flest klik?'];
         echo '<div class="sgap-card sgap-chat"><div class="sgap-chat-top"><span>' . SGAP_UI::pill($config['model'], 'brass') . ' '
-            . '<span id="sgap-chat-tools-pill">' . SGAP_UI::pill($config['tools'] . ' tools', $config['tools'] ? 'ok' : 'warn') . '</span></span>'
+            . '<span id="sgap-chat-tools-pill">' . SGAP_UI::pill($config['tools'] . ' of ' . $config['available'] . ' tools', $config['tools'] ? 'ok' : 'warn') . '</span></span>'
             . '<span class="sgap-chat-top-btns"><button type="button" class="button button-small" id="sgap-chat-refresh-tools" title="Read the tool catalogue again — new abilities show up without a reload"><span class="dashicons dashicons-update"></span>Refresh tools</button>'
             . '<button type="button" class="button button-small" id="sgap-chat-clear"><span class="dashicons dashicons-trash"></span>New chat</button></span></div>'
             . '<div id="sgap-chat-log" class="sgap-chat-log" aria-live="polite"></div>'
@@ -374,11 +540,32 @@ class SGAP_Chat {
             . 'document.getElementById("sgap-chat-clear").addEventListener("click",function(){post("sgap_chat_clear").then(function(){log.innerHTML="";sug.style.display="";add("assistant","Ny samtale. Hvad skal vi lave?");});});'
             . 'var tBtn=document.getElementById("sgap-chat-refresh-tools"),tPill=document.getElementById("sgap-chat-tools-pill");'
             . 'tBtn.addEventListener("click",function(){tBtn.disabled=true;post("sgap_chat_tools").then(function(j){tBtn.disabled=false;if(!j||!j.success)return;'
-            . 'var d=j.data;if(tPill)tPill.textContent=d.count+" tools";'
+            . 'var d=j.data;if(tPill)tPill.textContent=d.count+" of "+d.available+" tools";'
             . 'if(d.signature!==C.signature){var add_n=d.count-C.tools;C.tools=d.count;C.signature=d.signature;'
             . 'add("assistant",add_n>0?("Værktøjskataloget er opdateret: "+add_n+" nyt værktøj"+(add_n===1?"":"er")+" ("+d.count+" i alt)."):("Værktøjskataloget ændrede sig ("+d.count+" værktøjer nu)."));}})'
             . '.catch(function(){tBtn.disabled=false;});});'
             . '})();</script>';
         SGAP_Admin::close();
+    }
+}
+
+/**
+ * Wraps a plain callable so the meta tools (find-tools, describe-tool, run-tool) travel
+ * through the same run_tool() path as an ability object.
+ */
+final class SGAP_Chat_Runner {
+    /** @var callable */
+    private $callback;
+
+    public function __construct(callable $callback) {
+        $this->callback = $callback;
+    }
+
+    public function execute($input = null) {
+        return call_user_func($this->callback, $input);
+    }
+
+    public function get_input_schema() {
+        return null;
     }
 }
