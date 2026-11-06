@@ -549,6 +549,10 @@ $ct=SGAP_Chat::tools();
 check('chat: the assistant reaches the site lookups', isset($ct['list-posts']) && isset($ct['site-info']) && isset($ct['get-product']));
 check('chat: the assistant cannot write through a site tool', !isset($ct['create-post']) && !isset($ct['update-option']) && !isset($ct['set-plugin-state']) && !isset($ct['run-cron']));
 check('chat: its own tools are still there', count($ct)>2 && !isset($ct['manage-plugin']));
+// Chatten må ikke kunne skrive indstillinger: en gættet ai_model gjorde AIMLAPI-svaret til en fejl (7.38.3).
+check('chat: the assistant can read settings but not change them', isset($ct['get-settings']) && !isset($ct['update-settings']));
+check('chat: run-tool refuses to change settings', str_contains(SGAP_Chat::run_tool('run-tool',['name'=>'update-settings','input'=>['settings'=>['ai_model'=>'claude-3-5-sonnet']]],$ct),'may not use'));
+check('chat: the prompt forbids guessing a model name', str_contains(SGAP_Chat::system_prompt(),'never guess at a model name'));
 check('chat: every tool has a schema object', (function($t){ foreach($t as $v){ if(!is_array($v[1]) || ($v[1]['type']??'')!=='object') return false; } return true; })($ct));
 // Nye værktøjer: et filter kan lægge dem til, og siden kan hente kataloget igen.
 $GLOBALS['filters']['sgap_chat_tools']=fn($t)=>$t+['my-tool'=>['Does my thing',['type'=>'object','properties'=>[]],null],'bad-tool'=>'not a tool'];

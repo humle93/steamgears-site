@@ -21,7 +21,7 @@ class SGAP_Chat {
     const LOG_CACHE = 'sgap_chat_tool_log';
     const LOG_KEEP = 3;
     /** Abilities the chat may not use: they change the site beyond the autopilot. */
-    const EXCLUDED = ['manage-plugin', 'enable-full-access', 'update', 'run-cron'];
+    const EXCLUDED = ['manage-plugin', 'enable-full-access', 'update', 'run-cron', 'update-settings'];
 
     public static function init(): void {
         add_action('admin_menu', [__CLASS__, 'menu'], 20);
@@ -380,7 +380,9 @@ class SGAP_Chat {
             . 'to per-channel RSS feeds that Publer auto-posts from (or straight to Publer on its API plan); clicks and orders are tracked per channel. '
             . 'Use the tools to look things up and to act instead of guessing. The site tools can read posts, products, media, plugins, cron '
             . 'and options (never credentials) — reading is always allowed; changing a post, a product or an option happens on the site\'s MCP '
-            . 'surface, not here, so say what you would change and let the owner do it. Only a subset of the site\'s abilities is bound here; when you '
+            . 'surface, not here, so say what you would change and let the owner do it. You cannot change this plugin\'s settings yourself, and you must '
+            . 'never guess at a model name for the AI provider: name the setting and the new value and let the owner write it on the Settings page. '
+            . 'Only a subset of the site\'s abilities is bound here; when you '
             . 'are unsure whether a tool exists, call find-tools first, describe-tool for its arguments, and run-tool to run it by name. Before deleting anything, rejecting drafts in bulk or '
             . 'changing settings, say what you are about to do and ask, unless the owner already asked for exactly that. Never reveal API keys. '
             . 'Answer in the language the owner writes in (usually Danish), short and practical, with Markdown lists where they help. '
