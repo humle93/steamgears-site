@@ -67,12 +67,15 @@ check "commit-besked --selftest"             python3 tools/commit_check.py --sel
 check "kampagne-indlæser --selftest"         python3 tools/load_campaign.py --selftest
 check "plugin-smoke"                         "$PHP_BIN" plugins/tests/smoke.php
 check "MCP REST-klient"                      python3 tools/test_mcp_rest.py
+check "MCP-klassificering"                   python3 tools/test_mcp_klassificer.py
 check "MCP OAuth"                            python3 tools/test_mcp_oauth.py
+check "MCP keep-alive"                       python3 tools/test_mcp_keepalive.py
 check "niche-scanner"                        python3 tools/test_niche_scanner.py
 check "link-plan-selftest"                  python3 tools/link_plan_check.py --selftest
 check "link-plan"                           python3 tools/link_plan_check.py
 check "guide-copy-selftest"                  python3 tools/guide_check.py --selftest
 check "guide-copy"                           python3 tools/guide_check.py
+check "samtalepunkter-selftest"              python3 tools/samtalepunkter.py --selftest
 
 # Rendereren fejlede 2/11 på to måder der ikke gav en fejlkode: et sidebrud midt i et afsnit
 # skrev resten af dokumentet uden for papiret (niche-vurderingen blev 20 sider), og glyffer

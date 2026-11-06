@@ -1,15 +1,21 @@
 #!/usr/bin/env python3
 """Værn for link-planen til de ældre publicerede guides.
 
-Planen i `docs/library/guide-links-aeldre-2026-11-03.md` er den eneste kilde til hvilke `/go/<id>/`-links
-der skal ind i de guides der allerede er live. Værnet kontrollerer at planen ikke kan indeholde noget der
-ikke findes:
+Planen i `docs/library/guide-links-aeldre-2026-11-03.md` er kilden til hvilke `/go/<id>/`-links de ældre
+guides skal have. Værnet kontrollerer at planen ikke kan indeholde noget der ikke findes:
 
 - hver guide-sti ser ud som en sti på sitet (`/noget/`)
-- hvert `/go/<id>/` findes i produkt-ID-mappingen
+- hvert `/go/<id>/` findes i produkt-ID-mappingen (inkl. appendix for de seks produkter uden for de 39 designs)
 - linkteksten deler ord med mappingens titel, så et link ikke lover en corset og sælger goggles
-- hver pris findes i pristabellen (eller er markeret `gratis` for den gratis PDF)
-- ingen guide/produkt-par står to gange, og hver guide har mindst ét link
+- hver pris findes i pristabellen, i de målte priser fra butikken (3/11) — eller er `gratis` for den gratis
+  PDF (809). `—` er ikke en gyldig pris: hvert produkt i planen har en pris der kan slås op
+- status er en af `indsat`, `kladde` eller `klar`; `pris mangler` er afskaffet, fordi alle priser nu er målt
+- en række med status `indsat` kræver at `/go/<id>/` faktisk står i målingen af det levende site
+  (`docs/library/guide-links-live-<dato>.md`, skrevet af `tools/live_link_report.py`) — planen må ikke påstå at
+  et link er anvendt, hvis det ikke kan måles på siden
+- en række med status `kladde` kræver at `/go/<id>/` står i den fil guiden bor i repoet: linket findes, men
+  siden det hører til er ikke publiceret
+- ingen guide/produkt-par står to gange
 
 Brug:
     python3 tools/link_plan_check.py              # tjekker planen
@@ -23,7 +29,10 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PLAN = os.path.join(ROOT, "docs", "library", "guide-links-aeldre-2026-11-03.md")
-FREE_IDS = {"809"}  # den gratis tjekliste-PDF har ingen pris
+LIVE = os.path.join(ROOT, "docs", "library", "guide-links-live-2026-11-05.md")
+FREE_IDS = {"809"}          # den gratis tjekliste-PDF har ingen pris
+STATUSES = {"indsat", "kladde", "klar"}
+REPO_FILES = {"/steampunk-outfit-ideas-for-women/": "docs/library/steampunk-outfit-ideas-for-women.md"}
 
 _spec = importlib.util.spec_from_file_location("guide_check", os.path.join(ROOT, "tools", "guide_check.py"))
 gc = importlib.util.module_from_spec(_spec)
@@ -31,31 +40,55 @@ _spec.loader.exec_module(gc)
 
 
 def parse_rows(text: str) -> list:
-    """Læser plan-tabellen: | Guide | Link | Anchor | Pris | — header og skillelinje springes over."""
+    """Læser plan-tabellen: | Guide | Link | Linktekst | Pris | Status |."""
     rows = []
     for line in text.splitlines():
         if not line.startswith("|") or "/go/" not in line:
             continue
         cells = [c.strip() for c in line.strip().strip("|").split("|")]
-        if len(cells) < 4:
+        if len(cells) < 5:
             continue
-        guide, link, anchor, price = cells[0], cells[1], cells[2], cells[3]
-        m = re.search(r"/go/(\d+)/", link)
-        rows.append({"guide": guide.strip("`"), "id": m.group(1) if m else "", "anchor": anchor, "price": price})
+        m = re.search(r"/go/(\d+)/", cells[1])
+        rows.append({
+            "guide": cells[0].strip("`"),
+            "id": m.group(1) if m else "",
+            "anchor": cells[2],
+            "price": cells[3],
+            "status": cells[4].strip("`"),
+        })
     return rows
 
 
-def check_rows(rows: list, ids: set, titles: dict, prices: set) -> list:
+def parse_live(text: str) -> dict:
+    """Læser målingen: (guide, id) -> 'ja'/'nej'."""
+    live = {}
+    for line in text.splitlines():
+        if not line.startswith("|") or "/go/" not in line:
+            continue
+        cells = [c.strip() for c in line.strip().strip("|").split("|")]
+        if len(cells) < 3:
+            continue
+        m = re.search(r"/go/(\d+)/", cells[1])
+        if m:
+            live[(cells[0].strip("`"), m.group(1))] = cells[2].strip("`").lower()
+    return live
+
+
+def check_rows(rows: list, ids: set, titles: dict, prices: set,
+               repo_texts: dict | None = None, live: dict | None = None) -> list:
     problems = []
     if not rows:
         return ["ingen rækker i plan-tabellen"]
-    seen = set()
-    guides = set()
+    repo_texts = repo_texts or {}
+    live = live or {}
+    seen, guides = set(), set()
     for row in rows:
-        guide, pid, anchor, price = row["guide"], row["id"], row["anchor"], row["price"]
+        guide, pid, anchor, price, status = row["guide"], row["id"], row["anchor"], row["price"], row["status"]
         if not re.fullmatch(r"/[a-z0-9][a-z0-9/-]*/", guide):
             problems.append(f"guide-stien {guide!r} ser ikke ud som en sti på sitet")
         guides.add(guide)
+        if status not in STATUSES:
+            problems.append(f"{guide}: ukendt status {status!r} (skal være en af {', '.join(sorted(STATUSES))})")
         if not pid:
             problems.append(f"{guide}: linket har intet /go/<id>/")
             continue
@@ -72,46 +105,98 @@ def check_rows(rows: list, ids: set, titles: dict, prices: set) -> list:
                 )
         if len(gc.name_words(anchor)) < 1:
             problems.append(f"{guide}: linkteksten {anchor!r} er tom eller uden brugbare ord")
-        if price.lower() != "gratis":
+        if price == "—":
+            problems.append(
+                f"{guide}: /go/{pid}/ har pris '—' — prisen skal måles (butikken, 3/11) i stedet for at stå tom"
+            )
+        elif price.lower() == "gratis":
+            if pid not in FREE_IDS:
+                problems.append(f"{guide}: /go/{pid}/ er markeret gratis, men er ikke den gratis PDF")
+        else:
             m = re.fullmatch(r"\$(\d+\.\d{2})", price)
             if not m:
-                problems.append(f"{guide}: prisen {price!r} er hverken '$x.xx' eller 'gratis'")
+                problems.append(f"{guide}: prisen {price!r} er hverken '$x.xx', 'gratis' eller '—'")
             elif m.group(1) not in prices:
                 problems.append(f"{guide}: prisen {price} findes ikke i pristabellen")
-        elif pid not in FREE_IDS:
-            problems.append(f"{guide}: /go/{pid}/ er markeret gratis, men er ikke den gratis PDF")
+        if status == "indsat":
+            measured = live.get((guide, pid))
+            if measured is None:
+                problems.append(
+                    f"{guide}: står som 'indsat', men /go/{pid}/ står ikke i målingen af det levende site"
+                )
+            elif measured != "ja":
+                problems.append(
+                    f"{guide}: står som 'indsat', men målingen siger {measured!r} — linket er ikke på siden"
+                )
+        elif status == "kladde":
+            path = REPO_FILES.get(guide)
+            if not path:
+                problems.append(f"{guide}: står som 'kladde', men guiden findes ikke som fil i repoet")
+            elif f"/go/{pid}/" not in repo_texts.get(path, ""):
+                problems.append(f"{guide}: står som 'kladde', men /go/{pid}/ findes ikke i {path}")
         if (guide, pid) in seen:
             problems.append(f"{guide}: /go/{pid}/ står to gange — ét link pr. produkt pr. guide")
         seen.add((guide, pid))
-    print(f"{len(rows)} plan-rækker · {len(guides)} guides · {len({r['id'] for r in rows})} unikke produkter")
+    print(
+        f"{len(rows)} plan-rækker · {len(guides)} guides · {len({r['id'] for r in rows})} unikke produkter · "
+        f"{sum(1 for r in rows if r['status'] == 'indsat')} målt indsat på siden · "
+        f"{sum(1 for r in rows if r['status'] == 'kladde')} kladde i repoet · "
+        f"{sum(1 for r in rows if r['status'] == 'klar')} klar · "
+        f"{sum(1 for r in rows if r['price'] == '—')} uden pris"
+    )
     return problems
 
 
 def selftest() -> int:
-    ids = {"477", "481", "728"}
-    titles = {"477": ["Copper Pilot Goggles"], "481": ["Steampunk Top Hat with Removable Goggles"], "728": ["First Mate's Oath – Steampunk Pirate Poster", "First Mate's Oath — Vintage Maritime Print"]}
-    prices = {"24.95", "34.95", "21.90"}
+    ids = {"477", "481", "728", "766"}
+    titles = {
+        "477": ["Copper Pilot Goggles"],
+        "481": ["Steampunk Top Hat with Removable Goggles"],
+        "728": ["First Mate's Oath – Steampunk Pirate Poster", "First Mate's Oath — Vintage Maritime Print"],
+        "766": ["Steampunk Leather Utility Belt & Holster"],
+    }
+    prices = {"24.95", "34.95", "21.90", "6.90"}
+    repo = {"docs/library/steampunk-outfit-ideas-for-women.md": "[x](https://steamgears.eu/go/477/)"}
+    files = {"/steampunk-outfit-ideas-for-women/": "docs/library/steampunk-outfit-ideas-for-women.md"}
+    measured = {
+        ("/best-steampunk-books/", "728"): "ja",
+        ("/best-steampunk-books/", "721"): "ja",
+    }
+    def row(guide, pid, anchor, price, status):
+        return {"guide": guide, "id": pid, "anchor": anchor, "price": price, "status": status}
+
     good = [
-        {"guide": "/how-to-make-a-steampunk-costume/", "id": "477", "anchor": "Copper Pilot goggles", "price": "$24.95"},
-        {"guide": "/best-steampunk-books/", "id": "728", "anchor": "First Mate's Oath print", "price": "$21.90"},
+        row("/steampunk-outfit-ideas-for-women/", "477", "Copper Pilot goggles", "$24.95", "kladde"),
+        row("/best-steampunk-books/", "728", "First Mate's Oath print", "$21.90", "indsat"),
+        row("/build/weathering/", "766", "Utility belt and holster", "$6.90", "klar"),
     ]
+    old_files = dict(globals().get("REPO_FILES", {}))
+    globals()["REPO_FILES"] = files
     cases = [
         ("gyldig plan består", good, 0),
         ("ukendt /go/-id fanges", [dict(good[0], id="9999")], 1),
         ("opdigtet pris fanges", [dict(good[0], price="$19.99")], 1),
         ("gratis på et betalt produkt fanges", [dict(good[0], price="gratis")], 1),
+        ("tom pris '—' fanges", [dict(good[0], price="—")], 1),
+        ("den afskaffede status 'pris mangler' fanges", [dict(good[0], status="pris mangler")], 1),
         ("forkert produktnavn fanges", [dict(good[0], anchor="Victorian corset")], 1),
         ("dubleret guide/produkt fanges", [good[0], dict(good[0])], 1),
         ("ugyldig guide-sti fanges", [dict(good[0], guide="how-to-make-a-steampunk-costume")], 1),
+        ("ukendt status fanges", [dict(good[0], status="måske")], 1),
+        ("kladde uden link i filen fanges", [dict(good[0], id="481", anchor="Steampunk top hat")], 1),
+        ("kladde uden fil i repoet fanges", [dict(good[0], guide="/casual-steampunk-outfits/")], 1),
+        ("indsat uden måling fanges", [dict(good[1], guide="/how-to-make-a-steampunk-costume/")], 1),
+        ("indsat hvor målingen siger nej fanges", [dict(good[1], guide="/steampunk-outfit-ideas-for-women/", id="481")], 1),
         ("tom plan fanges", [], 1),
     ]
     failed = 0
     for label, rows, expect in cases:
-        problems = check_rows(rows, ids, titles, prices)
+        problems = check_rows(rows, ids, titles, prices, repo, measured)
         got = 1 if problems else 0
         ok = got == expect
         failed += 0 if ok else 1
         print(f"{'PASS' if ok else 'FAIL'} {label}" + ("" if ok else f" (forventede {expect}, fik {got}: {problems})"))
+    globals()["REPO_FILES"] = old_files
     print(f"\n{len(cases) - failed} af {len(cases)} selftest-fixtures bestod")
     return 1 if failed else 0
 
@@ -124,13 +209,25 @@ def main() -> int:
         return 1
     with open(PLAN, encoding="utf-8") as fh:
         text = fh.read()
-    problems = check_rows(parse_rows(text), gc.known_ids(), gc.mapping_titles(), gc.known_prices())
+    repo_texts = {}
+    for path in REPO_FILES.values():
+        with open(os.path.join(ROOT, path), encoding="utf-8") as fh:
+            repo_texts[path] = fh.read()
+    if not os.path.exists(LIVE):
+        print(f"FAIL {os.path.relpath(LIVE, ROOT)} findes ikke — mål det levende site med tools/live_link_report.py")
+        return 1
+    with open(LIVE, encoding="utf-8") as fh:
+        live = parse_live(fh.read())
+    if not live:
+        print(f"FAIL {os.path.relpath(LIVE, ROOT)} indeholder ingen målinger")
+        return 1
+    problems = check_rows(parse_rows(text), gc.known_ids(), gc.mapping_titles(), gc.known_prices(), repo_texts, live)
     if problems:
         print("FAIL guide-links-aeldre")
         for problem in problems:
             print(f"       - {problem}")
         return 1
-    print("PASS guide-links-aeldre — alle links, navne og priser har hold i mappingen og pristabellen")
+    print("PASS guide-links-aeldre — alle links, navne, priser og statusser har hold i repoet")
     return 0
 
 

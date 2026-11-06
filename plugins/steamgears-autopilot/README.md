@@ -23,7 +23,7 @@ The whole social autopilot runs inside WordPress (Command Center is retired):
 4. **Measure** – every post links via `/go/<id>/`, so clicks (and WooCommerce
    orders) are counted per channel.
 
-Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.24.0.zip` → Activate. On an existing
+Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.41.0.zip` → Activate. On an existing
 install the same zip arrives through the self-updater (see *Updates*), so an upload is only needed for the
 first install or a recovery.
 
@@ -46,6 +46,9 @@ all admin-only, none of them deleting anything:
 | `steamgears-autopilot/update` | Install the newest version from GitHub |
 | `steamgears-autopilot/check-keys` | Test the Publer and AI keys (see below) |
 | `steamgears-autopilot/check-publer` | Workspaces, accounts, channels without an account |
+| `steamgears-autopilot/list-evergreen` | Evergreen pages with budget, expiry, last share and whether they are ready — read-only |
+| `steamgears-autopilot/mark-evergreen` | Mark or unmark a post/product, with an optional budget and expiry date |
+| `steamgears-autopilot/recycle-evergreen` | Write and queue the next variation for the due pages now |
 | `steamgears-autopilot/meta-audit` | Title and meta-description audit on published posts: missing, too long, too short — read-only |
 | `steamgears-autopilot/optimize-site-seo` | Whole-site SEO/AEO/GEO scan in one pass; `fix=true` also writes the missing meta |
 
@@ -103,9 +106,10 @@ so the failure is visible instead of silent. A 202 from the API only means
 
 Queue page with Re-queue / Delete, *Approve & Queue* / *Approve only* / *Reject*
 on drafts, Campaigns (learning matrix, winners and losers), Reports (30-day ROI and
-ROAS against the budget, attributed orders), Etsy orders and profit, Full Auto
-(suppressed combinations, reposts) and an XML product feed for Google Merchant
-Center and Pinterest Catalogs (*Google Feed*, needs a feed secret and WooCommerce).
+ROAS against the budget, attributed orders), **Evergreen** (mark a page, see its
+budget and next share, recycle now), Etsy orders and profit, Full Auto (suppressed
+combinations, reposts) and an XML product feed for Google Merchant Center and
+Pinterest Catalogs (*Google Feed*, needs a feed secret and WooCommerce).
 
 ## Whole-site SEO, GEO and AEO (7.19)
 
@@ -203,6 +207,50 @@ briefly down. So the gate catches what it can prove without the network: placeho
 links with no domain, `http` instead of `https`, and internal addresses that do not resolve. A Pinterest pin
 that 404s is still only found by opening it.
 
+## Duplicate guard across systems (7.40.1)
+
+The queue has more than one writer: the AI generator, the Studio, the REST API, an MCP client and
+Command Center can all add a post, and two of them can hand over the same one. Command Center syncs
+every 30 minutes, so a dashboard that retries a hand-over would post twice.
+
+`includes/duplicate.php` (`SGAP_Duplicate`) keys on the fingerprint the database already indexes —
+`channel|destination_url|title`, sha256 — and refuses the second one with **409** and a message that
+names the row it collided with:
+
+> Already queued as #412 (queued, 2026-11-08 10:00). The same channel, destination and title went in
+> in the last 30 days — change the title, or delete the old row if this repeat is deliberate.
+
+- **Still queued always blocks**, however old the row is: it is about to go out.
+- **A published post blocks for `dupe_days`** (Settings → Publishing, default **30**, `0` = the whole
+  history), so an evergreen campaign can legitimately repeat a title next quarter.
+- **Failed rows never block** — a post that gave up is the owner's to retry.
+- `/snapshot` carries `fingerprint` on every queue row, so an outside dashboard can recognise its own
+  hand-over instead of learning from a 409.
+
+## Evergreen recycling (7.41)
+
+Some pages keep earning long after their first post: a fitting guide, the goggles everyone searches for,
+the corset explainer. Mark one as **evergreen** — in the editor sidebar, on the **Evergreen** page, or with
+the `mark-evergreen` ability — and the plugin brings it back on a schedule with a **freshly written
+caption**, not the same one again.
+
+- **Settings → Evergreen** holds the four numbers: the switch, the days between two shares (default 60),
+the default share budget per page (default 3) and how many pages may be recycled per day (default 1).
+- A page can override the budget and set an **expiry date** in the editor; `0` shares and an empty date mean
+"use the setting" and "never expires".
+- Each share rotates to the next channel (and the next angle) and goes through the normal queue, so the
+  quality gate, pre-flight, blackout calendar and duplicate guard all apply. A share is counted when the
+  post reaches the queue; a page with a post still queued is skipped, not doubled.
+- The variation prompt gets the page, the channel, the angle and the last captions for that page, and is
+  told what not to repeat. The `sgap_evergreen_variation` filter replaces the AI call with a human editor or
+  another model.
+- An expired page or one that has used its budget stays marked but stops; the Evergreen page says which
+  of the two it is, in words.
+
+The daily cron runs the recycler after the normal generator (20 minutes past the hour), and the **Evergreen**
+page has a *Recycle now* button plus `recycle-evergreen` for an MCP client. Nothing is published by the
+recycler itself: it only queues, exactly like the AI writer.
+
 ## Post meta audit (7.23)
 
 The ability `steamgears-autopilot/meta-audit` lets Claude run the meta round itself: it reads the published
@@ -258,6 +306,89 @@ becomes `reminded`.
 RSS mode uses the same path: a flagged item is held back from the feed (leaving it in would be the opposite of
 "do not post this one for me") and mailed instead.
 
+## Bluesky (direct posting)
+
+Bluesky needs no app review and no partner tier, so the plugin posts there itself instead of going through
+Publer: `includes/bluesky.php` logs in with `com.atproto.server.createSession` and posts with
+`com.atproto.repo.createRecord`, both through WordPress' HTTP API. Configure it under **Settings → Publer**:
+
+1. **Handle** — e.g. `steamgears.bsky.social`. The `@` is optional.
+2. **App password** — Bluesky → Settings → Privacy and security → App passwords. Not the account password.
+   It is stored like the Publer key: never shown again, and an empty field keeps the saved value.
+3. **Channels** — add `bluesky` to the list. That is also the switch: drop it again, or clear the password,
+   and posts for that channel go back to Publer.
+
+The login is cached for 90 minutes, and a refused token (401) is renewed once before the post is retried.
+Text follows Bluesky's 300 **graphemes**, not bytes: the tracking link is reserved first and never cut, the
+body is trimmed at a grapheme boundary with an ellipsis, and the link is sent as a richtext facet so it is
+clickable. Hashtags become tag facets. Direct posting runs in API mode only — in RSS mode the feed still owns
+every channel.
+
+Every failure is the ordinary path: missing credentials, a refused login, a refused post and a network error
+all put the item back in the queue with the same backoff, fire the alert after the last attempt and write a
+publish-log row. Nothing is swallowed, and no SDK is needed.
+
+## Mastodon (direct posting)
+
+One call to the instance's own API: `POST {instance}/api/v1/statuses` with the access token as a Bearer header
+and an `Idempotency-Key` per queue item, so a retried run cannot post twice. Settings → Publer:
+
+1. **Instance** — the server the account lives on, e.g. `mastodon.social`. `https://` is added when missing.
+2. **Access token** — Preferences → Development → New application, scope `write:statuses`.
+3. **Channels** — add `mastodon`. Removing it, or clearing the token, hands the channel back to Publer.
+
+The limit is **500 characters** by default because every instance accepts that; raise *Mastodon limit* only when
+the instance documents more. Trimming is grapheme-aware and keeps the tracking link whole. The API's own error
+text — `The access token is invalid`, a validation message — is what lands in the queue and the publish log,
+so a refused post says why.
+
+## Telegram (direct posting)
+
+One call to `https://api.telegram.org/bot<token>/sendMessage`. Settings → Publer:
+
+1. **Bot token** — from BotFather (`/newbot`, or `/token` for an existing bot).
+2. **Chat id** — `@channelname` for a public channel, or the numeric id; a group id is negative. The bot has to
+   be an administrator of the channel, otherwise the API refuses the message.
+3. **Channels** — add `telegram`.
+
+Telegram answers **HTTP 200 with `{"ok": false}`** when it refuses a message, so the plugin checks `ok` before
+anything else and reports `description` as the error — a refusal never looks like a published post. The limit is
+4096 characters, trimmed the same way as the others, and the bot token never appears in an error message.
+
+## Multi-language variants
+
+One source post can carry a caption per language. Under **Settings → AI content**, set the language the posts
+are written in (*Source language*, default `en`) and the languages you want (*Languages*, e.g. `da,sv,de`).
+When the list is not empty, every post that enters the queue also queues one translated caption per language.
+
+The translated page comes from **WPML or Polylang** — the plugin never guesses a URL. A language only gets a
+variant when the post has a translation in that language, and the variant points at that translation instead
+of the original. The caption is translated by the configured model through the same HTTP API as the rest of
+the plugin, and the `sgap_locale_translator` filter can hand that job to DeepL or to a human instead.
+
+Nothing is dropped silently: a language without a translated page, without an AI key, with an API error or
+with an empty answer is reported back in `locale_errors` on the queue result, while the source post stays
+queued. Variants are ordinary queue rows — same channel, angle, format, image, quality gate and blackout
+rules — carrying their language and the id of the post they came from, and a variant never spawns variants
+of its own.
+
+## Command Center link (7.33)
+
+Command Center (the self-hosted dashboard) talks to this plugin **one way**: it reads `GET /wp-json/sgap/v1/snapshot`
+every 30 minutes and sends posts as drafts with `POST /drafts`, using an administrator application password.
+Nothing on the site calls Command Center.
+
+- Every Command Center call carries `X-Command-Center: <version>`. The plugin notes it (option `sgap_cc_seen`,
+  at most once a minute, only for administrators on the `sgap/v1` routes).
+- The Self-check card shows **"Command Center … connected · last sync N min ago"**; `status` and `/snapshot`
+  report it as `command_center` (`connected` / `stale` / `never`).
+- If a Command Center that used to call has been silent for **more than 2 hours**, the daily self-check lists it
+  as a problem (and so the alerts fire). A site that never had Command Center is not nagged.
+- Command Center 7.19+ also calls `wp-cron.php` every 5 minutes, so the publishing cron runs on time even on a
+  quiet site. A real host cron (below) is still the better fix.
+- The **Command Center URL** setting (General) adds a "Log ind i Command Center" button to the dashboard. It opens
+  the dashboard in a new tab. Leave it empty to hide the button. The plugin does not call Command Center; the link is only a shortcut.
+
 ## Updates
 
 From 7.6 the plugin updates itself from GitHub (`humle93/steamgears-site`, branch `main`):
@@ -273,8 +404,16 @@ before it, because the MCP surface can read plugins but cannot install or activa
 1. Bump `Version:` in `steamgears-autopilot.php` and `SGAP_VERSION` — they must agree, CI fails otherwise.
 2. Rebuild the zip from the folder so the name and the contents match:
    `cd plugins && rm -f steamgears-autopilot-*.zip && zip -qr steamgears-autopilot-v<version>.zip steamgears-autopilot`
-3. `php plugins/tests/smoke.php` (229 checks) and `diff -r` the zipped copy against the source. CI repeats
-   both, plus `php -l` on PHP 8.0–8.5 and WordPress 6.4 / 7.1 / latest.
+3. `php plugins/tests/smoke.php` (523 checks) and `diff -r` the zipped copy against the source. CI repeats
+   both, plus `php -l` on PHP 8.0–8.5 and WordPress 6.4 / 7.1 / latest. The plugin is also exercised inside
+   a real WordPress: `bash plugins/tests/integration.sh` (needs `php` with `mysqli`, `wp-cli`, `curl` and a
+   reachable MySQL; 244 checks, including the four model rules and evergreen recycling) — it installs
+   WordPress, activates the plugin, runs the in-process, admin-tool and automation suites, then hits `/go/`,
+   the feeds, the REST routes and uninstall over HTTP. On WordPress 6.4 the same run passes 179 checks;
+   the ability groups are skipped because the Abilities API starts at 6.9. The model dropdown is proven
+   against the real catalogue with `curl -s -o /tmp/models.json https://api.aimlapi.com/v1/models` and
+   `SGAP_LIVE_CATALOG=/tmp/models.json php plugins/tests/smoke.php` — every `<option>` must match an id AIMLAPI
+   actually offers.
 4. Commit code, zip, README and `ROADMAP.md` together and push to `main`.
 5. **Click *Plugins → Update*** (or *Dashboard → Updates*). Auto-updates can be switched on in the same
    screen, which makes step 5 happen on its own after the next WP-Cron run.
@@ -364,7 +503,11 @@ define('SGAP_TELEGRAM_BOT_TOKEN', '...');
 ## Click tracking
 
 Every queue item gets a short link `https://steamgears.eu/go/<id>/`. Use that link
-in the post instead of the raw URL. A visit:
+in the post instead of the raw URL. **A `/go/<id>/` with no queue item is treated as a product short
+link** and resolves to that product's permalink (7.32.0), so the same route can be used in guides,
+newsletters and print; only an id that is neither a queue item nor a product falls back to the front
+page. Product links are not counted in the per-channel click stats, because they have no queue item
+to attribute to. A visit:
 
 1. logs a `click` event (bots and link-preview crawlers are ignored),
 2. sets a first-party cookie `sgap_click` (30 days, HttpOnly),
@@ -427,6 +570,5 @@ unattended:
   the actor (cron, admin, REST, WP-CLI). The queue shows the current state; the log keeps the history the
   `error` column overwrites. Rows are kept for `audit_keep_days` (default 90, `0` = forever) and pruned by
   the daily maintenance job.
-- The Etsy API settings and the direct Instagram/Pinterest/TikTok/YouTube/Reddit/Telegram keys are
-  registered but unused. Publishing goes through Publer (RSS feeds or API), and `/etsy/orders` takes a
-  manual import.
+- Etsy is a manual import: there is no Etsy API client, and the five Etsy fields were removed from Settings
+  in 7.33.4. Publishing goes through Publer (RSS feeds or API), and `/etsy/orders` takes the import.

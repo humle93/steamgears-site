@@ -25,7 +25,7 @@ class SGAP_Preflight {
         'twitter' => 280,
         'bluesky' => 300,
         'mastodon' => 500,
-        'telegram' => 1024,
+        'telegram' => 4096,
         'google' => 1500
     ];
 

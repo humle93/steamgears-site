@@ -1,0 +1,1213 @@
+{
+ "jsonrpc": "2.0",
+ "id": 2,
+ "result": {
+  "tools": [
+   {
+    "name": "acf_get_fields",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "acf_update_fields",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "mcp_list_changes",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "mcp_ping",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "mcp_undo_change",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "mwai_image",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "mwai_vision",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_add_post_terms",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_alter_post",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_count_media",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_count_posts",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_count_terms",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_create_comment",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_create_note",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_create_post",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_create_term",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_create_user",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_delete_comment",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_delete_media",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_delete_note",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_delete_post",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_delete_post_meta",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_delete_term",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_edit_blocks",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_edit_menu",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_edit_shortcodes",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_edit_widgets",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_get_blocks",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_get_comments",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_get_diagnostics",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_get_form_entries",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_get_media",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_get_menus",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_get_option",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_get_post",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_get_post_meta",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_get_post_snapshot",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_get_post_terms",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_get_post_types",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_get_posts",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_get_redirects",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_get_rendered",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_get_revisions",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_get_seo",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_get_shortcodes",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_get_site_style",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_get_taxonomies",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_get_templates",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_get_terms",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_get_users",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_get_widgets",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_insert_block_pattern",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_list_block_patterns",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_list_plugins",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_moderate_comments",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_open_template",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_preview_link",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_restore_revision",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_save_redirect",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_set_featured_image",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_site_maintenance",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_update_comment",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_update_media",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_update_note",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_update_option",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_update_post",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_update_post_meta",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_update_seo",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_update_site_style",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_update_term",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_update_user",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_upload_media",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_upload_request",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "wp_write_blocks",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "steamgears-tools_site-info",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "steamgears-tools_get-option",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "steamgears-tools_update-option",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "steamgears-tools_undo",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "steamgears-tools_list-plugins",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "steamgears-tools_set-plugin-state",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "steamgears-tools_list-themes",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "steamgears-tools_flush-rewrites",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "steamgears-tools_flush-caches",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "steamgears-tools_list-cron",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "steamgears-tools_run-cron",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "steamgears-tools_list-posts",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "steamgears-tools_get-post",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "steamgears-tools_create-post",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "steamgears-tools_update-post",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "steamgears-tools_trash-post",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "steamgears-tools_list-media",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "steamgears-tools_upload-media",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "steamgears-tools_list-products",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "steamgears-tools_get-product",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "steamgears-tools_update-product",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "steamgears-tools_indexnow-submit",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "steamgears-tools_indexnow-status",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "steamgears-tools_sitemap-audit",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "steamgears-tools_list-abilities",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "steamgears-tools_call-ability",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "steamgears-autopilot_check-keys",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    },
+    "annotations": {
+     "readOnlyHint": false
+    }
+   },
+   {
+    "name": "steamgears-autopilot_check-post",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    },
+    "annotations": {
+     "readOnlyHint": true
+    }
+   },
+   {
+    "name": "steamgears-autopilot_check-publer",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    },
+    "annotations": {
+     "readOnlyHint": true
+    }
+   },
+   {
+    "name": "steamgears-autopilot_edit-draft",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    },
+    "annotations": {
+     "readOnlyHint": false
+    }
+   },
+   {
+    "name": "steamgears-autopilot_enable-full-access",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    },
+    "annotations": {
+     "readOnlyHint": false
+    }
+   },
+   {
+    "name": "steamgears-autopilot_error-log",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    },
+    "annotations": {
+     "readOnlyHint": true
+    }
+   },
+   {
+    "name": "steamgears-autopilot_generate",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    },
+    "annotations": {
+     "readOnlyHint": false
+    }
+   },
+   {
+    "name": "steamgears-autopilot_generate-image",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    },
+    "annotations": {
+     "readOnlyHint": false
+    }
+   },
+   {
+    "name": "steamgears-autopilot_get-settings",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    },
+    "annotations": {
+     "readOnlyHint": true
+    }
+   },
+   {
+    "name": "steamgears-autopilot_keyword-research",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    },
+    "annotations": {
+     "readOnlyHint": false
+    }
+   },
+   {
+    "name": "steamgears-autopilot_list-drafts",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    },
+    "annotations": {
+     "readOnlyHint": true
+    }
+   },
+   {
+    "name": "steamgears-autopilot_list-plugins",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    },
+    "annotations": {
+     "readOnlyHint": true
+    }
+   },
+   {
+    "name": "steamgears-autopilot_list-queue",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    },
+    "annotations": {
+     "readOnlyHint": true
+    }
+   },
+   {
+    "name": "steamgears-autopilot_manage-plugin",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    },
+    "annotations": {
+     "readOnlyHint": false
+    }
+   },
+   {
+    "name": "steamgears-autopilot_manage-queue",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    },
+    "annotations": {
+     "readOnlyHint": false
+    }
+   },
+   {
+    "name": "steamgears-autopilot_meta-audit",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    },
+    "annotations": {
+     "readOnlyHint": true
+    }
+   },
+   {
+    "name": "steamgears-autopilot_optimize-seo",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    },
+    "annotations": {
+     "readOnlyHint": false
+    }
+   },
+   {
+    "name": "steamgears-autopilot_optimize-site-seo",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    },
+    "annotations": {
+     "readOnlyHint": false
+    }
+   },
+   {
+    "name": "steamgears-autopilot_publish",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    },
+    "annotations": {
+     "readOnlyHint": false
+    }
+   },
+   {
+    "name": "steamgears-autopilot_purge-cache",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    },
+    "annotations": {
+     "readOnlyHint": false
+    }
+   },
+   {
+    "name": "steamgears-autopilot_queue-post",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    },
+    "annotations": {
+     "readOnlyHint": false
+    }
+   },
+   {
+    "name": "steamgears-autopilot_rescue-images",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    },
+    "annotations": {
+     "readOnlyHint": false
+    }
+   },
+   {
+    "name": "steamgears-autopilot_review-draft",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    },
+    "annotations": {
+     "readOnlyHint": false
+    }
+   },
+   {
+    "name": "steamgears-autopilot_run-cron",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    },
+    "annotations": {
+     "readOnlyHint": false
+    }
+   },
+   {
+    "name": "steamgears-autopilot_self-check",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    },
+    "annotations": {
+     "readOnlyHint": false
+    }
+   },
+   {
+    "name": "steamgears-autopilot_set-mode",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    },
+    "annotations": {
+     "readOnlyHint": false
+    }
+   },
+   {
+    "name": "steamgears-autopilot_site-health",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    },
+    "annotations": {
+     "readOnlyHint": true
+    }
+   },
+   {
+    "name": "steamgears-autopilot_status",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    },
+    "annotations": {
+     "readOnlyHint": true
+    }
+   },
+   {
+    "name": "steamgears-autopilot_update",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    },
+    "annotations": {
+     "readOnlyHint": false
+    }
+   },
+   {
+    "name": "steamgears-autopilot_update-settings",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    },
+    "annotations": {
+     "readOnlyHint": false
+    }
+   },
+   {
+    "name": "steamgears-autopilot_write-article",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    },
+    "annotations": {
+     "readOnlyHint": false
+    }
+   },
+   {
+    "name": "steamgears-autopilot_write-weekly-articles",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    },
+    "annotations": {
+     "readOnlyHint": false
+    }
+   },
+   {
+    "name": "woocommerce_products_list",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "woocommerce_product-update",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    }
+   },
+   {
+    "name": "mcp-adapter/discover-abilities",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    },
+    "annotations": {
+     "readOnlyHint": true
+    }
+   },
+   {
+    "name": "mcp-adapter/get-ability-info",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    },
+    "annotations": {
+     "readOnlyHint": true
+    }
+   },
+   {
+    "name": "mcp-adapter/execute-ability",
+    "description": "",
+    "inputSchema": {
+     "type": "object",
+     "properties": {}
+    },
+    "annotations": {
+     "readOnlyHint": false
+    }
+   }
+  ],
+  "serverInfo": {
+   "name": "fixture",
+   "version": "1"
+  }
+ }
+}

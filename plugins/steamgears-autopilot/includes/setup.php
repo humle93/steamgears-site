@@ -21,8 +21,7 @@ class SGAP_Setup {
         'batch_size' => 'Posts per 15-minute run', 'quiet_start' => 'Quiet from', 'quiet_end' => 'Quiet until', 'labor_rate' => 'Your hourly rate',
         'monthly_budget' => 'Monthly budget', 'target_roi' => 'Target ROI %', 'winner_min_clicks' => 'Winner after clicks', 'loser_min_clicks' => 'Loser after clicks',
         'repost_cooldown_days' => 'Days before a page is promoted again', 'repost_max' => 'Max reposts', 'merchant_feed_secret' => 'Product feed secret',
-        'etsy_shop_id' => 'Etsy shop ID', 'etsy_oauth_token' => 'Etsy OAuth token', 'etsy_refresh_token' => 'Etsy refresh token',
-        'etsy_shipping_profile_id' => 'Etsy shipping profile', 'etsy_return_policy_id' => 'Etsy return policy',
+        'evergreen_enabled' => 'Recycle evergreen pages', 'evergreen_after_days' => 'Days between two shares', 'evergreen_max_shares' => 'Default shares per page', 'evergreen_batch' => 'Pages recycled per day',
         'auto_images' => 'AI photos for Instagram & Pinterest', 'auto_seo' => 'SEO meta for new posts & products', 'articles_per_week' => 'SEO articles per week',
         'auto_publish_articles' => 'Publish weekly articles automatically', 'weekly_report' => 'Weekly e-mail report', 'rescue_hosts' => 'Copy images from these servers'
     ];
@@ -31,9 +30,10 @@ class SGAP_Setup {
     const TABS = [
         'basics' => ['Basics', 'admin-home', ['autopilot_enabled', 'full_auto_enabled', 'channels', 'posts_per_day']],
         'ai' => ['AI & images', 'superhero-alt', ['ai_provider', 'ai_api_key', 'ai_model', 'ai_base_url', 'content_language', 'image_model', 'image_api_key', 'serpapi_key']],
-        'publishing' => ['Publishing', 'megaphone', ['publish_mode', 'publer_api_key', 'publer_workspace_id', 'publer_pinterest_board', 'quality_gate', 'banned_words']],
+        'publishing' => ['Publishing', 'megaphone', ['publish_mode', 'publer_api_key', 'publer_workspace_id', 'publer_pinterest_board', 'quality_gate', 'banned_words', 'dupe_days']],
         'schedule' => ['Schedule & limits', 'clock', ['quiet_start', 'quiet_end', 'blackout_ranges', 'daily_cap', 'batch_size', 'repost_cooldown_days']],
-        'shop' => ['Shop & feeds', 'cart', ['merchant_feed_secret', 'etsy_shop_id', 'etsy_oauth_token', 'etsy_refresh_token', 'etsy_shipping_profile_id', 'etsy_return_policy_id']],
+        'evergreen' => ['Evergreen', 'update', ['evergreen_enabled', 'evergreen_after_days', 'evergreen_max_shares', 'evergreen_batch']],
+        'shop' => ['Shop & feeds', 'cart', ['merchant_feed_secret']],
         'automation' => ['Automation', 'update-alt', ['auto_images', 'auto_seo', 'articles_per_week', 'auto_publish_articles', 'weekly_report', 'rescue_hosts']],
         'advanced' => ['Economics', 'chart-line', ['labor_rate', 'monthly_budget', 'target_roi', 'winner_min_clicks', 'loser_min_clicks', 'repost_max']]
     ];
@@ -177,6 +177,52 @@ class SGAP_Setup {
         return $html . '</select>';
     }
 
+    /**
+     * The model dropdown: only what the provider lists right now can be picked, so a retired or
+     * guessed model name can no longer be saved. Without a list the field stays free text, so an
+     * unreachable provider never blocks the rest of the form.
+     */
+    public static function model_field(string $name): string {
+        $id = 'sgap_ai_model';
+        $current = trim((string) SGAP_Settings::get('ai_model'));
+        $default = SGAP_AI::default_model();
+        $models = SGAP_AI::catalog();
+        if ($models === []) {
+            return '<input type="text" id="' . esc_attr($id) . '" name="' . esc_attr($name) . '" value="' . esc_attr($current)
+                . '" class="sgap-text" spellcheck="false" placeholder="' . esc_attr($default !== '' ? $default : 'model id') . '">'
+                . '<p class="sgap-hint">Could not read the model list from ' . esc_html(SGAP_AI::provider_name())
+                . ' right now, so the name is free text. Leave it empty for the default'
+                . ($default !== '' ? ' (' . esc_html($default) . ')' : '') . '.</p>';
+        }
+        $html = '<select id="' . esc_attr($id) . '" name="' . esc_attr($name) . '" class="sgap-model">'
+            . '<option value=""' . selected($current, '', false) . '>'
+            . esc_html($default !== '' ? 'Provider default: ' . $default : 'Provider default') . '</option>';
+        if ($current !== '' && !in_array($current, $models, true)) {
+            // Never hide what is saved: the owner has to see that it is gone.
+            $html .= '<option value="' . esc_attr($current) . '" selected>' . esc_html($current) . ' (not offered any more)</option>';
+        }
+        foreach (self::group_models($models) as $vendor => $ids) {
+            $html .= '<optgroup label="' . esc_attr($vendor) . '">';
+            foreach ($ids as $model) {
+                $html .= '<option value="' . esc_attr($model) . '"' . selected($current, $model, false) . '>' . esc_html($model) . '</option>';
+            }
+            $html .= '</optgroup>';
+        }
+        return $html . '</select><p class="sgap-hint">' . count($models) . ' model(s) that ' . esc_html(SGAP_AI::provider_name())
+            . ' offers right now. The list is refreshed every 12 hours, so a retired model cannot be picked, and saving checks it again.</p>';
+    }
+
+    /** Model ids by their vendor prefix, so hundreds of ids stay navigable in one dropdown. */
+    public static function group_models(array $models): array {
+        $groups = [];
+        foreach ($models as $model) {
+            $vendor = strpos($model, '/') !== false ? (string) strstr($model, '/', true) : 'other';
+            $groups[$vendor][] = $model;
+        }
+        ksort($groups);
+        return $groups;
+    }
+
     /** One settings field, named for options.php (sgap_<key>) or for the wizard (settings[<key>]). */
     public static function field(string $key, bool $wizard = false): string {
         $name = $wizard ? "settings[{$key}]" : 'sgap_' . $key;
@@ -209,6 +255,9 @@ class SGAP_Setup {
                 $html .= '<label class="sgap-clear"><input type="checkbox" name="sgap_clear[' . esc_attr($key) . ']" value="1"> Remove saved key</label>';
             }
             return $html;
+        }
+        if ($key === 'ai_model') {
+            return self::model_field($name);
         }
         if (in_array($key, SGAP_Settings::TEXTAREA_KEYS, true)) {
             return '<textarea id="' . esc_attr($id) . '" name="' . esc_attr($name) . '" rows="4" class="sgap-text" spellcheck="false">' . esc_textarea((string) SGAP_Settings::get($key)) . '</textarea>';

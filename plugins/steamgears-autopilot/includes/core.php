@@ -22,6 +22,7 @@ class SGAP_Install {
     const CLEANUP_CRON = 'sgap_daily_cleanup';
     const PUBLISH_CRON = 'sgap_publish_tick';
     const GENERATE_CRON = 'sgap_generate';
+    const EVERGREEN_CRON = 'sgap_evergreen';
     const QUARTER_HOUR = 'sgap_quarter_hour';
 
     const TABLES = [
@@ -45,6 +46,15 @@ class SGAP_Install {
         'sgap_repost_max' => 3,
         'sgap_posts_per_day' => 2,
         'sgap_channels' => 'facebook,instagram,pinterest',
+        'sgap_locale_source' => 'en',
+        'sgap_locales' => '',
+        'sgap_bluesky_handle' => '',
+        'sgap_bluesky_app_password' => '',
+        'sgap_mastodon_instance' => '',
+        'sgap_mastodon_token' => '',
+        'sgap_mastodon_limit' => 500,
+        'sgap_telegram_bot_token' => '',
+        'sgap_telegram_chat_id' => '',
         'sgap_utm_campaign' => 'steamgears_premium_evergreen',
         'sgap_ai_provider' => 'anthropic',
         'sgap_publish_mode' => 'rss',
@@ -56,8 +66,13 @@ class SGAP_Install {
         'sgap_alert_email' => '',
         'sgap_alert_dry_days' => 2,
         'sgap_audit_keep_days' => 90,
+        'sgap_dupe_days' => 30,
         'sgap_articles_per_week' => 0,
-        'sgap_rescue_hosts' => 'steamgears.juno.page'
+        'sgap_rescue_hosts' => 'steamgears.juno.page',
+        'sgap_evergreen_enabled' => 'no',
+        'sgap_evergreen_after_days' => 60,
+        'sgap_evergreen_max_shares' => 3,
+        'sgap_evergreen_batch' => 1
     ];
 
     public static function activate(): void {
@@ -66,7 +81,7 @@ class SGAP_Install {
 
     public static function deactivate(): void {
         self::clear_legacy_cron();
-        foreach ([self::CLEANUP_CRON, self::PUBLISH_CRON, self::GENERATE_CRON] as $hook) {
+        foreach ([self::CLEANUP_CRON, self::PUBLISH_CRON, self::GENERATE_CRON, self::EVERGREEN_CRON] as $hook) {
             wp_clear_scheduled_hook($hook);
         }
         if (class_exists('SGAP_Auto')) {
@@ -117,6 +132,8 @@ class SGAP_Install {
         content_type VARCHAR(40) NOT NULL DEFAULT 'product',
         format VARCHAR(40) NOT NULL DEFAULT 'pin',
         remind TINYINT(1) NOT NULL DEFAULT 0,
+        locale VARCHAR(10) NOT NULL DEFAULT '',
+        source_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
         destination_url TEXT NOT NULL,
         title TEXT NOT NULL,
         body LONGTEXT NULL,
@@ -137,7 +154,8 @@ class SGAP_Install {
         KEY status_scheduled (status,scheduled_at),
         KEY status_sent (status,sent_at),
         KEY published_at (published_at),
-        KEY fingerprint (fingerprint)
+        KEY fingerprint (fingerprint),
+        KEY source_locale (source_id,locale)
         ) $charset;");
 
         dbDelta("CREATE TABLE {$wpdb->prefix}sgap_events (
@@ -285,6 +303,7 @@ class SGAP_Install {
         foreach ([
             self::CLEANUP_CRON => ['daily', HOUR_IN_SECONDS],
             self::GENERATE_CRON => ['daily', 10 * MINUTE_IN_SECONDS],
+            self::EVERGREEN_CRON => ['daily', 20 * MINUTE_IN_SECONDS],
             self::PUBLISH_CRON => [self::QUARTER_HOUR, 5 * MINUTE_IN_SECONDS]
         ] as $hook => [$recurrence, $delay]) {
             if (!wp_next_scheduled($hook)) {
@@ -304,25 +323,27 @@ register_deactivation_hook(SGAP_FILE, ['SGAP_Install', 'deactivate']);
 
 /* ---------------- SETTINGS ---------------- */
 class SGAP_Settings {
-    const BOOL_KEYS = ['autopilot_enabled', 'full_auto_enabled', 'auto_images', 'auto_seo', 'auto_publish_articles', 'weekly_report'];
+    const BOOL_KEYS = ['autopilot_enabled', 'full_auto_enabled', 'auto_images', 'auto_seo', 'auto_publish_articles', 'weekly_report', 'evergreen_enabled'];
     const HOUR_KEYS = ['quiet_start', 'quiet_end'];
     const INT_KEYS = [
         'daily_cap','batch_size','labor_rate','monthly_budget','target_roi',
-        'winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max','posts_per_day','articles_per_week','alert_dry_days','audit_keep_days'
+        'winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max','posts_per_day','articles_per_week','alert_dry_days','audit_keep_days','dupe_days','mastodon_limit',
+        'evergreen_after_days','evergreen_max_shares','evergreen_batch'
     ];
     /** Never echoed back to the browser; can be overridden by SGAP_<KEY> constants in wp-config.php. */
     const SECRET_KEYS = [
         'publer_api_key','ai_api_key','image_api_key','serpapi_key',
-        'pinterest_token','instagram_token','telegram_bot_token','tiktok_token','youtube_token',
-        'etsy_oauth_token','etsy_refresh_token','merchant_feed_secret'
+        'telegram_bot_token',
+        'merchant_feed_secret','bluesky_app_password','mastodon_token'
     ];
     /** Multi-line text settings, shown as a textarea. */
     const TEXTAREA_KEYS = ['blackout_ranges', 'banned_words'];
     const TEXT_KEYS = [
         'publer_workspace_id','publer_pinterest_board','channels','ai_model','ai_base_url','image_model','content_language','rescue_hosts',
-        'telegram_chat_id','email_test_recipient','youtube_channel_id','reddit_username',
-        'reddit_subreddit','etsy_shop_id','etsy_shipping_profile_id','etsy_return_policy_id','ai_mode','alert_email',
-        'blackout_ranges','banned_words','utm_campaign'
+        'telegram_chat_id',
+        'alert_email',
+        'blackout_ranges','banned_words','utm_campaign','bluesky_handle','mastodon_instance',
+        'locale_source','locales','command_center_url'
     ];
     /** Settings with a fixed list of values, shown as a select. */
     const CHOICE_KEYS = [
@@ -334,16 +355,24 @@ class SGAP_Settings {
 
     /** Shown in the settings page. Keys not listed here stay registered for older data but are unused. */
     const SECTIONS = [
-        'General' => ['autopilot_enabled','full_auto_enabled','daily_cap','batch_size','quiet_start','quiet_end','blackout_ranges','quality_gate','banned_words','utm_campaign'],
-        'Publer' => ['publish_mode','publer_api_key','publer_workspace_id','publer_pinterest_board','channels'],
-        'AI content' => ['ai_provider','ai_api_key','ai_model','ai_base_url','posts_per_day','content_language','image_model','image_api_key','serpapi_key'],
+        'General' => ['autopilot_enabled','full_auto_enabled','daily_cap','batch_size','quiet_start','quiet_end','blackout_ranges','quality_gate','banned_words','dupe_days','utm_campaign','command_center_url'],
+        'Publer' => ['publish_mode','publer_api_key','publer_workspace_id','publer_pinterest_board','channels','bluesky_handle','bluesky_app_password','mastodon_instance','mastodon_token','mastodon_limit','telegram_bot_token','telegram_chat_id'],
+        'AI content' => ['ai_provider','ai_api_key','ai_model','ai_base_url','posts_per_day','content_language','locale_source','locales','image_model','image_api_key','serpapi_key'],
         'Economics' => ['labor_rate','monthly_budget','target_roi','winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max'],
+        'Evergreen' => ['evergreen_enabled','evergreen_after_days','evergreen_max_shares','evergreen_batch'],
         'Alerts and log' => ['alert_mode','alert_email','alert_dry_days','audit_keep_days'],
-        'Etsy' => ['etsy_shop_id','etsy_oauth_token','etsy_refresh_token','etsy_shipping_profile_id','etsy_return_policy_id'],
         'Google Feed' => ['merchant_feed_secret']
     ];
 
     const HELP = [
+        'evergreen_enabled' => 'Keep promoting pages that keep earning: once a page is marked, it is recycled with a freshly written caption after the waiting period, until it has used its share budget or reached its expiry date.',
+        'evergreen_after_days' => 'How long a page waits between two shares. The same clock the normal generator uses, so a recycled page is not also promoted as new the same week.',
+        'evergreen_max_shares' => 'Default budget per page: how many recycled posts it may produce. A page can override it in the editor, and 0 there means this number.',
+        'evergreen_batch' => 'How many evergreen pages may be recycled per day, each on its own channel in rotation. 1 keeps the queue balanced; the button on the Evergreen page can recycle more at once.',
+        'command_center_url' => 'Address of your Steamgears Command Center dashboard, e.g. https://cc.example.com. Adds a Log ind button to the dashboard. Empty = no button.',
+        'dupe_days' => 'How far back an identical post blocks a new one: same channel, destination and title. 30 days by default, 0 = the whole history. A post that is still queued always blocks, however old it is.',
+        'locale_source' => 'The language the source posts are written in. Every other language in the list gets its own translated caption.',
+        'locales' => 'Comma-separated languages, e.g. da,sv,de. A queued post also queues one translated caption per language, linking to that language\'s version of the page (WPML or Polylang). Languages without a translated page are reported, not posted. Needs an AI API key.',
         'autopilot_enabled' => 'Master switch: generate posts daily and publish the queue via Publer.',
         'full_auto_enabled' => 'On: AI posts go straight to the queue. Off: they wait under AI Drafts for your approval.',
         'publish_mode' => 'RSS: posts are released into one feed per channel; in Publer add each feed (Explore → RSS Feeds) and set it to Auto-post. API: posts are sent straight to Publer (needs a Business plan API key).',
@@ -359,7 +388,14 @@ class SGAP_Settings {
         'image_api_key' => 'Only needed when the AI provider is not AIMLAPI: an AIMLAPI key for images.',
         'serpapi_key' => 'serpapi.com → Manage API key. Gives the article writer live Google data: People also ask, related searches, top results.',
         'ai_api_key' => 'AIMLAPI: aimlapi.com → Dashboard → API Keys. Anthropic: console.anthropic.com → API keys.',
-        'channels' => 'Instagram and Pinterest posts need a photo; the Content Studio can create one.',
+        'channels' => 'Instagram and Pinterest posts need a photo; the Content Studio can create one. Comma-separated. Add bluesky to post there directly, without Publer — it needs the handle and an app password below, and is skipped (through Publer) until both are filled in.',
+        'bluesky_handle' => 'Your Bluesky handle, e.g. steamgears.bsky.social. The @ is optional. Used together with an app password to post directly; an email address works too but the handle is what readers see.',
+        'bluesky_app_password' => 'Bluesky → Settings → Privacy and security → App passwords (not the account password). Stays on this server: it is never shown again after saving, and an empty field keeps the stored value.',
+        'mastodon_instance' => 'Address of the server the account lives on, e.g. mastodon.social. There is no central Mastodon, so the token only works on the instance it was created on.',
+        'mastodon_token' => 'Mastodon → Preferences → Development → New application, then the access token of that application (scopes: write:statuses). Never shown again after saving; an empty field keeps the stored value.',
+        'mastodon_limit' => 'Characters the instance accepts in one post. 500 is what every server allows; raise it only when the instance documents a higher limit. The tracking link is always kept whole.',
+        'telegram_bot_token' => 'BotFather → /newbot (or /token for an existing bot). The token is what authorises the message; it is never shown again after saving.',
+        'telegram_chat_id' => 'Where the message lands: @channelname for a public channel, or the numeric id (a group is negative). The bot must be an administrator of the channel, or the API answers ok=false.',
         'daily_cap' => 'Never more than this many posts released per day, across all channels.',
         'batch_size' => 'How many due posts are released per 15-minute run.',
         'quiet_start' => 'No posts are released from this hour …',
@@ -388,7 +424,9 @@ class SGAP_Settings {
         return get_option('sgap_' . $key, $default);
     }
     public static function set(string $key, $value): void {
-        update_option('sgap_' . $key, $value);
+        // Secrets stay out of the autoloaded options blob, also when a write
+        // happens outside the install routine (key test, wizard, abilities).
+        update_option('sgap_' . $key, $value, in_array($key, self::SECRET_KEYS, true) ? false : null);
     }
     public static function enabled(string $key): bool {
         return self::get($key, 'no') === 'yes';
@@ -430,7 +468,13 @@ class SGAP_Settings {
                 'sanitize_callback' => match (true) {
                     // A campaign name ends up in a URL: strip everything a query
                     // string would have to encode, and never save an empty one.
+                    $key === 'locales' => [__CLASS__, 'sanitize_locales'],
+                    $key === 'locale_source' => [__CLASS__, 'sanitize_locale_code'],
                     $key === 'utm_campaign' => [__CLASS__, 'sanitize_campaign'],
+                    $key === 'command_center_url' => 'esc_url_raw',
+                    // A model the provider does not offer is what broke the chat once: refuse it
+                    // at the door, and let the owner pick one from the dropdown instead.
+                    $key === 'ai_model' => [__CLASS__, 'sanitize_model'],
                     // sanitize_text_field would flatten the newlines that separate the
                     // blackout ranges, leaving only the first range saved.
                     in_array($key, self::TEXTAREA_KEYS, true) => 'sanitize_textarea_field',
@@ -458,6 +502,64 @@ class SGAP_Settings {
                 }
             ]);
         }
+        // ai_model holds the concrete id in use, so a provider switch must not leave the old
+        // provider's id there: it is not offered by the new one, and the first call would fail
+        // before the fallback repaired it. Re-resolve it to the new provider's default instead.
+        add_action('update_option_sgap_ai_provider', [__CLASS__, 'keep_provider_model']);
+        add_action('add_option_sgap_ai_provider', [__CLASS__, 'keep_provider_model']);
+    }
+
+    /**
+     * Replaces a stored model the current provider does not offer with that provider's default.
+     * Runs when ai_provider changes, and does nothing while the catalogue cannot be read, so an
+     * unreachable provider never wipes a model that might well be fine.
+     */
+    public static function keep_provider_model(): void {
+        $stored = trim((string) get_option('sgap_ai_model', ''));
+        if ($stored === '') {
+            return;
+        }
+        $models = SGAP_AI::catalog();
+        if ($models === [] || in_array($stored, $models, true)) {
+            return;
+        }
+        update_option('sgap_ai_model', SGAP_AI::default_model());
+    }
+    /** 'DA, sv ,da' becomes 'da,sv': no junk, no duplicates, never the source language. */
+    public static function sanitize_locales($value): string {
+        return implode(',', SGAP_Locales::codes((string) $value));
+    }
+
+    /** A language code, or the source language when the value is not one. */
+    public static function sanitize_locale_code($value): string {
+        return SGAP_Locales::code((string) $value, SGAP_Locales::DEFAULT_SOURCE);
+    }
+
+    /**
+     * Only a model the provider actually lists may be stored; empty means "provider default".
+     * When the list cannot be read at all, the typed name is kept, so a provider that is briefly
+     * unreachable never blocks saving the rest of the form.
+     */
+    public static function sanitize_model($value): string {
+        $value = trim(sanitize_text_field((string) $value));
+        if ($value === '') {
+            // "Provider default" is stored as the model it resolves to, so the field says what is
+            // actually used instead of depending on a later change of provider or of that default.
+            return SGAP_AI::default_model();
+        }
+        $models = SGAP_AI::catalog();
+        if ($models === [] || in_array($value, $models, true)) {
+            return $value;
+        }
+        $previous = trim((string) get_option('sgap_ai_model', ''));
+        if (function_exists('add_settings_error')) {
+            add_settings_error('sgap_ai_model', 'sgap_model_unknown', sprintf(
+                '%s does not offer "%s", so the model was left unchanged. Pick one from the list.',
+                SGAP_AI::provider_name(),
+                $value
+            ));
+        }
+        return $previous;
     }
 }
 
@@ -585,6 +687,23 @@ class SGAP_Tracking {
         return $host !== '' && in_array($host, $allowed, true) ? $url : home_url('/');
     }
 
+    /**
+     * A /go/<id>/ that is not a queue item is a product short link (guides, print, campaigns).
+     * It resolves to the product permalink; anything unresolvable still lands on the front page.
+     */
+    public static function product_target(int $id): string {
+        if ($id > 0 && function_exists('wc_get_product')) {
+            $product = wc_get_product($id);
+            if ($product && method_exists($product, 'get_permalink')) {
+                $url = (string) $product->get_permalink();
+                if ($url !== '') {
+                    return $url;
+                }
+            }
+        }
+        return home_url('/');
+    }
+
     public static function redirect(): void {
         $id = absint(get_query_var(self::QUERY_VAR));
         if (!$id) {
@@ -597,7 +716,8 @@ class SGAP_Tracking {
         ));
         nocache_headers();
         if (!$row) {
-            wp_redirect(home_url('/'), 302, 'Steamgears');
+            // No queue row with this id: treat it as a product short link instead of the front page.
+            wp_redirect(self::product_target($id), 302, 'Steamgears');
             exit;
         }
 
@@ -716,16 +836,23 @@ class SGAP_Queue {
         // Per-post campaign: a twelve-post campaign can be told apart from the
         // evergreen stream in GA4 without changing the setting for everything else.
         $campaign = self::key($item['campaign'] ?? '', '', 60);
+        // P2.5: a variant knows its language and the queued post it was made from,
+        // so a translated caption never looks like an independent post.
+        $locale = self::key($item['locale'] ?? '', '', 10);
+        $source_id = absint($item['source_id'] ?? 0);
         if (SGAP_Settings::enabled('full_auto_enabled') && self::suppressed($channel, $angle, $content_type, $format)) {
             return new WP_Error('sgap_suppressed', 'Combination is currently suppressed.', ['status' => 422]);
         }
-        $fingerprint = hash('sha256', $channel . '|' . $destination . '|' . $title);
-        $existing = $wpdb->get_var($wpdb->prepare(
-            'SELECT id FROM ' . self::table() . " WHERE fingerprint = %s AND status <> 'failed' LIMIT 1",
-            $fingerprint
-        ));
-        if ($existing) {
-            return new WP_Error('sgap_duplicate', 'Already queued.', ['status' => 409, 'id' => (int) $existing]);
+        // P0.6: the fingerprint is channel + destination + title, so a second writer
+        // (Command Center, a script, an MCP client) cannot queue the same post twice.
+        $fingerprint = SGAP_Duplicate::fingerprint($channel, $destination, $title);
+        $existing = SGAP_Duplicate::find($fingerprint);
+        if ($existing !== null) {
+            return new WP_Error('sgap_duplicate', SGAP_Duplicate::message($existing), [
+                'status' => 409,
+                'id' => (int) $existing['id'],
+                'fingerprint' => $fingerprint
+            ]);
         }
         // A blackout moves the post instead of refusing it: the owner asked for "not
         // on these days", not "not at all".
@@ -741,6 +868,8 @@ class SGAP_Queue {
             'format' => $format,
             // P1.2: hand this one to the owner instead of trying to post a format the API rejects.
             'remind' => !empty($item['remind']) ? 1 : 0,
+            'locale' => $locale,
+            'source_id' => $source_id,
             'destination_url' => $destination,
             'title' => $title,
             'body' => sanitize_textarea_field((string) ($item['body'] ?? '')),
@@ -773,7 +902,24 @@ class SGAP_Queue {
         foreach ($gate['problems'] as $problem) {
             $warnings[] = (string) ($problem['message'] ?? '');
         }
-        return ['id' => $id, 'tracking_url' => SGAP_Tracking::url($id), 'utm_url' => $row['utm_url'], 'warnings' => array_values(array_filter($warnings)), 'scheduled_at' => $scheduled, 'remind' => (int) $row['remind']];
+        // P2.5: the source post also queues one translated caption per locale. A variant
+        // never expands again (source_id is set), and a language that cannot be translated
+        // is reported here instead of vanishing: the source post stays queued.
+        $variants = [];
+        $locale_errors = [];
+        if ($source_id === 0 && SGAP_Locales::enabled()) {
+            $expanded = SGAP_Locales::expand($row, $id);
+            foreach ($expanded['items'] as $variant) {
+                $created = self::add($variant);
+                if (is_wp_error($created)) {
+                    $locale_errors[] = ['locale' => $variant['locale'], 'error' => $created->get_error_message()];
+                    continue;
+                }
+                $variants[] = ['locale' => $variant['locale'], 'id' => (int) $created['id']];
+            }
+            $locale_errors = array_merge($locale_errors, $expanded['errors']);
+        }
+        return ['id' => $id, 'tracking_url' => SGAP_Tracking::url($id), 'utm_url' => $row['utm_url'], 'warnings' => array_values(array_filter($warnings)), 'scheduled_at' => $scheduled, 'remind' => (int) $row['remind'], 'locales' => $variants, 'locale_errors' => $locale_errors];
     }
 
     /** True when Full Auto has blocked this channel/angle/type/format combination. */
@@ -1153,7 +1299,7 @@ class SGAP_REST {
 
         $queue = $wpdb->get_results($wpdb->prepare(
             "SELECT id, post_id, channel, angle, content_type, format, destination_url, title, body,
-                    image_url, status, attempts, scheduled_at, sent_at, published_at, error
+                    image_url, status, attempts, scheduled_at, sent_at, published_at, error, fingerprint
              FROM {$prefix}sgap_queue ORDER BY id DESC LIMIT %d",
             $limit
         ), ARRAY_A);
@@ -1229,6 +1375,7 @@ class SGAP_REST {
                 'full_auto' => SGAP_Settings::enabled('full_auto_enabled'),
                 'publish_mode' => SGAP_RSS::enabled() ? 'rss' : 'api',
                 'channels' => SGAP_Publer::channels(),
+                'bluesky_direct' => SGAP_Bluesky::enabled(),
                 'feeds' => SGAP_RSS::enabled() ? array_map([SGAP_RSS::class, 'url'], SGAP_Publer::channels()) : null,
                 'publer_configured' => SGAP_RSS::enabled() || SGAP_Publer::configured(),
                 'ai_configured' => SGAP_Settings::get('ai_api_key') !== '',
@@ -1244,6 +1391,7 @@ class SGAP_REST {
                 'key_test' => get_option(SGAP_KeyCheck::RESULT) ?: null,
                 'last_self_check' => is_array($health) ? $health : null,
                 'cron_lag_minutes' => SGAP_Auto::cron_lag(),
+                'command_center' => SGAP_CC::status(),
                 'last_generation' => get_option('sgap_last_generate') ?: null,
                 'last_promote_new' => get_option('sgap_last_promote_new') ?: null,
                 'last_articles' => get_option('sgap_last_articles') ?: null
@@ -1362,30 +1510,32 @@ class SGAP_REST {
         if (!function_exists('wc_get_products')) {
             return new WP_Error('sgap_no_wc', 'WooCommerce is not active.', ['status' => 501]);
         }
-        header('Content-Type: application/xml; charset=utf-8');
         $products = wc_get_products(['status' => 'publish', 'limit' => 500]);
-        echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
-        echo '<rss version="2.0" xmlns:g="http://base.google.com/ns/1.0"><channel>' . "\n";
-        echo '<title>' . esc_xml(get_bloginfo('name')) . '</title>' . "\n";
-        echo '<link>' . esc_url(home_url('/')) . '</link>' . "\n";
         $currency = function_exists('get_woocommerce_currency') ? get_woocommerce_currency() : 'EUR';
-        foreach ($products as $p) {
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+        $xml .= '<rss version="2.0" xmlns:g="http://base.google.com/ns/1.0"><channel>' . "\n";
+        $xml .= '<title>' . esc_xml(get_bloginfo('name')) . '</title>' . "\n";
+        $xml .= '<link>' . esc_url(home_url('/')) . '</link>' . "\n";
+        foreach ((array) $products as $p) {
             $img = wp_get_attachment_url($p->get_image_id());
             $price = $p->get_price();
             if (!$price || !$img) continue;
-            echo "<item>\n";
-            echo '  <g:id>' . esc_xml((string) ($p->get_sku() ?: $p->get_id())) . "</g:id>\n";
-            echo '  <g:title>' . esc_xml($p->get_name()) . "</g:title>\n";
-            echo '  <g:description>' . esc_xml(wp_strip_all_tags($p->get_short_description() ?: $p->get_description())) . "</g:description>\n";
-            echo '  <g:link>' . esc_url($p->get_permalink()) . "</g:link>\n";
-            echo '  <g:image_link>' . esc_url($img) . "</g:image_link>\n";
-            echo '  <g:availability>' . ($p->is_in_stock() ? 'in_stock' : 'out_of_stock') . "</g:availability>\n";
-            echo '  <g:price>' . esc_xml(number_format((float) $price, 2, '.', '') . ' ' . $currency) . "</g:price>\n";
-            echo '  <g:condition>new</g:condition>' . "\n";
-            echo "</item>\n";
+            $xml .= "<item>\n";
+            $xml .= '  <g:id>' . esc_xml((string) ($p->get_sku() ?: $p->get_id())) . "</g:id>\n";
+            $xml .= '  <g:title>' . esc_xml($p->get_name()) . "</g:title>\n";
+            $xml .= '  <g:description>' . esc_xml(wp_strip_all_tags($p->get_short_description() ?: $p->get_description())) . "</g:description>\n";
+            $xml .= '  <g:link>' . esc_url($p->get_permalink()) . "</g:link>\n";
+            $xml .= '  <g:image_link>' . esc_url($img) . "</g:image_link>\n";
+            $xml .= '  <g:availability>' . ($p->is_in_stock() ? 'in_stock' : 'out_of_stock') . "</g:availability>\n";
+            $xml .= '  <g:price>' . esc_xml(number_format((float) $price, 2, '.', '') . ' ' . $currency) . "</g:price>\n";
+            $xml .= '  <g:condition>new</g:condition>' . "\n";
+            $xml .= "</item>\n";
         }
-        echo '</channel></rss>';
-        exit;
+        $xml .= '</channel></rss>';
+        // Returned instead of echoed: the old version printed the body and called exit, so
+        // the feed could not be tested at all, and a header() after that output was already
+        // too late to matter. WordPress sends the string and the content type from here.
+        return new WP_HTTP_Response($xml, 200, ['Content-Type' => 'application/xml; charset=utf-8']);
     }
 
 }
@@ -1436,6 +1586,7 @@ class SGAP_Admin {
         ['Campaigns', 'sgap-campaigns', 'campaigns'],
         ['Etsy', 'sgap-etsy', 'etsy'],
         ['Reports', 'sgap-reports', 'reports'],
+        ['Evergreen', 'sgap-evergreen', 'evergreen'],
         ['Full Auto', 'sgap-fullauto', 'fullauto'],
         ['Google Feed', 'sgap-merchant', 'merchant']
     ];
@@ -1445,6 +1596,7 @@ class SGAP_Admin {
         add_action('admin_post_sgap_approve_ai', [__CLASS__, 'approve_ai']);
         add_action('admin_post_sgap_run', [__CLASS__, 'run_action']);
         add_action('admin_post_sgap_queue_action', [__CLASS__, 'queue_action']);
+        add_action('admin_post_sgap_evergreen', [__CLASS__, 'evergreen_action']);
         add_action('admin_post_sgap_suppression_action', [__CLASS__, 'suppression_action']);
     }
 
@@ -1575,6 +1727,7 @@ class SGAP_Admin {
         echo '<p class="description" style="margin-top:0">Ask how things are going or tell the AI what to do: write posts, approve, release the queue, change settings.</p>'
             . '<p><a class="button button-primary" href="' . esc_url(admin_url('admin.php?page=sgap-chat')) . '"><span class="dashicons dashicons-format-chat"></span>Open AI Chat</a></p>';
         SGAP_UI::card_close();
+        echo SGAP_CC::dashboard_button();
         SGAP_Auto::health_card();
         self::feeds_panel();
         self::keys_panel();
@@ -1735,22 +1888,6 @@ class SGAP_Admin {
 
     public static function settings(): void {
         SGAP_Setup::settings_page();
-    }
-
-    private static function get_setting_help_link(string $key): ?array {
-        $links = [
-            'pinterest_token' => ['url' => 'https://developers.pinterest.com/', 'text' => 'Pinterest Developers'],
-            'instagram_token' => ['url' => 'https://developers.facebook.com/', 'text' => 'Meta App Dashboard'],
-            'telegram_bot_token' => ['url' => 'https://t.me/BotFather', 'text' => 'Telegram BotFather'],
-            'tiktok_token' => ['url' => 'https://developers.tiktok.com/', 'text' => 'TikTok Developers'],
-            'youtube_token' => ['url' => 'https://console.cloud.google.com/', 'text' => 'Google Cloud Console'],
-            'youtube_channel_id' => ['url' => 'https://www.youtube.com/account_advanced', 'text' => 'Find Channel ID'],
-            'reddit_username' => ['url' => 'https://www.reddit.com/prefs/apps', 'text' => 'Reddit App Preferences'],
-            'etsy_shop_id' => ['url' => 'https://www.etsy.com/your/shops/me', 'text' => 'Etsy Shop Manager'],
-            'etsy_oauth_token' => ['url' => 'https://www.etsy.com/developers/your-apps', 'text' => 'Etsy Developer Portal'],
-            'publer_api_key' => ['url' => 'https://publer.com/help/en/article/how-to-access-the-publer-api-1w08edo/', 'text' => 'Publer API keys'],
-        ];
-        return $links[$key] ?? null;
     }
 
     private static function field(string $key): void {
@@ -1959,7 +2096,11 @@ class SGAP_Admin {
 
     public static function etsy(): void {
         global $wpdb;
-        self::open('Etsy Orders & Profit');
+        self::open('Etsy Orders & Profit', 'Imported by hand — the plugin has no Etsy API client.');
+        echo '<div class="notice notice-info inline"><p><strong>Manual import.</strong> Orders arrive through '
+            . '<code>POST /wp-json/sgap/v1/etsy/orders</code> with <code>etsy_order_id</code> and the amounts. '
+            . 'The plugin never talks to Etsy and holds no Etsy credentials; the five Etsy fields were removed from '
+            . 'Settings in 7.33.4 so the screen no longer promises an integration that does not exist.</p></div>';
         $table = $wpdb->prefix . 'sgap_etsy_orders';
         $totals = $wpdb->get_row("SELECT COUNT(*) AS orders, SUM(revenue) AS revenue, SUM(fees) AS fees, SUM(shipping) AS shipping, SUM(profit) AS profit FROM {$table}");
         if ($totals && (int) $totals->orders > 0) {
@@ -2037,6 +2178,95 @@ class SGAP_Admin {
         $reposts = $wpdb->get_results("SELECT original_queue_id, repost_queue_id, repost_number, new_angle, new_hook, created_at FROM {$wpdb->prefix}sgap_reposts ORDER BY id DESC LIMIT 50");
         self::render_rows($reposts, ['original_queue_id', 'repost_queue_id', 'repost_number', 'new_angle', 'new_hook', 'created_at']);
         self::close();
+    }
+
+    public static function evergreen(): void {
+        self::open('Evergreen recycling', 'Pages that keep earning come back with a new caption — until the budget or the expiry date says stop.');
+        $summary = SGAP_Evergreen::summary();
+        echo '<div class="sgap-pills">'
+            . SGAP_UI::pill('Recycling ' . ($summary['enabled'] ? 'on' : 'off'), $summary['enabled'] ? 'ok' : 'bad')
+            . SGAP_UI::pill($summary['marked'] . ' marked')
+            . SGAP_UI::pill($summary['ready'] . ' ready now', $summary['ready'] > 0 ? 'ok' : 'warn')
+            . SGAP_UI::pill($summary['shares_used'] . ' shares used')
+            . SGAP_UI::pill('Wait ' . $summary['after_days'] . ' days')
+            . '</div>';
+        echo '<div class="sgap-card"><h2><span class="dashicons dashicons-update"></span>How it works</h2>'
+            . '<p>Mark a post or product as evergreen — here, or in the editor sidebar. After <strong>' . esc_html((string) $summary['after_days']) . ' days</strong> it is recycled with a variation written for the next channel in rotation, until it has had <strong>' . esc_html((string) $summary['default_max']) . ' shares</strong> (unless the page has its own budget) or reaches its expiry date. A share is counted when the post reaches the queue, and the quality gate, preflight, blackout and duplicate guard all still apply.</p>'
+            . ($summary['enabled'] ? '' : '<p><strong>Recycling is off.</strong> Turn it on under <a href="' . esc_url(admin_url('admin.php?page=sgap-settings#evergreen')) . '">Settings → Evergreen</a>.</p>')
+            . '<div class="sgap-actions">'
+            . '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '">'
+            . '<input type="hidden" name="action" value="sgap_evergreen"><input type="hidden" name="cmd" value="run">'
+            . wp_nonce_field('sgap_evergreen', '_wpnonce', true, false)
+            . '<button class="button button-primary"' . ($summary['ready'] > 0 ? '' : ' disabled') . '>Recycle ' . esc_html((string) min($summary['ready'], $summary['batch'])) . ' now</button></form>'
+            . '</div></div>';
+
+        echo '<div class="sgap-card"><h2><span class="dashicons dashicons-plus-alt2"></span>Mark a page</h2>'
+            . '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '" class="sgap-inline">'
+            . '<input type="hidden" name="action" value="sgap_evergreen"><input type="hidden" name="cmd" value="mark">'
+            . wp_nonce_field('sgap_evergreen', '_wpnonce', true, false)
+            . '<label>Post or product ID <input type="number" min="1" name="post_id" required class="small-text"></label>'
+            . '<label>Max shares <input type="number" min="0" name="max" value="0" class="small-text"></label>'
+            . '<label>Until <input type="date" name="until"></label>'
+            . '<button class="button">Mark evergreen</button></form>'
+            . '<p class="description">The ID is the number in the editor URL. Max shares 0 uses the setting; an empty date never expires.</p></div>';
+
+        $ids = SGAP_Evergreen::marked();
+        if (!$ids) {
+            SGAP_UI::empty_state('update-alt', 'Nothing is marked yet. Mark a page here or in its editor sidebar.');
+            self::close();
+            return;
+        }
+        echo '<div class="sgap-scroll"><table class="widefat striped"><thead><tr><th>Page</th><th>Type</th><th>Shares</th><th>Until</th><th>Last share</th><th>Next</th><th>Status</th><th></th></tr></thead><tbody>';
+        foreach ($ids as $id) {
+            $status = SGAP_Evergreen::status($id);
+            echo '<tr><td><a href="' . esc_url((string) get_edit_post_link($id)) . '">' . esc_html(get_the_title($id)) . '</a></td>'
+                . '<td>' . esc_html((string) get_post_type($id)) . '</td>'
+                . '<td>' . esc_html($status['shares'] . ' / ' . $status['max']) . '</td>'
+                . '<td>' . esc_html($status['until'] !== '' ? $status['until'] : '—') . '</td>'
+                . '<td>' . esc_html($status['last_share'] ?? '—') . '</td>'
+                . '<td>' . esc_html($status['next_share'] ?? '—') . '</td>'
+                . '<td>' . ($status['eligible'] ? SGAP_UI::pill('ready', 'ok') : SGAP_UI::pill($status['reason'], 'warn')) . '</td>'
+                . '<td><form method="post" action="' . esc_url(admin_url('admin-post.php')) . '">'
+                . '<input type="hidden" name="action" value="sgap_evergreen"><input type="hidden" name="cmd" value="unmark">'
+                . '<input type="hidden" name="post_id" value="' . esc_attr((string) $id) . '">'
+                . wp_nonce_field('sgap_evergreen', '_wpnonce', true, false)
+                . '<button class="button button-small sgap-danger">Stop</button></form></td></tr>';
+        }
+        echo '</tbody></table></div>';
+        self::close();
+    }
+
+    public static function evergreen_action(): void {
+        if (!current_user_can('manage_options')) wp_die('Forbidden', 403);
+        check_admin_referer('sgap_evergreen');
+        $cmd = isset($_POST['cmd']) ? sanitize_key($_POST['cmd']) : '';
+        $id = isset($_POST['post_id']) ? absint($_POST['post_id']) : 0;
+        if ($cmd === 'run') {
+            $report = SGAP_Evergreen::run();
+            $lines = [sprintf('Recycled %d page(s).', $report['recycled'])];
+            foreach ($report['items'] as $item) {
+                $lines[] = sprintf('#%d %s → %s (%d of %d shares)', $item['post_id'], $item['title'], $item['channel'], $item['share'], $item['max']);
+            }
+            if (!empty($report['note'])) {
+                $lines[] = $report['note'];
+            }
+            foreach ($report['errors'] as $error) {
+                $lines[] = 'Error: ' . $error;
+            }
+            self::done(implode("\n", $lines), 'sgap-evergreen');
+        }
+        if ($cmd === 'mark') {
+            $result = SGAP_Evergreen::mark($id, [
+                'max' => isset($_POST['max']) ? absint($_POST['max']) : 0,
+                'until' => isset($_POST['until']) ? sanitize_text_field(wp_unslash((string) $_POST['until'])) : ''
+            ]);
+            self::done(is_wp_error($result) ? $result->get_error_message() : 'Page #' . $id . ' is now evergreen.', 'sgap-evergreen');
+        }
+        if ($cmd === 'unmark') {
+            SGAP_Evergreen::unmark($id);
+            self::done('Page #' . $id . ' is no longer recycled.', 'sgap-evergreen');
+        }
+        self::done('Nothing changed.', 'sgap-evergreen');
     }
 
     public static function suppression_action(): void {

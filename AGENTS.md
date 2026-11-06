@@ -99,9 +99,20 @@ Reglen over holdes automatisk, så lidt som muligt afhænger af hukommelse:
 - **Natlig niche-scanning** (`.github/workflows/niche-scan.yml`): kl. 02:30 dansk tid scanner de 11 søgeord
   fra `tools/niche_seeds.txt` mod Pinterest Trends, skriver `reports/niche-scan-<dato>.md`/`.json` og
   committer kørselsdagen i `reports/niche-scan-history.json` — så tre-dages-gaten passer sig selv. Kræver
-  repository-secret `PINTEREST_ACCESS_TOKEN`; mangler det, springes scanningen over med en `::notice`, og
-  gaten flyttes ikke. Er tokenet udløbet (401), fejler jobbet rødt. Hvad et token kræver, og hvad kørslen
-  ikke kan: se [`docs/library/niche-scan-ci-2026-11-03.md`](docs/library/niche-scan-ci-2026-11-03.md).
+  adgang til Pinterest: et access-token eller refresh-oplysninger; mangler begge, springes scanningen over
+  med en `::notice`, og gaten flyttes ikke. Er access-tokenet udløbet (401), fornyes det med
+  refresh-tokenet, og det nye par gemmes tilbage i repository-secrets via `gh secret set` — Pinterest
+  roterer refresh-tokenet, så det gamle er dødt bagefter. Hvad der kræves, og hvad kørslen ikke kan: se
+  [`docs/library/pinterest-token-fornyelse-2026-11-03.md`](docs/library/pinterest-token-fornyelse-2026-11-03.md).
+
+- **Novamira keep-alive** (`.github/workflows/novamira-keepalive.yml`): MCP-adgangen til Novamira-fladen
+  (`/wp-json/mcp/novamira-oauth`) har et access-token på 3600 s og et refresh-token der **roteres** ved hver
+  fornyelse. Kørslen fornyer dagligt kl. 03 dansk tid med [`tools/mcp_keepalive.py`](tools/mcp_keepalive.py),
+  verificerer med `initialize` + `tools/list` og gemmer det nye token tilbage som repository-secret. Uden
+  `NOVAMIRA_REFRESH_TOKEN` og en PAT med Secrets: write springer den sig selv over med en `::notice`.
+  I en sandkasse kan [`tools/keepalive-loop.sh`](tools/keepalive-loop.sh) i stedet forny hvert 58. minut
+  (`setsid nohup bash tools/keepalive-loop.sh 3480 &`) — den dækker kun mens worktreen kører.
+  Opsætning og fælder: [`docs/mcp-auth.md`](docs/mcp-auth.md) → Novamira.
 
 - **Commit-besked-værnet** ([`tools/commit_check.py`](tools/commit_check.py)): reglen i §1 bliver kontrolleret
   maskinelt på tre flader — `--message-file` er **commit-msg-hooken** (`python3 tools/commit_check.py --install`,
@@ -198,6 +209,26 @@ Gælder alt arbejde i `plugins/`.
 - Melder `php -l` fejl, rettes fejlen med det samme, før der gås videre.
 - Ved 100 %: pak pluginnet i en installationsklar `.zip` i `plugins/` (uden `.git`, `AGENTS.md`, `node_modules`
   og `.tools`), så den kan uploades direkte under *Plugins → Tilføj nyt*.
+- Der ligger **præcis én** zip i `plugins/` — den aktuelle versions. [`plugin-ci.yml`](.github/workflows/plugin-ci.yml)
+  fejler hvis der er flere, så den gamle zip slettes i samme commit som den nye version er lagt ind.
 - Zip-filen **skal** ligge i `plugins/` på `main` og hedde `steamgears-autopilot-v<version>.zip`. Selvopdateringen
   henter præcis `https://raw.githubusercontent.com/humle93/steamgears-site/main/plugins/steamgears-autopilot-v<version>.zip`
   (`SGAP_Updater::package_url()`), så en zip i rodmappen eller på en sidegren bliver aldrig fundet.
+
+## 8. Context-håndtering — samtalens vigtigste punkter
+
+Når klientens **context meter nærmer sig 95 %**, eller når samtalen står foran en komprimering, skal det
+vigtigste fra samtalen over i [`docs/samtalepunkter.md`](docs/samtalepunkter.md) — ellers forsvinder
+begrundelserne, når historikken komprimeres, og næste pas skal gætte dem igen.
+
+- **Skriv først prosaen:** beslutninger, fund og fælder i "Beslutninger og fund" (nyeste først) og det der
+  stadig mangler i "Næste skridt". Kort og konkret — hvad blev besluttet, hvad blev målt, hvad var fælden.
+- **Opdatér derefter de maskinelle dele:** `python3 tools/samtalepunkter.py --update` skriver AUTO-blokken ud
+  fra [`projektstatus.json`](projektstatus.json) og git-historikken; `--check` bekræfter at den matcher.
+  Blokken må ikke håndredigeres, og den indeholder dagens dato og de seneste commits — derfor skal den
+  **opdateres, ikke bare tjekkes**.
+- **Commit og push i samme tur**, som §5 kræver. Filen er kun værd noget, hvis den ligger på `main`.
+- Filen er **hukommelse om hvorfor**, ikke en kopi af [`docs/projektstatus.md`](docs/projektstatus.md), der har
+  tallene. Står de to uenige, vinder `projektstatus.json`.
+- Værktøjet har 10 selftest-fixtures og kører som værn i [`tools/natlige-vaern.sh`](tools/natlige-vaern.sh).
+  Det regner procenter som `projektstatus.py` — undtagen `recurring`-moduler, som ikke tæller med.

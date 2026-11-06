@@ -13,8 +13,8 @@ dem: den scanner de 11 søgeord, skriver rapporten og committer kørselsdagen ti
 | Trin | Handling |
 | --- | --- |
 | 1 | Venter til kl. 02:30 dansk tid (samme sommertids-gate som den natlige push: begge UTC-timer, springer over hvis den lokale time ikke er 2) |
-| 2 | Tjekker om `PINTEREST_ACCESS_TOKEN` findes som repository secret — gør den ikke, springes scanningen over med en `::notice`, og intet skrives |
-| 3 | Kører `tools/test_niche_scanner.py` (40 tests, offline) som værn før et rigtigt kald |
+| 2 | Tjekker om der er et access-token **eller** et komplet sæt refresh-oplysninger — intet af det: scanningen springes over med en `::notice`, og intet skrives |
+| 3 | Kører `tools/test_niche_scanner.py` (48 tests, offline) som værn før et rigtigt kald |
 | 4 | Scanner `tools/niche_seeds.txt` mod `SE+DK+FI+NO`, `--trend-type seasonal`, og bruger `docs/library/tiktok-creative-center.csv` hvis filen findes |
 | 5 | Skriver måledage og gate-status i job-summaryen |
 | 6 | Committer `reports/niche-scan-<dato>.md`, `.json` og `reports/niche-scan-history.json` og pusher med tre genforsøg |
@@ -60,11 +60,12 @@ beskytter mod at konkludere på ét udtræk, ikke mod at måle tre gange i en un
 | Refresh-token til automatisk fornyelse | Kræver `client_id` + `client_secret` + refresh-token som secrets | **Ikke sat op** — og bør være ejerens beslutning |
 
 Pinterest roterer refresh-tokenet ved hver fornyelse, og access-tokenet udløber. Et secret med et
-access-token er derfor en **dato**, ikke en installation: når det udløber, svarer API'et 401, og
-den natlige kørsel fejler rødt med en annotation der peger her. Det er med vilje — en udløbet
-adgang må ikke se ud som en stille nat uden data. Den automatiske fornyelse er ikke bygget, fordi
-den kræver appens `client_secret` i CI; indtil ejeren beslutter det, er fornyelse en manuel
-opgave hver 30. dag.
+access-token er derfor en **dato**, ikke en installation: når det udløber, svarer API'et 401.
+Siden 3/11 fornyer kørslen det selv — 401 → refresh-tokenet byttes, kaldet gentages, og det nye
+par gemmes i secrets. Det kræver appens `client_secret` i CI og en PAT der må skrive secrets,
+så det forbliver ejerens beslutning; indtil de fem secrets er sat, fejler kørslen stadig rødt
+med en annotation der peger her. Se
+[`pinterest-token-fornyelse-2026-11-03.md`](pinterest-token-fornyelse-2026-11-03.md).
 
 TikTok-delen kræver intet token: læg en CSV fra Creative Center i
 `docs/library/tiktok-creative-center.csv` med kolonnerne `keyword,views,posts,growth_pct`, så
@@ -81,7 +82,7 @@ bruger kørslen den automatisk næste nat. Filen er valgfri.
 
 ## Verifikation
 
-- `python3 tools/test_niche_scanner.py` → **40 tests, OK** (38 før).
+- `python3 tools/test_niche_scanner.py` → **48 tests, OK** (40 før den natlige kørsel, 38 før den).
 - Workflowen er parset som YAML, og hver `run:`-blok er tjekket med `bash -n`.
 - Summary-trinnet er kørt mod en rigtig offline-rapport: 10 søgeord, korrekt tabel og kilderække.
 - **Ikke afprøvet:** et rigtigt Pinterest-kald (intet token), og dermed heller ikke 401-vejen mod
@@ -92,4 +93,6 @@ bruger kørslen den automatisk næste nat. Filen er valgfri.
 1. Ejer: app-review til Standard-adgang, og læg tokenet som secret `PINTEREST_ACCESS_TOKEN`.
 2. Første rigtige kørsel starter med 11 rækker «For tidlig (1/3 dage)» — det er gaten der
    virker, ikke en fejl.
-3. Beslut om refresh-token + `client_secret` skal i CI, så fornyelsen ikke er manuel hver 30. dag.
+3. Sæt refresh-secrets (`PINTEREST_REFRESH_TOKEN`, `PINTEREST_CLIENT_ID`,
+   `PINTEREST_CLIENT_SECRET`, `PINTEREST_SECRETS_TOKEN`), så fornyelsen ikke er manuel hver
+   30. dag — se [`pinterest-token-fornyelse-2026-11-03.md`](pinterest-token-fornyelse-2026-11-03.md).

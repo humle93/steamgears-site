@@ -19,6 +19,18 @@ sql() { wpc eval "global \$wpdb; echo \$wpdb->get_var(\"$1\");"; }
 check() {
     if [ "$2" = "$3" ]; then echo "PASS $1"; else echo "FAIL $1 (got '$2', want '$3')"; FAILED=1; fi
 }
+# The eval-files print their own PASS/FAIL lines; without this a failing check inside them
+# would only be a line in the log while the run still exited 0.
+run_eval() {
+    local label="$1" file="$2" log
+    log="$(mktemp)"
+    wpc eval-file "$file" | tee "$log"
+    if grep -q '^FAIL ' "$log"; then
+        echo "FAIL $label reported failing checks"
+        FAILED=1
+    fi
+    rm -f "$log"
+}
 
 echo "== Install WordPress $WP_VERSION"
 mkdir -p "$WP_DIR"
@@ -29,24 +41,35 @@ wpc config set WP_DEBUG true --raw --quiet
 wpc config set WP_DEBUG_LOG true --raw --quiet
 wpc config set WP_DEBUG_DISPLAY false --raw --quiet
 wpc config set FS_METHOD direct --quiet
+# Start from an empty database: a second run on the same server must not trip over the rows
+# the first one left behind (duplicate-queue, learning counters), and debug.log is per run.
+wpc db drop --yes 2>/dev/null || true
+rm -f "$WP_DIR/wp-content/debug.log"
 wpc db create || true
 wpc core install --url="$URL" --title="Plugin CI" --admin_user=admin --admin_password=admin \
     --admin_email=ci@example.com --skip-email --quiet
+# Pin the addresses to $URL: a WordPress installed in /tmp/wordpress otherwise answers with a
+# "/wordpress" path of its own, and every absolute URL check below would compare against it.
+wpc option update home "$URL" --quiet
+wpc option update siteurl "$URL" --quiet
 wpc rewrite structure '/%postname%/' --quiet
 
 echo "== Activate plugin"
-rm -rf "$WP_DIR/wp-content/plugins/steamgears-autopilot"
+# Only this plugin is installed: a plugin an earlier run left behind (hello-dolly) would make
+# the install-from-wordpress.org check fail on "already installed" instead of testing anything.
+rm -rf "$WP_DIR/wp-content/plugins"
+mkdir -p "$WP_DIR/wp-content/plugins"
 cp -r "$ROOT/plugins/steamgears-autopilot" "$WP_DIR/wp-content/plugins/"
 wpc plugin activate steamgears-autopilot
 
 echo "== In-process checks"
-wpc eval-file "$ROOT/plugins/tests/integration.php"
+run_eval "in-process checks" "$ROOT/plugins/tests/integration.php"
 
 echo "== Admin tools for Claude"
-wpc eval-file "$ROOT/plugins/tests/admin-tools.php"
+run_eval "admin tools" "$ROOT/plugins/tests/admin-tools.php"
 
 echo "== Set-and-forget automation"
-wpc eval-file "$ROOT/plugins/tests/automation.php"
+run_eval "automation" "$ROOT/plugins/tests/automation.php"
 
 echo "== HTTP checks"
 php -S 127.0.0.1:8080 -t "$WP_DIR" "$ROOT/plugins/tests/router.php" >/tmp/php-server.log 2>&1 &
@@ -101,6 +124,7 @@ fi
 echo "== Uninstall"
 wpc plugin deactivate steamgears-autopilot --quiet
 check "deactivate clears cleanup cron" "$(wpc cron event list --hook=sgap_daily_cleanup --format=count)" "0"
+check "deactivate clears evergreen cron" "$(wpc cron event list --hook=sgap_evergreen --format=count)" "0"
 wpc plugin uninstall steamgears-autopilot --quiet
 check "uninstall drops tables" "$(sql "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name LIKE '{\$wpdb->prefix}sgap\\\\_%'")" "0"
 check "uninstall removes options" "$(sql "SELECT COUNT(*) FROM {\$wpdb->options} WHERE option_name LIKE 'sgap\\\\_%'")" "0"

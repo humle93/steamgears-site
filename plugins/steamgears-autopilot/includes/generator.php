@@ -30,10 +30,159 @@ class SGAP_AI {
     /** Model from Settings, else the provider's default ('' for a generic OpenAI-compatible API). */
     public static function model(): string {
         $model = trim((string) SGAP_Settings::get('ai_model'));
-        if ($model !== '') {
-            return $model;
-        }
+        return $model !== '' ? $model : self::default_model();
+    }
+
+    /** The model the provider itself recommends: what an empty Settings field means. */
+    public static function default_model(): string {
         return ['anthropic' => self::DEFAULT_MODEL, 'aimlapi' => self::AIMLAPI_MODEL][self::provider()] ?? '';
+    }
+
+    /**
+     * True when the provider's error is about the model *name* — unknown, retired or not
+     * offered to this key. Network, auth, rate-limit and credit errors are never model
+     * errors, and must be reported as they are instead of being retried.
+     */
+    public static function model_rejected(string $message): bool {
+        $message = strtolower($message);
+        if (strpos($message, 'model') === false) {
+            return false;
+        }
+        foreach ([
+            'not found', 'does not exist', 'not exist', 'unknown model', 'not available', 'unavailable',
+            'not offered', 'no such model', 'invalid model', 'not a valid model', 'model_not_found', 'not supported'
+        ] as $needle) {
+            if (strpos($message, $needle) !== false) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** The model to retry with when the asked name is rejected — '' when no retry is right. */
+    public static function model_fallback(string $asked, WP_Error $error): string {
+        if ($asked === '' || !in_array(self::provider(), ['aimlapi', 'openai_compatible'], true)) {
+            return '';
+        }
+        $default = self::default_model();
+        if ($default === '' || $default === $asked || !self::model_rejected($error->get_error_message())) {
+            return '';
+        }
+        return $default;
+    }
+
+    /**
+     * Clears a stored model the provider rejected, so the provider default applies from now
+     * on. Only when the stored value is still the rejected one: a value the owner changed
+     * in the meantime is theirs and is left alone.
+     */
+    public static function repair_model(string $asked): bool {
+        $repaired = self::default_model();
+        if ($asked === '' || $repaired === '' || trim((string) SGAP_Settings::get('ai_model')) !== $asked) {
+            return false;
+        }
+        // Store the concrete model, not an empty field: what is used is then visible in Settings.
+        SGAP_Settings::set('ai_model', $repaired);
+        return trim((string) SGAP_Settings::get('ai_model')) === $repaired;
+    }
+
+    /**
+     * The model ids the provider lists right now, cached for 12 hours: the Settings dropdown
+     * and the save-time check then cost at most one request per half-day. A site whose provider
+     * is reached through a proxy can replace the list with the `sgap_ai_model_catalog` filter.
+     * @return string[]
+     */
+    public static function catalog(bool $fresh = false): array {
+        $supplied = apply_filters('sgap_ai_model_catalog', null, self::provider());
+        if (is_array($supplied)) {
+            return self::catalog_ids($supplied);
+        }
+        $cache = 'sgap_ai_catalog_' . self::provider();
+        $cached = get_site_transient($cache);
+        if (!$fresh && is_array($cached)) {
+            return $cached;
+        }
+        $ids = self::fetch_catalog();
+        // A failure is cached briefly too, so an unreachable provider never slows the settings page.
+        set_site_transient($cache, $ids, $ids !== [] ? 12 * HOUR_IN_SECONDS : 30 * MINUTE_IN_SECONDS);
+        return $ids;
+    }
+
+    /**
+     * Model ids from a /models answer — AIMLAPI and OpenAI use data[].id, Anthropic data[].id,
+     * and a plain list is accepted too. Deduped and sorted, because AIMLAPI repeats ids.
+     * @return string[]
+     */
+    public static function catalog_ids(array $body): array {
+        $rows = isset($body['data']) || isset($body['models']) ? (array) ($body['data'] ?? $body['models']) : $body;
+        $ids = [];
+        foreach ($rows as $row) {
+            $id = is_array($row) ? (string) ($row['id'] ?? '') : (is_string($row) ? $row : '');
+            $id = trim($id);
+            if ($id !== '') {
+                $ids[$id] = true;
+            }
+        }
+        $ids = array_keys($ids);
+        sort($ids, SORT_STRING);
+        return $ids;
+    }
+
+    /** @return string[] Empty when the provider cannot be asked (no key yet, or offline). */
+    private static function fetch_catalog(): array {
+        if (self::provider() === 'aimlapi') {
+            // AIMLAPI lists its catalogue without a key. The URL is fixed, never ai_base_url.
+            $response = wp_remote_get(self::DEFAULT_BASE_URL . '/models', ['timeout' => 20]);
+        } else {
+            $key = (string) SGAP_Settings::get('ai_api_key');
+            if ($key === '') {
+                return [];
+            }
+            $response = self::provider() === 'anthropic'
+                ? wp_remote_get('https://api.anthropic.com/v1/models?limit=100', [
+                    'timeout' => 20,
+                    'headers' => ['x-api-key' => $key, 'anthropic-version' => self::ANTHROPIC_VERSION]
+                ])
+                : wp_remote_get(self::base_url() . '/models', ['timeout' => 20, 'headers' => ['Authorization' => 'Bearer ' . $key]]);
+        }
+        if (is_wp_error($response) || (int) wp_remote_retrieve_response_code($response) !== 200) {
+            return [];
+        }
+        $body = json_decode((string) wp_remote_retrieve_body($response), true);
+        return is_array($body) ? self::catalog_ids($body) : [];
+    }
+
+    /**
+     * POST /chat/completions and decode it. A model name the provider does not know is
+     * retried once on the provider default, and Settings is repaired so the next call works
+     * too; every other error is returned unchanged, so nothing loops and nothing hides.
+     * @return array|WP_Error
+     */
+    public static function chat_call(string $key, array $body, int $timeout = 120, string $who = '') {
+        $who = $who !== '' ? $who : self::provider_name();
+        $send = static function (array $payload) use ($key, $timeout, $who) {
+            return self::decode(wp_remote_post(self::base_url() . '/chat/completions', [
+                'timeout' => $timeout,
+                'headers' => ['Authorization' => 'Bearer ' . $key, 'Content-Type' => 'application/json'],
+                'body' => wp_json_encode($payload)
+            ]), $who);
+        };
+        $asked = (string) ($body['model'] ?? '');
+        $decoded = $send($body);
+        if (!is_wp_error($decoded)) {
+            return $decoded;
+        }
+        $fallback = self::model_fallback($asked, $decoded);
+        if ($fallback === '') {
+            return $decoded;
+        }
+        $body['model'] = $fallback;
+        $decoded = $send($body);
+        if (is_wp_error($decoded)) {
+            return $decoded;
+        }
+        self::repair_model($asked);
+        return $decoded;
     }
 
     public static function base_url(): string {

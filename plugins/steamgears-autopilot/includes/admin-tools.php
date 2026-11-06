@@ -110,7 +110,7 @@ class SGAP_AdminTools {
                 'description' => $description,
                 'category' => SGAP_Abilities::CATEGORY,
                 'output_schema' => ['type' => 'object'],
-                'execute_callback' => $execute,
+                'execute_callback' => static fn($input = null) => call_user_func($execute, $input),
                 'permission_callback' => [SGAP_Abilities::class, 'can_manage'],
                 'meta' => SGAP_Abilities::meta($readonly, $idempotent, $destructive)
             ];
@@ -174,8 +174,24 @@ class SGAP_AdminTools {
             if (is_bool($value)) {
                 $value = $value ? 'yes' : 'no';
             }
+            $value = is_scalar($value) ? (string) $value : '';
+            $secret = $kinds[$key] === 'secret';
+            if ($secret) {
+                // A key in wp-config.php wins over the database: say so instead of
+                // reporting a write that get() would never return.
+                if (SGAP_Settings::constant_name($key)) {
+                    $changed[$key] = 'ignored (set in wp-config.php)';
+                    continue;
+                }
+                // Same rule as Settings and the wizard: an empty field keeps the
+                // stored key, so a copied-back settings object cannot wipe it.
+                if (trim($value) === '') {
+                    $changed[$key] = 'kept (the new value was empty)';
+                    continue;
+                }
+            }
             $before = get_option('sgap_' . $key);
-            update_option('sgap_' . $key, is_scalar($value) ? (string) $value : '');
+            SGAP_Settings::set($key, $value);
             $after = get_option('sgap_' . $key);
             if ($after !== $before) {
                 $changed[$key] = $kinds[$key] === 'secret' ? 'updated' : $after;

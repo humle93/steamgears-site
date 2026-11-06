@@ -445,6 +445,9 @@ class SGAP_Auto {
         if (!SGAP_Settings::enabled('full_auto_enabled') && $pending >= 12) {
             $problems[] = "{$pending} drafts are waiting for approval – nothing goes out until you approve them (or switch on Full auto).";
         }
+        if (class_exists('SGAP_CC') && ($cc = SGAP_CC::problem()) !== '') {
+            $problems[] = $cc;
+        }
         $rescue = SGAP_Rescue::status();
         if ($rescue['given_up'] > 0) {
             $problems[] = "{$rescue['given_up']} images on another server could not be copied.";
@@ -537,6 +540,9 @@ class SGAP_Auto {
             }
             echo '</ul><p class="description">' . esc_html('Checked ' . $h['at']) . '</p>';
         }
+        if (class_exists('SGAP_CC') && ($cc = SGAP_CC::line()) !== '') {
+            echo '<p>' . $cc . '</p>';
+        }
         SGAP_UI::card_close();
     }
 }
@@ -560,7 +566,7 @@ add_action('wp_abilities_api_init', function () {
     foreach ($defs as $name => [$label, $description, $props, $cb]) {
         $args = [
             'label' => $label, 'description' => $description, 'category' => SGAP_Abilities::CATEGORY,
-            'output_schema' => ['type' => 'object'], 'execute_callback' => $cb,
+            'output_schema' => ['type' => 'object'], 'execute_callback' => static fn($input = null) => call_user_func($cb, $input),
             'permission_callback' => [SGAP_Abilities::class, 'can_manage'], 'meta' => SGAP_Abilities::meta(false, false, false)
         ];
         if ($props) {

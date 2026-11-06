@@ -143,6 +143,27 @@ class SGAP_Abilities {
                 'Tests the Publer API key: lists workspaces, connected social accounts, and configured channels that have no Publer account.',
                 [], [], [__CLASS__, 'check_publer'], true, true
             ],
+            'list-evergreen' => [
+                'List evergreen pages',
+                'Lists the pages and products marked for evergreen recycling with their share budget, expiry date, last share and whether they are ready now. Also returns the recycle settings and how many shares have been used.',
+                ['limit' => ['type' => 'integer', 'minimum' => 1, 'maximum' => 100, 'default' => 50]], [], [__CLASS__, 'list_evergreen'], true, true
+            ],
+            'mark-evergreen' => [
+                'Mark or unmark an evergreen page',
+                'Marks a blog post or product for evergreen recycling, or stops it. Optional max shares override (0 = the setting) and an expiry date (YYYY-MM-DD); an empty date never expires.',
+                [
+                    'post_id' => ['type' => 'integer', 'minimum' => 1],
+                    'evergreen' => ['type' => 'boolean', 'default' => true, 'description' => 'false stops recycling this page'],
+                    'max' => ['type' => 'integer', 'minimum' => 0, 'description' => 'Share budget for this page. 0 = the default in Settings → Evergreen.'],
+                    'until' => ['type' => 'string', 'description' => 'Last day it may be recycled, YYYY-MM-DD. Empty = never expires.'],
+                    'reset' => ['type' => 'boolean', 'description' => 'Also set the share count back to 0.']
+                ], ['post_id'], [__CLASS__, 'mark_evergreen'], false, true
+            ],
+            'recycle-evergreen' => [
+                'Recycle evergreen pages now',
+                'Runs the evergreen recycler now (normally daily): writes a fresh variation for the next due pages and queues it on the next channel in rotation. Each share still passes the quality gate, preflight, blackout and duplicate guard.',
+                ['limit' => ['type' => 'integer', 'minimum' => 1, 'maximum' => 10, 'description' => 'How many pages to recycle. Default: the daily setting.']], [], [__CLASS__, 'recycle_evergreen'], false, false
+            ],
             'meta-audit' => [
                 'Audit post meta',
                 'Audits titles and meta descriptions on published posts and pages: how many have no description, how many are outside the limits (title 60, description 70-155 characters), and which posts are worst. Read-only — it changes nothing.',
@@ -164,7 +185,7 @@ class SGAP_Abilities {
                 'description' => $description,
                 'category' => self::CATEGORY,
                 'output_schema' => ['type' => 'object'],
-                'execute_callback' => $execute,
+                'execute_callback' => static fn($input = null) => call_user_func($execute, $input),
                 'permission_callback' => [__CLASS__, 'can_manage'],
                 'meta' => self::meta($readonly, $idempotent)
             ];
@@ -200,7 +221,9 @@ class SGAP_Abilities {
             'key_test' => get_option(SGAP_KeyCheck::RESULT) ?: null,
             'sending_paused_because' => SGAP_Queue::blocked_reason() !== '' ? SGAP_Queue::blocked_message() : null,
             'blackout' => SGAP_Blackout::summary(),
+            'command_center' => class_exists('SGAP_CC') ? SGAP_CC::status() : null,
             'quality_gate' => ['mode' => SGAP_Quality::mode(), 'banned_words' => count(SGAP_Quality::words())],
+            'evergreen' => SGAP_Evergreen::summary(),
             'can_send_now' => SGAP_Queue::capacity(),
             'limits' => [
                 'daily_cap' => (int) SGAP_Settings::get('daily_cap', 8),
@@ -355,6 +378,36 @@ class SGAP_Abilities {
 
     public static function check_keys($input = null): array {
         return SGAP_KeyCheck::run();
+    }
+
+    public static function list_evergreen($input = null): array {
+        $input = (array) $input;
+        $limit = min(100, max(1, (int) ($input['limit'] ?? 50)));
+        $items = [];
+        foreach (array_slice(SGAP_Evergreen::marked(), 0, $limit) as $id) {
+            $items[] = ['title' => get_the_title($id), 'type' => get_post_type($id)] + SGAP_Evergreen::status($id);
+        }
+        return ['settings' => SGAP_Evergreen::summary(), 'items' => $items];
+    }
+
+    public static function mark_evergreen($input = null) {
+        $input = (array) $input;
+        $id = absint($input['post_id'] ?? 0);
+        if (array_key_exists('evergreen', $input) && !$input['evergreen']) {
+            SGAP_Evergreen::unmark($id);
+            return ['post_id' => $id, 'marked' => false];
+        }
+        $result = SGAP_Evergreen::mark($id, [
+            'max' => absint($input['max'] ?? 0),
+            'until' => (string) ($input['until'] ?? ''),
+            'reset' => !empty($input['reset'])
+        ]);
+        return $result;
+    }
+
+    public static function recycle_evergreen($input = null): array {
+        $input = (array) $input;
+        return SGAP_Evergreen::run(isset($input['limit']) ? min(10, max(1, (int) $input['limit'])) : null);
     }
 
     /** Read-only audit of titles and meta descriptions. Delegates to SGAP_Meta_Audit so the logic can be tested. */

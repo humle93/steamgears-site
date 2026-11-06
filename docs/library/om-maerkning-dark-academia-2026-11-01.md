@@ -170,3 +170,20 @@ Alle 39 produkter har i dag under 3 billeder. Det er den største enkeltmangel i
 ## Rækkefølge-rationale
 
 Omdøbning uden mockups er spildt: en dark academia-titel på et produkt med ét billede konverterer dårligere end den nuværende steampunk-titel med ét billede, fordi forventningen bliver højere. Derfor batch 4 før batch 5 — og batch 1 kan først slå igennem, når mockups og tekst er med.
+
+## Appendix — produkter uden for de 39 designs (tilføjet 3/11 2026)
+
+Seks produkter fra 2/11-planen for produktlinks stod ikke i kortlægningen ovenfor. De er lagt ind her med den
+kilde i repoet der nævner dem, så et `/go/<id>/` kan slås op uden at gætte. **Priser:** de seks havde ingen
+række i [`valuta-og-priser-2026-11-02.md`](valuta-og-priser-2026-11-02.md), så priserne blev målt i den levende
+butik 3/11 2026 gennem Store API — målingen står i
+[`priser-fra-store-api-2026-11-03.md`](priser-fra-store-api-2026-11-03.md).
+
+| ID | Navn | Pris (målt 3/11) | Kilde |
+|---|---|---:|---|
+| 766 | Steampunk Leather Utility Belt & Holster | $24.90 | [`drafts-udgivet-2026-11-02.md`](drafts-udgivet-2026-11-02.md) (justerbar vidde 71–112 cm) + [`meta-fixes-og-produktlinks-2026-11-02.md`](meta-fixes-og-produktlinks-2026-11-02.md) §3 |
+| 767 | Digital Blueprint: Victorian Corset & Vest PDF | $6.90 | samme to dokumenter |
+| 940 | Clockwork Seer pendant | $89.00 | [`meta-fixes-og-produktlinks-2026-11-02.md`](meta-fixes-og-produktlinks-2026-11-02.md) §3 (gaveguide) |
+| 941 | The Aeronaut pocket watch | $149.00 | samme §3 |
+| 942 | Ink and Steam bracelet | $69.00 | samme §3 |
+| 968 | Nightshade Apothecary art print | $29.95 | samme §3 + [`butik-fund-2026-11-02.md`](butik-fund-2026-11-02.md) (Herbarium 965–968) |

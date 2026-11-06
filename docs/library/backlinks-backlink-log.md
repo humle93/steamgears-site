@@ -16,3 +16,4 @@ Tjek ugentligt (mandag). Log pr. run: dato, DR, backlinks, linking websites, top
 1. browser open https://ahrefs.com/backlink-checker
 2. Indsæt steamgears.eu → Check backlinks
 3. Læs DR / backlinks / linking websites + top-domæner → tilføj række i tabellen.
+| 2026-11-02 | 0 | 0 | 0 | Ugentligt tjek (Ahrefs gratis checker via browser). Stadig 0/0/0 — ingen nye refererende domæner fundet endnu. Baseline fra 26/10 uændret. |

@@ -297,7 +297,23 @@ class SGAP_Publer {
                 $report['reminded'][] = ['id' => (int) $row['id'], 'channel' => $row['channel'], 'mailed' => $done['mailed']];
                 continue;
             }
-            $job = self::publish($row);
+            // P2.1–P2.3: channels with their own API are posted directly, without Publer.
+            // All of them run through this same loop, so a failure gets the same backoff,
+            // alert and publish log as a rejected Publer post.
+            $direct = '';
+            if (SGAP_Bluesky::handles((string) $row['channel'])) {
+                $direct = 'bluesky';
+            } elseif (SGAP_Mastodon::handles((string) $row['channel'])) {
+                $direct = 'mastodon';
+            } elseif (SGAP_Telegram::handles((string) $row['channel'])) {
+                $direct = 'telegram';
+            }
+            $job = match ($direct) {
+                'bluesky' => SGAP_Bluesky::publish($row),
+                'mastodon' => SGAP_Mastodon::publish($row),
+                'telegram' => SGAP_Telegram::publish($row),
+                default => self::publish($row),
+            };
             if (is_wp_error($job)) {
                 $state = SGAP_Queue::mark((int) $row['id'], 'failed', $job->get_error_message());
                 // The queue only remembers the last error; the log keeps every attempt.
@@ -306,6 +322,16 @@ class SGAP_Publer {
                 continue;
             }
             $wpdb->update($wpdb->prefix . 'sgap_queue', ['external_id' => $job, 'sent_at' => current_time('mysql')], ['id' => (int) $row['id']]);
+            if ($direct !== '') {
+                // There is no Publer job to follow up: the AT URI, the Mastodon post URL or
+                // the Telegram message id is the receipt, so the item is published here
+                // instead of being polled as 'sending' until it times out.
+                SGAP_Queue::mark((int) $row['id'], 'published');
+                $labels = ['bluesky' => 'Bluesky post ', 'mastodon' => 'Mastodon post ', 'telegram' => 'Telegram message '];
+                SGAP_Audit::record((int) $row['id'], (string) $row['channel'], 'published', 200, ($labels[$direct] ?? '') . $job);
+                $report['sent'][] = ['id' => (int) $row['id'], 'channel' => $row['channel'], 'job_id' => $job, 'direct' => $direct];
+                continue;
+            }
             SGAP_Audit::record((int) $row['id'], (string) $row['channel'], 'sent', 200, 'Publer job ' . $job);
             $report['sent'][] = ['id' => (int) $row['id'], 'channel' => $row['channel'], 'job_id' => $job];
         }

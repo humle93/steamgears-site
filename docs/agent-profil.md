@@ -27,10 +27,10 @@ Der er **fem aktive projekter**, alle målt i [`projektstatus.json`](../projekts
 
 | id | Projekt | Status | Enhed |
 | --- | --- | --- | --- |
-| `site` | steamgears.eu — site-optimering | 54,0 % (11,4 af 21,1 d) | developer-dage |
-| `plugin` | Steamgears Autopilot — plugin | 29,0 % (6,95 af 24,0 d) | developer-dage |
+| `site` | steamgears.eu — site-optimering | 58,3 % (12,7 af 21,8 d) | developer-dage |
+| `plugin` | Steamgears Autopilot — plugin | 74,0 % (19,9 af 26,9 d) | developer-dage |
 | `rebrand` | Dark academia-rebrand | 63,0 % (8,5 af 13,5 t) | timer |
-| `seo` | SEO-indholdsproduktion | 0,0 % (0 af 3 guides) | guides |
+| `seo` | SEO-indholdsproduktion | 57,1 % (4 af 7 guides) | guides |
 | `links` | Døde internlinks | 100 % (39 af 39 links) | links |
 
 Roadmap'erne: [`docs/roadmap.md`](roadmap.md) (site, S0–S4) og
@@ -83,12 +83,13 @@ Alt her er målt mod den live side eller læst i kilden. Er noget ændret siden 
 - `/shop/` tager ~5,8 s og ~470 KB; produktside har ~151 KB inline CSS og ~105 scripts.
 - GA4 fyrer **dobbelt** på hvert pageview, så konverteringer kan ikke aflæses sikkert.
 
-**Pluginnet** (`plugins/steamgears-autopilot/`, v7.25.0)
+**Pluginnet** (`plugins/steamgears-autopilot/`, v7.41.0)
 
-- **Version i repo mod live:** repo **7.25.0**, sitet **7.22.0** (målt 2/11 med `wp_get_plugins`) — et
+- **Version i repo mod live:** repo **7.41.0**, sitet **7.40.1** (målt 6/11 via Novamira MCP) — et
   plugin-folder kan kun skiftes af WordPress selv, så en release slutter med ejerens *Plugins → Update*-klik,
   ikke med et push. Status: `docs/roadmap.md` §2b; procedure og efterkontrol: plugin-README §Updates.
-- 22 PHP-filer, 8.460 linjer, 1.203 linjer tests; **21 af 22 subsystemer er live**. Version **7.19.0** tilføjede
+- 44 klasser, 30 PHP-filer, 12.356 linjer (målt 6/11 på 7.41.0); hvert subsystem kan nås fra en rigtig
+  indgang (cron, REST, admin-side, ability eller AJAX). Version **7.19.0** tilføjede
   helsides SEO/GEO/AEO-auditten (`includes/site-seo.php`), som erstatter den per-side-optimering der krævede
   ét klik pr. URL. **7.20.0** tilføjede pre-flight-valideringen (`includes/preflight.php`): hver kø-post tjekkes
   mod nettets egne grænser før det første Publer-kald, og det der kan rettes mekanisk (caption-længde, hashtags)
@@ -99,12 +100,14 @@ Alt her er målt mod den live side eller læst i kilden. Er noget ændret siden 
   (`includes/meta-audit.php`): en læsende gennemgang af titler og metabeskrivelser med de værste poster først.
   **7.24.0** gjorde `utm_campaign` til en parameter:
   indstillingen *Campaign name* plus et `campaign`-felt pr. post i `/queue` og `queue-post`, så en navngivet
-  kampagne kan måles i GA4 ved siden af evergreen-strømmen. 233 smoke-checks, alle grønne.
+  kampagne kan måles i GA4 ved siden af evergreen-strømmen. 523 smoke-checks, alle grønne.
 - Kæden virker: generér → godkend → publicér (RSS eller Publer API) → mål.
 - Self-updateren virker: zip i repoet er **byte-identisk** med kilden; 20 versioner på fire dage.
 - 9 AJAX- og 5 admin_post-handlere har capability + nonce; **kun ét `wp_mail`** i hele pluginnet (ugerapport).
-- Mangler: fejl-alarmering, backoff, auditlog, kø-udtørrings-alarm, 15 ubrugte indstillinger, 1 død metode
-  (`SGAP_Admin::get_setting_help_link()`), og fem Etsy-felter der lover en integration der ikke findes.
+- **Mangler (målt 6/11):** P1.5 platform-analytics (4,0 d), eksternt blokeret af Pinterest-token og Meta-review;
+  P0.4's cron på hosten (ejer); P3.1 mangler kun `labor_rate` (ejerbeslutning). Alt det andet er bygget:
+  fejl-alarmering, kø-udtørrings-alarm, backoff og auditlog (P0.1–P0.5), P1.4 evergreen-recycling (7.41.0),
+  Etsy skjult med manuel import (7.33.4), og den døde metode plus de ni usynlige indstillinger er væk.
 - `uninstall.php` rydder 8 tabeller, alle `sgap_%` options/transients og 9 cron-hooks.
 - Cron er WP-Cron på et cachet site → publicering kan blive forsinket (`DISABLE_WP_CRON` detekteres).
 
@@ -125,8 +128,8 @@ Alt her er målt mod den live side eller læst i kilden. Er noget ændret siden 
 | Læse live HTML + REST (`wp-json`) | ✅ | strukturelle tjek, linkcrawl, produktdata |
 | Python 3.12 + PDF-biblioteker | ✅ i `tools/_deps` | rapporter i `reports/` |
 | PHP 8.5.8 (statisk binær) | ✅ i `tools/_deps/bin/php` | `php -l`, ikke tests |
-| **Skrive til sitet** | ❌ 401 | S2.3, S4.1, S4.3, S0.4 kan forberedes, ikke udføres |
-| MCP mod sitet | ⚪ **ny server, venter på ejerens godkendelse** | `/wp-json/mcp/v1/http` (AI Engine) svarer `401 rest_forbidden` uden credential og har OAuth med PKCE. `python3 tools/mcp_oauth.py --start` giver linket, `--finish '<kode>'` gemmer token uden for repoet; `tools/mcp_rest.py --check` tester det. Application password (Basic) er fallback og ikke målt endnu — se `docs/mcp-auth.md` |
+| **Skrive til sitet** | ✅ **virker (målt 4/11 2026)** | `wp_alter_post`, `wp_update_post` og plugin-værktøjerne skriver; 20 links indsat i ni guides og 14 hrefs konverteret på outfit-guiden. `mcp_drafts_only` er `false` — er den `true`, afvises alle skrivende kald, og den kan ikke slås fra over MCP med vilje |
+| MCP mod sitet | ✅ **to flader, begge virker** — AI Engine `/wp-json/mcp/v1/http` og **Novamira** `/wp-json/mcp/novamira-oauth` (1.12.14, OAuth 2.1 + PKCE, `full_access`, 3 meta-værktøjer over **207 abilities**, heraf 60 fra plugin'et). Målt 6/11 2026. Tokenet ligger i `~/.config/steamgears-mcp/` (mode 600), aldrig i repoet, og **hver ny sandkasse skal godkende igen** | `/wp-json/mcp/v1/http` (AI Engine), **236** værktøjer, rolle `admin`, Bearer-token fra OAuth med PKCE. `python3 tools/mcp_oauth.py --start` giver linket, `--finish '<kode>'` gemmer token uden for repoet; `tools/mcp_rest.py --check` tester det. Redirecten er `127.0.0.1:8765` **uden lytter**: kopiér hele adressen fra browserens adresselinje. Application password (Basic) er fallback og ikke målt endnu — se `docs/mcp-auth.md` |
 | Publer MCP | ❌ ingen `PUBLER_API_KEY` | kan ikke planlægge opslag |
 | Browser / Lighthouse | ❌ | ingen visuel eller ydelsesverifikation |
 | Root / `apt` | ❌ | brug statiske binærer (se opskrifter) |
@@ -143,7 +146,8 @@ tools/_deps/bin/php -l plugins/steamgears-autopilot/steamgears-autopilot.php
 **Blokeringer der kræver ejeren** (skriv dem i svaret, forsøg dem ikke): ét klik på OAuth-linket fra
 `tools/mcp_oauth.py --start` (eller et WordPress application password til REST-skrivning), Publer-nøgle,
 repo-secrets `GEMINI_API_KEY`/`WP_USER`/`WP_APP_PASS`, CVR/adresse til GPSR og imprint, Printify-variantmapping,
-én Redirection-gruppe til de fem vanity-301'er.
+én Redirection-gruppe til de fem vanity-301'er, og **et nyt OAuth-token i hver ny sandkasse** (`--start` → klik →
+`--finish '<kode>'`; token gemmes uden for repoet).
 
 ### Simply.com-connectoren (`simplycom`)
 
@@ -171,7 +175,8 @@ hvidliste noget. Det der stadig venter:
 
 Crawl og verifikation kører med **neutral UA** ([`tools/waf_check.sh`](../tools/waf_check.sh) bekræfter at den
 giver 200). At efterligne Googlebot er både unødvendigt og det der udløser 455. Alt andet i auditten — titler,
-schema, intern linkning, ydeevne — kræver WordPress-skriveadgang eller en ejerbeslutning.
+schema, intern linkning, ydeevne — kræver WordPress-skriveadgang (findes nu over MCP, se `docs/mcp-auth.md`)
+eller en ejerbeslutning.
 
 ---
 

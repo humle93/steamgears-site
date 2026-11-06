@@ -9,12 +9,17 @@ uden credential.
 | `publer` | `https://mcp.publer.com/` | `Bearer ${PUBLER_API_KEY}` | Publer MCP API key (Business/Enterprise) |
 | `steamgears-profil` | `tools/mcp_project_profile.py` (stdio) | ingen | ingen — læser kun repoet |
 
-**Status 2/11 2026, sent: forbindelsen virker.** OAuth-klienten blev godkendt af ejeren, tokenet lever 3600 s med
-refresh, og `python3 tools/mcp_rest.py --check` svarer `ok: true` med serveren `AI Engine - Steamgears` og
-**206 værktøjer**. Læsning virker hele vejen (`wp_list_plugins`, `list-queue`, `check-post`). Skrivning gør
-**ikke**: AI Engine har *Drafts Only* slået til, så `queue-post` afvises med »This site lets assistants work on
-drafts only«, før plugin'et ser kaldet. Skal agenten skrive, skal den switch slås fra i
-*Meow Apps → AI Engine → Settings → MCP* — det er en beslutning om risikoprofil, ikke en fejl.
+**Status 4/11 2026: både læsning og skrivning virker.** OAuth-klienten blev godkendt af ejeren i browseren,
+tokenet lever 3600 s med refresh, og `python3 tools/mcp_rest.py --check` svarer `ok: true` med serveren
+`AI Engine - Steamgears` og **236 værktøjer**, rolle `admin`. `mcp_drafts_only` er nu **`false`** (målt i
+`mwai_options` 4/11), så skrivende kald går igennem: 4/11 blev 20 `/go/`-links indsat i ni guides med
+`wp_alter_post`, og 14 hrefs blev konverteret med `wp_update_post`. Opskriften og fælderne står i
+[`library/mcp-skriveadgang-2026-11-04.md`](library/mcp-skriveadgang-2026-11-04.md).
+
+Indtil 4/11 var svaret det modsatte: *Drafts Only* var slået til, så `queue-post` blev afvist med »This site lets
+assistants work on drafts only«, før plugin'et så kaldet. Den switch slås til og fra i
+*Meow Apps → AI Engine → Settings → MCP*, og den er den eneste der holder et admin-token tilbage — den kan ikke
+slås fra over MCP, fordi spærren også dækker `wp_update_option`. Det er med vilje.
 
 **Sådan tjekkes spærren uden at skrive** (målt 2/11 2026, efter ejeren havde slået den fra — den var stadig
 til): AI Engines indstillinger ligger i option `mwai_options`, og læsende værktøjer må gerne læse den. Med
@@ -26,8 +31,8 @@ python3 tools/mcp_rest.py --call wp_get_option '{"key":"mwai_options","raw":true
 
 | Nøgle | Målt 2/11 | Betydning |
 | --- | --- | --- |
-| `mcp_drafts_only` | **true** | spærren: alle skrivende kald afvises, også plugin'ets egne |
-| `mcp_role` | `admin` | tokenet har administratorkraft, så kun Drafts Only holder det tilbage |
+| `mcp_drafts_only` | 2/11: true · **4/11: false** | spærren: da den var `true`, blev alle skrivende kald afvist, også plugin'ets egne |
+| `mcp_role` | `admin` | tokenet har administratorkraft, så kun Drafts Only holdt det tilbage |
 | `mcp_approvals` | `off` | ingen godkendelse pr. værktøj — spærren er den eneste |
 | `mcp_default_readonly` | false | læse-only er ikke slået til |
 | `mcp_dynamic_rest` | true | Dynamic REST er allerede tændt, så `wp_update_option` m.fl. er tilgængelige |
@@ -121,6 +126,69 @@ OAuth-flowet i `tools/test_mcp_oauth.py` (10 fixtures, lokal authorization serve
 | `454` / `455` | Simplys WAF på HTML | åbn linket i en rigtig browser, ikke fra worktreen |
 | `404 rest_no_route` | forkert sti | ruten er `/wp-json/mcp/v1/http`, ikke `/mcp` |
 | tomt `tools/list` | forbundet, men ingen værktøjer eksponeret | tjek AI Engines MCP-indstillinger i wp-admin |
+
+## Novamira (`novamira`) — den anden MCP-flade (målt 6/11 2026)
+
+Sitet kører **Novamira 1.12.14** ved siden af AI Engine. Den har sin egen OAuth-server og sin egen flade:
+
+| | |
+| --- | --- |
+| Resource | `https://steamgears.eu/wp-json/mcp/novamira-oauth` — `401` uden token, med `resource_metadata` i `WWW-Authenticate` |
+| Authorization server | `https://steamgears.eu/.well-known/oauth-authorization-server` (issuer `https://steamgears.eu`) |
+| Endpoints | authorize `admin.php?page=novamira-oauth-authorize`, token/register/revoke/introspect/device under `/wp-json/novamira/v1/oauth/` |
+| Scope | `full_access` (eneste understøttede) |
+| Flera | **3 meta-værktøjer** — `discover-abilities`, `get-ability-info`, `execute-ability` — over **207 abilities**, heraf 60 fra plugin'et og resten fra WordPress, WooCommerce, Rank Math m.fl. |
+
+**Tre ting der koster en runde, hvis man ikke ved dem:**
+
+1. **DCR registrerer ikke device-grant.** Metadata annoncerer `urn:ietf:params:oauth:grant-type:device_code`, men
+   en dynamisk registreret klient får kun `authorization_code` + `refresh_token` tilbage, og `/oauth/device`
+   svarer `unauthorized_client`. Brug authorization code + PKCE med redirect `http://127.0.0.1:8765/callback`.
+2. **Token-endepunkterne kræver form-encoding.** JSON giver `unsupported_grant_type` — serveren kan ikke læse
+   `grant_type` og afviser, før den ser koden. `tools/mcp_oauth.py` sender nu form-data til token-kald og JSON
+   til DCR (RFC 6749 §4.1.3).
+3. **`tools/list` kræver `Mcp-Session-Id`** fra `initialize`-svarets header. Uden den svarer fladen `400` med
+   0 værktøjer, selv om `initialize` gik igennem.
+
+### Hold adgangen i live
+
+Access-tokenet lever **3600 s**, og refresh-tokenet **roteres** ved hver fornyelse (målt 6/11: `refresh_token`
+ændres, `expires_in` er 3600, ingen `refresh_token_expires_in` oplyses). Introspection er admin-only, så
+refresh-tokenets levetid kan ikke læses udefra — derfor skal fornyelsen køre planlagt, ikke på held.
+
+[`tools/mcp_keepalive.py`](../tools/mcp_keepalive.py) fornyer, verificerer med `initialize` + `tools/list` og
+gemmer det nye par (mode 600, uden for repoet). Kør den manuelt med:
+
+```bash
+python3 tools/mcp_keepalive.py          # lokalt: forny + verificér + gem
+python3 tools/mcp_keepalive.py --ci --emit-refresh-file /tmp/refresh   # CI: skriv det roterede token til fil
+```
+
+**Løbende fornyelse i sandkassen (hvert 58. minut):**
+[`tools/keepalive-loop.sh`](../tools/keepalive-loop.sh) kalder keep-alive hvert 3480 s, så access-tokenet aldrig
+når at udløbe, og logger hver kørsel i `.tools/keepalive-loop.log`. Den tåler enkelte netværksfejl (prøver igen
+efter 5 min, op til 5 gange i træk) og stopper selv med en klar besked, hvis tokenet er dødt.
+
+```bash
+setsid nohup bash tools/keepalive-loop.sh 3480 >/dev/null 2>&1 < /dev/null &   # start
+kill "$(cat .tools/keepalive-loop.pid)"                                        # stop
+```
+
+Grænsen er arkivering: processen lever kun, mens worktreen kører, og efter en genstart skal kommandoen køres
+igen. Det dækker arbejdsdage, ikke 30 dage uden at nogen åbner chatten — det gør kun CI-varianten nedenfor.
+
+**Planlagt fornyelse (30+ dage uden ejerens hænder):**
+[`novamira-keepalive.yml`](../.github/workflows/novamira-keepalive.yml) kører dagligt kl. 03 dansk tid,
+fornyer og gemmer det roterede token tilbage som repository-secret. Den springer sig selv over med en
+`::notice`, indtil disse findes:
+
+| Navn | Type | Hvad |
+| --- | --- | --- |
+| `NOVAMIRA_REFRESH_TOKEN` | secret | refresh-tokenet fra den lokale godkendelse |
+| `NOVAMIRA_SECRETS_TOKEN` | secret | fine-grained PAT med **Secrets: write** (`PINTEREST_SECRETS_TOKEN` bruges som fallback) |
+| `NOVAMIRA_CLIENT_ID` | variabel, valgfri | den offentlige klient-id; ellers bruges klienten fra 6/11 2026 |
+
+Uden dem virker adgangen kun så længe refresh-tokenet lever, og et nyt kræver ejerens godkendelse igen.
 
 ## Kildesporet: hvad AI Engine og adapteren kan kalde (læst 2/11 2026)
 

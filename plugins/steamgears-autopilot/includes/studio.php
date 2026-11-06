@@ -454,7 +454,7 @@ class SGAP_Studio {
                 'category' => SGAP_Abilities::CATEGORY,
                 'input_schema' => SGAP_Abilities::object($props, $required),
                 'output_schema' => ['type' => 'object'],
-                'execute_callback' => $cb,
+                'execute_callback' => static fn($input = null) => call_user_func($cb, $input),
                 'permission_callback' => [SGAP_Abilities::class, 'can_manage'],
                 'meta' => SGAP_Abilities::meta(false, false, false)
             ]);

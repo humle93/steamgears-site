@@ -8,8 +8,12 @@ vest, og boot/spats-guiden fra 31/10 har heller ingen produkter, så de to kan i
 Produkt-ID'er kommer fra [`om-maerkning-dark-academia-2026-11-01.md`](om-maerkning-dark-academia-2026-11-01.md),
 priserne fra [`valuta-og-priser-2026-11-02.md`](valuta-og-priser-2026-11-02.md). Intet er gættet.
 
-**Det der venter på WordPress-adgang:** to egne fotos, HowTo + FAQPage-schema i Rank Math, og publicering.
-Guiden har ingen eksisterende post-ID i repoet, så den skal oprettes som ny side.
+**Status 6/11 2026:** guiden er **publiceret** som post 1394 på `/steampunk-corset-guide/` (1.590 ord, 11 H2'er,
+FAQPage-schema, fremhævet billede 1395). Kladden fandtes allerede, så der blev ikke oprettet en ny side — i stedet
+blev dens to rå `/product/`-hrefs sporet til `/go/489/` (leather overbust) og `/go/491/` (silver overbust), og
+guiden fik et hub-link til `/steampunk-costumes/` i konklusionen. De øvrige otte `/go/`-id'er i planen er **ikke**
+indsat: de kunne ikke måles fra sandkassen (Simplys WAF giver browser-UA en challenge, default-UA en »Page Not Found«-side),
+og et produktlink der ikke kan verificeres hører ikke i en publiceret guide.
 
 ---
 
