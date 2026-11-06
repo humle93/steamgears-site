@@ -139,7 +139,7 @@ python3 tools/mcp_rest.py --call tools/list '{}' | head -c 400   # efter nextCur
 | # | Skridt | Tid | Hvem | Blokeret af |
 | --- | --- | --- | --- | --- |
 | 1 | Mål de 301: `--split` plus `nextCursor`-tjek | 0,25 t | agent | OAuth-token |
-| 2 | Kør klassificeringen mod listen, skriv `mcp-kategorier-2026-11-05.csv` med kategori og R-klasse pr. værktøj | 0,5 t | agent | skridt 1 |
+| 2 | Kør [`tools/mcp_klassificer.py`](../../tools/mcp_klassificer.py) mod eksporten — CSV med kategori og R-klasse pr. værktøj er klar med det samme (§11) | 0,1 t | agent | skridt 1 |
 | 3 | Vælg profil (A/B/C) og sæt de fire knapper | 5 min | ejer | — |
 | 4 | Slå de abilities til der mangler `meta.mcp.public`, hvis public-filteret er årsagen | 0,25 t | ejer eller agent med token | skridt 1–3 |
 | 5 | Skriv profilen og værktøjstallet ind i [agent-profilen](../agent-profil.md), så næste pas starter fra en måling | 0,1 t | agent | skridt 1–4 |
@@ -165,3 +165,43 @@ værktøjer der er pagineret væk.
 - **`meta.mcp.public` på andres abilities** — kræver at det plugin tillader det; ellers er svaret at de 273 ikke
   kan gøres til værktøjer, kun nås gennem `list-abilities` + `call-ability`.
 - **At de 301 faktisk kan bruges** — kun et kald pr. kategori beviser det, og det skal gøres i profil C.
+
+## 11. Klassificeringen som værktøj
+
+Reglerne i §3–§5 er kodet i [`tools/mcp_klassificer.py`](../../tools/mcp_klassificer.py): én
+`tools/list`-eksport ind, en CSV ud med `navn,kategori,risiko,grundlag,notat`. Den kører uden netværk og
+uden credential, fordi eksporten er inputtet — målingen er stadig skridt 1, ikke dette værktøj.
+
+```bash
+python3 tools/mcp_klassificer.py --input eksport.json --csv mcp-kategorier.csv   # eller < eksport.json
+python3 tools/mcp_klassificer.py --input eksport.json --strict                    # ukendt → exit 1
+python3 tools/test_mcp_klassificer.py                                            # 32 offline-tests
+```
+
+Rækkefølgen er den samme som i §5 og er bindende i koden: **overstyring → annotation → navn
+(kategori) → udsagnsord (risiko) → `ukendt`**. `grundlag`-kolonnen skriver hvilken regel der afgjorde
+linjen, så en gennemlæsning kan nøjes med de linjer der ikke står til `udsagnsord`.
+
+| Lag | Omfang | Hvad det gør |
+| --- | --- | --- |
+| Overstyringstabel | 35 linjer, hver med begrundelse | de værktøjer hvor navnet lyver: `wp_update_option` (R3), `call-ability` og `execute-ability` (R3-broer), `wp_open_template`, `mwai_image` |
+| Annotation | `readOnlyHint`, `destructiveHint` | `readOnlyHint: true` → R0, `destructiveHint: true` → R3. Siger annotationen kun »skriver«, bliver svaret R2 når navnet ikke bærer et udsagnsord |
+| Kategori-hints | 65 ord i otte grupper | første hit vinder; ordgrænse, ikke bogstav-prefix |
+| Risiko-ord | 54 udsagnsord i fire klasser | det farligste ord i navnet vinder, så `delete` slår `post` |
+
+To fejl blev fanget af fixturerne undervejs og står nu som regressionsværn: `mode` ramte inde i
+`moderate`, så `wp_moderate_comments` blev **ops** i stedet for content, og verbet `set` ramte `settings`,
+så `get-settings` blev R2 i stedet for R0. Begge blev rettet ved at matche hele ord med ental og flertal
+(`post`/`posts`, `taxonom`/`taxonomies`) i stedet for bogstav-prefix.
+
+**Fixturerne** ligger i `tools/fixtures/` og er bygget af kilden, ikke af hukommelsen: de 74 indbyggede
+AI Engine-navne fra `mcp_rest.AI_ENGINE_NATIVE`, vores 26 fra `mcp-tools.php`, de 32 abilities fra
+[`egen-abilities-2026-11-02.csv`](egen-abilities-2026-11-02.csv) — 137 værktøjer i alt — plus
+`mcp-tools-list-side1.json`, der er de første 28 med et `nextCursor`. Den fil findes fordi 28 er det tal
+botten viser: en eksport med `nextCursor` bliver markeret `ufuldstaendig: true` med en advarsel, så en kort
+liste ikke kan forveksles med en fuld.
+
+Fordelingen på de 137 kendte navne: content 55, media 11, commerce 5, seo 11, social 13, ai 2, ops 31,
+system 9 — og R0 60, R1 17, R2 45, R3 15. Det er **ikke** de 301: ACF, WooCommerce og andre plugins'
+abilities mangler, og de kommer først ind når eksporten er hentet med et token. Tallene er et bevis på at
+reglerne kan køre, ikke en måling af sitet.

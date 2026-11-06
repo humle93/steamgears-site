@@ -67,6 +67,7 @@ check "commit-besked --selftest"             python3 tools/commit_check.py --sel
 check "kampagne-indlæser --selftest"         python3 tools/load_campaign.py --selftest
 check "plugin-smoke"                         "$PHP_BIN" plugins/tests/smoke.php
 check "MCP REST-klient"                      python3 tools/test_mcp_rest.py
+check "MCP-klassificering"                   python3 tools/test_mcp_klassificer.py
 check "MCP OAuth"                            python3 tools/test_mcp_oauth.py
 check "niche-scanner"                        python3 tools/test_niche_scanner.py
 check "link-plan-selftest"                  python3 tools/link_plan_check.py --selftest
