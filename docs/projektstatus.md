@@ -18,11 +18,11 @@ Betjening: `python3 projektstatus.py --check` (valider + drift), `--dry-run` (vi
 ## 1. Daglig status
 
 <!-- AUTO:DAGLIG:START -->
-Status pr. **2026-11-03** · beregnet af `projektstatus.py` · kilder: [`projektstatus.json`](../projektstatus.json)
+Status pr. **2026-11-06** · beregnet af `projektstatus.py` · kilder: [`projektstatus.json`](../projektstatus.json)
 
 | Projekt | Status i dag | Grundlag |
 | --- | --- | --- |
-| **steamgears.eu — site-optimering** *(roadmap S0–S4)* | **58,4 %** | 12,7 af 21,75 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,8/6 · S3 2,45/3,55 · S4 1,4/5) |
+| **steamgears.eu — site-optimering** *(roadmap S0–S4)* | **53,5 %** | 12,7 af 23,75 d (S0 1,9/2,85 · S1 2,15/4,6 · S2 4,8/7,5 · S3 2,45/3,55 · S4 1,4/5,25) |
 | **Steamgears Autopilot — plugin** | **34,1 %** | 8,3 af 24,35 d (P0 3,2/4 · P1 4,85/11,35 · P2 0/7 · P3 0,25/2) |
 | **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5) |
 | **SEO-indholdsproduktion** | **57,1 %** | 4 af 7 guides (Publicerede guides (id 292, 296, 295) 0/3 · Guide-copy klar til publicering (292, 296, 295 + corset) 4/4) · drift: Daglig loop kører |
@@ -34,7 +34,7 @@ Status pr. **2026-11-03** · beregnet af `projektstatus.py` · kilder: [`projekt
 <!-- AUTO:BLOKERINGER:START -->
 | Projekt | Næste skridt | Blokering |
 | --- | --- | --- |
-| steamgears.eu — site-optimering (58,4 %) | Publicér de fire guides + hub-copyen og S2.2 /shipping/ + /returns/ når WordPress-adgang er der; S1.1 Herbarium kræver varianter i Printify; S0.4 kræver én Redirection-gruppe (ejer) | S1.1 Herbarium kræver varianter i Printify; S0.4 5 vanity-301 kræver én Redirection-gruppe (ejer) |
+| steamgears.eu — site-optimering (53,5 %) | Publicér de fire guides + hub-copyen og S2.2 /shipping/ + /returns/ når WordPress-adgang er der; S1.1 Herbarium kræver varianter i Printify; S0.4 kræver én Redirection-gruppe (ejer); S0.9 kræver en browser-session med GA4 DebugView (to page_view i samme session) | S1.1 Herbarium kræver varianter i Printify; S0.4 5 vanity-301 kræver én Redirection-gruppe (ejer) |
 | Steamgears Autopilot — plugin (34,1 %) | P3.1/P3.2-hygiejne; P0.6 er blokeret af Command Center | 7.27.0 kan ikke installeres af agenten (OAuth-token tilbagekaldt, intet application password); P1.5 kræver Pinterest-token (401) og Meta-review; P0.6 kræver Command Center; P1.4 kræver P1.5 |
 | Dark academia-rebrand (63 %) | Batch 4 — mockups (~130 billeder) | Printify-adgang |
 | SEO-indholdsproduktion (57,1 %) | Publicér de fire guides — copy, FAQ og links er klar (292, 296, 295 + ny side /steampunk-corset-guide/) | Publicering kræver WordPress-adgang. Filer der nu venter kun på det: docs/library/guides-2026-11-03.md (post 292, 296, 295) og docs/library/guides-2026-11-03-corset.md (ny side), plus fotos, HowTo/FAQPage-schema i Rank Math og selve publish. Copy er skrevet og verificeret i repoet (tools/guide_check.py). |
@@ -50,6 +50,11 @@ Nyeste først. Append-only — rækker må ikke slettes eller ændres.
 
 | Dato | Projekt | Modul | Før → Efter | Δ | Grundlag |
 | --- | --- | --- | --- | --- | --- |
+| 2026-11-06 | Døde internlinks | ingen ændring | 100 % → 100 % | 0 | 39 af 39 links |
+| 2026-11-06 | SEO-indholdsproduktion | ingen ændring | 57,1 % → 57,1 % | 0 | 4 af 7 guides (Publicerede guides (id 292, 296, 295) 0/3 · Guide-copy klar til publicering (292, 296, 295 + corset) 4/4) |
+| 2026-11-06 | Dark academia-rebrand | ingen ændring | 63 % → 63 % | 0 | 8,5 af 13,5 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5) |
+| 2026-11-06 | Steamgears Autopilot — plugin | ingen ændring | 34,1 % → 34,1 % | 0 | 8,3 af 24,35 d (P0 3,2/4 · P1 4,85/11,35 · P2 0/7 · P3 0,25/2) |
+| 2026-11-06 | steamgears.eu — site-optimering | scope ændret — §9 P2–P5 indarbejdet (nævner 21,75 → 23,75 d) | 58,4 % → 53,5 % | -4,9 | 12,7 af 23,75 d (S0 1,9/2,85 · S1 2,15/4,6 · S2 4,8/7,5 · S3 2,45/3,55 · S4 1,4/5,25) |
 | 2026-11-03 | steamgears.eu — site-optimering | daglig måling | 57 % → 58,4 % | +1,4 | 12,7 af 21,75 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,8/6 · S3 2,45/3,55 · S4 1,4/5) |
 | 2026-11-03 | steamgears.eu — site-optimering | daglig måling | 56,8 % → 57 % | +0,2 | 12,4 af 21,75 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,8/6 · S3 2,15/3,55 · S4 1,4/5) |
 | 2026-11-03 | steamgears.eu — site-optimering | daglig måling | 56,3 % → 56,8 % | +0,5 | 12,35 af 21,75 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,75/6 · S3 2,15/3,55 · S4 1,4/5) |
@@ -96,18 +101,19 @@ Nyeste først. Append-only — rækker må ikke slettes eller ændres.
 
 ---
 
-## 4. Regnskab for roadmap-procenten (21,1 developer-dage)
+## 4. Regnskab for roadmap-procenten (23,75 developer-dage)
 
-Manuel tabel — opdateres når roadmap-estimaterne ændres, ikke af scriptet.
+Manuel tabel — opdateres når roadmap-estimaterne ændres, ikke af scriptet. Tallene skal matche
+`projektstatus.json`, ellers er der to sandheder om samme beløb.
 
 | Band | Estimat | Udført | Rest |
 | --- | --- | --- | --- |
-| S0 — brudt/akut | 2,6 d | 1,9 d | 0,7 d (robots.txt, Health Check, Coming Soon, bot-adgang, 2 vanity-301) |
-| S1 — butik og indhold | 4,5 d | 2,05 d | 2,45 d (`/go/`-tracking, lead magnets, resten af kladde-triage) |
-| S2 — struktur og SEO | 6,0 d | 4,45 d | 1,55 d (11 meta-rettelser, 2 H1'er, nav-punkter, `/shipping/` + `/returns/`) |
-| S3 — hygiejne | 3,0 d | 1,6 d | 1,4 d (webp, designsider, plugins) |
-| S4 — salgsklar butik | 5,0 d | 1,4 d | 3,6 d (valuta, betaling, anmeldelser) |
-| **I alt** | **21,1 d** | **11,4 d** | **9,7 d** |
+| S0 — brudt/akut | 2,85 d | 1,9 d | 0,95 d (robots.txt, Health Check, Coming Soon, bot-adgang, 2 vanity-301, S0.9 analytics) |
+| S1 — butik og indhold | 4,6 d | 2,15 d | 2,45 d (`/go/`-tracking, lead magnets, resten af kladde-triage) |
+| S2 — struktur og SEO | 7,5 d | 4,8 d | 2,7 d (11 meta-rettelser, 2 H1'er, nav-punkter, `/shipping/` + `/returns/`, S2.7 payload, S2.8 hub-links) |
+| S3 — hygiejne | 3,55 d | 2,45 d | 1,1 d (webp, designsider, plugins) |
+| S4 — salgsklar butik | 5,25 d | 1,4 d | 3,85 d (valuta, betaling, anmeldelser, S4.13 merchant-schema) |
+| **I alt** | **23,75 d** | **12,7 d** | **11,05 d** |
 
 Kilde: [`roadmap.md`](roadmap.md) §4 og
 [`seo.md`](seo.md) §5 (målt 1/11).

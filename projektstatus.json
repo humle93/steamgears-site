@@ -1,22 +1,22 @@
 {
   "schema": 1,
-  "updated": "2026-11-03",
+  "updated": "2026-11-06",
   "projects": [
     {
       "id": "site",
       "name": "steamgears.eu — site-optimering",
       "note": "roadmap S0–S4",
-      "next": "Publicér de fire guides + hub-copyen og S2.2 /shipping/ + /returns/ når WordPress-adgang er der; S1.1 Herbarium kræver varianter i Printify; S0.4 kræver én Redirection-gruppe (ejer)",
+      "next": "Publicér de fire guides + hub-copyen og S2.2 /shipping/ + /returns/ når WordPress-adgang er der; S1.1 Herbarium kræver varianter i Printify; S0.4 kræver én Redirection-gruppe (ejer); S0.9 kræver en browser-session med GA4 DebugView (to page_view i samme session)",
       "blocked_by": "S1.1 Herbarium kræver varianter i Printify; S0.4 5 vanity-301 kræver én Redirection-gruppe (ejer)",
       "modules": [
         {
           "id": "s0",
           "name": "S0 — brudt/akut",
           "done": 1.9,
-          "total": 2.6,
+          "total": 2.85,
           "unit": "d",
           "scope_change": true,
-          "note": "S0.7 trukket tilbage 2/11: sitemap-URL'er svarer 200 til browsere, men 455 til Googlebot og bingbot (Simply.com bot-regel), så S0.7 er ikke verificeret for søgemaskiner. Skal genmåles efter hosten har hvidlistet bots. S0.1, S0.3, S0.8 + meta-/link-/alt-runde 1/11"
+          "note": "S0.7 trukket tilbage 2/11: sitemap-URL'er svarer 200 til browsere, men 455 til Googlebot og bingbot (Simply.com bot-regel), så S0.7 er ikke verificeret for søgemaskiner. Skal genmåles efter hosten har hvidlistet bots. S0.1, S0.3, S0.8 + meta-/link-/alt-runde 1/11 + 0,25 d S0.9 analytics-afklaring (scope 6/11, endnu ikke udført: to tag-id'er skal måles, ikke gættes)."
         },
         {
           "id": "s1",
@@ -30,9 +30,9 @@
           "id": "s2",
           "name": "S2 — struktur og SEO",
           "done": 4.8,
-          "total": 6,
+          "total": 7.5,
           "unit": "d",
-          "note": "S2.1 9 af 13 planlagte sider live 2,08 (/inspiration/ id 1243 verificeret 2/11) + S2.5 meta-runde 1,4 + S2.6 hub-links 0,7 (0,4 tidligere + 0,2 guide-klynge + 0,1 hub-copy for side 550) (0,4 tidligere + 0,2 for guide-klyngen 3/11: gensidige links mellem de fire guides og hubben, håndhævet af tre nye guide_check-værn med 4 nye selftest-fixtures) + S2.4 H1 0,25 + S2.3 nav-links 0,3; S2.6 er 0,75/0,75: link-planen for de ældre guides er skrevet og værnkontrolleret, mens selve indsættelsen venter på adgang, og 11 meta-rettelser og /shipping/ + /returns/ mangler"
+          "note": "S2.1 9 af 13 planlagte sider live 2,08 (/inspiration/ id 1243 verificeret 2/11) + S2.5 meta-runde 1,4 + S2.6 hub-links 0,7 (0,4 tidligere + 0,2 guide-klynge + 0,1 hub-copy for side 550) (0,4 tidligere + 0,2 for guide-klyngen 3/11: gensidige links mellem de fire guides og hubben, håndhævet af tre nye guide_check-værn med 4 nye selftest-fixtures) + S2.4 H1 0,25 + S2.3 nav-links 0,3; S2.6 er 0,75/0,75: link-planen for de ældre guides er skrevet og værnkontrolleret, mens selve indsættelsen venter på adgang, og 11 meta-rettelser og /shipping/ + /returns/ mangler + 1,5 d S2.7 HTML-/scriptbudget 1,0 + S2.8 hub-links på de resterende indlæg 0,5 (scope 6/11, endnu ikke udført)."
         },
         {
           "id": "s3",
@@ -46,9 +46,9 @@
           "id": "s4",
           "name": "S4 — salgsklar butik",
           "done": 1.4,
-          "total": 5,
+          "total": 5.25,
           "unit": "d",
-          "note": "S4.4 formular-del + produkttekster"
+          "note": "S4.4 formular-del + produkttekster + 0,25 d S4.13 merchant-schema: shippingDetails + MerchantReturnPolicy (scope 6/11, endnu ikke udført)."
         }
       ]
     },
@@ -547,6 +547,52 @@
       "after": 58.4,
       "delta": 1.4,
       "basis": "12,7 af 21,75 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,8/6 · S3 2,45/3,55 · S4 1,4/5)"
+    },
+    {
+      "date": "2026-11-06",
+      "project": "steamgears.eu — site-optimering",
+      "module": "scope ændret — §9 P2–P5 indarbejdet (nævner 21,75 → 23,75 d)",
+      "before": 58.4,
+      "after": 53.5,
+      "delta": -4.9,
+      "scope_change": true,
+      "basis": "12,7 af 23,75 d (S0 1,9/2,85 · S1 2,15/4,6 · S2 4,8/7,5 · S3 2,45/3,55 · S4 1,4/5,25)"
+    },
+    {
+      "date": "2026-11-06",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "ingen ændring",
+      "before": 34.1,
+      "after": 34.1,
+      "delta": 0,
+      "basis": "8,3 af 24,35 d (P0 3,2/4 · P1 4,85/11,35 · P2 0/7 · P3 0,25/2)"
+    },
+    {
+      "date": "2026-11-06",
+      "project": "Dark academia-rebrand",
+      "module": "ingen ændring",
+      "before": 63.0,
+      "after": 63.0,
+      "delta": 0,
+      "basis": "8,5 af 13,5 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5)"
+    },
+    {
+      "date": "2026-11-06",
+      "project": "SEO-indholdsproduktion",
+      "module": "ingen ændring",
+      "before": 57.1,
+      "after": 57.1,
+      "delta": 0,
+      "basis": "4 af 7 guides (Publicerede guides (id 292, 296, 295) 0/3 · Guide-copy klar til publicering (292, 296, 295 + corset) 4/4)"
+    },
+    {
+      "date": "2026-11-06",
+      "project": "Døde internlinks",
+      "module": "ingen ændring",
+      "before": 100.0,
+      "after": 100.0,
+      "delta": 0,
+      "basis": "39 af 39 links"
     }
   ]
 }

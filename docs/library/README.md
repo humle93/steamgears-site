@@ -24,6 +24,7 @@ lukkedes research-bibliotek.
 
 | Dokument | Indhold | Dato |
 | --- | --- | --- |
+| [site-maalinger-2026-11-06.md](site-maalinger-2026-11-06.md) | **Site-målinger 6/11:** `/shipping/` + `/returns/` er nu rigtige 200-sider i sitemappen, men linkes ikke fra forsiden; forsiden er 215 KB HTML med 33 scripts; to analytics-id'er — grundlaget for roadmap §9 P1–P5 — PDF i `reports/site-maalinger-2026-11-06.pdf` | 2026-11-06 |
 | [guide-links-aeldre-2026-11-03.md](guide-links-aeldre-2026-11-03.md) | **Link-plan for de ældre guides 3/11:** tolv `/go/<id>/`-links på syv publicerede guides, kontrolleret mod mapping og pristabel; seks ID'er mangler i mappingen og er navngivet frem for gættet — PDF i `reports/guide-links-aeldre-2026-11-03.pdf` | 2026-11-03 |
 | [hub-steampunk-costumes-2026-11-03.md](hub-steampunk-costumes-2026-11-03.md) | **Hub-copy 3/11:** `/steampunk-costumes/` (side 550) skrevet som indgang til de fire guides — quick answer, femten produktlinks, tre figurer og FAQ — PDF i `reports/hub-steampunk-costumes-2026-11-03.pdf` | 2026-11-03 |
 | [guide-hub-2026-11-03.md](guide-hub-2026-11-03.md) | **Guide-klyngen 3/11:** de fire guides som én hub — gensidige links, `guide_check.py`-værnene (hub, klynge, produktnavn) og rækkefølgen de skal indsættes i — PDF i `reports/guide-hub-2026-11-03.pdf` | 2026-11-03 |
