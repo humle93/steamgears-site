@@ -91,6 +91,9 @@ class SGAP_UI {
 .sgap .sgap-sub{color:var(--muted);margin:-6px 0 12px}
 .sgap .sgap-chat{display:flex;flex-direction:column;gap:10px;max-width:900px}
 .sgap .sgap-chat-top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.sgap .sgap-chat-top-btns{display:inline-flex;gap:6px;flex-wrap:wrap}
+.sgap .sgap-chat-top-btns .button{min-height:30px;line-height:28px}
+.sgap #sgap-chat-tools-pill .sgap-pill{font-variant-numeric:tabular-nums}
 .sgap .sgap-chat-log{display:flex;flex-direction:column;gap:10px;min-height:280px;max-height:60vh;overflow-y:auto;padding:12px;background:#fbf8f3;border:1px solid #efe6d7;border-radius:12px}
 .sgap .sgap-msg{max-width:85%;padding:10px 13px;border-radius:14px;line-height:1.5;font-size:14px;word-wrap:break-word}
 .sgap .sgap-msg ul{margin:4px 0 4px 18px;list-style:disc}
@@ -205,6 +208,34 @@ class SGAP_UI {
 .sgap .button{min-height:40px}
 }
 @media (max-width:600px){.sgap .sgap-head{padding:12px 14px}.sgap .sgap-head h1{font-size:19px}.sgap .sgap-grid{grid-template-columns:1fr}.sgap .sgap-stat b{font-size:22px}.sgap .form-table{padding:4px 10px}}
+/* Tools browser (7.38.0): sticky search, category chips, card grid */
+.sgap .sgap-toolsbar{position:sticky;top:46px;z-index:5;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.92);backdrop-filter:blur(6px);border:1px solid var(--line);border-radius:12px;padding:8px 12px;margin:0 0 12px;box-shadow:0 4px 14px rgba(110,17,20,.06)}
+.sgap .sgap-toolsbar .dashicons{color:var(--brass);flex:none}
+.sgap .sgap-toolsbar input[type=search]{flex:1;min-width:0;border:0;background:transparent;box-shadow:none;font-size:14px;padding:6px 2px;outline:none}
+.sgap .sgap-toolsbar input[type=search]:focus{box-shadow:none}
+.sgap .sgap-toolcount{flex:none;font-size:12px;font-weight:600;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.sgap .sgap-cats{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px}
+.sgap .sgap-cat{border:1px solid var(--line);background:#fffdf7;color:var(--brass-d);border-radius:999px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;transition:background .15s,border-color .15s,transform .15s}
+.sgap .sgap-cat span{color:var(--muted);font-weight:500;margin-left:4px}
+.sgap .sgap-cat:hover{background:var(--brass-l);border-color:var(--gold)}
+.sgap .sgap-cat:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+.sgap .sgap-cat.is-on{background:var(--brass);border-color:var(--gold);color:#fff8e1}
+.sgap .sgap-cat.is-on span{color:#f7dc8a}
+.sgap .sgap-toolgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.sgap .sgap-toolcard{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:12px;padding:12px 14px;box-shadow:0 1px 2px rgba(0,0,0,.04);transition:box-shadow .15s,transform .15s}
+.sgap .sgap-toolcard:hover{box-shadow:0 6px 18px rgba(110,17,20,.1);transform:translateY(-1px)}
+.sgap .sgap-toolcard h3{margin:0 0 6px;font-size:13px;line-height:1.6;display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.sgap .sgap-toolcard code{background:#f7f4ee;border-radius:6px;padding:2px 6px;font-size:12px;color:var(--brass-d);word-break:break-word}
+.sgap .sgap-badge{display:inline-flex;align-items:center;padding:1px 7px;border-radius:999px;font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase}
+.sgap .sgap-badge.read{background:var(--ok-l);color:var(--ok)}
+.sgap .sgap-badge.write{background:var(--warn-l);color:var(--warn)}
+.sgap .sgap-badge.bound{background:var(--brass-l);color:var(--brass-d)}
+.sgap .sgap-badge.mute{background:#f0f0f1;color:var(--muted)}
+.sgap .sgap-toolmeta{margin:0 0 6px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.sgap .sgap-tool-desc{margin:0;font-size:13px;line-height:1.5;color:var(--ink);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.sgap .sgap-toolempty{padding:18px;text-align:center;color:var(--muted)}
+@media (max-width:782px){.sgap .sgap-toolsbar{top:0;border-radius:10px}.sgap .sgap-toolgrid{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){.sgap .sgap-toolcard,.sgap .sgap-cat{transition:none}}
 </style>';
     }
 

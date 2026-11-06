@@ -22,6 +22,7 @@ class SGAP_Chat {
 
     public static function init(): void {
         add_action('admin_menu', [__CLASS__, 'menu'], 20);
+        add_action('admin_menu', [__CLASS__, 'catalog_menu'], 21);
         add_action('wp_ajax_sgap_chat', [__CLASS__, 'ajax_send']);
         add_action('wp_ajax_sgap_chat_clear', [__CLASS__, 'ajax_clear']);
         add_action('wp_ajax_sgap_chat_tools', [__CLASS__, 'ajax_tools']);
@@ -51,8 +52,10 @@ class SGAP_Chat {
             if ($full === '') {
                 continue;
             }
-            $category = strpos($full, '/') !== false ? strstr($full, '/', true) : '';
-            $short = $category !== '' ? substr($full, strlen($category) + 1) : $full;
+            $prefix = strpos($full, '/') !== false ? (string) strstr($full, '/', true) : '';
+            $declared = method_exists($ability, 'get_category') ? trim((string) $ability->get_category()) : '';
+            $category = $declared !== '' ? $declared : $prefix;
+            $short = $prefix !== '' ? substr($full, strlen($prefix) + 1) : $full;
             $out[] = [
                 'name' => $full,
                 'short' => $short,
@@ -487,6 +490,85 @@ class SGAP_Chat {
         }
         check_ajax_referer('sgap_chat', 'nonce');
         wp_send_json_success(self::tool_catalog());
+    }
+
+    /* ---- tools browser ---- */
+
+    public static function catalog_menu(): void {
+        add_submenu_page('steamgears-autopilot', 'Tools', 'Tools', 'manage_options', 'sgap-tools', [__CLASS__, 'catalog_page'], 30);
+    }
+
+    /** Every ability the site registers, with search, category filters and read/write badges. */
+    public static function catalog_page(): void {
+        SGAP_Admin::open('Tools', 'Everything this site registers as an ability or MCP tool — search it, filter by category, and see which ones write.');
+        $available = self::available();
+        $bound = self::tools();
+        $bound_names = [];
+        foreach ($bound as $name => $tool) {
+            $bound_names[(string) $name] = true;
+            if (isset($tool[2]) && is_object($tool[2]) && method_exists($tool[2], 'get_name')) {
+                $bound_names[(string) $tool[2]->get_name()] = true;
+            }
+        }
+        $rows = [];
+        $categories = [];
+        $readonly = 0;
+        foreach ($available as $entry) {
+            $category = $entry['category'] !== '' ? $entry['category'] : '(none)';
+            $categories[$category] = ($categories[$category] ?? 0) + 1;
+            if (!empty($entry['readonly'])) {
+                $readonly++;
+            }
+            $rows[] = [
+                'name' => $entry['name'],
+                'short' => $entry['short'],
+                'category' => $category,
+                'description' => $entry['description'],
+                'readonly' => !empty($entry['readonly']),
+                'bound' => isset($bound_names[$entry['name']]) || isset($bound_names[$entry['short']]),
+                'chat' => !in_array($entry['short'], self::EXCLUDED, true)
+            ];
+        }
+        ksort($categories);
+        echo '<div class="sgap-pills">'
+            . SGAP_UI::pill(count($rows) . ' registered', count($rows) ? 'brass' : 'warn') . ' '
+            . SGAP_UI::pill(count($categories) . ' categories') . ' '
+            . SGAP_UI::pill($readonly . ' read-only', 'ok') . ' '
+            . SGAP_UI::pill((count($rows) - $readonly) . ' write', $readonly === count($rows) ? 'ok' : 'warn') . ' '
+            . SGAP_UI::pill(count($bound) . ' bound to chat', count($bound) ? 'ok' : 'warn')
+            . '</div>';
+        echo '<div class="sgap-toolsbar"><label class="screen-reader-text" for="sgap-tool-search">Search tools</label>'
+            . '<span class="dashicons dashicons-search" aria-hidden="true"></span>'
+            . '<input type="search" id="sgap-tool-search" placeholder="Search name, description or category …  ( / )" autocomplete="off">'
+            . '<span class="sgap-toolcount" id="sgap-toolcount">' . count($rows) . ' tools</span></div>'
+            . '<div class="sgap-cats" id="sgap-tool-cats"><button type="button" class="sgap-cat is-on" data-cat="">All</button>';
+        foreach ($categories as $category => $count) {
+            echo '<button type="button" class="sgap-cat" data-cat="' . esc_attr($category) . '">' . esc_html($category) . ' <span>' . (int) $count . '</span></button>';
+        }
+        echo '</div><div class="sgap-toolgrid" id="sgap-toolgrid"></div>'
+            . '<p class="sgap-toolempty" id="sgap-tool-empty" hidden>No tool matches that search.</p>';
+        echo '<script>(function(){var T=' . wp_json_encode($rows) . ';'
+            . 'var grid=document.getElementById("sgap-toolgrid"),search=document.getElementById("sgap-tool-search"),count=document.getElementById("sgap-toolcount"),empty=document.getElementById("sgap-tool-empty"),cats=document.getElementById("sgap-tool-cats");'
+            . 'var active="";'
+            . 'function esc(s){return String(s==null?"":s).replace(/[&<>"\']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\\"":"&quot;","\'":"&#39;"}[c];});}'
+            . 'function card(t){return "<article class=\\"sgap-toolcard\\">"+"<h3><code>"+esc(t.short)+"</code>"'
+            . '+(t.readonly?"<span class=\\"sgap-badge read\\">read</span>":"<span class=\\"sgap-badge write\\">write</span>")'
+            . '+(t.chat?"":"<span class=\\"sgap-badge mute\\">blocked in chat</span>")'
+            . '+(t.bound?"<span class=\\"sgap-badge bound\\">bound</span>":"<span class=\\"sgap-badge mute\\">via run-tool</span>")+"</h3>"'
+            . '+"<p class=\\"sgap-toolmeta\\">"+esc(t.category)+"</p>"'
+            . '+(t.description?"<p class=\\"sgap-tool-desc\\">"+esc(t.description)+"</p>":"")+"</article>";}'
+            . 'function render(){var q=search.value.toLowerCase().trim();var hits=T.filter(function(t){'
+            . 'if(active&&t.category!==active)return false;if(!q)return true;'
+            . 'return (t.name+" "+t.short+" "+t.category+" "+t.description).toLowerCase().indexOf(q)>-1;});'
+            . 'grid.innerHTML=hits.map(card).join("");count.textContent=hits.length+" of "+T.length+" tools";empty.hidden=hits.length>0;}'
+            . 'search.addEventListener("input",render);'
+            . 'cats.addEventListener("click",function(e){var b=e.target.closest(".sgap-cat");if(!b)return;'
+            . 'active=b.getAttribute("data-cat")||"";Array.prototype.forEach.call(cats.querySelectorAll(".sgap-cat"),function(x){x.classList.toggle("is-on",x===b);});render();});'
+            . 'document.addEventListener("keydown",function(e){'
+            . 'if(e.key==="/"&&document.activeElement!==search&&!/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)){e.preventDefault();search.focus();}'
+            . 'if(e.key==="Escape"&&document.activeElement===search){search.value="";render();search.blur();}});'
+            . 'render();})();</script>';
+        SGAP_Admin::close();
     }
 
     /* ---- page ---- */

@@ -297,6 +297,22 @@ class SGAP_MCP_Tools {
                 ['category' => ['type' => 'string', 'description' => 'Only abilities in this category.']],
                 [], [__CLASS__, 'list_abilities'], true, true
             ],
+            'ability-index' => [
+                'Ability index by category',
+                'Every registered ability grouped by category, with a count, how many only read, and the tool names in each. The cheapest way to see what a site exposes before searching it.',
+                ['category' => ['type' => 'string', 'description' => 'Only this category.']],
+                [], [__CLASS__, 'ability_index'], true, true
+            ],
+            'search-abilities' => [
+                'Search abilities',
+                'Keyword search across every registered ability, optionally inside one category. Matches name, label, description and category, and says how many matched so a caller knows whether to narrow.',
+                [
+                    'query' => ['type' => 'string', 'description' => 'Word or phrase to look for.'],
+                    'category' => ['type' => 'string', 'description' => 'Only this category.'],
+                    'limit' => ['type' => 'integer', 'minimum' => 1, 'maximum' => 100, 'default' => 25]
+                ],
+                [], [__CLASS__, 'search_abilities_tool'], true, true
+            ],
             'call-ability' => [
                 'Run any ability',
                 'Runs any registered ability by name with the given input, after checking that ability\'s own permission callback. This is the escape hatch: anything exposed as an ability on this site is reachable through it.',
@@ -393,14 +409,73 @@ class SGAP_MCP_Tools {
         };
         $name = $get('get_name', is_array($ability) ? ($ability['name'] ?? '') : '');
         $meta = $get('get_meta', is_array($ability) ? ($ability['meta'] ?? []) : []);
+        $annotations = is_array($meta) ? ($meta['annotations'] ?? []) : [];
         return [
             'name' => (string) $name,
             'label' => (string) $get('get_label', is_array($ability) ? ($ability['label'] ?? '') : ''),
             'description' => (string) $get('get_description', is_array($ability) ? ($ability['description'] ?? '') : ''),
             'category' => (string) $get('get_category', is_array($ability) ? ($ability['category'] ?? '') : ''),
             'input_schema' => $get('get_input_schema', is_array($ability) ? ($ability['input_schema'] ?? null) : null),
+            'readonly' => is_array($annotations) && !empty($annotations['readonly']) && empty($annotations['destructive']),
             'mcp' => is_array($meta) ? ($meta['mcp'] ?? null) : null
         ];
+    }
+
+    /**
+     * Groups described abilities by category. Pure: takes the output of describe_ability().
+     * @return array<string, array{count: int, readonly: int, tools: string[]}>
+     */
+    public static function index_abilities(array $abilities): array {
+        $index = [];
+        foreach ($abilities as $ability) {
+            $category = trim((string) ($ability['category'] ?? ''));
+            $category = $category !== '' ? $category : '(none)';
+            if (!isset($index[$category])) {
+                $index[$category] = ['count' => 0, 'readonly' => 0, 'tools' => []];
+            }
+            $index[$category]['count']++;
+            if (!empty($ability['readonly'])) {
+                $index[$category]['readonly']++;
+            }
+            $name = (string) ($ability['name'] ?? '');
+            if ($name !== '') {
+                $index[$category]['tools'][] = $name;
+            }
+        }
+        ksort($index);
+        foreach ($index as $category => $entry) {
+            sort($entry['tools']);
+            $index[$category] = $entry;
+        }
+        return $index;
+    }
+
+    /**
+     * Keyword + category search over described abilities. Pure.
+     * @return array{matched: int, abilities: array}
+     */
+    public static function search_abilities(array $abilities, string $query = '', string $category = '', int $limit = 25): array {
+        $needle = strtolower(trim($query));
+        $wanted = strtolower(trim($category));
+        $hits = [];
+        foreach ($abilities as $ability) {
+            $hay_category = strtolower(trim((string) ($ability['category'] ?? '')));
+            if ($wanted !== '' && $hay_category !== $wanted) {
+                continue;
+            }
+            $haystack = strtolower(trim(($ability['name'] ?? '') . ' ' . ($ability['label'] ?? '') . ' ' . ($ability['description'] ?? '') . ' ' . $hay_category));
+            if ($needle !== '' && strpos($haystack, $needle) === false) {
+                continue;
+            }
+            $hits[] = [
+                'name' => (string) ($ability['name'] ?? ''),
+                'category' => (string) ($ability['category'] ?? ''),
+                'readonly' => !empty($ability['readonly']),
+                'description' => (string) ($ability['description'] ?? '')
+            ];
+        }
+        $matched = count($hits);
+        return ['matched' => $matched, 'abilities' => array_slice($hits, 0, max(1, $limit))];
     }
 
     /** All registered abilities, from whichever registry this WordPress has. */
@@ -1149,6 +1224,56 @@ class SGAP_MCP_Tools {
             'count' => count($out),
             'source' => function_exists('wp_get_abilities') ? 'wp_get_abilities()' : 'WP_Abilities_Registry',
             'abilities' => $out
+        ];
+    }
+
+    /** Every registered ability, described — the input for the index and the search. */
+    private static function described_abilities(): array {
+        $out = [];
+        foreach (self::all_abilities() as $name => $ability) {
+            $row = self::describe_ability($ability);
+            if ($row['name'] === '' && is_string($name)) {
+                $row['name'] = $name;
+            }
+            $out[] = $row;
+        }
+        return $out;
+    }
+
+    public static function ability_index($input = null): array {
+        $input = (array) $input;
+        $category = trim((string) ($input['category'] ?? ''));
+        $abilities = self::described_abilities();
+        if ($category !== '') {
+            $abilities = array_values(array_filter($abilities, static fn($a) => ($a['category'] ?? '') === $category));
+        }
+        $index = self::index_abilities($abilities);
+        $readonly = 0;
+        foreach ($abilities as $ability) {
+            if (!empty($ability['readonly'])) {
+                $readonly++;
+            }
+        }
+        return [
+            'total' => count($abilities),
+            'readonly' => $readonly,
+            'categories' => $index
+        ];
+    }
+
+    public static function search_abilities_tool($input = null): array {
+        $input = (array) $input;
+        $abilities = self::described_abilities();
+        $result = self::search_abilities(
+            $abilities,
+            (string) ($input['query'] ?? ''),
+            (string) ($input['category'] ?? ''),
+            (int) ($input['limit'] ?? 25)
+        );
+        return [
+            'total_available' => count($abilities),
+            'matched' => $result['matched'],
+            'abilities' => $result['abilities']
         ];
     }
 

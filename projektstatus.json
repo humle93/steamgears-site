@@ -70,10 +70,10 @@
         {
           "id": "p1",
           "name": "P1 — paritet",
-          "done": 5.85,
-          "total": 12.35,
+          "done": 6.6,
+          "total": 13.1,
           "unit": "d",
-          "note": "P1.1 pre-flight pr. kanal 1,0 d (7.20.0) + P1.3 blackout-kalender 0,5 d (7.21.0) + P1.6 quality gate 1,0 d (includes/quality.php, 7.22.0 — nu også målt live på sitet) + P1.7 helsides SEO/GEO/AEO-audit 1,0 d (7.19.0) + P1.8 utm_campaign som parameter 0,25 d (7.23.0, venter på Update-klik) + 0,1 d queue-post bærer angle/format/kampagne (7.25.0, krævet fordi OAuth-tokenet ikke gælder pluginets REST-namespace) = 5,5 af 8 punkter. P1.5 er eksternt blokeret (Pinterest-token) + P1.2 remind me i stedet for at poste 1,0 d (7.27.0, includes/reminder.php, 20 smoke-checks) + P1.9 botten læser sitet via de 13 læsende MCP-værktøjer 0,25 d (7.35.0, includes/chat.php + mcp-tools.php, skrive-værktøjerne bliver på MCP-fladen) + P1.10 værktøjskataloget kan opdateres og udvides via filter 0,25 d (7.36.0, sgap_chat_tools-filter, signatur, Refresh tools-knap) + P1.11 botten ser hele sitets ability- og MCP-katalog via find/describe/run-tool 0,5 d (7.37.0)"
+          "note": "P1.1 pre-flight pr. kanal 1,0 d (7.20.0) + P1.3 blackout-kalender 0,5 d (7.21.0) + P1.6 quality gate 1,0 d (includes/quality.php, 7.22.0 — nu også målt live på sitet) + P1.7 helsides SEO/GEO/AEO-audit 1,0 d (7.19.0) + P1.8 utm_campaign som parameter 0,25 d (7.23.0, venter på Update-klik) + 0,1 d queue-post bærer angle/format/kampagne (7.25.0, krævet fordi OAuth-tokenet ikke gælder pluginets REST-namespace) = 5,5 af 8 punkter. P1.5 er eksternt blokeret (Pinterest-token) + P1.2 remind me i stedet for at poste 1,0 d (7.27.0, includes/reminder.php, 20 smoke-checks) + P1.9 botten læser sitet via de 13 læsende MCP-værktøjer 0,25 d (7.35.0, includes/chat.php + mcp-tools.php, skrive-værktøjerne bliver på MCP-fladen) + P1.10 værktøjskataloget kan opdateres og udvides via filter 0,25 d (7.36.0, sgap_chat_tools-filter, signatur, Refresh tools-knap) + P1.11 botten ser hele sitets ability- og MCP-katalog via find/describe/run-tool 0,5 d (7.37.0) + P1.12 ability-indeks, kategorisøgning og Tools-side 0,75 d (7.38.0, ability-index + search-abilities + sgap-tools med søgning og badges)"
         },
         {
           "id": "p2",
@@ -801,6 +801,15 @@
       "after": 62.5,
       "delta": 0.7,
       "basis": "15,85 af 25,35 d (P0 3,55/4 · P1 5,85/12,35 · P2 4,5/7 · P3 1,95/2)"
+    },
+    {
+      "date": "2026-11-06",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 62.5,
+      "after": 63.6,
+      "delta": 1.1,
+      "basis": "16,6 af 26,1 d (P0 3,55/4 · P1 6,6/13,1 · P2 4,5/7 · P3 1,95/2)"
     }
   ]
 }

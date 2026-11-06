@@ -43,7 +43,7 @@ require __DIR__.'/../steamgears-autopilot/steamgears-autopilot.php';
 function check($name,$ok){ echo ($ok?'PASS ':'FAIL ')."$name\n"; if(!$ok) $GLOBALS['fail']=1; }
 do_action('init'); do_action('admin_init'); do_action('admin_menu');
 check('install: 9 tables', count($GLOBALS['ddl']??[])===9); check('install: publish log table', str_contains(implode("\n",$GLOBALS['ddl']??[]),'sgap_publish_log')); check('install: cleanup cron', in_array('sgap_daily_cleanup',$GLOBALS['cron']??[])); check('install: /go/ rule + flush', ($GLOBALS['rules'][0]??'')==='^go/([0-9]+)/?$' && !empty($GLOBALS['flushed'])); check('install: secrets not autoloaded', isset($GLOBALS['noauto']['sgap_ai_api_key'])); check('version stored', $opts['sgap_version']===SGAP_VERSION);
-foreach(['steamgears-autopilot','sgap-settings','sgap-queue','sgap-ai','sgap-campaigns','sgap-etsy','sgap-reports','sgap-fullauto','sgap-merchant','sgap-setup','sgap-studio','sgap-chat','sgap-log'] as $p){ ob_start(); do_action('page_'.$p); $html=ob_get_clean(); check("page $p renders", strlen($html)>20); }
+foreach(['steamgears-autopilot','sgap-settings','sgap-queue','sgap-ai','sgap-campaigns','sgap-etsy','sgap-reports','sgap-fullauto','sgap-merchant','sgap-setup','sgap-studio','sgap-chat','sgap-tools','sgap-log'] as $p){ ob_start(); do_action('page_'.$p); $html=ob_get_clean(); check("page $p renders", strlen($html)>20); }
 // Etsy er manuel import: felterne er væk fra indstillingerne, og siden lover ikke en API der ikke findes.
 ob_start(); do_action('page_sgap-settings'); $set_html=ob_get_clean();
 check('etsy: no credential fields in Settings', !str_contains($set_html,'etsy_shop_id') && !str_contains($set_html,'etsy_oauth_token') && !str_contains($set_html,'Etsy shop ID'));
@@ -468,7 +468,7 @@ class SGAP_Fake_Ability { function __construct(public string $n, public array $a
 do_action('wp_abilities_api_categories_init'); do_action('wp_abilities_api_init');
 $tools=array_filter($GLOBALS['abilities'],fn($k)=>str_starts_with($k,'steamgears-tools/'),ARRAY_FILTER_USE_KEY);
 check('tools: category registered', isset($GLOBALS['ability_categories']['steamgears-tools']));
-check('tools: full catalogue registered', count($tools)===26);
+check('tools: full catalogue registered', count($tools)===28);
 check('tools: the actions we kept needing are there', !array_diff([
     'steamgears-tools/get-option','steamgears-tools/update-option','steamgears-tools/undo','steamgears-tools/set-plugin-state',
     'steamgears-tools/flush-rewrites','steamgears-tools/flush-caches','steamgears-tools/list-posts','steamgears-tools/update-post',
@@ -519,6 +519,25 @@ check('tools: bridge lists every registered ability', $la['count']===2 && $la['a
 check('tools: bridge filters by category', SGAP_MCP_Tools::list_abilities(['category'=>'other'])['count']===1);
 $called=SGAP_MCP_Tools::call_ability(['name'=>'x/y','input'=>['a'=>1]]);
 check('tools: bridge runs an ability and echoes its name', $called['ran']==='x/y' && $called['_ability']==='x/y' && $called['input']===['a'=>1]);
+// Indeks og kategorisøgning over abilities (7.38.0).
+$described=[
+ ['name'=>'steamgears-tools/list-posts','category'=>'steamgears-tools','description'=>'Lists posts','readonly'=>true],
+ ['name'=>'steamgears-tools/create-post','category'=>'steamgears-tools','description'=>'Creates a post','readonly'=>false],
+ ['name'=>'woo/report','category'=>'woo','description'=>'Sales report','readonly'=>true],
+];
+$idx=SGAP_MCP_Tools::index_abilities($described);
+check('tools: the index groups by category with counts and read flags', ($idx['steamgears-tools']['count']??0)===2 && ($idx['steamgears-tools']['readonly']??0)===1 && ($idx['woo']['tools'][0]??'')==='woo/report');
+$sr=SGAP_MCP_Tools::search_abilities($described,'report');
+check('tools: search matches the description and counts hits', ($sr['matched']??0)===1 && ($sr['abilities'][0]['name']??'')==='woo/report');
+check('tools: search can be limited to a category', (SGAP_MCP_Tools::search_abilities($described,'','steamgears-tools')['matched']??0)===2);
+$lim=SGAP_MCP_Tools::search_abilities($described,'','',1);
+check('tools: the limit slices the list without losing the count', ($lim['matched']??0)===3 && count($lim['abilities'])===1);
+$aidx=SGAP_MCP_Tools::ability_index([]);
+check('tools: ability-index reports the registered categories', ($aidx['total']??0)===2 && isset($aidx['categories']['other']));
+$asearch=SGAP_MCP_Tools::search_abilities_tool(['query'=>'x/y']);
+check('tools: search-abilities tool answers with the match', ($asearch['matched']??0)===1 && ($asearch['abilities'][0]['name']??'')==='x/y');
+ob_start(); do_action('page_sgap-tools'); $tools_html=ob_get_clean();
+check('tools page: renders a searchable, categorised browser', str_contains($tools_html,'sgap-tool-search') && str_contains($tools_html,'data-cat="other"') && str_contains($tools_html,'2 registered'));
 unset($GLOBALS['ability_objects']);
 // ---- Botten og MCP-fladen: chatten mÃ¥ lÃ¦se, men ikke skrive ----
 $ro=SGAP_MCP_Tools::readonly_names();
@@ -542,10 +561,10 @@ check('chat: a tool without a runner fails cleanly', str_contains(SGAP_Chat::run
 unset($GLOBALS['filters']['sgap_chat_tools'], $GLOBALS['ability_objects']);
 // Alt registreret på sitet skal kunne ses, ikke kun vores egne kataloger (7.37.0).
 $GLOBALS['ability_objects']=[
- 'core/analyse'=>new SGAP_Fake_Ability('core/analyse',['meta'=>['annotations'=>['readonly'=>true]]]),
- 'core/delete-all'=>new SGAP_Fake_Ability('core/delete-all'),
- 'woo/product-report'=>new SGAP_Fake_Ability('woo/product-report',['meta'=>['annotations'=>['readonly'=>true]]]),
- 'steamgears-autopilot/manage-plugin'=>new SGAP_Fake_Ability('steamgears-autopilot/manage-plugin'),
+ 'core/analyse'=>new SGAP_Fake_Ability('core/analyse',['category'=>'core','meta'=>['annotations'=>['readonly'=>true]]]),
+ 'core/delete-all'=>new SGAP_Fake_Ability('core/delete-all',['category'=>'core']),
+ 'woo/product-report'=>new SGAP_Fake_Ability('woo/product-report',['category'=>'woo','meta'=>['annotations'=>['readonly'=>true]]]),
+ 'steamgears-autopilot/manage-plugin'=>new SGAP_Fake_Ability('steamgears-autopilot/manage-plugin',['category'=>'steamgears-autopilot']),
 ];
 $ct3=SGAP_Chat::tools();
 check('chat: read-only abilities from other plugins are bound', isset($ct3['analyse']) && isset($ct3['product-report']));
