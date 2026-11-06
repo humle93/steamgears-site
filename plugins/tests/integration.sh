@@ -124,6 +124,7 @@ fi
 echo "== Uninstall"
 wpc plugin deactivate steamgears-autopilot --quiet
 check "deactivate clears cleanup cron" "$(wpc cron event list --hook=sgap_daily_cleanup --format=count)" "0"
+check "deactivate clears evergreen cron" "$(wpc cron event list --hook=sgap_evergreen --format=count)" "0"
 wpc plugin uninstall steamgears-autopilot --quiet
 check "uninstall drops tables" "$(sql "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name LIKE '{\$wpdb->prefix}sgap\\\\_%'")" "0"
 check "uninstall removes options" "$(sql "SELECT COUNT(*) FROM {\$wpdb->options} WHERE option_name LIKE 'sgap\\\\_%'")" "0"

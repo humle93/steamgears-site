@@ -407,9 +407,9 @@ before it, because the MCP surface can read plugins but cannot install or activa
 3. `php plugins/tests/smoke.php` (523 checks) and `diff -r` the zipped copy against the source. CI repeats
    both, plus `php -l` on PHP 8.0–8.5 and WordPress 6.4 / 7.1 / latest. The plugin is also exercised inside
    a real WordPress: `bash plugins/tests/integration.sh` (needs `php` with `mysqli`, `wp-cli`, `curl` and a
-   reachable MySQL; 222 checks, including the four model rules) — it installs WordPress, activates the
-   plugin, runs the in-process, admin-tool and automation suites, then hits `/go/`, the feeds, the REST
-   routes and uninstall over HTTP. The model dropdown is proven against
+   reachable MySQL; 244 checks, including the four model rules and evergreen recycling) — it installs
+   WordPress, activates the plugin, runs the in-process, admin-tool and automation suites, then hits `/go/`,
+   the feeds, the REST routes and uninstall over HTTP. The model dropdown is proven against
    the real catalogue with `curl -s -o /tmp/models.json https://api.aimlapi.com/v1/models` and
    `SGAP_LIVE_CATALOG=/tmp/models.json php plugins/tests/smoke.php` — every `<option>` must match an id AIMLAPI
    actually offers.

@@ -34,6 +34,7 @@ sgci_check('version stored', get_option('sgap_version') === SGAP_VERSION);
 $autoload = $wpdb->get_var("SELECT autoload FROM {$wpdb->options} WHERE option_name = 'sgap_ai_api_key'");
 sgci_check('secret option not autoloaded', in_array($autoload, ['no', 'off'], true), $autoload);
 sgci_check('cleanup cron scheduled', (bool) wp_next_scheduled(SGAP_Install::CLEANUP_CRON));
+sgci_check('evergreen cron scheduled', (bool) wp_next_scheduled(SGAP_Install::EVERGREEN_CRON));
 sgci_check('/go/ rewrite rule registered', array_key_exists('^go/([0-9]+)/?$', (array) get_option('rewrite_rules')));
 $legacy = array_filter(SGAP_Install::LEGACY_CRON, 'wp_next_scheduled');
 sgci_check('no legacy cron events', !$legacy, $legacy);
@@ -489,6 +490,154 @@ sgci_check('rss: key check needs no Publer key', SGAP_KeyCheck::check_publer()['
 update_option('sgap_ci_rss_id', (int) $rss_fb['id']);
 $wpdb->delete($wpdb->prefix . 'sgap_queue', ['id' => (int) $rss_ig['id']]);
 update_option('sgap_autopilot_enabled', 'no');
+
+/* --- Evergreen recycling: mark, AI variation, budget, cooldown and the real queue --- */
+$GLOBALS['sgci_evergreen_http'] = [];
+$GLOBALS['sgci_evergreen_n'] = 0;
+add_filter('pre_http_request', function ($pre, $args, $url) {
+    $reply = fn(int $code, $body) => ['headers' => ['content-type' => 'application/json'], 'body' => wp_json_encode($body), 'response' => ['code' => $code, 'message' => 'OK'], 'cookies' => [], 'filename' => null];
+    // Updating the model asks the provider what it offers; answer that before the chat call.
+    if (str_starts_with($url, 'https://api.anthropic.com/v1/models')) {
+        return $reply(200, ['data' => [['id' => 'claude-opus-5-5', 'type' => 'model']]]);
+    }
+    if ($url !== SGAP_AI::ANTHROPIC_URL) {
+        return $pre;
+    }
+    $body = json_decode((string) $args['body'], true);
+    $prompt = (string) ($body['messages'][0]['content'] ?? '');
+    $GLOBALS['sgci_evergreen_n']++;
+    preg_match('/^Page: (.+?) \([^)]+\)$/m', $prompt, $match);
+    $title = $match[1] ?? 'Evergreen page';
+    // Three genuinely different captions: the quality gate compares them on the same channel.
+    $texts = [
+        "The workshop returns to {$title} with a closer look at the hand-finished brass. Every scratch and rivet is part of the story, and the full notes show how it is made.",
+        "Why does {$title} still matter? Because the silhouette does the work. This guide walks through the fit, the leather and the small details that turn an outfit into a character.",
+        "A quieter take on {$title}: start with one piece, then let the rest follow. The guide covers materials, care and the choices that keep the look coherent."
+    ];
+    $answer = [
+        'title' => 'A second look at ' . $title,
+        'text' => $texts[($GLOBALS['sgci_evergreen_n'] - 1) % 3],
+        'hashtags' => ['steampunk', 'evergreen'],
+        'alt_text' => 'Brass goggles on a workbench'
+    ];
+    $GLOBALS['sgci_evergreen_http'][] = ['body' => $body, 'prompt' => $prompt, 'answer' => $answer];
+    return $reply(200, ['type' => 'message', 'stop_reason' => 'end_turn', 'content' => [
+        ['type' => 'thinking', 'thinking' => ''],
+        ['type' => 'text', 'text' => wp_json_encode($answer)]
+    ]]);
+}, 10, 3);
+
+update_option('sgap_ai_provider', 'anthropic');
+update_option('sgap_ai_model', 'claude-opus-5-5');
+update_option('sgap_ai_api_key', 'ci-evergreen-key');
+update_option('sgap_channels', 'facebook, instagram');
+update_option('sgap_evergreen_enabled', 'yes');
+update_option('sgap_evergreen_after_days', 60);
+update_option('sgap_evergreen_max_shares', 2);
+update_option('sgap_evergreen_batch', 2);
+$ever_a = wp_insert_post([
+    'post_title' => 'CI Evergreen One',
+    'post_content' => 'A guide to brass goggles, hand-finished leather and the small details that make a steampunk outfit hold together.',
+    'post_status' => 'publish'
+]);
+$ever_b = wp_insert_post([
+    'post_title' => 'CI Evergreen Two',
+    'post_content' => 'A guide to corset fitting, silhouette and the materials that keep a dark academia look coherent all day.',
+    'post_status' => 'publish'
+]);
+$a_status = SGAP_Evergreen::mark($ever_a, ['max' => 2]);
+$b_status = SGAP_Evergreen::mark($ever_b, ['max' => 2]);
+sgci_check('evergreen: marking real posts makes them ready', !is_wp_error($a_status) && !is_wp_error($b_status)
+    && $a_status['marked'] && $a_status['max'] === 2 && $a_status['eligible'] && $b_status['eligible'], [$a_status, $b_status]);
+sgci_check('evergreen: the cron hook is wired', has_action(SGAP_Install::EVERGREEN_CRON, [SGAP_Evergreen::class, 'cron']) !== false);
+$summary = SGAP_Evergreen::summary();
+sgci_check('evergreen: the summary counts two marked and two ready', $summary['enabled'] && $summary['marked'] === 2
+    && $summary['ready'] === 2 && $summary['shares_used'] === 0, $summary);
+if (function_exists('wp_get_ability')) {
+    $missing = array_values(array_filter(['list-evergreen', 'mark-evergreen', 'recycle-evergreen'], fn($n) => !wp_get_ability('steamgears-autopilot/' . $n)));
+    sgci_check('evergreen: all three abilities are registered', !$missing, $missing);
+    $listed = wp_get_ability('steamgears-autopilot/list-evergreen')->execute(['limit' => 10]);
+    sgci_check('evergreen: the ability lists both marked pages', is_array($listed) && count($listed['items'] ?? []) === 2
+        && in_array($ever_a, array_map('intval', array_column($listed['items'], 'post_id')), true), $listed);
+}
+
+$report = SGAP_Evergreen::run(2);
+sgci_check('evergreen: the run recycles both due pages', $report['recycled'] === 2 && count($report['items']) === 2 && !$report['errors'], $report);
+$rows = $wpdb->get_results($wpdb->prepare(
+    "SELECT * FROM {$wpdb->prefix}sgap_queue WHERE post_id IN (%d, %d) ORDER BY id",
+    $ever_a, $ever_b
+));
+sgci_check('evergreen: both shares are queued on the first channel and angle', count($rows) === 2
+    && array_column($rows, 'channel') === ['facebook', 'facebook'] && array_column($rows, 'angle') === ['angle_a', 'angle_a']
+    && array_column($rows, 'content_type') === ['guide', 'guide'] && array_column($rows, 'format') === ['post', 'post'], $rows);
+$ever_destinations = array_column($rows, 'destination_url');
+$expected_destinations = [get_permalink($ever_a), get_permalink($ever_b)];
+sort($ever_destinations);
+sort($expected_destinations);
+sgci_check('evergreen: caption, hashtags and destination reach the queue', count($rows) === 2
+    && count(array_filter($rows, fn($row) => str_contains($row->body, '#steampunk #evergreen'))) === 2
+    && $ever_destinations === $expected_destinations, $rows);
+sgci_check('evergreen: the share is counted and dated on the page', SGAP_Evergreen::shares($ever_a) === 1
+    && SGAP_Evergreen::shares($ever_b) === 1 && SGAP_Evergreen::last_share($ever_a) > 0 && SGAP_Evergreen::last_share($ever_b) > 0);
+$calls = $GLOBALS['sgci_evergreen_http'];
+sgci_check('evergreen: one structured AI call per share', count($calls) === 2
+    && ($calls[0]['body']['model'] ?? '') === 'claude-opus-5-5'
+    && ($calls[0]['body']['max_tokens'] ?? 0) === 1200
+    && ($calls[0]['body']['output_config']['effort'] ?? '') === 'low'
+    && ($calls[0]['body']['output_config']['format']['type'] ?? '') === 'json_schema', $calls);
+sgci_check('evergreen: the prompt asks for a new angle and forbids invented offers', count($calls) === 2
+    && str_contains($calls[0]['prompt'], 'genuinely different angle')
+    && str_contains($calls[0]['prompt'], 'do not invent a discount')
+    && str_contains($calls[0]['prompt'], 'CI Evergreen One'), $calls);
+
+$waiting = SGAP_Evergreen::run(1);
+sgci_check('evergreen: a page waits between shares, so a second run does nothing', $waiting['recycled'] === 0
+    && str_contains($waiting['note'] ?? '', 'No evergreen page is due'), $waiting);
+
+// The first share is out, so the next one may run; mark the queue rows published to close them.
+$wpdb->query($wpdb->prepare("UPDATE {$wpdb->prefix}sgap_queue SET status = 'published' WHERE post_id IN (%d, %d)", $ever_a, $ever_b));
+update_post_meta($ever_a, SGAP_Evergreen::LAST, time() - 61 * DAY_IN_SECONDS);
+$next = SGAP_Evergreen::run(1);
+$next_row = $wpdb->get_row($wpdb->prepare(
+    "SELECT * FROM {$wpdb->prefix}sgap_queue WHERE post_id = %d AND channel = 'instagram' ORDER BY id DESC LIMIT 1",
+    $ever_a
+));
+sgci_check('evergreen: after the waiting period the share rotates channel and angle', $next['recycled'] === 1
+    && ($next['items'][0]['channel'] ?? '') === 'instagram' && ($next['items'][0]['share'] ?? 0) === 2
+    && $next_row && $next_row->angle === 'angle_b', [$next, $next_row]);
+sgci_check('evergreen: the rotated AI answer is what reaches the queue', $next_row && str_contains($next_row->body, 'A quieter take on CI Evergreen One'), $next_row);
+$prompt3 = $GLOBALS['sgci_evergreen_http'][2]['prompt'] ?? '';
+$first_a = '';
+foreach (array_slice($GLOBALS['sgci_evergreen_http'], 0, 2) as $call) {
+    if (str_contains($call['prompt'], 'CI Evergreen One')) {
+        $first_a = $call['answer']['text'] ?? '';
+    }
+}
+sgci_check('evergreen: the next prompt carries the earlier captions as a do-not-repeat list', $first_a !== ''
+    && str_contains($prompt3, 'These captions already ran') && str_contains($prompt3, 'Do not reuse their hook')
+    && str_contains($prompt3, $first_a), $prompt3);
+$full = SGAP_Evergreen::status($ever_a);
+sgci_check('evergreen: the budget closes the page with a reason', $full['shares'] === 2 && !$full['eligible']
+    && str_contains($full['reason'], 'all 2 shares used'), $full);
+$paused = SGAP_Evergreen::status($ever_b);
+sgci_check('evergreen: the other page is waiting for its next share', $paused['shares'] === 1 && !$paused['eligible']
+    && str_contains($paused['reason'], 'next share from'), $paused);
+sgci_check('evergreen: the summary counts three used shares and none ready', SGAP_Evergreen::summary()['shares_used'] === 3
+    && SGAP_Evergreen::summary()['ready'] === 0);
+sgci_check('evergreen: the run leaves a report on the option', is_array(get_option('sgap_last_evergreen'))
+    && (get_option('sgap_last_evergreen')['recycled'] ?? -1) === 1, get_option('sgap_last_evergreen'));
+
+SGAP_Evergreen::unmark($ever_a);
+SGAP_Evergreen::unmark($ever_b);
+sgci_check('evergreen: unmark clears the mark, the budget and the share count', !SGAP_Evergreen::status($ever_a)['marked']
+    && get_post_meta($ever_a, SGAP_Evergreen::MARK, true) === '' && get_post_meta($ever_a, SGAP_Evergreen::MAX, true) === ''
+    && get_post_meta($ever_a, SGAP_Evergreen::SHARES, true) === '', SGAP_Evergreen::status($ever_a));
+$wpdb->delete($wpdb->prefix . 'sgap_queue', ['post_id' => $ever_a]);
+$wpdb->delete($wpdb->prefix . 'sgap_queue', ['post_id' => $ever_b]);
+wp_delete_post($ever_a, true);
+wp_delete_post($ever_b, true);
+update_option('sgap_evergreen_enabled', 'no');
+remove_all_filters('pre_http_request');
 
 /* --- Command Center link (one-way: CC calls us with X-Command-Center) --- */
 delete_option(SGAP_CC::SEEN);

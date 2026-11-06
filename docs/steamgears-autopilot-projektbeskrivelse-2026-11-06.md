@@ -70,11 +70,11 @@ brug den statiske binær i `.tools/php` (ikke i git). I Termux findes `php` norm
 | Klasser | 42 |
 | PHP-krav | 8.0+ i headeren; CI linter 8.0–8.5 |
 | WordPress-krav | 6.4+ (abilities kræver 6.9+) |
-| Seneste release | 7.38.2 — provider-kald logges med culprit-oversættelse, så afviste værktøjsnavne kan diagnosticeres |
+| Seneste release | 7.41.0 — evergreen-recycling med egen cron, metabox, admin-side og tre abilities |
 
 Testfilerne: `smoke.php` (stubbet WordPress, kører overalt), `admin-tools.php` (49 checks, kræver
-`wp eval-file`), `automation.php`, `integration.php` + `integration.sh` (rigtig WordPress + MySQL, CI),
-`router.php` og `fixtures/`.
+`wp eval-file`), `automation.php`, `integration.php` + `integration.sh` (rigtig WordPress + MySQL, CI og
+kørt lokalt 6/11 mod WordPress 7.1.4 + MySQL 8.0.36, 244 PASS), `router.php` og `fixtures/`.
 
 ---
 
@@ -131,10 +131,10 @@ Konkret pr. punkt:
 
 - **P0.1 ✅** fejlmail (`alerts.php`). **P0.2 ✅** kø-runway i dage. **P0.3 ✅** backoff 5 → 15 → 45 min.
 - **P0.4 ~** cron-detektion + dokumentation færdig, men **rigtig host-cron mangler** (0,4 af 0,5 d).
-- **P0.5 ✅** publish log. **P0.6 ✗** cross-system dublet-værn — **åben**, afhænger af Command Center-siden.
+- **P0.5 ✅** publish log. **P0.6 ✅** cross-system dublet-værn (7.40.1).
 - **P1.1 ✅** pre-flight, **P1.2 ✅** remind, **P1.3 ✅** blackout, **P1.6 ✅** quality gate,
   **P1.7 ✅** helsides SEO, **P1.8 ✅** `utm_campaign`.
-- **P1.4 ✅** evergreen-recycling (2,5 d, 7.41.0): markér et indlæg/produkt, få en frisk variation efter 60 dage til næste kanal, indtil budgettet eller udløbsdatoen stopper det — egen cron, metabox, admin-side og tre abilities (523 smoke-checks). **P1.5 ✗** platform-analytics (4,0 d) —
+- **P1.4 ✅** evergreen-recycling (2,5 d, 7.41.0): markér et indlæg/produkt, få en frisk variation efter 60 dage til næste kanal, indtil budgettet eller udløbsdatoen stopper det — egen cron, metabox, admin-side og tre abilities (523 smoke-checks + 20 integration-checks). **P1.5 ✗** platform-analytics (4,0 d) —
   blokeret af Pinterest-token (401) og Meta-review.
 - **P2.1 ✅** Bluesky, **P2.2 ✅** Mastodon, **P2.3 ✅** Telegram, **P2.5 ✅** multi-sprog.
   **P2.4 ✗** Etsy (byg 2,5 d eller skjul de fem indstillinger på 15 min — ejerens beslutning).
@@ -348,9 +348,9 @@ Derefter `git add` de konkrete filer, commit og push til `main` i samme arbejdsp
 | P3.1 død kode | `SGAP_Admin::get_setting_help_link()` har nul kald | Åben |
 | Graph API / X-priser | Direkte X-posting er økonomisk meningsløs med link | Ikke anbefalet |
 
-**Ikke verificeret i dette miljø:** `integration.php` og `admin-tools.php` kræver rigtig WordPress
-(`wp eval-file`) og MySQL; de kører i CI, ikke lokalt i cloud-sandkassen. Der er ikke kaldt live mod
-AIMLAPI (koster credit og kræver nøgle).
+**Verificeret 6/11:** `integration.php` og `admin-tools.php` blev kørt lokalt i cloud-sandkassen mod
+WordPress 7.1.4 + MySQL 8.0.36 (PHP 8.5.8, wp-cli) — **244 PASS / 0 FAIL**. Der er stadig ikke kaldt live
+mod AIMLAPI (koster credit og kræver nøgle), og intet er kørt mod den rigtige steamgears.eu-database.
 
 ---
 
