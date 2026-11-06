@@ -143,7 +143,6 @@ $GLOBALS['sgci_job_state'] = 'working';
 // A real JPEG: Instagram's preflight only accepts JPEG, so a PNG would keep those posts out of the run.
 $png = file_get_contents(__DIR__ . '/fixtures/ai-image.jpg');
 add_filter('pre_http_request', function ($pre, $args, $url) use ($png) {
-    $GLOBALS['sgci_http'][] = ['url' => $url, 'args' => $args];
     $reply = fn(int $code, $body, string $type = 'application/json') => [
         'headers' => ['content-type' => $type],
         'body' => is_string($body) ? $body : wp_json_encode($body),
@@ -151,6 +150,16 @@ add_filter('pre_http_request', function ($pre, $args, $url) use ($png) {
         'cookies' => [],
         'filename' => null
     ];
+    // Since 7.39.0 the model field is a dropdown over what the provider offers, so saving the
+    // model asks for /v1/models. That GET is answered before the request log, so $ai[0] below
+    // stays the chat call, and no test run reaches the real api.anthropic.com.
+    if (str_starts_with($url, 'https://api.anthropic.com/v1/models')) {
+        return $reply(200, ['data' => [
+            ['id' => 'claude-opus-5-5', 'type' => 'model'],
+            ['id' => 'claude-sonnet-5-5', 'type' => 'model']
+        ]]);
+    }
+    $GLOBALS['sgci_http'][] = ['url' => $url, 'args' => $args];
     if (str_starts_with($url, 'https://api.anthropic.com/')) {
         $request = json_decode($args['body'], true);
         $channels = $request['output_config']['format']['schema']['properties']['posts']['items']['properties']['channel']['enum'];
@@ -344,10 +353,20 @@ add_filter('pre_http_request', function ($pre, $args, $url) {
         }
         return str_ends_with($url, '/claude-opus-5-5') ? $reply(200, ['id' => 'claude-opus-5-5', 'type' => 'model']) : $reply(404, ['type' => 'error']);
     }
+    if ($url === 'https://api.aimlapi.com/v1/models') {
+        // The dropdown asks what this provider offers; provider switching resolves ai_model
+        // against this list, so it has to answer like the real /v1/models does.
+        return $reply(200, ['data' => [['id' => 'anthropic/claude-opus-5.5'], ['id' => 'openai/gpt-5.5']]]);
+    }
     if ($url === 'https://api.aimlapi.com/v1/chat/completions') {
-        $GLOBALS['sgci_aiml'][] = json_decode((string) $args['body'], true);
+        $sent_body = json_decode((string) $args['body'], true);
+        $GLOBALS['sgci_aiml'][] = $sent_body;
         if ($auth !== 'Bearer good-aiml-key') {
             return $reply(401, ['error' => ['message' => 'Invalid API key']]);
+        }
+        if (($sent_body['model'] ?? '') === 'anthropic/claude-3-5-sonnet') {
+            // A name the provider retired: the retry on the default is what has to happen next.
+            return $reply(404, ['error' => ['message' => 'Model anthropic/claude-3-5-sonnet not found', 'type' => 'model_not_found']]);
         }
         $content = "```json\n" . wp_json_encode(['posts' => [['channel' => 'facebook', 'title' => 'Goggles', 'text' => 'Brass goggles, polished by hand.', 'hashtags' => ['#steampunk'], 'alt_text' => 'Goggles']]]) . "\n```";
         return $reply(200, ['choices' => [['message' => ['role' => 'assistant', 'content' => $content], 'finish_reason' => 'stop']]]);
@@ -374,7 +393,14 @@ sgci_check('keycheck: channel without Publer account is reported', $r['publer'][
 update_option('sgap_publer_api_key', 'bad-key');
 $r = SGAP_KeyCheck::run();
 sgci_check('keycheck: invalid Publer key is reported', $r['publer']['ok'] === false && str_contains($r['publer']['message'], 'invalid'), $r['publer']);
+// A retired name cannot be saved again: the save-time check keeps the model that works.
 update_option('sgap_ai_model', 'claude-made-up');
+sgci_check('model: a name the provider does not offer is refused at save', get_option('sgap_ai_model') === 'claude-opus-5-5', get_option('sgap_ai_model'));
+// A site can still have one stored from before the check existed: written straight into the
+// options table, the way such a site has it, because the save above now refuses it.
+$wpdb->update($wpdb->options, ['option_value' => 'claude-made-up'], ['option_name' => 'sgap_ai_model']);
+wp_cache_delete('sgap_ai_model', 'options');
+wp_cache_delete('alloptions', 'options');
 $r = SGAP_KeyCheck::run();
 sgci_check('keycheck: unknown model is reported', $r['ai']['ok'] === false && str_contains($r['ai']['message'], 'claude-made-up'), $r['ai']);
 update_option('sgap_ai_model', '');
@@ -395,6 +421,39 @@ sgci_check('aimlapi: request uses Claude, JSON mode and low reasoning effort', (
 update_option('sgap_ai_api_key', 'wrong-aiml-key');
 $r = SGAP_KeyCheck::run();
 sgci_check('aimlapi: invalid key is reported', $r['ai']['ok'] === false && str_contains($r['ai']['message'], 'refused'), $r['ai']);
+
+/* --- the four model rules, checked against this WordPress instead of a stub --- */
+// A site whose stored model was retired underneath it: written straight into the options table,
+// because the save-time check below refuses new writes of it.
+$retire = function (string $name) use ($wpdb) {
+    $wpdb->update($wpdb->options, ['option_value' => $name], ['option_name' => 'sgap_ai_model']);
+    wp_cache_delete('sgap_ai_model', 'options');
+    wp_cache_delete('alloptions', 'options');
+};
+update_option('sgap_ai_api_key', 'good-aiml-key');
+// (1) the stored name stays visible as retired, and (4) only offered models are pickable.
+$retire('anthropic/claude-3-5-sonnet');
+sgci_check('model: a stored name that is gone is marked, not hidden',
+    str_contains(SGAP_Setup::field('ai_model'), 'anthropic/claude-3-5-sonnet (not offered any more)'));
+$html = SGAP_Setup::field('ai_model');
+sgci_check('model: dropdown groups by vendor, default first, only offered ids',
+    substr_count($html, '<option') === 4
+    && strpos($html, 'Provider default: anthropic/claude-opus-5.5') < strpos($html, '<optgroup')
+    && str_contains($html, '<optgroup label="anthropic">') && str_contains($html, '<optgroup label="openai">'), $html);
+// (3) the rejected name is retried on the provider default, and the answer says what changed.
+$GLOBALS['sgci_aiml'] = [];
+$answer = SGAP_Chat::reply([], 'Hvordan går det?');
+$asked = array_column($GLOBALS['sgci_aiml'], 'model');
+sgci_check('model: a rejected name is retried on the default and the answer says so',
+    is_array($answer) && $asked === ['anthropic/claude-3-5-sonnet', 'anthropic/claude-opus-5.5']
+    && str_contains($answer['text'], 'did not know the model `anthropic/claude-3-5-sonnet`')
+    && get_option('sgap_ai_model') === 'anthropic/claude-opus-5.5', [$asked, is_array($answer) ? $answer['text'] : $answer]);
+// (2) "Provider default" is stored as the model that is actually used, never as an empty field.
+update_option('sgap_ai_model', '');
+sgci_check('model: Provider default is saved as the model that is used',
+    get_option('sgap_ai_model') === 'anthropic/claude-opus-5.5' && SGAP_AI::model() === 'anthropic/claude-opus-5.5', get_option('sgap_ai_model'));
+update_option('sgap_ai_model', 'anthropic/claude-3-5-sonnet');
+sgci_check('model: a name that is not offered cannot be saved again', get_option('sgap_ai_model') === 'anthropic/claude-opus-5.5', get_option('sgap_ai_model'));
 update_option('sgap_ai_provider', 'anthropic');
 update_option('sgap_ai_api_key', 'wrong-ai-key');
 if (function_exists('wp_get_ability')) {

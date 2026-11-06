@@ -486,6 +486,28 @@ class SGAP_Settings {
                 }
             ]);
         }
+        // ai_model holds the concrete id in use, so a provider switch must not leave the old
+        // provider's id there: it is not offered by the new one, and the first call would fail
+        // before the fallback repaired it. Re-resolve it to the new provider's default instead.
+        add_action('update_option_sgap_ai_provider', [__CLASS__, 'keep_provider_model']);
+        add_action('add_option_sgap_ai_provider', [__CLASS__, 'keep_provider_model']);
+    }
+
+    /**
+     * Replaces a stored model the current provider does not offer with that provider's default.
+     * Runs when ai_provider changes, and does nothing while the catalogue cannot be read, so an
+     * unreachable provider never wipes a model that might well be fine.
+     */
+    public static function keep_provider_model(): void {
+        $stored = trim((string) get_option('sgap_ai_model', ''));
+        if ($stored === '') {
+            return;
+        }
+        $models = SGAP_AI::catalog();
+        if ($models === [] || in_array($stored, $models, true)) {
+            return;
+        }
+        update_option('sgap_ai_model', SGAP_AI::default_model());
     }
     /** 'DA, sv ,da' becomes 'da,sv': no junk, no duplicates, never the source language. */
     public static function sanitize_locales($value): string {

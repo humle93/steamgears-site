@@ -6,6 +6,11 @@
 // Test only: fake AIMLAPI so the buttons run end to end without cost.
 add_filter('pre_http_request', function ($pre, $args, $url) {
     if ($pre !== false || strpos($url, 'https://api.aimlapi.com/') !== 0) return $pre;
+    // 7.39.0: the model dropdown reads /v1/models, and so does a provider switch, so it has to
+    // answer here instead of falling through to the chat mock below.
+    if (str_ends_with($url, '/v1/models')) {
+        return ['headers' => [], 'body' => wp_json_encode(['data' => [['id' => 'anthropic/claude-opus-5.5'], ['id' => 'openai/gpt-5.5']]]), 'response' => ['code' => 200, 'message' => 'OK'], 'cookies' => [], 'filename' => null];
+    }
     $body = json_decode((string) ($args['body'] ?? ''), true) ?: [];
     if (($body['max_tokens'] ?? 0) === 1) {
         return ['headers' => [], 'body' => '{"choices":[{"message":{"content":""},"finish_reason":"length"}]}', 'response' => ['code' => 200, 'message' => 'OK'], 'cookies' => [], 'filename' => null];
@@ -101,7 +106,9 @@ $r = run('update-settings', ['settings' => ['quiet_start' => 0, 'quiet_end' => '
 $r = run('update-settings', ['settings' => ['ai_provider' => 'bogus']]); t('update-settings sanitizes a bad choice', get_option('sgap_ai_provider') !== 'bogus', get_option('sgap_ai_provider'));
 update_option('sgap_ai_provider', 'aimlapi');
 $r = run('update-settings', ['settings' => ['nope' => 1]]); t('update-settings rejects unknown keys', is_wp_error($r), is_wp_error($r) ? $r->get_error_message() : $r);
-$r = run('update-settings', ['settings' => ['ai_model' => 'anthropic/claude-opus-5.5']]); t('saving the model re-tests the key', isset($r['changed']['_key_test']['ai']), $r);
+// A different model than the one already stored: switching provider resolved ai_model to
+// anthropic/claude-opus-5.5 above, and saving an unchanged value is not a change to re-test.
+$r = run('update-settings', ['settings' => ['ai_model' => 'openai/gpt-5.5']]); t('saving the model re-tests the key', isset($r['changed']['_key_test']['ai']), $r);
 $gen = SGAP_Generator::run(1); t('generate a draft for the next tests', $gen['drafts'] >= 1, $gen);
 global $wpdb; $draft = (int) $wpdb->get_var("SELECT id FROM {$wpdb->prefix}sgap_ai_drafts WHERE channel='facebook' ORDER BY id DESC LIMIT 1");
 $r = run('edit-draft', ['draft_id' => $draft, 'text' => 'Edited by Claude.', 'hashtags' => '#brass']); t('edit-draft', $wpdb->get_var("SELECT body FROM {$wpdb->prefix}sgap_ai_drafts WHERE id=$draft") === 'Edited by Claude.', $r);
@@ -164,7 +171,7 @@ t('studio: no image key unless AIMLAPI is the provider or an image key is set', 
 update_option('sgap_ai_provider', 'aimlapi');
 // AI Chat: the AI calls a tool, gets its result and answers (AIMLAPI and Anthropic).
 $tools = SGAP_Chat::tools();
-t('chat: autopilot tools offered, site-changing ones left out', isset($tools['status'], $tools['generate'], $tools['update-settings']) && !isset($tools['manage-plugin']) && !isset($tools['enable-full-access']), implode(',', array_keys($tools)));
+t('chat: autopilot tools offered, site-changing ones left out', isset($tools['status'], $tools['generate']) && !isset($tools['manage-plugin'], $tools['enable-full-access'], $tools['update-settings']), implode(',', array_keys($tools)));
 update_option('sgap_ai_provider', 'aimlapi'); update_option('sgap_ai_api_key', 'test-key'); update_option('sgap_ai_model', '');
 $r = SGAP_Chat::reply([], 'Hvordan går det?');
 t('chat (AIMLAPI): tool loop answers from the status tool', !is_wp_error($r) && $r['tools'] === ['status'] && str_contains($r['text'], 'slået'), is_wp_error($r) ? $r->get_error_message() : $r);
