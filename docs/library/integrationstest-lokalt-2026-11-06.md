@@ -3,7 +3,8 @@
 6/11 2026. `plugins/tests/integration.sh` har ligget i repoet og kørt i CI, men var **aldrig blevet afviklet
 her**. Denne fil er opskriften der fik den til at køre i en cloud-worktree uden Docker, og listen over hvad
 kørslen afslørede. Resultat efter rettelserne: **222 PASS / 0 FAIL** mod WordPress 7.1.4, og smoke-suiten
-uændret **478 PASS**.
+uændret **478 PASS**. Samme script er kørt mod hele CI-matrixen (6.4, 7.1, latest); se
+[`wordpress-matrix-lokalt-2026-11-06.md`](wordpress-matrix-lokalt-2026-11-06.md).
 
 ## 1. Hvorfor Docker ikke kunne bruges
 
