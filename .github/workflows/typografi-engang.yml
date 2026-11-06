@@ -1,0 +1,111 @@
+name: Typografi-engang
+
+# Engangskørsel 6/11-2026: skifter header-filen til to skrifter (Marcellus + IBM Plex Sans).
+# Filen er ~50 kB og skal overskrives helt ved hvert API-kald, så ændringen udføres her i stedet.
+# Alt er deterministisk, og der committes kun hvis resultatet har præcis den sha256 som den
+# lokalt gennemgåede version. Arbejdsgangen sletter sig selv i samme commit som ændringen.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/typografi-engang.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  ret-skrifter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Ret skrifterne i css/header-dark-clockwork-active.html
+        run: |
+          python3 - <<'PY'
+          import hashlib
+
+          p = 'css/header-dark-clockwork-active.html'
+          raw = open(p, 'rb').read()
+          lines = raw.decode('utf-8').split('\n')
+          if len(lines) != 1385:
+              raise SystemExit('filen er aendret siden 6/11 (linjetal %d) - stop' % len(lines))
+
+          SANS   = '"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+          SANS_C = '"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif'
+          SERIF  = 'Marcellus, Georgia, "Times New Roman", serif'
+
+          edits = [
+           (144, 'font-family: Georgia, "Times New Roman", serif !important;', '  font-family: %s !important;' % SANS),
+           (228, 'font-family: Georgia, "Times New Roman", serif;',            '  font-family: %s;' % SERIF),
+           (229, 'font-weight: 700;',                                          '  font-weight: 400;'),
+           (267, 'font-family: Georgia, "Times New Roman", serif;',            '  font-family: %s;' % SERIF),
+           (268, 'font-weight: 700;',                                          '  font-weight: 400;'),
+           (429, 'font-family: Georgia, "Times New Roman", serif;',            '  font-family: %s;' % SANS),
+           (430, 'font-weight: 800;',                                          '  font-weight: 700;'),
+           (516, 'font-family: Georgia, "Times New Roman", serif;',            '  font-family: %s;' % SERIF),
+           (791, 'font-family:Georgia,"Times New Roman",serif;',               '.sg-logo .sg-word{font-family:Marcellus,Georgia,"Times New Roman",serif;font-size:24px;line-height:1;color:#eee3cd;letter-spacing:.08em}'),
+           (792, 'font-weight:700',                                            '.sg-logo .sg-word b{color:#c6a04d;font-weight:400}'),
+           (807, 'font-weight:800',                                            '  color:#18100b !important;font-weight:700;text-transform:uppercase;letter-spacing:.08em;'),
+           (810, 'font-family:Georgia,serif}',                                 '  padding:.85em 1.35em;text-decoration:none !important;font-family:%s}' % SANS_C),
+          ]
+          for ln, need, _ in edits:
+              if need not in lines[ln - 1]:
+                  raise SystemExit('linje %d matcher ikke: %r' % (ln, lines[ln - 1]))
+          for ln, need, new in edits:
+              lines[ln - 1] = new
+
+          keep = {16, 17, 18, 19, 26}
+          drop = [n for n in range(5, 38) if n not in keep]
+          if len(drop) != 28:
+              raise SystemExit('forventede 28 @font-face-linjer, fandt %d' % len(drop))
+
+          note = [
+              '/* Skrifter: to familier. Marcellus (display: overskrifter, ordmaerke, produkttitler) og',
+              '   IBM Plex Sans (tekst, knapper, UI). Begge ligger lokalt i temaets fontmappe.',
+              '   Georgia staar tilbage som reserve i Marcellus-stakken — den findes paa alle enheder',
+              '   og bliver ikke hentet. Se design.md §2. */',
+          ]
+          out = []
+          for i, line in enumerate(lines, 1):
+              if i in drop:
+                  continue
+              if i == 5:
+                  out.extend(note)
+              out.append(line)
+
+          nb = '\n'.join(out).encode('utf-8')
+          sha = hashlib.sha256(nb).hexdigest()
+          forventet = '9acd57a1aa56b11f5d9781163ca6c6930ff58d7c318e3980ca70a7204c146528'
+          if sha != forventet:
+              raise SystemExit('resultatet matcher ikke den gennemgaaede version: %s' % sha)
+          open(p, 'wb').write(nb)
+          print('ok: %d bytes, sha256 %s' % (len(nb), sha))
+          PY
+
+      - name: Commit og push
+        run: |
+          set -e
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm -q -f .github/workflows/typografi-engang.yml
+          git add css/header-dark-clockwork-active.html
+          git commit -q -F - <<'MSG'
+          style: to skrifter i stedet for tredive — Marcellus i overskrifterne
+
+          Fjerner 28 ubrugte @font-face-erklæringer (Inter, Archivo, Oswald, Hind, Space Mono,
+          Montserrat m.fl.) og lader Marcellus overtage Georgia i overskrifter, ordmærke og
+          produkttitler. Brødtekst og knapper går til IBM Plex Sans, som allerede var indlæst.
+          Georgia bliver kun stående som reserve i serif-stakken, så teksten ikke falder til
+          systemfont, hvis Marcellus ikke kan hentes. Overskrifterne sættes til vægt 400, fordi
+          Marcellus kun findes i 400 — 700 ville være en kunstig fed, der ville sløre bogstaverne.
+
+          Verificeret: 50 819 → 44 578 bytes, @font-face 33 → 5, klammer 333/333 → 305/305,
+          sha256 9acd57a1…4628. Se design.md §2.
+
+          🤖 Generated with Codebuff
+          Co-Authored-By: Codebuff <noreply@codebuff.com>
+          MSG
+          git pull --rebase --autostash origin main
+          git push origin HEAD:main
