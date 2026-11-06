@@ -13,6 +13,10 @@ Kør:
 
 Filerne ligger uden for repoet i `~/.config/steamgears-mcp/` (mode 600), så de ikke kan
 committes ved et uheld. Koden i linket lever kun kort — kør `--finish` med det samme.
+
+Sitet har mere end én MCP-server. Peger miljøvariablerne på en anden, bruges samme flow:
+`MCP_METADATA_URL` (authorization-server-metadata), `MCP_RESOURCE` (den beskyttede resource),
+`MCP_SCOPE` (standard `mcp`) og `MCP_CONFIG_DIR` (så to servere ikke deler token-fil).
 """
 
 from __future__ import annotations
@@ -37,7 +41,7 @@ CLIENT_FILE = CONFIG_DIR / "client.json"
 TOKEN_FILE = CONFIG_DIR / "tokens.json"
 REDIRECT = os.environ.get("MCP_REDIRECT_URI") or "http://127.0.0.1:8765/callback"
 METADATA_URL = os.environ.get("MCP_METADATA_URL") or "https://steamgears.eu/.well-known/oauth-authorization-server"
-SCOPE = "mcp"
+SCOPE = os.environ.get("MCP_SCOPE") or "mcp"
 
 
 def b64url(raw: bytes) -> str:
@@ -108,6 +112,16 @@ def register_client(meta: dict) -> dict:
     return body
 
 
+def authorize_url(endpoint: str, query: str) -> str:
+    """Godkendelseslinket — `&` når endepunktet allerede har en query.
+
+    AI Engines endepunkt er bart, men en WordPress-side som
+    `admin.php?page=novamira-oauth-authorize` ville ellers får et ekstra `?`, og så læser
+    WordPress `page` som `novamira-oauth-authorize?response_type=code`.
+    """
+    return endpoint + ("&" if "?" in endpoint else "?") + query
+
+
 def start() -> int:
     config = read_json(CLIENT_FILE)
     meta = metadata()
@@ -133,7 +147,7 @@ def start() -> int:
         f"resource={urllib.parse.quote(RESOURCE, safe='')}",
     ])
     print("\nÅbn linket i browseren, log ind som administrator og godkend:")
-    print(f"\n{config['authorize_endpoint']}?{query}\n")
+    print(f"\n{authorize_url(config['authorize_endpoint'], query)}\n")
     print("Du lander på 127.0.0.1:8765, som ikke svarer — det er med vilje.")
     print("Kopier hele adressen fra browserens adresselinje og kør:")
     print("  python3 tools/mcp_oauth.py --finish '<kode>'")

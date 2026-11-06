@@ -210,5 +210,19 @@ class OAuthTest(unittest.TestCase):
         self.assertEqual(STATE["verifiers"]["used"], verifier)
 
 
+    def test_11_authorize_link_haandterer_endpunkt_med_query(self):
+        # Novamira-sidens endepunkt er en wp-admin-side og har allerede `?page=...`.
+        self.assertEqual(
+            mcp_oauth.authorize_url("https://site/wp-admin/admin.php?page=novamira-oauth-authorize", "scope=full_access"),
+            "https://site/wp-admin/admin.php?page=novamira-oauth-authorize&scope=full_access",
+        )
+        self.assertEqual(
+            mcp_oauth.authorize_url("https://site/oauth/authorize", "scope=mcp"),
+            "https://site/oauth/authorize?scope=mcp",
+        )
+        self.assertNotIn("?", urlparse(mcp_oauth.authorize_url(
+            "https://site/wp-admin/admin.php?page=x", "a=1")).query)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
