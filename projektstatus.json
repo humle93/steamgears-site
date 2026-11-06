@@ -121,8 +121,8 @@
     {
       "id": "seo",
       "name": "SEO-indholdsproduktion",
-      "next": "Opret de tre manglende guides (mens-steampunk-costume-essentials, steampunk-clothing-three-budgets, womens-steampunk-essentials) fra den verificerede copy og færdiggør /steampunk-corset-guide/ (kladde 1394)",
-      "blocked_by": "Intet eksternt længere — MCP-adgang virker (målt 6/11 2026). Det, der mangler, er skrivningen: id 292/296/295 i den gamle note er **skraldespands-produktvariationer**, ikke guides, og kun /steampunk-corset-guide/ findes (kladde 1394, 11.351 tegn, 8 H2'er, fremhævet billede 1395, men 0 /go/-links og ingen Rank Math-meta). Copy, FAQ, priser og links ligger klar i docs/library/guides-2026-11-03.md og -corset.md",
+      "next": "Skriv de tre manglende guides (mens-steampunk-costume-essentials, steampunk-clothing-three-budgets, womens-steampunk-essentials) fra den verificerede copy — corset-guiden er publiceret 6/11",
+      "blocked_by": "Intet eksternt for de tre resterende guides: copy, FAQ, priser og links ligger i docs/library/guides-2026-11-03.md. De otte /go/-id'er 411/475/481/485/497/567 kunne ikke verificeres fra sandkassen (Simplys WAF giver browser-UA en challenge), så nye produktlinks skal måles fra ejerens side eller efter WAF-hvidlistning",
       "modules": [
         {
           "id": "batch",
@@ -148,6 +148,14 @@
           "total": 4,
           "unit": "guides",
           "note": "fire guides skrevet og verificeret 3/11 i docs/library/guides-2026-11-03.md og guides-2026-11-03-corset.md; 4/4 bestod tools/guide_check.py (7 selftest-fixtures). Corset-guiden er det sidste brief-mål kataloget kan bære — vest og boots har ingen produkter"
+        },
+        {
+          "id": "corset",
+          "name": "Corset-guiden publiceret (/steampunk-corset-guide/, 1394)",
+          "done": 1,
+          "total": 1,
+          "unit": "guides",
+          "note": "publiceret 6/11: kladde 1394 færdiggjort med to /go/-links (489, 491 — begge målt 302) i stedet for rå /product/-hrefs, og et hub-link til /steampunk-costumes/; Rank Math-titel, description og FAQPage-schema var allerede på plads, og det fremhævede billede er 1395"
         }
       ]
     },
@@ -856,6 +864,15 @@
       "after": 60.6,
       "delta": 2.3,
       "basis": "13,2 af 21,8 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 5,3/6,05 · S3 2,45/3,55 · S4 1,4/5)"
+    },
+    {
+      "date": "2026-11-06",
+      "project": "SEO-indholdsproduktion",
+      "module": "daglig måling",
+      "before": 57.1,
+      "after": 62.5,
+      "delta": 5.4,
+      "basis": "5 af 8 guides (Publicerede guides (id 292, 296, 295) 0/3 · Guide-copy klar til publicering (292, 296, 295 + corset) 4/4 · Corset-guiden publiceret (/steampunk-corset-guide/, 1394) 1/1)"
     }
   ]
 }
