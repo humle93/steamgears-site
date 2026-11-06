@@ -17,6 +17,9 @@ Kommandoer:
   python3 tools/commit_check.py --message-file .git/COMMIT_EDITMSG
   python3 tools/commit_check.py --install
 
+Tallene krydstjekkes desuden mod historik-rækkerne i `projektstatus.json`: Før/Efter/Δ skal matche
+en række, og Grundlag skal kunne læses ud af den rækkes `basis`. Et opdigtet regnestykke afvises.
+
 Undtaget, fordi de ikke kan bære procenter: merge- og revert-commits samt bot-committene fra
 `.github/workflows/projektstatus.yml` (`chore(status): …`) og `.github/workflows/natlig-push.yml`
 (`chore: natlig auto-push …`).
@@ -27,17 +30,20 @@ Exitkoder: 0 = ok, 1 = regelbrud, 2 = intern fejl eller forkert brug.
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import subprocess
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+STATE_PATH = ROOT / "projektstatus.json"
 NBSP = "\u00a0"
 ARROW = "\u2192"
 BOLD_RE = re.compile(r"\*\*|__")
 DASHES = ("—", "–", "-")
 TOLERANCE = 0.05
+HISTORY_TOLERANCE = 0.05
 
 # Emner der med vilje ikke bærer procenter. Maskingenereret eller ikke-arbejde.
 SKIP_SUBJECTS = (
@@ -60,12 +66,14 @@ FIELD_RE = re.compile(
 )
 DELTA_RE = re.compile(r"(?i)(?:Δ|delta)[ \t]*([+\-−]?[0-9]+(?:[.,][0-9]+)?|—|–|-)")
 PCT_RE = re.compile(r"[0-9]+(?:[.,][0-9]+)?[ \t]*%?")
+DELTA_VALUE_RE = re.compile(r"[+\-−]?[0-9]+(?:[.,][0-9]+)?")
+BASIS_HEAD_RE = re.compile(r"^(\d+(?:\.\d+)?) af (\d+(?:\.\d+)?) ?(.*)$")
 BAD_GROUNDS = ("tbd", "todo", "ved ikke", "føles", "??", "xxx")
 
 EXAMPLE = """\
-Modul: Dark academia-rebrand — batch 4 (mockups)
-Før: 63 %  →  Efter: 78 %  (Δ +15)
-Grundlag: 2 af 5 mockup-faser klar (4,5 t af 6,5 t i mockup-brief)"""
+Modul: S2.3 navigation — nav-links
+Før: 55,4 %  →  Efter: 56,3 %  (Δ +0,9)
+Grundlag: 12,25 af 21,75 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,65/6 · S3 2,15/3,55 · S4 1,4/5)"""
 
 HOOK = """\
 #!/usr/bin/env bash
@@ -180,8 +188,112 @@ def check_grounds(value: str, errors: list[str]) -> None:
         )
 
 
-def check_message(message: str) -> tuple[bool, list[str], str]:
-    """Returner (ok, fejl, undtagelsesgrund)."""
+def is_number(value) -> bool:
+    return isinstance(value, (int, float)) and not isinstance(value, bool)
+
+
+def normalize_basis(text: str) -> str:
+    """Sammenlignelig form: NBSP, decimaler og whitespace normaliseres."""
+    text = (text or "").replace(NBSP, " ")
+    text = re.sub(r"(?<=\d),(?=\d)", ".", text)
+    return re.sub(r"\s+", " ", text).strip().lower()
+
+
+def basis_head(text: str) -> tuple[float, float, str] | None:
+    """'12,25 af 21,75 d (…)' -> (12.25, 21.75, 'd')."""
+    match = BASIS_HEAD_RE.match(normalize_basis(text))
+    if not match:
+        return None
+    return float(match.group(1)), float(match.group(2)), match.group(3).strip()
+
+
+def basis_problem(claim: str, row_basis: str) -> str | None:
+    """None når beskedens Grundlag kan læses ud af historik-rækkens basis."""
+    claim_n, row_n = normalize_basis(claim), normalize_basis(row_basis)
+    if claim_n == row_n:
+        return None
+    claim_head, row_head = basis_head(claim), basis_head(row_basis)
+    if row_head is None:
+        return f"historik-rækkens grundlag '{row_basis}' har ikke formen 'X af Y enhed'"
+    if claim_head is None:
+        return f"'{claim}' matcher ikke rækkens '{row_basis}'"
+    if claim_head[:2] != row_head[:2]:
+        return (
+            f"grundlagets tal ({claim_head[0]:g} af {claim_head[1]:g}) matcher ikke "
+            f"rækkens ({row_head[0]:g} af {row_head[1]:g})"
+        )
+    claim_base = re.sub(r"\([^)]*\)", "", claim_n).strip()
+    row_base = re.sub(r"\([^)]*\)", "", row_n).strip()
+    if claim_base != row_base:
+        return f"'{claim_base}' matcher ikke rækkens '{row_base}'"
+    for part in re.findall(r"\(([^)]*)\)", claim_n):
+        if part not in row_n:
+            return f"'(...)'-delen '{part}' findes ikke i rækkens grundlag"
+    return None
+
+
+def row_matches(row: dict, before: float | None, after: float, delta: float | None) -> bool:
+    if not is_number(row.get("after")) or abs(float(row["after"]) - after) > HISTORY_TOLERANCE:
+        return False
+    if before is None:
+        if row.get("before") is not None:
+            return False
+    elif not is_number(row.get("before")) or abs(float(row["before"]) - before) > HISTORY_TOLERANCE:
+        return False
+    if delta is None:
+        return row.get("delta") is None
+    return is_number(row.get("delta")) and abs(float(row["delta"]) - delta) <= HISTORY_TOLERANCE
+
+
+def check_history(fields: dict[str, str], history: list[dict] | None, errors: list[str]) -> None:
+    """Krydstjek beskedens tal mod historik-rækkerne, så et opdigtet grundlag ikke går igennem."""
+    if history is None:
+        return
+    grundlag = (fields.get("grundlag") or "").strip()
+    if not grundlag:
+        return
+
+    raw_before = (fields.get("før") or "").strip()
+    raw_after = (fields.get("efter") or "").strip()
+    raw_delta = (fields.get("delta") or "").strip()
+    if raw_before not in DASHES and not PCT_RE.fullmatch(raw_before):
+        return
+    if not PCT_RE.fullmatch(raw_after):
+        return
+    if raw_delta not in DASHES and not DELTA_VALUE_RE.fullmatch(raw_delta):
+        return
+
+    before = None if raw_before in DASHES else as_number(raw_before)
+    after = as_number(raw_after)
+    delta = None if raw_delta in DASHES else as_number(raw_delta)
+    if after is None or (before is None and delta is not None):
+        return
+
+    candidates = [row for row in history if row_matches(row, before, after, delta)]
+    low = re.sub(r"\s+", " ", grundlag.replace(NBSP, " ")).strip().lower()
+    if not candidates:
+        # Et pas der ikke flytter noget kan ikke opfinde en procent — men et tal der bevæger sig skal stå i historikken.
+        if low == "ingen ændring" and before is not None and abs(after - before) <= HISTORY_TOLERANCE:
+            return
+        errors.append(
+            f"Før/Efter/Δ ({raw_before or '?'} → {raw_after}, Δ {raw_delta or '?'}) matcher ingen "
+            "historik-række i projektstatus.json — ret tallene i JSON, kør --update og brug rækkens tal"
+        )
+        return
+    if low == "ingen ændring":
+        return
+    problems = []
+    for row in candidates:
+        problem = basis_problem(grundlag, str(row.get("basis") or ""))
+        if problem is None:
+            return
+        problems.append(problem)
+    unique = list(dict.fromkeys(problems))
+    errors.append("Grundlag matcher ikke historik-rækken: " + "; ".join(unique))
+
+
+def check_message(message: str, history: list[dict] | None = None) -> tuple[bool, list[str], str]:
+    """Returner (ok, fejl, undtagelsesgrund). `history` er rækkerne fra projektstatus.json."""
     text = (message or "").strip()
     if not text:
         return True, [], "tom besked (committen blev afbrudt)"
@@ -212,17 +324,108 @@ def check_message(message: str) -> tuple[bool, list[str], str]:
         if abs(delta - expected) > TOLERANCE:
             errors.append(f"Δ {delta:+g} passer ikke med {before:g} → {after:g} (Δ skal være {expected:+g})")
 
+    check_history(fields, history, errors)
     return (not errors), errors, ""
 
 
 # --------------------------------------------------------------------------- fixtures
+
+# Rækkerne fixtures krydstjekkes mod — de ligner projektstatus.json, men er faste, så
+# fixture-svaret ikke ændrer sig når den virkelige historik vokser.
+FIXTURE_HISTORY: list[dict] = [
+    {
+        "date": "2026-11-01",
+        "project": "steamgears.eu — site-optimering",
+        "module": "S0–S4 (baseline)",
+        "before": None,
+        "after": 3.6,
+        "delta": None,
+        "basis": "0,75 af 21,1 d (S0 0,6/2,6 · S1 0/4,5 · S2 0/6 · S3 0/3 · S4 0,15/5)",
+    },
+    {
+        "date": "2026-11-03",
+        "project": "steamgears.eu — site-optimering",
+        "module": "daglig måling",
+        "before": 55.4,
+        "after": 56.3,
+        "delta": 0.9,
+        "basis": "12,25 af 21,75 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,65/6 · S3 2,15/3,55 · S4 1,4/5)",
+    },
+    {
+        "date": "2026-11-02",
+        "project": "Steamgears Autopilot — plugin",
+        "module": "daglig måling",
+        "before": 30.0,
+        "after": 34.1,
+        "delta": 4.1,
+        "basis": "1,0 af 11,35 d (P1.2 1,0/11,35)",
+    },
+    {
+        "date": "2026-11-02",
+        "project": "Steamgears Autopilot — plugin",
+        "module": "daglig måling",
+        "before": 29.7,
+        "after": 30.0,
+        "delta": 0.3,
+        "basis": "7,3 af 24,35 d (P0 7,3/24,35)",
+    },
+    {
+        "date": "2026-11-02",
+        "project": "SEO-indholdsproduktion",
+        "module": "ingen ændring",
+        "before": 0,
+        "after": 0,
+        "delta": 0,
+        "basis": "0 af 3 guides (Publicerede guides 0/3)",
+    },
+    {
+        "date": "2026-11-03",
+        "project": "Døde internlinks",
+        "module": "ingen ændring",
+        "before": 100,
+        "after": 100,
+        "delta": 0,
+        "basis": "39 af 39 links",
+    },
+]
 
 FIXTURES: list[tuple[str, str, bool]] = [
     (
         "fuld blok i tre linjer",
         "Ret navigationen\n\nModul: S2.3 navigation — nav-links\n"
         "Før: 55,4 %  →  Efter: 56,3 %  (Δ +0,9)\n"
-        "Grundlag: 12,45 af 21,75 d (S2 4,65/6)\n\n🤖 Generated with Codebuff\n",
+        "Grundlag: 12,25 af 21,75 d (S2 4,65/6)\n\n🤖 Generated with Codebuff\n",
+        True,
+    ),
+    (
+        "opdigtet grundlag afvises",
+        "Modul: S2.3 navigation — nav-links\n"
+        "Før: 55,4 %  →  Efter: 56,3 %  (Δ +0,9)\n"
+        "Grundlag: 12,45 af 21,75 d (S2 4,65/6)\n",
+        False,
+    ),
+    (
+        "før/efter uden historik-række afvises",
+        "Modul: S1.1 — crawl\nFør: 10 %\nEfter: 20 %\nΔ: +10\nGrundlag: 1 af 2 d\n",
+        False,
+    ),
+    (
+        "opdigtet moduldel i grundlaget afvises",
+        "Modul: S2.3 navigation — nav-links\n"
+        "Før: 55,4 %\nEfter: 56,3 %\nΔ: +0,9\n"
+        "Grundlag: 12,25 af 21,75 d (S9 9/9)\n",
+        False,
+    ),
+    (
+        "grundlag uden rod i historikken afvises",
+        "Modul: S2.3 navigation — nav-links\n"
+        "Før: 55,4 %\nEfter: 56,3 %\nΔ: +0,9\n"
+        "Grundlag: 5 af 5 faser\n",
+        False,
+    ),
+    (
+        "ingen ændring kræver ingen historik-række",
+        "Modul: tools — indeks\nFør: 42 %\nEfter: 42 %\nΔ: 0\nGrundlag: ingen ændring\n",
         True,
     ),
     (
@@ -342,7 +545,7 @@ FIXTURES: list[tuple[str, str, bool]] = [
 def run_selftest() -> int:
     failed = []
     for name, message, expected in FIXTURES:
-        ok, errors, _skip = check_message(message)
+        ok, errors, _skip = check_message(message, FIXTURE_HISTORY)
         if ok != expected:
             failed.append(f"{name}: forventet {'OK' if expected else 'FEJL'}, fik {'OK' if ok else 'FEJL'}"
                           + (f" ({'; '.join(errors)})" if errors else ""))
@@ -360,6 +563,25 @@ def run_selftest() -> int:
 
 def git(*args: str) -> subprocess.CompletedProcess:
     return subprocess.run(["git", *args], cwd=ROOT, capture_output=True, text=True)
+
+
+def load_history(path: Path = STATE_PATH) -> list[dict] | None:
+    """Historik-rækkerne fra projektstatus.json, eller None hvis filen ikke kan læses."""
+    try:
+        state = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    rows = state.get("history") if isinstance(state, dict) else None
+    if not isinstance(rows, list):
+        return None
+    return [row for row in rows if isinstance(row, dict)]
+
+
+def history_or_note() -> list[dict] | None:
+    rows = load_history()
+    if rows is None:
+        print("[NOTE] projektstatus.json kunne ikke læses — historik-krydstjek er sprunget over")
+    return rows
 
 
 def message_from_commit(rev: str) -> str:
@@ -390,7 +612,7 @@ def commits_in_range(spec: str) -> list[tuple[str, str]]:
 
 
 def report(message: str, errors: list[str], label: str) -> None:
-    print(f"[FEJL] {label}: commit-beskeden mangler procenterne (AGENTS.md §1).")
+    print(f"[FEJL] {label}: commit-beskeden opfylder ikke procentreglen (AGENTS.md §1).")
     for error in errors:
         print(f"  - {error}")
     print("\nSkriv blokken i beskeden:\n")
@@ -444,12 +666,14 @@ def main(argv: list[str] | None = None) -> int:
         if args.install:
             return install_hook()
 
+        history = history_or_note()
+
         if args.message_file:
             try:
                 message = Path(args.message_file).read_text()
             except OSError as exc:
                 raise Guard(f"kunne ikke læse beskedfilen: {exc}")
-            ok, errors, skip = check_message(message)
+            ok, errors, skip = check_message(message, history)
             if ok:
                 if skip:
                     print(f"[OK] undtaget: {skip}")
@@ -463,7 +687,7 @@ def main(argv: list[str] | None = None) -> int:
             rows = commits_in_range(args.range_spec)
             bad = 0
             for sha, body in rows:
-                ok, errors, skip = check_message(body)
+                ok, errors, skip = check_message(body, history)
                 short = sha[:8]
                 if ok:
                     print(f"[OK] {short} {skip or 'har procenterne'}")
@@ -475,7 +699,7 @@ def main(argv: list[str] | None = None) -> int:
             return 0 if bad == 0 else 1
 
         message = message_from_commit(args.commit or "HEAD")
-        ok, errors, skip = check_message(message)
+        ok, errors, skip = check_message(message, history)
         if ok:
             print(f"[OK] {skip or 'commit-beskeden har procenterne'}")
             return 0

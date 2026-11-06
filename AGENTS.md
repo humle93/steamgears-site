@@ -46,9 +46,9 @@ Hvert **aktivt projekt** skal have en procentstatus hver dag i [`docs/projektsta
 ## 3. Format
 
 ```
-Modul: Dark academia-rebrand — batch 4 (mockups)
-Før: 63 %  →  Efter: 78 %  (Δ +15)
-Grundlag: 2 af 5 mockup-faser klar (4,5 t af 6,5 t i mockup-brief)
+Modul: S2.3 navigation — nav-links
+Før: 55,4 %  →  Efter: 56,3 %  (Δ +0,9)
+Grundlag: 12,25 af 21,75 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,65/6 · S3 2,15/3,55 · S4 1,4/5)
 ```
 
 ## 4. Automation og værn (`projektstatus.py`)
@@ -107,11 +107,14 @@ Reglen over holdes automatisk, så lidt som muligt afhænger af hukommelse:
   maskinelt på tre flader — `--message-file` er **commit-msg-hooken** (`python3 tools/commit_check.py --install`,
   som [`tools/setup-agent-tools.sh`](tools/setup-agent-tools.sh) også kører), `--range A..B` tjekker de commits
   der blev pushet (CI: [`.github/workflows/commit-vaern.yml`](.github/workflows/commit-vaern.yml)), og
-  `--selftest` kører 24 fixtures. Værnet kræver `Modul:`, `Før:`, `Efter:`, `Δ:` og `Grundlag:` — også når de
-  står som `Før: 63 % → Efter: 78 % (Δ +15)` på én linje — afviser procentfelter der ikke er et tal eller en
+  `--selftest` kører 29 fixtures. Værnet kræver `Modul:`, `Før:`, `Efter:`, `Δ:` og `Grundlag:` — også når de
+  står som `Før: 55,4 % → Efter: 56,3 % (Δ +0,9)` på én linje — afviser procentfelter der ikke er et tal eller en
   streg, kræver at `Grundlag` kan genberegnes (tal eller `ingen ændring`), og at `Δ` passer med `Efter − Før`.
-  Merge-, revert- og bot-committene fra de to workflows er undtaget, fordi de ikke kan bære procenter;
-  historikken før 3/11 er ikke tjekket efter.
+  Tallene krydstjekkes desuden mod `projektstatus.json`: `Før`/`Efter`/`Δ` skal matche en historik-række, og
+  `Grundlag` skal kunne læses ud af den rækkes `basis` (også når beskeden kun citerer rækkens `X af Y enhed`-del),
+  så et opdigtet regnestykke afvises. Kan JSON-filen ikke læses, springes kun krydstjekket over — formen kræves
+  stadig. Et pas der ikke flytter noget kan skrive `ingen ændring` uden en række. Merge-, revert- og bot-committene
+  fra de to workflows er undtaget, fordi de ikke kan bære procenter; historikken før 3/11 er ikke tjekket efter.
 
 Automationen dækker **den daglige status**, og commit-beskeden bliver holdt op på formen. Det manuelle i §1 — at
 vurdere hvad der reelt blev udført og melde `% før → % efter` i svaret — kan scriptet ikke gøre og falder stadig
