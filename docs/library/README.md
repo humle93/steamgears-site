@@ -24,6 +24,7 @@ lukkedes research-bibliotek.
 
 | Dokument | Indhold | Dato |
 | --- | --- | --- |
+| [mcp-tool-schema-fix-2026-11-06.md](mcp-tool-schema-fix-2026-11-06.md) | **MCP-værktøjsskemaer og aimlapi 6/11:** diagnosen bag `tools.165.custom.input_schema` — pluginnet 7.33.1 har ingen root-combinators, de 165 værktøjer er abilities, og et mu-plugin folder dem ud på `wp_register_ability_args`; 42 tests grønne i PHP 8.4, og hvordan man aflæser hvilken ability der blev rettet (PDF i `reports/mcp-tool-schema-fix-2026-11-06.pdf`) | 2026-11-06 |
 | [mcp-kategorier-2026-11-05.md](mcp-kategorier-2026-11-05.md) | **MCP-kategorier og eksponering 5/11:** planen for at give site-botten alle 301 værktøjer — otte kategorier, fire risikoklasser (R0–R3), tre eksponeringsprofiler (læs/arbejde/fuld), de fire knapper der faktisk spærrer, og hvorfor de 28 synlige snarere er pagination eller public-filter end en rettighed — PDF i `reports/mcp-kategorier-2026-11-05.pdf` | 2026-11-05 |
 | [guide-links-aeldre-2026-11-03.md](guide-links-aeldre-2026-11-03.md) | **Link-plan for de ældre guides 3/11:** **20 `/go/`-links indsat** i den repo-ejede outfit-guide (verificeret ved læs-tilbage af filen), 12 klar til de guides der kun findes i WordPress, og 8 rækker med kortlagt ID men uden prisrække i repoet — PDF i `reports/guide-links-aeldre-2026-11-03.pdf` | 2026-11-03 |
 | [hub-steampunk-costumes-2026-11-03.md](hub-steampunk-costumes-2026-11-03.md) | **Hub-copy 3/11:** `/steampunk-costumes/` (side 550) skrevet som indgang til de fire guides — quick answer, femten produktlinks, tre figurer og FAQ — PDF i `reports/hub-steampunk-costumes-2026-11-03.pdf` | 2026-11-03 |
@@ -139,7 +140,6 @@ Høstede Google-kilder i [`knowledge_base/`](../../knowledge_base/) (indlæses a
 ## Repoets hoveddokumenter
 
 - [`../../README.md`](../../README.md) — repoets indgang og mappestruktur
-- [`../../design.md`](../../design.md) — designsystemet som spec: skrifter, farveroller, 4 px-grid, komponenter, billedstandard og stemme (målt 5/11, CSS ikke lagt ind endnu)
 - [`../roadmap.md`](../roadmap.md) — **den eneste** optimeringsplan for sitet (S0–S4)
 - [`../seo.md`](../seo.md) — **det eneste** SEO-dokument: regler, GEO-skabelon, måling
 - [`../../plugins/steamgears-autopilot/ROADMAP.md`](../../plugins/steamgears-autopilot/ROADMAP.md) — plugin-produktets egen roadmap

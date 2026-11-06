@@ -16,7 +16,6 @@ design/CSS, backup-data, dokumentation og status.
 | [`docs/projektstatus.md`](docs/projektstatus.md) | Daglig procentstatus pr. projekt, beregnet af `projektstatus.py` |
 | [`AGENTS.md`](AGENTS.md) | Arbejdsregler: hvert pass melder % før → efter med grundlag, og §7 dækker plugin-arbejdet |
 | [`docs/agent-profil.md`](docs/agent-profil.md) | **Agentprofil** — alt en bot skal vide: fakta, adgang, opskrifter, fælder. Kan også hentes over MCP |
-| [`design.md`](design.md) | **Designsystem (spec)** — typografi, farver, spacing, komponenter, billedstandard og stemme; målt på den live side 5/11, CSS ikke lagt ind endnu |
 
 Nye audits og research lægges i `docs/library/` og skrives ind i [dokumentindekset](docs/library/README.md),
 så de ikke bliver forældreløse (`AGENTS.md` §5).
@@ -31,7 +30,7 @@ så de ikke bliver forældreløse (`AGENTS.md` §5).
 | `docs/daily-briefs/` | Én brief pr. dag (`AUTO:PROJEKTSTATUS` skrives af CI) |
 | `docs/site-checks/` | Rutine-tjek af den live side: PageSpeed, GSC, meta, alt-tekster |
 | `reports/` | PDF-projektrapport pr. projekt: status med regnestykket, roadmap-indeks, udviklingsvej og hvad der virker/ikke virker |
-| `wordpress/mu-plugins/` | Deploybare mu-plugins til sitet — i dag `sgap-product-schema.php` (brand, returret, leveringstid) |
+| `wordpress/mu-plugins/` | Deploybare mu-plugins til sitet — i dag `sgap-product-schema.php` (brand, returret, leveringstid) og `sgap-mcp-schema-fix.php` + `aimlapi-tool-schema-sanitizer.php` (folder oneOf/anyOf/allOf ud af ability-skemaer) |
 | `plugins/steamgears-autopilot/` | Autopilot-pluginnet, dets egen `ROADMAP.md` og release-zip i `plugins/` |
 | `css/` | Live template part `extendable//header` (Dark Clockwork Theatre v3) |
 | `knowledge_base/` | Høstede Google-kilder; læses af `seo_agent.py` sammen med `docs/seo.md` |
