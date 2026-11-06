@@ -64,13 +64,24 @@ def read_json(path: Path) -> dict:
         return {}
 
 
-def request(url: str, payload: dict | None = None, method: str = "POST") -> tuple[int, dict | str]:
-    body = json.dumps(payload).encode() if payload is not None else None
+def request(url: str, payload: dict | None = None, method: str = "POST",
+            form: bool = False) -> tuple[int, dict | str]:
+    """HTTP-kald. Token-endepunkterne kræver form-encoding (RFC 6749 §4.1.3).
+
+    Registrering (DCR) er JSON, men et token-endepunkt svarer `unsupported_grant_type`
+    hvis kroppen er JSON: det kan slet ikke læse grant_type. Derfor `form=True` dér.
+    """
+    if payload is None:
+        body, ctype = None, "application/json"
+    elif form:
+        body, ctype = urllib.parse.urlencode(payload).encode(), "application/x-www-form-urlencoded"
+    else:
+        body, ctype = json.dumps(payload).encode(), "application/json"
     req = urllib.request.Request(
         url,
         data=body,
         method=method,
-        headers={"Content-Type": "application/json", "Accept": "application/json",
+        headers={"Content-Type": ctype, "Accept": "application/json",
                  "User-Agent": "steamgears-mcp-oauth/1.0"},
     )
     try:
@@ -177,7 +188,7 @@ def finish(raw_code: str) -> int:
         "client_id": config["client_id"],
         "code_verifier": config["code_verifier"],
     }
-    status, body = request(config["token_endpoint"], payload)
+    status, body = request(config["token_endpoint"], payload, form=True)
     if status != 200 or not isinstance(body, dict) or not body.get("access_token"):
         print(f"Token-udveksling afvist (HTTP {status}): {str(body)[:200]}")
         return 1
@@ -206,7 +217,7 @@ def refresh() -> str | None:
         return None
     payload = {"grant_type": "refresh_token", "refresh_token": tokens["refresh_token"],
                "client_id": config["client_id"]}
-    status, body = request(config.get("token_endpoint") or f"{API}/oauth/token", payload)
+    status, body = request(config.get("token_endpoint") or f"{API}/oauth/token", payload, form=True)
     if status != 200 or not isinstance(body, dict) or not body.get("access_token"):
         return None
     save_tokens(body)

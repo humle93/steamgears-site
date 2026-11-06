@@ -24,7 +24,7 @@ from urllib.parse import parse_qs, urlparse
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import mcp_oauth  # noqa: E402
 
-STATE: dict = {"codes": set(), "refreshed": 0, "verifiers": {}}
+STATE: dict = {"codes": set(), "refreshed": 0, "verifiers": {}, "types": []}
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -59,10 +59,13 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self):  # noqa: N802
         length = int(self.headers.get("Content-Length") or 0)
         raw = self.rfile.read(length) or b"{}"
+        STATE["types"].append((self.path, self.headers.get("Content-Type", "")))
         try:
             payload = json.loads(raw)
         except ValueError:
-            payload = parse_qs(raw.decode())
+            # Token-endepunkterne tager form-encoding; parse_qs giver lister.
+            payload = {k: (v[0] if isinstance(v, list) and len(v) == 1 else v)
+                       for k, v in parse_qs(raw.decode()).items()}
         if self.path == "/oauth/register":
             self._json(201, {"client_id": "test-client", "client_name": payload.get("client_name"),
                              "redirect_uris": payload.get("redirect_uris"),
@@ -110,6 +113,7 @@ class OAuthTest(unittest.TestCase):
         STATE["codes"] = {"god-kode"}
         STATE["verifiers"] = {}
         STATE["refreshed"] = 0
+        STATE["types"] = []
         self.dir = tempfile.TemporaryDirectory()
         self.addCleanup(self.dir.cleanup)
         base = Path(self.dir.name)
@@ -222,6 +226,22 @@ class OAuthTest(unittest.TestCase):
         )
         self.assertNotIn("?", urlparse(mcp_oauth.authorize_url(
             "https://site/wp-admin/admin.php?page=x", "a=1")).query)
+
+
+    def test_12_token_endepunktet_faar_form_encoding(self):
+        # RFC 6749 §4.1.3: token-kald er form-encoded. JSON giver unsupported_grant_type
+        # på Novamira, som er det site'et kører ved siden af AI Engine.
+        self.start_client()
+        self.assertEqual(mcp_oauth.finish("god-kode"), 0)
+        token_types = [ct for path, ct in STATE["types"] if path == "/oauth/token"]
+        self.assertTrue(token_types)
+        self.assertTrue(all(ct.startswith("application/x-www-form-urlencoded") for ct in token_types),
+                        token_types)
+        register_types = [ct for path, ct in STATE["types"] if path == "/oauth/register"]
+        self.assertTrue(register_types and register_types[0].startswith("application/json"),
+                        "DCR-registrering er JSON")
+        mcp_oauth.access_token(force_refresh=True)
+        self.assertEqual(STATE["refreshed"], 1)
 
 
 if __name__ == "__main__":
