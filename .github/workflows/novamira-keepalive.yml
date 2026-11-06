@@ -69,6 +69,20 @@ jobs:
         if: steps.gate.outputs.run == 'true'
         run: python3 tools/test_mcp_keepalive.py
 
+      - name: Kan det roterede token gemmes? (tjek FØR fornyelsen)
+        if: steps.gate.outputs.run == 'true' && steps.token.outputs.have == 'true'
+        env:
+          NOVAMIRA_SECRETS_TOKEN: ${{ secrets.NOVAMIRA_SECRETS_TOKEN || secrets.PINTEREST_SECRETS_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${NOVAMIRA_SECRETS_TOKEN}" ]; then
+            echo "::error title=For mange penge på bordet — fornyelsen er ikke kørt::Novamira roterer refresh-tokenet ved hver fornyelse, og uden en PAT med Secrets: write kan det nye token ikke gemmes — så ville det gamle være dødt og adgangen tabt. Tilføj NOVAMIRA_SECRETS_TOKEN (fine-grained PAT, Secrets: write) og kør jobbet igen. Der er intet fornyet i denne kørsel."
+            exit 1
+          fi
+          GH_TOKEN="$NOVAMIRA_SECRETS_TOKEN" gh secret list --repo "$GITHUB_REPOSITORY" >/dev/null \
+            || { echo "::error title=PAT kan ikke skrive secrets::PAT'en blev afvist af GitHub (mangler Secrets: write eller adgang til repoet). Intet er fornyet."; exit 1; }
+          echo "PAT kan skrive secrets — fornyelsen må køre."
+
       - name: Forny, verificér og gem det roterede token
         if: steps.gate.outputs.run == 'true' && steps.token.outputs.have == 'true'
         env:
