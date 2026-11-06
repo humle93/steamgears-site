@@ -62,10 +62,10 @@
         {
           "id": "p0",
           "name": "P0 — reliability",
-          "done": 3.55,
+          "done": 3.8,
           "total": 4.0,
           "unit": "d",
-          "note": "P0.1 0,5 + P0.2 0,5 + P0.3 1,0 + P0.5 1,0 (alarmer i includes/alerts.php, backoff 5/15/45, auditlog i includes/audit.php) + P0.4-detektion 0,2; + 0,15 d /go-ruten: produktlink uden kø-post gik til forsiden, nu produkt-fallback i 7.32.0 med 5 checks (404 PASS); P0.6 mangler; + 0,2 d P0.4/CC-link (7.33.0): pluginnet registrerer Command Centers kald (X-Command-Center), viser forbindelsen og melder i selvtjekket når CC har været tavs > 2 t, og CC 7.19.0 kalder wp-cron.php hvert 5. min (integration: 8 cc-checks PASS). P0.4 0,2 → 0,4 af 0,5 d — rigtig host-cron mangler stadig"
+          "note": "P0.1 0,5 + P0.2 0,5 + P0.3 1,0 + P0.5 1,0 (alarmer i includes/alerts.php, backoff 5/15/45, auditlog i includes/audit.php) + P0.4-detektion 0,2; + 0,15 d /go-ruten: produktlink uden kø-post gik til forsiden, nu produkt-fallback i 7.32.0 med 5 checks (404 PASS); P0.6 0,25 af 0,5 d (7.40.0: fingerprint i /snapshot-køen; N-dages-vindue og CC-side mangler); + 0,2 d P0.4/CC-link (7.33.0): pluginnet registrerer Command Centers kald (X-Command-Center), viser forbindelsen og melder i selvtjekket når CC har været tavs > 2 t, og CC 7.19.0 kalder wp-cron.php hvert 5. min (integration: 8 cc-checks PASS). P0.4 0,2 → 0,4 af 0,5 d — rigtig host-cron mangler stadig"
         },
         {
           "id": "p1",
@@ -819,6 +819,15 @@
       "after": 64.0,
       "delta": 0.4,
       "basis": "16,9 af 26,4 d (P0 3,55/4 · P1 6,9/13,4 · P2 4,5/7 · P3 1,95/2)"
+    },
+    {
+      "date": "2026-11-06",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 64.0,
+      "after": 65.0,
+      "delta": 1.0,
+      "basis": "17,15 af 26,4 d (P0 3,8/4 · P1 6,9/13,4 · P2 4,5/7 · P3 1,95/2)"
     }
   ]
 }
