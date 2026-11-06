@@ -30,10 +30,91 @@ class SGAP_AI {
     /** Model from Settings, else the provider's default ('' for a generic OpenAI-compatible API). */
     public static function model(): string {
         $model = trim((string) SGAP_Settings::get('ai_model'));
-        if ($model !== '') {
-            return $model;
-        }
+        return $model !== '' ? $model : self::default_model();
+    }
+
+    /** The model the provider itself recommends: what an empty Settings field means. */
+    public static function default_model(): string {
         return ['anthropic' => self::DEFAULT_MODEL, 'aimlapi' => self::AIMLAPI_MODEL][self::provider()] ?? '';
+    }
+
+    /**
+     * True when the provider's error is about the model *name* — unknown, retired or not
+     * offered to this key. Network, auth, rate-limit and credit errors are never model
+     * errors, and must be reported as they are instead of being retried.
+     */
+    public static function model_rejected(string $message): bool {
+        $message = strtolower($message);
+        if (strpos($message, 'model') === false) {
+            return false;
+        }
+        foreach ([
+            'not found', 'does not exist', 'not exist', 'unknown model', 'not available', 'unavailable',
+            'not offered', 'no such model', 'invalid model', 'not a valid model', 'model_not_found', 'not supported'
+        ] as $needle) {
+            if (strpos($message, $needle) !== false) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** The model to retry with when the asked name is rejected — '' when no retry is right. */
+    public static function model_fallback(string $asked, WP_Error $error): string {
+        if ($asked === '' || !in_array(self::provider(), ['aimlapi', 'openai_compatible'], true)) {
+            return '';
+        }
+        $default = self::default_model();
+        if ($default === '' || $default === $asked || !self::model_rejected($error->get_error_message())) {
+            return '';
+        }
+        return $default;
+    }
+
+    /**
+     * Clears a stored model the provider rejected, so the provider default applies from now
+     * on. Only when the stored value is still the rejected one: a value the owner changed
+     * in the meantime is theirs and is left alone.
+     */
+    public static function repair_model(string $asked): bool {
+        if ($asked === '' || trim((string) SGAP_Settings::get('ai_model')) !== $asked) {
+            return false;
+        }
+        SGAP_Settings::set('ai_model', '');
+        return trim((string) SGAP_Settings::get('ai_model')) === '';
+    }
+
+    /**
+     * POST /chat/completions and decode it. A model name the provider does not know is
+     * retried once on the provider default, and Settings is repaired so the next call works
+     * too; every other error is returned unchanged, so nothing loops and nothing hides.
+     * @return array|WP_Error
+     */
+    public static function chat_call(string $key, array $body, int $timeout = 120, string $who = '') {
+        $who = $who !== '' ? $who : self::provider_name();
+        $send = static function (array $payload) use ($key, $timeout, $who) {
+            return self::decode(wp_remote_post(self::base_url() . '/chat/completions', [
+                'timeout' => $timeout,
+                'headers' => ['Authorization' => 'Bearer ' . $key, 'Content-Type' => 'application/json'],
+                'body' => wp_json_encode($payload)
+            ]), $who);
+        };
+        $asked = (string) ($body['model'] ?? '');
+        $decoded = $send($body);
+        if (!is_wp_error($decoded)) {
+            return $decoded;
+        }
+        $fallback = self::model_fallback($asked, $decoded);
+        if ($fallback === '') {
+            return $decoded;
+        }
+        $body['model'] = $fallback;
+        $decoded = $send($body);
+        if (is_wp_error($decoded)) {
+            return $decoded;
+        }
+        self::repair_model($asked);
+        return $decoded;
     }
 
     public static function base_url(): string {

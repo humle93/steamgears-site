@@ -732,6 +732,35 @@ function wp_remote_retrieve_response_code($r){ return is_array($r)?(int)($r['res
 function wp_remote_retrieve_body($r){ return is_array($r)?(string)($r['body']??''):''; }
 function sgap_http($code,$body){ return ['response'=>['code'=>$code],'body'=>is_array($body)?json_encode($body):(string)$body]; }
 
+// 7.38.4 — et gemt modelnavn AIMLAPI ikke kender må ikke lamme chatten: kaldet prøver én gang
+// på standardmodellen, retter indstillingen og fortæller ejeren det. Auth, netværk og rate limit
+// må ikke udløse fallback.
+$ai_keep=[]; foreach(['sgap_ai_provider','sgap_ai_model','sgap_ai_api_key'] as $k){ $ai_keep[$k]=$GLOBALS['opts'][$k]??null; }
+$GLOBALS['opts']['sgap_ai_provider']='aimlapi'; $GLOBALS['opts']['sgap_ai_api_key']='KEY'; $GLOBALS['opts']['sgap_ai_model']='claude-3-5-sonnet';
+check('ai: only a model-name error counts as a model error', SGAP_AI::model_rejected('Model claude-3-5-sonnet not found') && SGAP_AI::model_rejected('The model `x` does not exist or you do not have access to it') && !SGAP_AI::model_rejected('Incorrect API key provided') && !SGAP_AI::model_rejected('Rate limit exceeded for model claude-3-5-sonnet') && !SGAP_AI::model_rejected('offline'));
+$GLOBALS['http_calls']=[];
+$GLOBALS['http_queue']=[
+ sgap_http(404,['error'=>['message'=>'Model claude-3-5-sonnet not found']]),
+ sgap_http(200,['model'=>'anthropic/claude-opus-5.5','choices'=>[['message'=>['content'=>'Hej fra standardmodellen'],'finish_reason'=>'stop']]])
+];
+$answer=SGAP_Chat::reply([], 'Hej');
+check('chat: a stored model AIMLAPI rejects still answers', is_array($answer) && str_contains((string)($answer['text']??''),'Hej fra standardmodellen'));
+check('chat: the retry runs on the default model, exactly once', count($GLOBALS['http_calls'])===2 && (json_decode((string)($GLOBALS['http_calls'][1][1]['body']??''),true)['model']??'')==='anthropic/claude-opus-5.5');
+check('chat: the rejected model is repaired in Settings', get_option('sgap_ai_model','')==='' && SGAP_AI::model()==='anthropic/claude-opus-5.5');
+check('chat: the owner is told which model was replaced', str_contains((string)($answer['text']??''),'claude-3-5-sonnet'));
+$GLOBALS['opts']['sgap_ai_model']='claude-3-5-sonnet'; $GLOBALS['http_calls']=[];
+$GLOBALS['http_queue']=[sgap_http(401,['error'=>['message'=>'Incorrect API key provided']])];
+$answer=SGAP_Chat::reply([], 'Hej');
+check('chat: an auth error fails without a fallback call', $answer instanceof WP_Error && count($GLOBALS['http_calls'])===1 && get_option('sgap_ai_model')==='claude-3-5-sonnet');
+$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[];
+$answer=SGAP_Chat::reply([], 'Hej');
+check('chat: a network error fails without a fallback call', $answer instanceof WP_Error && count($GLOBALS['http_calls'])===1 && get_option('sgap_ai_model')==='claude-3-5-sonnet');
+$GLOBALS['http_calls']=[];
+$GLOBALS['http_queue']=[sgap_http(429,['error'=>['message'=>'Rate limit exceeded for model claude-3-5-sonnet']])];
+$answer=SGAP_Chat::reply([], 'Hej');
+check('chat: a rate limit error is reported, not retried on another model', $answer instanceof WP_Error && count($GLOBALS['http_calls'])===1 && get_option('sgap_ai_model')==='claude-3-5-sonnet');
+foreach($ai_keep as $k=>$v){ if($v===null){ unset($GLOBALS['opts'][$k]); } else { $GLOBALS['opts'][$k]=$v; } }
+
 $GLOBALS['opts']['sgap_bluesky_handle']='@steamgears.bsky.social';
 $GLOBALS['opts']['sgap_bluesky_app_password']='abcd-efgh-ijkl-mnop';
 $GLOBALS['opts']['sgap_channels']='facebook,bluesky';

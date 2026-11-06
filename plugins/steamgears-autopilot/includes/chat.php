@@ -421,17 +421,19 @@ class SGAP_Chat {
 
     /** AIMLAPI / OpenAI-compatible: /chat/completions with function tools. */
     private static function loop_chat_completions(string $key, array $turns, array $tools) {
-        $model = SGAP_AI::model();
-        if ($model === '') {
-            return new WP_Error('sgap_ai_model', 'Set an AI model in Settings for the OpenAI-compatible provider.');
-        }
         $messages = array_merge([['role' => 'system', 'content' => self::system_prompt()]], $turns);
         $specs = [];
         foreach ($tools as $name => [$description, $schema]) {
             $specs[] = ['type' => 'function', 'function' => ['name' => $name, 'description' => $description, 'parameters' => $schema]];
         }
         $used = [];
+        $healed = '';
         for ($round = 0; $round < self::MAX_ROUNDS; $round++) {
+            // Read the model every round: a name the provider rejected was repaired on the last call.
+            $model = SGAP_AI::model();
+            if ($model === '') {
+                return new WP_Error('sgap_ai_model', 'Set an AI model in Settings for the OpenAI-compatible provider.');
+            }
             $body = ['model' => $model, 'max_tokens' => 4000, 'messages' => $messages];
             if ($specs) {
                 $body['tools'] = $specs;
@@ -439,12 +441,12 @@ class SGAP_Chat {
             if (SGAP_AI::provider() === 'aimlapi') {
                 $body['reasoning_effort'] = 'low';
             }
-            $response = wp_remote_post(SGAP_AI::base_url() . '/chat/completions', [
-                'timeout' => 120,
-                'headers' => ['Authorization' => 'Bearer ' . $key, 'Content-Type' => 'application/json'],
-                'body' => wp_json_encode($body)
-            ]);
-            $decoded = SGAP_AI::decode($response, SGAP_AI::provider_name());
+            // A stored model the provider does not know is healed inside chat_call: one retry on
+            // the provider default, then the stored value is cleared so it is the last time.
+            $decoded = SGAP_AI::chat_call($key, $body, 120);
+            if ($healed === '' && SGAP_AI::model() !== $model) {
+                $healed = $model;
+            }
             $names = array_keys($tools);
             if (is_wp_error($decoded)) {
                 $entry = self::remember_call(SGAP_AI::provider_name(), $model, $round, $names, $decoded->get_error_message());
@@ -460,9 +462,9 @@ class SGAP_Chat {
             if (!$calls) {
                 $text = trim((string) ($msg['content'] ?? ''));
                 if ($text === '' && ($decoded['choices'][0]['finish_reason'] ?? '') === 'length') {
-                    return new WP_Error('sgap_ai_truncated', 'The answer was cut off; try a shorter question.');
+                    return new WP_Error('sgap_ai_truncated', 'The answer was cut off; try a shorter question.' . self::healed_note($healed));
                 }
-                return ['text' => $text !== '' ? $text : '(no answer)', 'tools' => $used];
+                return ['text' => ($text !== '' ? $text : '(no answer)') . self::healed_note($healed), 'tools' => $used];
             }
             $messages[] = ['role' => 'assistant', 'content' => (string) ($msg['content'] ?? ''), 'tool_calls' => array_map(fn($c) => [
                 'id' => (string) ($c['id'] ?? ''), 'type' => 'function',
@@ -475,7 +477,16 @@ class SGAP_Chat {
                 $messages[] = ['role' => 'tool', 'tool_call_id' => (string) ($call['id'] ?? ''), 'content' => self::run_tool($name, $args, $tools)];
             }
         }
-        return ['text' => 'I stopped after ' . self::MAX_ROUNDS . ' tool steps; ask me to continue.', 'tools' => $used];
+        return ['text' => 'I stopped after ' . self::MAX_ROUNDS . ' tool steps; ask me to continue.' . self::healed_note($healed), 'tools' => $used];
+    }
+
+    /** Says so when a stored model name was rejected and the answer came from the default. */
+    private static function healed_note(string $from): string {
+        if ($from === '') {
+            return '';
+        }
+        return "\n\nAIMLAPI did not know the model `{$from}`, so this answer came from `" . SGAP_AI::model()
+            . '` and Settings has been reset to it — the next command works too.';
     }
 
     /** Anthropic Messages API with tool use. */
