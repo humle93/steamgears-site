@@ -105,6 +105,13 @@ Reglen over holdes automatisk, så lidt som muligt afhænger af hukommelse:
   roterer refresh-tokenet, så det gamle er dødt bagefter. Hvad der kræves, og hvad kørslen ikke kan: se
   [`docs/library/pinterest-token-fornyelse-2026-11-03.md`](docs/library/pinterest-token-fornyelse-2026-11-03.md).
 
+- **Novamira keep-alive** (`.github/workflows/novamira-keepalive.yml`): MCP-adgangen til Novamira-fladen
+  (`/wp-json/mcp/novamira-oauth`) har et access-token på 3600 s og et refresh-token der **roteres** ved hver
+  fornyelse. Kørslen fornyer dagligt kl. 03 dansk tid med [`tools/mcp_keepalive.py`](tools/mcp_keepalive.py),
+  verificerer med `initialize` + `tools/list` og gemmer det nye token tilbage som repository-secret. Uden
+  `NOVAMIRA_REFRESH_TOKEN` og en PAT med Secrets: write springer den sig selv over med en `::notice`.
+  Opsætning og fælder: [`docs/mcp-auth.md`](docs/mcp-auth.md) → Novamira.
+
 - **Commit-besked-værnet** ([`tools/commit_check.py`](tools/commit_check.py)): reglen i §1 bliver kontrolleret
   maskinelt på tre flader — `--message-file` er **commit-msg-hooken** (`python3 tools/commit_check.py --install`,
   som [`tools/setup-agent-tools.sh`](tools/setup-agent-tools.sh) også kører), `--range A..B` tjekker de commits

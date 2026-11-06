@@ -127,6 +127,56 @@ OAuth-flowet i `tools/test_mcp_oauth.py` (10 fixtures, lokal authorization serve
 | `404 rest_no_route` | forkert sti | ruten er `/wp-json/mcp/v1/http`, ikke `/mcp` |
 | tomt `tools/list` | forbundet, men ingen værktøjer eksponeret | tjek AI Engines MCP-indstillinger i wp-admin |
 
+## Novamira (`novamira`) — den anden MCP-flade (målt 6/11 2026)
+
+Sitet kører **Novamira 1.12.14** ved siden af AI Engine. Den har sin egen OAuth-server og sin egen flade:
+
+| | |
+| --- | --- |
+| Resource | `https://steamgears.eu/wp-json/mcp/novamira-oauth` — `401` uden token, med `resource_metadata` i `WWW-Authenticate` |
+| Authorization server | `https://steamgears.eu/.well-known/oauth-authorization-server` (issuer `https://steamgears.eu`) |
+| Endpoints | authorize `admin.php?page=novamira-oauth-authorize`, token/register/revoke/introspect/device under `/wp-json/novamira/v1/oauth/` |
+| Scope | `full_access` (eneste understøttede) |
+| Flera | **3 meta-værktøjer** — `discover-abilities`, `get-ability-info`, `execute-ability` — over **207 abilities**, heraf 60 fra plugin'et og resten fra WordPress, WooCommerce, Rank Math m.fl. |
+
+**Tre ting der koster en runde, hvis man ikke ved dem:**
+
+1. **DCR registrerer ikke device-grant.** Metadata annoncerer `urn:ietf:params:oauth:grant-type:device_code`, men
+   en dynamisk registreret klient får kun `authorization_code` + `refresh_token` tilbage, og `/oauth/device`
+   svarer `unauthorized_client`. Brug authorization code + PKCE med redirect `http://127.0.0.1:8765/callback`.
+2. **Token-endepunkterne kræver form-encoding.** JSON giver `unsupported_grant_type` — serveren kan ikke læse
+   `grant_type` og afviser, før den ser koden. `tools/mcp_oauth.py` sender nu form-data til token-kald og JSON
+   til DCR (RFC 6749 §4.1.3).
+3. **`tools/list` kræver `Mcp-Session-Id`** fra `initialize`-svarets header. Uden den svarer fladen `400` med
+   0 værktøjer, selv om `initialize` gik igennem.
+
+### Hold adgangen i live
+
+Access-tokenet lever **3600 s**, og refresh-tokenet **roteres** ved hver fornyelse (målt 6/11: `refresh_token`
+ændres, `expires_in` er 3600, ingen `refresh_token_expires_in` oplyses). Introspection er admin-only, så
+refresh-tokenets levetid kan ikke læses udefra — derfor skal fornyelsen køre planlagt, ikke på held.
+
+[`tools/mcp_keepalive.py`](../tools/mcp_keepalive.py) fornyer, verificerer med `initialize` + `tools/list` og
+gemmer det nye par (mode 600, uden for repoet). Kør den manuelt med:
+
+```bash
+python3 tools/mcp_keepalive.py          # lokalt: forny + verificér + gem
+python3 tools/mcp_keepalive.py --ci --emit-refresh-file /tmp/refresh   # CI: skriv det roterede token til fil
+```
+
+**Planlagt fornyelse (30+ dage uden ejerens hænder):**
+[`novamira-keepalive.yml`](../.github/workflows/novamira-keepalive.yml) kører dagligt kl. 03 dansk tid,
+fornyer og gemmer det roterede token tilbage som repository-secret. Den springer sig selv over med en
+`::notice`, indtil disse findes:
+
+| Navn | Type | Hvad |
+| --- | --- | --- |
+| `NOVAMIRA_REFRESH_TOKEN` | secret | refresh-tokenet fra den lokale godkendelse |
+| `NOVAMIRA_SECRETS_TOKEN` | secret | fine-grained PAT med **Secrets: write** (`PINTEREST_SECRETS_TOKEN` bruges som fallback) |
+| `NOVAMIRA_CLIENT_ID` | variabel, valgfri | den offentlige klient-id; ellers bruges klienten fra 6/11 2026 |
+
+Uden dem virker adgangen kun så længe refresh-tokenet lever, og et nyt kræver ejerens godkendelse igen.
+
 ## Kildesporet: hvad AI Engine og adapteren kan kalde (læst 2/11 2026)
 
 Afsnittene ovenfor er den vej ind der virker. Dette er hvad kilden siger om værktøjerne — brugbart når et
