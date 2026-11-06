@@ -47,15 +47,42 @@ _Opdateret 2026-11-06 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `692fb3e Modul: Samtalepunkter — check tåler sin egen commit Før: 60,6 % → Efter: 60,6 % (Δ 0) Grundlag: 0 roadmap-poster berørt — 11 af 11 selftest-fixtures, ingen ændring i 13,2 af 21,8 d`
 - `d7cfd7d Modul: Samtalepunkter + Cirlas dokumentation Før: 60,6 % → Efter: 60,6 % (Δ 0) Grundlag: 0 roadmap-poster berørt — dokumentation og værktøj, ingen ændring i 13,2 af 21,8 d`
 - `33c022a Modul: Plugin P1.4 — evergreen-kørslen i integrationstesten Før: 74,0 % → Efter: 74,0 % (Δ +0) Grundlag: 19,9 af 26,9 d — testdækning styrket, ingen ændring i estimatet`
 - `f47ba22 style: fjern Inter-preloadet og skriv typografien ind i design.md`
 - `9e1be40 chore: anden og sidste del af typografi-oprydningen`
 - `4beb61f style: to skrifter i stedet for tredive — Marcellus i overskrifterne`
-- `11fd392 chore: engangsarbejdsgang der retter skrifterne i header-filen`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 6/11 — butikken var nede i 1 t 38 min (den vigtigste hændelse i dag)
+
+Fire butiks-plugins blev deaktiveret i samme batch kl. **19:57:14 UTC**: WooCommerce 11.2.2, Stripe,
+Pinterest for WooCommerce og Google for WooCommerce. Konsekvens: `/product/*` og `/product-category/*`
+svarede **404**, Store API 404 — mens `/shop/`, `/cart/` og `/checkout/` svarede 200 fra sidecachen. Det er
+fælden der skal huskes: **en 200 er ikke et bevis for at butikken virker.** Alle fire er genaktiveret og målt
+bagefter (WC 11.2.2, Store API 200, produkt-URL 200 med købsknap, `stripe` + `bacs`, produkt-sitemap 21
+URL'er). Årsagen er **ikke fastslået** — `recently_activated` giver sekundet, men der findes ingen
+`debug.log`. Tre ting står stadig åbent: `sitemap_index.xml` udelader product og product_cat (kræver et
+`rank_math/sitemap/index`-filter, altså en kodeændring), butikken har 20 publicerede produkter mod 39 målt
+2/11, og indlæg 898 står som `test` med tre hub-links der lover “10 couple costumes”.
+
+Dokument: [`library/butik-nede-og-genoprettet-2026-11-06.md`](library/butik-nede-og-genoprettet-2026-11-06.md).
+
+To opsætningsrettelser blev lavet i samme pas, begge målt: `/shipping/` og `/returns/` står nu i footerens
+Support-kolonne (1 forekomst på `/`, `/shop/`, `/faq/`), og corset-guiden (1394) er kommet ind i hubbens
+guide-liste på `/steampunk-costumes/` — den havde **0** indgående interne links. Det tomme testindlæg 789
+(`<p>t3</p>`, 0 indgående links) er sat til kladde.
+
+### 6/11 — navigation: ejeren valgte native blokke
+
+S2.3 fortsætter i **Gutenberg/native blocks** (Extendable-bloktema), ikke page builder eller child theme.
+Headeren er allerede `wp:navigation-link`-markup i template part 12 med Start Here · Build · Shop (dropdown)
+· Gallery · Guides · About · Contact — hub-links er på plads siden 2/11, så det der manglede var footeren og
+den interne linkning, ikke topniveauet. Novamiras `gutenberg-*`-evner kræver en browser-finalizer for **nye**
+statiske blokke; målrettede rettelser i eksisterende markup kan skrives direkte med `wp_update_post`.
 
 ### 6/11 — MCP-adgang: fornyelse, ikke secrets
 
