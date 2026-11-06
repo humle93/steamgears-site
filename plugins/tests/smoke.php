@@ -164,6 +164,16 @@ check('bot: Publer link scraper is not a click', SGAP_Tracking::is_bot('facebook
 check('updater: reads Version from a plugin header', SGAP_Updater::parse_version("<?php\n/**\n* Plugin Name: X\n* Version: 7.6.2\n*/")==='7.6.2');
 check('updater: no version in junk', SGAP_Updater::parse_version('404: Not Found')==='');
 check('updater: package url points at the versioned zip on main', SGAP_Updater::package_url('7.6.2')==='https://raw.githubusercontent.com/humle93/steamgears-site/main/plugins/steamgears-autopilot-v7.6.2.zip');
+// Release notes i update-modalen (P3.4): parses fra roadmapens changelog, nyeste først.
+$notes_md="| Date | Plugin | Change |\n| --- | --- | --- |\n| 2026-11-06 | 7.34.0 | **Ny** note med `code` og <script>alert(1)</script> |\n| 2026-11-05 | 7.33.4 | Ældre note |\n";
+$notes=SGAP_Updater::changelog_notes($notes_md, 2);
+check('updater: changelog renders the newest rows', str_contains($notes,'7.34.0') && str_contains($notes,'<strong>Ny</strong>') && str_contains($notes,'<code>code</code>') && str_contains($notes,'7.33.4'));
+check('updater: changelog escapes html from the repo', !str_contains($notes,'<script>') && str_contains($notes,'&lt;script&gt;'));
+check('updater: changelog respects the limit', substr_count(SGAP_Updater::changelog_notes($notes_md,1),'<li>')===1);
+check('updater: changelog is empty without rows', SGAP_Updater::changelog_notes('# no table here')==='');
+$info=SGAP_Updater::plugin_info(null,'plugin_information',(object)['slug'=>'steamgears-autopilot']);
+check('updater: modal always has a changelog section', isset($info->sections['changelog']) && strlen($info->sections['changelog'])>10);
+check('updater: modal ignores other slugs', SGAP_Updater::plugin_info('keep','plugin_information',(object)['slug'=>'other'])==='keep');
 // --- Alerts: P0.1 failed post, P0.2 queue running dry ---
 $GLOBALS['mails']=[];
 update_option('admin_email','admin@example.com'); update_option('sgap_alert_mode','immediate');

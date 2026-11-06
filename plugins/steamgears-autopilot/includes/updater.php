@@ -14,6 +14,7 @@ class SGAP_Updater {
     const REPO = 'https://github.com/humle93/steamgears-site/tree/main/plugins/steamgears-autopilot';
     const SLUG = 'steamgears-autopilot';
     const CACHE = 'sgap_remote_version';
+    const NOTES_CACHE = 'sgap_release_notes';
 
     public static function init(): void {
         add_filter('pre_set_site_transient_update_plugins', [__CLASS__, 'inject_update']);
@@ -28,6 +29,53 @@ class SGAP_Updater {
     /** "Version: x.y.z" from a plugin header. Pure function. */
     public static function parse_version(string $header): string {
         return preg_match('/^[\s\*#@]*Version:\s*([0-9][0-9A-Za-z.\-]*)\s*$/mi', $header, $m) ? $m[1] : '';
+    }
+
+    /**
+     * Release notes for the update modal, from the roadmap's changelog table. Pure function:
+     * the newest rows first, HTML-escaped, with the two bits of markdown the table uses.
+     */
+    public static function changelog_notes(string $markdown, int $limit = 3): string {
+        $rows = [];
+        foreach (preg_split('/\R/', $markdown) ?: [] as $line) {
+            if (!preg_match('/^\|\s*(\d{4}-\d{2}-\d{2})\s*\|\s*([0-9][0-9A-Za-z.\-]*)\s*\|\s*(.+?)\s*\|\s*$/', trim($line), $m)) {
+                continue;
+            }
+            $rows[] = $m;
+            if (count($rows) >= max(1, $limit)) {
+                break;
+            }
+        }
+        if (!$rows) {
+            return '';
+        }
+        $out = '<ul class="sgap-release-notes">';
+        foreach ($rows as $m) {
+            $out .= '<li><strong>' . esc_html($m[2]) . '</strong> <span class="description">' . esc_html($m[1]) . '</span><br>'
+                . self::note_html($m[3]) . '</li>';
+        }
+        return $out . '</ul>';
+    }
+
+    /** Escapes a changelog cell and turns **bold** and `code` into markup. */
+    private static function note_html(string $text): string {
+        $html = preg_replace('/\*\*(.+?)\*\*/s', '<strong>$1</strong>', esc_html($text));
+        return (string) preg_replace('/`([^`]+)`/', '<code>$1</code>', (string) $html);
+    }
+
+    /** Release notes for the latest release on GitHub, cached for 6 hours. '' when unreadable. */
+    public static function remote_changelog(bool $fresh = false): string {
+        $cached = get_site_transient(self::NOTES_CACHE);
+        if (!$fresh && is_string($cached) && $cached !== '') {
+            return $cached === 'none' ? '' : $cached;
+        }
+        $response = wp_remote_get(self::RAW . 'steamgears-autopilot/ROADMAP.md', ['timeout' => 10]);
+        $notes = '';
+        if (!is_wp_error($response) && (int) wp_remote_retrieve_response_code($response) === 200) {
+            $notes = self::changelog_notes(substr((string) wp_remote_retrieve_body($response), 0, 400000));
+        }
+        set_site_transient(self::NOTES_CACHE, $notes !== '' ? $notes : 'none', $notes !== '' ? 6 * HOUR_IN_SECONDS : 30 * MINUTE_IN_SECONDS);
+        return $notes;
     }
 
     public static function package_url(string $version): string {
@@ -86,6 +134,7 @@ class SGAP_Updater {
             return $result;
         }
         $remote = self::remote_version() ?: SGAP_VERSION;
+        $notes = self::remote_changelog() ?: 'Release notes live in the <a href="' . esc_url(self::REPO . '/blob/main/ROADMAP.md') . '">roadmap</a>.';
         return (object) [
             'name' => 'Steamgears Autopilot',
             'slug' => self::SLUG,
@@ -97,7 +146,7 @@ class SGAP_Updater {
             'download_link' => self::package_url($remote),
             'sections' => [
                 'description' => 'Social media autopilot for steamgears.eu: AI drafts, publishing via Publer, click tracking and results.',
-                'changelog' => 'See the commit history: <a href="https://github.com/humle93/steamgears-site/commits/main/plugins">GitHub</a>.'
+                'changelog' => $notes
             ]
         ];
     }
@@ -138,6 +187,7 @@ class SGAP_Updater {
             activate_plugin(self::basename(), '', is_multisite() && is_plugin_active_for_network(self::basename()), true);
         }
         if ($result === true) {
+            delete_site_transient(self::NOTES_CACHE);
             $report['updated'] = true;
             $report['message'] = "Updated from {$report['from']} to {$remote}.";
         } else {
