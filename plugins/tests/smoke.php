@@ -520,6 +520,18 @@ check('tools: bridge filters by category', SGAP_MCP_Tools::list_abilities(['cate
 $called=SGAP_MCP_Tools::call_ability(['name'=>'x/y','input'=>['a'=>1]]);
 check('tools: bridge runs an ability and echoes its name', $called['ran']==='x/y' && $called['_ability']==='x/y' && $called['input']===['a'=>1]);
 unset($GLOBALS['ability_objects']);
+// ---- Botten og MCP-fladen: chatten mÃ¥ lÃ¦se, men ikke skrive ----
+$ro=SGAP_MCP_Tools::readonly_names();
+check('chat: the read-only set covers the lookups', !array_diff(['site-info','get-option','list-posts','get-post','list-products','get-product','list-abilities'],$ro));
+check('chat: the read-only set excludes every writer', !array_intersect(['create-post','update-post','trash-post','update-option','set-plugin-state','run-cron','upload-media','update-product','indexnow-submit','undo','call-ability'],$ro));
+$GLOBALS['ability_objects']=[];
+foreach($GLOBALS['abilities'] as $an=>$aa){ $GLOBALS['ability_objects'][$an]=new SGAP_Fake_Ability($an,['category'=>$aa['category']??'','input_schema'=>$aa['input_schema']??null]); }
+$ct=SGAP_Chat::tools();
+check('chat: the assistant reaches the site lookups', isset($ct['list-posts']) && isset($ct['site-info']) && isset($ct['get-product']));
+check('chat: the assistant cannot write through a site tool', !isset($ct['create-post']) && !isset($ct['update-option']) && !isset($ct['set-plugin-state']) && !isset($ct['run-cron']));
+check('chat: its own tools are still there', count($ct)>2 && !isset($ct['manage-plugin']));
+check('chat: every tool has a schema object', (function($t){ foreach($t as $v){ if(!is_array($v[1]) || ($v[1]['type']??'')!=='object') return false; } return true; })($ct));
+unset($GLOBALS['ability_objects']);
 
 // ---- P1.2: remind me instead of posting ----
 if (!function_exists('is_email')) { function is_email($e){ return (bool) filter_var((string)$e, FILTER_VALIDATE_EMAIL); } }

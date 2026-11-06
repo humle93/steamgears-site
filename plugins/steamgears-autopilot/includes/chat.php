@@ -28,19 +28,32 @@ class SGAP_Chat {
 
     /* ---- tools ---- */
 
-    /** name => [description, JSON schema, WP_Ability] for the abilities the chat may call. */
+    /**
+     * name => [description, JSON schema, WP_Ability] for the abilities the chat may call.
+     * Its own abilities first, then the read-only half of the MCP tool surface, so the
+     * assistant can look at posts, products, plugins and options without being handed
+     * the tools that write (those keep their dry_run/confirm step on the MCP side).
+     */
     public static function tools(): array {
         if (!function_exists('wp_get_abilities')) {
             return [];
         }
+        $site_category = class_exists('SGAP_MCP_Tools') ? SGAP_MCP_Tools::CATEGORY . '/' : '';
+        $readonly = $site_category !== '' ? SGAP_MCP_Tools::readonly_names() : [];
         $tools = [];
         foreach (wp_get_abilities() as $ability) {
             $full = $ability->get_name();
-            if (strpos($full, SGAP_Abilities::CATEGORY . '/') !== 0) {
+            if (strpos($full, SGAP_Abilities::CATEGORY . '/') === 0) {
+                $name = substr($full, strlen(SGAP_Abilities::CATEGORY) + 1);
+            } elseif ($site_category !== '' && strpos($full, $site_category) === 0) {
+                $name = substr($full, strlen($site_category));
+                if (!in_array($name, $readonly, true)) {
+                    continue;
+                }
+            } else {
                 continue;
             }
-            $name = substr($full, strlen(SGAP_Abilities::CATEGORY) + 1);
-            if (in_array($name, self::EXCLUDED, true)) {
+            if (in_array($name, self::EXCLUDED, true) || isset($tools[$name])) {
                 continue;
             }
             $schema = $ability->get_input_schema();
@@ -77,8 +90,10 @@ class SGAP_Chat {
             . 'costumes, accessories and DIY guides. You help the site owner run the social media autopilot: the AI writes drafts for site '
             . 'pages, the owner approves them, approved posts go into a queue and are released every 15 minutes (quiet hours and a daily cap apply) '
             . 'to per-channel RSS feeds that Publer auto-posts from (or straight to Publer on its API plan); clicks and orders are tracked per channel. '
-            . 'Use the tools to look things up and to act instead of guessing. Before deleting anything, rejecting drafts in bulk or changing '
-            . 'settings, say what you are about to do and ask, unless the owner already asked for exactly that. Never reveal API keys. '
+            . 'Use the tools to look things up and to act instead of guessing. The site tools can read posts, products, media, plugins, cron '
+            . 'and options (never credentials) — reading is always allowed; changing a post, a product or an option happens on the site\'s MCP '
+            . 'surface, not here, so say what you would change and let the owner do it. Before deleting anything, rejecting drafts in bulk or '
+            . 'changing settings, say what you are about to do and ask, unless the owner already asked for exactly that. Never reveal API keys. '
             . 'Answer in the language the owner writes in (usually Danish), short and practical, with Markdown lists where they help. '
             . 'Site time now: ' . wp_date('Y-m-d H:i (l)') . '.';
     }

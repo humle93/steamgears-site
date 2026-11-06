@@ -340,6 +340,21 @@ class SGAP_MCP_Tools {
      * Pure helpers (no WordPress state; unit-tested in plugins/tests)
      * ------------------------------------------------------------------ */
 
+    /**
+     * Names of the tools that only read. The chat assistant may use these without a
+     * confirm step; anything that writes stays on the MCP surface, where the caller
+     * sees dry_run/confirm and the undo token.
+     */
+    public static function readonly_names(): array {
+        $names = [];
+        foreach (self::definitions() as $name => $def) {
+            if (!empty($def[5])) {
+                $names[] = (string) $name;
+            }
+        }
+        return $names;
+    }
+
     /** True when an option name looks like a credential and must never be exposed. */
     public static function is_secret_option(string $name): bool {
         return (bool) preg_match(self::SECRET_PATTERN, $name);
