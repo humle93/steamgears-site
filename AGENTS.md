@@ -197,6 +197,8 @@ Gælder alt arbejde i `plugins/`.
 - Melder `php -l` fejl, rettes fejlen med det samme, før der gås videre.
 - Ved 100 %: pak pluginnet i en installationsklar `.zip` i `plugins/` (uden `.git`, `AGENTS.md`, `node_modules`
   og `.tools`), så den kan uploades direkte under *Plugins → Tilføj nyt*.
+- Der ligger **præcis én** zip i `plugins/` — den aktuelle versions. [`plugin-ci.yml`](.github/workflows/plugin-ci.yml)
+  fejler hvis der er flere, så den gamle zip slettes i samme commit som den nye version er lagt ind.
 - Zip-filen **skal** ligge i `plugins/` på `main` og hedde `steamgears-autopilot-v<version>.zip`. Selvopdateringen
   henter præcis `https://raw.githubusercontent.com/humle93/steamgears-site/main/plugins/steamgears-autopilot-v<version>.zip`
   (`SGAP_Updater::package_url()`), så en zip i rodmappen eller på en sidegren bliver aldrig fundet.
