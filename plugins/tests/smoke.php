@@ -11,7 +11,7 @@ function apply_filters($h,$v,...$a){return isset($GLOBALS['filters'][$h])?($GLOB
 function do_action($h,...$a){ foreach($GLOBALS['actions'][$h]??[] as $cb) call_user_func_array($cb,$a); }
 function register_activation_hook(...$a){} function register_deactivation_hook(...$a){}
 function is_admin(){return true;} function get_option($k,$d=false){return $GLOBALS['opts'][$k]??$d;}
-function update_option($k,$v){$GLOBALS['opts'][$k]=$v;} function add_option($k,$v){$GLOBALS['opts'][$k]??=$v;} function wp_mail($to,$s,$b){$GLOBALS['mails'][]=[$to,$s,$b]; return true;}
+function update_option($k,$v,$autoload=null){$GLOBALS['opts'][$k]=$v; $GLOBALS['autoload'][$k]=$autoload;} function add_option($k,$v){$GLOBALS['opts'][$k]??=$v;} function wp_mail($to,$s,$b){$GLOBALS['mails'][]=[$to,$s,$b]; return true;}
 function register_setting($g,$k,$a){ $GLOBALS['settings'][$k]=$a; } function wp_clear_scheduled_hook($h){}
 function add_menu_page($t,$m,$c,$slug,$cb){ add_action('page_'.$slug,$cb);} function add_submenu_page($p,$t,$m,$c,$slug,$cb){ add_action('page_'.$slug,$cb);}
 function esc_html($s){return htmlspecialchars((string)$s);} function esc_attr($s){return htmlspecialchars((string)$s);} function esc_url($s){return $s;} function esc_textarea($s){return htmlspecialchars((string)$s);}
@@ -50,6 +50,18 @@ check('secret not in settings html', !str_contains($html,'SECRET123') && str_con
 $san=$settings['sgap_ai_api_key']['sanitize_callback'];
 check('empty secret keeps old', $san('')==='SECRET123'); check('new secret saved',$san('NEW')==='NEW');
 $_POST['sgap_clear']['ai_api_key']=1; check('clear secret', $san('')===''); unset($_POST['sgap_clear']);
+// Skrivevejene uden om formularen: nøgler må ikke autoloades, og et tomt felt må ikke slette dem.
+$img_before=get_option('sgap_image_api_key','');
+SGAP_Settings::set('image_api_key','IMGSECRET');
+check('secret writes are never autoloaded', ($GLOBALS['autoload']['sgap_image_api_key']??null)===false && get_option('sgap_image_api_key')==='IMGSECRET');
+$cap_before=get_option('sgap_daily_cap'); SGAP_Settings::set('daily_cap',5);
+check('plain settings keep the default autoload', array_key_exists('sgap_daily_cap',$GLOBALS['autoload']) && $GLOBALS['autoload']['sgap_daily_cap']===null);
+SGAP_Settings::set('daily_cap',$cap_before);
+$r=SGAP_AdminTools::update_settings(['settings'=>['image_api_key'=>'']]);
+check('empty secret through update-settings keeps the key', get_option('sgap_image_api_key')==='IMGSECRET' && ($r['changed']['image_api_key']??'')==='kept (the new value was empty)');
+$r=SGAP_AdminTools::update_settings(['settings'=>['image_api_key'=>'IMGSECRET2']]);
+check('new secret through update-settings is saved without autoload', get_option('sgap_image_api_key')==='IMGSECRET2' && ($GLOBALS['autoload']['sgap_image_api_key']??null)===false && ($r['changed']['image_api_key']??'')==='updated');
+SGAP_Settings::set('image_api_key',$img_before);
 define('SGAP_TELEGRAM_BOT_TOKEN','fromconfig'); check('wp-config constant wins', SGAP_Settings::get('telegram_bot_token')==='fromconfig');
 check('hour clamp', $settings['sgap_quiet_start']['sanitize_callback']('99')===23);
 check('bool sanitize', $settings['sgap_autopilot_enabled']['sanitize_callback']('hack')==='no');

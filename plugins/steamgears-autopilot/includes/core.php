@@ -410,7 +410,9 @@ class SGAP_Settings {
         return get_option('sgap_' . $key, $default);
     }
     public static function set(string $key, $value): void {
-        update_option('sgap_' . $key, $value);
+        // Secrets stay out of the autoloaded options blob, also when a write
+        // happens outside the install routine (key test, wizard, abilities).
+        update_option('sgap_' . $key, $value, in_array($key, self::SECRET_KEYS, true) ? false : null);
     }
     public static function enabled(string $key): bool {
         return self::get($key, 'no') === 'yes';
