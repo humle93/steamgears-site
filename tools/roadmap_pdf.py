@@ -104,10 +104,20 @@ def status_rows() -> list[dict]:
 
 
 def clean(text: str) -> str:
+    # Bevar inline-kode, så pladsholdere som `/go/<id>/` og `<script>` ikke
+    # forveksles med HTML-tags og forsvinder fra PDF'en.
+    code: list[str] = []
+
+    def stash(match: re.Match[str]) -> str:
+        code.append(match.group(1))
+        return f"\x00{len(code) - 1}\x00"
+
+    text = re.sub(r"`([^`]*)`", stash, text)
     text = re.sub(r"!\[[^\]]*\]\([^)]*\)", "", text)
     text = re.sub(r"\[([^\]]+)\]\([^)]*\)", r"\1", text)
-    text = text.replace("**", "").replace("__", "").replace("`", "")
+    text = text.replace("**", "").replace("__", "")
     text = re.sub(r"<[^>]+>", "", text)
+    text = re.sub(r"\x00(\d+)\x00", lambda m: code[int(m.group(1))], text)
     # DejaVu har ikke emoji: fjern symbolblokkene, så PDF'en ikke advarer pr. side
     text = re.sub(r"[\U0001F000-\U0001FAFF\u2600-\u27BF\uFE0F\u2B00-\u2BFF]", "", text)
     return text.replace("→", "->").replace("·", "·").strip()
