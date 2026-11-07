@@ -79,7 +79,7 @@ Ingen af dem havde indhold: `royal-mcp`, `mcp-adapter`, `ms-wp-abilities` (alle 
 `wpforms-lite` (0 formularer), `svg-support` (0 SVG-vedhæftninger), `royal-links` (0 links).
 
 Sletning fjerner filerne, ikke databasen: options og postmeta bliver liggende, så et geninstalleret plugin finder
-sin konfiguration igen. Det er grunden til at de fem i §3 blev beholdt i stedet for slettet.
+sin konfiguration igen. Det er grunden til at de fire i §3 blev beholdt i stedet for slettet.
 
 ## 5. Det der stadig mangler
 
