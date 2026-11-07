@@ -998,6 +998,37 @@ class SGAP_Queue {
         return max(0, min((int) SGAP_Settings::get('batch_size', 5), (int) SGAP_Settings::get('daily_cap', 8) - $in_flight_or_published));
     }
 
+    /**
+     * Channels with their own cap (channel_caps) that have used it up today, counting posts
+     * published or still sending. Only the publisher checks this; the queue is untouched.
+     */
+    public static function full_channels(): array {
+        global $wpdb;
+        if (!class_exists('SGAP_Alerts')) {
+            return [];
+        }
+        $caps = SGAP_Alerts::caps();
+        if (!$caps) {
+            return [];
+        }
+        $today = wp_date('Y-m-d 00:00:00');
+        $rows = (array) $wpdb->get_results($wpdb->prepare(
+            'SELECT channel, COUNT(*) AS n FROM ' . self::table() . " WHERE published_at >= %s OR (status = 'sending' AND sent_at >= %s AND (published_at IS NULL OR published_at < %s)) GROUP BY channel",
+            $today, $today, $today
+        ), ARRAY_A);
+        $used = [];
+        foreach ($rows as $row) {
+            $used[sanitize_key((string) ($row['channel'] ?? ''))] = (int) ($row['n'] ?? 0);
+        }
+        $full = [];
+        foreach ($caps as $channel => $cap) {
+            if (($used[$channel] ?? 0) >= $cap) {
+                $full[] = $channel;
+            }
+        }
+        return $full;
+    }
+
     /** Takes the next due items and marks them 'sending' so nobody else picks them up. */
     public static function claim(int $limit, string $channel = ''): array {
         global $wpdb;
@@ -1005,6 +1036,15 @@ class SGAP_Queue {
             return [];
         }
         $where = $channel !== '' ? $wpdb->prepare(' AND channel = %s', $channel) : '';
+        if ($channel === '') {
+            // channel_caps is a real ceiling: a channel that has reached its own daily cap is
+            // skipped here, so the rest of the queue still goes out and the capped one waits.
+            $full = self::full_channels();
+            if ($full) {
+                $where = ' AND channel NOT IN (' . implode(',', array_fill(0, count($full), '%s')) . ')';
+                $where = $wpdb->prepare($where, $full);
+            }
+        }
         $items = $wpdb->get_results($wpdb->prepare(
             'SELECT id, post_id, channel, angle, content_type, format, remind, destination_url, title, body, image_url, utm_url, attempts, scheduled_at
              FROM ' . self::table() . " WHERE status = 'queued' AND (scheduled_at IS NULL OR scheduled_at <= %s){$where}

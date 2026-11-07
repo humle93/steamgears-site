@@ -1,6 +1,6 @@
 # Runway pr. kanal — så en tør kanal ikke skjules af en sund total
 
-**Steamgears Autopilot 7.42.0 · P0.2 · 7. november 2026**
+**Steamgears Autopilot 7.43.0 · P0.2 · 7. november 2026**
 
 ## Kort fortalt
 
@@ -29,13 +29,16 @@ mail og den daglige digest.
 - **Ukendt kanal ignoreres.** En tastefejl (`pinterest99`) må ikke give en evig alarm om en kanal der aldrig
   poster.
 - **Loftet 1–50.** 0 ville give division med nul; 50 ligger over alle reelle daglige volumener.
-- **`channel_caps` er kun et alarm-grundlag.** Publisheren bruger stadig `daily_cap` på tværs af kanaler;
-  indstillingen ændrer ikke hvad der rent faktisk udgives.
+- **`channel_caps` er et reelt loft (7.43.0).** En kanal med cap, der har publiceret eller sender sin cap i dag,
+  springes over i udtrækket. Resten af køen går stadig ud, og de ventende poster for den kanal bliver i køen
+  til i morgen. Kanaler uden cap påvirkes ikke. Det er `SGAP_Queue::full_channels()`, der måler det.
 
 ## Verifikation
 
 - `php -l` uden fejl på `alerts.php`, `core.php`, `smoke.php` og hovedfilen.
-- Smoke: **544 → 555 PASS, 0 FAIL** (11 nye checks på stubbede kø-rækker). Teststubbens `get_var` kan nu
+- Smoke: **544 → 555 PASS** i 7.42.0 (11 nye checks på stubbede kø-rækker), og **→ 559 PASS, 0 FAIL** i 7.43.0
+  (3 nye checks for loftet: fuld kanal rapporteres, under cap er ikke fuld, og uden cap er ingen fuld; `claim()`
+  springer en fuld kanal over i SQL). Teststubbens `get_var` kan nu
   modtage en liste, så ét `after_health`-kald kan give forskellige tal til runway og til failed-tællingen.
 - Testen fangede først en fejl i **testdata**: Facebook med 8 poster ved cap 8 er også tør, så mailen sagde
   korrekt »2 channels«. Testen blev rettet — koden var rigtig.
@@ -49,4 +52,5 @@ mail og den daglige digest.
 ## Filer
 
 `includes/alerts.php` (caps, channel_runway, dry_channels, after_health), `includes/core.php` (standard,
-felt, hjælpetekst), `plugins/tests/smoke.php` (11 checks), `ROADMAP.md` (P0.2-rækken og changelog).
+felt, hjælpetekst, `full_channels()` og `claim()`), `plugins/tests/smoke.php` (14 checks), `ROADMAP.md`
+(P0.2-rækken og changelog), `README.md` (channel_caps-afsnit).

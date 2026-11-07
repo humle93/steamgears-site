@@ -286,6 +286,18 @@ update_option('sgap_alert_dry_days',0); update_option('sgap_alert_mode','immedia
 $wpdb->next=[8,0]; SGAP_Alerts::after_health([]);
 check('alerts: warning level 0 turns the channel alarm off too', SGAP_Alerts::dry_channels()===[] && $GLOBALS['mails']===[]);
 update_option('sgap_alert_dry_days',2); update_option('sgap_channel_caps',''); $GLOBALS['rows']=[]; $wpdb->next=0;
+// --- channel_caps as a real ceiling (P0.2 follow-up) ---
+update_option('sgap_channel_caps','pinterest=2'); $GLOBALS['rows']=[['channel'=>'pinterest','n'=>2]];
+$wpdb->next=0;
+check('ceiling: a channel at its cap is reported full', SGAP_Queue::full_channels()===['pinterest']);
+update_option('sgap_channel_caps','pinterest=2'); $GLOBALS['rows']=[['channel'=>'pinterest','n'=>1]];
+check('ceiling: a channel under its cap is not full', SGAP_Queue::full_channels()===[]);
+update_option('sgap_channel_caps',''); $GLOBALS['rows']=[['channel'=>'pinterest','n'=>9]];
+check('ceiling: without channel_caps nothing is ever full', SGAP_Queue::full_channels()===[]);
+update_option('sgap_channel_caps','pinterest=2'); $GLOBALS['rows']=[['channel'=>'pinterest','n'=>2]];
+$wpdb->log=[]; SGAP_Queue::claim(5);
+check('ceiling: claim skips a full channel in the query', implode(' ',$wpdb->log) !== '' && str_contains(implode(' ',$wpdb->log),'NOT IN'));
+update_option('sgap_channel_caps',''); $GLOBALS['rows']=[]; $wpdb->log=[];
 // --- Retry with backoff (P0.3) ---
 check('backoff: 5, 15, 45 minutes by attempt', SGAP_Queue::retry_delay_minutes(1)===5 && SGAP_Queue::retry_delay_minutes(2)===15 && SGAP_Queue::retry_delay_minutes(3)===45);
 check('backoff: clamped at both ends', SGAP_Queue::retry_delay_minutes(0)===5 && SGAP_Queue::retry_delay_minutes(99)===45);
