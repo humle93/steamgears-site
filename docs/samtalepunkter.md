@@ -25,7 +25,7 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 | Projekt | Status | Grundlag |
 | --- | --- | --- |
 | **steamgears.eu — site-optimering** | **64,4 %** | 15,65 af 24,3 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 7,35/8,05 · S3 2,5/3,55 · S4 1,5/5,25) |
-| **Steamgears Autopilot — plugin** | **87,3 %** | 24,8 af 28,4 d (P0 4,65/4,7 · P1 11,7/15,2 · P2 4,75/4,75 · P3 2,45/2,5 · P0S 1/1 · P0C 0,25/0,25) |
+| **Steamgears Autopilot — plugin** | **87,4 %** | 25,05 af 28,65 d (P0 4,65/4,7 · P1 11,7/15,2 · P2 4,75/4,75 · P3 2,45/2,5 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25) |
 | **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5) |
 | **SEO-indholdsproduktion** | **62,5 %** | 5 af 8 guides (BATCH 0/3 · COPY 4/4 · CORSET 1/1) |
 | **Døde internlinks** | **100 %** | 39 af 39 links (FIX 39/39) |
@@ -47,15 +47,40 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `1d3214f Modul: roadmap-bogføring — Etsy afgjort, dobbelttælling fjernet (scope) Før: 80,3 %  →  Efter: 87,3 %  (Δ +7) Grundlag: 24,8 af 28,4 d (P0 4,65/4,7 · P1 11,7/15,2 · P2 4,75/4,75 · P3 2,45/2,5 · P0.7 1/1 · P0.7c 0,25/0,25)`
 - `fb11620 Modul: P0.7c scheduler- og engagement-status i admin Før: 80,1 %  →  Efter: 80,3 %  (Δ +0,2) Grundlag: 24,8 af 30,9 d`
 - `e7317c4 Modul: P0.7b scheduler-adapter — alle jobs Før: 79,8 %  →  Efter: 80,1 %  (Δ +0,3) Grundlag: 24,55 af 30,65 d`
 - `3b1ab50 Modul: P0.7 Action Scheduler-adapter Før: 79,4 %  →  Efter: 79,8 %  (Δ +0,4) Grundlag: 24,05 af 30,15 d`
 - `d744812 Modul: P1.5a Bluesky + Mastodon-engagement Før: 77,7 %  →  Efter: 79,4 %  (Δ +1,7) Grundlag: 23,55 af 29,65 d`
 - `671d88e Modul: P1.5 + Action Scheduler — research af fire plugin-funktioner Før: 77,7 %  →  Efter: 77,7 %  (Δ 0) Grundlag: ingen ændring`
-- `1543db4 Modul: S2.5/S4.11 — cache-audit af sitet 7/11 (kun to sider målelige) Før: 64,4 %  →  Efter: 64,4 %  (Δ 0) Grundlag: ingen ændring`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 7/11 — dashboardet blev læst som to ulige kolonner
+
+- **Asymmetrien var målt i markup, ikke gættet:** venstre kolonne havde to kort (`Run now` og
+  kanaltabellen), højre havde otte. Siden blev tre skærmhøjder lang på den ene side og næsten tom på
+  den anden, og de kort der svarer på »går det?« (Scheduler, Engagement) lå nederst i den rækkefølge
+  de var blevet tilføjet.
+- **Beslutning: ét spørgsmål pr. sektion** — *Now* (Run now, AI Chat, Self-check, Scheduler),
+  *Channels* (tal pr. kanal, Engagement, RSS-feeds, API-nøgler) og *System* (opdatering, Command
+  Center, billed-rescue). Overskrifterne er `SGAP_UI::section()`, ikke kort, så mønstret kan flyttes
+  til de øvrige sider uden at ændre deres markup.
+- **Én `Needs you`-linje i stedet for grønne pills overalt.** Kun fire slags fund tæller: dumpek
+  AI-test, self-check-problemer, blokeret publicering (oversat til ord) og kladder der venter.
+  »Queue er tom« og »nøglen er ikke testet endnu« er bevidst ude — det sidste stod allerede i
+  *Get started*, og med det i linjen ville advarslen være permanent og derfor ulæst.
+- **Fælde: `SGAP_UI::css()` printer kun én gang pr. request** (`self::$printed`). En test der leder
+  efter nye CSS-regler i sidens HTML fejler, hvis en tidligere side i samme kørsel har printet
+  stylesheet'et. Læs `SGAP_UI::stylesheet()` i stedet. Samme slags fælde: assert på kortets titel
+  (`Scheduler</h2>`) og ikke på `Next publish tick`, som afhænger af om cron-stubben svarer med en tid.
+- **Verificeret:** 706 → **714 PASS**, 0 FAIL. **Ikke** set i en rigtig wp-admin — der er ingen
+  adgang fra worktreen, og 7.52.0 venter på ejerens *Plugins → Update*-klik. Farver og hvordan de to
+  kolonner bryder ved 782 px er uverificeret.
+- **Bogføring:** ny modul **P1.19 0,25 d** (mønstret kunne genbruges, derfor ikke større), så
+  projektet går fra 28,4 til 28,65 d — nævneren vokser med arbejdet, og procenten stiger kun det
+  arbejdet er værd.
 
 ### 7/11 — to rækker i plugin-roadmappet talte den samme eftermiddag to gange
 

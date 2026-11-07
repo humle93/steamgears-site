@@ -293,6 +293,26 @@ class SGAP_UI {
 .sgap .sgap-key-testout{font-size:12px;color:var(--muted);flex:1 1 200px}
 .sgap .sgap-connected{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 12px;border:1px dashed var(--line);border-radius:12px;background:#fffdf7;font-size:13px}
 @media (max-width:782px){.sgap .sgap-tabs{top:0;border-radius:14px}.sgap .sgap-keys{grid-template-columns:1fr}.sgap .sgap-savebar{bottom:0}}
+/* 7.52.0 — dashboard: one heading per question, so every card below it has a place */
+.sgap .sgap-section-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:26px 0 12px}
+.sgap .sgap-section-head h2{margin:0;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.sgap .sgap-section-head:after{content:"";flex:1 1 80px;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
+.sgap .sgap-section-hint{margin:0;font-size:12px;color:var(--muted)}
+.sgap .sgap-attn{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 18px;padding:10px 14px;border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:12px;background:#fffdf7}
+.sgap .sgap-attn>strong{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.sgap .sgap-attn.is-ok{border-left-color:var(--ok);background:#fbfdfb}
+.sgap .sgap-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin:0 0 14px}
+.sgap .sgap-metric{border:1px solid #f0e6d2;border-radius:12px;padding:10px 12px;background:#fffdf7}
+.sgap .sgap-metric b{display:block;font-size:20px;line-height:1.2;font-variant-numeric:tabular-nums;color:var(--ink)}
+.sgap .sgap-metric span{display:block;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.sgap .sgap-metric em{display:block;margin-top:2px;font-style:normal;font-size:11px;color:var(--muted)}
+@media (max-width:600px){.sgap .sgap-section-head{margin-top:20px}.sgap .sgap-metrics{grid-template-columns:1fr 1fr}}
+@media (forced-colors:active){
+.sgap .sgap-card,.sgap .sgap-stat,.sgap .sgap-metric,.sgap .sgap-attn{border:1px solid CanvasText}
+.sgap .sgap-pill,.sgap .sgap-badge,.sgap .sgap-tab,.sgap .sgap-cat{border:1px solid CanvasText;color:CanvasText}
+.sgap .sgap-tab.on,.sgap .sgap-cat.is-on{background:Highlight;color:HighlightText}
+.sgap .sgap-bar span,.sgap .sgap-progress progress::-webkit-progress-value{background:Highlight}
+}
 </style>';
     }
 
@@ -321,6 +341,18 @@ class SGAP_UI {
     public static function status_pill(string $status): string {
         $kinds = ['published' => 'ok', 'failed' => 'bad', 'sending' => 'warn', 'queued' => 'brass', 'reminded' => 'brass', 'pending' => 'brass', 'approved' => 'ok', 'rejected' => 'bad', 'used' => 'ok'];
         return self::pill($status, $kinds[$status] ?? '');
+    }
+
+    /** A dashboard group. One question per heading; the cards below it answer that question. */
+    public static function section(string $title, string $hint = ''): void {
+        echo '<div class="sgap-section-head"><h2>' . esc_html($title) . '</h2>'
+            . ($hint !== '' ? '<p class="sgap-section-hint">' . esc_html($hint) . '</p>' : '') . '</div>';
+    }
+
+    /** One number with its label, for a row of related metrics inside a card. */
+    public static function metric(string $label, $value, string $hint = ''): string {
+        return '<div class="sgap-metric"><b>' . esc_html((string) $value) . '</b><span>' . esc_html($label) . '</span>'
+            . ($hint !== '' ? '<em>' . esc_html($hint) . '</em>' : '') . '</div>';
     }
 
     public static function empty_state(string $icon, string $text): void {

@@ -106,9 +106,17 @@
           "total": 0.25,
           "unit": "d",
           "verified": true
+        },
+        {
+          "id": "p1d",
+          "name": "P1.19 — dashboard-layout: tre sektioner",
+          "done": 0.25,
+          "total": 0.25,
+          "unit": "d",
+          "verified": true
         }
       ],
-      "total": 28.4
+      "total": 28.65
     },
     {
       "id": "rebrand",
@@ -1142,6 +1150,15 @@
       "after": 87.3,
       "delta": 7.0,
       "basis": "24,8 af 28,4 d (P0 4,65/4,7 · P1 11,7/15,2 · P2 4,75/4,75 · P3 2,45/2,5 · P0.7 1/1 · P0.7c 0,25/0,25)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 87.3,
+      "after": 87.4,
+      "delta": 0.1,
+      "basis": "25,05 af 28,65 d (P0 4,65/4,7 · P1 11,7/15,2 · P2 4,75/4,75 · P3 2,45/2,5 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25)"
     }
   ]
 }

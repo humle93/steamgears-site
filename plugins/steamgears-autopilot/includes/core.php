@@ -1782,8 +1782,10 @@ class SGAP_Admin {
             . SGAP_UI::pill('v' . SGAP_VERSION)
             . '</div>';
 
+        // One line before the cards: what a person has to do, if anything.
+        self::attention_strip($stats['tiles'], $blocked, $ai_ok);
+
         SGAP_Setup::checklist_card();
-        SGAP_Rescue::card();
 
         // Tiles
         $t = $stats['tiles'];
@@ -1795,25 +1797,98 @@ class SGAP_Admin {
             . SGAP_UI::stat('Orders · 30 days', $t['orders'] . ($t['revenue'] > 0 ? ' · ' . number_format_i18n($t['revenue'], 0) : ''))
             . '</div>';
 
+        // 7.52.0 — three questions, in the order they are asked: is it running, where does it post,
+        // and what keeps it alive. Every card sits under the question it answers, so the page reads
+        // top-down instead of being two columns of unequal length.
+        SGAP_UI::section('Now', 'Run a step by hand, ask the assistant, and check the job arrived on time.');
         echo '<div class="sgap-grid"><div>';
         self::run_panel();
+        echo '</div><div>';
+        self::chat_card();
+        SGAP_Auto::health_card();
+        SGAP_Auto::scheduler_card();
+        echo '</div></div>';
+
+        SGAP_UI::section('Channels', 'Where the posts go, and what the platforms and the visitors did with them.');
+        echo '<div class="sgap-grid"><div>';
         SGAP_UI::card_open('Last 30 days per channel', 'chart-bar');
         self::render_rows($stats['channels'], ['channel', 'published', 'clicks', 'orders', 'revenue']);
         SGAP_UI::card_close();
+        SGAP_Engagement::dashboard_card();
         echo '</div><div>';
+        self::feeds_panel();
+        self::keys_panel();
+        echo '</div></div>';
+
+        SGAP_UI::section('System', 'Connections, the next release, and the jobs that tidy up after themselves.');
+        echo '<div class="sgap-grid"><div>';
+        SGAP_Updater::panel();
+        echo '</div><div>';
+        self::cc_card();
+        SGAP_Rescue::card();
+        echo '</div></div>';
+        self::close();
+    }
+
+    /**
+     * The one line at the top of the dashboard: the things a person has to do, and nothing else.
+     * A quiet, all-clear strip is cheaper to read than a page of green pills — but it still says
+     * what it checked, so "all clear" is a claim rather than an empty space.
+     */
+    private static function attention_strip(array $tiles, string $blocked, $ai_ok): void {
+        $health = get_option(SGAP_Auto::HEALTH);
+        $problems = is_array($health) ? (array) ($health['problems'] ?? []) : [];
+        $items = [];
+        if ($ai_ok === false) {
+            $items[] = ['AI key failed its last test', 'bad'];
+        }
+        if ($problems !== []) {
+            $items[] = [count($problems) . (count($problems) === 1 ? ' problem' : ' problems') . ' in the self-check', 'warn'];
+        }
+        $words = [
+            'autopilot_disabled' => 'Autopilot is off — nothing new is written',
+            'quiet_hours' => 'Quiet hours — queued posts go out at ' . sprintf('%02d:00', (int) SGAP_Settings::get('quiet_end', 7)),
+            'daily_cap_reached' => 'Daily limit reached — the rest waits for tomorrow',
+            'blackout' => 'Blackout — queued posts moved to the next free day'
+        ];
+        if (isset($words[$blocked])) {
+            $items[] = [$words[$blocked], $blocked === 'autopilot_disabled' ? 'bad' : 'brass'];
+        }
+        if ((int) ($tiles['pending'] ?? 0) > 0) {
+            $items[] = [$tiles['pending'] . ' draft' . ((int) $tiles['pending'] === 1 ? '' : 's') . ' waiting for you', 'brass'];
+        }
+
+        echo '<div class="sgap-attn' . ($items === [] ? ' is-ok' : '') . '"><strong>' . ($items === [] ? 'Status' : 'Needs you') . '</strong>';
+        foreach ($items as [$text, $kind]) {
+            echo SGAP_UI::pill($text, $kind);
+        }
+        if ($items === []) {
+            echo SGAP_UI::pill('All clear — the autopilot runs on its own', 'ok');
+        }
+        echo '</div>';
+    }
+
+    private static function chat_card(): void {
         SGAP_UI::card_open('AI Chat', 'format-chat');
         echo '<p class="description" style="margin-top:0">Ask how things are going or tell the AI what to do: write posts, approve, release the queue, change settings.</p>'
             . '<p><a class="button button-primary" href="' . esc_url(admin_url('admin.php?page=sgap-chat')) . '"><span class="dashicons dashicons-format-chat"></span>Open AI Chat</a></p>';
         SGAP_UI::card_close();
-        echo SGAP_CC::dashboard_button();
-        SGAP_Auto::health_card();
-        SGAP_Auto::scheduler_card();
-        SGAP_Engagement::dashboard_card();
-        self::feeds_panel();
-        self::keys_panel();
-        SGAP_Updater::panel();
-        echo '</div></div>';
-        self::close();
+    }
+
+    /** Command Center is a connection, so it belongs under System rather than next to the queue. */
+    private static function cc_card(): void {
+        $line = SGAP_CC::line();
+        $button = SGAP_CC::dashboard_button();
+        if ($line === '' && $button === '') {
+            return; // never connected and no address set: no card, no noise
+        }
+        SGAP_UI::card_open('Command Center', 'admin-site-alt3');
+        echo '<p class="description" style="margin-top:0">The self-hosted dashboard reads <code>/snapshot</code> and sends drafts here. Nothing on this site calls it.</p>';
+        if ($line !== '') {
+            echo '<p>' . $line . '</p>';
+        }
+        echo $button;
+        SGAP_UI::card_close();
     }
 
     private static function run_panel(): void {

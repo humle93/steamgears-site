@@ -1388,7 +1388,24 @@ $GLOBALS['rows']=[
 ];
 ob_start(); SGAP_Engagement::dashboard_card(); $engagement_card=ob_get_clean();
 check('engagement admin: dashboard renders per-channel likes, reposts and replies', str_contains($engagement_card,'bluesky') && str_contains($engagement_card,'mastodon') && str_contains($engagement_card,'>12</td>') && str_contains($engagement_card,'>3</td>') && str_contains($engagement_card,'>2</td>'));
+check('engagement admin: the totals sit above the table as metrics', str_contains($engagement_card,'sgap-metrics') && strpos($engagement_card,'sgap-metrics') < strpos($engagement_card,'<table'));
 $GLOBALS['rows']=[];
+
+// 7.52.0 — dashboardet læses oppefra: hvad kræver et menneske, hvad kører, hvor poster det,
+// og hvad holder det i live. Hvert kort skal stå under det spørgsmål det svarer på.
+ob_start(); do_action('page_steamgears-autopilot'); $dash = ob_get_clean();
+$now = strpos($dash,'<h2>Now</h2>'); $chan = strpos($dash,'<h2>Channels</h2>'); $sys = strpos($dash,'<h2>System</h2>');
+check('dashboard 7.52: three sections in reading order', $now !== false && $chan !== false && $sys !== false && $now < $chan && $chan < $sys);
+check('dashboard 7.52: the attention strip is the first thing after the status pills', str_contains($dash,'sgap-attn') && strpos($dash,'sgap-attn') < strpos($dash,'sgap-stats'));
+check('dashboard 7.52: run now, chat and scheduler answer "is it running"', $now < strpos($dash,'Run now') && strpos($dash,'Run now') < $chan
+    && $now < strpos($dash,'Open AI Chat') && strpos($dash,'Open AI Chat') < $chan
+    && $now < strpos($dash,'Scheduler</h2>') && strpos($dash,'Scheduler</h2>') < $chan);
+check('dashboard 7.52: channel numbers and engagement share one section', $chan < strpos($dash,'Last 30 days per channel') && strpos($dash,'Last 30 days per channel') < $sys
+    && $chan < strpos($dash,'Engagement · last 30 days') && strpos($dash,'Engagement · last 30 days') < $sys);
+check('dashboard 7.52: the updater moved under System', $sys < strpos($dash,'Plugin update'));
+check('dashboard 7.52: a healthy dashboard says so in one line instead of scattered pills', str_contains($dash,'sgap-attn is-ok') && str_contains($dash,'All clear'));
+$css52 = SGAP_UI::stylesheet();
+check('dashboard 7.52: css carries the section heading and the metric row', str_contains($css52,'.sgap-section-head{') && str_contains($css52,'.sgap-metrics{') && str_contains($css52,'forced-colors:active'));
 
 // P1.5a — Bluesky- og Mastodon-engagement ind i sgap_events. Netværket går gennem
 // SGAP_Engagement::$transport, fordi smoke-suiten allerede har defineret wp_remote_get.

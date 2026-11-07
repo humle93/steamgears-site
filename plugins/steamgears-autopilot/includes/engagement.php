@@ -290,6 +290,19 @@ class SGAP_Engagement {
             return;
         }
 
+        // The three numbers people actually look for, before the per-channel detail.
+        $totals = ['likes' => 0, 'reposts' => 0, 'replies' => 0];
+        foreach ($summary as $counts) {
+            foreach ($totals as $type => $sum) {
+                $totals[$type] += (int) ($counts[$type] ?? 0);
+            }
+        }
+        echo '<div class="sgap-metrics">'
+            . SGAP_UI::metric('Likes', $totals['likes'], count($summary) . (count($summary) === 1 ? ' channel' : ' channels'))
+            . SGAP_UI::metric('Reposts', $totals['reposts'])
+            . SGAP_UI::metric('Replies', $totals['replies'])
+            . '</div>';
+
         echo '<div class="sgap-scroll"><table class="widefat striped"><thead><tr>'
             . '<th>Channel</th><th>Likes</th><th>Reposts</th><th>Replies</th>'
             . '</tr></thead><tbody>';
