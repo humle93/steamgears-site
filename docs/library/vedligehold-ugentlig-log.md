@@ -1,5 +1,50 @@
 # Ugentlig backup + 1 indholdselement — log
 
+## 2026-11-07 — ugentlig kontrol (værn, smoke, zip)
+**Formål:** S3.5's anden post: ugens kontrol kørt efter opskriften i [`../projektstatus.md`](../projektstatus.md) og
+roadmap'ens tjekliste. Backup blev **ikke** kørt i dette pas, og der er ingen live-skrivning: sandkassen har ingen
+MCP-credential (`tools/mcp_oauth.py --status` → »Ingen klient registreret endnu«, `tools/mcp_rest.py --check` →
+»ingen credential«).
+
+**1) Status fra `projektstatus.json` (beregnet, ikke håndskrevet):**
+- steamgears.eu — site-optimering: **64,6 %** (15,7 af 24,3 d)
+- Steamgears Autopilot — plugin: **91,1 %** (26,55 af 29,15 d)
+- Dark academia-rebrand: **63 %** (8,5 af 13,5 t)
+- SEO-indholdsproduktion: **62,5 %** (5 af 8 guides)
+- Døde internlinks: **100 %** (39 af 39 links)
+
+**2) Værn og test — alle kørt i dette pas:**
+- `bash tools/natlige-vaern.sh`: **24 af 24 grønne**. Listen er udvidet siden 6/11 (17 værn dengang), så tallet
+  kan ikke sammenlignes direkte med den forrige post.
+- `plugins/tests/smoke.php`: **781 PASS / 0 FAIL**, exit 0.
+- `python3 projektstatus.py --check`: **5 projekter · 110 historik-rækker · ingen drift**.
+- PHP var **ikke** installeret i sandkassen efter genoprettelsen (`tools/_deps/bin/php` manglede, så den samlede
+  kørsel stoppede før første værn). Hent med `bash tools/setup-agent-tools.sh`, eller — som her — den statiske
+  binær fra AGENTS.md §7.3; kørslen brugte **PHP 8.3.14**.
+
+**3) Fund: en zip der var ældre end kilden.** `diff -r` mellem `plugins/steamgears-autopilot` og den udpakkede
+`plugins/steamgears-autopilot-v7.43.0.zip` gav to afvigelser, begge i den indlejrede `ROADMAP.md`: P0.4 stod som
+»Delvist (0,4 af 0,5 d) … Rigtig host-cron mangler stadig (ejer)« og overskriften nævnte ikke cron, mens kilden
+havde P0.4 lukket og ejerbekræftet. En selvopdatering fra den pakke ville altså have installeret en ældre
+roadmap-tekst end repoet. **Ved rebasen var `main` rykket 41 commits frem og udgiver nu 7.54.0**, hvis zip er
+`diff -r`-identisk med kilden — så den gamle pakke blev **droppet** i stedet for genopbygget, og der ligger stadig
+præcis én zip i `plugins/`. Lærdommen står: kør zip-sammenligningen **før** push, og mål igen efter en rebase —
+tal fra før et rebase er ikke status for det der udgives.
+
+**4) Fund: setup-scriptet kunne ikke hente PHP.** `tools/setup-agent-tools.sh` fejlede med `IndentationError` i
+sin `python3 -c`-streng, fordi list-comprehensionen var ombrudt med indrykning — så PHP-trinnet døde før download.
+Rettet til én linje og efterprøvet: den vælger nu `php-8.5.8-cli-linux-x86_64.tar.gz`, altså samme minor som
+produktionen. `bash -n` er grøn.
+
+**5) Blokeret — uændret:** S0.2/S0.6 (robots-ejerskab og GSC Crawl stats kræver ejerens login), S0.4 (én
+Redirection-gruppe), S1.1/S1.2 (Printify-varianter), S2.7's resterende del (ejerbeslutninger), S3.1–S3.4 og
+S4.1–S4.13 (ejerklik, betaling/forsendelse eller live-skrivning), plugin P1.5 (Pinterest-token 401 + Meta-review)
+og P3.1 (`labor_rate`). **Live-skrivning kræver et nyt OAuth-token i denne sandkasse**
+(`python3 tools/mcp_oauth.py --start` → ejerens klik → `--finish '<kode>'`).
+
+**6) Næste ugentlige kontrol:** samme kommandoer plus zip-sammenligningen — og den skal køres **efter** en rebase,
+så en zip der er ældre end kilden ikke når at blive udbudt til selvopdatering.
+
 ## 2026-11-06 — roadmap-status (ingen backupkørsel i dette pas)
 **Formål:** S3.5 kræver at loggen følger roadmap'ets checks, ikke kun backup. Denne post samler ugens målte
 tal og de blokeringer der står mellem roadmap'et og næste procent. Backup blev **ikke** kørt i dette pas, og

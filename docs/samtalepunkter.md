@@ -24,22 +24,22 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 | Projekt | Status | Grundlag |
 | --- | --- | --- |
-| **steamgears.eu — site-optimering** | **64,4 %** | 15,65 af 24,3 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 7,35/8,05 · S3 2,5/3,55 · S4 1,5/5,25) |
-| **Steamgears Autopilot — plugin** | **96,3 %** | 28,8 af 29,9 d (P0 4,65/4,7 · P1 14,2/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25 · P1E 0,25/0,25 · P1F 0,25/0,25 · P1G 0,5/0,5) |
+| **steamgears.eu — site-optimering** | **64,6 %** | 15,7 af 24,3 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 7,35/8,05 · S3 2,55/3,55 · S4 1,5/5,25) |
+| **Steamgears Autopilot — plugin** | **96,3 %** | 28,3 af 29,4 d (P0 4,65/4,7 · P1 14,2/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25 · P1E 0,25/0,25 · P1F 0,25/0,25) |
 | **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5) |
 | **SEO-indholdsproduktion** | **62,5 %** | 5 af 8 guides (BATCH 0/3 · COPY 4/4 · CORSET 1/1) |
 | **Døde internlinks** | **100 %** | 39 af 39 links (FIX 39/39) |
 
 ### Åbne blokeringer
 
-- **steamgears.eu — site-optimering** — S2.7's script-loft kan ikke naas uden tre nye beslutninger (chatbot ved interaktion, GLA vaek eller flyttet til GTM, klassisk kurv) — maalt 7/11; S1.1 Herbarium kraever varianter i Printify; S0.4 5 vanity-301 kraever en Redirection-gruppe (ejer). S2.2, S2.7-trin og S2.8 er udfoert 6-7/11, S0.9 7/11.
-- **Steamgears Autopilot — plugin** — P1.5b (Pinterest) og P1.5c (Instagram) er kode-færdige, men den første live-kørsel kræver et token af hver (Settings → Keys); P3.1 mangler ejerens labor_rate-beslutning; P1.15 kræver ejerens MCP-godkendelse i wp-admin.
+- **steamgears.eu — site-optimering** — Sitet svarer PHP-parsefejl på alle dynamiske kald (målt igen 7/11: /wp-json, robots.txt, sitemap_index.xml, /?sgap_feed= og admin-ajax 500) — kun W3TC-cachede HTML-sider virker, og wp-admin er nede, så rettelsen kræver File Manager/SFTP (ejer). Ingen MCP-credential i sandkassen. S2.7-loftet kræver tre ejerbeslutninger; S1.1 kræver Printify-varianter; S0.4 er forældet (URL'erne svarer 200).
+- **Steamgears Autopilot — plugin** — P1.5b/P1.5c kræver et Pinterest- og Instagram-token (Settings → Keys); P3.1 mangler ejerens labor_rate-beslutning; P1.15 kræver ejerens MCP-godkendelse i wp-admin — og wp-admin er nede indtil mu-plugin-fejlen er ryddet, ligesom RSS-feedet (?sgap_feed=) som publiceringen bruger.
 - **Dark academia-rebrand** — Printify-adgang
 - **SEO-indholdsproduktion** — Intet eksternt for de tre resterende guides: copy, FAQ, priser og links ligger i docs/library/guides-2026-11-03.md. De otte /go/-id'er 411/475/481/485/497/567 kunne ikke verificeres fra sandkassen (Simplys WAF giver browser-UA en challenge), så nye produktlinks skal måles fra ejerens side eller efter WAF-hvidlistning
 
 ### Næste skridt
 
-- **steamgears.eu — site-optimering** — Vedtag loftet paa det maalte gulv (tekst 30 · lister 45 · produkt 95 · kurv 112) eller bestil trin 3 (klassisk kurv/produkt, 0,75 d); skriv de tre manglende guides fra den verificerede copy; S1.1 Herbarium kraever varianter i Printify; S0.4 kraever en Redirection-gruppe (ejer)
+- **steamgears.eu — site-optimering** — Ryd op i hostens mu-plugin først: erstat wp-content/mu-plugins/managed-wordpress-robots.php med den rettede fil i repoet (wordpress/mu-plugins/, 8/8 offline-checks) via Simplys File Manager — derefter genmåles robots/sitemap/REST/feed. Så: tre ejerbeslutninger til S2.7-loftet, de tre manglende guides, S1.1 Herbarium (Printify-varianter).
 - **Steamgears Autopilot — plugin** — P1.5b (Pinterest) og P1.5c (Instagram) er kode-færdige, men den første live-kørsel kræver et token af hver (Settings → Keys); P3.1 mangler ejerens labor_rate-beslutning; P1.15 kræver ejerens MCP-godkendelse i wp-admin.
 - **Dark academia-rebrand** — Batch 4 — mockups (~130 billeder)
 - **SEO-indholdsproduktion** — Skriv de tre manglende guides (mens-steampunk-costume-essentials, steampunk-clothing-three-budgets, womens-steampunk-essentials) fra den verificerede copy — corset-guiden er publiceret 6/11
@@ -47,42 +47,30 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `2124512 S3.5: ugens kontrol kørt — 24/24 værn, 781 smoke-checks`
 - `d0e86a9 Merge main (P1.20/P1.21, 7.55.0) ind i P1.5c Instagram-insights — udgivet som 7.56.0`
 - `c38acb4 chore(status): daglig projektstatus 2026-11-07`
 - `c747a47 Modul: P1.5c Instagram-insights — fem metrics, caption-match og in-place fornyelse Før: 91,0 %  →  Efter: 96,2 %  (Δ +5,2) Grundlag: 27,8 af 28,9 d (P0 4,65/4,7 · P1 14,2/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25)`
 - `f1670e5 Modul: P1.21 AI Drafts og Publish log — grupperet og talt op Før: 91,1 %  →  Efter: 91,2 %  (Δ +0,1) Grundlag: 26,8 af 29,4 d`
 - `185645c chore(status): samtalepunkter opdateret efter Simply-afsnittet`
-- `3103982 Modul: A-adgang — Simply.com-connectoren (simplycom) dokumenteret Før: 91,0 % Efter: 91,0 % Δ: 0 Grundlag: ingen ændring`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
 
-### 7/11 — Fejlsøgning i pluginnet (P1.22, 7.57.0) og forbehold som en del af svaret
+### 7/11 — Nedbruddet målt igen: hele den dynamiske del er nede
 
-- **Fejlsøgning er nu også inde i pluginnet**, ikke kun i repoet: **Steamgears → Fejlsøgning**
-  (`includes/diagnostics.php`) har ni tjek der **læses** ud af den tilstand modulerne allerede holder — PHP,
-  tabeller, planlagte job, fejlede posts, AI-nøgle, Pinterest, Instagram, MCP og modulfejl — hvert med en
-  tilstand, en sætning om hvad det fandt, og en om hvad man gør. Siden skriver ikke til den tilstand, så den
-  kan ikke selv blive en ny fejlkilde.
-- **En kanal der aldrig er blevet forbundet er `off`, ikke `bad`.** Det er ikke en fejl at have slået en kanal
-  fra, og et dashboard der råber op om det, lærer ejeren at ignorere farverne. Et token i `wp-config.php` er
-  derimod en fejl, fordi det ikke kan fornyes.
-- **Loggen findes, fordi modulerne kun holder én fejltekst.** `sgap_instagram_state['error']` bliver ryddet af
-  den næste kørsel der lykkes — et natligt afslag kl. 03 var væk kl. 09. `SGAP_Diagnostics::log()` skriver til
-  en ringbuffer på 40 rækker, **tæller gentagelser i stedet for at duplikere** (en natlig fejl der fortsætter er
-  ét problem, og antallet er hvor mange kørsler det overlevede), og skiller visnings-`at` (sitets ur) fra
-  regne-`ts` (`time()`) — 24-timers-vinduet må ikke arve den gamle `gmdate`-fejl på ±14 timer.
-- **Logningen sidder i `record()`** i Instagram- og Pinterest-modulet, ikke i hvert kaldested: det er det ene
-  sted tilstanden skrives, så en ny fejlvej ikke kan glemme loggen.
-- **Forbeholdet er blevet indhold:** `SGAP_UI::caveat()` står under Instagram-, Pinterest- og
-  engagement-kortet og samlet på fejlsøgningssiden. Teksterne siger hvad der er *uden for* tallet — at en
-  metric Instagram ikke har rapporteret endnu er **udeladt, ikke 0**; at Pinterest-forespørgsler er afgrænset
-  til kanalen fordi `saves`/`likes` deles med andre kanaler; at ROI er last-click, så en ordre uden klik hører
-  til ingen kanal; og at et opslag der aldrig kom afsted slet ingen tal har.
-- **Bogføringsfejl fanget og rettet i samme pas:** P1.22 blev først lagt både ind i P1's total (15,2 → 15,7) og
-  ind som eget modul, så de 0,5 d blev talt to gange (96,4 %). Rettet til eget modul alene → **96,3 %
-  (28,8 af 29,9 d)**; korrektionen står som historik-række med `scope_change`, ikke som en slettet række.
-- **905 smoke-checks, 0 FAIL**, 24/24 værn grønne. Ikke kørt live — intet token findes.
+- **Målt med neutral UA:** `/robots.txt`, `/sitemap_index.xml`, `/wp-json/…` og `/?sgap_feed=pinterest` svarer **HTTP 200 med 193 bytes** parsefejl fra `mu-plugins/managed-wordpress-robots.php` linje 13; cache-bustede sider (`/?nocache=`, `/cart/?cb=`, `/checkout/?cb=`) det samme; `admin-ajax.php` svarer **500 «critical error»**. Forsiden og `/shop/` ser raske ud, fordi de kommer fra W3TC-sidecachen.
+- **Konsekvens:** wp-admin er nede (så ejeren kan ikke rette det gennem WordPress), **RSS-publiceringen er død**, og søgemaskiner kan ikke læse robots/sitemap. Alle live-punkter i S1–S4 og plugin P1.5b/P1.5c/P1.15 er blokeret af den samme fil.
+- **Rettelsen er stadig vej C i** [`library/robots-og-nedbrud-2026-11-07.md`](library/robots-og-nedbrud-2026-11-07.md) §4: læg `wordpress/mu-plugins/managed-wordpress-robots.php` ind via Simplys File Manager. Filen er verificeret igen i dette pas: `php -l` ren og `tools/test_robots_muplugin.php` **8/8**.
+- **Fælde:** alle fejl svarer 200. Overvågning skal tælle `Parse error` eller bodystørrelsen (193 bytes), ikke kigge på statuskoden — og altid teste med en cache-buster.
+
+### 7/11 — S3.5: ugens kontrol kørt, og en zip var ældre end kilden
+
+- **Sandkassen havde ingen PHP og ingen MCP-credential.** `tools/natlige-vaern.sh` stoppede derfor før første værn (`tools/_deps/bin/php` manglede), og `tools/mcp_oauth.py --status` svarede »Ingen klient registreret endnu«. PHP blev hentet som den statiske binær AGENTS §7.3 angiver (8.3.14); derefter gik alle **24/24** værn grønne.
+- **Zip-sammenligningen var det værd:** `diff -r` mellem kilden og den udpakkede `v7.43.0.zip` viste at den indlejrede `ROADMAP.md` stadig havde P0.4 som »Delvist (0,4 af 0,5 d)«. `main` udgiver nu **7.54.0**, hvis zip er `diff -r`-identisk med kilden, så den gamle pakke blev droppet. **Konklusion: mål zip'en efter en rebase, før push — tal fra før rebasen er ikke status for det der udgives.**
+- **`tools/setup-agent-tools.sh` kunne ikke hente PHP:** `python3 -c`-strengen var ombrudt med indrykning → `IndentationError`, så PHP-trinnet døde før download. Rettet til én linje og efterprøvet (vælger nu `php-8.5.8`).
+- **Målt efter rebasen:** 781 smoke-checks / 0 FAIL, ingen drift i historikken, PDF renderet og set. S3.5 0,05 → **0,1 af 0,5 d**; site 64,4 % → **64,6 %** (15,7 af 24,3 d).
+- **Backup blev ikke kørt** i dette pas, og det står i loggen i stedet for at blive skjult.
 
 ### 7/11 — Instagram-insights (P1.5c, 7.56.0): `views`, ikke `impressions` — og nul betyder «ved det ikke»
 
@@ -544,6 +532,8 @@ statiske blokke; målrettede rettelser i eksisterende markup kan skrives direkte
 
 ## Næste skridt
 
+0. **Sandkassen mangler et MCP-token** — uden det kan intet skrives til sitet, kun måles. `python3 tools/mcp_oauth.py --start`
+   giver linket, ejeren godkender i browseren, `--finish '<kode>'` gemmer token uden for repoet.
 1. **S2.9 designsystem: læg laget på sitet og se det** (0,1 d tilbage af 0,5). CSS-filen og loaderen er
    skrevet og værnet; det der mangler, er at kopiere `css/sg-design-system.css` til `uploads/sga-design/`
    (eller ind i `mu-plugins/`), kopiere `wordpress/mu-plugins/sga-design-system.php` til

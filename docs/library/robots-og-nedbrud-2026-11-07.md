@@ -48,6 +48,47 @@ To ting gjorde det værre:
 2. Da jeg ville rette det med et nyt kald, svarede MCP `server_unsupported` — REST-API'et var selv dødt af
    parse-fejlen. **En fejl i et mu-plugin kan ikke rettes over MCP**, fordi MCP'en kører gennem det samme PHP.
 
+## 3b. Målt igen senere samme dag — nedbruddet står stadig
+
+En ny, uafhængig måling fra agent-sandkassen (neutral UA) viser at tilstanden er **uændret**: nedbruddet er
+ikke selvreparerende, og sidecachen får det til at se raskt ud for den der kigger på forsiden.
+
+| Forespørgsel | HTTP | Bytes | Indhold |
+| --- | --- | --- | --- |
+| `/` (cachet, `last-modified: 07 Nov 12:27 GMT`) | 200 | 80.307 | Forsiden som normalt |
+| `/shop/` (cachet) | 200 | 257.065 | Butikken som normalt |
+| `/robots.txt` | 200 | **193** | `Parse error: unexpected token "=" … managed-wordpress-robots.php on line 13` |
+| `/sitemap_index.xml` | 200 | **193** | samme parsefejl |
+| `/wp-json/` og `/wp-json/wp/v2/pages` | 200 | **193** | samme parsefejl |
+| `/?sgap_feed=pinterest` | 200 | **193** | samme parsefejl — **autopilotens RSS-publicering er død** |
+| `/?nocache=…`, `/about/?cb=…`, `/cart/?cb=…`, `/checkout/?cb=…` | 200 | **193** | samme parsefejl — ingen cache-bustet side kan rendere |
+| `/wp-admin/admin-ajax.php?action=heartbeat` | **500** | 184 | `There has been a critical error on this website.` |
+
+Det tilføjer tre ting til billedet ovenfor:
+
+1. **wp-admin er også nede** (500 på `admin-ajax.php`). Ejerens normale vej ind i WordPress findes ikke, så
+   rettelsen skal ske via **File Manager/SFTP** — ikke gennem wp-admin.
+2. **RSS-feedet er ramt**, og i RSS-tilstand er det plugin'ets publiceringsvej. Autopilotens publicering står
+   altså stille af samme årsag, uden at der er noget at rette i pluginnet.
+3. **Alle fejl svarer HTTP 200** (bortset fra admin-ajax' 500). En statuskode-baseret overvågning ser et raskt
+   site; tjek derfor indholdet — `grep -c 'Parse error'` eller en bodystørrelse på 193 bytes.
+
+**Den rettede fil er verificeret igen, offline:** `php -l` er ren, og `tools/test_robots_muplugin.php` giver
+**8 PASS / 0 FAIL**. Vej C i §4 kan derfor bruges direkte, og filen ligger klar i repoet på
+[`wordpress/mu-plugins/managed-wordpress-robots.php`](../../wordpress/mu-plugins/managed-wordpress-robots.php).
+
+**Efterkontrol efter indgrebet** — alle fem skal give 0 forekomster af «Parse error», og admin-ajax skal svare
+200/400 i stedet for 500:
+
+```bash
+UA='Mozilla/5.0 (compatible; steamgears-agent/1.0)'
+for p in /robots.txt /sitemap_index.xml /wp-json/ '/?sgap_feed=pinterest' '/cart/?cb=1'; do
+  printf '%-24s %s\n' "$p" "$(curl -sS -A "$UA" "https://steamgears.eu$p" | grep -c 'Parse error')"
+done
+curl -sS -A "$UA" -o /dev/null -w 'admin-ajax: %{http_code}\n' \
+  'https://steamgears.eu/wp-admin/admin-ajax.php?action=heartbeat'
+```
+
 ## 4. Sådan rettes det (under et minut, kræver ikke PHP)
 
 Vælg én af tre veje i Simplys kontrolpanel (Filhåndtering eller SFTP):

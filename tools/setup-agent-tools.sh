@@ -32,10 +32,9 @@ if [ -x "$DEPS/bin/php" ]; then
   echo "  findes allerede: $("$DEPS/bin/php" -v | head -1)"
 else
   BASE="https://dl.static-php.dev/static-php-cli/bulk"
+  # Én linje med vilje: en "-c"-streng må ikke ombrydes med indrykning, det giver IndentationError.
   ASSET=$(curl -sL "$BASE/?format=json" \
-    | python3 -c 'import json,sys; names=[e["name"] for e in json.load(sys.stdin)
-                 if e["name"].startswith("php-") and e["name"].endswith("-cli-linux-x86_64.tar.gz")]
-                 print(sorted(names, key=lambda n: [int(p) for p in n.split("-")[1].split(".")])[-1])')
+    | python3 -c 'import json,sys; names=[e["name"] for e in json.load(sys.stdin) if e["name"].startswith("php-") and e["name"].endswith("-cli-linux-x86_64.tar.gz")]; print(sorted(names, key=lambda n: [int(p) for p in n.split("-")[1].split(".")])[-1])')
   [ -n "$ASSET" ] || { echo "  kunne ikke finde en PHP-binær"; exit 1; }
   echo "  henter $ASSET"
   curl -sL "$BASE/$ASSET" -o /tmp/php-static.tgz
