@@ -93,6 +93,15 @@ class SGAP_Keys {
             'hint' => 'The App ID lives under Publishing. Scopes: boards:read and pins:read. The access token lives 30 days; with the app secret and a refresh token it renews itself on every run, and the rotated token is saved here automatically.',
             'optional' => true
         ],
+        'instagram' => [
+            'title' => 'Instagram insights',
+            'icon' => 'instagram',
+            'keys' => ['instagram_access_token'],
+            'body' => 'Reads views, likes, comments, shares and saves for the posts the account owns. Publishing still goes through Publer.',
+            'links' => [['Meta app dashboard', 'https://developers.facebook.com/apps/']],
+            'hint' => 'The professional account id and the Graph host live under Publishing. The long-lived token lasts 60 days and refreshes itself on every run with Instagram Login; Facebook Login tokens have to be replaced by hand.',
+            'optional' => true
+        ],
         'telegram' => [
             'title' => 'Telegram',
             'icon' => 'email-alt',

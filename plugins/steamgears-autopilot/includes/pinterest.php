@@ -432,7 +432,7 @@ class SGAP_Pinterest {
         $types = self::TYPES;
         $marks = implode(',', array_fill(0, count($types), '%s'));
         $wpdb->query($wpdb->prepare(
-            "DELETE FROM {$wpdb->prefix}sgap_events WHERE queue_id = %d AND event_type IN ({$marks})",
+            "DELETE FROM {$wpdb->prefix}sgap_events WHERE queue_id = %d AND channel = 'pinterest' AND event_type IN ({$marks})",
             array_merge([$queue_id], $types)
         ));
         foreach ($types as $type) {

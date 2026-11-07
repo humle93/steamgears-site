@@ -462,6 +462,9 @@ class SGAP_Auto {
         if (class_exists('SGAP_Pinterest') && ($pinterest = SGAP_Pinterest::problem()) !== '') {
             $problems[] = $pinterest;
         }
+        if (class_exists('SGAP_Instagram') && ($instagram = SGAP_Instagram::problem()) !== '') {
+            $problems[] = $instagram;
+        }
         $rescue = SGAP_Rescue::status();
         if ($rescue['given_up'] > 0) {
             $problems[] = "{$rescue['given_up']} images on another server could not be copied.";

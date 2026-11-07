@@ -28,7 +28,9 @@ class SGAP_Setup {
         'telegram_bot_token' => 'Bot token', 'bluesky_app_password' => 'App password', 'mastodon_token' => 'Access token',
         'printful_api_key' => 'Printful API token', 'printful_store_id' => 'Printful store ID', 'woo_min_margin' => 'Minimum margin %',
         'pinterest_client_id' => 'Pinterest App ID', 'pinterest_client_secret' => 'Pinterest app secret',
-        'pinterest_access_token' => 'Pinterest access token', 'pinterest_refresh_token' => 'Pinterest refresh token'
+        'pinterest_access_token' => 'Pinterest access token', 'pinterest_refresh_token' => 'Pinterest refresh token',
+        'instagram_user_id' => 'Instagram account ID', 'instagram_graph_host' => 'Graph host',
+        'instagram_access_token' => 'Instagram access token'
     ];
 
     /**
@@ -39,10 +41,10 @@ class SGAP_Setup {
      * key added to the wrong tab later still shows up in exactly one place.
      */
     const TABS = [
-        'keys' => ['Keys', 'lock', ['publer_api_key', 'ai_api_key', 'image_api_key', 'serpapi_key', 'telegram_bot_token', 'merchant_feed_secret', 'bluesky_app_password', 'mastodon_token', 'mcp_refresh_token', 'printful_api_key', 'pinterest_access_token', 'pinterest_refresh_token', 'pinterest_client_secret']],
+        'keys' => ['Keys', 'lock', ['publer_api_key', 'ai_api_key', 'image_api_key', 'serpapi_key', 'telegram_bot_token', 'merchant_feed_secret', 'bluesky_app_password', 'mastodon_token', 'mcp_refresh_token', 'printful_api_key', 'pinterest_access_token', 'pinterest_refresh_token', 'pinterest_client_secret', 'instagram_access_token']],
         'basics' => ['Basics', 'admin-home', ['autopilot_enabled', 'full_auto_enabled', 'channels', 'posts_per_day']],
         'ai' => ['AI & images', 'superhero-alt', ['ai_profile', 'ai_provider', 'ai_model', 'ai_base_url', 'content_language', 'image_model']],
-        'publishing' => ['Publishing', 'megaphone', ['publish_mode', 'publer_workspace_id', 'publer_pinterest_board', 'pinterest_client_id', 'bluesky_handle', 'mastodon_instance', 'mastodon_limit', 'telegram_chat_id', 'quality_gate', 'banned_words', 'dupe_days']],
+        'publishing' => ['Publishing', 'megaphone', ['publish_mode', 'publer_workspace_id', 'publer_pinterest_board', 'pinterest_client_id', 'instagram_user_id', 'instagram_graph_host', 'bluesky_handle', 'mastodon_instance', 'mastodon_limit', 'telegram_chat_id', 'quality_gate', 'banned_words', 'dupe_days']],
         'schedule' => ['Schedule & limits', 'clock', ['quiet_start', 'quiet_end', 'blackout_ranges', 'daily_cap', 'batch_size', 'repost_cooldown_days']],
         'evergreen' => ['Evergreen', 'update', ['evergreen_enabled', 'evergreen_after_days', 'evergreen_max_shares', 'evergreen_batch']],
         'shop' => ['Shop & feeds', 'cart', ['printful_store_id', 'woo_min_margin']],

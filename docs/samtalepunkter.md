@@ -25,7 +25,7 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 | Projekt | Status | Grundlag |
 | --- | --- | --- |
 | **steamgears.eu — site-optimering** | **64,4 %** | 15,65 af 24,3 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 7,35/8,05 · S3 2,5/3,55 · S4 1,5/5,25) |
-| **Steamgears Autopilot — plugin** | **91 %** | 26,3 af 28,9 d (P0 4,65/4,7 · P1 12,7/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25) |
+| **Steamgears Autopilot — plugin** | **96,2 %** | 27,8 af 28,9 d (P0 4,65/4,7 · P1 14,2/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25) |
 | **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5) |
 | **SEO-indholdsproduktion** | **62,5 %** | 5 af 8 guides (BATCH 0/3 · COPY 4/4 · CORSET 1/1) |
 | **Døde internlinks** | **100 %** | 39 af 39 links (FIX 39/39) |
@@ -33,29 +33,52 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 ### Åbne blokeringer
 
 - **steamgears.eu — site-optimering** — S2.7's script-loft kan ikke naas uden tre nye beslutninger (chatbot ved interaktion, GLA vaek eller flyttet til GTM, klassisk kurv) — maalt 7/11; S1.1 Herbarium kraever varianter i Printify; S0.4 5 vanity-301 kraever en Redirection-gruppe (ejer). S2.2, S2.7-trin og S2.8 er udfoert 6-7/11, S0.9 7/11.
-- **Steamgears Autopilot — plugin** — P1.5b er kode-færdig, men den første live-kørsel kræver et Pinterest-token (Settings → Keys); P1.5c kræver en IG-konto-token; P3.1 mangler ejerens labor_rate-beslutning
+- **Steamgears Autopilot — plugin** — P1.5b (Pinterest) og P1.5c (Instagram) er kode-færdige, men den første live-kørsel kræver et token af hver (Settings → Keys); P3.1 mangler ejerens labor_rate-beslutning; P1.15 kræver ejerens MCP-godkendelse i wp-admin.
 - **Dark academia-rebrand** — Printify-adgang
 - **SEO-indholdsproduktion** — Intet eksternt for de tre resterende guides: copy, FAQ, priser og links ligger i docs/library/guides-2026-11-03.md. De otte /go/-id'er 411/475/481/485/497/567 kunne ikke verificeres fra sandkassen (Simplys WAF giver browser-UA en challenge), så nye produktlinks skal måles fra ejerens side eller efter WAF-hvidlistning
 
 ### Næste skridt
 
 - **steamgears.eu — site-optimering** — Vedtag loftet paa det maalte gulv (tekst 30 · lister 45 · produkt 95 · kurv 112) eller bestil trin 3 (klassisk kurv/produkt, 0,75 d); skriv de tre manglende guides fra den verificerede copy; S1.1 Herbarium kraever varianter i Printify; S0.4 kraever en Redirection-gruppe (ejer)
-- **Steamgears Autopilot — plugin** — P1.5b er bygget 7/11 og venter kun på et Pinterest-token til den første live-kørsel; P1.5c IG-insights kræver egen konto-token; P3.1 labor_rate (ejer); P1.16/P1.17 er klar, men kostprisen skal importeres med woo-cost-import (kræver Printful-nøglen under Settings → Keys), før værktøjerne kan foreslå priser; P1.15 venter på ejerens MCP-godkendelse i wp-admin
+- **Steamgears Autopilot — plugin** — P1.5b/P1.5c er kode-færdige og venter kun på tokens til den første live-kørsel (Pinterest og Instagram, begge under Settings → Keys); P3.1 labor_rate (ejer); P1.16/P1.17 kræver Printful-nøglen og woo-cost-import før værktøjerne kan foreslå priser; P1.15 venter på ejerens MCP-godkendelse i wp-admin
 - **Dark academia-rebrand** — Batch 4 — mockups (~130 billeder)
 - **SEO-indholdsproduktion** — Skriv de tre manglende guides (mens-steampunk-costume-essentials, steampunk-clothing-three-budgets, womens-steampunk-essentials) fra den verificerede copy — corset-guiden er publiceret 6/11
 - **Døde internlinks** — Vedligehold: tjek nye indlæg mod live-URL'er
 
 ### Seneste commits
 
+- `731c0e9 Modul: P3.6 fejlsøgning — fast scan, fem fejl rettet Før: 90,9 %  →  Efter: 91,0 %  (Δ +0,1) Grundlag: 26,3 af 28,9 d (P0 4,65/4,7 · P1 12,7/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25) Fejlsøgning er nu en kørsel i stedet for en lejlighed: tools/fejlscan.py er værn nr. 23-24 i den natlige kontrol og leder efter det php -l og smoke-suiten ikke kan se — version tre steder, zip mod kilde byte for byte, døde og forældreløse includes, nye dokumenter uden for biblioteksindekset, tokens i sporede filer, TODO/FIXME og tests der ikke kan fejle. 13 fixtures beviser både at hver klasse fanges, og at en ren kasse er grøn.`
 - `cf6e8b3 Modul: P1.5b Pinterest-analytics Før: 87,4 %  →  Efter: 90,9 %  (Δ +3,5) Grundlag: 26,05 af 28,65 d (P0 4,65/4,7 · P1 12,7/15,2 · P2 4,75/4,75 · P3 2,45/2,5 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25)`
 - `a27b054 chore(status): daglig projektstatus 2026-11-07`
 - `95c9106 Modul: P1.19 dashboard-layout — tre sektioner og én Needs you-linje Før: 87,3 %  →  Efter: 87,4 %  (Δ +0,1) Grundlag: 25,05 af 28,65 d`
 - `1619779 chore(status): daglig projektstatus 2026-11-07`
 - `1d3214f Modul: roadmap-bogføring — Etsy afgjort, dobbelttælling fjernet (scope) Før: 80,3 %  →  Efter: 87,3 %  (Δ +7) Grundlag: 24,8 af 28,4 d (P0 4,65/4,7 · P1 11,7/15,2 · P2 4,75/4,75 · P3 2,45/2,5 · P0.7 1/1 · P0.7c 0,25/0,25)`
-- `fb11620 Modul: P0.7c scheduler- og engagement-status i admin Før: 80,1 %  →  Efter: 80,3 %  (Δ +0,2) Grundlag: 24,8 af 30,9 d`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 7/11 — Instagram-insights (P1.5c): `views`, ikke `impressions` — og nul betyder «ved det ikke»
+
+- **Modulet er `includes/instagram.php` (`SGAP_Instagram`), og det gemmer fem egne event-typer** (`views`,
+  `likes`, `comments`, `shares`, `saves`) på kanalen `instagram`, adskilt fra vores `/go/`-klik, ordrerne og de
+  to andre platformes snapshots. Sletningen er afgrænset til kanalen, fordi `likes` også er Bluesky/Mastodons
+  snapshot-type — **samme latente fejl blev rettet i Pinterest-modulet i samme pas**, hvor `saves` deles.
+- **`impressions` er deprecated for medier efter 2/7 2024** og afløst af `views`. Havde vi spurgt om
+  `impressions`, ville hvert nyt opslag rapportere nul, og det ville se ud som en måling.
+- **En metric Instagram ikke har rapporteret endnu udelades af svaret i stedet for at være 0** (op til 48 timer).
+  Opslaget tælles som *waiting* og gemmes ikke som et opslag uden visninger; ellers ville hvert gennemsnit
+  nedstrøms arve en påstand Meta ikke har fremsat.
+- **Match på caption, ikke på permalink:** et medie har intet link-felt, og `/p/<shortcode>/` indeholder aldrig
+  vores vært. Et opslag uden vores `/go/`-link er *unmapped*; en række uden publiceret Instagram-post i vinduet
+  er *orphaned*. Begge står på dashboardet i stedet for at blive gættet.
+- **To login-typer, to Graph-værter** — værten er derfor en indstilling og ikke et gæt ud fra tokenens form; et
+  forkert gæt gør en fungerende token til en 400. Den 60-dages token fornyes **på stedet** (der findes ingen
+  separat refresh-token), så en token i `wp-config.php` afvises helt.
+- **Tre fejl fanget undervejs:** test-doublen manglede `WP_Error::get_error_code()`, det smallere metric-forsøg
+  slugte token-fejl (en udløbet token blev «retried» i stedet for fornyet), og token-fejlen blev returneret før
+  fornyelsen blev forsøgt — fordi Instagram svarer 400/code 190 og ikke 401.
+- **P1.5 er 3,0 af 3,85 d bygget; de sidste 0,85 d er live-verifikation** af Pinterest og Instagram, som kræver
+  tokens. 820 smoke-checks, 0 FAIL.
 
 ### 7/11 — Fejlsøgning er nu en kørsel, ikke en lejlighed
 

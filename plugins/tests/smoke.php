@@ -35,7 +35,7 @@ if (!class_exists('WP_Post')) { class WP_Post {
     public $post_title=''; public $post_content=''; public $post_excerpt='';
     function __construct($a=[]){ foreach($a as $k=>$v){ $this->$k=$v; } }
 } }
-class WP_Error{ function __construct(public $code,public $msg,public $data=[]){} function get_error_message(){return $this->msg;} function get_error_data(){return $this->data;} }
+class WP_Error{ function __construct(public $code,public $msg,public $data=[]){} function get_error_message(){return $this->msg;} function get_error_code(){return $this->code;} function get_error_data(){return $this->data;} }
 class WP_REST_Response{ function __construct(public $data,public $status=200){} }
 class WP_REST_Request implements ArrayAccess{ function __construct(public array $p){} function get_param($k){return $this->p[$k]??null;}
  function offsetGet($k):mixed{return $this->p[$k]??null;} function offsetExists($k):bool{return isset($this->p[$k]);} function offsetSet($k,$v):void{} function offsetUnset($k):void{} }
@@ -1453,6 +1453,7 @@ check('engagement: a 500 is reported and stores nothing', $failed['updated']===0
 SGAP_Engagement::$transport=null; $GLOBALS['rows']=[];
 
 require __DIR__.'/pinterest.php';
+require __DIR__.'/instagram.php';
 require __DIR__.'/mcp-woo.php';
 require __DIR__.'/mcp.php';
 require __DIR__.'/evergreen.php';
