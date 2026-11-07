@@ -41,6 +41,15 @@ python3 tools/mcp_rest.py --call wp_get_option '{"key":"mwai_options","raw":true
 Pointen: en switch der ikke blev gemt, eller som blev sat på en anden fane, kan ses her med det samme — og
 agenten kan ikke selv slå den fra, fordi spærren også dækker `wp_update_option`. Det er med vilje.
 
+**Profilen i pluginnet rører chattens værktøjer, ikke denne flade.** `sgap_ai_profile` (7.41.2) afgør hvem
+Autopilotens *egen* AI Chat er, og hvilke af pluginnets værktøjer den må kalde; profilen *Site administration*
+slår `mcp_dynamic_rest` og `mcp_abilities` til gennem `enable_full_access()`. Begge nøgler stod **allerede** på
+`true` her (målt 2/11 og 4/11), så aktiveringen er idempotent på dette site og ændrer intet i `mwai_options` —
+og den eksterne MCP-klient fik ikke mere adgang af profilen, fordi den havde `mcp_role: admin` i forvejen.
+Det der faktisk kan ses efter et profilskift, er chattens egen værktøjsliste og persona, ikke REST-fladen.
+Tilstanden læses uden at skrive med `wp_get_option mwai_options raw` eller pluginnets `site_health`, der svarer
+`ai_engine_mcp: {abilities, dynamic_rest, role}` plus `autopilot_version`.
+
 Sitet kører **AI Engine (Meow Apps)** som MCP-server. Det er standard MCP over HTTP med `Mcp-Session-Id`, og
 det kræver en credential på hvert kald: uden en svarer ruten `401 rest_forbidden`. Den gamle site-side
 MCP-server og dens API-nøgle er væk, og stdio-broen er derfor også fjernet — der er ingen nøgle at gemme i
