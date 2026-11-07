@@ -32,30 +32,49 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Åbne blokeringer
 
-- **steamgears.eu — site-optimering** — REST er nede, målt 7/11 17:29 UTC: pluginnet på live er nu 7.58.0, hvis includes/diagnostics.php registrerer sin rute med SGAP_Admin::NS — en konstant der ikke findes — så rest_api_init kaster en fatal på hver /wp-json/-forespørgsel. Forsiden (/) og /cart/ svarer 200, robots.txt og sitemap_index.xml svarer 200, men /wp/v2, Store API (kurv og kasse) og begge MCP-flader er døde, indtil 7.58.1 er installeret (Plugins → Update). Derfor kan S2.9, S4.13, S1.4 og S1.6 ikke udføres nu. S2.7-loftet kræver desuden tre ejerbeslutninger, og S2.5 mangler OG-billedet.
-- **Steamgears Autopilot — plugin** — Live kører 7.58.0, og den build tog hele REST-fladen ned (SGAP_Admin::NS i diagnostics.php og facebook.php, rettet i 7.58.1 — se docs/library/rest-nedbrud-7-58-0-2026-11-07.md). Plugins → Update skal køres før /wp-json svarer, og før P2.6's Facebook-felter og MCP-fladerne kan bruges. P2.6 kræver desuden at ejeren selv indtaster Page access token og side-id i wp-admin — en nøgle må ikke gennem chat eller repo. P1.5b/P1.5c kræver et Pinterest- og Instagram-token; P3.1 mangler ejerens labor_rate-beslutning; P1.15 kræver ejerens MCP-godkendelse.
+- **steamgears.eu — site-optimering** — REST er stadig nede, målt 7/11 med cache-buster: /wp-json/, /wp-json/sgap/v1 og /wp-json/novamira/v1/oauth/token svarer 200 med 1.650 B PHP-fatal (SGAP_Admin::NS, diagnostics.php:531 i live-versionen 7.58.0), og Store API svarer 404-HTML. Repoet har 7.58.2, som retter både fatalen og opdateringsfælden (dashboard-kortet kunne sige “Up to date” i 6 timer, så et Update-klik havde intet at installere). Installationen kræver en adgang der ikke findes i agentens sandkasse: ingen SSH/SFTP-nøgle, ingen wp-cli, ingen WP-credential, og wp-login.php/xmlrpc.php svarer 455 fra Simplys WAF. Derfor kan S2.9, S4.13, S1.4, S1.6 og de tre guides ikke udføres nu.
+- **Steamgears Autopilot — plugin** — Live kører 7.58.0, som tager hele REST ned (SGAP_Admin::NS, rettet i 7.58.1), og den build kunne ikke opdateres, fordi dashboard-kortet læste en 6-timers cachet version (rettet i 7.58.2 med refresh_for_admin() + rydning af update_plugins; se plugins/tests/updater_cache.php). Repoet står på 7.58.2, men installationen kræver en adgang agentens sandkasse ikke har: ingen SSH/SFTP, ingen wp-cli, ingen WP-credential — og wp-login.php svarer 455 fra Simplys WAF. P2.6 kræver desuden ejerens Page access token og side-id i wp-admin; P1.5b/P1.5c mangler Pinterest-/Instagram-token; P3.1 mangler ejerens labor_rate-beslutning; P1.15 kræver ejerens MCP-godkendelse.
 - **Dark academia-rebrand** — Printify-adgang
 - **SEO-indholdsproduktion** — Intet eksternt for de tre resterende guides: copy, FAQ, priser og links ligger i docs/library/guides-2026-11-03.md. De otte /go/-id'er 411/475/481/485/497/567 kunne ikke verificeres fra sandkassen (Simplys WAF giver browser-UA en challenge), så nye produktlinks skal måles fra ejerens side eller efter WAF-hvidlistning
 
 ### Næste skridt
 
-- **steamgears.eu — site-optimering** — Ejerens ét klik: Plugins → Update til 7.58.1 (REST-nedbruddet). Derefter S2.9 + S4.13 ud på siden: OG-billede pr. indlæg og /shop/s H1, og tre ejerbeslutninger til S2.7-loftet. S0.2 behøver intet: host-laget er væk og robots.txt er én gruppe (målt 7/11 17:25 UTC).
-- **Steamgears Autopilot — plugin** — Plugins → Update til 7.58.1 (retter REST-nedbruddet; zip ligger på main). Derefter P2.6: Page access token under Settings → Keys og side-id under Publishing, og «Kør nu» på Facebook-siden. P1.5b (Pinterest) og P1.5c (Instagram) er kode-færdige og venter på hvert sit token; P3.1 mangler ejerens labor_rate-beslutning; P1.15 kræver ejerens MCP-godkendelse.
+- **steamgears.eu — site-optimering** — Installér 7.58.2 (Plugins → Update, eller pluginets eget dashboard-kort “Check again and update”, som nu læser versionen friskt). Derefter S2.9 + S4.13 ud på siden og de tre guides live. Kræver en adgangskanal: SFTP/SSH til Simply, ejer-whitelistet admin-session eller et application password på et site hvor REST svarer.
+- **Steamgears Autopilot — plugin** — Installér 7.58.2 — helst via pluginets eget dashboard-kort, som nu henter versionen friskt og rydder WordPress' update-transient. Derefter P2.6 (Page access token + side-id + «Kør nu»), P1.5b/P1.5c-tokens, P3.1's labor_rate og P1.15's MCP-godkendelse.
 - **Dark academia-rebrand** — Batch 4 — mockups (~130 billeder)
 - **SEO-indholdsproduktion** — Skriv de tre manglende guides (mens-steampunk-costume-essentials, steampunk-clothing-three-budgets, womens-steampunk-essentials) fra den verificerede copy — corset-guiden er publiceret 6/11
 - **Døde internlinks** — Vedligehold: tjek nye indlæg mod live-URL'er
 
 ### Seneste commits
 
+- `b69443c Modul: P1.22-fejlretning — de ikke-REST-kanaler er afprøvet Før: 96,5 % Efter: 96,5 % Δ: 0 Grundlag: ingen ændring`
 - `f5b8187 Modul: P1.22-fejlretning — REST-nedbruddet i 7.58.0 Før: 96,5 % Efter: 96,5 % Δ: 0 Grundlag: ingen ændring`
 - `1ec840b Merge main (S4.10-anmeldelser) — og nedbruddet konstateret overstået`
 - `fb6e015 Sitet svarer igen — og Facebook-nøglen kan først komme på efter Update`
 - `8654be5 S4.10: butikken spørger nu om en anmeldelse — én gang, 14 dage efter levering`
 - `1054691 Værnene hærdet: registeret lemper kun den regel det gælder`
-- `77148a2 P2.6: Facebook-siden kan styres — med direkte publicering som opt-in (7.58.0)`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 7/11 — opdateringsfælden: “Update” havde intet at installere
+
+- **Ejerens klik fejlede ikke — der var intet at installere.** `SGAP_Updater::remote_version()` cacher GitHubs
+  versionsnummer i et site-transient i **6 timer**, og WordPress' egen `update_plugins`-transient kan hænge op
+  til **12 timer** bagefter. Release 7.58.1 var derfor usynlig for både Plugin-listen og dashboard-kortet, selv
+  om zippen lå på `main` og svarede 200.
+- **7.58.2 retter det:** dashboard-kortet kalder `refresh_for_admin()`, som læser versionen **friskt** (højst ét
+  GitHub-kald pr. minut via sit eget transient) og **rydder `update_plugins`**, når GitHub har noget nyere end
+  den installerede version — så begge flader tilbyder samme version med det samme.
+- **Bevis uden WordPress:** `plugins/tests/updater_cache.php` (9 checks, kørt grøn) viser cachet læsning på den
+  gamle version, frisk læsning på den nye, at `update_plugins` bliver ryddet, at det *ikke* bliver ryddet når vi
+  er ajour, og at `panel()` ikke længere kalder den cachede læsning. Værnet kører nu i `tools/natlige-vaern.sh`.
+- **Ingen adgangskanal findes i sandkassen** (målt 7/11 18:0x UTC): `~/.ssh` og `~/.netrc` findes ikke, ingen
+  `wp-cli`, ingen `wp-cli.yml`, ingen WP-/SFTP-/SSH-variabler i miljøet — og `wp-login.php`/`xmlrpc.php` svarer
+  455 fra Simplys WAF. Derfor kan hverken 7.58.1 eller 7.58.2 installeres herfra, og de tre guides kan ikke
+  publiceres. **Den manglende brik er en adgang, ikke et klik:** enten SFTP/SSH til Simply, en ejer-whitelistet
+  admin-session, eller et application password på et site hvor REST virker.
+- **SEO står stadig på 5 af 8 guides**, og det er den samme ene brik der blokerer.
 
 ### 7/11 — 7.58.0 tog hele REST ned, og SEO-arbejdet fandt det
 

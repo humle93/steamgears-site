@@ -83,9 +83,9 @@ Alt her er målt mod den live side eller læst i kilden. Er noget ændret siden 
 - `/shop/` tager ~5,8 s og ~470 KB; produktside har ~151 KB inline CSS og ~105 scripts.
 - GA4 fyrer **dobbelt** på hvert pageview, så konverteringer kan ikke aflæses sikkert.
 
-**Pluginnet** (`plugins/steamgears-autopilot/`, v7.58.1)
+**Pluginnet** (`plugins/steamgears-autopilot/`, v7.58.2)
 
-- **Version i repo mod live:** repo **7.58.1**, live **7.58.0** (målt 7/11 17:29 UTC: `/wp-json/` svarer 200 med
+- **Version i repo mod live:** repo **7.58.2**, live **7.58.0** (målt 7/11 17:29 UTC: `/wp-json/` svarer 200 med
   `Undefined constant SGAP_Admin::NS` i `includes/diagnostics.php:531`) — og 7.58.0 tog **hele** REST-fladen
   ned, inklusive Store API og begge MCP-flader, mens forsiden svarede 200. 7.58.1 retter de fire referencer til
   `SGAP_REST::NS`; se `docs/library/rest-nedbrud-7-58-0-2026-11-07.md`. Et plugin-folder kan kun skiftes af

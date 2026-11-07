@@ -66,6 +66,7 @@ check "projektstatus --check"                python3 projektstatus.py --check
 check "commit-besked --selftest"             python3 tools/commit_check.py --selftest
 check "kampagne-indlæser --selftest"         python3 tools/load_campaign.py --selftest
 check "plugin-smoke"                         "$PHP_BIN" plugins/tests/smoke.php
+check "updater-cache"                       "$PHP_BIN" plugins/tests/updater_cache.php
 check "MCP REST-klient"                      python3 tools/test_mcp_rest.py
 check "MCP-klassificering"                   python3 tools/test_mcp_klassificer.py
 check "MCP OAuth"                            python3 tools/test_mcp_oauth.py

@@ -6,8 +6,8 @@
       "id": "site",
       "name": "steamgears.eu — site-optimering",
       "note": "roadmap S0–S4",
-      "next": "Ejerens ét klik: Plugins → Update til 7.58.1 (REST-nedbruddet). Derefter S2.9 + S4.13 ud på siden: OG-billede pr. indlæg og /shop/s H1, og tre ejerbeslutninger til S2.7-loftet. S0.2 behøver intet: host-laget er væk og robots.txt er én gruppe (målt 7/11 17:25 UTC).",
-      "blocked_by": "REST er nede, målt 7/11 17:29 UTC: pluginnet på live er nu 7.58.0, hvis includes/diagnostics.php registrerer sin rute med SGAP_Admin::NS — en konstant der ikke findes — så rest_api_init kaster en fatal på hver /wp-json/-forespørgsel. Forsiden (/) og /cart/ svarer 200, robots.txt og sitemap_index.xml svarer 200, men /wp/v2, Store API (kurv og kasse) og begge MCP-flader er døde, indtil 7.58.1 er installeret (Plugins → Update). Derfor kan S2.9, S4.13, S1.4 og S1.6 ikke udføres nu. S2.7-loftet kræver desuden tre ejerbeslutninger, og S2.5 mangler OG-billedet.",
+      "next": "Installér 7.58.2 (Plugins → Update, eller pluginets eget dashboard-kort “Check again and update”, som nu læser versionen friskt). Derefter S2.9 + S4.13 ud på siden og de tre guides live. Kræver en adgangskanal: SFTP/SSH til Simply, ejer-whitelistet admin-session eller et application password på et site hvor REST svarer.",
+      "blocked_by": "REST er stadig nede, målt 7/11 med cache-buster: /wp-json/, /wp-json/sgap/v1 og /wp-json/novamira/v1/oauth/token svarer 200 med 1.650 B PHP-fatal (SGAP_Admin::NS, diagnostics.php:531 i live-versionen 7.58.0), og Store API svarer 404-HTML. Repoet har 7.58.2, som retter både fatalen og opdateringsfælden (dashboard-kortet kunne sige “Up to date” i 6 timer, så et Update-klik havde intet at installere). Installationen kræver en adgang der ikke findes i agentens sandkasse: ingen SSH/SFTP-nøgle, ingen wp-cli, ingen WP-credential, og wp-login.php/xmlrpc.php svarer 455 fra Simplys WAF. Derfor kan S2.9, S4.13, S1.4, S1.6 og de tre guides ikke udføres nu.",
       "modules": [
         {
           "id": "s0",
@@ -56,8 +56,8 @@
     {
       "id": "plugin",
       "name": "Steamgears Autopilot — plugin",
-      "next": "Plugins → Update til 7.58.1 (retter REST-nedbruddet; zip ligger på main). Derefter P2.6: Page access token under Settings → Keys og side-id under Publishing, og «Kør nu» på Facebook-siden. P1.5b (Pinterest) og P1.5c (Instagram) er kode-færdige og venter på hvert sit token; P3.1 mangler ejerens labor_rate-beslutning; P1.15 kræver ejerens MCP-godkendelse.",
-      "blocked_by": "Live kører 7.58.0, og den build tog hele REST-fladen ned (SGAP_Admin::NS i diagnostics.php og facebook.php, rettet i 7.58.1 — se docs/library/rest-nedbrud-7-58-0-2026-11-07.md). Plugins → Update skal køres før /wp-json svarer, og før P2.6's Facebook-felter og MCP-fladerne kan bruges. P2.6 kræver desuden at ejeren selv indtaster Page access token og side-id i wp-admin — en nøgle må ikke gennem chat eller repo. P1.5b/P1.5c kræver et Pinterest- og Instagram-token; P3.1 mangler ejerens labor_rate-beslutning; P1.15 kræver ejerens MCP-godkendelse.",
+      "next": "Installér 7.58.2 — helst via pluginets eget dashboard-kort, som nu henter versionen friskt og rydder WordPress' update-transient. Derefter P2.6 (Page access token + side-id + «Kør nu»), P1.5b/P1.5c-tokens, P3.1's labor_rate og P1.15's MCP-godkendelse.",
+      "blocked_by": "Live kører 7.58.0, som tager hele REST ned (SGAP_Admin::NS, rettet i 7.58.1), og den build kunne ikke opdateres, fordi dashboard-kortet læste en 6-timers cachet version (rettet i 7.58.2 med refresh_for_admin() + rydning af update_plugins; se plugins/tests/updater_cache.php). Repoet står på 7.58.2, men installationen kræver en adgang agentens sandkasse ikke har: ingen SSH/SFTP, ingen wp-cli, ingen WP-credential — og wp-login.php svarer 455 fra Simplys WAF. P2.6 kræver desuden ejerens Page access token og side-id i wp-admin; P1.5b/P1.5c mangler Pinterest-/Instagram-token; P3.1 mangler ejerens labor_rate-beslutning; P1.15 kræver ejerens MCP-godkendelse.",
       "modules": [
         {
           "id": "p0",

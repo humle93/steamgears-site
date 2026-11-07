@@ -1,12 +1,13 @@
 # Steamgears Autopilot — audit, roadmap and effort estimates
 
-_Last audited: 2026-11-01 · audit was of **7.15.0** (`ab676db` on `main`); current release **7.58.1**, and
+_Last audited: 2026-11-01 · audit was of **7.15.0** (`ab676db` on `main`); current release **7.58.2**, and
 **7.58.0 is what steamgears.eu runs** — and that build takes the whole REST API down: `includes/diagnostics.php`
 registered its route with `SGAP_Admin::NS`, a constant that has never existed, so `rest_api_init` dies with
 a fatal on every `/wp-json/` request (measured 2026-11-07, see
-`docs/library/rest-nedbrud-7-58-0-2026-11-07.md`). **7.58.1 fixes it** with `SGAP_REST::NS` — the
-zip in `plugins/` is **7.58.1**, and
-nothing reaches the site until the owner clicks *Update* · update this file in the same commit as any release._
+`docs/library/rest-nedbrud-7-58-0-2026-11-07.md`). **7.58.1 fixes that** with `SGAP_REST::NS`; **7.58.2** adds
+the fix for the second half of the same trap — the dashboard could say “Up to date” for six hours after a
+release, so *Update* had nothing to install. The zip in `plugins/` is **7.58.2**, and nothing reaches the site
+until an update runs from wp-admin · update this file in the same commit as any release._
 
 This is the working roadmap for `plugins/steamgears-autopilot`. It answers three questions: does every
 function in the plugin actually do something, what is missing before the plugin can truly run unattended,
@@ -344,6 +345,16 @@ Platform limits: [Instagram content publishing](https://developers.facebook.com/
 
 ## 9. Change log for this document
 
+- **7.58.2 (7/11)** — **opdateringsfælden: kortet kunne sige “Up to date” i seks timer.** Ejeren trykkede
+  *Plugins → Update*, og der skete intet — ikke fordi knappen fejlede, men fordi der ikke var noget at
+  installere: `SGAP_Updater::remote_version()` cacher GitHubs versionsnummer i et site-transient i **6 timer**,
+  og WordPress' egen `update_plugins`-transient kan hænge op til **12 timer** bagefter, så release 7.58.1 var
+  usynlig for begge flader. Dashboard-kortet bruger nu **`refresh_for_admin()`**: den læser versionen **friskt**
+  (højst ét GitHub-kald pr. minut via `sgap_remote_version_admin`), og når GitHub har noget nyere end den
+  installerede version, ryddes `update_plugins`, så Plugins-listen tilbyder samme version med det samme.
+  Beviset ligger i `plugins/tests/updater_cache.php`, som kører uden WordPress: en cachet læsning på den gamle
+  version, en frisk læsning på den nye, og en kontrol af at `update_plugins` bliver ryddet — og ikke ryddet når
+  vi er ajour. Ingen nye dage.
 - **7.58.1 (7/11)** — **REST-nedbruddet i 7.58.0 rettet.** `includes/diagnostics.php` og
   `includes/facebook.php` registrerede deres ruter med `SGAP_Admin::NS`; klassen `SGAP_Admin` har ingen
   `NS`-konstant (den ligger på `SGAP_REST`), så `rest_api_init` kastede en `Error` på **hver**

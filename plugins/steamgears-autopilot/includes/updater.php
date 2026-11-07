@@ -15,6 +15,7 @@ class SGAP_Updater {
     const SLUG = 'steamgears-autopilot';
     const CACHE = 'sgap_remote_version';
     const NOTES_CACHE = 'sgap_release_notes';
+    const ADMIN_CACHE = 'sgap_remote_version_admin';
 
     public static function init(): void {
         add_filter('pre_set_site_transient_update_plugins', [__CLASS__, 'inject_update']);
@@ -209,9 +210,30 @@ class SGAP_Updater {
         exit;
     }
 
+    /**
+     * Fresh version check for the dashboard card — a release must never hide behind the
+     * 6-hour cache in remote_version(). At most one GitHub request per minute, and when
+     * GitHub has something newer than the installed version, WordPress' own update list
+     * is invalidated so the Plugins screen offers the same version straight away.
+     */
+    public static function refresh_for_admin(): string {
+        $version = get_site_transient(self::ADMIN_CACHE);
+        if (!is_string($version) || $version === '') {
+            $version = self::remote_version(true);
+            if ($version !== '') {
+                set_site_transient(self::ADMIN_CACHE, $version, MINUTE_IN_SECONDS);
+            }
+        }
+        if ($version !== '' && version_compare($version, SGAP_VERSION, '>')) {
+            // Without this the Plugins screen can keep saying "no update" for up to 12 hours.
+            delete_site_transient('update_plugins');
+        }
+        return $version;
+    }
+
     /** Dashboard card: installed vs. GitHub, with the button. */
     public static function panel(): void {
-        $remote = self::remote_version();
+        $remote = self::refresh_for_admin();
         $newer = $remote !== '' && version_compare($remote, SGAP_VERSION, '>');
         SGAP_UI::card_open('Plugin update', 'update');
         echo '<p>' . SGAP_UI::pill('Installed ' . SGAP_VERSION) . ' ' . SGAP_UI::pill('GitHub ' . ($remote !== '' ? $remote : 'unknown'), $newer ? 'warn' : 'ok')
