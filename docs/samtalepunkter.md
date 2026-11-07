@@ -47,15 +47,23 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `77148a2 P2.6: Facebook-siden kan styres — med direkte publicering som opt-in (7.58.0)`
 - `3d7a3ff Merge main (S0.4-forbehold) ind i S4.12`
 - `9f77099 Merge main (roadmap-rækker lukket, commit-værn rettet) ind i S4.12`
 - `0165d79 S0.4: forbehold om at «ingen 404» er målt før nedbruddet`
 - `7431166 S4.12: fortrydelsesoplysningerne ind i ordremailen`
 - `0a628a2 Roadmap-rækker lukket med bevis, og CI's commit-værn gjort grøn`
-- `1bed4d8 Ryd op efter sammenfletningen: de genererede filer fik deres rigtige tal`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 7/11 — Værnene prøvet med vilje-fejl: tre huller, alle lukket
+
+- **Registret var et smuthul.** En registreret SHA slap for **hele** regelsættet: en commit uden `Modul:` og med tal der ikke findes i historikken blev godkendt (`[OK] … undtaget: verificeret register`). Nu er posten `{relax, reason}`, og kun `basis` eller `history` lempes — form, Δ og regnestykke gælder også de to gamle commits. Målt: samme commit med SHA i registeret er stadig **rød** på `mangler linjen 'Modul:'`.
+- **Et scope-flag kunne brændes af en fremmed række.** Flaget blev fjernet for alle projekter, når blot én række blev skrevet. Nu forbruger kun den række det gælder det, og flaget skal være en sætning — `true` og tomme strenge afvises.
+- **`scope_change: true` var en tom etiket.** Et fald på 25,3 pp slap igennem med `module: «daglig måling»`. Nu kræver et fald på ≥ 0,5 pp en navngivet ændring; under tærsklen regnes det som afrundingsstøj, fordi en eksisterende række (96,4 → 96,3) ellers ville gøre historikken ugyldig.
+- **Det der stadig bider:** ikke-registrerede commits med den undtagne fejl er røde med tre forskellige fejltekster, drift i JSON uden historik er rød i tre varianter, og en commit-msg-hook afviste endda forsøgs-committene, før de blev til commits. Hele forsøgsrækken står i `library/vaern-adversarisk-kontrol-2026-11-07.md`.
+- **Fælde:** `git commit` uden `--no-verify` blev stoppet af hooken, så en efterfølgende `--commit HEAD` målte den *forrige* commit. Kontrollér exitkoden, ikke kun linjen.
 
 ### 7/11 — Facebook-siden kan nu styres, men først når nogen slår det til (P2.6, 7.58.0)
 
