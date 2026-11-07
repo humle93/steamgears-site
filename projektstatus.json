@@ -62,10 +62,10 @@
         {
           "id": "p0",
           "name": "P0 — reliability",
-          "done": 4.35,
+          "done": 4.65,
           "total": 4.7,
           "unit": "d",
-          "note": "P0.1 0,5 + P0.2 0,5 + P0.3 1,0 + P0.5 1,0 (alarmer i includes/alerts.php, backoff 5/15/45, auditlog i includes/audit.php) + P0.4-detektion 0,2; + 0,15 d /go-ruten: produktlink uden kø-post gik til forsiden, nu produkt-fallback i 7.32.0 med 5 checks (404 PASS); P0.6 0,5 d (7.40.1): dublet-værn pr. fingerprint med tidsvindue i includes/duplicate.php (en kø-post blokerer uanset alder, en publiceret kun inden for dupe_days = 30, failed blokerer aldrig), 409 navngiver rækken den kolliderede med, og /snapshot bærer fingerprint; 15 checks (479 → 494 PASS); + 0,2 d P0.4/CC-link (7.33.0): pluginnet registrerer Command Centers kald (X-Command-Center), viser forbindelsen og melder i selvtjekket når CC har været tavs > 2 t, og CC 7.19.0 kalder wp-cron.php hvert 5. min (integration: 8 cc-checks PASS). P0.4 0,2 → 0,4 af 0,5 d (7.18.0 + 7.33.0), og 0,1 d lukket 7/11 2026 af ejeren: Simply-cron er sat op (URL-cron mod `wp-cron.php?doing_wp_cron` hver 5. min, Websundhed viser Good) → P0.4 0,5 af 0,5 d; + 0,2 d P0.2 pr. kanal (7.42.0): ny indstilling channel_caps (fx pinterest=2, facebook=3) giver hver kanal sin egen cap og sin egen runway. SGAP_Alerts::caps() ignorerer ukendte kanaler og tal uden for 1-50, channel_runway() grupperer koen pr. kanal, dry_channels() melder dem under advarselsniveauet (en kanal med cap taeller altid, en uden cap kun mens den har noget i koen). Immediate: egen mail pr. kanal-saet; daily: kanal-linje + tabel, og digesten springes ikke over naar kun een kanal er toer. 11 checks (544 -> 555 PASS)"
+          "note": "P0.1 0,5 + P0.2 0,5 + P0.3 1,0 + P0.5 1,0 (alarmer i includes/alerts.php, backoff 5/15/45, auditlog i includes/audit.php) + P0.4-detektion 0,2; + 0,15 d /go-ruten: produktlink uden kø-post gik til forsiden, nu produkt-fallback i 7.32.0 med 5 checks (404 PASS); P0.6 0,5 d (7.40.1): dublet-værn pr. fingerprint med tidsvindue i includes/duplicate.php (en kø-post blokerer uanset alder, en publiceret kun inden for dupe_days = 30, failed blokerer aldrig), 409 navngiver rækken den kolliderede med, og /snapshot bærer fingerprint; 15 checks (479 → 494 PASS); + 0,2 d P0.4/CC-link (7.33.0): pluginnet registrerer Command Centers kald (X-Command-Center), viser forbindelsen og melder i selvtjekket når CC har været tavs > 2 t, og CC 7.19.0 kalder wp-cron.php hvert 5. min (integration: 8 cc-checks PASS). P0.4 0,2 → 0,4 af 0,5 d (7.18.0 + 7.33.0), og 0,1 d lukket 7/11 2026 af ejeren: Simply-cron er sat op (URL-cron mod `wp-cron.php?doing_wp_cron` hver 5. min, Websundhed viser Good) → P0.4 0,5 af 0,5 d; + 0,2 d P0.2 pr. kanal (7.42.0): ny indstilling channel_caps (fx pinterest=2, facebook=3) giver hver kanal sin egen cap og sin egen runway. SGAP_Alerts::caps() ignorerer ukendte kanaler og tal uden for 1-50, channel_runway() grupperer koen pr. kanal, dry_channels() melder dem under advarselsniveauet (en kanal med cap taeller altid, en uden cap kun mens den har noget i koen). Immediate: egen mail pr. kanal-saet; daily: kanal-linje + tabel, og digesten springes ikke over naar kun een kanal er toer. 11 checks (544 -> 555 PASS) + P0.4 0,3 d indfriet 7/11: de »smoke-checks« rækken lovede, fandtes ikke — stubbens wp_next_scheduled() svarede altid false, så cron_lag() var 0 i alle tests. Fire checks dækker nu registrering, good, critical og wp-cron.php-linjen (662 → 666 PASS)"
         },
         {
           "id": "p1",
@@ -1072,6 +1072,15 @@
       "after": 64.4,
       "delta": 0.4,
       "basis": "15,65 af 24,3 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 7,35/8,05 · S3 2,5/3,55 · S4 1,5/5,25)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 76.7,
+      "after": 77.7,
+      "delta": 1.0,
+      "basis": "23,05 af 29,65 d (P0 4,65/4,7 · P1 11,2/15,2 · P2 4,5/7 · P3 2,7/2,75)"
     }
   ]
 }

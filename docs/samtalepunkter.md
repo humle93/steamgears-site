@@ -25,7 +25,7 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 | Projekt | Status | Grundlag |
 | --- | --- | --- |
 | **steamgears.eu — site-optimering** | **64,4 %** | 15,65 af 24,3 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 7,35/8,05 · S3 2,5/3,55 · S4 1,5/5,25) |
-| **Steamgears Autopilot — plugin** | **76,7 %** | 22,75 af 29,65 d (P0 4,35/4,7 · P1 11,2/15,2 · P2 4,5/7 · P3 2,7/2,75) |
+| **Steamgears Autopilot — plugin** | **77,7 %** | 23,05 af 29,65 d (P0 4,65/4,7 · P1 11,2/15,2 · P2 4,5/7 · P3 2,7/2,75) |
 | **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5) |
 | **SEO-indholdsproduktion** | **62,5 %** | 5 af 8 guides (BATCH 0/3 · COPY 4/4 · CORSET 1/1) |
 | **Døde internlinks** | **100 %** | 39 af 39 links (FIX 39/39) |
@@ -47,12 +47,12 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `ef03855 chore(status): daglig projektstatus 2026-11-07`
+- `d1d8048 Modul: S4.13 merchant-schema — produktionstid, og det krav der ikke kan opfyldes`
+- `718fe6a chore(status): daglig projektstatus 2026-11-07`
 - `000b54b Modul: S2.9 designsystem — ét lag for hele sidens flade`
 - `3a3e010 chore(status): daglig projektstatus 2026-11-07`
 - `1c15f93 Modul: UI moderniseret — alle nøgler på ét sted (7.47.0)`
-- `602566a Modul: evergreen-rotationen — deterministisk rækkefølge (7.46.1)`
-- `a74e310 Modul: S0.2 robots.txt — ejer målt, og et nedbrud jeg selv lavede Før: 63,7 %  →  Efter: 63,7 %  (Δ 0) Grundlag: ingen ændring`
-- `0a45621 chore(status): daglig projektstatus 2026-11-07`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
