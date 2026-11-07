@@ -198,7 +198,11 @@ class SGAP_Evergreen {
                 $ids[] = $id;
             }
         }
-        usort($ids, fn($a, $b) => self::last_share($a) <=> self::last_share($b));
+        // Oldest share first, and the id breaks the tie. Two pages that have never been
+        // shared have the same last-share time, and without the second key the order is
+        // whatever the database happens to return — the rotation then depends on the
+        // MySQL version instead of on the shop.
+        usort($ids, fn($a, $b) => [self::last_share($a), $a] <=> [self::last_share($b), $b]);
         $ready = array_values(array_filter($ids, fn($id) => self::status($id)['eligible']));
         return $limit > 0 ? array_slice($ready, 0, $limit) : $ready;
     }
