@@ -24,7 +24,7 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 | Projekt | Status | Grundlag |
 | --- | --- | --- |
-| **steamgears.eu — site-optimering** | **65,9 %** | 15,85 af 24,05 d (S0 2,15/2,35 · S1 2,15/4,6 · S2 7,35/8,3 · S3 2,55/3,55 · S4 1,65/5,25) |
+| **steamgears.eu — site-optimering** | **67,4 %** | 16,2 af 24,05 d (S0 2,15/2,35 · S1 2,15/4,6 · S2 7,35/8,3 · S3 2,55/3,55 · S4 2/5,25) |
 | **Steamgears Autopilot — plugin** | **96,5 %** | 30,3 af 31,4 d (P0 4,65/4,7 · P1 14,2/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25 · P1E 0,25/0,25 · P1F 0,25/0,25 · P1G 0,5/0,5 · P2F 1,5/1,5) |
 | **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5) |
 | **SEO-indholdsproduktion** | **62,5 %** | 5 af 8 guides (BATCH 0/3 · COPY 4/4 · CORSET 1/1) |
@@ -47,12 +47,12 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `fb6e015 Sitet svarer igen — og Facebook-nøglen kan først komme på efter Update`
 - `77148a2 P2.6: Facebook-siden kan styres — med direkte publicering som opt-in (7.58.0)`
 - `3d7a3ff Merge main (S0.4-forbehold) ind i S4.12`
 - `9f77099 Merge main (roadmap-rækker lukket, commit-værn rettet) ind i S4.12`
 - `0165d79 S0.4: forbehold om at «ingen 404» er målt før nedbruddet`
 - `7431166 S4.12: fortrydelsesoplysningerne ind i ordremailen`
-- `0a628a2 Roadmap-rækker lukket med bevis, og CI's commit-værn gjort grøn`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
@@ -81,6 +81,43 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
   `/wp-json/sgap/v1`, at Facebook-rækken i Fejlsøgning står «Connected» med side-navn og fans, at
   post-mappingen vokser ved den første publicering, og at kommentartabellen viser Metas `can_hide`. Intet af
   det er målt endnu.
+
+### 7/11 — Nul anmeldelser var ikke et plugin-problem, men et spørgsmål ingen stillede (S4.10)
+
+WooCommerce har haft anmeldelser hele tiden: formularen ligger på hver produktside, og
+verified-buyer-mærkningen er i kernen. Der er nul, fordi **ingen nogensinde har spurgt** kunden. Derfor
+blev S4.10 ikke en platform, men en mail — `wordpress/mu-plugins/sgap-review-request.php`, 14 dage efter
+ordren er gennemført, ét link pr. produkt til dets `#reviews`-formular.
+
+Fire ting blev gjort eksplicitte i stedet for antaget, og de er hele forskellen mellem en mail og en
+irritation: **status læses igen ved afsendelse**, så en refunderet eller annulleret ordre ikke får
+»hvordan gik det?« midt i en retursag (springet noteres i `_sgap_review_skipped`); **ordremeta
+forhindrer dubletter**, også når en status skifter frem og tilbage; **produkter med lukkede anmeldelser
+udelades**, fordi en anmodning der ikke kan efterkommes er værre end ingen; og der **genplanlægges
+ikke** — én chance pr. ordre, ikke en kø der følger statussen rundt.
+
+Copy afviser incitamenter med vilje (rabat, gave eller refundering for en anmeldelse er unfair
+handelspraksis efter Omnibus) og lover ikke at fjerne negative anmeldelser. Det står i mailen som en
+sætning, ikke som en fodnote — og testen fejler hvis en fremtidig omskrivning begynder at tilbyde noget.
+Afsnittene skrives én gang og renderes til både HTML og ren tekst via `AltBody`, så en tekst-only-klient
+ikke får en tom mail.
+
+**26 påstande / 0 FAIL** i `wordpress/tests/test-review-request.php` (stubbe, ingen WordPress), nu
+**værn nr. 26** i den natlige kørsel. Testen beviser planlægning, dubletværn, status-gaten,
+udeladelsen af lukkede produkter, Action Scheduler-adapteren, escaping og incitament-afvisningen — men
+**ikke** at en mail kan leveres: der er ikke sendt en mail, filen er ikke set i en rigtig WordPress, og
+`#reviews`-ankeret er ikke klikket efter. Det er præcis de sidste 0,05 d, og de kræver File Manager.
+
+S4.10 står derfor som **0,35 af 0,4 d** — samme præcedens som S4.12 (0,15 af 0,2 d, »built, not
+deployed«). S4 1,65 → **2,0 af 5,25 d**.
+
+### 7/11 — Værnene prøvet med vilje-fejl: tre huller, alle lukket
+
+- **Registret var et smuthul.** En registreret SHA slap for **hele** regelsættet: en commit uden `Modul:` og med tal der ikke findes i historikken blev godkendt (`[OK] … undtaget: verificeret register`). Nu er posten `{relax, reason}`, og kun `basis` eller `history` lempes — form, Δ og regnestykke gælder også de to gamle commits. Målt: samme commit med SHA i registeret er stadig **rød** på `mangler linjen 'Modul:'`.
+- **Et scope-flag kunne brændes af en fremmed række.** Flaget blev fjernet for alle projekter, når blot én række blev skrevet. Nu forbruger kun den række det gælder det, og flaget skal være en sætning — `true` og tomme strenge afvises.
+- **`scope_change: true` var en tom etiket.** Et fald på 25,3 pp slap igennem med `module: «daglig måling»`. Nu kræver et fald på ≥ 0,5 pp en navngivet ændring; under tærsklen regnes det som afrundingsstøj, fordi en eksisterende række (96,4 → 96,3) ellers ville gøre historikken ugyldig.
+- **Det der stadig bider:** ikke-registrerede commits med den undtagne fejl er røde med tre forskellige fejltekster, drift i JSON uden historik er rød i tre varianter, og en commit-msg-hook afviste endda forsøgs-committene, før de blev til commits. Hele forsøgsrækken står i `library/vaern-adversarisk-kontrol-2026-11-07.md`.
+- **Fælde:** `git commit` uden `--no-verify` blev stoppet af hooken, så en efterfølgende `--commit HEAD` målte den *forrige* commit. Kontrollér exitkoden, ikke kun linjen.
 
 ### 7/11 — Facebook-siden kan nu styres, men først når nogen slår det til (P2.6, 7.58.0)
 

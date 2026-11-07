@@ -57,13 +57,28 @@ SKIP_SUBJECTS = (
 
 # Ældre commits i main-historikken hvis procenter ikke kan rettes bagefter: en commit er
 # uforanderlig uden force-push, og det er forbudt. Hver post er efterprøvet mod
-# projektstatus.json og forklaret i docs/commit-vaern-register.md. Registret undtager den
-# enkelte commit — det lemper ikke reglen for nye commits.
-VERIFIED_LEGACY: dict[str, str] = {
-    "1c15f939": "række 96 (76,3 → 76,7 %, 22,75 af 29,65 d): tallene er rækkens; Grundlag citerede "
-                 "modul-deltaet (P1 10,7 → 11,2 = 0,5 d) i stedet for totalen",
-    "c747a47a": "P1.5c-arbejdet ligger på main, men beskedens statuslinje (91,0 → 96,2 %, 27,8 af 28,9 d) "
-                 "blev udregnet før det merge der satte række 110 (91,2 → 96,3 %, 28,3 af 29,4 d)",
+# projektstatus.json og forklaret i docs/commit-vaern-register.md.
+#
+# `relax` nævner PRÆCIS de regler der er efterprøvet og godkendt for den commit — ikke hele
+# regelsættet. En registreret commit skal stadig have Modul/Før/Efter/Δ/Grundlag, stadig have
+# et Δ der passer med Efter − Før, og stadig have et regnestykke. Nye regler gælder derfor også
+# for de gamle commits, medmindre de udtrykkeligt står her.
+ALLOWED_RELAX = frozenset({"basis", "history"})
+RELAX_LABELS = {
+    "basis": "Grundlag mod historik-rækkens basis",
+    "history": "Før/Efter/Δ mod en historik-række",
+}
+VERIFIED_LEGACY: dict[str, dict] = {
+    "1c15f939": {
+        "relax": ("basis",),
+        "reason": "række 96 (76,3 → 76,7 %, 22,75 af 29,65 d): Før/Efter/Δ er rækkens egne tal, men "
+                  "Grundlag citerede modul-deltaet (P1 10,7 → 11,2 = 0,5 d) i stedet for totalen",
+    },
+    "c747a47a": {
+        "relax": ("history",),
+        "reason": "P1.5c-arbejdet ligger på main, men beskedens statuslinje (91,0 → 96,2 %, 27,8 af 28,9 d) "
+                  "blev udregnet før det merge der satte række 110 (91,2 → 96,3 %, 28,3 af 29,4 d)",
+    },
 }
 
 
@@ -259,9 +274,18 @@ def row_matches(row: dict, before: float | None, after: float, delta: float | No
     return is_number(row.get("delta")) and abs(float(row["delta"]) - delta) <= HISTORY_TOLERANCE
 
 
-def check_history(fields: dict[str, str], history: list[dict] | None, errors: list[str]) -> None:
-    """Krydstjek beskedens tal mod historik-rækkerne, så et opdigtet grundlag ikke går igennem."""
-    if history is None:
+def check_history(
+    fields: dict[str, str],
+    history: list[dict] | None,
+    errors: list[str],
+    relax: frozenset[str] = frozenset(),
+) -> None:
+    """Krydstjek beskedens tal mod historik-rækkerne, så et opdigtet grundlag ikke går igennem.
+
+    `relax` er de regler der er verificeret for netop denne commit (se VERIFIED_LEGACY).
+    "history" slår kun række-match fra; resten af beskeden valideres stadig.
+    """
+    if history is None or "history" in relax:
         return
     grundlag = (fields.get("grundlag") or "").strip()
     if not grundlag:
@@ -294,7 +318,7 @@ def check_history(fields: dict[str, str], history: list[dict] | None, errors: li
             "historik-række i projektstatus.json — ret tallene i JSON, kør --update og brug rækkens tal"
         )
         return
-    if low == "ingen ændring":
+    if low == "ingen ændring" or "basis" in relax:
         return
     problems = []
     for row in candidates:
@@ -306,19 +330,27 @@ def check_history(fields: dict[str, str], history: list[dict] | None, errors: li
     errors.append("Grundlag matcher ikke historik-rækken: " + "; ".join(unique))
 
 
-def verified_legacy(sha: str) -> str | None:
-    """Undtagelsesgrund hvis commit'en står i det verificerede register (fuld eller kort SHA)."""
+def verified_legacy(sha: str) -> dict | None:
+    """Register-posten (relax + reason) hvis commit'en står i det verificerede register.
+
+    Opslaget kræver mindst 7 tegn, så en tilfældig kort streng ikke kan ramme en post.
+    """
     key = (sha or "").strip().lower()
     if len(key) < 7:
         return None
-    for known, reason in VERIFIED_LEGACY.items():
+    for known, entry in VERIFIED_LEGACY.items():
         if known.startswith(key) or key.startswith(known):
-            return reason
+            return entry
     return None
 
 
-def check_message(message: str, history: list[dict] | None = None) -> tuple[bool, list[str], str]:
-    """Returner (ok, fejl, undtagelsesgrund). `history` er rækkerne fra projektstatus.json."""
+def check_message(
+    message: str,
+    history: list[dict] | None = None,
+    relax: frozenset[str] = frozenset(),
+) -> tuple[bool, list[str], str]:
+    """Returner (ok, fejl, undtagelsesgrund). `history` er rækkerne fra projektstatus.json,
+    `relax` de regler der er verificeret for denne commit."""
     text = (message or "").strip()
     if not text:
         return True, [], "tom besked (committen blev afbrudt)"
@@ -349,7 +381,7 @@ def check_message(message: str, history: list[dict] | None = None) -> tuple[bool
         if abs(delta - expected) > TOLERANCE:
             errors.append(f"Δ {delta:+g} passer ikke med {before:g} → {after:g} (Δ skal være {expected:+g})")
 
-    check_history(fields, history, errors)
+    check_history(fields, history, errors, relax)
     return (not errors), errors, ""
 
 
@@ -567,6 +599,37 @@ FIXTURES: list[tuple[str, str, bool]] = [
 ]
 
 
+# Register-fixtures: de kører mod deres egen historik, så de ikke flytter de faste fixtures.
+RELAX_HISTORY: list[dict] = [
+    {
+        "date": "2026-11-03",
+        "project": "Steamgears Autopilot — plugin",
+        "module": "P1.18 UI",
+        "before": 76.3,
+        "after": 76.7,
+        "delta": 0.4,
+        "basis": "22,75 af 29,65 d (P0 4,35/4,7 · P1 11,2/15,2 · P2 4,5/7 · P3 2,7/2,75)",
+    },
+]
+
+_MSG_BASIS_STYLE = (
+    "Modul: P1.18 UI — nøgler på ét sted\nFør: 76,3 %\nEfter: 76,7 %\nΔ: +0,4\n"
+    "Grundlag: P1.18 0,5 d af 29,65 d (P1 10,7 → 11,2 af 15,2 d)\n"
+)
+_MSG_NO_MODUL = "Før: 76,3 %\nEfter: 76,7 %\nΔ: +0,4\nGrundlag: 22,75 af 29,65 d\n"
+_MSG_BAD_DELTA = "Modul: P1.18\nFør: 76,3 %\nEfter: 76,7 %\nΔ: +9\nGrundlag: 22,75 af 29,65 d\n"
+_MSG_FOREIGN_NUMBERS = "Modul: P1.5c\nFør: 91,0 %\nEfter: 96,2 %\nΔ: +5,2\nGrundlag: 27,8 af 28,9 d\n"
+
+RELAX_FIXTURES: list[tuple[str, str, frozenset[str], bool]] = [
+    ("register: kun Grundlag-reglen lempes", _MSG_BASIS_STYLE, frozenset({"basis"}), True),
+    ("register: samme besked uden lempelse er rød", _MSG_BASIS_STYLE, frozenset(), False),
+    ("register: history-lempelse dækker ikke et manglende Modul", _MSG_NO_MODUL, frozenset({"history"}), False),
+    ("register: history-lempelse dækker ikke et forkert Δ", _MSG_BAD_DELTA, frozenset({"history"}), False),
+    ("register: basis-lempelse dækker ikke tal uden række", _MSG_FOREIGN_NUMBERS, frozenset({"basis"}), False),
+    ("register: history-lempelse accepterer den registrerede form", _MSG_FOREIGN_NUMBERS, frozenset({"history"}), True),
+]
+
+
 def run_selftest() -> int:
     failed = []
     for name, message, expected in FIXTURES:
@@ -581,12 +644,30 @@ def run_selftest() -> int:
         got = verified_legacy(sha) is not None
         if got != expected:
             failed.append(f"register {sha!r}: forventet {'fundet' if expected else 'ikke fundet'}")
+
+    # Registret må ikke kunne lempe mere end de regler der findes, og hver post skal have en grund.
+    for sha, entry in VERIFIED_LEGACY.items():
+        if not isinstance(entry, dict) or not str(entry.get("reason", "")).strip():
+            failed.append(f"register {sha}: posten mangler en begrundelse")
+            continue
+        if len(sha) < 8:
+            failed.append(f"register {sha}: SHA er kortere end 8 tegn")
+        unknown = set(entry.get("relax", ())) - ALLOWED_RELAX
+        if unknown:
+            failed.append(f"register {sha}: ukendt lempelse {sorted(unknown)}")
+
+    for name, message, relax, expected in RELAX_FIXTURES:
+        ok, errors, _skip = check_message(message, RELAX_HISTORY, relax)
+        if ok != expected:
+            failed.append(f"{name}: forventet {'OK' if expected else 'FEJL'}, fik {'OK' if ok else 'FEJL'}"
+                          + (f" ({'; '.join(errors)})" if errors else ""))
     for line in failed:
         print(f"[FEJL] {line}")
     if failed:
         print(f"[FEJL] {len(failed)} fejl i {len(FIXTURES)} fixtures + register")
         return 1
     print(f"[OK] {len(FIXTURES)} af {len(FIXTURES)} fixtures som forventet")
+    print(f"[OK] {len(RELAX_FIXTURES)} register-fixtures: kun den verificerede regel lempes")
     print(f"[OK] register: {len(VERIFIED_LEGACY)} verificerede ældre commits")
     return 0
 
@@ -722,12 +803,14 @@ def main(argv: list[str] | None = None) -> int:
             for sha, body in rows:
                 short = sha[:8]
                 legacy = verified_legacy(sha)
-                if legacy:
-                    print(f"[OK] {short} undtaget: verificeret register — {legacy}")
-                    continue
-                ok, errors, skip = check_message(body, history)
+                relax = frozenset(legacy["relax"]) if legacy else frozenset()
+                ok, errors, skip = check_message(body, history, relax)
                 if ok:
-                    print(f"[OK] {short} {skip or 'har procenterne'}")
+                    if legacy:
+                        print(f"[OK] {short} register: {legacy['reason']}"
+                              f" (lempet: {', '.join(RELAX_LABELS[r] for r in legacy['relax'])})")
+                    else:
+                        print(f"[OK] {short} {skip or 'har procenterne'}")
                     continue
                 bad += 1
                 report(body, errors, f"{short}")
@@ -738,13 +821,15 @@ def main(argv: list[str] | None = None) -> int:
         rev = args.commit or "HEAD"
         resolved = git("rev-parse", rev).stdout.strip()
         legacy = verified_legacy(resolved)
-        if legacy:
-            print(f"[OK] {resolved[:8]} undtaget: verificeret register — {legacy}")
-            return 0
+        relax = frozenset(legacy["relax"]) if legacy else frozenset()
         message = message_from_commit(rev)
-        ok, errors, skip = check_message(message, history)
+        ok, errors, skip = check_message(message, history, relax)
         if ok:
-            print(f"[OK] {skip or 'commit-beskeden har procenterne'}")
+            if legacy:
+                print(f"[OK] {resolved[:8]} register: {legacy['reason']}"
+                      f" (lempet: {', '.join(RELAX_LABELS[r] for r in legacy['relax'])})")
+            else:
+                print(f"[OK] {skip or 'commit-beskeden har procenterne'}")
             return 0
         report(message, errors, args.commit or "HEAD")
         return 1

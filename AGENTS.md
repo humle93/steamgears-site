@@ -72,6 +72,10 @@ Reglen over holdes automatisk, så lidt som muligt afhænger af hukommelse:
 - **100 % kræver `"verified": true`** — ellers er tallet en påstand, ikke en status.
 - **Fald i procent afvises** både i forhold til forrige række og til modulernes tal, medmindre rækken har
   `"scope_change": true` (og så skal årsagen stå i `module`/`basis`).
+- En **planlagt** scope-ændring markeres med `scope_change_pending` på projektet: en sætning der forklarer
+  hvad der tages ud/ind. Den sætter `scope_change: true` på den ene række den gælder og forbruges derefter;
+  en række for et andet projekt kan ikke brænde den. `true` eller en tom streng afvises, og en
+  `scope_change`-række med et fald på 0,5 pp eller mere skal navngive ændringen i `module`.
 - `delta` skal passe med `after - before`. Drift i dokumentet (håndredigerede AUTO-blokke) fanges.
 
 **Værn efter skrivning:**
@@ -131,7 +135,7 @@ Reglen over holdes automatisk, så lidt som muligt afhænger af hukommelse:
   `Grundlag` skal kunne læses ud af den rækkes `basis` (også når beskeden kun citerer rækkens `X af Y enhed`-del),
   så et opdigtet regnestykke afvises. Kan JSON-filen ikke læses, springes kun krydstjekket over — formen kræves
   stadig. Et pas der ikke flytter noget kan skrive `ingen ændring` uden en række. Merge-, revert- og bot-committene
-  fra de to workflows er undtaget, fordi de ikke kan bære procenter; historikken før 3/11 er ikke tjekket efter. Commits der ligger fast i historikken og ikke kan rettes, står i et **verificeret register** ([`docs/commit-vaern-register.md`](docs/commit-vaern-register.md)) med grund og bevis — `--range` skriver hver undtagelse med sin grund, og registret undtager kun den enkelte commit.
+  fra de to workflows er undtaget, fordi de ikke kan bære procenter; historikken før 3/11 er ikke tjekket efter. Commits der ligger fast i historikken og ikke kan rettes, står i et **verificeret register** ([`docs/commit-vaern-register.md`](docs/commit-vaern-register.md)) med grund og bevis — og registret lemper **kun den enkelte commit og kun den regel der er efterprøvet** (`basis` eller `history`). Formkravene, `Δ = Efter − Før` og kravet om et regnestykke gælder også de registrerede commits, så et nyt værn rammer dem medmindre det udtrykkeligt står i posten. `--range` skriver hver undtagelse med sin grund og hvilken regel der blev lempet.
 
 Automationen dækker **den daglige status**, og commit-beskeden bliver holdt op på formen. Det manuelle i §1 — at
 vurdere hvad der reelt blev udført og melde `% før → % efter` i svaret — kan scriptet ikke gøre og falder stadig
