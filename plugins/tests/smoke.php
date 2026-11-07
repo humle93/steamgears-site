@@ -4,7 +4,7 @@
  * No WordPress or database needed. Usage: php plugins/tests/smoke.php
  * (Real WordPress + MySQL is covered by plugins/tests/integration.php in CI.)
  */
-define('ABSPATH', __DIR__.'/fixtures/'); define('DAY_IN_SECONDS',86400); define('HOUR_IN_SECONDS',3600); define('MINUTE_IN_SECONDS',60); define('ARRAY_A','ARRAY_A');
+define('ABSPATH', __DIR__.'/fixtures/'); define('DAY_IN_SECONDS',86400); define('HOUR_IN_SECONDS',3600); define('MINUTE_IN_SECONDS',60); define('WEEK_IN_SECONDS',604800); define('ARRAY_A','ARRAY_A');
 $GLOBALS['actions']=[]; $opts=[]; $settings=[];
 function add_action($h,$cb){ $GLOBALS['actions'][$h][]=$cb; } function add_filter($h,$cb){ $GLOBALS['actions'][$h][]=$cb; }
 function apply_filters($h,$v,...$a){return isset($GLOBALS['filters'][$h])?($GLOBALS['filters'][$h])($v,...$a):$v;}
@@ -12,7 +12,7 @@ function do_action($h,...$a){ foreach($GLOBALS['actions'][$h]??[] as $cb) call_u
 function register_activation_hook(...$a){} function register_deactivation_hook(...$a){}
 function is_admin(){return true;} function get_option($k,$d=false){return $GLOBALS['opts'][$k]??$d;}
 function update_option($k,$v,$autoload=null){$GLOBALS['opts'][$k]=$v; $GLOBALS['autoload'][$k]=$autoload;} function add_option($k,$v){$GLOBALS['opts'][$k]??=$v;} function wp_mail($to,$s,$b){$GLOBALS['mails'][]=[$to,$s,$b]; return true;}
-function register_setting($g,$k,$a){ $GLOBALS['settings'][$k]=$a; } function wp_clear_scheduled_hook($h){}
+function register_setting($g,$k,$a){ $GLOBALS['settings'][$k]=$a; } function wp_clear_scheduled_hook($h,$a=[]){ $GLOBALS['cleared'][]=$h; }
 function add_menu_page($t,$m,$c,$slug,$cb){ add_action('page_'.$slug,$cb);} function add_submenu_page($p,$t,$m,$c,$slug,$cb){ add_action('page_'.$slug,$cb);}
 function esc_html($s){return htmlspecialchars((string)$s);} function esc_attr($s){return htmlspecialchars((string)$s);} function esc_url($s){return $s;} function esc_textarea($s){return htmlspecialchars((string)$s);}
 function get_transient($k){return false;} function set_transient(...$a){} function delete_transient($k){} function settings_fields($g){} function submit_button(){}
@@ -1327,6 +1327,41 @@ SGAP_Scheduler::unschedule('sgap_as_hook');
 check('scheduler: unschedule clears the AS hook in our group', ($GLOBALS['as']['unschedule'][0]??null)===['sgap_as_hook','sgap']);
 check('scheduler: AS present means WP-Cron is never asked', !in_array('sgap_as_hook',$GLOBALS['cron'],true));
 check('scheduler: health names the backend and explains the difference', SGAP_Scheduler::health()['backend']==='action-scheduler' && str_contains(SGAP_Scheduler::health()['note'],'Action Scheduler'));
+
+// P0.7b — alle jobs gennem adapteren.
+$GLOBALS['as']['recurring']=[]; $GLOBALS['as']['single']=[]; $GLOBALS['as']['unschedule']=[]; $GLOBALS['as']['next']=0; $GLOBALS['cron']=[]; $GLOBALS['ddl']=[];
+SGAP_Install::install();
+$as_hooks = array_map(fn($r)=>$r[2], $GLOBALS['as']['recurring']);
+check('scheduler: activation puts all five jobs on Action Scheduler', count(array_intersect(
+    [SGAP_Install::CLEANUP_CRON, SGAP_Install::GENERATE_CRON, SGAP_Install::EVERGREEN_CRON, SGAP_Install::PUBLISH_CRON, SGAP_Install::MCP_CRON], $as_hooks))===5);
+$publish = array_values(array_filter($GLOBALS['as']['recurring'], fn($r)=>$r[2]===SGAP_Install::PUBLISH_CRON));
+check('scheduler: the publisher keeps its 15-minute interval on AS', ($publish[0][1]??0)===15*MINUTE_IN_SECONDS && ($publish[0][3]??'')==='sgap');
+check('scheduler: the first run keeps its delay instead of waiting a whole interval', abs(($publish[0][0]??0) - (time()+5*MINUTE_IN_SECONDS)) < 5);
+check('scheduler: one pass leaves WP-Cron empty when AS is there', $GLOBALS['cron']===[]);
+
+$GLOBALS['as']['recurring']=[];
+SGAP_Auto::schedule();
+$health = array_values(array_filter($GLOBALS['as']['recurring'], fn($r)=>$r[2]===SGAP_Auto::HEALTH_CRON));
+check('scheduler: the daily self-check goes through the adapter too', ($health[0][1]??0)===DAY_IN_SECONDS && abs(($health[0][0]??0)-(time()+2*HOUR_IN_SECONDS)) < 5);
+
+$GLOBALS['cleared']=[]; $GLOBALS['as']['unschedule']=[];
+SGAP_Scheduler::unschedule('sgap_both_hook');
+check('scheduler: unschedule clears AS and WP-Cron, so a switch cannot leave a twin', ($GLOBALS['as']['unschedule'][0]??null)===['sgap_both_hook','sgap'] && in_array('sgap_both_hook',$GLOBALS['cleared'],true));
+
+$GLOBALS['as']['next']=time()-45*MINUTE_IN_SECONDS;
+$lag=SGAP_Auto::cron_lag();
+check('scheduler: cron lag is measured on whichever backend runs', $lag>=44 && $lag<=46);
+$GLOBALS['as']['next']=time()+5*MINUTE_IN_SECONDS;
+check('scheduler: Site Health names the backend that is running', str_contains(SGAP_Auto::site_health_cron()['description'],'action-scheduler'));
+
+$GLOBALS['filters']['sgap_scheduler_action_scheduler']=fn($v)=>false;
+check('scheduler: the filter forces WP-Cron while AS is installed', SGAP_Scheduler::backend()==='wp-cron');
+unset($GLOBALS['filters']['sgap_scheduler_action_scheduler']);
+
+$GLOBALS['as']['next']=0; $GLOBALS['as']['recurring']=[];
+check('scheduler: a zero next run in AS still means not scheduled', SGAP_Scheduler::recurring('sgap_as_zero',HOUR_IN_SECONDS) && count($GLOBALS['as']['recurring'])===1);
+$GLOBALS['as']['next']=0; $GLOBALS['as']['recurring']=[]; $GLOBALS['as']['unschedule']=[];
+
 
 // P1.5a — Bluesky- og Mastodon-engagement ind i sgap_events. Netværket går gennem
 // SGAP_Engagement::$transport, fordi smoke-suiten allerede har defineret wp_remote_get.

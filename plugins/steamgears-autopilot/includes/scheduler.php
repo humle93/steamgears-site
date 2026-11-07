@@ -26,11 +26,21 @@ class SGAP_Scheduler {
     /** Group every job of ours, so `wp action-scheduler run --group=sgap` is a clean handle. */
     const GROUP = 'sgap';
 
-    /** The three functions that must exist before we hand scheduling to AS. */
+    /**
+     * The three functions that must exist before we hand scheduling to AS — plus an explicit
+     * way out. `define('SGAP_SCHEDULER_WP_CRON', true)` in wp-config.php, or the
+     * `sgap_scheduler_action_scheduler` filter, forces WP-Cron while AS is still loaded.
+     * Without that, a site whose AS queue has stalled would have no way to publish if the
+     * admin is unreachable.
+     */
     public static function available(): bool {
-        return function_exists('as_schedule_recurring_action')
+        if (defined('SGAP_SCHEDULER_WP_CRON') && SGAP_SCHEDULER_WP_CRON) {
+            return false;
+        }
+        $present = function_exists('as_schedule_recurring_action')
             && function_exists('as_schedule_single_action')
             && function_exists('as_next_scheduled_action');
+        return $present && (bool) apply_filters('sgap_scheduler_action_scheduler', true);
     }
 
     /** `action-scheduler` or `wp-cron` — what the admin page and Site Health report. */
@@ -42,16 +52,19 @@ class SGAP_Scheduler {
      * Make sure a recurring job exists. Idempotent: an existing occurrence is left alone,
      * so calling this on every request is safe and cannot stack duplicates.
      */
-    public static function recurring(string $hook, int $interval, array $args = []): bool {
+    public static function recurring(string $hook, int $interval, array $args = [], int $first_delay = 0, string $schedule = ''): bool {
         $interval = max(60, $interval);
         if (self::next($hook, $args) !== false) {
             return true;
         }
+        // The first run keeps the delay the caller asked for — activation starts the
+        // publisher five minutes in, not a whole interval in — and repeats on the interval.
+        $first = time() + ($first_delay > 0 ? $first_delay : $interval);
         if (self::available()) {
-            $id = as_schedule_recurring_action(time() + $interval, $interval, $hook, $args, self::GROUP);
+            $id = as_schedule_recurring_action($first, $interval, $hook, $args, self::GROUP);
             return !is_wp_error($id) && (int) $id > 0;
         }
-        return (bool) wp_schedule_event(time() + $interval, self::wp_schedule_name($interval), $hook, $args);
+        return (bool) wp_schedule_event($first, $schedule !== '' ? $schedule : self::wp_schedule_name($interval), $hook, $args);
     }
 
     /** A one-off job at a fixed time; past timestamps run on the next queue pass. */
@@ -79,11 +92,14 @@ class SGAP_Scheduler {
         return $next ? (int) $next : false;
     }
 
-    /** Remove every pending occurrence of a hook, in whichever backend owns it. */
+    /**
+     * Remove every pending occurrence of a hook. Both backends are cleared on purpose: a job
+     * scheduled before AS became available would otherwise survive the switch and keep firing
+     * next to its AS twin.
+     */
     public static function unschedule(string $hook, array $args = []): void {
         if (self::available()) {
             as_unschedule_all_actions($hook, $args, self::GROUP);
-            return;
         }
         wp_clear_scheduled_hook($hook, $args);
     }

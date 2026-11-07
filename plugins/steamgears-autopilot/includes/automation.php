@@ -203,8 +203,8 @@ class SGAP_Rescue {
         update_option(self::FAILED, $failed, false);
         $places = self::rewrite($map);
         $waiting = max(0, count($todo) - $copied - $errors);
-        if ($waiting > 0 && !wp_next_scheduled(self::CRON)) {
-            wp_schedule_single_event(time() + 120, self::CRON);
+        if ($waiting > 0 && SGAP_Scheduler::next(self::CRON) === false) {
+            SGAP_Scheduler::single(self::CRON, time() + 120);
         }
         return ['copied' => $copied, 'failed' => $errors, 'places_updated' => $places, 'waiting' => $waiting];
     }
@@ -282,7 +282,7 @@ class SGAP_Auto {
             $desc = '<p>DISABLE_WP_CRON is set, so WordPress will not run cron on page loads. Make sure a real cron job calls <code>wp-cron.php</code> every 5 minutes, or posts will be released late.</p>';
         } else {
             $status = 'good';
-            $desc = '<p>The 15-minute publisher is on time.</p>';
+            $desc = '<p>' . esc_html('The 15-minute publisher is on time (' . SGAP_Scheduler::backend() . ').') . '</p>';
         }
         $badge = $status === 'critical' ? 'red' : ($status === 'recommended' ? 'orange' : 'blue');
         return [
@@ -295,16 +295,20 @@ class SGAP_Auto {
     }
 
     public static function schedule(): void {
-        foreach ([self::HEALTH_CRON => ['daily', 2 * HOUR_IN_SECONDS], self::ARTICLE_CRON => ['weekly', DAY_IN_SECONDS], self::REPORT_CRON => ['weekly', 3 * DAY_IN_SECONDS], SGAP_Rescue::CRON => ['hourly', 15 * MINUTE_IN_SECONDS]] as $hook => [$rec, $delay]) {
-            if (!wp_next_scheduled($hook)) {
-                wp_schedule_event(time() + $delay, $rec, $hook);
-            }
+        // [interval in seconds, WP-Cron recurrence name, first-run delay]
+        foreach ([
+            self::HEALTH_CRON => [DAY_IN_SECONDS, 'daily', 2 * HOUR_IN_SECONDS],
+            self::ARTICLE_CRON => [WEEK_IN_SECONDS, 'weekly', DAY_IN_SECONDS],
+            self::REPORT_CRON => [WEEK_IN_SECONDS, 'weekly', 3 * DAY_IN_SECONDS],
+            SGAP_Rescue::CRON => [HOUR_IN_SECONDS, 'hourly', 15 * MINUTE_IN_SECONDS]
+        ] as $hook => [$interval, $rec, $delay]) {
+            SGAP_Scheduler::recurring($hook, $interval, [], $delay, $rec);
         }
     }
 
     public static function clear(): void {
         foreach ([self::HEALTH_CRON, self::ARTICLE_CRON, self::REPORT_CRON, self::NEW_CONTENT_CRON, SGAP_Rescue::CRON] as $hook) {
-            wp_clear_scheduled_hook($hook);
+            SGAP_Scheduler::unschedule($hook);
         }
     }
 
@@ -340,8 +344,8 @@ class SGAP_Auto {
         $pending = (array) get_option('sgap_new_content', []);
         $pending[] = (int) $post->ID;
         update_option('sgap_new_content', array_values(array_unique($pending)), false);
-        if (!wp_next_scheduled(self::NEW_CONTENT_CRON)) {
-            wp_schedule_single_event(time() + 5 * MINUTE_IN_SECONDS, self::NEW_CONTENT_CRON);
+        if (SGAP_Scheduler::next(self::NEW_CONTENT_CRON) === false) {
+            SGAP_Scheduler::single(self::NEW_CONTENT_CRON, time() + 5 * MINUTE_IN_SECONDS);
         }
     }
 
@@ -510,7 +514,7 @@ class SGAP_Auto {
      * WordPress handles a request; a full page cache plus quiet hours of traffic can stop it.
      */
     public static function cron_lag(): int {
-        $next = wp_next_scheduled(SGAP_Install::PUBLISH_CRON);
+        $next = SGAP_Scheduler::next(SGAP_Install::PUBLISH_CRON);
         if (!$next || (defined('DISABLE_WP_CRON') && DISABLE_WP_CRON && $next > time() - 1800)) {
             return 0;
         }
@@ -518,6 +522,9 @@ class SGAP_Auto {
     }
 
     public static function cron_advice(int $lag): string {
+        if (SGAP_Scheduler::backend() === 'action-scheduler') {
+            return "Action Scheduler is {$lag} minutes behind, so posts are released late. Check WooCommerce → Status → Scheduled Actions; from a shell, `wp action-scheduler run --group=sgap` runs the queue now.";
+        }
         return "WP-Cron is {$lag} minutes behind, so posts are released late. Set up a free external cron that calls "
             . site_url('wp-cron.php') . ' every 5 minutes (e.g. cron-job.org or your host\'s cron), or add the feeds in Publer – its polling also keeps cron running.';
     }

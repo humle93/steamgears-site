@@ -203,10 +203,13 @@ Effort is developer-days for one developer who knows this codebase, excluding wa
 | P0.4 | Cron honesty: detect `DISABLE_WP_CRON`, surface a Site Health test + the exact `wp-cron.php` line for real cron, document it in the README | On a cached site WP-Cron may not fire for hours; quiet hours then release posts late | 0.5 d (detect + docs) **Done 0,5 af 0,5 d (7.18.0 + 7.33.0, ejerbekræftet 7/11 2026).** Site Health-test (`SGAP_Auto::site_status_tests()`), `DISABLE_WP_CRON`-detektion, README "Real cron"-afsnit, smoke-checks og CC-kaldsregistrering. Host-cron er sat op i Simply (URL-cron mod `wp-cron.php?doing_wp_cron` hver 5. min); Websundhed viser Good. |
 | P0.5 | ✅ **Done 2/11** — `includes/audit.php` (`SGAP_Audit`): every attempt writes one row to `sgap_publish_log` — time, queue id, channel, outcome (`sent`/`rss`/`published`/`requeued`/`failed`), HTTP status carried by the Publer `WP_Error`, a 500-character response excerpt, and the actor (cron, admin, REST, WP-CLI). Own **Publish log** page with outcome filters, paging and a clear button. `SGAP_Maintenance::daily()` prunes rows older than `audit_keep_days` (default 90, `0` = keep everything). Retention rather than a cap, so a busy week cannot push out the evidence | You cannot debug "why did this not post" from `error TEXT` alone | 1.0 d | ✅ |
 | P0.6 | ✅ **Done 6/11 (7.40.1)** — `includes/duplicate.php` (`SGAP_Duplicate`): the queue refuses a second hand-over of the same `channel`+`destination_url`+`title` from *any* writer, not just through the old all-time exact match. The key is the sha256 the database already indexed; **a row that is still queued blocks whatever its age** (it is about to go out), a published one only inside `dupe_days` (Settings → Publishing, default 30, `0` = the whole history), so an evergreen title may legitimately return next quarter, and `failed` rows never block. The refusal names the row it collided with — `Already queued as #412 (queued, 2026-11-08 10:00) …` — and carries `id` + `fingerprint` in the error data, and `/snapshot` exposes `fingerprint` on every queue row so an outside dashboard can recognise its own hand-over. 15 smoke checks (479 → 494) | A dashboard that retries a hand-over would post twice | 0.5 d | ✅ |
-| **P0 total** | | | **4.0 d** | |
+| P0.7 | ✅ **Done 7/11 (7.49.0 + 7.50.0)** — `includes/scheduler.php` (`SGAP_Scheduler`) lægger hvert job på Action Scheduler når WooCommerce leverer den (gruppe `sgap`, så `wp action-scheduler run --group=sgap` er et rent håndtag) og falder tilbage til WP-Cron ellers. `recurring()`/`single()`/`next()`/`unschedule()` er idempotente, første kørsel beholder den forsinkelse aktiveringen bad om, og `unschedule()` rydder **begge** backends, så et backend-skift ikke efterlader en tvilling. Aktivering, publicerings-tick, self-check, ugentlig artikel/mail, rescue-kø og MCP-fornyelse går nu gennem adapteren; `cron_lag()` og Site Health læser næste kørsel samme vej, så »15 minutter bagud« måles rigtigt uanset backend. Nødudgang hvis AS-køen står stille: `define('SGAP_SCHEDULER_WP_CRON', true)` eller filteret `sgap_scheduler_action_scheduler`. 20 smoke-checks (679 → 700 PASS) | Et cron-job der kun findes i WP-Cron kan ikke inspiceres, gentages eller køres manuelt — og et job der findes i begge backends kører dobbelt | 1.0 d | ✅ |
+| **P0 total** | | | **5.0 d** (4.0 + P0.7 1.0) | |
 
-Optional, larger: migrate the publish tick to **Action Scheduler** (per-job status, retries, real WP-CLI
-runner). That is 2.0 d on top and is the "correct" long-term answer to P0.4 on low-traffic sites.
+Done 7/11 as P0.7 — **adapter, not migration**. `SGAP_Scheduler` uses WooCommerce's copy of Action Scheduler
+when it is loaded (per-job status, retries, a real WP-CLI runner) and stays on WP-Cron when it is not, so the
+2.0 d migration was unnecessary: the library was already on the site. `SGAP_SCHEDULER_WP_CRON` forces WP-Cron
+if the AS queue ever stalls.
 
 ### P1 — parity with what shop owners get from hosted tools
 
@@ -312,9 +315,10 @@ Platform limits: [Instagram content publishing](https://developers.facebook.com/
    only if Etsy volume justifies the 2.5 d OAuth import.
 2. **Direct network tokens** — ✅ **decided 2026-11-06: removed** (7.33.3). All publishing goes through Publer,
    so `pinterest_token`, `instagram_token`, `tiktok_token`, `youtube_*`, `reddit_*` and `ai_mode` are gone.
-3. ~~**Action Scheduler**~~ — **afgjort 7/11: adapter, ikke migration** (7.49.0). `includes/scheduler.php` bruger
-   Woo's kopi når den findes og falder tilbage til WP-Cron ellers; se nedenfor. Den oprindelige formulering lød:
-   accept the 2 d migration, or stay on WP-Cron with detection and documentation
+3. ~~**Action Scheduler**~~ — **afgjort 7/11: adapter, ikke migration** (7.49.0 + 7.50.0). `includes/scheduler.php`
+   bruger Woo's kopi når den findes og falder tilbage til WP-Cron ellers; samtlige jobs går gennem den, og
+   `SGAP_SCHEDULER_WP_CRON` er nødudgangen. Den oprindelige formulering lød: accept the 2 d migration, or stay on
+   WP-Cron with detection and documentation
    (P0.4)? **Research 7/11:** WooCommerce 11.x leverer Action Scheduler (GPL-3.0, L-2-politik), så en adapter på ~0,5 d
    (`function_exists('as_schedule_recurring_action')` → AS med `sgap`-gruppe, ellers WP-Cron) slår den fulde 2,0 d-migration — se
    [docs/library/plugin-funktioner-research-2026-11-07.md](../../docs/library/plugin-funktioner-research-2026-11-07.md).
@@ -330,6 +334,13 @@ Platform limits: [Instagram content publishing](https://developers.facebook.com/
 
 ## 9. Change log for this document
 
+- **7.50.0 (7/11)** — **P0.7b alle jobs gennem adapteren:** aktiveringens fem jobs, publicerings-tick'et,
+  den daglige self-check, ugentlig artikel/mail, rescue-køen og MCP-fornyelsen planlægges nu med
+  `SGAP_Scheduler::recurring()`/`single()` i stedet for direkte WP-Cron-kald. `cron_lag()` og Site Health læser
+  næste kørsel gennem adapteren, så »15 minutter bagud« måles rigtigt uanset backend, og rådgivningen skelner
+  mellem de to. `unschedule()` rydder begge backends, så et skift ikke efterlader en tvilling, og `uninstall.php`
+  fjerner vores AS-actions. Nødudgang: `define('SGAP_SCHEDULER_WP_CRON', true)` eller filteret
+  `sgap_scheduler_action_scheduler`. 10 nye smoke-checks (690 → **700 PASS**).
 - **7.49.0 (7/11)** — **P0.7 scheduler-adapter:** `includes/scheduler.php` vælger Action Scheduler når WooCommerce
   leverer den (`as_schedule_recurring_action` m.fl., gruppe `sgap`) og falder ellers tilbage til WP-Cron.
   `recurring()`/`single()`/`next()`/`unschedule()` er idempotente, og `health()` rapporterer backend uden

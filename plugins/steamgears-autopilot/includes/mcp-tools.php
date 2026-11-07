@@ -750,9 +750,9 @@ class SGAP_MCP_Tools {
         if ($hook === '') {
             return new WP_Error('sgap_mcp_missing', 'hook is required.');
         }
-        $scheduled = function_exists('wp_next_scheduled') ? wp_next_scheduled($hook) : false;
+        $scheduled = SGAP_Scheduler::next($hook) !== false;
         do_action_ref_array($hook, []);
-        return ['hook' => $hook, 'was_scheduled' => (bool) $scheduled, 'ran' => true];
+        return ['hook' => $hook, 'was_scheduled' => $scheduled, 'ran' => true];
     }
 
     /* ------------------------------------------------------------------ *

@@ -327,7 +327,7 @@ class SGAP_MCP_Auth {
         $access = (string) get_option(self::ACCESS, '');
         $expires = (int) get_option(self::EXPIRES, 0);
         $valid = $access !== '' && $expires > time();
-        $next = wp_next_scheduled(self::CRON);
+        $next = SGAP_Scheduler::next(self::CRON);
         $missing = [];
         if (self::client_id() === '') {
             $missing[] = 'the client ID';

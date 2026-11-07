@@ -93,9 +93,9 @@
         },
         {
           "id": "p0s",
-          "name": "P0.7 — Action Scheduler-adapter",
-          "done": 0.5,
-          "total": 0.5,
+          "name": "P0.7 — scheduler-adapter (alle jobs)",
+          "done": 1.0,
+          "total": 1.0,
           "unit": "d",
           "verified": true
         }
@@ -1107,6 +1107,15 @@
       "after": 79.8,
       "delta": 0.4,
       "basis": "24,05 af 30,15 d (P0 4,65/4,7 · P1 11,7/15,2 · P2 4,5/7 · P3 2,7/2,75 · P0.7 0,5/0,5)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 79.8,
+      "after": 80.1,
+      "delta": 0.3,
+      "basis": "24,55 af 30,65 d (P0 4,65/4,7 · P1 11,7/15,2 · P2 4,5/7 · P3 2,7/2,75 · P0.7 1/1)"
     }
   ]
 }

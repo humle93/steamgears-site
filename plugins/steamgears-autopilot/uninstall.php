@@ -30,3 +30,9 @@ foreach ([
 ] as $hook) {
     wp_clear_scheduled_hook($hook);
 }
+
+// The plugin may have scheduled its jobs in Action Scheduler instead: a deleted plugin
+// must not leave actions behind that fire hooks nobody listens to any more.
+if (function_exists('as_unschedule_all_actions')) {
+    as_unschedule_all_actions('', [], 'sgap');
+}

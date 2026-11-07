@@ -508,7 +508,7 @@ class SGAP_AdminTools {
         ], fn($v) => $v !== null) : null;
         $sgap_events = [];
         foreach ([SGAP_Install::PUBLISH_CRON, SGAP_Install::GENERATE_CRON, SGAP_Install::CLEANUP_CRON] as $hook) {
-            $next = wp_next_scheduled($hook);
+            $next = SGAP_Scheduler::next($hook);
             $sgap_events[$hook] = $next ? wp_date('Y-m-d H:i:s', $next) : 'not scheduled';
         }
         $free = function_exists('disk_free_space') ? @disk_free_space(ABSPATH) : false;

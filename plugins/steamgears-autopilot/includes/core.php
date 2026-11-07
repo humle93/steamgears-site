@@ -90,7 +90,7 @@ class SGAP_Install {
     public static function deactivate(): void {
         self::clear_legacy_cron();
         foreach ([self::CLEANUP_CRON, self::PUBLISH_CRON, self::GENERATE_CRON, self::EVERGREEN_CRON, self::MCP_CRON] as $hook) {
-            wp_clear_scheduled_hook($hook);
+            SGAP_Scheduler::unschedule($hook);
         }
         if (class_exists('SGAP_Auto')) {
             SGAP_Auto::clear();
@@ -126,7 +126,7 @@ class SGAP_Install {
 
     public static function clear_legacy_cron(): void {
         foreach (self::LEGACY_CRON as $hook) {
-            wp_clear_scheduled_hook($hook);
+            SGAP_Scheduler::unschedule($hook);
         }
     }
 
@@ -311,16 +311,15 @@ class SGAP_Install {
         // Old versions scheduled these; nothing handles them now, so they
         // would only keep waking WP-Cron for no reason.
         self::clear_legacy_cron();
+        // [interval in seconds, WP-Cron recurrence name, first-run delay]
         foreach ([
-            self::CLEANUP_CRON => ['daily', HOUR_IN_SECONDS],
-            self::GENERATE_CRON => ['daily', 10 * MINUTE_IN_SECONDS],
-            self::EVERGREEN_CRON => ['daily', 20 * MINUTE_IN_SECONDS],
-            self::PUBLISH_CRON => [self::QUARTER_HOUR, 5 * MINUTE_IN_SECONDS],
-            self::MCP_CRON => [self::MCP_HALF_HOUR, 12 * MINUTE_IN_SECONDS]
-        ] as $hook => [$recurrence, $delay]) {
-            if (!wp_next_scheduled($hook)) {
-                wp_schedule_event(time() + $delay, $recurrence, $hook);
-            }
+            self::CLEANUP_CRON => [DAY_IN_SECONDS, 'daily', HOUR_IN_SECONDS],
+            self::GENERATE_CRON => [DAY_IN_SECONDS, 'daily', 10 * MINUTE_IN_SECONDS],
+            self::EVERGREEN_CRON => [DAY_IN_SECONDS, 'daily', 20 * MINUTE_IN_SECONDS],
+            self::PUBLISH_CRON => [15 * MINUTE_IN_SECONDS, self::QUARTER_HOUR, 5 * MINUTE_IN_SECONDS],
+            self::MCP_CRON => [30 * MINUTE_IN_SECONDS, self::MCP_HALF_HOUR, 12 * MINUTE_IN_SECONDS]
+        ] as $hook => [$interval, $recurrence, $delay]) {
+            SGAP_Scheduler::recurring($hook, $interval, [], $delay, $recurrence);
         }
 
         SGAP_Tracking::add_rewrite_rule();
