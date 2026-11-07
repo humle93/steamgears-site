@@ -335,11 +335,24 @@ class SGAP_MCP_Tools {
         ];
     }
 
+    /**
+     * The full catalogue: the rows above plus the shop tools, which keep their own
+     * class because they talk to WooCommerce and Printful. One registry, one
+     * capability callback, one set of ability metadata.
+     */
+    private static function all_definitions(): array {
+        $definitions = self::definitions();
+        if (class_exists('SGAP_MCP_Woo')) {
+            $definitions += SGAP_MCP_Woo::definitions();
+        }
+        return $definitions;
+    }
+
     public static function register(): void {
         if (!function_exists('wp_register_ability')) {
             return;
         }
-        foreach (self::definitions() as $name => $def) {
+        foreach (self::all_definitions() as $name => $def) {
             [$label, $description, $properties, $required, $execute, $readonly, $idempotent] = $def;
             $destructive = (bool) ($def[7] ?? false);
             $args = [
@@ -373,7 +386,7 @@ class SGAP_MCP_Tools {
      */
     public static function readonly_names(): array {
         $names = [];
-        foreach (self::definitions() as $name => $def) {
+        foreach (self::all_definitions() as $name => $def) {
             if (!empty($def[5])) {
                 $names[] = (string) $name;
             }

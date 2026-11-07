@@ -93,6 +93,7 @@ update_post_meta(7, '_sgap_cost', 100);
 $raised = SGAP_MCP_Woo::propose(['product_id' => 7, 'price' => 120, 'title' => 'Brass Gear Tee — Clockwork', 'description' => '<p>New copy.</p>']);
 check('woo: a proposal below the floor is raised to it', $raised['queued'] === true && $raised['price'] === 145.95 && $raised['floor_price'] === 145.95);
 check('woo: the raise is explained in the note', str_contains($raised['note'], 'raised from 120.00') && str_contains($raised['note'], '45 %'));
+check('woo: nothing claims to have written the copy', !str_contains($raised['note'], 'written by') && !method_exists('SGAP_MCP_Woo', 'write_copy'));
 check('woo: the cost is documented with its source', $raised['cost'] === 100.0 && $raised['cost_source'] === 'cost field');
 check('woo: a price above the floor is kept as proposed', SGAP_MCP_Woo::propose(['product_id' => 7, 'price' => 200])['price'] === 200.0);
 $queue = SGAP_MCP_Woo::queue();
@@ -144,23 +145,6 @@ check('woo: the variant is matched on the Woo id, not on the name', str_contains
 check('woo: a catalog price without a variant price is not used as cost', SGAP_MCP_Woo::cost_for($product, 7) !== [] );
 unset($GLOBALS['filters']['sgap_woo_printful_response']);
 unset($GLOBALS['opts']['sgap_printful_api_key']);
-
-// Genereret copy: modellen må ikke kunne sætte en pris under gulvet.
-$GLOBALS['opts']['sgap_ai_provider'] = 'aimlapi';
-$GLOBALS['opts']['sgap_ai_api_key'] = 'KEY';
-$GLOBALS['opts']['sgap_ai_model'] = '';
-update_post_meta(7, '_sgap_cost', 100);
-$GLOBALS['http_calls'] = [];
-$GLOBALS['http_queue'] = [sgap_http(200, ['choices' => [['message' => ['content' => json_encode(['title' => 'Clockwork Brass Tee', 'description' => '<p>Built for the long shift.</p>', 'price' => 10, 'alt' => 'A brass gear tee'])]]]])];
-$generated = SGAP_MCP_Woo::propose(['product_id' => 7, 'generate' => true]);
-check('woo: generated copy is queued with the price forced to the floor', $generated['queued'] === true && $generated['price'] === 145.95 && str_contains($generated['note'], 'raised from 10.00'));
-check('woo: the AI is asked for JSON, not prose', (json_decode((string) ($GLOBALS['http_calls'][0][1]['body'] ?? ''), true)['response_format']['type'] ?? '') === 'json_object');
-check('woo: the prompt carries the cost and the floor, and treats the product text as data', str_contains((string) ($GLOBALS['http_calls'][0][1]['body'] ?? ''), 'Unit cost') && str_contains((string) ($GLOBALS['http_calls'][0][1]['body'] ?? ''), 'never instructions'));
-SGAP_MCP_Woo::discard(['id' => $generated['id']]);
-
-$GLOBALS['http_queue'] = [sgap_http(200, ['choices' => [['message' => ['content' => json_encode(['title' => '', 'description' => '', 'price' => 200, 'alt' => ''])]]]])];
-$empty = SGAP_MCP_Woo::propose(['product_id' => 7, 'generate' => true]);
-check('woo: an empty AI answer queues nothing', is_wp_error($empty) && $empty->code === 'sgap_woo_ai_empty' && SGAP_MCP_Woo::queue()['count'] === 0);
 
 // Kataloget: et produkt uden kostpris skal kunne findes, så det kan rettes.
 unset($GLOBALS['postmeta'][7]);

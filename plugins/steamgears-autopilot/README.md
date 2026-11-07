@@ -138,7 +138,7 @@ another credential:
 | Tool | What it does |
 | --- | --- |
 | `woo-catalog` | Products with price, cost, **where that cost came from**, the margin, and the lowest price your setting allows |
-| `woo-propose` | Builds a proposal (title, description, price, optional AI copy) and queues it — the shop is not touched |
+| `woo-propose` | Builds a proposal (title, description, price) and queues it — the shop is not touched |
 | `woo-queue` | The proposals waiting for approval, with before and after |
 | `woo-apply` | Writes one proposal; dry run unless `confirm` is true |
 | `woo-discard` | Drops a proposal without touching the product |
@@ -148,8 +148,9 @@ variant's own price (matched on the WooCommerce id or SKU, never on the product 
 either, the call is refused and names both fixes. The floor is
 `floor(cost × (1 + margin)) + 0.95`, raised by one when that would land *under* the margin, and
 it is recomputed at apply time — so a cost that rose while a proposal was waiting raises the
-price instead of quietly breaking the promise. The AI copy is generated with the cost and the
-floor in the prompt, and the model's price is raised to the floor if it ignores them.
+price instead of quietly breaking the promise. The tools do not write the copy themselves: the MCP
+client is an assistant already, and *Content Studio* writes product texts for the owner — so
+`woo-propose` takes the text you send and carries the rest over unchanged.
 
 *Settings → Shop & feeds* holds the Printful token (a secret, autoload off), the store id and
 the minimum margin (45 % by default: a cost of 100 refuses anything under 145.95).
