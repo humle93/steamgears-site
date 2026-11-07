@@ -49,7 +49,7 @@ class SGAP_Setup {
         'publishing' => ['Publishing', 'megaphone', ['publish_mode', 'publer_workspace_id', 'publer_pinterest_board', 'pinterest_client_id', 'instagram_user_id', 'instagram_graph_host', 'facebook_page_id', 'facebook_graph_version', 'facebook_direct', 'bluesky_handle', 'mastodon_instance', 'mastodon_limit', 'telegram_chat_id', 'quality_gate', 'banned_words', 'dupe_days']],
         'schedule' => ['Schedule & limits', 'clock', ['quiet_start', 'quiet_end', 'blackout_ranges', 'daily_cap', 'batch_size', 'repost_cooldown_days']],
         'evergreen' => ['Evergreen', 'update', ['evergreen_enabled', 'evergreen_after_days', 'evergreen_max_shares', 'evergreen_batch']],
-        'shop' => ['Shop & feeds', 'cart', ['printful_store_id', 'woo_min_margin']],
+        'shop' => ['Shop & feeds', 'cart', ['woo_min_margin']],
         'mcp' => ['MCP access', 'admin-links', ['mcp_client_id']],
         'automation' => ['Automation', 'update-alt', ['auto_images', 'auto_seo', 'articles_per_week', 'auto_publish_articles', 'weekly_report', 'rescue_hosts']],
         'advanced' => ['Economics', 'chart-line', ['labor_rate', 'monthly_budget', 'target_roi', 'winner_min_clicks', 'loser_min_clicks', 'repost_max']]
@@ -181,7 +181,7 @@ class SGAP_Setup {
     public static function ajax_test(): void {
         self::guard();
         $r = SGAP_KeyCheck::run();
-        wp_send_json_success(['ai' => $r['ai'], 'publer' => $r['publer']]);
+        wp_send_json_success(['ai' => $r['ai'], 'publer' => $r['publer'], 'printful' => $r['printful']]);
     }
 
     /* ---- fields ---- */

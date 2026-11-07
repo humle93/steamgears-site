@@ -10,7 +10,7 @@ if (!defined('ABSPATH')) exit;
 
 class SGAP_KeyCheck {
     /** Saving any of these settings triggers a check. */
-    const WATCH = ['publer_api_key', 'publer_workspace_id', 'channels', 'ai_api_key', 'ai_provider', 'ai_model', 'ai_base_url'];
+    const WATCH = ['publer_api_key', 'publer_workspace_id', 'channels', 'ai_api_key', 'ai_provider', 'ai_model', 'ai_base_url', 'printful_api_key', 'printful_store_id'];
     const PENDING = 'sgap_keycheck_pending';
     const RESULT = 'sgap_key_status';
 
@@ -36,7 +36,7 @@ class SGAP_KeyCheck {
             return;
         }
         $result = self::run();
-        foreach (['publer' => 'Publer', 'ai' => 'AI'] as $part => $label) {
+        foreach (['publer' => 'Publer', 'ai' => 'AI', 'printful' => 'Printful'] as $part => $label) {
             $check = $result[$part];
             if ($check['ok'] === null) {
                 continue; // no key saved: nothing to report
@@ -55,6 +55,7 @@ class SGAP_KeyCheck {
         $result = [
             'publer' => self::check_publer(),
             'ai' => self::check_ai(),
+            'printful' => self::check_printful(),
             'checked_at' => current_time('mysql')
         ];
         update_option(self::RESULT, $result, false);
@@ -106,6 +107,62 @@ class SGAP_KeyCheck {
             return ['ok' => false, 'message' => 'Key works. ' . implode(' ', $notes) . ' Set the Pinterest board id to post to Pinterest.'];
         }
         return ['ok' => true, 'message' => 'Key works. ' . implode(' ', $notes)];
+    }
+
+    /**
+     * Printful: GET /stores lists what the token can see. A token for one store is enough; with
+     * exactly one store and no store id saved, the id is filled in, the way Publer's workspace is.
+     * @return array{ok: ?bool, message: string} ok is null when no token is saved.
+     */
+    public static function check_printful(): array {
+        $key = (string) SGAP_Settings::get('printful_api_key', '');
+        if ($key === '') {
+            return ['ok' => null, 'message' => 'No Printful token saved.'];
+        }
+        $url = SGAP_MCP_Woo::API . '/stores';
+        $response = apply_filters('sgap_woo_printful_response', null, $url, $key, '');
+        if ($response === null) {
+            $response = wp_remote_get($url, ['timeout' => 15, 'headers' => ['Authorization' => 'Bearer ' . $key]]);
+        }
+        if (is_wp_error($response)) {
+            return ['ok' => false, 'message' => 'Could not reach Printful: ' . $response->get_error_message()];
+        }
+        $code = (int) wp_remote_retrieve_response_code($response);
+        if ($code === 401) {
+            return ['ok' => false, 'message' => 'Printful refused the token: it is invalid or revoked.'];
+        }
+        if ($code === 403) {
+            return ['ok' => false, 'message' => 'Printful token lacks access. Create it with the scopes "View stores" and "View sync products".'];
+        }
+        if ($code === 429) {
+            return ['ok' => false, 'message' => 'Printful is rate limiting; try again in a minute.'];
+        }
+        if ($code !== 200) {
+            return ['ok' => false, 'message' => "Printful answered HTTP {$code}; try again later."];
+        }
+        $body = json_decode((string) wp_remote_retrieve_body($response), true);
+        $stores = is_array($body['result'] ?? null) ? $body['result'] : [];
+        if ($stores === []) {
+            return ['ok' => false, 'message' => 'The token works, but it sees no store. Create the token under the store that holds the products.'];
+        }
+        $saved = trim((string) SGAP_Settings::get('printful_store_id', ''));
+        if ($saved === '' && count($stores) === 1) {
+            $saved = (string) ($stores[0]['id'] ?? '');
+            if ($saved !== '') {
+                SGAP_Settings::set('printful_store_id', $saved);
+            }
+        }
+        $names = [];
+        foreach ($stores as $store) {
+            $names[] = ($store['name'] ?? '?') . ' (id ' . ($store['id'] ?? '?') . ')';
+            if ($saved !== '' && (string) ($store['id'] ?? '') === $saved) {
+                return ['ok' => true, 'message' => 'Printful connected to store ' . ($store['name'] ?? $saved) . ' (id ' . $saved . ').'];
+            }
+        }
+        if ($saved === '') {
+            return ['ok' => true, 'message' => 'Printful token works. Pick a store id: ' . implode(', ', $names) . '.'];
+        }
+        return ['ok' => false, 'message' => "Printful token works, but store id {$saved} is not among: " . implode(', ', $names) . '.'];
     }
 
     /** @return array{ok: ?bool, message: string} ok is null when no key is saved. */

@@ -1932,10 +1932,10 @@ class SGAP_Admin {
         SGAP_UI::card_open('Run now', 'controls-play');
         echo '<div class="sgap-actions">';
         $tasks = [
-            'generate' => ['Generate posts now', 'edit', true],
-            'publish' => ['Publish queue now', 'megaphone', false],
-            'test_keys' => ['Test API keys', 'admin-network', false],
-            'test_publer' => ['List Publer accounts', 'groups', false]
+            'generate' => ['Write posts now', 'edit', true],
+            'publish' => ['Send the queue now', 'megaphone', false],
+            'test_keys' => ['Test connections', 'admin-network', false],
+            'test_publer' => ['Show Publer channels', 'groups', false]
         ];
         foreach ($tasks as $task => [$label, $icon, $primary]) {
             echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '">'
@@ -1943,7 +1943,9 @@ class SGAP_Admin {
                 . wp_nonce_field('sgap_run_' . $task, '_wpnonce', true, false)
                 . '<button class="button' . ($primary ? ' button-primary' : '') . '"><span class="dashicons dashicons-' . $icon . '"></span>' . esc_html($label) . '</button></form>';
         }
-        echo '</div>';
+        echo '</div>'
+            . '<p class="description">Write posts: the AI drafts a post per channel for pages that need one. Send the queue: releases what is approved, now. '
+            . 'Test connections: checks AI, Publer and Printful. Keys live under <a href="' . esc_url(admin_url('admin.php?page=sgap-settings')) . '">Settings &amp; keys</a>.</p>';
         // Progress bar for "Generate posts now": one request per page, so each step is visible.
         echo '<div id="sgap-progress" class="sgap-progress" style="display:none">'
             . '<progress id="sgap-progress-bar" value="0" max="1"></progress>'
@@ -2001,7 +2003,7 @@ class SGAP_Admin {
         $keys = get_option(SGAP_KeyCheck::RESULT);
         SGAP_UI::card_open('API keys', 'admin-network');
         if (!is_array($keys)) {
-            echo '<p class="description">Not tested yet. Save a key in Settings or press "Test API keys".</p>';
+            echo '<p class="description">Not tested yet. Save a key in Settings or press "Test connections".</p>';
         } else {
             foreach (['ai' => 'AI', 'publer' => 'Publer'] as $part => $label) {
                 $check = $keys[$part] ?? ['ok' => null, 'message' => ''];
@@ -2033,7 +2035,7 @@ class SGAP_Admin {
             }
         } elseif ($task === 'test_keys') {
             $r = SGAP_KeyCheck::run();
-            $out = 'Publer: ' . $r['publer']['message'] . "\nAI: " . $r['ai']['message'];
+            $out = 'Publer: ' . $r['publer']['message'] . "\nAI: " . $r['ai']['message'] . "\nPrintful: " . $r['printful']['message'];
         } elseif ($task === 'test_publer') {
             $out = self::publer_report();
         } else {
@@ -2230,7 +2232,7 @@ class SGAP_Admin {
                 FROM {$table} d LEFT JOIN {$wpdb->posts} p ON p.ID = d.post_id WHERE d.status = 'pending' ORDER BY d.id DESC LIMIT 60")
             : [];
         if (!$rows) {
-            SGAP_UI::empty_state('yes-alt', 'No drafts waiting. Press "Generate posts now" on the dashboard to have the AI write some.');
+            SGAP_UI::empty_state('yes-alt', 'No drafts waiting. Press "Write posts now" on the dashboard to have the AI write some.');
             self::close();
             return;
         }

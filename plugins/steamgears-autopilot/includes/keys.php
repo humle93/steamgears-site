@@ -53,7 +53,9 @@ class SGAP_Keys {
             'keys' => ['printful_api_key'],
             'body' => 'Reads the synced variants so every product gets its real cost price, and the shop tools can work out a margin that cannot undercut it.',
             'links' => [['Printful', 'https://www.printful.com/dashboard/settings/developers']],
-            'hint' => 'Printful → Settings → Developers → API tokens. The store id lives under Shop & feeds.',
+            'hint' => 'Printful → Settings → Developers → API tokens (scopes: View stores, View sync products). Leave the store id empty and it is filled in when the token is tested and belongs to one store.',
+            'extra' => ['printful_store_id'],
+            'test' => 'printful',
             'optional' => true
         ],
         'search' => [
@@ -202,6 +204,10 @@ class SGAP_Keys {
             $html .= '<div class="sgap-key-field"><label for="sgap_' . esc_attr($key) . '">' . esc_html(SGAP_Setup::LABELS[$key] ?? $key) . '</label>'
                 . SGAP_Setup::field((string) $key) . '</div>';
         }
+        foreach ((array) ($provider['extra'] ?? []) as $extra) {
+            $html .= '<div class="sgap-key-field"><label for="sgap_' . esc_attr($extra) . '">' . esc_html(SGAP_Setup::LABELS[$extra] ?? $extra) . '</label>'
+                . SGAP_Setup::field((string) $extra) . '</div>';
+        }
         $test = $provider['test'] ?? '';
         if ($test !== '') {
             $result = self::last_test()[$test] ?? null;
@@ -241,16 +247,17 @@ class SGAP_Keys {
             echo self::card((string) $id, $provider);
         }
         echo '</div>';
-        echo '<div class="sgap-key-testbar"><button type="button" class="button" id="sgap-test-keys"><span class="dashicons dashicons-yes-alt"></span>Test the saved keys</button>'
+        echo '<div class="sgap-key-testbar"><button type="button" class="button" id="sgap-test-keys"><span class="dashicons dashicons-yes-alt"></span>Test connections</button>'
             . '<span class="sgap-key-testout" id="sgap-test-keys-out">'
             . (isset($result['ai']['message']) ? esc_html('AI: ' . $result['ai']['message']) : '')
             . (isset($result['publer']['message']) ? ' ' . esc_html('Publer: ' . $result['publer']['message']) : '')
+            . (isset($result['printful']['message']) ? ' ' . esc_html('Printful: ' . $result['printful']['message']) : '')
             . '</span></div>';
         $cfg = ['ajax' => admin_url('admin-ajax.php'), 'nonce' => wp_create_nonce('sgap_setup')];
         echo '<script>(function(){var b=document.getElementById("sgap-test-keys"),o=document.getElementById("sgap-test-keys-out"),C=' . wp_json_encode($cfg) . ';if(!b)return;'
             . 'b.addEventListener("click",function(){var l=b.innerHTML;b.disabled=true;b.textContent="Testing…";var fd=new FormData();fd.append("action","sgap_setup_test");fd.append("nonce",C.nonce);'
             . 'fetch(C.ajax,{method:"POST",credentials:"same-origin",body:fd}).then(function(r){return r.json();}).then(function(j){var d=j&&j.data?j.data:{};'
-            . 'var parts=[];["ai","publer"].forEach(function(k){if(d[k])parts.push((k==="ai"?"AI":"Publer")+": "+d[k].message);});'
+            . 'var parts=[];["ai","publer","printful"].forEach(function(k){if(d[k]&&d[k].message)parts.push({ai:"AI",publer:"Publer",printful:"Printful"}[k]+": "+d[k].message);});'
             . 'o.textContent=parts.join(" ");}).catch(function(){o.textContent="Could not reach the test endpoint.";})'
             . '.then(function(){b.disabled=false;b.innerHTML=l;});});})();</script>';
     }
