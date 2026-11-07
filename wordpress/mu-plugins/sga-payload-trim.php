@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Steamgears payload — trin 0–1 (S2.7)
  * Description: Fjerner emoji-scriptet og de to annoncepixels der ikke bruges (TikTok for Business' browser-pixel og Kliken), saa hver side slipper for scripts den ikke har brug for. Kilde: wordpress/mu-plugins/sga-payload-trim.php i repoet.
- * Version: 1.3.0
+ * Version: 1.3.1
  * Author: Steamgears
  *
  * Baggrund (S2.7, maalt 7/11 2026): forsiden var 117,7 KB med 51 <script>-tags, og
@@ -129,6 +129,13 @@ add_action(
 	'wp_enqueue_scripts',
 	static function (): void {
 		if ( ! sga_payload_trim_enabled( 'woo' ) ) {
+			return;
+		}
+		// WooCommerce kan vaere slaaet fra. Saa findes is_woocommerce() ikke, og det
+		// ukontrollerede kald tog 7/11 2026 hele forsiden ned med HTTP 500 (maalt paa
+		// /, /shop/ og /?nocache=1). Er Woo ikke indlaest, findes de seks handles
+		// heller ikke, saa der er intet at fjerne.
+		if ( ! function_exists( 'is_woocommerce' ) ) {
 			return;
 		}
 		if ( is_woocommerce() || is_cart() || is_checkout() || is_account_page() ) {

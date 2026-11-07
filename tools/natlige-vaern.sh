@@ -82,6 +82,9 @@ check "designsystem-selftest"                python3 tools/design_check.py --sel
 check "designsystem"                         python3 tools/design_check.py
 check "designsystem-loader"                  "$PHP_BIN" wordpress/tests/test-design-system.php
 check "produkt-schema"                       "$PHP_BIN" tools/schema_filter_test.php
+# S2.7: payload-trimmen kostede forsiden 7/11 2026, fordi is_woocommerce() blev kaldt
+# uden at WooCommerce var indlaest. Vaernet kraever at fravaeret af Woo er en no-op.
+check "payload-trim"                         "$PHP_BIN" tools/test_payload_trim.php
 # S4.12: fortrydelsesoplysningerne i ordremailen — teksten er kundens durable medium,
 # så en regression må ikke kunne snige sig ind uden at en test bliver rød.
 check "fortrydelsesmail"                     "$PHP_BIN" tools/withdrawal_email_test.php

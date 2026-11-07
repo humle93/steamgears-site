@@ -85,13 +85,13 @@ Alt her er målt mod den live side eller læst i kilden. Er noget ændret siden 
 
 **Pluginnet** (`plugins/steamgears-autopilot/`, v7.58.2)
 
-- **Version i repo mod live:** repo **7.58.2**, live **7.58.0 — installeret men INAKTIVT** (målt 7/11 2026 senere
-  på aftenen: sitets egen liste siger `Steamgears Autopilot v7.58.0 (inactive)`, og `/wp-json/sgap/v1` svarer
-  `404 rest_no_route`; den tidligere måling 17:29 UTC viste `Undefined constant SGAP_Admin::NS` i
-  `includes/diagnostics.php:531`, altså tog 7.58.0 **hele** REST-fladen ned mens den var aktiv). **WooCommerce
-  11.2.2 er også inaktivt**, så `mu-plugins/sga-payload-trim.php:134` kalder `is_woocommerce()` og forsiden +
-  `/shop/` svarer **HTTP 500**. Rækkefølgen er WooCommerce → plugin (7.58.2) → måling, og begge aktiveringer er
-  ejerens: Novamira skriver kun PHP i sin sandkasse (`outside_sandbox`, 403). 7.58.1 retter de fire referencer til
+- **Version i repo mod live:** repo **7.58.2**, live **7.58.2, aktív** (7/11 2026: `wp plugin install` fra
+  repoets zip og `wp plugin activate` gennem Novamira; `/wp-json/sgap/v1` svarer 200 med 19 ruter, inkl. de tre
+  `/facebook/*`). Vejen dertil kostede en runde: 7.58.0 lå på disken men var **inaktiv**, WooCommerce var også
+  inaktiv, og `mu-plugins/sga-payload-trim.php:134` kaldte `is_woocommerce()` → **500 på hver side**. Efter
+  aktiveringen blev 500 ved med at komme fra **W3 Total Caches cachede fatale side**, indtil `w3tc_flush_all()`.
+  Plugin-listen er ryddet (18 slettet, 5 beholdt inaktive fordi de har data): se
+  [library/genaktivering-og-oprydning-2026-11-07.md](library/genaktivering-og-oprydning-2026-11-07.md). 7.58.1 retter de fire referencer til
   `SGAP_REST::NS`; se `docs/library/rest-nedbrud-7-58-0-2026-11-07.md`. Et plugin-folder kan kun skiftes af
   WordPress selv, så en release slutter med ejerens *Plugins → Update*-klik, ikke med et push.
   Status: `docs/roadmap.md` §2b; procedure og efterkontrol: plugin-README §Updates.

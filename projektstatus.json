@@ -56,8 +56,8 @@
     {
       "id": "plugin",
       "name": "Steamgears Autopilot — plugin",
-      "next": "Aktivér WooCommerce og derefter pluginnet på 7.58.2 (målt 7/11 aften: 7.58.0 er installeret, men inaktivt, og WooCommerce er også inaktivt, så forsiden og /shop/ svarer 500). Først derefter kan 7.58.2's REST-retning, P2.6 (Page access token + side-id + «Kør nu»), P1.5b/P1.5c-tokens og P1.15's MCP-godkendelse måles. P3.1 venter på ejerens labor_rate-beslutning (ROADMAP §8 punkt 6).",
-      "blocked_by": "Målt 7/11 2026 gennem Novamira: `Steamgears Autopilot v7.58.0 (inactive)` og `WooCommerce v11.2.2 (inactive)`, `/wp-json/sgap/v1` 404, forsiden + `/shop/` HTTP 500 (`is_woocommerce()` i mu-plugins/sga-payload-trim.php:134). Novamira kan kun skrive PHP i sin sandkasse (403 outside_sandbox), så hverken aktiveringen eller mu-plugin-filen kan rettes herfra — det kræver ejerens wp-admin. P2.6 kræver desuden Page access token og side-id; P1.5b/P1.5c kræver Pinterest-/Instagram-tokens; P3.1 kræver labor_rate-beslutningen.",
+      "next": "P2.6's første rigtige synk: plugin 7.58.2 kører nu live og de tre /facebook/*-ruter svarer, så det der mangler er Page access token + side-id i wp-admin og «Kør nu» på Facebook-siden. Derefter P1.5b/P1.5c (Pinterest- og Instagram-token), P3.1's labor_rate-beslutning (ROADMAP §8 punkt 6) og P1.15's MCP-godkendelse. mu-plugin-rettelsen 1.3.1 mangler at blive lagt ind på sitet (File Manager).",
+      "blocked_by": "P2.6/P1.5b/P1.5c kræver ejerens nøgler, som ikke må gennem chat eller repo: Page access token + side-id, et Pinterest- og et Instagram-token. P3.1 kræver labor_rate-beslutningen, P1.15 en MCP-godkendelse. Sitet er raskt igen (målt 7/11 19:05 UTC: / 200, /shop/ 200, /cart/ 200, /wp-json/sgap/v1 200 med 19 ruter), men mu-plugins/sga-payload-trim.php står stadig som 1.3.0 på sitet: rettelsen ligger i repoet, og Novamira skriver kun PHP i sin sandkasse, så den kræver File Manager — indtil da er siden kun sikker, så længe WooCommerce er aktiv.",
       "modules": [
         {
           "id": "p0",
