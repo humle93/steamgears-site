@@ -47,12 +47,12 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `373fcc5 Luksus-lag rev. 3 i designsystemet (css sektion 12)`
+- `565d326 Modul: S2.5b — OG-billede målt på alle 30 indlæg og fast værn (+0,15 d) + S0.4 bekræftet uden cache Før: 67,4 %  →  Efter: 68,0 %  (Δ +0,6) Grundlag: 16,35 af 24,05 d (S0 2,15/2,35 · S1 2,15/4,6 · S2 7,5/8,3 · S3 2,55/3,55 · S4 2/5,25)`
 - `0570740 Modul: samtalepunkter — afstemningen og det ene åbne punkt skrevet ned Før: 97,2 %  →  Efter: 97,2 %  (Δ 0) Grundlag: ingen ændring`
 - `fb91b39 chore(status): daglig projektstatus 2026-11-07`
 - `419d594 Modul: roadmap-afstemning — de 0,2 d var regnefejl, og P3 havde 0,75 d fantom Før: 96,7 %  →  Efter: 97,2 %  (Δ +0,5) Grundlag: 29,6 af 30,45 d (P0 4,65/4,65 · P1 14,2/15,05 · P2 4,75/4,75 · P3 2/2 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5)`
 - `850e8c4 Modul: P3.1 — regnestykket bag de sidste 0,2 d skrevet ned Før: 96,7 %  →  Efter: 96,7 %  (Δ 0) Grundlag: 30,35 af 31,4 d (P0 4,65/4,7 · P1 14,2/15,2 · P2 4,75/4,75 · P3 2,75/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5)`
-- `7c25a13 Modul: P3.1 — dokumentation og bibliotek for labor_rate-lukningen Før: 96,7 %  →  Efter: 96,7 %  (Δ 0) Grundlag: 30,35 af 31,4 d (P0 4,65/4,7 · P1 14,2/15,2 · P2 4,75/4,75 · P3 2,75/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5)`
-- `f36e716 chore(status): daglig projektstatus 2026-11-07`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
