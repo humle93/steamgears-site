@@ -359,6 +359,42 @@ Test uden MCP-klient:
 printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | python3 tools/mcp_project_profile.py
 ```
 
+## Simply.com (`simplycom`)
+
+Simply har en MCP-server ved siden af WordPress-fladen: den rører **hosten**, ikke sitet. Den er registreret i
+[`.mcp.json`](../.mcp.json) som `simplycom`, og opsætningen er Simplys egen vejledning:
+<https://www.simply.com/agent-setup/prompt.md>.
+
+| | |
+| --- | --- |
+| Endpoint | `https://mcp.simply.com/v2` |
+| Transport | streamable HTTP |
+| Auth | OAuth 2.1 — **ingen nøgle at kopiere**; ejeren logger ind i browseren ved første kald |
+| Navn | `simplycom` (den offentlige udgave uden login hedder `simplycom-public` og ligger på `https://mcp.simply.com/public`) |
+
+Målt 7/11 2026 fra cloud-worktreen: `GET /v2` svarer `401` — serveren lever og kræver auth — og
+`/.well-known/oauth-protected-resource` svarer `200`, så discovery virker. Et kald uden token fejler altså på
+**auth**, ikke på netværk. Selve login-flowet kan ikke gennemføres herfra: OAuth'en kræver ejerens browser, og
+Simplys WAF svarer `454` på HTML-ruter fra datacenter-IP'er (se fejlsøgningstabellen).
+
+Fladen giver DNS-poster, nameservere og DNSSEC, domænetilgængelighed og ordrelinks, mailkonti og
+videresendinger, subdomæner, MySQL-databaser, website- og MySQL slow-logs, deploy-oplysninger til
+SSH/SFTP/FTP/rsync samt support-sager — og agenten har samme rettigheder som brugeren. Den kan **ikke**
+bestille, opsige eller betale.
+
+### Sådan tages den i brug
+
+1. `simplycom` står allerede i [`.mcp.json`](../.mcp.json) med `"type": "http"` og URL'en ovenfor. Andre
+   klienter registreres med deres egen kommando fra Simplys side — brug samme navn, så henvisningerne passer.
+2. Genstart agenten, så MCP-serveren bliver læst.
+3. Første gang et Simply-værktøj kaldes, åbner klienten browser-login. **Kun ejeren kan gennemføre det** —
+   agenten kan ikke logge ind på brugerens vegne, og der er ingen nøgle at indsætte i stedet.
+4. Virker det ikke: tjek at URL'en er præcis `https://mcp.simply.com/v2` (ikke `/mcp` eller `/v1`), at
+   klienten understøtter streamable HTTP + OAuth, og at adgangen ikke er tilbagekaldt.
+
+Adgangen tilbagekaldes under *Connected apps* i Simplys kontrolpanel
+(<https://www.simply.com/en/controlpanel/user/>) — det er den vej en agent fratages adgang igen.
+
 ## Sikkerhed
 
 - Tokenet arver den WP-bruger der godkender OAuth-flowet. Godkend som en dedikeret administratorkonto, ikke
@@ -373,6 +409,8 @@ printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | python3 tools/m
 - Publer-nøglen hører i `PUBLER_API_KEY`, ikke i URL'en: `?api_key=` lækker nemt gennem logs, historik og
   skærmbilleder. Nøglen giver adgang til workspaces og konti, og scopes afgør hvor meget agenten kan.
 - Har en nøgle været eksponeret: tilbagekald den i WordPress **først**, og opret derefter en ny.
+- Simply.com-connectoren har ingen nøgle at lække — den arver brugerens rettigheder gennem OAuth og
+  tilbagekaldes under *Connected apps*. Giv den derfor ikke adgang fra en konto der også kan betale.
 
 ## Referencer
 

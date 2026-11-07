@@ -252,7 +252,7 @@ check('pinterest: the App ID is an ordinary setting with help text',
     in_array('pinterest_client_id', SGAP_Settings::TEXT_KEYS, true)
     && isset(SGAP_Settings::HELP['pinterest_client_id'])
     && in_array('pinterest_client_id', SGAP_Setup::TABS['publishing'][2], true));
-check('plugin: the release carries the Pinterest module', SGAP_VERSION >= '7.53.1' && class_exists('SGAP_Pinterest'));
+check('plugin: the Pinterest module ships in the current version', version_compare(SGAP_VERSION, '7.53.1', '>=') && class_exists('SGAP_Pinterest'));
 
 // --- a token with no recorded expiry is usable, not "expired" ------------------------
 $GLOBALS['opts']['sgap_pinterest_access_token'] = 'pasted-by-hand';

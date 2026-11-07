@@ -1,4 +1,4 @@
-# Instagram insights i pluginnet — P1.5c (7.54.0, 7/11 2026)
+# Instagram insights i pluginnet — P1.5c (7.56.0, 7/11 2026)
 
 **Instagram er den tredje kanal hvor platformen ved noget vi ikke selv kan måle.** Bluesky og Mastodon
 offentliggør likes/reposts/replies som et frit opslag (P1.5a), Pinterest rapporterer impression/saves/outbound
@@ -7,7 +7,7 @@ de gjorde ved det. Det er de tal der svarer på «blev opslaget set», i modsæt
 (`sgap_cro`) og ordrerne i WooCommerce. Modulet er `includes/instagram.php` (`SGAP_Instagram`), og tallene
 gemmes som **Instagram-egne event-typer**, så ingen af de tre kilder kan blandes sammen i en sum.
 
-Målt: **820 smoke-checks, 0 FAIL** (var 770) · **24 af 24 værn grønne** · zip byte-identisk med kilden ·
+Målt: **838 smoke-checks, 0 FAIL** (var 770) · **24 af 24 værn grønne** · zip byte-identisk med kilden ·
 plugin **91,0 % → 96,2 %** (27,8 af 28,9 d) · P1.5c er 1,5 af 1,5 d.
 
 ---
@@ -69,10 +69,10 @@ for de sidste to år, og hukommelse er den dyreste kilde her:
 | Kontrol | Resultat |
 | --- | --- |
 | `php -l` på alle ændrede filer | rent |
-| `plugins/tests/smoke.php` | **820 PASS / 0 FAIL**, ingen PHP-advarsler |
+| `plugins/tests/smoke.php` | **838 PASS / 0 FAIL**, ingen PHP-advarsler |
 | `tools/fejlscan.py` | ingen fund (version, zip, includes, bibliotek, tokens, tests) |
 | `bash tools/natlige-vaern.sh` | **24 af 24 grønne** |
-| zip mod kilde | byte-identisk (7.54.0) |
+| zip mod kilde | byte-identisk (7.56.0) |
 
 **Ikke gjort:** der findes ingen Instagram-token i repoet eller i sandkassen, så modulet har aldrig talt med
 Meta. Første rigtige kørsel skal bekræfte tre ting: at `views` faktisk kommer tilbage (og ikke kun `likes`), at

@@ -28,6 +28,14 @@ on:
     # Begge UTC-timer der kan være kl. 03 dansk tid; kørslen springer selv den forkerte over.
     - cron: '15 1,2 * * *'
   workflow_dispatch:
+  push:
+    # Et push til filerne der styrer målingen starter kørslen med det samme — så svaret
+    # ikke skal vente til kl. 03, og en ændret måling bliver prøvet i samme tur.
+    # Rapport-committet rører ingen af filerne, så det trigger ikke en ny kørsel.
+    paths:
+      - .github/workflows/novamira-keepalive.yml
+      - tools/live_state.py
+      - tools/mcp_keepalive.py
 
 permissions:
   contents: write

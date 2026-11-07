@@ -53,6 +53,22 @@ class SGAP_Setup {
         'advanced' => ['Economics', 'chart-line', ['labor_rate', 'monthly_budget', 'target_roi', 'winner_min_clicks', 'loser_min_clicks', 'repost_max']]
     ];
 
+    /**
+     * One line per tab: what the tab decides. Every tab has a heading of its own, so a tab is
+     * never a stack of unnamed fields — the keys tab speaks for itself and is therefore absent.
+     */
+    const TAB_HINTS = [
+        'basics' => 'What the autopilot may do on its own, where it posts, and how many pages it promotes a day.',
+        'ai' => 'Which model writes the posts, the articles and the images, and in which language.',
+        'publishing' => 'How posts leave the site, which accounts they go to, and what the quality gate refuses.',
+        'schedule' => 'When posts are released, how many per day, and the days when nothing goes out at all.',
+        'evergreen' => 'Pages worth sharing more than once: how long between two shares, and how many each page gets.',
+        'shop' => 'Printful\'s store, the product feed and the margin floor the shop tools may not undercut.',
+        'mcp' => 'The client id the site uses when it renews its own MCP token.',
+        'automation' => 'What runs by itself: AI images, SEO meta on new posts, weekly articles and the image rescue.',
+        'advanced' => 'Your hourly rate and the numbers that decide whether a post is a winner, a loser or worth repeating.'
+    ];
+
     const CHANNEL_LABELS = [
         'facebook' => 'Facebook', 'instagram' => 'Instagram', 'pinterest' => 'Pinterest', 'linkedin' => 'LinkedIn', 'twitter' => 'X / Twitter',
         'threads' => 'Threads', 'bluesky' => 'Bluesky', 'mastodon' => 'Mastodon', 'telegram' => 'Telegram', 'google' => 'Google Business'
@@ -321,6 +337,9 @@ class SGAP_Setup {
             if ($id === 'keys') {
                 SGAP_Keys::panel();
             } else {
+                // Every tab opens with the question it answers, so the fields below have a place.
+                echo '<div class="sgap-panel-head"><h2><span class="dashicons dashicons-' . esc_attr($tab[1]) . '"></span>' . esc_html($tab[0]) . '</h2>'
+                    . (isset(self::TAB_HINTS[$id]) ? '<p class="sgap-section-hint">' . esc_html(self::TAB_HINTS[$id]) . '</p>' : '') . '</div>';
                 // A secret belongs on the keys tab and nowhere else, even if it is listed here by mistake.
                 foreach (array_diff($keys, SGAP_Settings::SECRET_KEYS) as $key) {
                     echo self::row($key);

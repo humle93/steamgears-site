@@ -307,11 +307,21 @@ class SGAP_UI {
 .sgap .sgap-metric span{display:block;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
 .sgap .sgap-metric em{display:block;margin-top:2px;font-style:normal;font-size:11px;color:var(--muted)}
 @media (max-width:600px){.sgap .sgap-section-head{margin-top:20px}.sgap .sgap-metrics{grid-template-columns:1fr 1fr}}
+/* 7.54.0 — every admin page says which question it answers, starting with the Settings tabs */
+.sgap .sgap-panel-head{margin:0 0 18px;padding:0 0 12px;border-bottom:1px solid #f3ead6}
+.sgap .sgap-panel-head h2{margin:0;font-size:16px;line-height:1.3;display:flex;align-items:center;gap:8px;color:var(--ink)}
+.sgap .sgap-panel-head h2 .dashicons{font-size:18px;width:18px;height:18px;color:var(--brass)}
+.sgap .sgap-panel-head .sgap-section-hint{margin:4px 0 0;font-size:12px;line-height:1.55;max-width:74ch}
+.sgap .sgap-qgroup{margin:0}
+.sgap .sgap-group-head{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin:18px 0 10px;padding:0 0 8px;border-bottom:1px solid #f3ead6}
+.sgap .sgap-group-head h3{margin:0;font-size:14px;line-height:1.35;color:var(--ink)}
+.sgap .sgap-group-head .sgap-pill{flex:none}
 @media (forced-colors:active){
 .sgap .sgap-card,.sgap .sgap-stat,.sgap .sgap-metric,.sgap .sgap-attn{border:1px solid CanvasText}
 .sgap .sgap-pill,.sgap .sgap-badge,.sgap .sgap-tab,.sgap .sgap-cat{border:1px solid CanvasText;color:CanvasText}
 .sgap .sgap-tab.on,.sgap .sgap-cat.is-on{background:Highlight;color:HighlightText}
 .sgap .sgap-bar span,.sgap .sgap-progress progress::-webkit-progress-value{background:Highlight}
+.sgap .sgap-panel-head,.sgap .sgap-section-head:after{border-color:CanvasText}
 }
 </style>';
     }

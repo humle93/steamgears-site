@@ -28,7 +28,7 @@ Der er **fem aktive projekter**, alle målt i [`projektstatus.json`](../projekts
 | id | Projekt | Status | Enhed |
 | --- | --- | --- | --- |
 | `site` | steamgears.eu — site-optimering | 64,4 % (15,65 af 24,3 d) | developer-dage |
-| `plugin` | Steamgears Autopilot — plugin | 96,2 % (27,8 af 28,9 d) | developer-dage |
+| `plugin` | Steamgears Autopilot — plugin | 96,3 % (28,3 af 29,4 d) | developer-dage |
 | `rebrand` | Dark academia-rebrand | 63,0 % (8,5 af 13,5 t) | timer |
 | `seo` | SEO-indholdsproduktion | 62,5 % (5 af 8 guides) | guides |
 | `links` | Døde internlinks | 100 % (39 af 39 links) | links |
@@ -85,11 +85,11 @@ Alt her er målt mod den live side eller læst i kilden. Er noget ændret siden 
 
 **Pluginnet** (`plugins/steamgears-autopilot/`, v7.54.0)
 
-- **Version i repo mod live:** repo **7.54.0**, live **7.41.1** (målt 7/11 med `get_plugins()`; ikke genmålt
+- **Version i repo mod live:** repo **7.56.0**, live **7.41.1** (målt 7/11 med `get_plugins()`; ikke genmålt
   siden, fordi sitet ikke kunne nås efter `managed-wordpress-robots.php`'s parse-fejl) — et plugin-folder kan
   kun skiftes af WordPress selv, så en release slutter med ejerens *Plugins → Update*-klik, ikke med et push.
   Status: `docs/roadmap.md` §2b; procedure og efterkontrol: plugin-README §Updates.
-- 52 klasser, 40 PHP-filer, 16.590 linjer (målt 7/11 på 7.54.0); hvert subsystem kan nås fra en rigtig
+- 52 klasser, 40 PHP-filer, 16.697 linjer (målt 7/11 på 7.56.0); hvert subsystem kan nås fra en rigtig
   indgang (cron, REST, admin-side, ability eller AJAX). Version **7.19.0** tilføjede
   helsides SEO/GEO/AEO-auditten (`includes/site-seo.php`), som erstatter den per-side-optimering der krævede
   ét klik pr. URL. **7.20.0** tilføjede pre-flight-valideringen (`includes/preflight.php`): hver kø-post tjekkes
@@ -106,7 +106,7 @@ Alt her er målt mod den live side eller læst i kilden. Er noget ændret siden 
   `docs/library/fejlsogning-fast-vaern-2026-11-07.md`. **7.54.0** tilføjede Instagram-insights (P1.5c):
   `includes/instagram.php` læser `views`, `likes`, `comments`, `shares` og `saved` pr. medie — `views` afløser
   det deprecerede `impressions`, en metric Instagram endnu ikke har rapporteret udelades i stedet for at blive
-  gemt som 0, og matchningen sker på captionen mod `/go/<id>/`. **820 smoke-checks, alle grønne.**
+  gemt som 0, og matchningen sker på captionen mod `/go/<id>/`. **838 smoke-checks, alle grønne.**
 - Kæden virker: generér → godkend → publicér (RSS eller Publer API) → mål.
 - Self-updateren virker: zip i repoet er **byte-identisk** med kilden; 20 versioner på fire dage.
 - 9 AJAX- og 5 admin_post-handlere har capability + nonce; **kun ét `wp_mail`** i hele pluginnet (ugerapport).

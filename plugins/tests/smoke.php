@@ -25,7 +25,7 @@ function sanitize_text_field($s){return trim(strip_tags((string)$s));} function 
 function sanitize_key($s){return preg_replace('/[^a-z0-9_\-]/','',strtolower((string)$s));} function absint($v){return abs((int)$v);}
 function esc_url_raw($u,$p=null){return preg_match('#^https?://#',$u)?$u:'';} function wp_parse_url($u,$c=-1){return parse_url($u,$c);}
 function wp_parse_args($a,$d){return array_merge($d,$a);} function add_query_arg($a,$u){return $u.(str_contains($u,'?')?'&':'?').http_build_query($a,'','&',PHP_QUERY_RFC3986);}
-function current_time($t){return '2026-10-30 12:00:00';} function wp_date($f,$t=null){return date($f,$t??time());}
+function current_time($t){return '2026-10-30 12:00:00';} function wp_date($f,$t=null){return date($f,$t??time());} function mysql2date($f,$d,$t=null){return $d?date($f,strtotime((string)$d)):'';}
 function current_user_can($c){return true;} function get_current_user_id(){return 1;} function get_site_transient($k){return false;} function set_site_transient(...$a){} function wp_remote_get(...$a){return new WP_Error('offline','offline');} function wp_nonce_field_stub(){} function delete_option($k){unset($GLOBALS["opts"][$k]);} function wp_json_encode($v){return json_encode($v);} function is_wp_error($v){return $v instanceof WP_Error;}
 function wp_strip_all_tags($s){return strip_tags((string)$s);} function attachment_url_to_postid($u){return (int)($GLOBALS['attachment_for'][$u]??0);} function get_post_meta($id,$k='',$s=false){return $GLOBALS['postmeta'][$id][$k]??'';} function url_to_postid($u){return (int)($GLOBALS['postid_for'][$u]??0);} function get_post_status($id){return (string)($GLOBALS['poststatus'][$id]??'publish');} function wp_get_attachment_metadata($id){return $GLOBALS['attachment_meta'][$id]??[];} function get_post_mime_type($id){return (string)($GLOBALS['attachment_mime'][$id]??'');} function wp_die($m=''){throw new RuntimeException((string)$m);} function check_admin_referer($a=''){return true;}
 $GLOBALS['abilities']=[]; $GLOBALS['ability_categories']=[];
@@ -335,8 +335,35 @@ $q=implode("\n",$wpdb->log);
 check('audit: rows filters by outcome and channel with paging', str_contains($q,"outcome = 'failed'") && str_contains($q,"channel = 'pinterest'") && str_contains($q,'LIMIT 25 OFFSET 50'));
 check('audit: page size is clamped', str_contains((function(){global $wpdb; $wpdb->log=[]; SGAP_Audit::rows('','',9999,0); return implode("\n",$wpdb->log);})(),'LIMIT 200 OFFSET 0'));
 $wpdb->next=7; check('audit: total counts with the same filter', SGAP_Audit::total('failed')===7);
+// Siden tjekker først at tabellen findes (SHOW TABLES), derefter antallet: to svar i kø.
+$wpdb->next=['wp_sgap_publish_log',7];
+$GLOBALS['rows']=[
+    (object)['id'=>3,'queue_id'=>901,'channel'=>'pinterest','outcome'=>'sent','http_status'=>200,'actor'=>'cron','message'=>'Publer job job_1','created_at'=>'2026-11-07 10:00:00'],
+    (object)['id'=>2,'queue_id'=>902,'channel'=>'instagram','outcome'=>'failed','http_status'=>429,'actor'=>'cron','message'=>'Publer: HTTP 429','created_at'=>'2026-11-07 09:00:00'],
+    (object)['id'=>1,'queue_id'=>903,'channel'=>'bluesky','outcome'=>'requeued','http_status'=>0,'actor'=>'admin','message'=>'Try again later','created_at'=>'2026-11-07 08:00:00'],
+];
 ob_start(); do_action('page_sgap-log'); $html=ob_get_clean();
 check('audit: the log page explains the retention window', str_contains($html,'Kept for 90 days'));
+$lf = strpos($html,'<h2>Filter</h2>'); $la = strpos($html,'<h2>Attempts</h2>');
+check('log 7.55: filter first, then the attempts it produced', $lf !== false && $la !== false && $lf < $la);
+check('log 7.55: the counts describe the rows on screen', str_contains($html,'<b>1</b><span>Sent</span>') && str_contains($html,'<b>1</b><span>Failed</span>') && str_contains($html,'<b>1</b><span>Requeued or held</span>'));
+check('log 7.55: the rows are still there with their own message and queue link', str_contains($html,'Publer: HTTP 429') && str_contains($html,'#901'));
+$GLOBALS['rows']=[]; $wpdb->next=null;
+
+// AI Drafts: grupperet efter den side de er skrevet til, med tre tal over grupperne.
+$wpdb->next='wp_sgap_ai_drafts';
+$GLOBALS['rows']=[
+    (object)['id'=>11,'post_id'=>5,'channel'=>'pinterest','title'=>'Brass goggles','body'=>'Body one','hashtags'=>'#steampunk','created_at'=>'2026-11-07 09:00:00','source'=>'How to pick goggles'],
+    (object)['id'=>12,'post_id'=>5,'channel'=>'facebook','title'=>'Brass goggles again','body'=>'Body two','hashtags'=>'','created_at'=>'2026-11-07 09:05:00','source'=>'How to pick goggles'],
+    (object)['id'=>13,'post_id'=>8,'channel'=>'bluesky','title'=>'Leather care','body'=>'Body three','hashtags'=>'','created_at'=>'2026-11-07 09:10:00','source'=>'Leather care 101'],
+    (object)['id'=>14,'post_id'=>0,'channel'=>'mastodon','title'=>'Orphan','body'=>'Body four','hashtags'=>'','created_at'=>'2026-11-07 09:15:00','source'=>null],
+];
+ob_start(); do_action('page_sgap-ai'); $drafts55 = ob_get_clean();
+check('drafts 7.55: one section and three numbers before the cards', str_contains($drafts55,'<h2>Waiting for your decision</h2>') && str_contains($drafts55,'<b>4</b><span>Drafts</span>') && str_contains($drafts55,'<b>3</b><span>Pages</span>') && str_contains($drafts55,'<b>4</b><span>Channels</span>'));
+check('drafts 7.55: drafts for the same page are grouped under that page', str_contains($drafts55,'<h3>How to pick goggles</h3>') && str_contains($drafts55,'2 posts') && str_contains($drafts55,'<h3>Leather care 101</h3>'));
+check('drafts 7.55: a draft without a source page is still shown, under its own heading', str_contains($drafts55,'<h3>No source page</h3>') && str_contains($drafts55,'>16</option>') === false && str_contains($drafts55,'#14'));
+check('drafts 7.55: every draft keeps its three decisions', substr_count($drafts55,'value="queue"')===4 && substr_count($drafts55,'value="rejected"')===4);
+$GLOBALS['rows']=[]; $wpdb->next=null;
 // ---- whole-site SEO / AEO / GEO (7.19.0) ----
 $sgap_check = function (array $checks, string $id) { foreach ($checks as $c) { if ($c['id'] === $id) return $c; } return ['status' => 'missing', 'detail' => '']; };
 $base = ['type' => 'post', 'slug' => 'steampunk-goggles', 'title' => 'Steampunk Goggles: How to Choose a Pair That Fits',
@@ -1404,6 +1431,39 @@ check('dashboard 7.52: channel numbers and engagement share one section', $chan 
     && $chan < strpos($dash,'Engagement · last 30 days') && strpos($dash,'Engagement · last 30 days') < $sys);
 check('dashboard 7.52: the updater moved under System', $sys < strpos($dash,'Plugin update'));
 check('dashboard 7.52: a healthy dashboard says so in one line instead of scattered pills', str_contains($dash,'sgap-attn is-ok') && str_contains($dash,'All clear'));
+ob_start(); do_action('page_sgap-settings'); $set53 = ob_get_clean();
+check('settings 7.54: every tab but Keys opens with a heading and a hint', substr_count($set53,'class="sgap-panel-head"') === count(SGAP_Setup::TABS) - 1);
+check('settings 7.54: the hints cover exactly those tabs, in tab order', array_keys(SGAP_Setup::TAB_HINTS) === array_values(array_diff(array_keys(SGAP_Setup::TABS), ['keys'])));
+check('settings 7.54: the hint is rendered next to the heading, not only stored', str_contains($set53,'<h2><span class="dashicons dashicons-admin-home"></span>Basics</h2>') && str_contains($set53,'What the autopilot may do on its own'));
+
+// Køen er to spørgsmål, ikke én tabel: hvad er på vej ud, og hvad kom der ud af det.
+$wpdb->next='wp_sgap_queue';
+$GLOBALS['rows']=[
+    (object)['id'=>901,'channel'=>'pinterest','title'=>'Waiting one','status'=>'queued','remind'=>0,'attempts'=>1,'scheduled_at'=>'2026-11-08 10:00:00','published_at'=>null,'error'=>null],
+    (object)['id'=>902,'channel'=>'bluesky','title'=>'Done one','status'=>'published','remind'=>0,'attempts'=>1,'scheduled_at'=>'2026-11-07 09:00:00','published_at'=>'2026-11-07 09:01:00','error'=>null],
+];
+ob_start(); do_action('page_sgap-queue'); $queue53 = ob_get_clean();
+$qw = strpos($queue53,'<h2>Waiting</h2>'); $qd = strpos($queue53,'<h2>Done</h2>');
+check('queue 7.54: waiting and done are two sections, waiting first', $qw !== false && $qd !== false && $qw < $qd);
+check('queue 7.54: a queued row sits under Waiting, a published row under Done', $qw !== false && $qd !== false
+    && str_contains(substr($queue53,$qw,$qd-$qw),'>901</td>') && !str_contains(substr($queue53,$qw,$qd-$qw),'>902</td>')
+    && str_contains(substr($queue53,$qd),'>902</td>'));
+check('queue 7.54: the waiting hint counts what is left', str_contains(substr($queue53,$qw,$qd-$qw),'One post still has to go out.'));
+$GLOBALS['rows']=[(object)['id'=>903,'channel'=>'bluesky','title'=>'Sending now','status'=>'sending','remind'=>0,'attempts'=>1,'scheduled_at'=>null,'published_at'=>null,'error'=>null]];
+ob_start(); do_action('page_sgap-queue'); $q53b = ob_get_clean();
+$qw2 = strpos($q53b,'<h2>Waiting</h2>');
+check('queue 7.54: a sending row counts as waiting, and an empty Done group says so', $qw2 !== false
+    && str_contains(substr($q53b,$qw2),'>903</td>') && str_contains($q53b,'Nothing has gone out yet.'));
+$GLOBALS['rows']=[]; $wpdb->next=null;
+
+ob_start(); do_action('page_sgap-studio'); $studio53 = ob_get_clean();
+$sw = strpos($studio53,'<h2>Write</h2>'); $sf = strpos($studio53,'<h2>Fix</h2>');
+check('studio 7.54: write and fix are two sections, write first', $sw !== false && $sf !== false && $sw < $sf);
+check('studio 7.54: drafting and images under Write, SEO work under Fix', $sw !== false && $sf !== false
+    && str_contains(substr($studio53,$sw,$sf-$sw),'Write an article or guide') && str_contains(substr($studio53,$sw,$sf-$sw),'AI image')
+    && str_contains(substr($studio53,$sf),'Optimise SEO of a page') && str_contains(substr($studio53,$sf),'Optimise the whole site'));
+check('studio 7.54: the score card still explains what it measures', str_contains(substr($studio53,$sf),'What the score measures') && str_contains(substr($studio53,$sf),'AEO'));
+check('admin pages 7.54: css carries the panel head and its high-contrast rule', str_contains(SGAP_UI::stylesheet(), '.sgap-panel-head{') && str_contains(SGAP_UI::stylesheet(), '.sgap-panel-head,.sgap .sgap-section-head:after{border-color:CanvasText}'));
 $css52 = SGAP_UI::stylesheet();
 check('dashboard 7.52: css carries the section heading and the metric row', str_contains($css52,'.sgap-section-head{') && str_contains($css52,'.sgap-metrics{') && str_contains($css52,'forced-colors:active'));
 

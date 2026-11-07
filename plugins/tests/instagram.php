@@ -304,7 +304,7 @@ check('instagram: both settings sit on the Publishing tab and the token only on 
     && !in_array('instagram_access_token', SGAP_Setup::TABS['publishing'][2], true));
 check('instagram: the daily hook can be unscheduled on uninstall', str_contains(
     (string) file_get_contents(dirname(__DIR__) . '/steamgears-autopilot/uninstall.php'), 'sgap_instagram_refresh'));
-check('plugin: 7.54.0 carries the Instagram module', SGAP_VERSION === '7.54.0' && class_exists('SGAP_Instagram'));
+check('plugin: the release carries the Instagram module', version_compare(SGAP_VERSION, '7.56.0', '>=') && class_exists('SGAP_Instagram'));
 
 SGAP_Instagram::$transport = null;
 $GLOBALS['http_calls'] = [];
