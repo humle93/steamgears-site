@@ -9,6 +9,13 @@ the fix for the second half of the same trap — the dashboard could say “Up t
 release, so *Update* had nothing to install. The zip in `plugins/` is **7.58.2**, and nothing reaches the site
 until an update runs from wp-admin · update this file in the same commit as any release._
 
+**Measured later the same evening (7/11 2026, through Novamira): the plugin is not active at all.** The site's
+own inventory reads `Steamgears Autopilot v7.58.0 (inactive)`, so `/wp-json/sgap/v1` answers `404 rest_no_route`
+instead of the fatal, and `/wp-json/` is 200 again. **WooCommerce 11.2.2 is inactive as well**, which has a second
+consequence: `mu-plugins/sga-payload-trim.php:134` calls `is_woocommerce()` unguarded, so the homepage, `/shop/`
+and `/?nocache=1` answer **HTTP 500**. So the next release needs three owner actions, in this order: activate
+WooCommerce, activate the plugin (7.58.2, not 7.58.0), and only then can any live claim below be re-measured.
+
 This is the working roadmap for `plugins/steamgears-autopilot`. It answers three questions: does every
 function in the plugin actually do something, what is missing before the plugin can truly run unattended,
 and how long each missing piece takes.
@@ -340,6 +347,15 @@ Platform limits: [Instagram content publishing](https://developers.facebook.com/
    [docs/library/plugin-funktioner-research-2026-11-07.md](../../docs/library/plugin-funktioner-research-2026-11-07.md).
 5. **Command Center direction** — one-way (CC reads `/snapshot` and hands drafts to
    `POST /wp-json/sgap/v1/drafts`) remains the recommendation; confirm before CC work starts.
+6. **`labor_rate`** — the last registered-but-unread setting, and the decision this section already pointed at
+   ("it waits for the owner"). Three endings, each a small code change rather than a guess: **remove** the field
+   (Settings → Economics stops offering a rate ROI never spends — the treatment the nine invisible leftovers got
+   in 7.33.3), **use** it (ROI gains a labour line, which needs the owner's minutes-per-post before any number is
+   computed), or **rename** it to what it is today (a budget-to-hours reference). Until one is chosen the field
+   stays visible and P3.1 stays at 0,2 of 0,25 d.
+7. **Activate WooCommerce and the plugin** — both are inactive (measured 7/11 evening), so the store answers 500
+   and the autopilot cannot run or be measured. Once both are active, the first proof is `/wp-json/sgap/v1` → 200
+   with the three `/facebook/*` routes, and the front page returning 200 instead of the `is_woocommerce()` fatal.
 
 ---
 

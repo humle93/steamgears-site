@@ -85,9 +85,13 @@ Alt her er målt mod den live side eller læst i kilden. Er noget ændret siden 
 
 **Pluginnet** (`plugins/steamgears-autopilot/`, v7.58.2)
 
-- **Version i repo mod live:** repo **7.58.2**, live **7.58.0** (målt 7/11 17:29 UTC: `/wp-json/` svarer 200 med
-  `Undefined constant SGAP_Admin::NS` i `includes/diagnostics.php:531`) — og 7.58.0 tog **hele** REST-fladen
-  ned, inklusive Store API og begge MCP-flader, mens forsiden svarede 200. 7.58.1 retter de fire referencer til
+- **Version i repo mod live:** repo **7.58.2**, live **7.58.0 — installeret men INAKTIVT** (målt 7/11 2026 senere
+  på aftenen: sitets egen liste siger `Steamgears Autopilot v7.58.0 (inactive)`, og `/wp-json/sgap/v1` svarer
+  `404 rest_no_route`; den tidligere måling 17:29 UTC viste `Undefined constant SGAP_Admin::NS` i
+  `includes/diagnostics.php:531`, altså tog 7.58.0 **hele** REST-fladen ned mens den var aktiv). **WooCommerce
+  11.2.2 er også inaktivt**, så `mu-plugins/sga-payload-trim.php:134` kalder `is_woocommerce()` og forsiden +
+  `/shop/` svarer **HTTP 500**. Rækkefølgen er WooCommerce → plugin (7.58.2) → måling, og begge aktiveringer er
+  ejerens: Novamira skriver kun PHP i sin sandkasse (`outside_sandbox`, 403). 7.58.1 retter de fire referencer til
   `SGAP_REST::NS`; se `docs/library/rest-nedbrud-7-58-0-2026-11-07.md`. Et plugin-folder kan kun skiftes af
   WordPress selv, så en release slutter med ejerens *Plugins → Update*-klik, ikke med et push.
   Status: `docs/roadmap.md` §2b; procedure og efterkontrol: plugin-README §Updates.

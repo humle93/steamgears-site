@@ -56,8 +56,8 @@
     {
       "id": "plugin",
       "name": "Steamgears Autopilot — plugin",
-      "next": "Installér 7.58.2 — helst via pluginets eget dashboard-kort, som nu henter versionen friskt og rydder WordPress' update-transient. Derefter P2.6 (Page access token + side-id + «Kør nu»), P1.5b/P1.5c-tokens, P3.1's labor_rate og P1.15's MCP-godkendelse.",
-      "blocked_by": "Live kører 7.58.0, som tager hele REST ned (SGAP_Admin::NS, rettet i 7.58.1), og den build kunne ikke opdateres, fordi dashboard-kortet læste en 6-timers cachet version (rettet i 7.58.2 med refresh_for_admin() + rydning af update_plugins; se plugins/tests/updater_cache.php). Repoet står på 7.58.2, men installationen kræver en adgang agentens sandkasse ikke har: ingen SSH/SFTP, ingen wp-cli, ingen WP-credential — og wp-login.php svarer 455 fra Simplys WAF. P2.6 kræver desuden ejerens Page access token og side-id i wp-admin; P1.5b/P1.5c mangler Pinterest-/Instagram-token; P3.1 mangler ejerens labor_rate-beslutning; P1.15 kræver ejerens MCP-godkendelse.",
+      "next": "Aktivér WooCommerce og derefter pluginnet på 7.58.2 (målt 7/11 aften: 7.58.0 er installeret, men inaktivt, og WooCommerce er også inaktivt, så forsiden og /shop/ svarer 500). Først derefter kan 7.58.2's REST-retning, P2.6 (Page access token + side-id + «Kør nu»), P1.5b/P1.5c-tokens og P1.15's MCP-godkendelse måles. P3.1 venter på ejerens labor_rate-beslutning (ROADMAP §8 punkt 6).",
+      "blocked_by": "Målt 7/11 2026 gennem Novamira: `Steamgears Autopilot v7.58.0 (inactive)` og `WooCommerce v11.2.2 (inactive)`, `/wp-json/sgap/v1` 404, forsiden + `/shop/` HTTP 500 (`is_woocommerce()` i mu-plugins/sga-payload-trim.php:134). Novamira kan kun skrive PHP i sin sandkasse (403 outside_sandbox), så hverken aktiveringen eller mu-plugin-filen kan rettes herfra — det kræver ejerens wp-admin. P2.6 kræver desuden Page access token og side-id; P1.5b/P1.5c kræver Pinterest-/Instagram-tokens; P3.1 kræver labor_rate-beslutningen.",
       "modules": [
         {
           "id": "p0",
