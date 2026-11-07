@@ -25,7 +25,7 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 | Projekt | Status | Grundlag |
 | --- | --- | --- |
 | **steamgears.eu — site-optimering** | **67,4 %** | 16,2 af 24,05 d (S0 2,15/2,35 · S1 2,15/4,6 · S2 7,35/8,3 · S3 2,55/3,55 · S4 2/5,25) |
-| **Steamgears Autopilot — plugin** | **96,5 %** | 30,3 af 31,4 d (P0 4,65/4,7 · P1 14,2/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25 · P1E 0,25/0,25 · P1F 0,25/0,25 · P1G 0,5/0,5 · P2F 1,5/1,5) |
+| **Steamgears Autopilot — plugin** | **97,2 %** | 29,6 af 30,45 d (P0 4,65/4,65 · P1 14,2/15,05 · P2 4,75/4,75 · P3 2/2 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25 · P1E 0,25/0,25 · P1F 0,25/0,25 · P1G 0,5/0,5 · P2F 1,5/1,5) |
 | **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5) |
 | **SEO-indholdsproduktion** | **62,5 %** | 5 af 8 guides (BATCH 0/3 · COPY 4/4 · CORSET 1/1) |
 | **Døde internlinks** | **100 %** | 39 af 39 links (FIX 39/39) |
@@ -33,29 +33,49 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 ### Åbne blokeringer
 
 - **steamgears.eu — site-optimering** — REST er stadig nede, målt 7/11 med cache-buster: /wp-json/, /wp-json/sgap/v1 og /wp-json/novamira/v1/oauth/token svarer 200 med 1.650 B PHP-fatal (SGAP_Admin::NS, diagnostics.php:531 i live-versionen 7.58.0), og Store API svarer 404-HTML. Repoet har 7.58.2, som retter både fatalen og opdateringsfælden (dashboard-kortet kunne sige “Up to date” i 6 timer, så et Update-klik havde intet at installere). Installationen kræver en adgang der ikke findes i agentens sandkasse: ingen SSH/SFTP-nøgle, ingen wp-cli, ingen WP-credential, og wp-login.php/xmlrpc.php svarer 455 fra Simplys WAF. Derfor kan S2.9, S4.13, S1.4, S1.6 og de tre guides ikke udføres nu.
-- **Steamgears Autopilot — plugin** — Live kører 7.58.0, som tager hele REST ned (SGAP_Admin::NS, rettet i 7.58.1), og den build kunne ikke opdateres, fordi dashboard-kortet læste en 6-timers cachet version (rettet i 7.58.2 med refresh_for_admin() + rydning af update_plugins; se plugins/tests/updater_cache.php). Repoet står på 7.58.2, men installationen kræver en adgang agentens sandkasse ikke har: ingen SSH/SFTP, ingen wp-cli, ingen WP-credential — og wp-login.php svarer 455 fra Simplys WAF. P2.6 kræver desuden ejerens Page access token og side-id i wp-admin; P1.5b/P1.5c mangler Pinterest-/Instagram-token; P3.1 mangler ejerens labor_rate-beslutning; P1.15 kræver ejerens MCP-godkendelse.
+- **Steamgears Autopilot — plugin** — P1.5 kræver ejerens Pinterest- og Instagram-tokens (må ikke gennem chat eller repo). Målt 7/11 er alle seks nøgler tomme, diagnostics svarer pinterest: off / instagram: off, og ruterne svarer 200 med deres egen besked: pinterest/refresh → "save a Pinterest access token, or the app credentials plus a refresh token"; instagram/refresh → "save the professional account id and a long-lived Instagram User token". Roadmappet er afstemt linje for linje 7/11 (åbent = 0,85 d = dette punkt). Uden for roadmappet: mu-plugin-rettelsen 1.3.1 ligger stadig kun i repoet og kræver ejerens File Manager.
 - **Dark academia-rebrand** — Printify-adgang
 - **SEO-indholdsproduktion** — Intet eksternt for de tre resterende guides: copy, FAQ, priser og links ligger i docs/library/guides-2026-11-03.md. De otte /go/-id'er 411/475/481/485/497/567 kunne ikke verificeres fra sandkassen (Simplys WAF giver browser-UA en challenge), så nye produktlinks skal måles fra ejerens side eller efter WAF-hvidlistning
 
 ### Næste skridt
 
 - **steamgears.eu — site-optimering** — Installér 7.58.2 (Plugins → Update, eller pluginets eget dashboard-kort “Check again and update”, som nu læser versionen friskt). Derefter S2.9 + S4.13 ud på siden og de tre guides live. Kræver en adgangskanal: SFTP/SSH til Simply, ejer-whitelistet admin-session eller et application password på et site hvor REST svarer.
-- **Steamgears Autopilot — plugin** — Installér 7.58.2 — helst via pluginets eget dashboard-kort, som nu henter versionen friskt og rydder WordPress' update-transient. Derefter P2.6 (Page access token + side-id + «Kør nu»), P1.5b/P1.5c-tokens, P3.1's labor_rate og P1.15's MCP-godkendelse.
+- **Steamgears Autopilot — plugin** — P1.5's live-verifikation er det eneste åbne punkt (0,85 d): plugin 7.59.0 kører live, men hverken Pinterest- eller Instagram-token findes på sitet (målt 7/11: begge tomme, diagnostics svarer off). Når ejeren har indtastet dem i wp-admin, køres pinterest/refresh og instagram/refresh, og svarene bogføres som P1.5's sidste 0,85 d.
 - **Dark academia-rebrand** — Batch 4 — mockups (~130 billeder)
 - **SEO-indholdsproduktion** — Skriv de tre manglende guides (mens-steampunk-costume-essentials, steampunk-clothing-three-budgets, womens-steampunk-essentials) fra den verificerede copy — corset-guiden er publiceret 6/11
 - **Døde internlinks** — Vedligehold: tjek nye indlæg mod live-URL'er
 
 ### Seneste commits
 
-- `b69443c Modul: P1.22-fejlretning — de ikke-REST-kanaler er afprøvet Før: 96,5 % Efter: 96,5 % Δ: 0 Grundlag: ingen ændring`
-- `f5b8187 Modul: P1.22-fejlretning — REST-nedbruddet i 7.58.0 Før: 96,5 % Efter: 96,5 % Δ: 0 Grundlag: ingen ændring`
-- `1ec840b Merge main (S4.10-anmeldelser) — og nedbruddet konstateret overstået`
-- `fb6e015 Sitet svarer igen — og Facebook-nøglen kan først komme på efter Update`
-- `8654be5 S4.10: butikken spørger nu om en anmeldelse — én gang, 14 dage efter levering`
-- `1054691 Værnene hærdet: registeret lemper kun den regel det gælder`
+- `419d594 Modul: roadmap-afstemning — de 0,2 d var regnefejl, og P3 havde 0,75 d fantom Før: 96,7 %  →  Efter: 97,2 %  (Δ +0,5) Grundlag: 29,6 af 30,45 d (P0 4,65/4,65 · P1 14,2/15,05 · P2 4,75/4,75 · P3 2/2 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5)`
+- `850e8c4 Modul: P3.1 — regnestykket bag de sidste 0,2 d skrevet ned Før: 96,7 %  →  Efter: 96,7 %  (Δ 0) Grundlag: 30,35 af 31,4 d (P0 4,65/4,7 · P1 14,2/15,2 · P2 4,75/4,75 · P3 2,75/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5)`
+- `7c25a13 Modul: P3.1 — dokumentation og bibliotek for labor_rate-lukningen Før: 96,7 %  →  Efter: 96,7 %  (Δ 0) Grundlag: 30,35 af 31,4 d (P0 4,65/4,7 · P1 14,2/15,2 · P2 4,75/4,75 · P3 2,75/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5)`
+- `f36e716 chore(status): daglig projektstatus 2026-11-07`
+- `eddf8fe Modul: P3.1 — labor_rate læses nu: ROI-kortet viser arbejdstimer Før: 96,5 %  →  Efter: 96,7 %  (Δ +0,2) Grundlag: 30,35 af 31,4 d (P0 4,65/4,7 · P1 14,2/15,2 · P2 4,75/4,75 · P3 2,75/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5)`
+- `778b317 Modul: dokumentation — antallet af beholdte plugins rettet til fire Før: 96,5 %  →  Efter: 96,5 %  (Δ 0) Grundlag: ingen ændring`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 7/11 — roadmap-afstemning: de 0,2 d var regnefejl, og P3 havde 0,75 d fantom
+
+- **Der var intet skjult punkt bag de 0,2 d.** Roadmappet blev gennemgået linje for linje (kilde-anker, dage,
+  status, verifikation): P0's total 4,70 talte **CC-linkets 0,20 d to gange** (det ligger i P0.4's 0,50, som
+  rækken selv skriver) og udelod **`/go/`-rettelsens 0,15** → 4,65. P1's total 15,20 talte **P1.19's 0,25 to
+  gange** (den bogføres som modulet `p1d`) og udelod **queue-post-arbejdet 0,10** → 15,05.
+- **Fund oveni:** P3's total sagde 2,75 mens rækkerne summer til 2,00 — 0,75 d der aldrig blev fjernet, da
+  P3.1's Etsy-halvdel flyttede til P2.4 og P3.6 blev sat ned til 0,25. `git log -S "P3.7"` er tom, så der har
+  aldrig været en række bag dem; både `done` og `total` er nu 2,00.
+- **Regnestykket er dokumentet:** [`library/roadmap-afstemning-2026-11-07.md`](library/roadmap-afstemning-2026-11-07.md)
+  (+ PDF) har en tabel pr. modul og summen **29,60 af 30,45 d**; `total − done` = **0,85 d = P1.5's
+  live-verifikation**. Intet punkt blev erklæret færdigt, og intet `done`-tal blev hævet — kun P0.4's manglende
+  ✅ blev tilføjet, og §8 punkt 7 (aktiveringen) lukket.
+- **Fælden at huske:** en total der ikke summer med sine egne rækker giver en rest der *ligner* uafsluttet
+  arbejde. Tjek altid `sum(rækker) == total`, før et punkt jagtes.
+- **P1.5 kan stadig ikke lukkes:** målt 7/11 er alle seks Pinterest-/Instagram-nøgler tomme (kun tilstedeværelse
+  læst, ingen værdier), `diagnostics` svarer `pinterest: off` / `instagram: off`, og begge ruter svarer 200 med
+  deres egen »not connected«-besked. Sitet svarer 200 på `/`, `/shop/` og `/wp-json/sgap/v1`, og 7.59.0 er
+  geninstalleret fra repoets zip.
 
 ### 7/11 — opdateringsfælden: “Update” havde intet at installere
 
@@ -703,8 +723,9 @@ statiske blokke; målrettede rettelser i eksisterende markup kan skrives direkte
 
 ## Næste skridt
 
-0. **Sandkassen mangler et MCP-token** — uden det kan intet skrives til sitet, kun måles. `python3 tools/mcp_oauth.py --start`
-   giver linket, ejeren godkender i browseren, `--finish '<kode>'` gemmer token uden for repoet.
+0. ~~Sandkassen mangler et MCP-token~~ — ✅ **adgang virker:** Novamira-CLI'en ligger i `.novamira-global/`
+   (gitignored) med et `fresh` full-access-token, så `wp plugin install`, `wp eval` og REST-kald kan køres
+   herfra. Det er den vej 7.59.0 blev installeret og ROI-kortet læst tilbage.
 1. **S2.9 designsystem: læg laget på sitet og se det** (0,1 d tilbage af 0,5). CSS-filen og loaderen er
    skrevet og værnet; det der mangler, er at kopiere `css/sg-design-system.css` til `uploads/sga-design/`
    (eller ind i `mu-plugins/`), kopiere `wordpress/mu-plugins/sga-design-system.php` til
@@ -718,7 +739,10 @@ statiske blokke; målrettede rettelser i eksisterende markup kan skrives direkte
 2. ✅ MCP-fornyelsen er bygget ind i pluginnet (7.44.0). Det der mangler, er ejerens godkendelse og de to
    værdier under *Settings → MCP access* — derefter holder adgangen i 30 dage uden secrets.
 3. Cirla som til/fra-modul i pluginnet efter dokumentets §9.4 — start med trin 1, modulet slukket som standard.
-4. Plugin 7.41.0 er i repo, 7.40.1 er live: opdateringen kræver ejerens klik i wp-admin.
+4. **Plugin-sporet har præcis ét åbent punkt: P1.5's live-verifikation (0,85 d).** Alt andet er lukket og
+   afstemt; det der mangler, er ejerens Pinterest-nøgle (access- eller app-credentials + refresh) og
+   Instagram-nøgle (professionelt konto-id + long-lived user-token) under *Settings → Keys*. Derefter er
+   verifikationen to kald til `pinterest/refresh` og `instagram/refresh`.
 
 ## Hvad der ikke kan gøres herfra
 
