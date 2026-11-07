@@ -6,17 +6,17 @@
       "id": "site",
       "name": "steamgears.eu — site-optimering",
       "note": "roadmap S0–S4",
-      "next": "Skriv de tre manglende guides fra den verificerede copy (S2.5-meta-runde og S2.6-links er kørt; S2.2 og corset-guiden er lukket 6/11); S1.1 Herbarium kræver varianter i Printify; S0.4 kræver én Redirection-gruppe (ejer); S0.9 kræver en browser-session med GA4 DebugView (to page_view i samme session)",
-      "blocked_by": "S1.1 Herbarium kræver varianter i Printify; S0.4 5 vanity-301 kræver én Redirection-gruppe (ejer). S2.2 er lukket 6/11 — trust-siderne findes og er linket ind",
+      "next": "Skriv de tre manglende guides fra den verificerede copy (S2.5-meta-runde og S2.6-links er kørt; S2.2 og corset-guiden er lukket 6/11); S1.1 Herbarium kræver varianter i Printify; S0.4 kræver én Redirection-gruppe (ejer); S2.7 HTML-/scriptbudget og S2.8 hub-links er næste uafhængige punkter",
+      "blocked_by": "S1.1 Herbarium kræver varianter i Printify; S0.4 5 vanity-301 kræver én Redirection-gruppe (ejer). S2.2 er lukket 6/11 — trust-siderne findes og er linket ind. S0.9 er lukket 7/11 — det inline GA4-tag er fjernet og der er målt ét page_view igen.",
       "modules": [
         {
           "id": "s0",
           "name": "S0 — brudt/akut",
-          "done": 1.9,
+          "done": 2.15,
           "total": 2.85,
           "unit": "d",
           "scope_change": true,
-          "note": "S0.7 trukket tilbage 2/11: sitemap-URL'er svarer 200 til browsere, men 455 til Googlebot og bingbot (Simply.com bot-regel), så S0.7 er ikke verificeret for søgemaskiner. Skal genmåles efter hosten har hvidlistet bots. S0.1, S0.3, S0.8 + meta-/link-/alt-runde 1/11 + 0,25 d S0.9 analytics-afklaring (scope 6/11, endnu ikke udført: to tag-id'er skal måles, ikke gættes)."
+          "note": "S0.7 trukket tilbage 2/11: sitemap-URL'er svarer 200 til browsere, men 455 til Googlebot og bingbot (Simply.com bot-regel), så S0.7 er ikke verificeret for søgemaskiner. Skal genmåles efter hosten har hvidlistet bots. S0.1, S0.3, S0.8 + meta-/link-/alt-runde 1/11 + 0,25 d S0.9 analytics-afklaring (scope 6/11, endnu ikke udført: to tag-id'er skal måles, ikke gættes). + 0,25 d S0.9 analytics lukket 7/11: kilden var Rank Maths option rank_math_google_analytic_options, ikke et snippet — install_code 1 → tom (gammel værdi gemt), og der er målt ét g/collect med en=page_view på /, /?nocache=1 og /shop/, alle på G-0HC9BLQ88R; Ads-tagget fyrer stadig."
         },
         {
           "id": "s1",
@@ -964,6 +964,15 @@
       "after": 74.9,
       "delta": 0.2,
       "basis": "20,85 af 27,85 d = 74,9 % (11 nye checks, 555 PASS)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "steamgears.eu — site-optimering",
+      "module": "S0.9 analytics — inline GA4-tag fjernet",
+      "before": 56.5,
+      "after": 57.6,
+      "delta": 1.1,
+      "basis": "13,7 af 23,8 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 5,5/7,55 · S3 2,5/3,55 · S4 1,4/5,25)"
     }
   ]
 }

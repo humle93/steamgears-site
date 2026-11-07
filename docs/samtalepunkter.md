@@ -18,28 +18,28 @@ konteksten komprimeres. Filen er repoets hukommelse om **hvorfor** tingene blev 
   hvad blev målt, og hvad var fælden.
 
 <!-- AUTO:SAMTALEPUNKTER:START -->
-_Opdateret 2026-11-06 af `tools/samtalepunkter.py`. Blokken er maskinelt genereret — ret i `projektstatus.json`, ikke her._
+_Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt genereret — ret i `projektstatus.json`, ikke her._
 
 ### Status
 
 | Projekt | Status | Grundlag |
 | --- | --- | --- |
-| **steamgears.eu — site-optimering** | **56,3 %** | 13,4 af 23,8 d (S0 1,9/2,85 · S1 2,15/4,6 · S2 5,5/7,55 · S3 2,45/3,55 · S4 1,4/5,25) |
-| **Steamgears Autopilot — plugin** | **74 %** | 19,9 af 26,9 d (P0 4,05/4,5 · P1 9,4/13,4 · P2 4,5/7 · P3 1,95/2) |
+| **steamgears.eu — site-optimering** | **57,6 %** | 13,7 af 23,8 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 5,5/7,55 · S3 2,5/3,55 · S4 1,4/5,25) |
+| **Steamgears Autopilot — plugin** | **74,9 %** | 20,85 af 27,85 d (P0 4,25/4,7 · P1 9,4/13,4 · P2 4,5/7 · P3 2,7/2,75) |
 | **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5) |
 | **SEO-indholdsproduktion** | **62,5 %** | 5 af 8 guides (BATCH 0/3 · COPY 4/4 · CORSET 1/1) |
 | **Døde internlinks** | **100 %** | 39 af 39 links (FIX 39/39) |
 
 ### Åbne blokeringer
 
-- **steamgears.eu — site-optimering** — S1.1 Herbarium kræver varianter i Printify; S0.4 5 vanity-301 kræver én Redirection-gruppe (ejer). S2.2 er lukket 6/11 — trust-siderne findes og er linket ind
+- **steamgears.eu — site-optimering** — S1.1 Herbarium kræver varianter i Printify; S0.4 5 vanity-301 kræver én Redirection-gruppe (ejer). S2.2 er lukket 6/11 — trust-siderne findes og er linket ind. S0.9 er lukket 7/11 — det inline GA4-tag er fjernet og der er målt ét page_view igen.
 - **Steamgears Autopilot — plugin** — P1.5 kræver Pinterest-token (401) og Meta-review; P0.4 kræver host-cron (ejer); P3.1 mangler ejerens labor_rate-beslutning
 - **Dark academia-rebrand** — Printify-adgang
 - **SEO-indholdsproduktion** — Intet eksternt for de tre resterende guides: copy, FAQ, priser og links ligger i docs/library/guides-2026-11-03.md. De otte /go/-id'er 411/475/481/485/497/567 kunne ikke verificeres fra sandkassen (Simplys WAF giver browser-UA en challenge), så nye produktlinks skal måles fra ejerens side eller efter WAF-hvidlistning
 
 ### Næste skridt
 
-- **steamgears.eu — site-optimering** — Skriv de tre manglende guides fra den verificerede copy (S2.5-meta-runde og S2.6-links er kørt; S2.2 og corset-guiden er lukket 6/11); S1.1 Herbarium kræver varianter i Printify; S0.4 kræver én Redirection-gruppe (ejer); S0.9 kræver en browser-session med GA4 DebugView (to page_view i samme session)
+- **steamgears.eu — site-optimering** — Skriv de tre manglende guides fra den verificerede copy (S2.5-meta-runde og S2.6-links er kørt; S2.2 og corset-guiden er lukket 6/11); S1.1 Herbarium kræver varianter i Printify; S0.4 kræver én Redirection-gruppe (ejer); S2.7 HTML-/scriptbudget og S2.8 hub-links er næste uafhængige punkter
 - **Steamgears Autopilot — plugin** — P0.4 rigtig host-cron (ejer); P3.1 labor_rate (ejer); P1.5 er eksternt blokeret (Pinterest-token + Meta-review)
 - **Dark academia-rebrand** — Batch 4 — mockups (~130 billeder)
 - **SEO-indholdsproduktion** — Skriv de tre manglende guides (mens-steampunk-costume-essentials, steampunk-clothing-three-budgets, womens-steampunk-essentials) fra den verificerede copy — corset-guiden er publiceret 6/11
@@ -47,15 +47,25 @@ _Opdateret 2026-11-06 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
-- `de9cd1b CSS snapshot 07/11`
-- `1678bf2 Modul: roadmap-kørsel — S0.9 målt, resten blokeret af manglende skriveadgang Før: —  →  Efter: —  (Δ —) Grundlag: ingen ændring`
-- `3473e4f Merge branch 'main' of https://github.com/humle93/steamgears-site into freebuff/d96c797cb28964a7f8fb9d78`
-- `6a77774 Modul: S2.3 navigation — footer-links til /shipping/ og /returns/ målt Før: 55,5 %  →  Efter: 56,3 %  (Δ +0,8) Grundlag: 13,4 af 23,8 d (S0 1,9/2,85 · S1 2,15/4,6 · S2 5,5/7,55 · S3 2,45/3,55 · S4 1,4/5,25)`
-- `d78b50d Modul: Plugin P3.2 — keycheck-test for Anthropic og custom OpenAI-kompatibel provider Før: 74,0 % → Efter: 74,0 % (Δ +0) Grundlag: 19,9 af 26,9 d — test- og cachefix, ingen ændring i estimatet`
-- `49a27a2 Modul: site S0–S4 — §9 P2–P5 indarbejdet oven på main Før: 60,6 %  →  Efter: 55,5 %  (Δ -5,1) Grundlag: 13,2 af 23,8 d (S0 1,9/2,85 · S1 2,15/4,6 · S2 5,3/7,55 · S3 2,45/3,55 · S4 1,4/5,25)`
+- `693c1f1 Modul: Docs — MCP-fladen vs. plugin-profilen (ingen ændring) Før: 74,7 %  →  Efter: 74,7 %  (Δ 0) Grundlag: ingen ændring`
+- `57e6910 Modul: P0.2 — runway pr. kanal (7.42.0) Før: 74,7 % Efter: 74,9 % Δ: +0,2 Grundlag: 20,85 af 27,85 d = 74,9 % (11 nye checks, 555 PASS)`
+- `c674b82 chore(status): daglig projektstatus 2026-11-07`
+- `65a6336 Modul: Plugin P3.3 — AI-profiler og access all (7.41.2) Før: 74,0 %  →  Efter: 74,7 %  (Δ +0,7) Grundlag: 20,65 af 27,65 d (P0 4,05/4,5 · P1 9,4/13,4 · P2 4,5/7 · P3 2,7/2,75)`
+- `8b2f565 Modul: Smoke-test — PHP-matrix (8.0–8.5) Før: 74 %  →  Efter: 74 %  (Δ 0) Grundlag: ingen ændring`
+- `2133a8d Modul: WordPress-matrix — CI-parity (PHP 8.2 + MySQL 8.0) Før: 74 %  →  Efter: 74 %  (Δ 0) Grundlag: ingen ændring`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 7/11 — S0.9 lukket: det inline GA4-tag var Rank Math, ikke et snippet
+
+- **Fælden først:** en filsøgning i `wp-content` efter `G-3MYLFKY8MY` gav **nul hits** blandt 34.972 filer, og Code Snippets er ikke aktiv. Tag'et bor i en **option**, ikke i en fil — søg i `wp_options` med `LIKE` før tema og snippets ledes igennem.
+- Kilden var `rank_math_google_analytic_options`: `measurement_id: G-3MYLFKY8MY` + `install_code: "1"`. `seo-by-rank-math/includes/modules/analytics/class-gtag.php:71-74` returnerer tidligt når flaget er tomt, og det ene flag styrer **både** `google_gtagjs`-scriptet og den inline `gtag("config", …)`.
+- Indgrebet: `install_code` → tom streng over Novamira CLI'ens `execute-php`; property-id, `GT-PL9L67B4` og `AW-18518250875` urørt. Den gamle serialiserede værdi blev gemt først, så rollback er ét felt.
+- Målt: **0** forekomster i HTML (var 2), og **ét** `g/collect` med `en=page_view` på `/`, `/?nocache=1` og `/shop/` — alle `tid=G-0HC9BLQ88R` og samme `cid` som 6/11. Ads sporer stadig.
+- Adgangsvejen var **Novamira CLI'ens device-godkendelse**, ikke `tools/mcp_oauth.py`: CLI'en har sin egen credential i `~/.config/novamira/config.json` (mode 600). `tools/mcp_rest.py --check` svarer stadig »ingen credential« — den vej er ikke rørt.
+- Novamira-tokenet udløber efter 3600 s og forsvinder med sandkassen: næste pas skal køre `novamira doctor --json` først og om nødvendigt godkende igen med `--device`.
+- Dokumentation: [`library/analytics-dobbelt-2026-11-06.md`](library/analytics-dobbelt-2026-11-06.md).
 
 ### 6/11 — hvorfor faldt butikken: vores egen fatale fejl, og nu en log der fanger næste gang
 
@@ -182,7 +192,7 @@ statiske blokke; målrettede rettelser i eksisterende markup kan skrives direkte
 ## Hvad der ikke kan gøres herfra
 
 - **Live publicering af produktændringer** og alt der kræver wp-admin-klik (plugin-opdatering, Redirection-gruppe).
-- **Pinterest, GA4 og Command Center** — ingen adgang fra sandkassen.
+- **Pinterest, GA4 og Command Center** — ingen adgang fra sandkassen. Undtagelse målt 7/11: WordPress selv nås via Novamira CLI'ens device-godkendelse (`install_code`-rettelsen blev skrevet ad den vej), og GA4-tag'et blev verificeret i cloud-browseren — men selve GA4-rapporterne er stadig utilgængelige.
 - **Printify** — rebrand-mockups er blokeret uden ejerens adgang.
 - **At holde en proces i live efter arkivering.** Ingen kommando her kan love det; kun CI eller sitets egen
   WP-Cron kan.
