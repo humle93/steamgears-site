@@ -77,7 +77,10 @@ class SGAP_Install {
         'sgap_evergreen_after_days' => 60,
         'sgap_evergreen_max_shares' => 3,
         'sgap_evergreen_batch' => 1,
-        'sgap_mcp_client_id' => ''
+        'sgap_mcp_client_id' => '',
+        'sgap_printful_api_key' => '',
+        'sgap_printful_store_id' => '',
+        'sgap_woo_min_margin' => 45
     ];
 
     public static function activate(): void {
@@ -337,14 +340,15 @@ class SGAP_Settings {
     const INT_KEYS = [
         'daily_cap','batch_size','labor_rate','monthly_budget','target_roi',
         'winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max','posts_per_day','articles_per_week','alert_dry_days','audit_keep_days','dupe_days','mastodon_limit',
-        'evergreen_after_days','evergreen_max_shares','evergreen_batch'
+        'evergreen_after_days','evergreen_max_shares','evergreen_batch',
+        'woo_min_margin'
     ];
     /** Never echoed back to the browser; can be overridden by SGAP_<KEY> constants in wp-config.php. */
     const SECRET_KEYS = [
         'publer_api_key','ai_api_key','image_api_key','serpapi_key',
         'telegram_bot_token',
         'merchant_feed_secret','bluesky_app_password','mastodon_token',
-        'mcp_refresh_token'
+        'mcp_refresh_token','printful_api_key'
     ];
     /** Multi-line text settings, shown as a textarea. */
     const TEXTAREA_KEYS = ['blackout_ranges', 'banned_words'];
@@ -353,7 +357,8 @@ class SGAP_Settings {
         'telegram_chat_id',
         'alert_email','channel_caps',
         'blackout_ranges','banned_words','utm_campaign','bluesky_handle','mastodon_instance',
-        'locale_source','locales','command_center_url','mcp_client_id'
+        'locale_source','locales','command_center_url','mcp_client_id',
+        'printful_store_id'
     ];
     /** Settings with a fixed list of values, shown as a select. */
     const CHOICE_KEYS = [
@@ -372,7 +377,7 @@ class SGAP_Settings {
         'Economics' => ['labor_rate','monthly_budget','target_roi','winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max'],
         'Evergreen' => ['evergreen_enabled','evergreen_after_days','evergreen_max_shares','evergreen_batch'],
         'Alerts and log' => ['alert_mode','alert_email','alert_dry_days','channel_caps','audit_keep_days'],
-        'Google Feed' => ['merchant_feed_secret'],
+        'Shop & feeds' => ['merchant_feed_secret','printful_api_key','printful_store_id','woo_min_margin'],
         'MCP access' => ['mcp_client_id','mcp_refresh_token']
     ];
 
@@ -430,7 +435,10 @@ class SGAP_Settings {
         'rescue_hosts' => 'Images on these servers are copied into your media library and every link is rewritten (comma-separated).',
         'utm_campaign' => 'The campaign name every link from this site carries as utm_campaign: set it once per campaign (e.g. clockwork_punk_2026_11) and GA4 can tell campaigns apart. A single post can override it with its own campaign. Letters, digits, -            and _ only; empty = steamgears_premium_evergreen. Posts queued before the change keep the value they were queued with.',
         'mcp_client_id' => 'The public client ID from the one-time MCP approval (tools/mcp_oauth.py --start prints it). It is not a secret.',
-        'mcp_refresh_token' => 'The refresh token from that approval (tools/mcp_oauth.py --finish saves it in ~/.config/steamgears-mcp/tokens.json). The plugin renews the access token every 30 minutes and writes the rotated refresh token back here, so it must live in the database — a wp-config.php constant cannot be updated by the server. Never shown again after saving; an empty field keeps the stored value.'
+        'mcp_refresh_token' => 'The refresh token from that approval (tools/mcp_oauth.py --finish saves it in ~/.config/steamgears-mcp/tokens.json). The plugin renews the access token every 30 minutes and writes the rotated refresh token back here, so it must live in the database — a wp-config.php constant cannot be updated by the server. Never shown again after saving; an empty field keeps the stored value.',
+        'printful_api_key' => 'Printful API token (Dashboard → Settings → API). Optional: it lets the shop tools read the real cost price of a sync product instead of asking you to fill in the cost field on every product. Not the same key as AIMLAPI.',
+        'printful_store_id' => 'The Printful store id the token belongs to (Dashboard → Stores). Sent as X-PF-Store-Id; empty means the token\'s default store.',
+        'woo_min_margin' => 'The margin a price must keep above the cost price, in percent. The shop tools never propose or apply a price below cost × (1 + this), rounded up to .95. 45 % on a cost of 100 refuses anything under 145.95.'
     ];
 
     public static function get(string $key, $default = '') {
@@ -1656,7 +1664,7 @@ class SGAP_Admin {
         ['Reports', 'sgap-reports', 'reports'],
         ['Evergreen', 'sgap-evergreen', 'evergreen'],
         ['Full Auto', 'sgap-fullauto', 'fullauto'],
-        ['Google Feed', 'sgap-merchant', 'merchant']
+        ['Shop & feeds', 'sgap-merchant', 'merchant']
     ];
 
     public static function init(): void {
@@ -2359,7 +2367,7 @@ class SGAP_Admin {
         self::open('Google Merchant & Pinterest Catalog Feed');
         $secret = (string) SGAP_Settings::get('merchant_feed_secret', '');
         if ($secret === '') {
-            echo '<div class="notice notice-warning"><p>Please set a <strong>Merchant feed secret</strong> under <a href="' . esc_url(admin_url('admin.php?page=sgap-settings')) . '">Settings &rarr; Google Feed</a> to enable your XML product feed.</p></div>';
+            echo '<div class="notice notice-warning"><p>Please set a <strong>Merchant feed secret</strong> under <a href="' . esc_url(admin_url('admin.php?page=sgap-settings')) . '">Settings &rarr; Shop &amp; feeds</a> to enable your XML product feed.</p></div>';
         } else {
             $feed_url = add_query_arg('key', rawurlencode($secret), rest_url(SGAP_REST::NS . '/feed'));
             echo '<p>Use this XML feed URL in <strong>Pinterest Catalogs</strong> and <strong>Google Merchant Center</strong>:</p>';

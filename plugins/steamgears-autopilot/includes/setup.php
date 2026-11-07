@@ -24,7 +24,8 @@ class SGAP_Setup {
         'evergreen_enabled' => 'Recycle evergreen pages', 'evergreen_after_days' => 'Days between two shares', 'evergreen_max_shares' => 'Default shares per page', 'evergreen_batch' => 'Pages recycled per day',
         'auto_images' => 'AI photos for Instagram & Pinterest', 'auto_seo' => 'SEO meta for new posts & products', 'articles_per_week' => 'SEO articles per week',
         'auto_publish_articles' => 'Publish weekly articles automatically', 'weekly_report' => 'Weekly e-mail report', 'rescue_hosts' => 'Copy images from these servers',
-        'mcp_client_id' => 'MCP client ID', 'mcp_refresh_token' => 'MCP refresh token'
+        'mcp_client_id' => 'MCP client ID', 'mcp_refresh_token' => 'MCP refresh token',
+        'printful_api_key' => 'Printful API token', 'printful_store_id' => 'Printful store ID', 'woo_min_margin' => 'Minimum margin %'
     ];
 
     /** Settings page tabs: id => [label, icon, keys]. */
@@ -34,7 +35,7 @@ class SGAP_Setup {
         'publishing' => ['Publishing', 'megaphone', ['publish_mode', 'publer_api_key', 'publer_workspace_id', 'publer_pinterest_board', 'quality_gate', 'banned_words', 'dupe_days']],
         'schedule' => ['Schedule & limits', 'clock', ['quiet_start', 'quiet_end', 'blackout_ranges', 'daily_cap', 'batch_size', 'repost_cooldown_days']],
         'evergreen' => ['Evergreen', 'update', ['evergreen_enabled', 'evergreen_after_days', 'evergreen_max_shares', 'evergreen_batch']],
-        'shop' => ['Shop & feeds', 'cart', ['merchant_feed_secret']],
+        'shop' => ['Shop & feeds', 'cart', ['merchant_feed_secret', 'printful_api_key', 'printful_store_id', 'woo_min_margin']],
         'mcp' => ['MCP access', 'admin-links', ['mcp_client_id', 'mcp_refresh_token']],
         'automation' => ['Automation', 'update-alt', ['auto_images', 'auto_seo', 'articles_per_week', 'auto_publish_articles', 'weekly_report', 'rescue_hosts']],
         'advanced' => ['Economics', 'chart-line', ['labor_rate', 'monthly_budget', 'target_roi', 'winner_min_clicks', 'loser_min_clicks', 'repost_max']]

@@ -129,6 +129,31 @@ access no longer depends on repository secrets or on a loop running in a sandbox
 Approval is still one owner click: `python3 tools/mcp_oauth.py --start` prints the link, `--finish '<code>'`
 saves the pair outside the repo, and the two values are pasted under *Settings → MCP access*.
 
+### Shop tools that cannot underprice themselves (7.45)
+
+The WooCommerce/Printful side is no longer a second plugin. Five tools live in the same
+`steamgears-tools` category as everything else, so the site's MCP server exposes them without
+another credential:
+
+| Tool | What it does |
+| --- | --- |
+| `woo-catalog` | Products with price, cost, **where that cost came from**, the margin, and the lowest price your setting allows |
+| `woo-propose` | Builds a proposal (title, description, price, optional AI copy) and queues it — the shop is not touched |
+| `woo-queue` | The proposals waiting for approval, with before and after |
+| `woo-apply` | Writes one proposal; dry run unless `confirm` is true |
+| `woo-discard` | Drops a proposal without touching the product |
+
+A cost is **never invented**. It is the product's `_sgap_cost` field, or the Printful sync
+variant's own price (matched on the WooCommerce id or SKU, never on the product name); without
+either, the call is refused and names both fixes. The floor is
+`floor(cost × (1 + margin)) + 0.95`, raised by one when that would land *under* the margin, and
+it is recomputed at apply time — so a cost that rose while a proposal was waiting raises the
+price instead of quietly breaking the promise. The AI copy is generated with the cost and the
+floor in the prompt, and the model's price is raised to the floor if it ignores them.
+
+*Settings → Shop & feeds* holds the Printful token (a secret, autoload off), the store id and
+the minimum margin (45 % by default: a cost of 100 refuses anything under 145.95).
+
 ### IndexNow key
 
 `indexnow-submit` serves its own key rather than borrowing Rank Math's (that key

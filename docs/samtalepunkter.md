@@ -25,7 +25,7 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 | Projekt | Status | Grundlag |
 | --- | --- | --- |
 | **steamgears.eu — site-optimering** | **63,7 %** | 15,15 af 23,8 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 6,95/7,55 · S3 2,5/3,55 · S4 1,4/5,25) |
-| **Steamgears Autopilot — plugin** | **75,7 %** | 21,45 af 28,35 d (P0 4,35/4,7 · P1 9,9/13,9 · P2 4,5/7 · P3 2,7/2,75) |
+| **Steamgears Autopilot — plugin** | **76,1 %** | 21,95 af 28,85 d (P0 4,35/4,7 · P1 10,4/14,4 · P2 4,5/7 · P3 2,7/2,75) |
 | **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5) |
 | **SEO-indholdsproduktion** | **62,5 %** | 5 af 8 guides (BATCH 0/3 · COPY 4/4 · CORSET 1/1) |
 | **Døde internlinks** | **100 %** | 39 af 39 links (FIX 39/39) |
@@ -40,19 +40,19 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 ### Næste skridt
 
 - **steamgears.eu — site-optimering** — Vedtag loftet paa det maalte gulv (tekst 30 · lister 45 · produkt 95 · kurv 112) eller bestil trin 3 (klassisk kurv/produkt, 0,75 d); skriv de tre manglende guides fra den verificerede copy; S1.1 Herbarium kraever varianter i Printify; S0.4 kraever en Redirection-gruppe (ejer)
-- **Steamgears Autopilot — plugin** — P3.1 labor_rate (ejer); P1.5 er eksternt blokeret (Pinterest-token + Meta-review); P1.15 er bygget i 7.44.0 og venter kun på ejerens godkendelse og de to MCP-værdier i wp-admin
+- **Steamgears Autopilot — plugin** — P3.1 labor_rate (ejer); P1.5 er eksternt blokeret (Pinterest-token + Meta-review); P1.15 venter på ejerens MCP-godkendelse i wp-admin; P1.16 er klar, men kostprisen skal sættes på varerne (eller Printful-nøglen gemmes), før værktøjerne kan foreslå priser
 - **Dark academia-rebrand** — Batch 4 — mockups (~130 billeder)
 - **SEO-indholdsproduktion** — Skriv de tre manglende guides (mens-steampunk-costume-essentials, steampunk-clothing-three-budgets, womens-steampunk-essentials) fra den verificerede copy — corset-guiden er publiceret 6/11
 - **Døde internlinks** — Vedligehold: tjek nye indlæg mod live-URL'er
 
 ### Seneste commits
 
+- `faed5c9 chore(status): daglig projektstatus 2026-11-07`
+- `5bd1ba8 Modul: S2.7 trin 0–2 — emoji, TikTok, Kliken, Google-login og headerens blok-kurv fjernet Før: 62 %  →  Efter: 63,7 %  (Δ +1,7) Grundlag: 15,15 af 23,8 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 6,95/7,55 · S3 2,5/3,55 · S4 1,4/5,25)`
 - `de3f1f4 chore(status): daglig projektstatus 2026-11-07`
 - `da254f3 Modul: P1.15 — MCP-fornyelsen kører nu i pluginnet (7.44.0) Før: 75,2 %  →  Efter: 75,7 %  (Δ +0,5) Grundlag: 21,45 af 28,35 d (P0 4,35/4,7 · P1 9,9/13,9 · P2 4,5/7 · P3 2,7/2,75)`
 - `fb787cf chore(status): samtalepunkter opdateret efter CI-vagten`
 - `e5ee7e7 Modul: CI-vagt — 14 fixtures og version læst fra plugin-headeren i live_state Før: 74,9 % Efter: 74,9 % Δ: 0 Grundlag: ingen ændring`
-- `bcfbde4 Modul: CI-vagt — natlig måling af MCP-adgang og AI-profil (live_state) Før: 74,9 % Efter: 74,9 % Δ: 0 Grundlag: ingen ændring`
-- `97f3eeb Modul: S1.5 — alle /go/-links målt efter rewrite-flush Før: 62,0 %  →  Efter: 62,0 %  (Δ +0) Grundlag: ingen ændring`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
