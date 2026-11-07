@@ -81,6 +81,12 @@ Disallow: /*?*et_columns-count=
 Efter indgrebet skal `https://steamgears.eu/robots.txt` svare én `User-agent: *`-gruppe (vej C) eller to
 (vej A/B), og `/wp-json/` skal igen svare `application/json`.
 
+**Vej C er verificeret offline, før den lægges på sitet:** filen er `php -l`-ren, og
+[`tools/test_robots_muplugin.php`](../../tools/test_robots_muplugin.php) kører otte checks mod den — én
+`User-agent`-gruppe, de otte regler før Sitemap, urørt Sitemap-linje, idempotens ved andet genløb, ingen
+blank-linje-skade og en fallback når der ikke er nogen Sitemap-linje. Resultat: **8 PASS / 0 FAIL**. Kør
+`./.tools/php tools/test_robots_muplugin.php` for at gentage det.
+
 ## 5. Reglen der forhindrer gentagelsen
 
 - **PHP-filindhold må aldrig indsættes i en dobbelt-citeret PHP-streng.** Brug `base64_decode('…')` (som
