@@ -27,7 +27,7 @@ Der er **fem aktive projekter**, alle målt i [`projektstatus.json`](../projekts
 
 | id | Projekt | Status | Enhed |
 | --- | --- | --- | --- |
-| `site` | steamgears.eu — site-optimering | 64,4 % (15,65 af 24,3 d) | developer-dage |
+| `site` | steamgears.eu — site-optimering | 65,2 % (15,85 af 24,3 d) | developer-dage |
 | `plugin` | Steamgears Autopilot — plugin | 96,3 % (28,8 af 29,9 d) | developer-dage |
 | `rebrand` | Dark academia-rebrand | 63,0 % (8,5 af 13,5 t) | timer |
 | `seo` | SEO-indholdsproduktion | 62,5 % (5 af 8 guides) | guides |

@@ -24,7 +24,7 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 | Projekt | Status | Grundlag |
 | --- | --- | --- |
-| **steamgears.eu — site-optimering** | **64,6 %** | 15,7 af 24,3 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 7,35/8,05 · S3 2,55/3,55 · S4 1,5/5,25) |
+| **steamgears.eu — site-optimering** | **65,2 %** | 15,85 af 24,3 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 7,35/8,05 · S3 2,55/3,55 · S4 1,65/5,25) |
 | **Steamgears Autopilot — plugin** | **96,3 %** | 28,8 af 29,9 d (P0 4,65/4,7 · P1 14,2/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25 · P1E 0,25/0,25 · P1F 0,25/0,25 · P1G 0,5/0,5) |
 | **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5) |
 | **SEO-indholdsproduktion** | **62,5 %** | 5 af 8 guides (BATCH 0/3 · COPY 4/4 · CORSET 1/1) |
@@ -47,15 +47,37 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `1bed4d8 Ryd op efter sammenfletningen: de genererede filer fik deres rigtige tal`
+- `3b9e163 Merge main (S3.5-ugeskontrol og nedbrudsmåling) ind i P1.22`
 - `f104f72 P1.22: fejlsøgning i pluginnet og forbehold pr. modul (7.57.0)`
+- `58260e9 Drift: nedbruddet målt igen — hele den dynamiske del er nede`
+- `2124512 S3.5: ugens kontrol kørt — 24/24 værn, 781 smoke-checks`
 - `d0e86a9 Merge main (P1.20/P1.21, 7.55.0) ind i P1.5c Instagram-insights — udgivet som 7.56.0`
-- `c38acb4 chore(status): daglig projektstatus 2026-11-07`
-- `c747a47 Modul: P1.5c Instagram-insights — fem metrics, caption-match og in-place fornyelse Før: 91,0 %  →  Efter: 96,2 %  (Δ +5,2) Grundlag: 27,8 af 28,9 d (P0 4,65/4,7 · P1 14,2/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25)`
-- `f1670e5 Modul: P1.21 AI Drafts og Publish log — grupperet og talt op Før: 91,1 %  →  Efter: 91,2 %  (Δ +0,1) Grundlag: 26,8 af 29,4 d`
-- `185645c chore(status): samtalepunkter opdateret efter Simply-afsnittet`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 7/11 — Roadmap igen: fortrydelsesoplysningerne ind i ordremailen (S4.12, 0,15 af 0,2 d)
+
+- **Roadmappet er ved at være tømt for arbejde der ikke kræver adgang.** Plugin-sporet mangler kun P1.5's
+  live-verifikation (kræver Pinterest-/Instagram-tokens) og P3.1's `labor_rate`-beslutning (ejer). Site-sporet
+  kræver WordPress-adgang, og sitet svarer stadig `Parse error` på alle dynamiske kald
+  (`managed-wordpress-robots.php`), så wp-admin og MCP er nede. Derfor blev det næste **repo-byggelige** punkt
+  taget: S4.12.
+- **En ordrebekræftelse er kundens dokument; et link er det ikke.** Et link kan flytte sig, ændre sig eller
+  ligge nede, og så har kunden intet — derfor skal fortrydelsesoplysningerne stå **i** mailen (varigt medium).
+- **Hver sætning er et citat fra sitets egne sider** (`/right-of-withdrawal/`, `/refund_returns/`, fanget i
+  `trust-sider-2026-11-06.md`): 14 dage fra modtagelsen, skriv først med ordrenummer, send ikke retur før svar,
+  kunden betaler returfragten medmindre varen er fejlbehæftet, tilbagebetaling inden 14 dage på samme
+  betalingsmetode, hygiejneundtagelsen. **Ingen returadresse, ingen fragtpris, ingen hurtigere tilbagebetaling**
+  — det er præcis de tre ting en generisk standardtekst opfinder, og som butikken ikke har lovet.
+- **Mailens id afgør, ikke konteksten:** `customer_processing_order`, `_completed_order` og `_on_hold_order` får
+  blokken; `new_order`, `customer_invoice`, `customer_note` og alt med `sent_to_admin` gør ikke. Afsnittene
+  skrives **én gang** og renderes til både HTML og ren tekst, så en tekst-only-mail ikke bliver et link og en
+  hilsen. Ordrenummeret escapes — en mail er ikke stedet at opdage en `<script>`-ordre.
+- **36 påstande** i `tools/withdrawal_email_test.php`, nu **værn nr. 25** i den natlige kørsel.
+- **Ikke deployeret:** filen skal kopieres til `wp-content/mu-plugins/` og ses i en rigtig bekræftelse i begge
+  formater — 0,05 d tilbage af de 0,2. Det er blokeret af nedbruddet, ikke af koden.
 
 ### 7/11 — Fejlsøgning i pluginnet (P1.22, 7.57.0) og forbehold som en del af svaret
 

@@ -46,10 +46,10 @@
         {
           "id": "s4",
           "name": "S4 — salgsklar butik",
-          "done": 1.5,
+          "done": 1.65,
           "total": 5.25,
           "unit": "d",
-          "note": "S4.4 formular-del + produkttekster + 0,25 d S4.13 merchant-schema: shippingDetails + MerchantReturnPolicy (scope 6/11, endnu ikke udført) + S4.13 merchant-schema 0,1 af 0,25 d (7/11): produktionstiden 3-7 hverdage fra /shipping/ er nu handlingTime i deliveryTime ved siden af transitTime, itemCondition NewCondition er sat hvor den mangler, testen gik 19 -> 30 paastande og produkt-schema er vaern nr. 22 i den natlige koersel. Fragt-linjen kan IKKE kvalificere: Google kraever shippingRate.value/maxValue og butikken har ingen fast fragtpris, saa den er bevidst udeladt. returnPolicyCountry gaelder organisation-niveau, ikke offer-niveau. Ikke deployet — kraever WordPress-adgang."
+          "note": "S4.4 formular-del + produkttekster + 0,25 d S4.13 merchant-schema: shippingDetails + MerchantReturnPolicy (scope 6/11, endnu ikke udført) + S4.13 merchant-schema 0,1 af 0,25 d (7/11): produktionstiden 3-7 hverdage fra /shipping/ er nu handlingTime i deliveryTime ved siden af transitTime, itemCondition NewCondition er sat hvor den mangler, testen gik 19 -> 30 paastande og produkt-schema er vaern nr. 22 i den natlige koersel. Fragt-linjen kan IKKE kvalificere: Google kraever shippingRate.value/maxValue og butikken har ingen fast fragtpris, saa den er bevidst udeladt. returnPolicyCountry gaelder organisation-niveau, ikke offer-niveau. Ikke deployet — kraever WordPress-adgang. + 0,15 d S4.12 (7/11): fortrydelsesoplysningerne står nu i selve ordremailen (14 dage fra modtagelsen, skriv først, send ikke retur før svar, returfragt hos kunden undtagen fejl, tilbagebetaling inden 14 dage, hygiejneundtagelsen) — hver sætning citeret fra sitets egne sider, ingen opdigtet returadresse eller fragtpris, afsnittene skrevet én gang og renderet som både HTML og ren tekst, 36 påstande i tools/withdrawal_email_test.php som værn nr. 25; ikke deployeret (sitet svarer Parse error), 0,05 d tilbage."
         }
       ]
     },
@@ -1257,6 +1257,15 @@
       "after": 64.6,
       "delta": 0.2,
       "basis": "15,7 af 24,3 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 7,35/8,05 · S3 2,55/3,55 · S4 1,5/5,25)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 64.6,
+      "after": 65.2,
+      "delta": 0.6,
+      "basis": "15,85 af 24,3 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 7,35/8,05 · S3 2,55/3,55 · S4 1,65/5,25)"
     }
   ]
 }

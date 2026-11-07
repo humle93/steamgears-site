@@ -81,6 +81,9 @@ check "designsystem-selftest"                python3 tools/design_check.py --sel
 check "designsystem"                         python3 tools/design_check.py
 check "designsystem-loader"                  "$PHP_BIN" wordpress/tests/test-design-system.php
 check "produkt-schema"                       "$PHP_BIN" tools/schema_filter_test.php
+# S4.12: fortrydelsesoplysningerne i ordremailen — teksten er kundens durable medium,
+# så en regression må ikke kunne snige sig ind uden at en test bliver rød.
+check "fortrydelsesmail"                     "$PHP_BIN" tools/withdrawal_email_test.php
 # Fejlsøgning som fast punkt (P3.6): konsistens på tværs af filer — version mod zip,
 # zip mod kilde, includes, biblioteksindekset, tokens og tests der ikke kan fejle.
 check "fejlscan-selftest"                    python3 tools/fejlscan.py --selftest
