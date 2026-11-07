@@ -131,7 +131,7 @@ Reglen over holdes automatisk, så lidt som muligt afhænger af hukommelse:
   `Grundlag` skal kunne læses ud af den rækkes `basis` (også når beskeden kun citerer rækkens `X af Y enhed`-del),
   så et opdigtet regnestykke afvises. Kan JSON-filen ikke læses, springes kun krydstjekket over — formen kræves
   stadig. Et pas der ikke flytter noget kan skrive `ingen ændring` uden en række. Merge-, revert- og bot-committene
-  fra de to workflows er undtaget, fordi de ikke kan bære procenter; historikken før 3/11 er ikke tjekket efter.
+  fra de to workflows er undtaget, fordi de ikke kan bære procenter; historikken før 3/11 er ikke tjekket efter. Commits der ligger fast i historikken og ikke kan rettes, står i et **verificeret register** ([`docs/commit-vaern-register.md`](docs/commit-vaern-register.md)) med grund og bevis — `--range` skriver hver undtagelse med sin grund, og registret undtager kun den enkelte commit.
 
 Automationen dækker **den daglige status**, og commit-beskeden bliver holdt op på formen. Det manuelle i §1 — at
 vurdere hvad der reelt blev udført og melde `% før → % efter` i svaret — kan scriptet ikke gøre og falder stadig

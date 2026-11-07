@@ -53,6 +53,20 @@ SKIP_SUBJECTS = (
     "chore: natlig auto-push",
 )
 
+# ------------------------------------------------------------------- verificeret register
+
+# Ældre commits i main-historikken hvis procenter ikke kan rettes bagefter: en commit er
+# uforanderlig uden force-push, og det er forbudt. Hver post er efterprøvet mod
+# projektstatus.json og forklaret i docs/commit-vaern-register.md. Registret undtager den
+# enkelte commit — det lemper ikke reglen for nye commits.
+VERIFIED_LEGACY: dict[str, str] = {
+    "1c15f939": "række 96 (76,3 → 76,7 %, 22,75 af 29,65 d): tallene er rækkens; Grundlag citerede "
+                 "modul-deltaet (P1 10,7 → 11,2 = 0,5 d) i stedet for totalen",
+    "c747a47a": "P1.5c-arbejdet ligger på main, men beskedens statuslinje (91,0 → 96,2 %, 27,8 af 28,9 d) "
+                 "blev udregnet før det merge der satte række 110 (91,2 → 96,3 %, 28,3 af 29,4 d)",
+}
+
+
 FIELDS = (
     ("modul", "Modul"),
     ("før", "Før"),
@@ -290,6 +304,17 @@ def check_history(fields: dict[str, str], history: list[dict] | None, errors: li
         problems.append(problem)
     unique = list(dict.fromkeys(problems))
     errors.append("Grundlag matcher ikke historik-rækken: " + "; ".join(unique))
+
+
+def verified_legacy(sha: str) -> str | None:
+    """Undtagelsesgrund hvis commit'en står i det verificerede register (fuld eller kort SHA)."""
+    key = (sha or "").strip().lower()
+    if len(key) < 7:
+        return None
+    for known, reason in VERIFIED_LEGACY.items():
+        if known.startswith(key) or key.startswith(known):
+            return reason
+    return None
 
 
 def check_message(message: str, history: list[dict] | None = None) -> tuple[bool, list[str], str]:
@@ -549,12 +574,20 @@ def run_selftest() -> int:
         if ok != expected:
             failed.append(f"{name}: forventet {'OK' if expected else 'FEJL'}, fik {'OK' if ok else 'FEJL'}"
                           + (f" ({'; '.join(errors)})" if errors else ""))
+    # Registret: kendt SHA (fuld som kort) giver en grund, ukendt giver ingenting, og en
+    # forkortelse under 7 tegn må ikke ramme et register-opslag ved et tilfælde.
+    for sha, expected in ((next(iter(VERIFIED_LEGACY)), True), (next(iter(VERIFIED_LEGACY))[:8], True),
+                          ("0" * 40, False), (next(iter(VERIFIED_LEGACY))[:4], False)):
+        got = verified_legacy(sha) is not None
+        if got != expected:
+            failed.append(f"register {sha!r}: forventet {'fundet' if expected else 'ikke fundet'}")
     for line in failed:
         print(f"[FEJL] {line}")
     if failed:
-        print(f"[FEJL] {len(failed)} af {len(FIXTURES)} fixtures fejlede")
+        print(f"[FEJL] {len(failed)} fejl i {len(FIXTURES)} fixtures + register")
         return 1
     print(f"[OK] {len(FIXTURES)} af {len(FIXTURES)} fixtures som forventet")
+    print(f"[OK] register: {len(VERIFIED_LEGACY)} verificerede ældre commits")
     return 0
 
 
@@ -687,8 +720,12 @@ def main(argv: list[str] | None = None) -> int:
             rows = commits_in_range(args.range_spec)
             bad = 0
             for sha, body in rows:
-                ok, errors, skip = check_message(body, history)
                 short = sha[:8]
+                legacy = verified_legacy(sha)
+                if legacy:
+                    print(f"[OK] {short} undtaget: verificeret register — {legacy}")
+                    continue
+                ok, errors, skip = check_message(body, history)
                 if ok:
                     print(f"[OK] {short} {skip or 'har procenterne'}")
                     continue
@@ -698,7 +735,13 @@ def main(argv: list[str] | None = None) -> int:
                   f" opfylder reglen")
             return 0 if bad == 0 else 1
 
-        message = message_from_commit(args.commit or "HEAD")
+        rev = args.commit or "HEAD"
+        resolved = git("rev-parse", rev).stdout.strip()
+        legacy = verified_legacy(resolved)
+        if legacy:
+            print(f"[OK] {resolved[:8]} undtaget: verificeret register — {legacy}")
+            return 0
+        message = message_from_commit(rev)
         ok, errors, skip = check_message(message, history)
         if ok:
             print(f"[OK] {skip or 'commit-beskeden har procenterne'}")
