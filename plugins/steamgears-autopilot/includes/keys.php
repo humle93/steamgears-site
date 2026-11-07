@@ -102,6 +102,15 @@ class SGAP_Keys {
             'hint' => 'The professional account id and the Graph host live under Publishing. The long-lived token lasts 60 days and refreshes itself on every run with Instagram Login; Facebook Login tokens have to be replaced by hand.',
             'optional' => true
         ],
+        'facebook' => [
+            'title' => 'Facebook page',
+            'icon' => 'facebook-alt',
+            'keys' => ['facebook_access_token'],
+            'body' => 'Reads the page and its posts, and can answer or hide a comment. Publishing goes through Publer unless you switch it on under Publishing.',
+            'links' => [['Meta app dashboard', 'https://developers.facebook.com/apps/']],
+            'hint' => 'A Page access token, not a user token. The page id and the Graph version live under Publishing. Scopes: pages_show_list, pages_read_engagement, pages_manage_posts, pages_manage_engagement.',
+            'optional' => true
+        ],
         'telegram' => [
             'title' => 'Telegram',
             'icon' => 'email-alt',

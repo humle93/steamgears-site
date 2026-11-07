@@ -48,6 +48,7 @@ class SGAP_Diagnostics {
     const CAVEATS = [
         'instagram' => 'Views, likes, comments, shares and saves are what Instagram had reported when we asked. A metric Instagram has not published yet (up to 48 hours) is left out, not stored as 0, and the post counts as waiting. Each media object reports its own lifetime totals, so the table is not a sum over a date range.',
         'pinterest' => 'Impressions, saves and outbound clicks are what Pinterest had reported when we asked, and a pin that is not reported yet is left out rather than counted as 0. Saves and likes are event types we also use for other channels, so every query here is scoped to the pinterest channel.',
+        'facebook' => 'Impressions, reach, reactions and clicks are what Meta reported for our own posts at the time we asked; a post Meta has not reported yet is left out, not stored as 0, and page insights are not the same measurement as post insights. Comments are read live, so the screen shows what is there now, not a history.',
         'engagement' => 'Likes, reposts and replies are what the platforms answered when the daily run asked. A platform that is not connected, or refuses the call, contributes nothing here — its row is missing, not zero — and the reason is in the error log.',
         'roi' => 'Revenue is last-click attribution inside the window: an order with no tracked click belongs to no channel, and an order after the window is counted for nobody. Our own /go/ clicks are counted by us, not by the platform.',
         'automation' => 'A post that never left has no numbers at all. A failed post is retried once; if it fails again it stays failed until someone looks at the reason on the Queue page.',
@@ -226,7 +227,7 @@ class SGAP_Diagnostics {
             'Save a working key under Settings → Keys; the weekly self-check tests it every Monday.'
         );
 
-        foreach (['pinterest', 'instagram'] as $channel) {
+        foreach (['pinterest', 'instagram', 'facebook'] as $channel) {
             $checks[] = self::channel_row($channel);
         }
 
@@ -257,7 +258,8 @@ class SGAP_Diagnostics {
             'publish tick' => SGAP_Install::PUBLISH_CRON,
             'self-check' => SGAP_Auto::HEALTH_CRON,
             'Pinterest' => SGAP_Pinterest::CRON,
-            'Instagram' => SGAP_Instagram::CRON
+            'Instagram' => SGAP_Instagram::CRON,
+            'Facebook' => SGAP_Facebook::CRON
         ];
         $late = [];
         $unscheduled = [];
@@ -288,7 +290,7 @@ class SGAP_Diagnostics {
 
     /** One insight channel: configured, token alive, last run, next run. */
     private static function channel_row(string $channel): array {
-        $class = $channel === 'pinterest' ? 'SGAP_Pinterest' : 'SGAP_Instagram';
+        $class = ['pinterest' => 'SGAP_Pinterest', 'instagram' => 'SGAP_Instagram', 'facebook' => 'SGAP_Facebook'][$channel] ?? '';
         $label = ucfirst($channel) . ' insights';
         if (!class_exists($class)) {
             return self::row($channel, $label, 'bad', 'The module is not loaded.', 'Reactivate the plugin; the file is missing from the release.');
@@ -319,7 +321,9 @@ class SGAP_Diagnostics {
     private static function channel_fix(string $channel): string {
         return $channel === 'instagram'
             ? 'Paste a long-lived Instagram User token and the professional account id under Settings → Keys; a token set in wp-config.php cannot be refreshed.'
-            : 'Paste a Pinterest access token, or the app credentials plus a refresh token, under Settings → Keys.';
+            : ($channel === 'facebook'
+                ? 'Mint a Page access token with pages_manage_posts and paste it under Settings → Keys together with the page id.'
+                : 'Paste a Pinterest access token, or the app credentials plus a refresh token, under Settings → Keys.');
     }
 
     private static function row(string $id, string $label, string $state, string $detail, string $fix): array {

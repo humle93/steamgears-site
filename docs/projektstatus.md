@@ -23,7 +23,7 @@ Status pr. **2026-11-07** · beregnet af `projektstatus.py` · kilder: [`projekt
 | Projekt | Status i dag | Grundlag |
 | --- | --- | --- |
 | **steamgears.eu — site-optimering** *(roadmap S0–S4)* | **65,9 %** | 15,85 af 24,05 d (S0 2,15/2,35 · S1 2,15/4,6 · S2 7,35/8,3 · S3 2,55/3,55 · S4 1,65/5,25) |
-| **Steamgears Autopilot — plugin** | **96,3 %** | 28,8 af 29,9 d (P0 4,65/4,7 · P1 14,2/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5) |
+| **Steamgears Autopilot — plugin** | **96,5 %** | 30,3 af 31,4 d (P0 4,65/4,7 · P1 14,2/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5) |
 | **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5) |
 | **SEO-indholdsproduktion** | **62,5 %** | 5 af 8 guides (Publicerede guides (id 292, 296, 295) 0/3 · Guide-copy klar til publicering (292, 296, 295 + corset) 4/4 · Corset-guiden publiceret (/steampunk-corset-guide/, 1394) 1/1) · drift: Daglig loop kører |
 | **Døde internlinks** | **100 %** | 39 af 39 links |
@@ -35,7 +35,7 @@ Status pr. **2026-11-07** · beregnet af `projektstatus.py` · kilder: [`projekt
 | Projekt | Næste skridt | Blokering |
 | --- | --- | --- |
 | steamgears.eu — site-optimering (65,9 %) | Ryd op i hostens mu-plugin først: erstat wp-content/mu-plugins/managed-wordpress-robots.php med den rettede fil i repoet (wordpress/mu-plugins/, 8/8 offline-checks) via Simplys File Manager — derefter genmåles robots/sitemap/REST/feed. Så: S2.9 + S4.13 ud på siden, OG-billede pr. indlæg og /shop/s H1 (kræver live-adgang), og tre ejerbeslutninger til S2.7-loftet. | Sitet svarer PHP-parsefejl på alle dynamiske kald (målt igen 7/11: /wp-json, robots.txt, sitemap_index.xml, /?sgap_feed=, og admin-ajax 500 — MCP-fladen svarer selv 500) — kun W3TC-cachede HTML-sider virker, og wp-admin er nede, så rettelsen kræver File Manager/SFTP (ejer). Der findes ingen deploy-vej i repoet: ingen FTP/SFTP/SSH-workflow, ingen .env, ingen gh-login og ingen MCP-credential i sandkassen. S2.7-loftet kræver tre ejerbeslutninger; S1.4/S1.6 kræver live-skrivning; S2.5 mangler OG-billedet. |
-| Steamgears Autopilot — plugin (96,3 %) | P1.5b (Pinterest) og P1.5c (Instagram) er kode-færdige, men den første live-kørsel kræver et token af hver (Settings → Keys); P3.1 mangler ejerens labor_rate-beslutning; P1.15 kræver ejerens MCP-godkendelse i wp-admin. | P1.5b/P1.5c kræver et Pinterest- og Instagram-token (Settings → Keys); P3.1 mangler ejerens labor_rate-beslutning; P1.15 kræver ejerens MCP-godkendelse i wp-admin — og wp-admin er nede indtil mu-plugin-fejlen er ryddet, ligesom RSS-feedet (?sgap_feed=) som publiceringen bruger. |
+| Steamgears Autopilot — plugin (96,5 %) | P1.5b (Pinterest) og P1.5c (Instagram) er kode-færdige, men den første live-kørsel kræver et token af hver (Settings → Keys); P3.1 mangler ejerens labor_rate-beslutning; P1.15 kræver ejerens MCP-godkendelse i wp-admin. | P1.5b/P1.5c kræver et Pinterest- og Instagram-token (Settings → Keys); P3.1 mangler ejerens labor_rate-beslutning; P1.15 kræver ejerens MCP-godkendelse i wp-admin — og wp-admin er nede indtil mu-plugin-fejlen er ryddet, ligesom RSS-feedet (?sgap_feed=) som publiceringen bruger. |
 | Dark academia-rebrand (63 %) | Batch 4 — mockups (~130 billeder) | Printify-adgang |
 | SEO-indholdsproduktion (62,5 %) | Skriv de tre manglende guides (mens-steampunk-costume-essentials, steampunk-clothing-three-budgets, womens-steampunk-essentials) fra den verificerede copy — corset-guiden er publiceret 6/11 | Intet eksternt for de tre resterende guides: copy, FAQ, priser og links ligger i docs/library/guides-2026-11-03.md. De otte /go/-id'er 411/475/481/485/497/567 kunne ikke verificeres fra sandkassen (Simplys WAF giver browser-UA en challenge), så nye produktlinks skal måles fra ejerens side eller efter WAF-hvidlistning |
 | Døde internlinks (100 %) | Vedligehold: tjek nye indlæg mod live-URL'er | ingen |
@@ -50,6 +50,7 @@ Nyeste først. Append-only — rækker må ikke slettes eller ændres.
 
 | Dato | Projekt | Modul | Før → Efter | Δ | Grundlag |
 | --- | --- | --- | --- | --- | --- |
+| 2026-11-07 | Steamgears Autopilot — plugin | daglig måling | 96,3 % → 96,5 % | +0,2 | 30,3 af 31,4 d (P0 4,65/4,7 · P1 14,2/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5) |
 | 2026-11-07 | steamgears.eu — site-optimering | daglig måling | 65,3 % → 65,9 % | +0,6 | 15,85 af 24,05 d (S0 2,15/2,35 · S1 2,15/4,6 · S2 7,35/8,3 · S3 2,55/3,55 · S4 1,65/5,25) |
 | 2026-11-07 | steamgears.eu — site-optimering | scope-ændring S2.5b (OG-billede) | 66 % → 65,3 % | -0,7 | 15,7 af 24,05 d (S0 2,15/2,35 · S1 2,15/4,6 · S2 7,35/8,3 · S3 2,55/3,55 · S4 1,5/5,25) |
 | 2026-11-07 | steamgears.eu — site-optimering | daglig måling | 64,6 % → 66 % | +1,4 | 15,7 af 23,8 d (S0 2,15/2,35 · S1 2,15/4,6 · S2 7,35/8,05 · S3 2,55/3,55 · S4 1,5/5,25) |

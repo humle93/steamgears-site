@@ -138,6 +138,14 @@
           "total": 0.5,
           "unit": "d",
           "verified": true
+        },
+        {
+          "id": "p2f",
+          "name": "P2.6 — Facebook-siden som kanal (publicering, insights, moderation)",
+          "done": 1.5,
+          "total": 1.5,
+          "unit": "d",
+          "note": "Bygget 7/11 (7.58.0). Direkte publicering er opt-in (facebook_direct, standard no), så en side der kun forbindes for at blive læst ikke flytter publiceringen ud af Publer. 82 smoke-checks gennem $transport — intet kald er gået til Meta, og siden er ikke set i en rigtig wp-admin."
         }
       ],
       "total": 29.9
@@ -1294,6 +1302,15 @@
       "after": 65.9,
       "delta": 0.6,
       "basis": "15,85 af 24,05 d (S0 2,15/2,35 · S1 2,15/4,6 · S2 7,35/8,3 · S3 2,55/3,55 · S4 1,65/5,25)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 96.3,
+      "after": 96.5,
+      "delta": 0.2,
+      "basis": "30,3 af 31,4 d (P0 4,65/4,7 · P1 14,2/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5)"
     }
   ]
 }

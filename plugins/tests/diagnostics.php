@@ -85,7 +85,7 @@ check('diagnostics: the pinterest caveat names the channel scoping', str_contain
 
 // --- the checks read state, they do not write it -------------------------------------
 $ids = array_column(SGAP_Diagnostics::checks(), 'id');
-check('diagnostics: every check is present', $ids === ['php', 'tables', 'cron', 'queue', 'ai', 'pinterest', 'instagram', 'mcp', 'errors']);
+check('diagnostics: every check is present', $ids === ['php', 'tables', 'cron', 'queue', 'ai', 'pinterest', 'instagram', 'facebook', 'mcp', 'errors']);
 $states = array_column(SGAP_Diagnostics::checks(), 'state');
 check('diagnostics: a state is one of the four', count(array_diff($states, ['ok', 'warn', 'bad', 'off'])) === 0);
 check('diagnostics: a failing check always says what to do', array_reduce(SGAP_Diagnostics::checks(), fn($c, $r) => $c && ($r['state'] === 'ok' || $r['fix'] !== ''), true));
@@ -114,30 +114,30 @@ $GLOBALS['as']['next'] = 0;
 // A channel that was never connected is not broken. Pinterest is a different case in this
 // harness: smoke.php defines a Pinterest token in wp-config.php, so the plugin reports the
 // refresh it cannot do — that is a fault, and it is reported as one.
-$channels = array_column(array_slice(SGAP_Diagnostics::checks(), 5, 2), 'state', 'id');
-check('diagnostics: an unconnected channel is off, not bad', $channels['instagram'] === 'off');
+$channels = array_column(array_slice(SGAP_Diagnostics::checks(), 5, 3), 'state', 'id');
+check('diagnostics: an unconnected channel is off, not bad', $channels['instagram'] === 'off' && $channels['facebook'] === 'off');
 check('diagnostics: a token that cannot be refreshed is a fault, not an off row', $channels['pinterest'] === 'bad');
 SGAP_Settings::set('instagram_user_id', '17841400000000000');
 SGAP_Settings::set('instagram_access_token', 'IGQVJtest');
-$row = array_column(array_slice(SGAP_Diagnostics::checks(), 5, 2), 'state', 'id');
+$row = array_column(array_slice(SGAP_Diagnostics::checks(), 5, 3), 'state', 'id');
 check('diagnostics: a connected channel is accounted for', $row['instagram'] !== 'off');
 check('diagnostics: a channel that never ran says so', str_contains(SGAP_Diagnostics::checks()[6]['detail'], 'never'));
 SGAP_Diagnostics::log('instagram', 'Media listing: Instagram refused the access token (HTTP 400).');
-$row = array_column(array_slice(SGAP_Diagnostics::checks(), 5, 2), 'state', 'id');
+$row = array_column(array_slice(SGAP_Diagnostics::checks(), 5, 3), 'state', 'id');
 check('diagnostics: a logged failure reaches the channel row through the module state', in_array($row['instagram'], ['warn', 'bad'], true));
 
 SGAP_Diagnostics::clear();
 SGAP_Diagnostics::log('instagram', 'one');
-check('diagnostics: one error in the window is a warning', SGAP_Diagnostics::checks()[8]['state'] === 'warn');
+check('diagnostics: one error in the window is a warning', SGAP_Diagnostics::checks()[9]['state'] === 'warn');
 SGAP_Diagnostics::log('pinterest', 'two');
 SGAP_Diagnostics::log('publer', 'three');
-check('diagnostics: three errors in the window fail the check', SGAP_Diagnostics::checks()[8]['state'] === 'bad');
-check('diagnostics: the error check counts the window', str_contains(SGAP_Diagnostics::checks()[8]['detail'], '3 error(s)'));
+check('diagnostics: three errors in the window fail the check', SGAP_Diagnostics::checks()[9]['state'] === 'bad');
+check('diagnostics: the error check counts the window', str_contains(SGAP_Diagnostics::checks()[9]['detail'], '3 error(s)'));
 
 // --- the snapshot, the line and the report -------------------------------------------
 $status = SGAP_Diagnostics::status();
-check('diagnostics: the status carries every check', count($status['checks']) === 9);
-check('diagnostics: the totals add up to the checks', array_sum($status['totals']) === 9);
+check('diagnostics: the status carries every check', count($status['checks']) === 10);
+check('diagnostics: the totals add up to the checks', array_sum($status['totals']) === 10);
 check('diagnostics: the totals count the states they claim', $status['totals']['bad'] === count(array_filter($status['checks'], fn($c) => $c['state'] === 'bad')));
 check('diagnostics: the status has a timestamp', $status['at'] !== '');
 check('diagnostics: the snapshot is stored for the dashboard', ($GLOBALS['opts']['sgap_diagnostics_state']['totals'] ?? null) === $status['totals']);
@@ -145,7 +145,7 @@ check('diagnostics: the summary names what needs attention', str_contains($statu
 check('diagnostics: the self-check line points at the page', str_contains(SGAP_Diagnostics::problem(), 'Fejlsøgning'));
 
 $report = SGAP_Diagnostics::rest_report();
-check('diagnostics: the REST report is a response with the same report', $report instanceof WP_REST_Response && count($report->data['checks']) === 9);
+check('diagnostics: the REST report is a response with the same report', $report instanceof WP_REST_Response && count($report->data['checks']) === 10);
 check('diagnostics: the REST report carries the caveats', isset($report->data['caveats']['instagram']));
 
 // --- the page and the dashboard card -------------------------------------------------

@@ -25,7 +25,7 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 | Projekt | Status | Grundlag |
 | --- | --- | --- |
 | **steamgears.eu — site-optimering** | **65,9 %** | 15,85 af 24,05 d (S0 2,15/2,35 · S1 2,15/4,6 · S2 7,35/8,3 · S3 2,55/3,55 · S4 1,65/5,25) |
-| **Steamgears Autopilot — plugin** | **96,3 %** | 28,8 af 29,9 d (P0 4,65/4,7 · P1 14,2/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25 · P1E 0,25/0,25 · P1F 0,25/0,25 · P1G 0,5/0,5) |
+| **Steamgears Autopilot — plugin** | **96,5 %** | 30,3 af 31,4 d (P0 4,65/4,7 · P1 14,2/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25 · P1E 0,25/0,25 · P1F 0,25/0,25 · P1G 0,5/0,5 · P2F 1,5/1,5) |
 | **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5) |
 | **SEO-indholdsproduktion** | **62,5 %** | 5 af 8 guides (BATCH 0/3 · COPY 4/4 · CORSET 1/1) |
 | **Døde internlinks** | **100 %** | 39 af 39 links (FIX 39/39) |
@@ -47,15 +47,42 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `3d7a3ff Merge main (S0.4-forbehold) ind i S4.12`
+- `9f77099 Merge main (roadmap-rækker lukket, commit-værn rettet) ind i S4.12`
+- `0165d79 S0.4: forbehold om at «ingen 404» er målt før nedbruddet`
 - `7431166 S4.12: fortrydelsesoplysningerne ind i ordremailen`
+- `0a628a2 Roadmap-rækker lukket med bevis, og CI's commit-værn gjort grøn`
 - `1bed4d8 Ryd op efter sammenfletningen: de genererede filer fik deres rigtige tal`
-- `3b9e163 Merge main (S3.5-ugeskontrol og nedbrudsmåling) ind i P1.22`
-- `f104f72 P1.22: fejlsøgning i pluginnet og forbehold pr. modul (7.57.0)`
-- `58260e9 Drift: nedbruddet målt igen — hele den dynamiske del er nede`
-- `2124512 S3.5: ugens kontrol kørt — 24/24 værn, 781 smoke-checks`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 7/11 — Facebook-siden kan nu styres, men først når nogen slår det til (P2.6, 7.58.0)
+
+Facebook var den kanal, pluginnet nævnte i `channels` og aldrig rørte. Nu er der et modul som de
+andre — publicering, insights, moderation — men med én forsætlig bremse: **`facebook_direct` står på
+`no`**. En side kan altså forbindes for at blive læst (følgere, kommentarer, tal) uden at et eneste
+indlæg flytter sig ud af Publer. Det er ikke forsigtighed for syns skyld: en nøgle, der gemmes for at
+se tallene, må ikke i sig selv ændre en arbejdsgang, og publiceringsvejen er en beslutning om
+arbejdsgang.
+
+Det dyre i den her slags arbejde er ikke kaldet, men de fire steder hvor et svar ikke er det, man
+tror. `post_reactions_by_type_total` er et objekt (`{LIKE: 3, LOVE: 2}`), ikke et tal. En metrik Meta
+endnu ikke har rapporteret er ikke 0 — den udelades, og posten spørges igen i næste kørsel, for
+"ingen visninger" og "ikke målt endnu" må ikke se ens ud i databasen. Et metriksæt kan blive afvist
+med kode 100 på medietyper uden klik, så det brede sæt genforsøges med de to metrikker alle indlæg
+har. Og en sletning ved gem skal være afgrænset til `channel = 'facebook'`, fordi `likes` og `shares`
+også er Bluesky-, Mastodon- og Instagram-typer.
+
+Moderation er med vilje kun skjul, vis igen og svar. Intet slettes: skjul er reversibelt, og en cron
+skal ikke eje endelige handlinger over for andres ord.
+
+82 nye checks, smoke 905 → 987 PASS, 0 FAIL, alle gennem `$transport`-sømmen. Det betyder også, at
+**intet kald er gået til Meta**: der findes ingen Page access token i miljøet, så publicering,
+insights og kommentarer er kun målt mod svar med Metas form, og siden er ikke set i en rigtig
+wp-admin. Det næste skridt er ejerens: en Page access token med `pages_manage_posts` og
+`pages_manage_engagement`, side-id'et under Settings → Publishing, og først derefter `facebook_direct`
+hvis publiceringen skal flyttes.
 
 ### 7/11 — Ingen vej uden File Manager, og seks rækker lukket med bevis
 

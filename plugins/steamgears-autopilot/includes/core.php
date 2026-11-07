@@ -352,7 +352,8 @@ class SGAP_Settings {
         'merchant_feed_secret','bluesky_app_password','mastodon_token',
         'mcp_refresh_token','printful_api_key',
         'pinterest_access_token','pinterest_refresh_token','pinterest_client_secret',
-        'instagram_access_token'
+        'instagram_access_token',
+        'facebook_access_token'
     ];
     /** Multi-line text settings, shown as a textarea. */
     const TEXTAREA_KEYS = ['blackout_ranges', 'banned_words'];
@@ -361,7 +362,7 @@ class SGAP_Settings {
         'telegram_chat_id',
         'alert_email','channel_caps',
         'blackout_ranges','banned_words','utm_campaign','bluesky_handle','mastodon_instance',
-        'pinterest_client_id','instagram_user_id',
+        'pinterest_client_id','instagram_user_id','facebook_page_id',
         'locale_source','locales','command_center_url','mcp_client_id',
         'printful_store_id'
     ];
@@ -371,6 +372,8 @@ class SGAP_Settings {
         'ai_provider' => ['anthropic' => 'Anthropic (Claude)', 'aimlapi' => 'AIMLAPI (Claude and 300+ other models)', 'openai_compatible' => 'Other OpenAI-compatible API (OpenAI, OpenRouter, ...)'],
         'quality_gate' => ['block' => 'Block — keep the post out of the queue until it is fixed', 'warn' => 'Warn — queue it and report what is wrong', 'off' => 'Off — do not check'],
         'instagram_graph_host' => ['graph.instagram.com' => 'Instagram Login (graph.instagram.com) — scopes instagram_business_basic and instagram_business_manage_insights', 'graph.facebook.com' => 'Facebook Login (graph.facebook.com) — scopes instagram_basic and instagram_manage_insights; the token cannot renew itself'],
+        'facebook_graph_version' => ['v21.0' => 'v21.0 (current)', 'v20.0' => 'v20.0', 'v19.0' => 'v19.0'],
+        'facebook_direct' => ['no' => 'No — keep publishing through Publer, read the page only', 'yes' => 'Yes — publish to the page directly with the Graph API'],
         'alert_mode' => ['immediate' => 'Immediate — one mail per failed post, plus one when the queue runs dry', 'daily' => 'Daily digest — one mail a day from the self-check', 'off' => 'Off — the dashboard still shows the problems'],
         'ai_profile' => ['assistant' => 'Autopilot assistant — drafts, queue and results', 'site_admin' => 'Site administration — full access, everything on the site', 'wp_seo_expert' => 'WordPress SEO expert — content and SEO, no ops']
     ];
@@ -378,7 +381,7 @@ class SGAP_Settings {
     /** Shown in the settings page. Keys not listed here stay registered for older data but are unused. */
     const SECTIONS = [
         'General' => ['autopilot_enabled','full_auto_enabled','daily_cap','batch_size','quiet_start','quiet_end','blackout_ranges','quality_gate','banned_words','dupe_days','utm_campaign','command_center_url'],
-        'Publer' => ['publish_mode','publer_api_key','publer_workspace_id','publer_pinterest_board','pinterest_client_id','instagram_user_id','instagram_graph_host','channels','bluesky_handle','bluesky_app_password','mastodon_instance','mastodon_token','mastodon_limit','telegram_bot_token','telegram_chat_id'],
+        'Publer' => ['publish_mode','publer_api_key','publer_workspace_id','publer_pinterest_board','pinterest_client_id','instagram_user_id','instagram_graph_host','facebook_page_id','facebook_access_token','facebook_graph_version','facebook_direct','channels','bluesky_handle','bluesky_app_password','mastodon_instance','mastodon_token','mastodon_limit','telegram_bot_token','telegram_chat_id'],
         'AI content' => ['ai_profile','ai_provider','ai_api_key','ai_model','ai_base_url','posts_per_day','content_language','locale_source','locales','image_model','image_api_key','serpapi_key'],
         'Economics' => ['labor_rate','monthly_budget','target_roi','winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max'],
         'Evergreen' => ['evergreen_enabled','evergreen_after_days','evergreen_max_shares','evergreen_batch'],
@@ -420,6 +423,10 @@ class SGAP_Settings {
         'instagram_user_id' => 'The Instagram professional account id (starts with 1784…), not the @handle: Meta app dashboard → Instagram → API setup with Instagram login, or `GET /me?fields=id,username` with the token. Insights only exist for business and creator accounts you manage.',
         'instagram_access_token' => 'A long-lived Instagram User token (60 days). With Instagram Login it is refreshed in place on every run once it is at least 24 hours old, so it never expires as long as the cron runs; with Facebook Login it has to be replaced by hand. Never shown again after saving; an empty field keeps the stored value.',
         'instagram_graph_host' => 'Which Graph host the token belongs to. The two login types issue tokens to different hosts, so this is a setting instead of a guess: pointing an Instagram Login token at graph.facebook.com answers 400.',
+        'facebook_page_id' => 'The numeric id of the Facebook Page, not the @name. Found under the page\'s About → Page transparency, or with GET /me/accounts using a user token that manages the page.',
+        'facebook_access_token' => 'A Page access token (Facebook Login for Business → the page). It is what writes as the page; a user token cannot. Scopes: pages_show_list, pages_read_engagement, pages_manage_posts, and pages_manage_engagement for answers and hiding. Never shown again after saving; an empty field keeps the stored value.',
+        'facebook_graph_version' => 'The Graph API version the calls use. Meta retires old versions after about two years, so this is a setting and not a constant in the code.',
+        'facebook_direct' => 'Off by default on purpose: the page can be connected just to be read, and a key must not move publishing out of Publer on its own. On: queue posts on the facebook channel go straight to the page.',
         'pinterest_client_id' => 'The App ID of your Pinterest developer app (developers.pinterest.com → My apps). Not a secret — it is sent with the secret to renew the access token. Analytics need the boards:read and pins:read scopes, and only work for pins the token account owns.',
         'mastodon_limit' => 'Characters the instance accepts in one post. 500 is what every server allows; raise it only when the instance documents a higher limit. The tracking link is always kept whole.',
         'telegram_bot_token' => 'BotFather → /newbot (or /token for an existing bot). The token is what authorises the message; it is never shown again after saving.',
@@ -1835,6 +1842,7 @@ class SGAP_Admin {
         SGAP_Engagement::dashboard_card();
         SGAP_Pinterest::dashboard_card();
         SGAP_Instagram::dashboard_card();
+        SGAP_Facebook::dashboard_card();
         echo '</div><div>';
         self::feeds_panel();
         self::keys_panel();

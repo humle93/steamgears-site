@@ -465,6 +465,10 @@ class SGAP_Auto {
         if (class_exists('SGAP_Instagram') && ($instagram = SGAP_Instagram::problem()) !== '') {
             $problems[] = $instagram;
         }
+        // A page that was connected but cannot be read looks exactly like a quiet week.
+        if (class_exists('SGAP_Facebook') && ($facebook = SGAP_Facebook::problem()) !== '') {
+            $problems[] = $facebook;
+        }
         // The channel lines above describe the state right now. A failure that the next run
         // fixed is only in the log, and that is the one worth walking back to.
         if (class_exists('SGAP_Diagnostics') && ($logged = SGAP_Diagnostics::problem()) !== '') {

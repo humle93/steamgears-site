@@ -1515,6 +1515,7 @@ SGAP_Engagement::$transport=null; $GLOBALS['rows']=[];
 require __DIR__.'/pinterest.php';
 require __DIR__.'/instagram.php';
 require __DIR__.'/diagnostics.php';
+require __DIR__.'/facebook.php';
 require __DIR__.'/mcp-woo.php';
 require __DIR__.'/mcp.php';
 require __DIR__.'/evergreen.php';

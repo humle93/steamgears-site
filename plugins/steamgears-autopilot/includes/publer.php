@@ -307,11 +307,14 @@ class SGAP_Publer {
                 $direct = 'mastodon';
             } elseif (SGAP_Telegram::handles((string) $row['channel'])) {
                 $direct = 'telegram';
+            } elseif (SGAP_Facebook::handles((string) $row['channel'])) {
+                $direct = 'facebook';
             }
             $job = match ($direct) {
                 'bluesky' => SGAP_Bluesky::publish($row),
                 'mastodon' => SGAP_Mastodon::publish($row),
                 'telegram' => SGAP_Telegram::publish($row),
+                'facebook' => SGAP_Facebook::publish($row),
                 default => self::publish($row),
             };
             if (is_wp_error($job)) {
@@ -327,7 +330,7 @@ class SGAP_Publer {
                 // the Telegram message id is the receipt, so the item is published here
                 // instead of being polled as 'sending' until it times out.
                 SGAP_Queue::mark((int) $row['id'], 'published');
-                $labels = ['bluesky' => 'Bluesky post ', 'mastodon' => 'Mastodon post ', 'telegram' => 'Telegram message '];
+                $labels = ['bluesky' => 'Bluesky post ', 'mastodon' => 'Mastodon post ', 'telegram' => 'Telegram message ', 'facebook' => 'Facebook post '];
                 SGAP_Audit::record((int) $row['id'], (string) $row['channel'], 'published', 200, ($labels[$direct] ?? '') . $job);
                 $report['sent'][] = ['id' => (int) $row['id'], 'channel' => $row['channel'], 'job_id' => $job, 'direct' => $direct];
                 continue;
