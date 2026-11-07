@@ -25,7 +25,7 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 | Projekt | Status | Grundlag |
 | --- | --- | --- |
 | **steamgears.eu — site-optimering** | **64,4 %** | 15,65 af 24,3 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 7,35/8,05 · S3 2,5/3,55 · S4 1,5/5,25) |
-| **Steamgears Autopilot — plugin** | **77,7 %** | 23,05 af 29,65 d (P0 4,65/4,7 · P1 11,2/15,2 · P2 4,5/7 · P3 2,7/2,75) |
+| **Steamgears Autopilot — plugin** | **79,4 %** | 23,55 af 29,65 d (P0 4,65/4,7 · P1 11,7/15,2 · P2 4,5/7 · P3 2,7/2,75) |
 | **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5) |
 | **SEO-indholdsproduktion** | **62,5 %** | 5 af 8 guides (BATCH 0/3 · COPY 4/4 · CORSET 1/1) |
 | **Døde internlinks** | **100 %** | 39 af 39 links (FIX 39/39) |
@@ -47,12 +47,12 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `671d88e Modul: P1.5 + Action Scheduler — research af fire plugin-funktioner Før: 77,7 %  →  Efter: 77,7 %  (Δ 0) Grundlag: ingen ændring`
+- `1543db4 Modul: S2.5/S4.11 — cache-audit af sitet 7/11 (kun to sider målelige) Før: 64,4 %  →  Efter: 64,4 %  (Δ 0) Grundlag: ingen ændring`
+- `d63bd80 Modul: S0.2 robots — vej C verificeret offline, før filen lægges på sitet Før: 64,4 %  →  Efter: 64,4 %  (Δ 0) Grundlag: ingen ændring`
+- `7ad0bcf chore(status): daglig projektstatus 2026-11-07`
+- `c5e964f Modul: P0.4 cron-honesty — testen fandtes ikke, nu gør den (7.46.0) Før: 76,7 %  →  Efter: 77,7 %  (Δ +1,0) Grundlag: 23,05 af 29,65 d (P0 4,65/4,7 · P1 11,2/15,2 · P2 4,5/7 · P3 2,7/2,75)`
 - `ef03855 chore(status): daglig projektstatus 2026-11-07`
-- `d1d8048 Modul: S4.13 merchant-schema — produktionstid, og det krav der ikke kan opfyldes`
-- `718fe6a chore(status): daglig projektstatus 2026-11-07`
-- `000b54b Modul: S2.9 designsystem — ét lag for hele sidens flade`
-- `3a3e010 chore(status): daglig projektstatus 2026-11-07`
-- `1c15f93 Modul: UI moderniseret — alle nøgler på ét sted (7.47.0)`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)

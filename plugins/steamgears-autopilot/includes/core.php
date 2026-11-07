@@ -1199,6 +1199,9 @@ class SGAP_REST {
         register_rest_route(self::NS, '/snapshot', [
             'methods' => 'GET', 'callback' => [__CLASS__, 'snapshot'], 'permission_callback' => $auth
         ]);
+        register_rest_route(self::NS, '/engagement/refresh', [
+            'methods' => 'POST', 'callback' => ['SGAP_Engagement', 'rest_refresh'], 'permission_callback' => $auth
+        ]);
     }
 
     private static function key(WP_REST_Request $r, string $name, string $default, int $max): string {

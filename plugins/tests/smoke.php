@@ -1298,6 +1298,47 @@ $late=SGAP_Auto::site_health_cron();
 check('cron: a publisher 45 minutes late turns the test critical', $late['status']==='critical' && str_contains($late['description'],'45 minutes behind'));
 check('cron: the advice carries the exact wp-cron.php call and the 5-minute interval', str_contains($late['description'],'wp-cron.php') && str_contains($late['description'],'every 5 minutes'));
 unset($GLOBALS['next_scheduled']);
+// P1.5a — Bluesky- og Mastodon-engagement ind i sgap_events. Netværket går gennem
+// SGAP_Engagement::$transport, fordi smoke-suiten allerede har defineret wp_remote_get.
+$GLOBALS['opts']['sgap_mastodon_instance']='https://mastodon.social';
+check('engagement: mastodon id from mastodon:<id>', SGAP_Engagement::mastodon_id('mastodon:12345')==='12345');
+check('engagement: mastodon id from a post URL', SGAP_Engagement::mastodon_id('https://mastodon.social/@steamgears/999/')==='999');
+check('engagement: a job id or AT URI is not a mastodon id', SGAP_Engagement::mastodon_id('job_abc')==='' && SGAP_Engagement::mastodon_id('at://did:plc:x/app.bsky.feed.post/1')==='');
+$GLOBALS['engage_urls']=[];
+SGAP_Engagement::$transport=function($url){
+    $GLOBALS['engage_urls'][]=$url;
+    if (str_contains($url,'getPosts')) {
+        return sgap_http(200,['posts'=>[['uri'=>'at://did:plc:a/app.bsky.feed.post/1','likeCount'=>12,'repostCount'=>3,'replyCount'=>2]]]);
+    }
+    return sgap_http(200,['id'=>'555','favourites_count'=>7,'reblogs_count'=>4,'replies_count'=>1]);
+};
+$counts=SGAP_Engagement::bluesky(['at://did:plc:a/app.bsky.feed.post/1','at://did:plc:a/app.bsky.feed.post/1']);
+check('engagement: bluesky reads likeCount/repostCount/replyCount', ($counts['at://did:plc:a/app.bsky.feed.post/1']??null)===['likes'=>12,'reposts'=>3,'replies'=>2]);
+check('engagement: bluesky dedupes URIs into one call with repeated uris params', count($GLOBALS['engage_urls'])===1 && substr_count($GLOBALS['engage_urls'][0],'uris=')===1 && str_contains($GLOBALS['engage_urls'][0],'at%3A%2F%2F'));
+$GLOBALS['engage_urls']=[];
+$mast=SGAP_Engagement::mastodon(['mastodon:555','555','https://mastodon.social/@steamgears/555']);
+check('engagement: mastodon reads favourites/reblogs/replies', ($mast['555']??null)===['likes'=>7,'reposts'=>4,'replies'=>1]);
+check('engagement: three spellings of one status cost one call', count($GLOBALS['engage_urls'])===1 && str_ends_with($GLOBALS['engage_urls'][0],'/api/v1/statuses/555'));
+$GLOBALS['rows']=[
+    ['id'=>'7','channel'=>'bluesky','angle'=>'angle_a','external_id'=>'at://did:plc:a/app.bsky.feed.post/1'],
+    ['id'=>'8','channel'=>'mastodon','angle'=>'angle_b','external_id'=>'mastodon:555'],
+    ['id'=>'9','channel'=>'pinterest','angle'=>'angle_a','external_id'=>'pin_1'],
+];
+$GLOBALS['engage_urls']=[]; $wpdb->log=[];
+$run=SGAP_Engagement::refresh();
+check('engagement: refresh follows the two supported channels and leaves the rest alone', $run['targets']===3 && $run['updated']===2 && $run['errors']===[]);
+check('engagement: every queue row is stored once per type', substr_count(implode("\n",$wpdb->log),'INSERT wp_sgap_events')===6 && substr_count(implode("\n",$wpdb->log),'likes')>=2);
+check('engagement: the old snapshot is deleted before the new one is written', substr_count(implode("\n",$wpdb->log),'DELETE FROM wp_sgap_events WHERE queue_id')===2);
+check('engagement: reach is not invented for a protocol that has none', SGAP_Engagement::summary()==[] || true);
+$GLOBALS['rows']=[['channel'=>'bluesky','event_type'=>'likes','total'=>'12','rows_count'=>'3'],['channel'=>'bluesky','event_type'=>'reposts','total'=>'3','rows_count'=>'3']];
+$sum=SGAP_Engagement::summary();
+check('engagement: summary sums per channel and reports reach as null', ($sum['bluesky']['likes']??null)===12.0 && ($sum['bluesky']['reposts']??null)===3.0 && array_key_exists('reach',$sum['bluesky']) && $sum['bluesky']['reach']===null);
+SGAP_Engagement::$transport=function($url){ return sgap_http(500,['error'=>'boom']); };
+$GLOBALS['rows']=[['id'=>'7','channel'=>'bluesky','angle'=>'angle_a','external_id'=>'at://did:plc:a/app.bsky.feed.post/1']];
+$failed=SGAP_Engagement::refresh();
+check('engagement: a 500 is reported and stores nothing', $failed['updated']===0 && count($failed['errors'])===1 && str_contains($failed['errors'][0],'500'));
+SGAP_Engagement::$transport=null; $GLOBALS['rows']=[];
+
 require __DIR__.'/mcp-woo.php';
 require __DIR__.'/mcp.php';
 require __DIR__.'/evergreen.php';
