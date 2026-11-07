@@ -597,7 +597,12 @@ def cmd_check(state_path: Path = STATE_PATH, doc_path: Path = DOC_PATH, today: s
 
 
 def plan_history(state: dict, computed: dict, today: str) -> list[dict]:
-    """Nye historik-rækker: én pr. projekt pr. dag, og kun når noget ændrer sig."""
+    """Nye historik-rækker: én pr. projekt pr. dag, og kun når noget ændrer sig.
+
+    En planlagt scope-ændring markeres på projektet med `scope_change_pending` (en tekst der
+    beskriver ændringen). Den sætter `scope_change: true` på den række den gælder og forbruges
+    bagefter — så et fald i procent kun accepteres én gang, og kun for den række.
+    """
     rows: list[dict] = []
     for project in state["projects"]:
         info = computed[str(project["id"])]
@@ -619,17 +624,20 @@ def plan_history(state: dict, computed: dict, today: str) -> list[dict]:
                 }
             )
             continue
-        rows.append(
-            {
-                "date": today,
-                "project": project["name"],
-                "module": "daglig måling" if last else "baseline",
-                "before": None if last is None else last.get("after"),
-                "after": pct,
-                "delta": None if last is None else round(pct - float(last.get("after", 0)), 1),
-                "basis": info["basis"],
-            }
-        )
+        row = {
+            "date": today,
+            "project": project["name"],
+            "module": "daglig måling" if last else "baseline",
+            "before": None if last is None else last.get("after"),
+            "after": pct,
+            "delta": None if last is None else round(pct - float(last.get("after", 0)), 1),
+            "basis": info["basis"],
+        }
+        pending = project.get("scope_change_pending")
+        if pending:
+            row["scope_change"] = True
+            row["module"] = pending if isinstance(pending, str) else "scope-ændring"
+        rows.append(row)
     return rows
 
 
@@ -656,6 +664,10 @@ def cmd_update(
     new_state = copy.deepcopy(state)
     new_state["history"] = list(state.get("history", [])) + new_rows
     new_state["updated"] = today
+    # En brugt scope-ændring skal ikke gælde igen ved næste kørsel.
+    if new_rows:
+        for project in new_state["projects"]:
+            project.pop("scope_change_pending", None)
 
     history_errors = validate_state(new_state, today)
     if history_errors:
@@ -860,6 +872,10 @@ def cmd_selftest(today: str | None = None) -> int:
             )
         ),
     )
+    case(
+        "planlagt scope-ændring mærker kun sin egen række",
+        lambda: _expect_scope_pending(mutated()),
+    )
     case("ukendt projekt i historik fanges", lambda: expect_error(_with_history(mutated(), {"project": "spøgelse"}), "findes ikke"))
     case("manglende grundlag fanges", lambda: expect_error(_with_history(mutated(), {"basis": ""}), "basis"))
 
@@ -958,6 +974,23 @@ def cmd_selftest(today: str | None = None) -> int:
         return 1
     print(f"[OK] alle {len(results)} værn bestået")
     return 0
+
+
+def _expect_scope_pending(state: dict) -> None:
+    """`scope_change_pending` skal give én række med scope_change og den nævnte grund, så et
+    planlagt fald i nævneren accepteres — og kun den ene gang."""
+    project = state["projects"][0]
+    last = [r for r in state["history"] if r.get("project") == project["name"]][-1]
+    project["modules"][0]["total"] = float(project["modules"][0]["total"]) + 10
+    project["scope_change_pending"] = "scope-ændring i fixture"
+    rows = plan_history(state, compute(state), today_iso())
+    row = next((r for r in rows if r["project"] == project["name"]), None)
+    assert row is not None, "der blev ikke planlagt en række for projektet"
+    assert row.get("scope_change") is True, "rækken mangler scope_change"
+    assert row["module"] == "scope-ændring i fixture", f"rækken har modul {row['module']!r}"
+    assert row["after"] < float(last["after"]), "fixturen skulle give et fald"
+    errors = validate_state({**state, "history": list(state["history"]) + rows}, today_iso())
+    assert not [e for e in errors if "scope_change" in e], f"faldet blev afvist: {errors}"
 
 
 def assert_no_errors(errors: list[str]) -> None:

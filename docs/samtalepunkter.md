@@ -24,7 +24,7 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 | Projekt | Status | Grundlag |
 | --- | --- | --- |
-| **steamgears.eu — site-optimering** | **65,2 %** | 15,85 af 24,3 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 7,35/8,05 · S3 2,55/3,55 · S4 1,65/5,25) |
+| **steamgears.eu — site-optimering** | **65,9 %** | 15,85 af 24,05 d (S0 2,15/2,35 · S1 2,15/4,6 · S2 7,35/8,3 · S3 2,55/3,55 · S4 1,65/5,25) |
 | **Steamgears Autopilot — plugin** | **96,3 %** | 28,8 af 29,9 d (P0 4,65/4,7 · P1 14,2/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25 · P1E 0,25/0,25 · P1F 0,25/0,25 · P1G 0,5/0,5) |
 | **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5) |
 | **SEO-indholdsproduktion** | **62,5 %** | 5 af 8 guides (BATCH 0/3 · COPY 4/4 · CORSET 1/1) |
@@ -32,14 +32,14 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Åbne blokeringer
 
-- **steamgears.eu — site-optimering** — Sitet svarer PHP-parsefejl på alle dynamiske kald (målt igen 7/11: /wp-json, robots.txt, sitemap_index.xml, /?sgap_feed= og admin-ajax 500) — kun W3TC-cachede HTML-sider virker, og wp-admin er nede, så rettelsen kræver File Manager/SFTP (ejer). Ingen MCP-credential i sandkassen. S2.7-loftet kræver tre ejerbeslutninger; S1.1 kræver Printify-varianter; S0.4 er forældet (URL'erne svarer 200).
+- **steamgears.eu — site-optimering** — Sitet svarer PHP-parsefejl på alle dynamiske kald (målt igen 7/11: /wp-json, robots.txt, sitemap_index.xml, /?sgap_feed=, og admin-ajax 500 — MCP-fladen svarer selv 500) — kun W3TC-cachede HTML-sider virker, og wp-admin er nede, så rettelsen kræver File Manager/SFTP (ejer). Der findes ingen deploy-vej i repoet: ingen FTP/SFTP/SSH-workflow, ingen .env, ingen gh-login og ingen MCP-credential i sandkassen. S2.7-loftet kræver tre ejerbeslutninger; S1.4/S1.6 kræver live-skrivning; S2.5 mangler OG-billedet.
 - **Steamgears Autopilot — plugin** — P1.5b/P1.5c kræver et Pinterest- og Instagram-token (Settings → Keys); P3.1 mangler ejerens labor_rate-beslutning; P1.15 kræver ejerens MCP-godkendelse i wp-admin — og wp-admin er nede indtil mu-plugin-fejlen er ryddet, ligesom RSS-feedet (?sgap_feed=) som publiceringen bruger.
 - **Dark academia-rebrand** — Printify-adgang
 - **SEO-indholdsproduktion** — Intet eksternt for de tre resterende guides: copy, FAQ, priser og links ligger i docs/library/guides-2026-11-03.md. De otte /go/-id'er 411/475/481/485/497/567 kunne ikke verificeres fra sandkassen (Simplys WAF giver browser-UA en challenge), så nye produktlinks skal måles fra ejerens side eller efter WAF-hvidlistning
 
 ### Næste skridt
 
-- **steamgears.eu — site-optimering** — Ryd op i hostens mu-plugin først: erstat wp-content/mu-plugins/managed-wordpress-robots.php med den rettede fil i repoet (wordpress/mu-plugins/, 8/8 offline-checks) via Simplys File Manager — derefter genmåles robots/sitemap/REST/feed. Så: tre ejerbeslutninger til S2.7-loftet, de tre manglende guides, S1.1 Herbarium (Printify-varianter).
+- **steamgears.eu — site-optimering** — Ryd op i hostens mu-plugin først: erstat wp-content/mu-plugins/managed-wordpress-robots.php med den rettede fil i repoet (wordpress/mu-plugins/, 8/8 offline-checks) via Simplys File Manager — derefter genmåles robots/sitemap/REST/feed. Så: S2.9 + S4.13 ud på siden, OG-billede pr. indlæg og /shop/s H1 (kræver live-adgang), og tre ejerbeslutninger til S2.7-loftet.
 - **Steamgears Autopilot — plugin** — P1.5b (Pinterest) og P1.5c (Instagram) er kode-færdige, men den første live-kørsel kræver et token af hver (Settings → Keys); P3.1 mangler ejerens labor_rate-beslutning; P1.15 kræver ejerens MCP-godkendelse i wp-admin.
 - **Dark academia-rebrand** — Batch 4 — mockups (~130 billeder)
 - **SEO-indholdsproduktion** — Skriv de tre manglende guides (mens-steampunk-costume-essentials, steampunk-clothing-three-budgets, womens-steampunk-essentials) fra den verificerede copy — corset-guiden er publiceret 6/11
@@ -47,37 +47,24 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `7431166 S4.12: fortrydelsesoplysningerne ind i ordremailen`
 - `1bed4d8 Ryd op efter sammenfletningen: de genererede filer fik deres rigtige tal`
 - `3b9e163 Merge main (S3.5-ugeskontrol og nedbrudsmåling) ind i P1.22`
 - `f104f72 P1.22: fejlsøgning i pluginnet og forbehold pr. modul (7.57.0)`
 - `58260e9 Drift: nedbruddet målt igen — hele den dynamiske del er nede`
 - `2124512 S3.5: ugens kontrol kørt — 24/24 værn, 781 smoke-checks`
-- `d0e86a9 Merge main (P1.20/P1.21, 7.55.0) ind i P1.5c Instagram-insights — udgivet som 7.56.0`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
 
-### 7/11 — Roadmap igen: fortrydelsesoplysningerne ind i ordremailen (S4.12, 0,15 af 0,2 d)
+### 7/11 — Ingen vej uden File Manager, og seks rækker lukket med bevis
 
-- **Roadmappet er ved at være tømt for arbejde der ikke kræver adgang.** Plugin-sporet mangler kun P1.5's
-  live-verifikation (kræver Pinterest-/Instagram-tokens) og P3.1's `labor_rate`-beslutning (ejer). Site-sporet
-  kræver WordPress-adgang, og sitet svarer stadig `Parse error` på alle dynamiske kald
-  (`managed-wordpress-robots.php`), så wp-admin og MCP er nede. Derfor blev det næste **repo-byggelige** punkt
-  taget: S4.12.
-- **En ordrebekræftelse er kundens dokument; et link er det ikke.** Et link kan flytte sig, ændre sig eller
-  ligge nede, og så har kunden intet — derfor skal fortrydelsesoplysningerne stå **i** mailen (varigt medium).
-- **Hver sætning er et citat fra sitets egne sider** (`/right-of-withdrawal/`, `/refund_returns/`, fanget i
-  `trust-sider-2026-11-06.md`): 14 dage fra modtagelsen, skriv først med ordrenummer, send ikke retur før svar,
-  kunden betaler returfragten medmindre varen er fejlbehæftet, tilbagebetaling inden 14 dage på samme
-  betalingsmetode, hygiejneundtagelsen. **Ingen returadresse, ingen fragtpris, ingen hurtigere tilbagebetaling**
-  — det er præcis de tre ting en generisk standardtekst opfinder, og som butikken ikke har lovet.
-- **Mailens id afgør, ikke konteksten:** `customer_processing_order`, `_completed_order` og `_on_hold_order` får
-  blokken; `new_order`, `customer_invoice`, `customer_note` og alt med `sent_to_admin` gør ikke. Afsnittene
-  skrives **én gang** og renderes til både HTML og ren tekst, så en tekst-only-mail ikke bliver et link og en
-  hilsen. Ordrenummeret escapes — en mail er ikke stedet at opdage en `<script>`-ordre.
-- **36 påstande** i `tools/withdrawal_email_test.php`, nu **værn nr. 25** i den natlige kørsel.
-- **Ikke deployeret:** filen skal kopieres til `wp-content/mu-plugins/` og ses i en rigtig bekræftelse i begge
-  formater — 0,05 d tilbage af de 0,2. Det er blokeret af nedbruddet, ikke af koden.
+- **Syv veje prøvet, alle lukkede.** Der er ingen deploy-workflow i repoet (syv workflows, ingen upload/rsync/SSH), ingen FTP-/SFTP-/SSH-secret, intet `.env`, ingen `~/.ssh`, ingen gh-login og ingen MCP-credential. Vigtigst: **både REST og MCP kører gennem samme PHP og dør med filen** — `wp/v2/users/me` giver 200 med parsefejl, `mcp/v1/http` svarer 500. Et app-password eller et MCP-token ville altså ikke hjælpe. Det står med kommandoer og svar i `library/robots-og-nedbrud-2026-11-07.md` §3c.
+- **Seks rækker var markeret åbne, selv om arbejdet var gjort:** S1.1, S2.2, S2.4, S2.5 og S2.6 er lukket med dokumentbevis (Herbarium-linket, `/shipping/`+`/returns/`, H1-beslutelsen, meta-runden på 59 sider, de 54 sporede `/go/`-links). **S0.4** er lukket som *overflødig*, og de 0,5 d er taget ud af nævneren — ikke ført som fremgang.
+- **S2.5b er ny og åben:** OG-billede pr. indlæg blev aldrig målt, så det er skilt ud som egen række (+0,25 d) i stedet for at gemme sig i S2.5.
+- **S1.4/S1.6 er ikke startet og står urørt** med præcis blokering: `wp_delete_post` og en formular-endring kræver live-adgang.
+- **CI's commit-værn er grøn på hele rangen.** To ældre commits kunne ikke rettes; de er efterprøvet mod historikken og står nu i `docs/commit-vaern-register.md` — den ene havde korrekte tal med en anden ordlyd, den anden en overhalet mellemregning fra før et merge. `projektstatus.py` har fået `scope_change_pending`, så et planlagt fald mærker præcis én række og derefter forbruges.
+- **Næste skridt** er stadig ét ejerklik: læg `wordpress/mu-plugins/managed-wordpress-robots.php` ind via File Manager. Alt andet venter på det.
 
 ### 7/11 — Fejlsøgning i pluginnet (P1.22, 7.57.0) og forbehold som en del af svaret
 

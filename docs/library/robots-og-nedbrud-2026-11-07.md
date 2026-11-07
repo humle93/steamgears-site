@@ -89,6 +89,36 @@ curl -sS -A "$UA" -o /dev/null -w 'admin-ajax: %{http_code}\n' \
   'https://steamgears.eu/wp-admin/admin-ajax.php?action=heartbeat'
 ```
 
+## 3c. Uden ejerens File Manager — de veje der blev prøvet, og hvorfor de er lukkede
+
+Spørgsmålet var ikke »har vi en nøgle?« men »findes der en vej til at skrive filen på plads, som
+ikke kræver ejerens hænder?«. Syv veje blev prøvet 7/11. Alle er lukkede, og grunden er målt, ikke
+antaget:
+
+| # | Vej | Hvad blev prøvet | Målt resultat |
+| --- | --- | --- | --- |
+| 1 | **Deploy-workflow i repoet** | `ls .github/workflows/` og `grep -rniE 'ftp\|sftp\|ssh\|rsync\|deploy\|wp-cli'` over dem | Syv workflows (`commit-vaern`, `natlig-push`, `niche-scan`, `novamira-keepalive`, `plugin-ci`, `projektstatus`, `seo_audit`) — **ingen** har et upload-, rsync- eller SSH-trin. Alle arbejder inde i repoet. |
+| 2 | **GitHub-secrets der kunne skrive** | Gennemgang af hvilke secrets workflows bruger | Kun `PINTEREST_*`, `NOVAMIRA_REFRESH_TOKEN`, `GEMINI_API_KEY`, `WP_USER`/`WP_APP_PASS`. Ingen FTP-, SFTP- eller SSH-secret findes. |
+| 3 | **App-password-vejen (REST)** | `GET /wp-json/wp/v2/users/me` med neutral UA | **HTTP 200 med parsefejl i kroppen.** WordPress dør i mu-pluginnet *før* autentificering, så et app-password kan ikke bruges — uanset om det findes. |
+| 4 | **MCP-vejen (Novamira)** | `POST /wp-json/mcp/v1/http` med `initialize` | **HTTP 500 «critical error».** MCP-fladen ligger oven på samme PHP og dør med filen; et gyldigt token ville ikke hjælpe. |
+| 5 | **gh-CLI i sandkassen** | `gh auth status` + `env` | »You are not logged into any GitHub hosts«, og der er ingen `GITHUB_TOKEN`/`GH_TOKEN`. Jeg kan derfor hverken læse secret-listen eller starte en workflow med en anden credential. |
+| 6 | **Credentials i sandkassen** | `.env`, `~/.ssh`, `~/.config`, `env` | Intet `.env`, ingen `~/.ssh`, ingen `~/.config/steamgears-mcp`, ingen `MCP_*`/`WP_*`/`NOVAMIRA_*`-variabler. |
+| 7 | **Git-pull-hook på hosten** | Repoet og dets workflows | Repoet er dokumentation og assets; WordPress-kernen ligger hos Simply (AGENTS §5). Intet i repoet peger på en pull-hook i `public_html`, og et push har aldrig ændret en fil der. |
+
+**Konklusion:** der findes ingen vej uden ejerens File Manager/SFTP. Den eneste vej der *kan*
+bygges, er at ejeren lægger en FTP- eller SSH-nøgle ind som repository-secret — men det er stadig
+ejerens handling, og den er ikke sat op i dag. Simplys eget kontrolpanel er ikke et alternativ
+herfra: det kræver ejerens OAuth-login i en browser, og det administrerer domæne, mail, database og
+logs — ikke filer i `public_html`. WordPress' egen plugin-editor er også død, fordi `admin-ajax.php`
+svarer 500.
+
+To fælder står tilbage som læring, fordi de koster en runde hver:
+
+- **En 200 er ikke et svar.** Alle døde ruter returnerer 200 med 193 bytes fejltekst. Overvågning
+  skal tælle `Parse error` eller bodystørrelsen — og altid kalde med en cache-buster.
+- **Adgangsvejene dør med filen.** Både MCP og REST kører gennem den samme PHP, så et nedbrud i et
+  mu-plugin tager dem alle på én gang. Et token i hånden er derfor ikke det samme som adgang.
+
 ## 4. Sådan rettes det (under et minut, kræver ikke PHP)
 
 Vælg én af tre veje i Simplys kontrolpanel (Filhåndtering eller SFTP):
