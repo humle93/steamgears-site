@@ -312,7 +312,9 @@ Platform limits: [Instagram content publishing](https://developers.facebook.com/
    only if Etsy volume justifies the 2.5 d OAuth import.
 2. **Direct network tokens** — ✅ **decided 2026-11-06: removed** (7.33.3). All publishing goes through Publer,
    so `pinterest_token`, `instagram_token`, `tiktok_token`, `youtube_*`, `reddit_*` and `ai_mode` are gone.
-3. **Action Scheduler** — accept the 2 d migration, or stay on WP-Cron with detection and documentation
+3. ~~**Action Scheduler**~~ — **afgjort 7/11: adapter, ikke migration** (7.49.0). `includes/scheduler.php` bruger
+   Woo's kopi når den findes og falder tilbage til WP-Cron ellers; se nedenfor. Den oprindelige formulering lød:
+   accept the 2 d migration, or stay on WP-Cron with detection and documentation
    (P0.4)? **Research 7/11:** WooCommerce 11.x leverer Action Scheduler (GPL-3.0, L-2-politik), så en adapter på ~0,5 d
    (`function_exists('as_schedule_recurring_action')` → AS med `sgap`-gruppe, ellers WP-Cron) slår den fulde 2,0 d-migration — se
    [docs/library/plugin-funktioner-research-2026-11-07.md](../../docs/library/plugin-funktioner-research-2026-11-07.md).
@@ -328,6 +330,10 @@ Platform limits: [Instagram content publishing](https://developers.facebook.com/
 
 ## 9. Change log for this document
 
+- **7.49.0 (7/11)** — **P0.7 scheduler-adapter:** `includes/scheduler.php` vælger Action Scheduler når WooCommerce
+  leverer den (`as_schedule_recurring_action` m.fl., gruppe `sgap`) og falder ellers tilbage til WP-Cron.
+  `recurring()`/`single()`/`next()`/`unschedule()` er idempotente, og `health()` rapporterer backend uden
+  side effects. Engagement-cron'en kører nu gennem adapteren. 10 nye smoke-checks (689 → 699 PASS).
 - **7.48.0 (7/11)** — **P1.5a:** Bluesky- og Mastodon-engagement læses ind i `sgap_events` (`likeCount`/`repostCount`/`replyCount`, `favourites_count`/`reblogs_count`/`replies_count`), dagligt via `sgap_engagement_refresh` og `POST /sgap/v1/engagement/refresh`. Snapshottet erstattes pr. queue-række, og reach står som `null`, fordi protokollerne ikke har tallet.
 | Date | Plugin | Change |
 | --- | --- | --- |

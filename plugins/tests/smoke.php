@@ -1298,6 +1298,36 @@ $late=SGAP_Auto::site_health_cron();
 check('cron: a publisher 45 minutes late turns the test critical', $late['status']==='critical' && str_contains($late['description'],'45 minutes behind'));
 check('cron: the advice carries the exact wp-cron.php call and the 5-minute interval', str_contains($late['description'],'wp-cron.php') && str_contains($late['description'],'every 5 minutes'));
 unset($GLOBALS['next_scheduled']);
+// P0.5 — scheduler-adapteren. Uden Action Scheduler (som i denne suite, indtil stubbene
+// nedenfor defineres) skal alt lande på WP-Cron med samme hook; med AS skal intet gøre det.
+if (!function_exists('wp_schedule_single_event')) { function wp_schedule_single_event($ts,$h,$a=[]){ $GLOBALS['single_events'][]=[$h,$ts]; return true; } }
+check('scheduler: without Action Scheduler the backend is wp-cron', SGAP_Scheduler::backend()==='wp-cron' && !SGAP_Scheduler::available());
+$GLOBALS['cron']=[]; $GLOBALS['next_scheduled']=[];
+SGAP_Scheduler::recurring('sgap_test_hook',5*MINUTE_IN_SECONDS);
+check('scheduler: a recurring job lands on WP-Cron with its hook intact', in_array('sgap_test_hook',$GLOBALS['cron'],true));
+$cron_before=count($GLOBALS['cron']); $GLOBALS['next_scheduled']['sgap_test_hook']=time()+120;
+check('scheduler: an existing occurrence is not scheduled twice', SGAP_Scheduler::recurring('sgap_test_hook',5*MINUTE_IN_SECONDS) && count($GLOBALS['cron'])===$cron_before);
+unset($GLOBALS['next_scheduled']['sgap_test_hook']);
+$GLOBALS['single_events']=[];
+check('scheduler: a one-off job lands on WP-Cron', SGAP_Scheduler::single('sgap_test_once',time()+600) && ($GLOBALS['single_events'][0][0]??'')==='sgap_test_once');
+if (!function_exists('as_schedule_recurring_action')) {
+    function as_schedule_recurring_action($ts,$interval,$hook,$args=[],$group=''){ $GLOBALS['as']['recurring'][]=[$ts,$interval,$hook,$group]; return 77; }
+    function as_schedule_single_action($ts,$hook,$args=[],$group=''){ $GLOBALS['as']['single'][]=[$ts,$hook,$group]; return 78; }
+    function as_next_scheduled_action($hook,$args=[],$group=''){ return $GLOBALS['as']['next']; }
+    function as_unschedule_all_actions($hook,$args=[],$group=''){ $GLOBALS['as']['unschedule'][]=[$hook,$group]; return 1; }
+}
+$GLOBALS['as']=['recurring'=>[],'single'=>[],'unschedule'=>[],'next'=>false];
+check('scheduler: Action Scheduler is detected from its functions', SGAP_Scheduler::available() && SGAP_Scheduler::backend()==='action-scheduler');
+check('scheduler: recurring jobs go to AS in the sgap group', SGAP_Scheduler::recurring('sgap_as_hook',DAY_IN_SECONDS) && ($GLOBALS['as']['recurring'][0][2]??'')==='sgap_as_hook' && ($GLOBALS['as']['recurring'][0][3]??'')==='sgap');
+$GLOBALS['as']['next']=time()+300; $as_before=count($GLOBALS['as']['recurring']);
+check('scheduler: an AS job that already exists is left alone', SGAP_Scheduler::recurring('sgap_as_hook',DAY_IN_SECONDS) && count($GLOBALS['as']['recurring'])===$as_before);
+$GLOBALS['as']['next']=false;
+check('scheduler: single jobs carry the group too', SGAP_Scheduler::single('sgap_as_once',time()+600) && ($GLOBALS['as']['single'][0][2]??'')==='sgap');
+SGAP_Scheduler::unschedule('sgap_as_hook');
+check('scheduler: unschedule clears the AS hook in our group', ($GLOBALS['as']['unschedule'][0]??null)===['sgap_as_hook','sgap']);
+check('scheduler: AS present means WP-Cron is never asked', !in_array('sgap_as_hook',$GLOBALS['cron'],true));
+check('scheduler: health names the backend and explains the difference', SGAP_Scheduler::health()['backend']==='action-scheduler' && str_contains(SGAP_Scheduler::health()['note'],'Action Scheduler'));
+
 // P1.5a — Bluesky- og Mastodon-engagement ind i sgap_events. Netværket går gennem
 // SGAP_Engagement::$transport, fordi smoke-suiten allerede har defineret wp_remote_get.
 $GLOBALS['opts']['sgap_mastodon_instance']='https://mastodon.social';

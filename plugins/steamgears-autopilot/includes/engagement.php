@@ -44,9 +44,8 @@ class SGAP_Engagement {
 
     public static function init(): void {
         add_action(self::CRON, [__CLASS__, 'refresh']);
-        if (function_exists('wp_next_scheduled') && !wp_next_scheduled(self::CRON)) {
-            wp_schedule_event(time() + HOUR_IN_SECONDS, 'daily', self::CRON);
-        }
+        // Action Scheduler when WooCommerce supplies it, WP-Cron otherwise.
+        SGAP_Scheduler::recurring(self::CRON, DAY_IN_SECONDS);
     }
 
     /**
