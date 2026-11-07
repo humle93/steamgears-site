@@ -107,8 +107,9 @@ før fejlene læses — `Failed to get current SQL modes` er et miljøproblem, i
 
 - **Runneren.** Testen er kørt på Ubuntu 24.04 i en cloud-worktree, ikke på GitHub's `ubuntu-latest`.
 - **PHP 8.0, 8.1, 8.3, 8.4 og 8.5.** CI's `smoke`-job kører `php -l` og `smoke.php` på seks PHP-versioner.
-  Her er kun 8.2 kørt (den version `wordpress`-jobbet bruger); `smoke.php` og `php -l` blev kørt separat på
-  8.2, men de øvrige fem er ikke gentaget i denne omgang.
+  Her er kun 8.2 kørt (den version `wordpress`-jobbet bruger). De fem øvrige er kørt efterfølgende i
+  [`smoke-php-matrix-lokalt-2026-11-07.md`](smoke-php-matrix-lokalt-2026-11-07.md), hvor alle seks giver
+  530 PASS / 0 FAIL.
 - **`latest` er et øjebliksbillede.** Kørslen dækker 7.1.4, den nyeste kerne 6/11 2026.
 - **MariaDB er ikke kørt i denne omgang.** Den tidligere kørsel dækkede MariaDB 11.4.5, så begge
   databasefamilier er nu prøvet — men aldrig i samme kørsel.

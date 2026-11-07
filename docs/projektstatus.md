@@ -18,7 +18,7 @@ Betjening: `python3 projektstatus.py --check` (valider + drift), `--dry-run` (vi
 ## 1. Daglig status
 
 <!-- AUTO:DAGLIG:START -->
-Status pr. **2026-11-06** · beregnet af `projektstatus.py` · kilder: [`projektstatus.json`](../projektstatus.json)
+Status pr. **2026-11-07** · beregnet af `projektstatus.py` · kilder: [`projektstatus.json`](../projektstatus.json)
 
 | Projekt | Status i dag | Grundlag |
 | --- | --- | --- |
@@ -50,6 +50,11 @@ Nyeste først. Append-only — rækker må ikke slettes eller ændres.
 
 | Dato | Projekt | Modul | Før → Efter | Δ | Grundlag |
 | --- | --- | --- | --- | --- | --- |
+| 2026-11-07 | Døde internlinks | ingen ændring | 100 % → 100 % | 0 | 39 af 39 links |
+| 2026-11-07 | SEO-indholdsproduktion | ingen ændring | 62,5 % → 62,5 % | 0 | 5 af 8 guides (Publicerede guides (id 292, 296, 295) 0/3 · Guide-copy klar til publicering (292, 296, 295 + corset) 4/4 · Corset-guiden publiceret (/steampunk-corset-guide/, 1394) 1/1) |
+| 2026-11-07 | Dark academia-rebrand | ingen ændring | 63 % → 63 % | 0 | 8,5 af 13,5 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5) |
+| 2026-11-07 | Steamgears Autopilot — plugin | ingen ændring | 74 % → 74 % | 0 | 19,9 af 26,9 d (P0 4,05/4,5 · P1 9,4/13,4 · P2 4,5/7 · P3 1,95/2) |
+| 2026-11-07 | steamgears.eu — site-optimering | ingen ændring | 56,5 % → 56,5 % | 0 | 13,45 af 23,8 d (S0 1,9/2,85 · S1 2,15/4,6 · S2 5,5/7,55 · S3 2,5/3,55 · S4 1,4/5,25) |
 | 2026-11-06 | steamgears.eu — site-optimering | daglig måling | 56,3 % → 56,5 % | +0,2 | 13,45 af 23,8 d (S0 1,9/2,85 · S1 2,15/4,6 · S2 5,5/7,55 · S3 2,5/3,55 · S4 1,4/5,25) |
 | 2026-11-06 | steamgears.eu — site-optimering | daglig måling | 55,5 % → 56,3 % | +0,8 | 13,4 af 23,8 d (S0 1,9/2,85 · S1 2,15/4,6 · S2 5,5/7,55 · S3 2,45/3,55 · S4 1,4/5,25) |
 | 2026-11-06 | steamgears.eu — site-optimering | scope ændret — §9 P2–P5 indarbejdet (nævner 21,8 → 23,8 d) | 60,6 % → 55,5 % | -5,1 | 13,2 af 23,8 d (S0 1,9/2,85 · S1 2,15/4,6 · S2 5,3/7,55 · S3 2,45/3,55 · S4 1,4/5,25) |
