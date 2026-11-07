@@ -25,18 +25,26 @@ class SGAP_Setup {
         'auto_images' => 'AI photos for Instagram & Pinterest', 'auto_seo' => 'SEO meta for new posts & products', 'articles_per_week' => 'SEO articles per week',
         'auto_publish_articles' => 'Publish weekly articles automatically', 'weekly_report' => 'Weekly e-mail report', 'rescue_hosts' => 'Copy images from these servers',
         'mcp_client_id' => 'MCP client ID', 'mcp_refresh_token' => 'MCP refresh token',
+        'telegram_bot_token' => 'Bot token', 'bluesky_app_password' => 'App password', 'mastodon_token' => 'Access token',
         'printful_api_key' => 'Printful API token', 'printful_store_id' => 'Printful store ID', 'woo_min_margin' => 'Minimum margin %'
     ];
 
-    /** Settings page tabs: id => [label, icon, keys]. */
+    /**
+     * Settings page tabs: id => [label, icon, keys].
+     *
+     * The keys tab is first and owns every secret (SGAP_Settings::SECRET_KEYS); the other tabs
+     * carry settings only. settings_page() strips a secret from any other panel as a guard, so a
+     * key added to the wrong tab later still shows up in exactly one place.
+     */
     const TABS = [
+        'keys' => ['Keys', 'lock', ['publer_api_key', 'ai_api_key', 'image_api_key', 'serpapi_key', 'telegram_bot_token', 'merchant_feed_secret', 'bluesky_app_password', 'mastodon_token', 'mcp_refresh_token', 'printful_api_key']],
         'basics' => ['Basics', 'admin-home', ['autopilot_enabled', 'full_auto_enabled', 'channels', 'posts_per_day']],
-        'ai' => ['AI & images', 'superhero-alt', ['ai_profile', 'ai_provider', 'ai_api_key', 'ai_model', 'ai_base_url', 'content_language', 'image_model', 'image_api_key', 'serpapi_key']],
-        'publishing' => ['Publishing', 'megaphone', ['publish_mode', 'publer_api_key', 'publer_workspace_id', 'publer_pinterest_board', 'quality_gate', 'banned_words', 'dupe_days']],
+        'ai' => ['AI & images', 'superhero-alt', ['ai_profile', 'ai_provider', 'ai_model', 'ai_base_url', 'content_language', 'image_model']],
+        'publishing' => ['Publishing', 'megaphone', ['publish_mode', 'publer_workspace_id', 'publer_pinterest_board', 'bluesky_handle', 'mastodon_instance', 'mastodon_limit', 'telegram_chat_id', 'quality_gate', 'banned_words', 'dupe_days']],
         'schedule' => ['Schedule & limits', 'clock', ['quiet_start', 'quiet_end', 'blackout_ranges', 'daily_cap', 'batch_size', 'repost_cooldown_days']],
         'evergreen' => ['Evergreen', 'update', ['evergreen_enabled', 'evergreen_after_days', 'evergreen_max_shares', 'evergreen_batch']],
-        'shop' => ['Shop & feeds', 'cart', ['merchant_feed_secret', 'printful_api_key', 'printful_store_id', 'woo_min_margin']],
-        'mcp' => ['MCP access', 'admin-links', ['mcp_client_id', 'mcp_refresh_token']],
+        'shop' => ['Shop & feeds', 'cart', ['printful_store_id', 'woo_min_margin']],
+        'mcp' => ['MCP access', 'admin-links', ['mcp_client_id']],
         'automation' => ['Automation', 'update-alt', ['auto_images', 'auto_seo', 'articles_per_week', 'auto_publish_articles', 'weekly_report', 'rescue_hosts']],
         'advanced' => ['Economics', 'chart-line', ['labor_rate', 'monthly_budget', 'target_roi', 'winner_min_clicks', 'loser_min_clicks', 'repost_max']]
     ];
@@ -303,20 +311,27 @@ class SGAP_Setup {
         }
         echo '<a class="sgap-tab sgap-tab-link" href="' . esc_url(admin_url('admin.php?page=sgap-setup')) . '"><span class="dashicons dashicons-welcome-learn-more"></span>Setup guide</a></div>';
         $first = true;
-        $shown = [];
-        foreach (self::TABS as $id => [$label, $icon, $keys]) {
-            echo '<div class="sgap-card sgap-panel" data-panel="' . esc_attr($id) . '"' . ($first ? '' : ' hidden') . '>';
-            foreach ($keys as $key) {
-                echo self::row($key);
-                $shown[] = $key;
+        foreach (self::TABS as $id => $tab) {
+            $keys = (array) $tab[2];
+            echo '<div class="sgap-card sgap-panel' . ($id === 'keys' ? ' sgap-panel--keys' : '') . '" data-panel="' . esc_attr($id) . '"' . ($first ? '' : ' hidden') . '>';
+            if ($id === 'keys') {
+                SGAP_Keys::panel();
+            } else {
+                // A secret belongs on the keys tab and nowhere else, even if it is listed here by mistake.
+                foreach (array_diff($keys, SGAP_Settings::SECRET_KEYS) as $key) {
+                    echo self::row($key);
+                }
             }
             echo '</div>';
             $first = false;
         }
         // Registered settings not on a tab keep their values (options.php only saves fields it receives).
-        echo '<div class="sgap-savebar"><span class="description">Changes are saved for all tabs at once.</span>';
+        echo '<div class="sgap-savebar"><span class="sgap-dirty" hidden>Unsaved changes</span><span class="description">Every tab is saved at once.</span>';
         submit_button('Save settings', 'primary', 'submit', false);
         echo '</div></form>';
+        echo '<script>(function(){var f=document.querySelector("form.sgap-settings"),b=f&&f.querySelector(".sgap-dirty");if(!f||!b)return;'
+            . 'function edge(){var d=false;f.querySelectorAll("input,select,textarea").forEach(function(i){if(i.type==="hidden"||i.name==="nonce")return;if(i.type==="checkbox"||i.type==="radio"){if(i.checked!==i.defaultChecked)d=true;}else if(i.value!==i.defaultValue){d=true;}});b.hidden=!d;}'
+            . 'f.addEventListener("input",edge);f.addEventListener("change",edge);edge();})();</script>';
         echo self::field_js();
         echo '<script>(function(){var tabs=document.querySelectorAll(".sgap-tab[data-tab]"),panels=document.querySelectorAll(".sgap-panel");'
             . 'function show(id){tabs.forEach(function(t){t.classList.toggle("on",t.dataset.tab===id);});panels.forEach(function(p){p.hidden=p.dataset.panel!==id;});try{localStorage.setItem("sgapTab",id);}catch(e){}}'
@@ -353,7 +368,11 @@ class SGAP_Setup {
         foreach (['aimlapi' => ['AIMLAPI', 'Recommended. Claude and 300+ models plus images with one key. Pay as you go.'], 'anthropic' => ['Anthropic (Claude)', 'Directly from Anthropic. Text only – images need an AIMLAPI key.'], 'openai_compatible' => ['Other', 'OpenAI, OpenRouter or any OpenAI-compatible API.']] as $value => [$title, $text]) {
             echo '<label class="sgap-choice' . ($provider === $value ? ' on' : '') . '"><input type="radio" name="settings[ai_provider]" value="' . esc_attr($value) . '"' . checked($provider, $value, false) . '><span><strong>' . esc_html($title) . '</strong><small>' . esc_html($text) . '</small></span></label>';
         }
-        echo '</div>' . self::row('ai_api_key', true)
+        $ai_saved = trim((string) SGAP_Settings::get('ai_api_key', '')) !== '' || SGAP_Settings::constant_name('ai_api_key');
+        echo '</div>' . ($ai_saved
+                ? '<div class="sgap-connected">' . SGAP_UI::pill('Key saved', 'ok') . ' <span>Change it under <a href="'
+                    . esc_url(admin_url('admin.php?page=sgap-settings#keys')) . '">Settings → Keys</a> — that is the only place keys are pasted.</span></div>'
+                : self::row('ai_api_key', true))
             . '<details class="sgap-more"><summary>Model and address (optional)</summary>' . self::row('ai_model', true) . self::row('ai_base_url', true) . '</details>'
             . '<div class="sgap-test-result">' . (is_array($keys) && isset($keys['ai']) ? SGAP_UI::pill('AI ' . ($keys['ai']['ok'] ? '✓' : '✗'), $keys['ai']['ok'] ? 'ok' : 'bad') . ' <span>' . esc_html($keys['ai']['message']) . '</span>' : '') . '</div>'
             . '<div class="sgap-step-nav"><span></span><button class="button button-primary" data-next>Save, test &amp; continue</button></div></form>';

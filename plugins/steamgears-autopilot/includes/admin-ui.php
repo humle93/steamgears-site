@@ -20,8 +20,14 @@ class SGAP_UI {
             return;
         }
         self::$printed = true;
-        echo '<style>
+        echo self::stylesheet();
+    }
+
+    /** The stylesheet as a string, so a test can assert on it without rendering a page. */
+    public static function stylesheet(): string {
+        return '<style>
 .sgap{--brass:#9b1c1f;--brass-d:#6e1114;--brass-l:#fbf3e1;--gold:#d4af37;--gold-d:#a8841f;--ink:#1f2328;--muted:#646970;--line:#e3c770;--ok:#1a7f37;--ok-l:#e6f4ea;--bad:#b32d2e;--bad-l:#fbeaea;--warn:#9a6700;--warn-l:#fff4d6;--card:#fff;max-width:1200px}
+.sgap{--shadow-1:0 1px 2px rgba(16,24,40,.06),0 1px 3px rgba(16,24,40,.08);--shadow-2:0 10px 30px -14px rgba(31,35,40,.3);--ring:0 0 0 3px rgba(212,175,55,.4)}
 .sgap .sgap-head{display:flex;align-items:center;gap:14px;margin:8px 0 18px;padding:16px 18px;border-radius:14px;background:linear-gradient(135deg,#6e1114,#9b1c1f 55%,#b3272a);color:#fbecc0;border:2px solid var(--gold);box-shadow:0 0 0 3px rgba(212,175,55,.18),0 3px 12px rgba(110,17,20,.3)}
 .sgap .sgap-head h1{color:#f7dc8a;margin:0;padding:0;font-size:22px;line-height:1.2;font-weight:600;text-shadow:0 1px 0 rgba(0,0,0,.25)}
 .sgap .sgap-head p{margin:2px 0 0;color:#f3dfae;font-size:13px}
@@ -40,7 +46,8 @@ class SGAP_UI {
 .sgap .sgap-stat span{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.04em}
 .sgap .sgap-stat a{text-decoration:none;color:inherit;display:block}
 .sgap .sgap-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px;align-items:start}
-.sgap .sgap-card{background:var(--card);border:1px solid var(--line);border-top:3px solid var(--gold);border-radius:14px;padding:16px 18px;margin:0 0 16px;box-shadow:0 1px 3px rgba(0,0,0,.05);min-width:0}
+.sgap .sgap-card{background:var(--card);border:1px solid var(--line);border-top:2px solid var(--gold);border-radius:16px;padding:18px 20px;margin:0 0 16px;box-shadow:var(--shadow-1);min-width:0;transition:box-shadow .18s ease}
+.sgap .sgap-card:hover{box-shadow:var(--shadow-2)}
 .sgap .sgap-card>h2{margin:0 0 12px;font-size:15px;display:flex;align-items:center;gap:8px;color:var(--ink)}
 .sgap .sgap-card>h2 .dashicons{color:var(--brass)}
 .sgap .sgap-card p.description{margin:6px 0}
@@ -158,20 +165,25 @@ class SGAP_UI {
 .sgap .sgap-field-label label{font-weight:600;color:var(--ink)}
 .sgap .sgap-field-label p{margin:3px 0 0;color:var(--muted);font-size:12px;line-height:1.45}
 .sgap .sgap-field-input input.sgap-text,.sgap .sgap-secret input{width:100%;max-width:420px}
-.sgap .sgap-field-input input,.sgap .sgap-field-input select{border-radius:8px;border:1px solid #c9b07a;min-height:38px;padding:4px 10px}
-.sgap .sgap-field-input input:focus,.sgap .sgap-field-input select:focus{border-color:var(--brass);box-shadow:0 0 0 1px var(--brass)}
+.sgap .sgap-field-input input,.sgap .sgap-field-input select{border-radius:10px;border:1px solid #d9c9a3;min-height:40px;padding:6px 12px;background:#fff;transition:border-color .15s,box-shadow .15s}
+.sgap .sgap-field-input input:focus,.sgap .sgap-field-input select:focus{border-color:var(--brass);box-shadow:var(--ring);outline:none}
 .sgap .sgap-num{width:100px}
 .sgap .sgap-secret{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .sgap .sgap-clear{display:block;margin-top:6px;font-size:12px;color:var(--muted)}
 .sgap .sgap-inline{display:flex;align-items:center;gap:8px}
-.sgap .sgap-tabs{display:flex;gap:4px;overflow-x:auto;margin:0 0 -1px;padding:0 2px;scrollbar-width:none}
+.sgap .sgap-tabs{position:sticky;top:32px;z-index:6;display:flex;gap:6px;overflow-x:auto;margin:0 0 14px;padding:6px;border:1px solid var(--line);border-radius:999px;background:rgba(255,253,247,.92);backdrop-filter:blur(10px);box-shadow:var(--shadow-1);scrollbar-width:none}
 .sgap .sgap-tabs::-webkit-scrollbar{display:none}
-.sgap .sgap-tab{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;padding:10px 14px;border:1px solid transparent;border-bottom:0;border-radius:10px 10px 0 0;background:none;cursor:pointer;color:var(--muted);font-weight:600;font-size:13px;text-decoration:none}
-.sgap .sgap-tab:hover{color:var(--brass-d)}
-.sgap .sgap-tab.on{background:#fff;border-color:var(--line);border-top:3px solid var(--gold);color:var(--brass-d)}
+.sgap .sgap-tab{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;padding:9px 15px;border:1px solid transparent;border-radius:999px;background:none;cursor:pointer;color:var(--muted);font-weight:600;font-size:13px;text-decoration:none;transition:background .15s,color .15s,box-shadow .15s}
+.sgap .sgap-tab:hover{color:var(--brass-d);background:var(--brass-l)}
+.sgap .sgap-tab:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.sgap .sgap-tab.on{background:var(--brass);border-color:var(--brass);color:#fff8e1;box-shadow:0 2px 10px -2px rgba(110,17,20,.45)}
+.sgap .sgap-tab.on .dashicons{color:var(--gold)}
 .sgap .sgap-tab-link{margin-left:auto}
-.sgap .sgap-panel{border-top-left-radius:0}
-.sgap .sgap-savebar{position:sticky;bottom:0;z-index:5;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 16px;margin-top:-4px;background:rgba(255,253,247,.96);border:1px solid var(--line);border-radius:12px;box-shadow:0 -4px 14px rgba(0,0,0,.06);backdrop-filter:blur(4px)}
+.sgap .sgap-panel{border-radius:16px;padding:20px 22px}
+.sgap .sgap-savebar{position:sticky;bottom:12px;z-index:6;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 18px;margin-top:4px;background:rgba(255,253,247,.96);border:1px solid var(--line);border-radius:14px;box-shadow:0 12px 30px -16px rgba(31,35,40,.45);backdrop-filter:blur(10px)}
+.sgap .sgap-dirty{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--warn);background:var(--warn-l);border:1px solid #f0dca0;border-radius:999px;padding:3px 10px}
+.sgap .sgap-dirty::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--warn)}
+.sgap .sgap-dirty[hidden]{display:none}
 .sgap .sgap-wizard{display:grid;grid-template-columns:220px 1fr;gap:20px;align-items:start}
 .sgap .sgap-rail{list-style:none;margin:0;padding:12px;background:#fff;border:1px solid var(--line);border-top:3px solid var(--gold);border-radius:14px;position:sticky;top:46px}
 .sgap .sgap-rail li{display:flex;align-items:center;gap:10px;padding:9px 8px;border-radius:8px;cursor:pointer;color:var(--muted);font-weight:600}
@@ -247,6 +259,40 @@ class SGAP_UI {
 .sgap .sgap-call details code{display:block;margin-top:6px;font-size:11px;line-height:1.6;white-space:pre-wrap;word-break:break-word;color:var(--muted)}
 @media (max-width:782px){.sgap .sgap-toolsbar{top:0;border-radius:10px}.sgap .sgap-toolgrid{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){.sgap .sgap-toolcard,.sgap .sgap-cat{transition:none}}
+/* 7.47.0 — Keys: one card per service, the pattern core uses for Settings → Connectors */
+.sgap .sgap-panel--keys{border-top-color:var(--brass)}
+.sgap .sgap-keys-top{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;margin:0 0 16px}
+.sgap .sgap-keys-top h2{margin:0;font-size:18px}
+.sgap .sgap-keys-top .sgap-sub{margin:6px 0 0;max-width:64ch}
+.sgap .sgap-keys-tally{flex:none}
+.sgap .sgap-keys{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px}
+.sgap .sgap-keycard{display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow-1);transition:box-shadow .18s,border-color .18s}
+.sgap .sgap-keycard:hover{box-shadow:var(--shadow-2)}
+.sgap .sgap-keycard:focus-within{border-color:var(--brass);box-shadow:var(--shadow-2),var(--ring)}
+.sgap .sgap-keycard--saved{border-left:3px solid var(--ok)}
+.sgap .sgap-keycard--constant{border-left:3px solid var(--gold)}
+.sgap .sgap-key-head{display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap}
+.sgap .sgap-key-icon{flex:none;width:34px;height:34px;border-radius:10px;background:var(--brass-l);color:var(--brass);display:inline-flex;align-items:center;justify-content:center}
+.sgap .sgap-key-icon .dashicons{font-size:18px;width:18px;height:18px}
+.sgap .sgap-key-title{flex:1 1 180px;min-width:0}
+.sgap .sgap-key-title h3{margin:0;font-size:14px;line-height:1.35;color:var(--ink)}
+.sgap .sgap-key-title p{margin:4px 0 0;font-size:12px;line-height:1.5;color:var(--muted)}
+.sgap .sgap-key-body{margin-top:12px;display:flex;flex-direction:column;gap:10px;flex:1}
+.sgap .sgap-key-field label{display:block;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:0 0 4px}
+.sgap .sgap-key-field input[type=password]{width:100%;min-height:40px;border-radius:10px;border:1px solid #d9c9a3;padding:6px 12px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.sgap .sgap-key-field input[type=password]:focus{border-color:var(--brass);box-shadow:var(--ring);outline:none}
+.sgap .sgap-key-field .sgap-secret{width:100%}
+.sgap .sgap-key-test{margin:0;font-size:12px;color:var(--muted);display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.sgap .sgap-key-foot{margin-top:auto;padding-top:10px;border-top:1px solid #f3ead6;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}
+.sgap .sgap-key-foot p{margin:0;font-size:11px;line-height:1.5;color:var(--muted);flex:1 1 150px}
+.sgap .sgap-key-links{display:inline-flex;gap:10px;flex-wrap:wrap}
+.sgap .sgap-key-links a{font-size:12px;font-weight:600;color:var(--brass-d);text-decoration:none;display:inline-flex;align-items:center;gap:3px}
+.sgap .sgap-key-links a:hover{text-decoration:underline}
+.sgap .sgap-key-links .dashicons{font-size:13px;width:13px;height:13px}
+.sgap .sgap-key-testbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:16px 0 0;padding-top:14px;border-top:1px solid #f3ead6}
+.sgap .sgap-key-testout{font-size:12px;color:var(--muted);flex:1 1 200px}
+.sgap .sgap-connected{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 12px;border:1px dashed var(--line);border-radius:12px;background:#fffdf7;font-size:13px}
+@media (max-width:782px){.sgap .sgap-tabs{top:0;border-radius:14px}.sgap .sgap-keys{grid-template-columns:1fr}.sgap .sgap-savebar{bottom:0}}
 </style>';
     }
 

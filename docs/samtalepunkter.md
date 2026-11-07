@@ -25,7 +25,7 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 | Projekt | Status | Grundlag |
 | --- | --- | --- |
 | **steamgears.eu — site-optimering** | **63,7 %** | 15,15 af 23,8 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 6,95/7,55 · S3 2,5/3,55 · S4 1,4/5,25) |
-| **Steamgears Autopilot — plugin** | **76,3 %** | 22,25 af 29,15 d (P0 4,35/4,7 · P1 10,7/14,7 · P2 4,5/7 · P3 2,7/2,75) |
+| **Steamgears Autopilot — plugin** | **76,7 %** | 22,75 af 29,65 d (P0 4,35/4,7 · P1 11,2/15,2 · P2 4,5/7 · P3 2,7/2,75) |
 | **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5) |
 | **SEO-indholdsproduktion** | **62,5 %** | 5 af 8 guides (BATCH 0/3 · COPY 4/4 · CORSET 1/1) |
 | **Døde internlinks** | **100 %** | 39 af 39 links (FIX 39/39) |
@@ -40,19 +40,19 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 ### Næste skridt
 
 - **steamgears.eu — site-optimering** — Vedtag loftet paa det maalte gulv (tekst 30 · lister 45 · produkt 95 · kurv 112) eller bestil trin 3 (klassisk kurv/produkt, 0,75 d); skriv de tre manglende guides fra den verificerede copy; S1.1 Herbarium kraever varianter i Printify; S0.4 kraever en Redirection-gruppe (ejer)
-- **Steamgears Autopilot — plugin** — P3.1 labor_rate (ejer); P1.5 er eksternt blokeret (Pinterest-token + Meta-review); P1.15 venter på ejerens MCP-godkendelse i wp-admin; P1.16/P1.17 er klar, men kostprisen skal importeres med woo-cost-import (kræver Printful-nøglen under Settings → Shop & feeds), før værktøjerne kan foreslå priser
+- **Steamgears Autopilot — plugin** — P3.1 labor_rate (ejer); P1.5 er eksternt blokeret (Pinterest-token + Meta-review); P1.16/P1.17 er klar, men kostprisen skal importeres med woo-cost-import (kræver Printful-nøglen under Settings → Keys), før værktøjerne kan foreslå priser; P1.15 venter på ejerens MCP-godkendelse i wp-admin
 - **Dark academia-rebrand** — Batch 4 — mockups (~130 billeder)
 - **SEO-indholdsproduktion** — Skriv de tre manglende guides (mens-steampunk-costume-essentials, steampunk-clothing-three-budgets, womens-steampunk-essentials) fra den verificerede copy — corset-guiden er publiceret 6/11
 - **Døde internlinks** — Vedligehold: tjek nye indlæg mod live-URL'er
 
 ### Seneste commits
 
+- `602566a Modul: evergreen-rotationen — deterministisk rækkefølge (7.46.1)`
+- `a74e310 Modul: S0.2 robots.txt — ejer målt, og et nedbrud jeg selv lavede Før: 63,7 %  →  Efter: 63,7 %  (Δ 0) Grundlag: ingen ændring`
 - `0a45621 chore(status): daglig projektstatus 2026-11-07`
 - `1af6253 Modul: P1.17 — kostpris-import fra Printful (7.46.0)`
 - `e7b163d Modul: P1.16 — shop-værktøjerne uden eget tekstlag (7.45.1) Før: 76,1 %  →  Efter: 76,1 %  (Δ 0) Grundlag: ingen ændring`
 - `d4f1ad6 chore(status): daglig projektstatus 2026-11-07`
-- `1fa4c00 Modul: P1.16 — WooCommerce/Printful som ét MCP-modul i pluginnet (7.45.0) Før: 75,7 %  →  Efter: 76,1 %  (Δ +0,4) Grundlag: 21,95 af 28,85 d (P0 4,35/4,7 · P1 10,4/14,4 · P2 4,5/7 · P3 2,7/2,75)`
-- `faed5c9 chore(status): daglig projektstatus 2026-11-07`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)

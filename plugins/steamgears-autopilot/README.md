@@ -23,9 +23,30 @@ The whole social autopilot runs inside WordPress (Command Center is retired):
 4. **Measure** – every post links via `/go/<id>/`, so clicks (and WooCommerce
    orders) are counted per channel.
 
-Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.43.0.zip` → Activate. On an existing
+Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.47.0.zip` → Activate. On an existing
 install the same zip arrives through the self-updater (see *Updates*), so an upload is only needed for the
 first install or a recovery.
+
+## Keys in one place (7.47)
+
+Every credential the plugin uses sits on **one** screen, *Settings → Keys*, one card per service:
+AI text, AI images, Publer, Printful, SerpApi, Bluesky, Mastodon, Telegram, the product-feed secret
+and the MCP token. Each card says what the key is for, where to get it (a link to the service or to
+your own Mastodon instance), whether it is saved, and whether the last test passed. Nothing else in
+the plugin renders a key field: the AI, Publishing, Shop and MCP tabs carry settings only, and the
+settings page strips any secret that is listed outside the Keys tab, so a key added to the wrong tab
+later still appears in exactly one place.
+
+A saved key is never printed back. The field is always empty with the placeholder *saved – leave empty
+to keep*; typing a new value replaces it and ticking *Remove saved key* deletes it. A key that lives in
+`wp-config.php` as `SGAP_<KEY>` replaces the field with a note naming the constant. *Test the saved keys*
+runs the same check as the setup guide and shows the answer next to the button. The setup guide no longer
+asks for the AI key once one is saved — it points at *Settings → Keys* instead.
+
+The screen is built the way WordPress 7.x builds *Settings → Connectors*: a grid of cards, each with an
+icon, a purpose, its source and a status pill; the tab bar and the save bar are sticky, focus rings follow
+`:focus-visible`, and the layout collapses to one column below 782 px. The plugin still ships its own
+stylesheet — no build step, no `@wordpress/ui` — and picks up the WordPress design tokens where they exist.
 
 ## AI profiles (7.41.2)
 

@@ -1288,5 +1288,6 @@ $GLOBALS['opts']['sgap_ai_api_key']='';
 require __DIR__.'/mcp-woo.php';
 require __DIR__.'/mcp.php';
 require __DIR__.'/evergreen.php';
+require __DIR__.'/keys.php';
 // P3.2/P3.5-slut
 exit(empty($GLOBALS['fail'])?0:1);
