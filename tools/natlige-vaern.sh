@@ -80,6 +80,7 @@ check "samtalepunkter-selftest"              python3 tools/samtalepunkter.py --s
 check "designsystem-selftest"                python3 tools/design_check.py --selftest
 check "designsystem"                         python3 tools/design_check.py
 check "designsystem-loader"                  "$PHP_BIN" wordpress/tests/test-design-system.php
+check "produkt-schema"                       "$PHP_BIN" tools/schema_filter_test.php
 
 # Rendereren fejlede 2/11 på to måder der ikke gav en fejlkode: et sidebrud midt i et afsnit
 # skrev resten af dokumentet uden for papiret (niche-vurderingen blev 20 sider), og glyffer

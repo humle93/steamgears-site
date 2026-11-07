@@ -46,10 +46,10 @@
         {
           "id": "s4",
           "name": "S4 — salgsklar butik",
-          "done": 1.4,
+          "done": 1.5,
           "total": 5.25,
           "unit": "d",
-          "note": "S4.4 formular-del + produkttekster + 0,25 d S4.13 merchant-schema: shippingDetails + MerchantReturnPolicy (scope 6/11, endnu ikke udført)."
+          "note": "S4.4 formular-del + produkttekster + 0,25 d S4.13 merchant-schema: shippingDetails + MerchantReturnPolicy (scope 6/11, endnu ikke udført) + S4.13 merchant-schema 0,1 af 0,25 d (7/11): produktionstiden 3-7 hverdage fra /shipping/ er nu handlingTime i deliveryTime ved siden af transitTime, itemCondition NewCondition er sat hvor den mangler, testen gik 19 -> 30 paastande og produkt-schema er vaern nr. 22 i den natlige koersel. Fragt-linjen kan IKKE kvalificere: Google kraever shippingRate.value/maxValue og butikken har ingen fast fragtpris, saa den er bevidst udeladt. returnPolicyCountry gaelder organisation-niveau, ikke offer-niveau. Ikke deployet — kraever WordPress-adgang."
         }
       ]
     },
@@ -1063,6 +1063,15 @@
       "after": 64.0,
       "delta": 0.3,
       "basis": "15,55 af 24,3 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 7,35/8,05 · S3 2,5/3,55 · S4 1,4/5,25)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 64.0,
+      "after": 64.4,
+      "delta": 0.4,
+      "basis": "15,65 af 24,3 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 7,35/8,05 · S3 2,5/3,55 · S4 1,5/5,25)"
     }
   ]
 }

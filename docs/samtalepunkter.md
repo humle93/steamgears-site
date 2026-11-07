@@ -24,7 +24,7 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 | Projekt | Status | Grundlag |
 | --- | --- | --- |
-| **steamgears.eu — site-optimering** | **64 %** | 15,55 af 24,3 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 7,35/8,05 · S3 2,5/3,55 · S4 1,4/5,25) |
+| **steamgears.eu — site-optimering** | **64,4 %** | 15,65 af 24,3 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 7,35/8,05 · S3 2,5/3,55 · S4 1,5/5,25) |
 | **Steamgears Autopilot — plugin** | **76,7 %** | 22,75 af 29,65 d (P0 4,35/4,7 · P1 11,2/15,2 · P2 4,5/7 · P3 2,7/2,75) |
 | **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5) |
 | **SEO-indholdsproduktion** | **62,5 %** | 5 af 8 guides (BATCH 0/3 · COPY 4/4 · CORSET 1/1) |
@@ -47,15 +47,39 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `000b54b Modul: S2.9 designsystem — ét lag for hele sidens flade`
 - `3a3e010 chore(status): daglig projektstatus 2026-11-07`
 - `1c15f93 Modul: UI moderniseret — alle nøgler på ét sted (7.47.0)`
 - `602566a Modul: evergreen-rotationen — deterministisk rækkefølge (7.46.1)`
 - `a74e310 Modul: S0.2 robots.txt — ejer målt, og et nedbrud jeg selv lavede Før: 63,7 %  →  Efter: 63,7 %  (Δ 0) Grundlag: ingen ændring`
 - `0a45621 chore(status): daglig projektstatus 2026-11-07`
-- `1af6253 Modul: P1.17 — kostpris-import fra Printful (7.46.0)`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 7/11 — merchant-schemaet var rigtigt, men sprang produktionen over
+
+- **S4.13's kode lå der allerede** (skrevet 2/11), så runden handlede om at måle den mod Googles
+  **nuværende** krav i stedet for mod hukommelsen. Kilden er Search Centrals merchant-listing-side.
+- **Produktionstiden manglede.** `/shipping/` siger »Production: 3-7 business days«, derefter 6–10 dage i DK
+  og 7–12 i EU. Markupen satte hele leveringstiden som `transitTime` og sprang produktionen over, så en
+  dansk kunde så 6–10 dage mod sitets 3–7 **plus** 6–10. Den er nu `handlingTime` ved siden af `transitTime`.
+- **`itemCondition: NewCondition`** er tilføjet hvor feltet mangler — butikken er print-on-demand og sælger
+  ikke returvarer, så det er en kendsgerning, ikke en påstand om stand.
+- **Fragt-linjen kan ikke kvalificere, og det skal siges højt.** Google kræver `shippingRate.value` eller
+  `.maxValue` for at vise fragtoplysningen. Sitet har ingen fast fragtpris (»shown before you confirm your
+  order«), og at skrive `0` ville love gratis fragt. Feltet er derfor bevidst udeladt: markupen er gyldig og
+  **returretten** kvalificerer (den kræver kun `applicableCountry` + `returnPolicyCategory`), men
+  fragt-linjen bliver ikke vist, uanset hvor meget kode der skrives. Det kræver en pris fra ejeren eller en
+  indstilling i Merchant Center.
+- **En overskrift fra marts 2025 holdt ikke.** Nyhedsartiklerne skrev at `returnPolicyCountry` nu er
+  påkrævet — det gælder **organisation**-niveau, ikke den offer-politik filteret skriver. Havde jeg bygget
+  på overskriften, var feltet blevet ignoreret, og dokumentationen havde påstået noget forkert.
+- **Værnet var hullet.** `tools/schema_filter_test.php` har kørt siden 2/11, men var **ikke** med i den
+  natlige kørsel — en regression i schema-filteret ville være gået ubemærket hen. Den er nu værn nr. 22, og
+  testen gik 19 → 30 påstande.
+- **Ikke deployet:** filen skal stadig i `wp-content/mu-plugins/` og måles med `tools/schema_check.py`. Det
+  kræver WordPress-adgang, som sessionen ikke har.
 
 ### 7/11 — hele sidens overflade er nu ét lag, ikke 300 inline-regler
 

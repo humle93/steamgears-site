@@ -8,15 +8,24 @@
  *
  * Installeres i wp-content/mu-plugins/ (eller som almindeligt plugin).
  *
- * Værdierne er ikke gættet: de kommer fra sitets egne sider, målt 2/11 2026.
+ * Værdierne er ikke gættet: de kommer fra sitets egne sider, målt 2/11 og 6/11 2026.
  *   /terms/    "EU consumers have 14 days to withdraw from the purchase from the day the item is received"
  *   /delivery/ "Denmark: 6-10 business days" · "Rest of EU: 7-12 business days"
+ *   /shipping/ "Production: your item is printed and finished — 3-7 business days for printed
+ *               goods", derefter 6-10 dage i DK og 7-12 i resten af EU. Derfor staar
+ *               produktionstiden som handlingTime og fragtperioden som transitTime; Google
+ *               behandler dem som to led i samme leveringstid.
  *
  * Bevidst udeladt, fordi sitet ikke oplyser det (og gæt ville være fabrikation):
  *   aggregateRating  — ingen anmeldelser på sitet; opdigtede ratings er en Google-overtrædelse
  *   shippingRate     — "Shipping costs are shown before you confirm your order", ingen fast pris
  *   returnFees       — ingen side siger hvem der betaler returfragten
  *   priceCurrency    — butikken prissætter i USD; det er en ejerbeslutning, ikke en schema-fix
+ *
+ * Konsekvens, som er vaerd at kende: Google kraever shippingRate.value eller .maxValue for at
+ * vise fragtoplysningen i merchant listings (Search Central, OfferShippingDetails). Uden en fast
+ * fragtpris er markupen gyldig og returretten kvalificerer, men selve fragt-linjen bliver ikke
+ * vist. Det kan kun loeses ved at butikken oplyser en pris — ikke ved at gaette en.
  */
 
 if (!defined('SGAP_SCHEMA_VERSION')) {
@@ -25,6 +34,15 @@ if (!defined('SGAP_SCHEMA_VERSION')) {
 
 if (!defined('SGAP_RETURN_DAYS')) {
     define('SGAP_RETURN_DAYS', 14);
+}
+
+// Produktionstid for trykte varer, fra /shipping/ og /delivery/. Den kommer foer fragtperioden.
+if (!defined('SGAP_HANDLING_DAYS_MIN')) {
+    define('SGAP_HANDLING_DAYS_MIN', 3);
+}
+
+if (!defined('SGAP_HANDLING_DAYS_MAX')) {
+    define('SGAP_HANDLING_DAYS_MAX', 7);
 }
 
 /**
@@ -63,7 +81,8 @@ function sgap_schema_return_policy(): array
 }
 
 /**
- * Leveringstid pr. destination. Ingen fragtpris, fordi sitet ikke har en fast.
+ * Leveringstid pr. destination: produktion (handlingTime) plus fragt (transitTime).
+ * Ingen fragtpris, fordi sitet ikke har en fast.
  *
  * @return array<int, array<string, mixed>>
  */
@@ -75,6 +94,12 @@ function sgap_schema_shipping_details(): array
             'shippingDestination' => ['@type' => 'DefinedRegion', 'addressCountry' => 'DK'],
             'deliveryTime' => [
                 '@type' => 'ShippingDeliveryTime',
+                'handlingTime' => [
+                    '@type' => 'QuantitativeValue',
+                    'minValue' => SGAP_HANDLING_DAYS_MIN,
+                    'maxValue' => SGAP_HANDLING_DAYS_MAX,
+                    'unitCode' => 'DAY',
+                ],
                 'transitTime' => [
                     '@type' => 'QuantitativeValue',
                     'minValue' => 6,
@@ -91,6 +116,12 @@ function sgap_schema_shipping_details(): array
             ],
             'deliveryTime' => [
                 '@type' => 'ShippingDeliveryTime',
+                'handlingTime' => [
+                    '@type' => 'QuantitativeValue',
+                    'minValue' => SGAP_HANDLING_DAYS_MIN,
+                    'maxValue' => SGAP_HANDLING_DAYS_MAX,
+                    'unitCode' => 'DAY',
+                ],
                 'transitTime' => [
                     '@type' => 'QuantitativeValue',
                     'minValue' => 7,
@@ -118,6 +149,10 @@ function sgap_schema_is_list(array $value): bool
  */
 function sgap_schema_enrich_offer(array $offer): array
 {
+    // Varerne laves paa bestilling og er nye; brugte varer findes ikke i butikken.
+    if (empty($offer['itemCondition'])) {
+        $offer['itemCondition'] = 'https://schema.org/NewCondition';
+    }
     if (empty($offer['hasMerchantReturnPolicy'])) {
         $offer['hasMerchantReturnPolicy'] = sgap_schema_return_policy();
     }
