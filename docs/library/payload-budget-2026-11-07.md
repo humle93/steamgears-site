@@ -116,32 +116,29 @@ på en Woo-butik med blok-kurv, chatbot og tre sporingsintegrationer uden at fje
 Det er ejerens valg, ikke en teknisk detalje — og et forsøg på at nå tallet ved at fjerne
 scripts i blinde ville ramme checkout.
 
-## Kontrol
+## Kontrol og filer
 
 - Alle otte skabeloner svarer **200** og har samme titler som før målingen.
 - De nye CSS-filer svarer **200** med `content-type: text/css` (fx `inline-93a72a941d30.css`,
   6.017 B; `inline-5d0f9937a8de.css`, 11.849 B).
-- **Visuelt:** forsiden og produktsiden er fotograferet i cloud-browseren før og efter — fire PNG'er gemt i chatten (`artifacts/` er ikke versionsstyret, så de linkes ikke her). Header, typografi, farver og produktbillede er identiske
-  der dukker op efter load i begge målinger.
+- **Visuelt:** forsiden og produktsiden er fotograferet før og efter (fire PNG'er i chatten —
+  `artifacts/` er ikke versionsstyret). Header, typografi, farver og produktbillede er identiske;
+  kun AI-boblen dukker op efter load i begge målinger.
 - Ingen `critical error`/`fatal error` i HTML'en efter indgrebet.
+
+**Filer:** værktøjet [`../../tools/payload_audit.py`](../../tools/payload_audit.py) og mu-pluginnet
+[`../../wordpress/mu-plugins/sga-inline-css.php`](../../wordpress/mu-plugins/sga-inline-css.php) (samme fil
+ligger på sitet); råmålingerne `reports/payload-2026-11-07.json` (før) og `-efter.json` (efter); den
+oprindelige måling 6/11 i [`site-maalinger-2026-11-06.md`](site-maalinger-2026-11-06.md); roadmap-punktet
+i [`../roadmap.md`](../roadmap.md) S2.7 og §9 P2.
 
 ## Fælder
 
 - **Værtscachen på `/`.** Efter indgrebet svarede `/` stadig den gamle HTML (255.154 B), indtil
   W3TC's page cache blev ryddet (`royal-mcp/w3tc-purge-cache`, `scope: all`). Ryd cachen og mål
-  igen — en uændret byte-størrelse er ikke bevis på, at indgrebet fejlede.
+  igen: `/?sga=1` går uden om sidecachen, og en uændret byte-størrelse er ikke bevis på fejl.
 - **`<link>` kan stå i `<body>`.** Header-template-parten printer sin CSS midt i dokumentet, så
   det nye `<link>` arver placeringen. Browserne anvender det korrekt, men en HTML-validator vil
   klage. At flytte blokken til `<head>` ville ændre rækkefølgen i cascaden — det er ikke gjort.
-- **Filer akkumulerer.** Hver CSS-ændring giver en ny sha1-fil. 21 filer/537 KB er harmløst nu,
-  men `uploads/sga-css/` bør ryddes for filer ældre end fx 30 dage ved lejlighed.
-- **Mål med en cache-buster, når du fejlfinder.** `/?sga=1` går uden om sidecachen og viser
-  øjeblikkeligt hvad PHP'en leverer.
-
-## Filer
-
-- Værktøjet: [`../../tools/payload_audit.py`](../../tools/payload_audit.py)
-- Mu-pluginnet (samme fil ligger på sitet): [`../../wordpress/mu-plugins/sga-inline-css.php`](../../wordpress/mu-plugins/sga-inline-css.php)
-- Råmålinger: `reports/payload-2026-11-07.json` (før), `reports/payload-2026-11-07-efter.json` (efter)
-- Den oprindelige måling 6/11: [`site-maalinger-2026-11-06.md`](site-maalinger-2026-11-06.md)
-- Roadmap-punktet: [`../roadmap.md`](../roadmap.md) S2.7 og §9 P2
+- **Filer akkumulerer.** Hver CSS-ændring giver en ny sha1-fil; ryd `uploads/sga-css/` for
+  filer ældre end fx 30 dage ved lejlighed.

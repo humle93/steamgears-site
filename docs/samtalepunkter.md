@@ -24,7 +24,7 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 | Projekt | Status | Grundlag |
 | --- | --- | --- |
-| **steamgears.eu — site-optimering** | **61,6 %** | 14,65 af 23,8 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 6,45/7,55 · S3 2,5/3,55 · S4 1,4/5,25) |
+| **steamgears.eu — site-optimering** | **62 %** | 14,75 af 23,8 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 6,55/7,55 · S3 2,5/3,55 · S4 1,4/5,25) |
 | **Steamgears Autopilot — plugin** | **74,9 %** | 20,85 af 27,85 d (P0 4,25/4,7 · P1 9,4/13,4 · P2 4,5/7 · P3 2,7/2,75) |
 | **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5) |
 | **SEO-indholdsproduktion** | **62,5 %** | 5 af 8 guides (BATCH 0/3 · COPY 4/4 · CORSET 1/1) |
@@ -32,14 +32,14 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Åbne blokeringer
 
-- **steamgears.eu — site-optimering** — S1.1 Herbarium kræver varianter i Printify; S0.4 5 vanity-301 kræver én Redirection-gruppe (ejer); S2.7's mål om < 100 KB HTML og < 20 scripts pr. skabelon kan ikke nås uden at fjerne Woo-blokkenes React-stak, AI Engine-chatbot'en eller TikTok/Site Kit-sporing (ejerbeslutning, målt 7/11). S2.2 er lukket 6/11, S0.9 7/11. S2.8 er lukket 7/11 — 29 af 30 indlæg har et hub-link (898 har indholdet 'test').
+- **steamgears.eu — site-optimering** — S2.7's resterende 0,4 d kræver tre ejerbeslutninger (annoncepixels, headerens blok-mini-kurv, loft for produkt/kurv) — målt 7/11; S1.1 Herbarium kræver varianter i Printify; S0.4 5 vanity-301 kræver én Redirection-gruppe (ejer). S2.2 og S2.8 er lukket 6–7/11, S0.9 7/11.
 - **Steamgears Autopilot — plugin** — P1.5 kræver Pinterest-token (401) og Meta-review; P0.4 kræver host-cron (ejer); P3.1 mangler ejerens labor_rate-beslutning
 - **Dark academia-rebrand** — Printify-adgang
 - **SEO-indholdsproduktion** — Intet eksternt for de tre resterende guides: copy, FAQ, priser og links ligger i docs/library/guides-2026-11-03.md. De otte /go/-id'er 411/475/481/485/497/567 kunne ikke verificeres fra sandkassen (Simplys WAF giver browser-UA en challenge), så nye produktlinks skal måles fra ejerens side eller efter WAF-hvidlistning
 
 ### Næste skridt
 
-- **steamgears.eu — site-optimering** — Skriv de tre manglende guides fra den verificerede copy; S2.8 hub-links på de resterende indlæg; S2.7's sidste to kriterier kræver en ejerbeslutning om Woo-blokke/chatbot/sporing; S1.1 Herbarium kræver varianter i Printify; S0.4 kræver én Redirection-gruppe (ejer); S2.8 er lukket 7/11 — næste ublokerede punkt er S4.13 merchant-schema (0,25 d) og S2.4/S2.5-opfølgning
+- **steamgears.eu — site-optimering** — Svar på de tre spørgsmål i docs/library/payload-loft-beslutning-2026-11-07.md §6 (annoncepixels, header-mini-kurv, klasse 3-loft), derefter trin 0–2 (0,4 d); skriv de tre manglende guides fra den verificerede copy; S1.1 Herbarium kræver varianter i Printify; S0.4 kræver én Redirection-gruppe (ejer)
 - **Steamgears Autopilot — plugin** — P0.4 rigtig host-cron (ejer); P3.1 labor_rate (ejer); P1.5 er eksternt blokeret (Pinterest-token + Meta-review)
 - **Dark academia-rebrand** — Batch 4 — mockups (~130 billeder)
 - **SEO-indholdsproduktion** — Skriv de tre manglende guides (mens-steampunk-costume-essentials, steampunk-clothing-three-budgets, womens-steampunk-essentials) fra den verificerede copy — corset-guiden er publiceret 6/11
@@ -47,15 +47,24 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `23833d0 chore(status): daglig projektstatus 2026-11-07`
+- `7992bbe Modul: S2.8 — hub-links på de resterende indlæg Før: 59,7 % → Efter: 61,6 % (Δ +1,9) Grundlag: 14,65 af 23,8 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 6,45/7,55 · S3 2,5/3,55 · S4 1,4/5,25)`
 - `e50d0c0 chore(status): daglig projektstatus 2026-11-07`
 - `a4e0f2e Modul: S2.7 HTML-/scriptbudget pr. skabelon — inline CSS til filer Før: 57,6 %  →  Efter: 59,7 %  (Δ +2,1) Grundlag: 14,2 af 23,8 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 6/7,55 · S3 2,5/3,55 · S4 1,4/5,25)`
 - `91b2494 chore(status): daglig projektstatus 2026-11-07`
 - `d5ea466 Modul: S0.9 analytics — inline GA4-tag fjernet Før: 56,5 %  →  Efter: 57,6 %  (Δ +1,1) Grundlag: 13,7 af 23,8 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 5,5/7,55 · S3 2,5/3,55 · S4 1,4/5,25)`
-- `dd09915 Modul: P0.2 — kanal-cap som reelt loft (7.43.0) Før: 74,9 % Efter: 74,9 % Δ: 0,0 Grundlag: ingen ændring`
-- `693c1f1 Modul: Docs — MCP-fladen vs. plugin-profilen (ingen ændring) Før: 74,7 %  →  Efter: 74,7 %  (Δ 0) Grundlag: ingen ændring`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 7/11 — S2.7: script-tallet forklaret, loft pr. skabelon foreslået
+
+- **Fordelingen, ikke bare tallet:** forsiden har 23 inline-blokke, 8 kernel-scripts, 8 Woo-scripts, 2 tema-scripts og **13 sporings-scripts** (TikTok 4, Kliken 3, Google Listings & Ads 4, Google Sign-in 2). Produkt (105) og kurv (120) har 27–40 kernel-scripts, fordi begge er blok-skabeloner (`wp-block-woocommerce-product`, `wp-block-woocommerce-cart`, 40 forskellige `wc-block-*`-klasser).
+- **Headeren er den skjulte årsag:** `wc-block-mini-cart__button` står i `<header>` og `wc-block-customer-account` 4 steder samme sted, så React, react-dom, element, escape-html, hooks, `mini-cart.js`, `customer-account.js` og `js-cookie` indlæses på **alle** sider (155 `data-wp-*`-direktiver på forsiden). Gulvet er derfor 22–24 scripts med blok-header og ~13 uden.
+- **`< 20` kan ikke nås på produkt og kurv** uden at skifte til klassiske skabeloner. Forslaget er derfor tre klasser med hvert sit loft: tekst 130 KB/20 scripts, lister 290 KB/30, transaktion 350 KB/90–105, og `< 20` trækkes eksplicit tilbage for transaktion.
+- **Tre spørgsmål står til ejeren** (annoncepixels, header-mini-kurv, klasse 3-loft) i [`library/payload-loft-beslutning-2026-11-07.md`](library/payload-loft-beslutning-2026-11-07.md) §6. Trin 0–2 (0,4 d) venter på dem.
+- **Fælde:** `GT-PL9L67B4` og `AW-18518250875` er **ikke** en dublet — det er Google Tag (GA4) og Ads-konvertering. S0.9's dublet var Rank Maths `install_code`.
+- **PDF-rendereren** gentager nu tabelhovedet, når en tabel fortsætter over et sidebrud, og forstår `<!-- sidebrud -->`. Begge payload-PDF'er er renderet igen og set side for side.
 
 ### 7/11 — S2.8 lukket: 29 af 30 indlæg sender nu et hub-link
 
