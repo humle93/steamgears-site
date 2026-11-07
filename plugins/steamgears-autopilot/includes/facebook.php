@@ -727,13 +727,13 @@ class SGAP_Facebook {
 
     public static function routes(): void {
         $auth = static fn() => current_user_can('manage_options');
-        register_rest_route(SGAP_Admin::NS, '/facebook/refresh', [
+        register_rest_route(SGAP_REST::NS, '/facebook/refresh', [
             'methods' => 'POST', 'callback' => [__CLASS__, 'rest_refresh'], 'permission_callback' => $auth
         ]);
-        register_rest_route(SGAP_Admin::NS, '/facebook/reply', [
+        register_rest_route(SGAP_REST::NS, '/facebook/reply', [
             'methods' => 'POST', 'callback' => [__CLASS__, 'rest_reply'], 'permission_callback' => $auth
         ]);
-        register_rest_route(SGAP_Admin::NS, '/facebook/hide', [
+        register_rest_route(SGAP_REST::NS, '/facebook/hide', [
             'methods' => 'POST', 'callback' => [__CLASS__, 'rest_hide'], 'permission_callback' => $auth
         ]);
     }

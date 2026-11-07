@@ -528,7 +528,7 @@ class SGAP_Diagnostics {
      * ------------------------------------------------------------------ */
 
     public static function routes(): void {
-        register_rest_route(SGAP_Admin::NS, '/diagnostics', [
+        register_rest_route(SGAP_REST::NS, '/diagnostics', [
             'methods' => 'GET',
             'callback' => [__CLASS__, 'rest_report'],
             'permission_callback' => fn() => current_user_can('manage_options')

@@ -184,3 +184,11 @@ check('diagnostics: the quiet path is not taken when a check fails', !SGAP_Diagn
 SGAP_Diagnostics::clear();
 $wpdb->next = null;
 $GLOBALS['as']['next'] = 0;
+
+// --- the REST route lives in the namespace that exists (7.58.1) ----------------------
+// 7.58.0 registered it with SGAP_Admin::NS, a constant that has never existed, so
+// rest_api_init threw on every /wp-json/ request and took Store API and MCP with it.
+$GLOBALS['routes'] = [];
+SGAP_Diagnostics::routes();
+check('diagnostics: the route is registered in sgap/v1', in_array('/diagnostics', $GLOBALS['routes']['sgap/v1'] ?? [], true));
+check('diagnostics: no other namespace is used', array_keys($GLOBALS['routes']) === ['sgap/v1']);

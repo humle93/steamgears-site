@@ -32,30 +32,52 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Åbne blokeringer
 
-- **steamgears.eu — site-optimering** — Sitet svarer igen — målt 7/11 17:25 UTC: /wp-json 200 (1.521.253 B JSON), robots.txt 200 (319 B, én User-agent-gruppe uden de otte host-regler), sitemap_index.xml 200, /?sgap_feed=facebook 200 som RSS og /?nocache=1 200; ingen Parse error. Tilbage: S2.7-loftet kræver tre ejerbeslutninger, S1.4/S1.6 og S2.9/S4.13 kræver live-skrivning (ingen .env, ingen MCP-credential i sandkassen), og S2.5 mangler OG-billedet.
-- **Steamgears Autopilot — plugin** — P2.6 kræver at ejeren selv indtaster Page access token og side-id i wp-admin — en nøgle må ikke gennem chat eller repo, og der findes ingen credential i sandkassen. Live kører stadig 7.41.1: /wp-json/sgap/v1 annoncerer 12 ruter og ingen /facebook/refresh, /reply eller /hide, som 7.58.0 registrerer, så Plugins → Update skal køres før felterne findes. P1.5b/P1.5c kræver et Pinterest- og Instagram-token; P3.1 mangler ejerens labor_rate-beslutning; P1.15 kræver ejerens MCP-godkendelse. wp-admin er tilgængeligt igen (sitet målt raskt 7/11 17:25 UTC).
+- **steamgears.eu — site-optimering** — REST er nede, målt 7/11 17:29 UTC: pluginnet på live er nu 7.58.0, hvis includes/diagnostics.php registrerer sin rute med SGAP_Admin::NS — en konstant der ikke findes — så rest_api_init kaster en fatal på hver /wp-json/-forespørgsel. Forsiden (/) og /cart/ svarer 200, robots.txt og sitemap_index.xml svarer 200, men /wp/v2, Store API (kurv og kasse) og begge MCP-flader er døde, indtil 7.58.1 er installeret (Plugins → Update). Derfor kan S2.9, S4.13, S1.4 og S1.6 ikke udføres nu. S2.7-loftet kræver desuden tre ejerbeslutninger, og S2.5 mangler OG-billedet.
+- **Steamgears Autopilot — plugin** — Live kører 7.58.0, og den build tog hele REST-fladen ned (SGAP_Admin::NS i diagnostics.php og facebook.php, rettet i 7.58.1 — se docs/library/rest-nedbrud-7-58-0-2026-11-07.md). Plugins → Update skal køres før /wp-json svarer, og før P2.6's Facebook-felter og MCP-fladerne kan bruges. P2.6 kræver desuden at ejeren selv indtaster Page access token og side-id i wp-admin — en nøgle må ikke gennem chat eller repo. P1.5b/P1.5c kræver et Pinterest- og Instagram-token; P3.1 mangler ejerens labor_rate-beslutning; P1.15 kræver ejerens MCP-godkendelse.
 - **Dark academia-rebrand** — Printify-adgang
 - **SEO-indholdsproduktion** — Intet eksternt for de tre resterende guides: copy, FAQ, priser og links ligger i docs/library/guides-2026-11-03.md. De otte /go/-id'er 411/475/481/485/497/567 kunne ikke verificeres fra sandkassen (Simplys WAF giver browser-UA en challenge), så nye produktlinks skal måles fra ejerens side eller efter WAF-hvidlistning
 
 ### Næste skridt
 
-- **steamgears.eu — site-optimering** — S2.9 + S4.13 ud på siden: OG-billede pr. indlæg og /shop/s H1 (kræver live-skrivning), og tre ejerbeslutninger til S2.7-loftet. S0.2 behøver intet: host-laget er væk og robots.txt er én gruppe (målt 7/11 17:25 UTC).
-- **Steamgears Autopilot — plugin** — P2.6: opdatér pluginnet til 7.58.0 (Plugins → Update), indsæt Page access token under Settings → Keys og side-id under Publishing, og kør «Kør nu» på Facebook-siden — så er den første rigtige synk målt. P1.5b (Pinterest) og P1.5c (Instagram) er kode-færdige og venter på hvert sit token; P3.1 mangler ejerens labor_rate-beslutning; P1.15 kræver ejerens MCP-godkendelse.
+- **steamgears.eu — site-optimering** — Ejerens ét klik: Plugins → Update til 7.58.1 (REST-nedbruddet). Derefter S2.9 + S4.13 ud på siden: OG-billede pr. indlæg og /shop/s H1, og tre ejerbeslutninger til S2.7-loftet. S0.2 behøver intet: host-laget er væk og robots.txt er én gruppe (målt 7/11 17:25 UTC).
+- **Steamgears Autopilot — plugin** — Plugins → Update til 7.58.1 (retter REST-nedbruddet; zip ligger på main). Derefter P2.6: Page access token under Settings → Keys og side-id under Publishing, og «Kør nu» på Facebook-siden. P1.5b (Pinterest) og P1.5c (Instagram) er kode-færdige og venter på hvert sit token; P3.1 mangler ejerens labor_rate-beslutning; P1.15 kræver ejerens MCP-godkendelse.
 - **Dark academia-rebrand** — Batch 4 — mockups (~130 billeder)
 - **SEO-indholdsproduktion** — Skriv de tre manglende guides (mens-steampunk-costume-essentials, steampunk-clothing-three-budgets, womens-steampunk-essentials) fra den verificerede copy — corset-guiden er publiceret 6/11
 - **Døde internlinks** — Vedligehold: tjek nye indlæg mod live-URL'er
 
 ### Seneste commits
 
+- `1ec840b Merge main (S4.10-anmeldelser) — og nedbruddet konstateret overstået`
 - `fb6e015 Sitet svarer igen — og Facebook-nøglen kan først komme på efter Update`
+- `8654be5 S4.10: butikken spørger nu om en anmeldelse — én gang, 14 dage efter levering`
+- `1054691 Værnene hærdet: registeret lemper kun den regel det gælder`
 - `77148a2 P2.6: Facebook-siden kan styres — med direkte publicering som opt-in (7.58.0)`
 - `3d7a3ff Merge main (S0.4-forbehold) ind i S4.12`
-- `9f77099 Merge main (roadmap-rækker lukket, commit-værn rettet) ind i S4.12`
-- `0165d79 S0.4: forbehold om at «ingen 404» er målt før nedbruddet`
-- `7431166 S4.12: fortrydelsesoplysningerne ind i ordremailen`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 7/11 — 7.58.0 tog hele REST ned, og SEO-arbejdet fandt det
+
+- **Målt 17:29 UTC:** `/wp-json/` svarer **200 med en PHP-fatal i kroppen** (1.650 B), ikke med JSON.
+  `rest_api_init` kaster `Undefined constant SGAP_Admin::NS` i `includes/diagnostics.php:531`. Klassen
+  `SGAP_Admin` har ingen `NS`; den ligger på `SGAP_REST`. Fire referencer i alt: én i `diagnostics.php`
+  (7.57.0) og tre i `facebook.php` (7.58.0).
+- **Konsekvensen er hele fladen, ikke ruten:** `/wp/v2`, Store API (kurv og kasse i blok-editoren) og begge
+  MCP-flader er døde, fordi de alle ligger under samme REST-rod. Forsiden og `/cart/` svarer 200 med 80 KB
+  HTML, så et blik på sitet afslører intet. Det var også derfor Novamira-refresh svarede **500**: tokenet var
+  ikke dårligt, endepunktet kunne ikke køre.
+- **Retten er 7.58.1** (fire referencer → `SGAP_REST::NS`, ingen adfærd ændret). Zip ligger på `main`, så
+  ejerens *Plugins → Update* installerer den. **Intet er verificeret live endnu** — målingen efter opdateringen
+  er det første der skal gøres.
+- **To værn, fordi `php -l` og smoke var grønne hele vejen:** `tools/fejlscan.py` har fået kontrollen
+  `class-konstanter` (enhver `SGAP_X::KONSTANT` som klassen ikke definerer er et fund, to nye fixtures), og
+  tre smoke-checks kalder nu `routes()` og kræver at ruterne lander i `sgap/v1`. Før blev `routes()` aldrig
+  kaldt af nogen test.
+- **Fælde:** statuskoden løj. Et 200-tal på `/` beviser kun at PHP kan rendere en side; helbredstjekket er
+  `/wp-json/`, ikke forsiden.
+- **SEO-missionen er derfor stadig blokeret:** de tre guides kan ikke publiceres (ingen MCP-skrivning), og
+  S4.13 kan ikke måles, før REST svarer igen.
 
 ### 7/11 — Sitet er tilbage, og Facebook venter på to ejerklik
 

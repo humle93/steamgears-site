@@ -6,8 +6,8 @@
       "id": "site",
       "name": "steamgears.eu — site-optimering",
       "note": "roadmap S0–S4",
-      "next": "S2.9 + S4.13 ud på siden: OG-billede pr. indlæg og /shop/s H1 (kræver live-skrivning), og tre ejerbeslutninger til S2.7-loftet. S0.2 behøver intet: host-laget er væk og robots.txt er én gruppe (målt 7/11 17:25 UTC).",
-      "blocked_by": "Sitet svarer igen — målt 7/11 17:25 UTC: /wp-json 200 (1.521.253 B JSON), robots.txt 200 (319 B, én User-agent-gruppe uden de otte host-regler), sitemap_index.xml 200, /?sgap_feed=facebook 200 som RSS og /?nocache=1 200; ingen Parse error. Tilbage: S2.7-loftet kræver tre ejerbeslutninger, S1.4/S1.6 og S2.9/S4.13 kræver live-skrivning (ingen .env, ingen MCP-credential i sandkassen), og S2.5 mangler OG-billedet.",
+      "next": "Ejerens ét klik: Plugins → Update til 7.58.1 (REST-nedbruddet). Derefter S2.9 + S4.13 ud på siden: OG-billede pr. indlæg og /shop/s H1, og tre ejerbeslutninger til S2.7-loftet. S0.2 behøver intet: host-laget er væk og robots.txt er én gruppe (målt 7/11 17:25 UTC).",
+      "blocked_by": "REST er nede, målt 7/11 17:29 UTC: pluginnet på live er nu 7.58.0, hvis includes/diagnostics.php registrerer sin rute med SGAP_Admin::NS — en konstant der ikke findes — så rest_api_init kaster en fatal på hver /wp-json/-forespørgsel. Forsiden (/) og /cart/ svarer 200, robots.txt og sitemap_index.xml svarer 200, men /wp/v2, Store API (kurv og kasse) og begge MCP-flader er døde, indtil 7.58.1 er installeret (Plugins → Update). Derfor kan S2.9, S4.13, S1.4 og S1.6 ikke udføres nu. S2.7-loftet kræver desuden tre ejerbeslutninger, og S2.5 mangler OG-billedet.",
       "modules": [
         {
           "id": "s0",
@@ -56,8 +56,8 @@
     {
       "id": "plugin",
       "name": "Steamgears Autopilot — plugin",
-      "next": "P2.6: opdatér pluginnet til 7.58.0 (Plugins → Update), indsæt Page access token under Settings → Keys og side-id under Publishing, og kør «Kør nu» på Facebook-siden — så er den første rigtige synk målt. P1.5b (Pinterest) og P1.5c (Instagram) er kode-færdige og venter på hvert sit token; P3.1 mangler ejerens labor_rate-beslutning; P1.15 kræver ejerens MCP-godkendelse.",
-      "blocked_by": "P2.6 kræver at ejeren selv indtaster Page access token og side-id i wp-admin — en nøgle må ikke gennem chat eller repo, og der findes ingen credential i sandkassen. Live kører stadig 7.41.1: /wp-json/sgap/v1 annoncerer 12 ruter og ingen /facebook/refresh, /reply eller /hide, som 7.58.0 registrerer, så Plugins → Update skal køres før felterne findes. P1.5b/P1.5c kræver et Pinterest- og Instagram-token; P3.1 mangler ejerens labor_rate-beslutning; P1.15 kræver ejerens MCP-godkendelse. wp-admin er tilgængeligt igen (sitet målt raskt 7/11 17:25 UTC).",
+      "next": "Plugins → Update til 7.58.1 (retter REST-nedbruddet; zip ligger på main). Derefter P2.6: Page access token under Settings → Keys og side-id under Publishing, og «Kør nu» på Facebook-siden. P1.5b (Pinterest) og P1.5c (Instagram) er kode-færdige og venter på hvert sit token; P3.1 mangler ejerens labor_rate-beslutning; P1.15 kræver ejerens MCP-godkendelse.",
+      "blocked_by": "Live kører 7.58.0, og den build tog hele REST-fladen ned (SGAP_Admin::NS i diagnostics.php og facebook.php, rettet i 7.58.1 — se docs/library/rest-nedbrud-7-58-0-2026-11-07.md). Plugins → Update skal køres før /wp-json svarer, og før P2.6's Facebook-felter og MCP-fladerne kan bruges. P2.6 kræver desuden at ejeren selv indtaster Page access token og side-id i wp-admin — en nøgle må ikke gennem chat eller repo. P1.5b/P1.5c kræver et Pinterest- og Instagram-token; P3.1 mangler ejerens labor_rate-beslutning; P1.15 kræver ejerens MCP-godkendelse.",
       "modules": [
         {
           "id": "p0",

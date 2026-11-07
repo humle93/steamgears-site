@@ -83,12 +83,13 @@ Alt her er målt mod den live side eller læst i kilden. Er noget ændret siden 
 - `/shop/` tager ~5,8 s og ~470 KB; produktside har ~151 KB inline CSS og ~105 scripts.
 - GA4 fyrer **dobbelt** på hvert pageview, så konverteringer kan ikke aflæses sikkert.
 
-**Pluginnet** (`plugins/steamgears-autopilot/`, v7.58.0)
+**Pluginnet** (`plugins/steamgears-autopilot/`, v7.58.1)
 
-- **Version i repo mod live:** repo **7.58.0**, live **7.41.1** (målt 7/11 med `get_plugins()` og bekræftet
-  7/11 17:25 uden credential: `/wp-json/sgap/v1` annoncerer 12 ruter og **ingen** `/facebook/*`, mens 7.58.0
-  registrerer `/facebook/refresh`, `/reply` og `/hide`) — et plugin-folder kan
-  kun skiftes af WordPress selv, så en release slutter med ejerens *Plugins → Update*-klik, ikke med et push.
+- **Version i repo mod live:** repo **7.58.1**, live **7.58.0** (målt 7/11 17:29 UTC: `/wp-json/` svarer 200 med
+  `Undefined constant SGAP_Admin::NS` i `includes/diagnostics.php:531`) — og 7.58.0 tog **hele** REST-fladen
+  ned, inklusive Store API og begge MCP-flader, mens forsiden svarede 200. 7.58.1 retter de fire referencer til
+  `SGAP_REST::NS`; se `docs/library/rest-nedbrud-7-58-0-2026-11-07.md`. Et plugin-folder kan kun skiftes af
+  WordPress selv, så en release slutter med ejerens *Plugins → Update*-klik, ikke med et push.
   Status: `docs/roadmap.md` §2b; procedure og efterkontrol: plugin-README §Updates.
 - 54 klasser, 42 PHP-filer, 18.153 linjer (målt 7/11 på 7.58.0); hvert subsystem kan nås fra en rigtig
   indgang (cron, REST, admin-side, ability eller AJAX). Version **7.19.0** tilføjede
@@ -109,7 +110,7 @@ Alt her er målt mod den live side eller læst i kilden. Er noget ændret siden 
   det deprecerede `impressions`, en metric Instagram endnu ikke har rapporteret udelades i stedet for at blive
   gemt som 0, og matchningen sker på captionen mod `/go/<id>/`. **7.57.0** gjorde fejlsøgningen til et fast
 værn, og **7.58.0** tilføjede Facebook-siden som kanal (P2.6): publicering, insights og moderation med
-direkte publicering som opt-in. **987 smoke-checks, alle grønne.**
+direkte publicering som opt-in. **990 smoke-checks, alle grønne.**
 - Kæden virker: generér → godkend → publicér (RSS eller Publer API) → mål.
 - Self-updateren virker: zip i repoet er **byte-identisk** med kilden; 20 versioner på fire dage.
 - 9 AJAX- og 5 admin_post-handlere har capability + nonce; **kun ét `wp_mail`** i hele pluginnet (ugerapport).

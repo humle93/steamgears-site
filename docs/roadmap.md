@@ -68,7 +68,7 @@ from the site itself (`wp_get_plugins`), never inferred from this repo, so it ca
 
 | What | In this repo | Live on steamgears.eu | Gap |
 | --- | --- | --- | --- |
-| Steamgears Autopilot | **7.41.1** (`plugins/steamgears-autopilot-v7.41.1.zip`, byte-identical to source) | **7.41.1**, active (målt 7/11 2026 via `novamira/execute-php` → `get_plugins()`) | **Closed 6/11 23:54 UTC** — the owner's update installed 7.41.1, which carries the `$home` fix for the `admin_init` fatal: the deployed `includes/site-seo.php` now reads `$home . 'llms.txt'` on lines 354–360 and contains no bare `home` constant |
+| Steamgears Autopilot | **7.58.1** (`plugins/steamgears-autopilot-v7.58.1.zip`, byte-identical to source) | **7.58.0** — and that build is down: `rest_api_init` throws on `SGAP_Admin::NS`, so every `/wp-json/` request answers 200 with a fatal (measured 7/11 2026 17:29 UTC, `docs/library/rest-nedbrud-7-58-0-2026-11-07.md`) | **Closed 6/11 23:54 UTC** — the owner's update installed 7.41.1, which carries the `$home` fix for the `admin_init` fatal: the deployed `includes/site-seo.php` now reads `$home . 'llms.txt'` on lines 354–360 and contains no bare `home` constant |
 | MCP server | AI Engine 3.9.0 (site-side, not in this repo) | `/wp-json/mcp/v1/http`, OAuth approved 2/11 2026, 206 tools | **Read access only** — AI Engine's *Drafts Only* is on, so `queue-post` is refused |
 
 **Measured 2/11 2026, after the owner approved the OAuth client:** `wp_list_plugins` returns

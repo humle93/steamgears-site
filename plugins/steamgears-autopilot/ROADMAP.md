@@ -1,10 +1,11 @@
 # Steamgears Autopilot — audit, roadmap and effort estimates
 
-_Last audited: 2026-11-01 · audit was of **7.15.0** (`ab676db` on `main`); current release **7.58.0**, and
-**7.41.1 is what steamgears.eu runs** (measured 2026-11-07 with `get_plugins()` and
-`steamgears-autopilot/status`, then confirmed the same evening without a credential: `/wp-json/sgap/v1`
-announces 12 routes and none of the `/facebook/*` routes 7.58.0 registers; see `docs/roadmap.md` §2b) — the
-zip in `plugins/` is **7.58.0**, and
+_Last audited: 2026-11-01 · audit was of **7.15.0** (`ab676db` on `main`); current release **7.58.1**, and
+**7.58.0 is what steamgears.eu runs** — and that build takes the whole REST API down: `includes/diagnostics.php`
+registered its route with `SGAP_Admin::NS`, a constant that has never existed, so `rest_api_init` dies with
+a fatal on every `/wp-json/` request (measured 2026-11-07, see
+`docs/library/rest-nedbrud-7-58-0-2026-11-07.md`). **7.58.1 fixes it** with `SGAP_REST::NS` — the
+zip in `plugins/` is **7.58.1**, and
 nothing reaches the site until the owner clicks *Update* · update this file in the same commit as any release._
 
 This is the working roadmap for `plugins/steamgears-autopilot`. It answers three questions: does every
@@ -343,6 +344,13 @@ Platform limits: [Instagram content publishing](https://developers.facebook.com/
 
 ## 9. Change log for this document
 
+- **7.58.1 (7/11)** — **REST-nedbruddet i 7.58.0 rettet.** `includes/diagnostics.php` og
+  `includes/facebook.php` registrerede deres ruter med `SGAP_Admin::NS`; klassen `SGAP_Admin` har ingen
+  `NS`-konstant (den ligger på `SGAP_REST`), så `rest_api_init` kastede en `Error` på **hver**
+  `/wp-json/`-forespørgsel — også `/wp/v2`, Store API (kurv og kasse) og begge MCP-flader — mens forsiden
+  og de statiske sider svarede 200. Fire forekomster rettet til `SGAP_REST::NS`, og `tools/fejlscan.py`
+  har fået kontrollen **`class-konstanter`**, der afviser en `SGAP_X::KONSTANT` som klassen ikke
+  definerer, med to selftest-fixtures. Ingen nye dage.
 - **7.58.0 (7/11)** — **Facebook-siden som en kanal pluginnet kan styre (P2.6).** `includes/facebook.php` (`SGAP_Facebook`) publicerer, måler og modererer: tekstindlæg går til `/{page}/feed` med det sporede link som `link`, fotoindlæg til `/{page}/photos` med linket i captionen (et `link` på et fotoindlæg ignoreres af Facebook, og så står posten uden klikbar vej). **Direkte publicering er opt-in** — `facebook_direct` står på `no`, fordi en side der kun er forbundet for at blive læst ikke må flytte publiceringen ud af Publer af sig selv; `handles()` svarer først ja, når ejeren har slået den til. Nøglen er et Page access token, ikke et bruger-token, og fejl 190 siger det i stedet for at videresende Metas tekst. Insights læser `post_impressions`, `post_impressions_unique`, `post_reactions_by_type_total` (et objekt, summeret) og `post_clicks`; en metrik Meta ikke har rapporteret endnu udelades frem for at gemmes som 0, og posten tælles som `waiting` og spørges igen — mens et afvist metriksæt (kode 100 på medietyper uden klik) genforsøges med de to metrikker alle indlæg har. Kommentarer læses, besvares og skjules, aldrig slettes, og `can_hide` fra Meta afgør om knappen tilbydes. Gem sletter kun kanalens egne typer (`channel = 'facebook'`), så `likes`/`shares` fra Bluesky, Mastodon og Instagram overlever; Graph-versionen er en indstilling med fallback til `v21.0`, ikke en konstant. Egen side, dashboardkort, REST-ruter, cron i Fejlsøgnings listen og eget forbehold. 82 nye smoke-checks (905 → 987 PASS, 0 FAIL) — alle gennem `$transport`-sømmen, så intet kald er gået til Meta, og siden er ikke set i en rigtig wp-admin.
 - **7.57.0 (7/11)** — **fejlsøgning i pluginnet (P1.22), og forbehold som en del af svaret.** Ny side **Steamgears → Fejlsøgning** (`includes/diagnostics.php`) med ni tjek, der hver har en tilstand, en sætning om hvad der blev fundet og en om hvad man gør — også når rækken er grøn. Tilstanden læses af det modulerne allerede ved (cron, tabeller, token, sidste kørsel, fejlede posts), så siden ikke selv kan blive en ny fejlkilde; **en kanal der aldrig er forbundet er `off`, ikke `bad`**. Ved siden af ligger `sgap_error_log`: en ringbuffer på 40 rækker, fordi et modul kun holder én fejltekst og rydder den ved næste kørsel — et natligt afslag kl. 03 var ellers væk kl. 09. Den samme fejl tælles op i stedet for at duplikere, og rækken har både `at` (sitets ur, til visning) og `ts` (`time()`, til regnestykker), så 24-timers-vinduet ikke arver den gamle `gmdate`-fejl. **Forbeholdet står under hvert moduls tal** (`SGAP_UI::caveat()`): Instagrams metric der ikke er rapporteret endnu er *udeladt*, ikke 0; Pinterest afgrænses til sin kanal; ROI er last-click uden ordrer uden klik; et opslag der aldrig kom afsted har ingen tal. Dashboardkortet vises kun når der er noget at sige, og rapporten kan hentes som `GET /sgap/v1/diagnostics`. 67 smoke-checks (838 → **905**, 0 FAIL).
 - **7.56.0 (7/11)** — **Instagram-insights (P1.5c): den tredje kanal hvor platformen ved noget vi ikke selv kan

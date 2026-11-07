@@ -222,8 +222,52 @@ def check_vacuous(root: Path) -> list[tuple[str, str]]:
     return found
 
 
+def _strip_comments(source: str) -> str:
+    """Drop //, # and /* */ comments so a docblock cannot look like a live reference."""
+    source = re.sub(r"/\*.*?\*/", "", source, flags=re.DOTALL)
+    return re.sub(r"(^|\s)(?://|#)[^\n]*", r"\1", source)
+
+
+def check_constants(root: Path) -> list[tuple[str, str]]:
+    """En klassekonstant der ikke findes dræber hele REST-fladen, ikke bare ruten.
+
+    `SGAP_Admin::NS` blev refereret i to filer, men konstanten har altid ligget på
+    `SGAP_REST`; `rest_api_init` kastede derfor en Error på hver /wp-json/-forespørgsel,
+    og både /wp/v2, Store API og MCP var nede mens forsiden svarede 200. `php -l` ser det
+    ikke, og ingen test kaldte `routes()`. Denne kontrol læser kildekoden i stedet.
+    """
+    bases = [root / "plugins" / PLUGIN, root / "wordpress"]
+    files = [f for base in bases if base.is_dir() for f in base.rglob("*.php")
+             if "__pycache__" not in f.parts]
+    class_pattern = re.compile(r"(?:final\s+|abstract\s+)?(?:class|trait|interface)\s+(SGAP_\w+)")
+    const_pattern = re.compile(r"\bconst\s+([A-Z][A-Z0-9_]*)\s*=")
+    ref_pattern = re.compile(r"\b(SGAP_\w+)::([A-Z][A-Z0-9_]*)\b")
+
+    defined: dict[str, set[str]] = {}
+    for path in files:
+        body = read(path)
+        starts = [m.start() for m in class_pattern.finditer(body)]
+        for index, match in enumerate(class_pattern.finditer(body)):
+            end = starts[index + 1] if index + 1 < len(starts) else len(body)
+            defined.setdefault(match.group(1), set()).update(const_pattern.findall(body[match.start():end]))
+
+    found: list[tuple[str, str]] = []
+    for path in files:
+        body = _strip_comments(read(path))
+        for number, line in enumerate(body.splitlines(), 1):
+            for klass, const in ref_pattern.findall(line):
+                known = defined.get(klass)
+                if known is None:
+                    continue  # not one of ours (or defined elsewhere); not this check's job
+                if const not in known:
+                    found.append(("constant-missing",
+                                  f"{path.relative_to(root)}:{number}: {klass}::{const} findes ikke"))
+    return found
+
+
 CHECKS = [
     ("version", check_version),
+    ("class-konstanter", check_constants),
     ("zip", check_zip),
     ("includes", check_includes),
     ("bibliotek", check_library),
@@ -315,6 +359,17 @@ def selftest() -> int:
         root = Path(tmp)
         build(root)
         expect("ren kasse", None, root)
+
+        root = Path(tmp) / "konstant"
+        build(root, alpha="<?php\nclass SGAP_Alpha { const MAX = 3; "
+                           "public static function f() { return self::MAX; } }\n"
+                           "echo SGAP_Alpha::MAX;\n")
+        expect("reference til en konstant klassen har", None, root)
+
+        root = Path(tmp) / "konstant-væk"
+        build(root, alpha="<?php\nclass SGAP_Alpha { const MAX = 3; }\n"
+                           "echo SGAP_Alpha::NS;\n")
+        expect("reference til en konstant klassen ikke har", "constant-missing", root)
 
         root = Path(tmp) / "header"
         build(root, main=GOOD_MAIN.replace("Version: 9.9.9", "Version: 9.9.8"))

@@ -274,6 +274,12 @@ check('facebook: the card links to the page screen', str_contains($card, 'sgap-f
 $report = SGAP_Facebook::rest_refresh();
 check('facebook: the REST refresh returns the run and the status', $report instanceof WP_REST_Response && isset($report->data['matched'], $report->data['status']));
 
+// --- the three routes live in the namespace that exists (7.58.1) ---------------------
+$GLOBALS['routes'] = [];
+SGAP_Facebook::routes();
+check('facebook: the three routes are registered in sgap/v1',
+    ($GLOBALS['routes']['sgap/v1'] ?? []) === ['/facebook/refresh', '/facebook/reply', '/facebook/hide']);
+
 // Leave the shared stubs as the next test file expects them.
 SGAP_Facebook::$transport = null;
 $GLOBALS['fb_queue'] = [];
