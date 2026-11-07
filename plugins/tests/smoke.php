@@ -567,7 +567,7 @@ class SGAP_Fake_Ability { function __construct(public string $n, public array $a
 do_action('wp_abilities_api_categories_init'); do_action('wp_abilities_api_init');
 $tools=array_filter($GLOBALS['abilities'],fn($k)=>str_starts_with($k,'steamgears-tools/'),ARRAY_FILTER_USE_KEY);
 check('tools: category registered', isset($GLOBALS['ability_categories']['steamgears-tools']));
-check('tools: full catalogue registered', count($tools)===35);
+check('tools: full catalogue registered', count($tools)===36);
 check('tools: the actions we kept needing are there', !array_diff([
     'steamgears-tools/get-option','steamgears-tools/update-option','steamgears-tools/undo','steamgears-tools/set-plugin-state',
     'steamgears-tools/flush-rewrites','steamgears-tools/flush-caches','steamgears-tools/list-posts','steamgears-tools/update-post',

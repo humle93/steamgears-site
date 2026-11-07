@@ -129,9 +129,9 @@ access no longer depends on repository secrets or on a loop running in a sandbox
 Approval is still one owner click: `python3 tools/mcp_oauth.py --start` prints the link, `--finish '<code>'`
 saves the pair outside the repo, and the two values are pasted under *Settings → MCP access*.
 
-### Shop tools that cannot underprice themselves (7.45)
+### Shop tools that cannot underprice themselves (7.45, cost import 7.46)
 
-The WooCommerce/Printful side is no longer a second plugin. Five tools live in the same
+The WooCommerce/Printful side is no longer a second plugin. Six tools live in the same
 `steamgears-tools` category as everything else, so the site's MCP server exposes them without
 another credential:
 
@@ -142,6 +142,7 @@ another credential:
 | `woo-queue` | The proposals waiting for approval, with before and after |
 | `woo-apply` | Writes one proposal; dry run unless `confirm` is true |
 | `woo-discard` | Drops a proposal without touching the product |
+| `woo-cost-import` | Writes each product's cost from its Printful sync variant — dry run unless `confirm` is true |
 
 A cost is **never invented**. It is the product's `_sgap_cost` field, or the Printful sync
 variant's own price (matched on the WooCommerce id or SKU, never on the product name); without
@@ -151,6 +152,17 @@ it is recomputed at apply time — so a cost that rose while a proposal was wait
 price instead of quietly breaking the promise. The tools do not write the copy themselves: the MCP
 client is an assistant already, and *Content Studio* writes product texts for the owner — so
 `woo-propose` takes the text you send and carries the rest over unchanged.
+
+`woo-cost-import` is how that cost field gets filled. It reads the Printful sync variants
+(paginated, cached for six hours, `fresh` bypasses the cache) and writes each variant's **own
+price** as the product's cost, matched on the WooCommerce id first and the SKU second — never on
+the name. It is a dry run unless `confirm` is true, so the first call only shows the plan. A cost
+you already typed wins: without `overwrite` it is reported as `kept`, and a second run reports
+`unchanged` rather than churning the same number. A variant without its own price is listed as
+`no_price` and left alone; a product Printful does not know is `unmatched` and left alone. A
+variable product gets each variation's cost, and the parent gets the lowest of them. The source is
+stored next to the number (`_sgap_cost_source`, e.g. *Printful import: sync variant 56 (matched on
+Woo id)*), so `woo-catalog` can say where a cost came from instead of pretending it is the owner's.
 
 *Settings → Shop & feeds* holds the Printful token (a secret, autoload off), the store id and
 the minimum margin (45 % by default: a cost of 100 refuses anything under 145.95).

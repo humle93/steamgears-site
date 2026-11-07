@@ -158,6 +158,79 @@ check('woo: the floor follows the saved margin setting', SGAP_MCP_Woo::margin() 
 update_post_meta(7, '_sgap_cost', 0);
 check('woo: a cost of zero counts as unknown, not as free', SGAP_MCP_Woo::cost_for($product, 7)['cost'] === null);
 
+
+// Kostpris-import (7.46.0): kostprisen hentes fra Printful, aldrig fra shop-prisen,
+// og en pris du selv har skrevet bliver ikke overskrevet uden at du beder om det.
+class SGAP_Fake_Variable extends SGAP_Fake_Product {
+    public $children = [];
+    public function get_children() { return $this->children; }
+}
+$import_keep_meta = $GLOBALS['postmeta'] ?? [];
+$import_keep_key  = $GLOBALS['opts']['sgap_printful_api_key'] ?? null;
+$import_keep_store = $GLOBALS['opts']['sgap_printful_store_id'] ?? null;
+$GLOBALS['postmeta'] = [];
+$GLOBALS['wc_product_by_id'] = [];
+$GLOBALS['posts_result'] = [];
+$import_no_key = SGAP_MCP_Woo::import_costs([]);
+check('import: without a Printful key it refuses and names the setting', is_wp_error($import_no_key) && $import_no_key->code === 'sgap_woo_no_printful' && str_contains($import_no_key->get_error_message(), 'Shop & feeds'));
+
+$GLOBALS['opts']['sgap_printful_api_key'] = 'pf-key';
+$GLOBALS['opts']['sgap_printful_store_id'] = '123';
+$simple    = new SGAP_Fake_Product(7, 'Brass Gear Tee', 200.0, '', 'SG-TEE-1');
+$by_sku    = new SGAP_Fake_Product(9, 'Copper Mug', 90.0, '', 'SG-CUP-1');
+$no_price  = new SGAP_Fake_Product(12, 'Unpriced Poster', 50.0, '', 'SG-POSTER-1');
+$unmatched = new SGAP_Fake_Product(13, 'Own Product', 70.0, '', 'OWN-1');
+$parent    = new SGAP_Fake_Variable(20, 'Variant Tee', 300.0, '', 'SG-VAR');
+$child_a   = new SGAP_Fake_Product(21, 'Variant Tee S', 150.0, '', 'SG-VAR-S');
+$child_b   = new SGAP_Fake_Product(22, 'Variant Tee M', 150.0, '', 'SG-VAR-M');
+$parent->children = [21, 22];
+$GLOBALS['wc_product_by_id'] = [7 => $simple, 9 => $by_sku, 12 => $no_price, 13 => $unmatched, 20 => $parent, 21 => $child_a, 22 => $child_b];
+$GLOBALS['posts_result'] = [];
+foreach ([7, 9, 12, 13, 20] as $pid) {
+    $GLOBALS['posts_result'][] = new WP_Post(['ID' => $pid, 'post_type' => 'product', 'post_status' => 'publish', 'post_title' => 'p' . $pid]);
+}
+$GLOBALS['filters']['sgap_woo_printful_response'] = fn($pre, $url) => sgap_http(200, ['result' => [
+    ['id' => 9, 'sync_variants' => [
+        ['id' => 55, 'external_id' => '7', 'sku' => 'SG-TEE-1', 'variant' => ['price' => '121.50']],
+        ['id' => 56, 'external_id' => '7', 'sku' => 'SG-TEE-1', 'variant' => ['price' => '99.00']]
+    ]],
+    ['id' => 10, 'sync_variants' => [['id' => 57, 'sku' => 'SG-CUP-1', 'variant' => ['price' => '40.00']]]],
+    ['id' => 11, 'sync_variants' => [['id' => 58, 'external_id' => '12', 'variant' => []]]],
+    ['id' => 12, 'sync_variants' => [
+        ['id' => 59, 'external_id' => '21', 'variant' => ['price' => '60.00']],
+        ['id' => 60, 'external_id' => '22', 'variant' => ['price' => '45.50']]
+    ]]
+]]);
+
+$dry = SGAP_MCP_Woo::import_costs([]);
+check('import: a dry run writes nothing', $dry['dry_run'] === true && $dry['stats']['would_write'] >= 1 && (string) get_post_meta(7, '_sgap_cost', true) === '');
+check('import: the plan says which product and how it was matched', $dry['rows'][0]['id'] === 7 && $dry['rows'][0]['via'] === 'Woo id' && $dry['rows'][0]['cost'] === 99.0);
+check('import: several variants of one product give the lowest cost', SGAP_MCP_Woo::printful_index([['sync_variants' => [['external_id' => '7', 'variant' => ['price' => '121.50']], ['external_id' => '7', 'variant' => ['price' => '99.00']]]]])['by_id']['7']['cost'] === 99.0);
+
+$written = SGAP_MCP_Woo::import_costs(['confirm' => true]);
+check('import: confirm writes the cost', $written['stats']['written'] >= 1 && (float) get_post_meta(7, '_sgap_cost', true) === 99.0);
+check('import: the source names the variant it came from', str_contains((string) get_post_meta(7, '_sgap_cost_source', true), 'sync variant 56'));
+check('import: the catalogue now reports a Printful cost', SGAP_MCP_Woo::cost_for($simple, 7)['source'] === 'Printful' && SGAP_MCP_Woo::cost_for($simple, 7)['cost'] === 99.0);
+check('import: a second run changes nothing', SGAP_MCP_Woo::import_costs(['confirm' => true])['stats']['unchanged'] >= 1);
+
+update_post_meta(7, '_sgap_cost', 80);
+delete_post_meta(7, '_sgap_cost_source');
+$kept = SGAP_MCP_Woo::import_costs(['confirm' => true]);
+check('import: the cost you typed yourself wins by default', $kept['stats']['kept_existing'] >= 1 && (float) get_post_meta(7, '_sgap_cost', true) === 80.0);
+$over = SGAP_MCP_Woo::import_costs(['confirm' => true, 'overwrite' => true]);
+check('import: overwrite replaces it when asked', $over['stats']['written'] >= 1 && (float) get_post_meta(7, '_sgap_cost', true) === 99.0);
+
+check('import: a product without an id match is matched on its SKU', (float) get_post_meta(9, '_sgap_cost', true) === 40.0 && str_contains((string) get_post_meta(9, '_sgap_cost_source', true), 'SKU'));
+check('import: a variant without its own price is reported, not guessed', $written['stats']['no_price'] === 1 && (string) get_post_meta(12, '_sgap_cost', true) === '');
+check('import: a product Printful does not know is left alone', $written['stats']['unmatched'] === 1 && (string) get_post_meta(13, '_sgap_cost', true) === '');
+check('import: a variable product gets its cheapest variation', $written['stats']['variations'] === 2 && (float) get_post_meta(21, '_sgap_cost', true) === 60.0 && (float) get_post_meta(20, '_sgap_cost', true) === 45.5);
+check('import: the limit caps how many products are read', SGAP_MCP_Woo::import_costs(['limit' => 1])['stats']['products'] === 1);
+$tool = $GLOBALS['abilities']['steamgears-tools/woo-cost-import'] ?? null;
+check('import: the tool is registered and is not read-only', $tool !== null && ($tool['meta']['annotations']['readonly'] ?? true) === false && ($tool['meta']['annotations']['idempotent'] ?? false) === true);
+unset($GLOBALS['filters']['sgap_woo_printful_response']);
+$GLOBALS['postmeta'] = $import_keep_meta;
+if ($import_keep_key === null) { unset($GLOBALS['opts']['sgap_printful_api_key']); } else { $GLOBALS['opts']['sgap_printful_api_key'] = $import_keep_key; }
+if ($import_keep_store === null) { unset($GLOBALS['opts']['sgap_printful_store_id']); } else { $GLOBALS['opts']['sgap_printful_store_id'] = $import_keep_store; }
 sgap_woo_reset();
 if ($woo_keep_products === null) { unset($GLOBALS['wc_product_by_id']); } else { $GLOBALS['wc_product_by_id'] = $woo_keep_products; }
 if ($woo_keep_posts === null) { unset($GLOBALS['posts_result']); } else { $GLOBALS['posts_result'] = $woo_keep_posts; }

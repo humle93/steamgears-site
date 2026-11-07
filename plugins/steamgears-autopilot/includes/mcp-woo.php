@@ -33,6 +33,8 @@ class SGAP_MCP_Woo {
     const OPTION = 'sgap_woo_proposals';
     /** Product meta the owner can fill in with the real cost price. */
     const COST_META = '_sgap_cost';
+    /** Where an imported cost came from, so the catalogue can say it out loud. */
+    const SOURCE_META = '_sgap_cost_source';
     const MAX_QUEUE = 50;
     const API = 'https://api.printful.com';
     const COST_CACHE = 'sgap_printful_costs';
@@ -91,6 +93,17 @@ class SGAP_MCP_Woo {
                 'Removes one proposal from the queue without touching the product. The record is gone afterwards; the shop was never changed.',
                 ['id' => ['type' => 'integer', 'minimum' => 1]],
                 ['id'], [__CLASS__, 'discard'], false, true, true
+            ],
+            'woo-cost-import' => [
+                'Import cost prices from Printful',
+                'Reads the Printful sync variants and writes each variant\'s own price into the product as its cost, so the margin tools can work. Matched on the WooCommerce id or the SKU, never on the name. Dry run unless confirm is true; a cost you already set is kept unless overwrite is true; a variant without its own price is reported, not guessed; a variable product gets the lowest of its variations.',
+                [
+                    'confirm' => ['type' => 'boolean', 'default' => false],
+                    'overwrite' => ['type' => 'boolean', 'default' => false, 'description' => 'Replace a cost that is already set. Off by default: what you typed wins.'],
+                    'fresh' => ['type' => 'boolean', 'default' => false, 'description' => 'Ignore the six-hour Printful cache.'],
+                    'limit' => ['type' => 'integer', 'minimum' => 1, 'maximum' => 500, 'default' => 200]
+                ],
+                [], [__CLASS__, 'import_costs'], false, true
             ]
         ];
     }
@@ -144,7 +157,12 @@ class SGAP_MCP_Woo {
     public static function cost_for($product, int $post_id): array {
         $meta = get_post_meta($post_id, self::COST_META, true);
         if (is_numeric($meta) && (float) $meta > 0) {
-            return ['cost' => (float) $meta, 'source' => 'cost field', 'detail' => 'Product meta ' . self::COST_META . '.'];
+            $origin = trim((string) get_post_meta($post_id, self::SOURCE_META, true));
+            return [
+                'cost' => (float) $meta,
+                'source' => $origin !== '' ? 'Printful' : 'cost field',
+                'detail' => $origin !== '' ? $origin : 'Product meta ' . self::COST_META . '.'
+            ];
         }
         $printful = self::printful_cost($product, $post_id);
         if ($printful['cost'] !== null) {
@@ -486,6 +504,191 @@ class SGAP_MCP_Woo {
             'written' => $plan,
             'note' => $raised ? 'The proposal was below the current floor and was raised to it.' : 'Applied as proposed.'
         ];
+    }
+
+    /**
+     * Writes the Printful sync variant price into every matching product's cost field.
+     *
+     * The cost is the one Printful charges for the variant. Nothing is derived from
+     * the shop price, and a variant without its own price is reported as missing —
+     * a cost that only looks like a cost is worse than none.
+     */
+    public static function import_costs($input = null) {
+        $in = (array) $input;
+        if (!function_exists('wc_get_product')) {
+            return new WP_Error('sgap_woo_no_woo', 'WooCommerce is not active on this site.');
+        }
+        if ((string) SGAP_Settings::get('printful_api_key', '') === '') {
+            return new WP_Error('sgap_woo_no_printful', 'No Printful key is saved, so there is no cost to import. Add the token and store id under Settings → Shop & feeds.', ['status' => 400]);
+        }
+        if (!empty($in['fresh'])) {
+            delete_transient(self::COST_CACHE);
+        }
+        $items = self::printful_sync_products();
+        if (is_wp_error($items)) {
+            return $items;
+        }
+        $index = self::printful_index($items);
+        if ($index['variants'] === 0) {
+            return new WP_Error('sgap_woo_no_variants', 'Printful returned no sync variants, so there is nothing to import.');
+        }
+        $dry = empty($in['confirm']);
+        $overwrite = !empty($in['overwrite']);
+        $limit = min(500, max(1, (int) (($in['limit'] ?? 200) ?: 200)));
+        $stats = [
+            'variants_in_printful' => $index['variants'],
+            'variants_with_price' => $index['priced'],
+            'products' => 0,
+            'variations' => 0,
+            'matched' => 0,
+            'would_write' => 0,
+            'written' => 0,
+            'unchanged' => 0,
+            'kept_existing' => 0,
+            'unmatched' => 0,
+            'no_price' => 0,
+            'dry_run' => $dry,
+            'overwrite' => $overwrite
+        ];
+        $rows = [];
+        foreach (get_posts([
+            'post_type' => 'product',
+            'post_status' => ['publish', 'draft', 'private', 'pending'],
+            'numberposts' => $limit,
+            'orderby' => 'ID',
+            'order' => 'ASC'
+        ]) as $post) {
+            $product = wc_get_product($post->ID);
+            if (!$product) {
+                continue;
+            }
+            $stats['products']++;
+            $children = method_exists($product, 'get_children') ? (array) $product->get_children() : [];
+            if ($children) {
+                $costs = [];
+                foreach ($children as $child_id) {
+                    $child = wc_get_product((int) $child_id);
+                    if (!$child) {
+                        continue;
+                    }
+                    $stats['variations']++;
+                    $result = self::import_one($child, $index, $overwrite, $dry);
+                    self::tally($stats, $result);
+                    if (isset($result['cost'])) {
+                        $costs[] = (float) $result['cost'];
+                    }
+                    if ($result['status'] !== 'unchanged') {
+                        $rows[] = ['id' => (int) $child_id, 'name' => $child->get_name(), 'variation' => true] + $result;
+                    }
+                }
+                if ($costs) {
+                    $parent = self::write_cost((int) $product->get_id(), min($costs), 'Printful import: lowest variation cost', $overwrite, $dry);
+                    self::tally($stats, $parent);
+                    $rows[] = ['id' => (int) $product->get_id(), 'name' => $product->get_name(), 'variation' => false] + $parent;
+                }
+                continue;
+            }
+            $result = self::import_one($product, $index, $overwrite, $dry);
+            self::tally($stats, $result);
+            if ($result['status'] !== 'unchanged') {
+                $rows[] = ['id' => (int) $post->ID, 'name' => $product->get_name(), 'variation' => false] + $result;
+            }
+        }
+        return [
+            'dry_run' => $dry,
+            'stats' => $stats,
+            'rows' => array_slice($rows, 0, 25),
+            'more' => max(0, count($rows) - 25),
+            'next' => $dry ? 'Call again with confirm true to write these costs.' : 'Run woo-catalog to see the margins, then woo-propose.'
+        ];
+    }
+
+    /** Every sync variant, indexed by the Woo id it points at and by its SKU. */
+    public static function printful_index(array $items): array {
+        $by_id = [];
+        $by_sku = [];
+        $variants = 0;
+        $priced = 0;
+        foreach ($items as $item) {
+            foreach ((array) ($item['sync_variants'] ?? []) as $variant) {
+                $variants++;
+                $price = $variant['variant']['price'] ?? null;
+                $cost = is_numeric($price) && (float) $price > 0 ? (float) $price : null;
+                if ($cost !== null) {
+                    $priced++;
+                }
+                $entry = ['cost' => $cost, 'variant' => (string) ($variant['id'] ?? '')];
+                // A product with several Printful variants costs what its cheapest
+                // variant costs; keeping the first would overstate the cost of half
+                // the catalogue.
+                $keep = static function (array &$map, string $key, array $entry): void {
+                    if ($key === '') {
+                        return;
+                    }
+                    if (!isset($map[$key]) || ($entry['cost'] !== null && ($map[$key]['cost'] === null || $entry['cost'] < $map[$key]['cost']))) {
+                        $map[$key] = $entry;
+                    }
+                };
+                $keep($by_id, trim((string) ($variant['external_id'] ?? '')), $entry);
+                $keep($by_sku, trim((string) ($variant['sku'] ?? '')), $entry);
+            }
+        }
+        return ['by_id' => $by_id, 'by_sku' => $by_sku, 'variants' => $variants, 'priced' => $priced];
+    }
+
+    /** One product against the index. @return array{status:string, cost?:float, detail?:string, via?:string} */
+    private static function import_one($product, array $index, bool $overwrite, bool $dry): array {
+        $id = (string) $product->get_id();
+        $match = null;
+        $via = '';
+        if (isset($index['by_id'][$id])) {
+            $match = $index['by_id'][$id];
+            $via = 'Woo id';
+        } else {
+            $sku = method_exists($product, 'get_sku') ? trim((string) $product->get_sku()) : '';
+            if ($sku !== '' && isset($index['by_sku'][$sku])) {
+                $match = $index['by_sku'][$sku];
+                $via = 'SKU';
+            }
+        }
+        if ($match === null) {
+            return ['status' => 'unmatched', 'detail' => 'No Printful sync variant carries this product id or SKU.'];
+        }
+        if ($match['cost'] === null) {
+            return ['status' => 'no_price', 'detail' => 'Printful sync variant ' . ($match['variant'] ?: '?') . ' has no price of its own.'];
+        }
+        $result = self::write_cost((int) $product->get_id(), (float) $match['cost'], 'Printful import: sync variant ' . ($match['variant'] ?: '?') . ' (matched on ' . $via . ')', $overwrite, $dry);
+        $result['via'] = $via;
+        return $result;
+    }
+
+    /** Writes one cost, and never over a value the owner set unless asked. @return array{status:string, cost:float, detail?:string} */
+    private static function write_cost(int $post_id, float $cost, string $source, bool $overwrite, bool $dry): array {
+        $existing = get_post_meta($post_id, self::COST_META, true);
+        if (is_numeric($existing) && (float) $existing > 0) {
+            if (abs((float) $existing - $cost) < 0.005) {
+                return ['status' => 'unchanged', 'cost' => $cost, 'detail' => 'Already the same cost'];
+            }
+            if (!$overwrite) {
+                return ['status' => 'kept', 'cost' => (float) $existing, 'detail' => 'An existing cost was kept'];
+            }
+        }
+        if (!$dry) {
+            update_post_meta($post_id, self::COST_META, $cost);
+            update_post_meta($post_id, self::SOURCE_META, $source);
+        }
+        return ['status' => $dry ? 'would_write' : 'written', 'cost' => $cost, 'detail' => $source];
+    }
+
+    private static function tally(array &$stats, array $result): void {
+        $ok = ['written' => 'written', 'would_write' => 'would_write', 'unchanged' => 'unchanged', 'kept' => 'kept_existing', 'unmatched' => 'unmatched', 'no_price' => 'no_price'];
+        $key = $ok[$result['status']] ?? null;
+        if ($key !== null) {
+            $stats[$key]++;
+        }
+        if (in_array($result['status'], ['written', 'would_write', 'unchanged', 'kept'], true)) {
+            $stats['matched']++;
+        }
     }
 
     public static function discard($input = null) {
