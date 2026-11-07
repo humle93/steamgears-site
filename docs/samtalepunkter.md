@@ -47,12 +47,12 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `e5ee7e7 Modul: CI-vagt — 14 fixtures og version læst fra plugin-headeren i live_state Før: 74,9 % Efter: 74,9 % Δ: 0 Grundlag: ingen ændring`
+- `bcfbde4 Modul: CI-vagt — natlig måling af MCP-adgang og AI-profil (live_state) Før: 74,9 % Efter: 74,9 % Δ: 0 Grundlag: ingen ændring`
+- `97f3eeb Modul: S1.5 — alle /go/-links målt efter rewrite-flush Før: 62,0 %  →  Efter: 62,0 %  (Δ +0) Grundlag: ingen ændring`
+- `c59fff7 chore(status): daglig projektstatus 2026-11-07`
+- `71a742a Luk P0.4 cron-honesty: host-cron sat op i Simply`
 - `3a5b734 chore(status): daglig projektstatus 2026-11-07`
-- `d6726cc Modul: roadmap — forældet S2.8-række fjernet Før: 62 %  →  Efter: 62 % Grundlag: ingen ændring (samme 14,75 af 23,8 d)`
-- `85a673e Modul: S2.7 loft pr. skabelon — script-tallet fordelt og beslutningsgrundlag Før: 61,6 %  →  Efter: 62 %  (Δ +0,4) Grundlag: 14,75 af 23,8 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 6,55/7,55 · S3 2,5/3,55 · S4 1,4/5,25)`
-- `23833d0 chore(status): daglig projektstatus 2026-11-07`
-- `7992bbe Modul: S2.8 — hub-links på de resterende indlæg Før: 59,7 % → Efter: 61,6 % (Δ +1,9) Grundlag: 14,65 af 23,8 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 6,45/7,55 · S3 2,5/3,55 · S4 1,4/5,25)`
-- `e50d0c0 chore(status): daglig projektstatus 2026-11-07`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
