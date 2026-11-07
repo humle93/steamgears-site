@@ -122,9 +122,17 @@
           "total": 0.25,
           "unit": "d",
           "verified": true
+        },
+        {
+          "id": "p1f",
+          "name": "P1.21 — AI Drafts og Publish log i sektioner",
+          "done": 0.25,
+          "total": 0.25,
+          "unit": "d",
+          "verified": true
         }
       ],
-      "total": 29.15
+      "total": 29.4
     },
     {
       "id": "rebrand",
@@ -1194,6 +1202,15 @@
       "after": 91.1,
       "delta": 0.1,
       "basis": "26,55 af 29,15 d (P0 4,65/4,7 · P1 12,7/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 91.1,
+      "after": 91.2,
+      "delta": 0.1,
+      "basis": "26,8 af 29,4 d (P0 4,65/4,7 · P1 12,7/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25)"
     }
   ]
 }

@@ -335,8 +335,35 @@ $q=implode("\n",$wpdb->log);
 check('audit: rows filters by outcome and channel with paging', str_contains($q,"outcome = 'failed'") && str_contains($q,"channel = 'pinterest'") && str_contains($q,'LIMIT 25 OFFSET 50'));
 check('audit: page size is clamped', str_contains((function(){global $wpdb; $wpdb->log=[]; SGAP_Audit::rows('','',9999,0); return implode("\n",$wpdb->log);})(),'LIMIT 200 OFFSET 0'));
 $wpdb->next=7; check('audit: total counts with the same filter', SGAP_Audit::total('failed')===7);
+// Siden tjekker først at tabellen findes (SHOW TABLES), derefter antallet: to svar i kø.
+$wpdb->next=['wp_sgap_publish_log',7];
+$GLOBALS['rows']=[
+    (object)['id'=>3,'queue_id'=>901,'channel'=>'pinterest','outcome'=>'sent','http_status'=>200,'actor'=>'cron','message'=>'Publer job job_1','created_at'=>'2026-11-07 10:00:00'],
+    (object)['id'=>2,'queue_id'=>902,'channel'=>'instagram','outcome'=>'failed','http_status'=>429,'actor'=>'cron','message'=>'Publer: HTTP 429','created_at'=>'2026-11-07 09:00:00'],
+    (object)['id'=>1,'queue_id'=>903,'channel'=>'bluesky','outcome'=>'requeued','http_status'=>0,'actor'=>'admin','message'=>'Try again later','created_at'=>'2026-11-07 08:00:00'],
+];
 ob_start(); do_action('page_sgap-log'); $html=ob_get_clean();
 check('audit: the log page explains the retention window', str_contains($html,'Kept for 90 days'));
+$lf = strpos($html,'<h2>Filter</h2>'); $la = strpos($html,'<h2>Attempts</h2>');
+check('log 7.55: filter first, then the attempts it produced', $lf !== false && $la !== false && $lf < $la);
+check('log 7.55: the counts describe the rows on screen', str_contains($html,'<b>1</b><span>Sent</span>') && str_contains($html,'<b>1</b><span>Failed</span>') && str_contains($html,'<b>1</b><span>Requeued or held</span>'));
+check('log 7.55: the rows are still there with their own message and queue link', str_contains($html,'Publer: HTTP 429') && str_contains($html,'#901'));
+$GLOBALS['rows']=[]; $wpdb->next=null;
+
+// AI Drafts: grupperet efter den side de er skrevet til, med tre tal over grupperne.
+$wpdb->next='wp_sgap_ai_drafts';
+$GLOBALS['rows']=[
+    (object)['id'=>11,'post_id'=>5,'channel'=>'pinterest','title'=>'Brass goggles','body'=>'Body one','hashtags'=>'#steampunk','created_at'=>'2026-11-07 09:00:00','source'=>'How to pick goggles'],
+    (object)['id'=>12,'post_id'=>5,'channel'=>'facebook','title'=>'Brass goggles again','body'=>'Body two','hashtags'=>'','created_at'=>'2026-11-07 09:05:00','source'=>'How to pick goggles'],
+    (object)['id'=>13,'post_id'=>8,'channel'=>'bluesky','title'=>'Leather care','body'=>'Body three','hashtags'=>'','created_at'=>'2026-11-07 09:10:00','source'=>'Leather care 101'],
+    (object)['id'=>14,'post_id'=>0,'channel'=>'mastodon','title'=>'Orphan','body'=>'Body four','hashtags'=>'','created_at'=>'2026-11-07 09:15:00','source'=>null],
+];
+ob_start(); do_action('page_sgap-ai'); $drafts55 = ob_get_clean();
+check('drafts 7.55: one section and three numbers before the cards', str_contains($drafts55,'<h2>Waiting for your decision</h2>') && str_contains($drafts55,'<b>4</b><span>Drafts</span>') && str_contains($drafts55,'<b>3</b><span>Pages</span>') && str_contains($drafts55,'<b>4</b><span>Channels</span>'));
+check('drafts 7.55: drafts for the same page are grouped under that page', str_contains($drafts55,'<h3>How to pick goggles</h3>') && str_contains($drafts55,'2 posts') && str_contains($drafts55,'<h3>Leather care 101</h3>'));
+check('drafts 7.55: a draft without a source page is still shown, under its own heading', str_contains($drafts55,'<h3>No source page</h3>') && str_contains($drafts55,'>16</option>') === false && str_contains($drafts55,'#14'));
+check('drafts 7.55: every draft keeps its three decisions', substr_count($drafts55,'value="queue"')===4 && substr_count($drafts55,'value="rejected"')===4);
+$GLOBALS['rows']=[]; $wpdb->next=null;
 // ---- whole-site SEO / AEO / GEO (7.19.0) ----
 $sgap_check = function (array $checks, string $id) { foreach ($checks as $c) { if ($c['id'] === $id) return $c; } return ['status' => 'missing', 'detail' => '']; };
 $base = ['type' => 'post', 'slug' => 'steampunk-goggles', 'title' => 'Steampunk Goggles: How to Choose a Pair That Fits',

@@ -313,6 +313,9 @@ class SGAP_UI {
 .sgap .sgap-panel-head h2 .dashicons{font-size:18px;width:18px;height:18px;color:var(--brass)}
 .sgap .sgap-panel-head .sgap-section-hint{margin:4px 0 0;font-size:12px;line-height:1.55;max-width:74ch}
 .sgap .sgap-qgroup{margin:0}
+.sgap .sgap-group-head{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin:18px 0 10px;padding:0 0 8px;border-bottom:1px solid #f3ead6}
+.sgap .sgap-group-head h3{margin:0;font-size:14px;line-height:1.35;color:var(--ink)}
+.sgap .sgap-group-head .sgap-pill{flex:none}
 @media (forced-colors:active){
 .sgap .sgap-card,.sgap .sgap-stat,.sgap .sgap-metric,.sgap .sgap-attn{border:1px solid CanvasText}
 .sgap .sgap-pill,.sgap .sgap-badge,.sgap .sgap-tab,.sgap .sgap-cat{border:1px solid CanvasText;color:CanvasText}

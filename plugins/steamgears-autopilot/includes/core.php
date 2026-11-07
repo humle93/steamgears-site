@@ -2204,22 +2204,41 @@ class SGAP_Admin {
             self::close();
             return;
         }
-        echo '<p class="sgap-sub">' . esc_html(count($rows) . ' draft' . (count($rows) === 1 ? '' : 's') . ' waiting for you.') . '</p><div class="sgap-drafts">';
+        // Grouped by the page the AI wrote for: a decision is about one page's posts, and once a
+        // group is empty that page is done. A draft without a source page gets its own group, so
+        // nothing is silently dropped from the list.
+        $pages = [];
+        $channels = [];
         foreach ($rows as $row) {
-            echo '<div class="sgap-draft"><div class="sgap-meta">' . SGAP_UI::channel($row->channel) . '<span>#' . esc_html($row->id) . '</span></div>'
-                . '<h3>' . esc_html($row->title) . '</h3>'
-                . '<div class="sgap-text">' . esc_html($row->body) . '</div>'
-                . ($row->hashtags !== '' ? '<div class="sgap-tags">' . esc_html($row->hashtags) . '</div>' : '')
-                . '<div class="sgap-meta"><span>' . esc_html($row->source ? 'For: ' . $row->source : '') . '</span><span>' . esc_html(mysql2date('j M H:i', $row->created_at)) . '</span></div>'
-                . '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '" class="sgap-actions">'
-                . '<input type="hidden" name="action" value="sgap_approve_ai">'
-                . '<input type="hidden" name="draft_id" value="' . esc_attr($row->id) . '">'
-                . wp_nonce_field('sgap_approve_ai_' . $row->id, '_wpnonce', true, false)
-                . '<button class="button button-primary" name="decision" value="queue"><span class="dashicons dashicons-yes"></span>Approve &amp; Queue</button>'
-                . '<button class="button" name="decision" value="approved">Approve Only</button>'
-                . '<button class="button sgap-danger" name="decision" value="rejected">Reject</button></form></div>';
+            $key = $row->source !== null && $row->source !== '' ? (string) $row->source : 'No source page';
+            $pages[$key][] = $row;
+            $channels[sanitize_key((string) $row->channel)] = true;
         }
-        echo '</div>';
+        SGAP_UI::section('Waiting for your decision', 'The AI wrote these for your pages. Approve & Queue sends one to the publishing queue, Approve Only keeps it, and Reject drops it.');
+        echo '<div class="sgap-metrics">'
+            . SGAP_UI::metric('Drafts', count($rows), count($rows) === 1 ? '1 post to read' : count($rows) . ' posts to read')
+            . SGAP_UI::metric('Pages', count($pages))
+            . SGAP_UI::metric('Channels', count($channels))
+            . '</div>';
+        foreach ($pages as $source => $group) {
+            echo '<div class="sgap-group-head"><h3>' . esc_html((string) $source) . '</h3>' . SGAP_UI::pill(count($group) . (count($group) === 1 ? ' post' : ' posts'), 'brass') . '</div>'
+                . '<div class="sgap-drafts">';
+            foreach ($group as $row) {
+                echo '<div class="sgap-draft"><div class="sgap-meta">' . SGAP_UI::channel($row->channel) . '<span>#' . esc_html($row->id) . '</span></div>'
+                    . '<h3>' . esc_html($row->title) . '</h3>'
+                    . '<div class="sgap-text">' . esc_html($row->body) . '</div>'
+                    . ($row->hashtags !== '' ? '<div class="sgap-tags">' . esc_html($row->hashtags) . '</div>' : '')
+                    . '<div class="sgap-meta"><span>' . esc_html(mysql2date('j M H:i', $row->created_at)) . '</span></div>'
+                    . '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '" class="sgap-actions">'
+                    . '<input type="hidden" name="action" value="sgap_approve_ai">'
+                    . '<input type="hidden" name="draft_id" value="' . esc_attr($row->id) . '">'
+                    . wp_nonce_field('sgap_approve_ai_' . $row->id, '_wpnonce', true, false)
+                    . '<button class="button button-primary" name="decision" value="queue"><span class="dashicons dashicons-yes"></span>Approve &amp; Queue</button>'
+                    . '<button class="button" name="decision" value="approved">Approve Only</button>'
+                    . '<button class="button sgap-danger" name="decision" value="rejected">Reject</button></form></div>';
+            }
+            echo '</div>';
+        }
         self::close();
     }
 

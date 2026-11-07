@@ -25,7 +25,7 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 | Projekt | Status | Grundlag |
 | --- | --- | --- |
 | **steamgears.eu — site-optimering** | **64,4 %** | 15,65 af 24,3 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 7,35/8,05 · S3 2,5/3,55 · S4 1,5/5,25) |
-| **Steamgears Autopilot — plugin** | **91,1 %** | 26,55 af 29,15 d (P0 4,65/4,7 · P1 12,7/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25 · P1E 0,25/0,25) |
+| **Steamgears Autopilot — plugin** | **91,2 %** | 26,8 af 29,4 d (P0 4,65/4,7 · P1 12,7/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25 · P1E 0,25/0,25 · P1F 0,25/0,25) |
 | **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5) |
 | **SEO-indholdsproduktion** | **62,5 %** | 5 af 8 guides (BATCH 0/3 · COPY 4/4 · CORSET 1/1) |
 | **Døde internlinks** | **100 %** | 39 af 39 links (FIX 39/39) |
@@ -47,15 +47,34 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `2e24b19 Modul: P1.21 AI Drafts og Publish log — grupperet og talt op Før: 91,1 %  →  Efter: 91,2 %  (Δ +0,1) Grundlag: 26,8 af 29,4 d`
+- `185645c chore(status): samtalepunkter opdateret efter Simply-afsnittet`
 - `3103982 Modul: A-adgang — Simply.com-connectoren (simplycom) dokumenteret Før: 91,0 % Efter: 91,0 % Δ: 0 Grundlag: ingen ændring`
 - `055db56 chore(status): daglig projektstatus 2026-11-07`
 - `e90932c Modul: P1.20 Settings, Queue og Studio — ét spørgsmål pr. side Før: 91,0 %  →  Efter: 91,1 %  (Δ +0,1) Grundlag: 26,55 af 29,15 d`
 - `ed2aec9 Modul: CI-vagt — mål live-tilstanden nu i stedet for at vente på kl. 03 Før: 91,0 % Efter: 91,0 % Δ: 0 Grundlag: ingen ændring`
-- `731c0e9 Modul: P3.6 fejlsøgning — fast scan, fem fejl rettet Før: 90,9 %  →  Efter: 91,0 %  (Δ +0,1) Grundlag: 26,3 af 28,9 d (P0 4,65/4,7 · P1 12,7/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25) Fejlsøgning er nu en kørsel i stedet for en lejlighed: tools/fejlscan.py er værn nr. 23-24 i den natlige kontrol og leder efter det php -l og smoke-suiten ikke kan se — version tre steder, zip mod kilde byte for byte, døde og forældreløse includes, nye dokumenter uden for biblioteksindekset, tokens i sporede filer, TODO/FIXME og tests der ikke kan fejle. 13 fixtures beviser både at hver klasse fanges, og at en ren kasse er grøn.`
-- `cf6e8b3 Modul: P1.5b Pinterest-analytics Før: 87,4 %  →  Efter: 90,9 %  (Δ +3,5) Grundlag: 26,05 af 28,65 d (P0 4,65/4,7 · P1 12,7/15,2 · P2 4,75/4,75 · P3 2,45/2,5 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25)`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 7/11 — de sidste to lister
+
+- **AI Drafts var ét grid sorteret efter id.** Man skulle læse hver kladde for at se hvilken side
+  den hørte til — men beslutningen er om en *side*: »er denne sides posts gode nok?« Derfor er
+  kladderne nu grupperet efter kilde-siden, med antal pr. gruppe og tre tal øverst (kladder, sider,
+  kanaler). En kladde uden kilde får gruppen *No source page* i stedet for at falde ud af listen.
+- **Publish log havde filter, tabel og paginering som tre løse bjælker**, og retentionsnoten som en
+  separat bjælke over det hele. Nu: *Filter* som egen sektion med levetiden i forklaringen, derefter
+  *Attempts* med Sent · Failed · Requeued or held — **talt op fra de rækker der vises**, mærket »on
+  this page«, så tallet ikke kan modsige tabellen under sig.
+- **Fælde nummer to i harnessen:** log-siden spørger først `SHOW TABLES` og derefter `COUNT(*)`.
+  `get_var()` i smoke-harnessen svarer med én værdi pr. kald, så en test med et enkelt tal blev
+  afvist som »tabellen findes ikke« og renderede tom-tilstanden. Svaret lægges nu i kø:
+  `$wpdb->next = ['wp_sgap_publish_log', 7]`. Samme familie som `mysql2date()`-hullet: en stub der
+  kun kan svare ét sted, skjuler hvilken gren der faktisk blev kørt.
+- **Verificeret:** 781 → **788 PASS**, 0 FAIL. UI'et er stadig **ikke** set i en wp-admin; 7.55.0
+  venter på ejerens *Plugins → Update*-klik.
+- **Bogføring:** P1.21 0,25 d, projektet 29,15 → 29,40 d, 91,1 → 91,2 %.
 
 ### 7/11 — sektionsmønstret blev bredt ud, og en skjult gren kom frem
 
