@@ -89,8 +89,8 @@ Reglen over holdes automatisk, så lidt som muligt afhænger af hukommelse:
   ligger i repoet — ucommittet arbejde i en agent-sandkasse ser den ikke — så reglen om at committe og pushe i
   samme tur gælder stadig; nattens kørsel er sikkerhedsnettet, ikke en erstatning.
   Efter pushet kører kørslen **alle repoets værn** via [`tools/natlige-vaern.sh`](tools/natlige-vaern.sh):
-  `php -l` på alle plugin-filer, `projektstatus.py --selftest` og `--check`, `load_campaign.py --selftest`,
-  `plugins/tests/smoke.php`, `test_mcp_rest.py`, `test_mcp_oauth.py`, `test_niche_scanner.py` og en
+  `php -l` på alle plugin-filer,  `projektstatus.py --selftest` og `--check`, `load_campaign.py --selftest`,
+  `plugins/tests/smoke.php`, `test_mcp_rest.py`, `test_mcp_oauth.py`, `test_live_state.py`, `test_niche_scanner.py` og en
   PDF-render-kontrol af tre biblioteksdokumenter. Et rødt værn
   giver en `::error`-annotation, skriver en tabel og de fejlende linjer i job-summaryen og fejler jobbet. Det
   ligger bevidst efter pushet, så en testfejl ikke holder status-dokumenterne tilbage — men det kan ikke
@@ -110,6 +110,12 @@ Reglen over holdes automatisk, så lidt som muligt afhænger af hukommelse:
   fornyelse. Kørslen fornyer dagligt kl. 03 dansk tid med [`tools/mcp_keepalive.py`](tools/mcp_keepalive.py),
   verificerer med `initialize` + `tools/list` og gemmer det nye token tilbage som repository-secret. Uden
   `NOVAMIRA_REFRESH_TOKEN` og en PAT med Secrets: write springer den sig selv over med en `::notice`.
+  Den samme fornyelse **måler site-tilstanden** med [`tools/live_state.py`](tools/live_state.py): AI Engines
+  `mcp_dynamic_rest` og `mcp_abilities`, `mcp_role`, den gemte profil `sgap_ai_profile` og sitets
+  plugin-version — det token kræver, findes kun i CI. Rapporten skrives til
+  `reports/live-tilstand-<dato>.md`/`.json` og committes; det roterede token gemmes **før** målingen kan gøre
+  jobbet rødt, så en målefejl aldrig koster adgangen. Det er den vej et spørgsmål som »har profilen tændt
+  Dynamic REST på det levende site?« besvares uden ejerens browser.
   I en sandkasse kan [`tools/keepalive-loop.sh`](tools/keepalive-loop.sh) i stedet forny hvert 58. minut
   (`setsid nohup bash tools/keepalive-loop.sh 3480 &`) — den dækker kun mens worktreen kører.
   Opsætning og fælder: [`docs/mcp-auth.md`](docs/mcp-auth.md) → Novamira.

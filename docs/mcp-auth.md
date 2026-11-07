@@ -199,6 +199,39 @@ fornyer og gemmer det roterede token tilbage som repository-secret. Den springer
 
 Uden dem virker adgangen kun så længe refresh-tokenet lever, og et nyt kræver ejerens godkendelse igen.
 
+### Natlig måling af site-tilstanden
+
+Den samme kørsel **måler** sitet, ikke bare forbindelsen: [`tools/live_state.py`](../tools/live_state.py) kaldes af
+`mcp_keepalive.py --live-report reports` med det netop fornyede token og spørger fladen om fire ting — det er
+svaret på »har *Site administration*-profilen faktisk tændt Dynamic REST og Abilities?«, som ellers kræver et
+token i en sandkasse:
+
+| Krav | Hvor det kommer fra | Dom |
+| --- | --- | --- |
+| AI Engine **Dynamic REST** | `steamgears-autopilot/site-health` → `ai_engine_mcp.dynamic_rest` | `true` kræves |
+| AI Engine **Abilities** | samme svar → `ai_engine_mcp.abilities` | `true` kræves |
+| `mcp_role` | samme svar → `ai_engine_mcp.role` | advarsel hvis ikke `admin` |
+| Profilen `sgap_ai_profile` | `steamgears-autopilot/get-settings` → `ai_profile` | oplyses; krav kun hvis `LIVE_EXPECT_PROFILE` er sat |
+| Plugin-version på sitet | `site-health` → `autopilot_version` | **advarsel** ved forskel fra repoet — et plugin-folder skiftes kun af WordPress |
+
+Rapporten skrives til `reports/live-tilstand-<dato>.md` og `.json` og committes af workflowet; er et **krævet**
+krav ikke opfyldt, får jobbet en `::error`-annotation. Rækkefølgen er med vilje: refresh-tokenet gemmes som
+repository-secret **før** målingen kan farve jobbet rødt, så en målefejl aldrig koster adgangen.
+
+To ting er værd at kende, hvis målingen skal køres i hånden:
+
+- **Argumentnavnene læses af `tools/list`, ikke gættet.** Meta-værktøjet har heddet både `{name, input}` og
+  `{ability, arguments}`; skemaet afgør formen, og rapporten skriver hvilken der virkede.
+- **To kald, ikke flere.** `discover-abilities`/`get-ability-info` bruges ikke: de to abilities kaldes direkte,
+  og et svar der ikke kan læses (fx et ældre plugin uden `ai_engine_mcp`) bliver `fejl`/`ukendt` — aldrig
+  »bestået«.
+
+```bash
+python3 tools/live_state.py                 # lokalt: kræver token i ~/.config/steamgears-mcp/novamira/ eller NOVAMIRA_ACCESS_TOKEN
+python3 tools/live_state.py --out /tmp/x    # skriv et andet sted
+python3 tools/test_live_state.py            # 13 offline-fixtures, ingen token
+```
+
 ## Kildesporet: hvad AI Engine og adapteren kan kalde (læst 2/11 2026)
 
 Afsnittene ovenfor er den vej ind der virker. Dette er hvad kilden siger om værktøjerne — brugbart når et
@@ -324,6 +357,9 @@ printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | python3 tools/m
 - [`.mcp.json`](../.mcp.json) — `steamgears`-serveren med `Bearer ${MCP_ACCESS_TOKEN}`.
 - [`tools/mcp_oauth.py`](../tools/mcp_oauth.py) — registrering, PKCE-link, token-udveksling og fornyelse.
   `--status` viser om der er et gyldigt token.
+- [`tools/live_state.py`](../tools/live_state.py) — måler `mwai_options`' MCP-nøgler og profilen gennem
+  Novamira-fladen og skriver `reports/live-tilstand-<dato>.md`/`.json`; `tools/test_live_state.py` er dets
+  13 offline-fixtures.
 - [`tools/mcp_rest.py`](../tools/mcp_rest.py) — `--check`, `--abilities`, `--diff`, `--csv`, `--call`.
 - [`tools/test_mcp_oauth.py`](../tools/test_mcp_oauth.py) og [`tools/test_mcp_rest.py`](../tools/test_mcp_rest.py)
   — 24 fixtures mod lokale efterligninger, ingen credential nødvendig.

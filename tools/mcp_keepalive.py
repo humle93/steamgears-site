@@ -9,6 +9,8 @@ To tilstande:
     python3 tools/mcp_keepalive.py                 # lokalt: læs og skriv tokenfilen
     python3 tools/mcp_keepalive.py --ci \\
         --emit-refresh-file /tmp/refresh           # CI: læs miljøvariabler, skriv nyt token til fil
+    python3 tools/mcp_keepalive.py --ci --emit-refresh-file /tmp/refresh \\
+        --live-report reports                      # CI: mål også site-tilstanden (tools/live_state.py)
 
 Miljøvariabler (begge tilstande kan overstyre stierne):
     NOVAMIRA_CLIENT_ID      offentlig klient-id (ikke en hemmelighed)
@@ -117,8 +119,12 @@ def refresh_once(client_id: str, refresh_token: str) -> dict:
     }
 
 
-def verify(access_token: str) -> int:
-    """initialize + tools/list. Session-headeren skal med på hvert efterfølgende kald."""
+def verify(access_token: str) -> tuple[int, str | None]:
+    """initialize + tools/list. Session-headeren skal med på hvert efterfølgende kald.
+
+    Returnerer (antal værktøjer, session-id), så en efterfølgende måling kan genbruge
+    forbindelsen i stedet for at forny tokenet igen — refresh-tokenet roteres.
+    """
     status, body, headers = post(RESOURCE, {"jsonrpc": "2.0", "id": 1, "method": "initialize",
                                             "params": {"protocolVersion": "2025-06-18", "capabilities": {},
                                                        "clientInfo": {"name": "steamgears-keepalive",
@@ -134,13 +140,31 @@ def verify(access_token: str) -> int:
     tools = (body.get("result") or {}).get("tools") if isinstance(body, dict) else None
     if status != 200 or not tools:
         raise SystemExit(f"tools/list svarede HTTP {status} — tokenet er ikke brugbart: {str(body)[:160]}")
-    return len(tools)
+    return len(tools), session
+
+
+def live_state_report(access_token: str, session: str | None, out_dir: Path) -> str:
+    """Mål site-tilstanden med det token der netop er fornyet, og skriv rapporten.
+
+    En fejl her må ikke koste det roterede token: fornyelsen er allerede gemt, og
+    næste nat prøver igen. Derfor fanges alt og rapporteres som en note.
+    """
+    try:
+        import live_state
+
+        markdown, payload, checks = live_state.report(access_token, session, out_dir)
+    except SystemExit as exc:  # pragma: no cover — kun ved uventet afbrydelse
+        return f"målingen blev afbrudt: {exc}"
+    except Exception as exc:  # noqa: BLE001 — rapporten er ikke vigtigere end tokenet
+        return f"målingen fejlede: {exc.__class__.__name__}: {exc}"
+    state = live_state.verdict(checks)
+    return f"{state} — {live_state.failed(checks)} krav mangler ({markdown.name}, {payload.name})"
 
 
 def main() -> int:
     client_id, refresh_token, ci = credentials()
     result = refresh_once(client_id, refresh_token)
-    tools = verify(result["access_token"])
+    tools, session = verify(result["access_token"])
 
     if ci:
         emit = None
@@ -148,6 +172,11 @@ def main() -> int:
             index = sys.argv.index("--emit-refresh-file")
             if index + 1 < len(sys.argv):
                 emit = Path(sys.argv[index + 1])
+        report_dir = None
+        if "--live-report" in sys.argv:
+            index = sys.argv.index("--live-report")
+            if index + 1 < len(sys.argv):
+                report_dir = Path(sys.argv[index + 1])
         if emit is not None:
             emit.parent.mkdir(parents=True, exist_ok=True)
             emit.write_text(result["refresh_token"], encoding="utf-8")
@@ -157,6 +186,8 @@ def main() -> int:
         else:
             print(f"[OK] fornyet i CI: {tools} værktøjer (roteret: {result['rotated']}) — "
                   "intet token skrevet, brug --emit-refresh-file for at gemme det nye")
+        if report_dir is not None:
+            print(f"[CI] live-tilstand: {live_state_report(result['access_token'], session, report_dir)}")
         return 0
 
     tokens = read_json(TOKEN_FILE)
