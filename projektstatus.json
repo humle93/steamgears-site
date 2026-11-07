@@ -56,8 +56,8 @@
     {
       "id": "plugin",
       "name": "Steamgears Autopilot — plugin",
-      "next": "P3.1 labor_rate (ejer); P1.5 er eksternt blokeret (Pinterest-token + Meta-review); P1.16/P1.17 er klar, men kostprisen skal importeres med woo-cost-import (kræver Printful-nøglen under Settings → Keys), før værktøjerne kan foreslå priser; P1.15 venter på ejerens MCP-godkendelse i wp-admin",
-      "blocked_by": "P1.5 kræver Pinterest-token (401) og Meta-review; P3.1 mangler ejerens labor_rate-beslutning",
+      "next": "P1.5b/P1.5c (Pinterest- og IG-insights) kræver Trial-token og en IG-konto-token; P3.1 labor_rate (ejer); P1.16/P1.17 er klar, men kostprisen skal importeres med woo-cost-import (kræver Printful-nøglen under Settings → Keys), før værktøjerne kan foreslå priser; P1.15 venter på ejerens MCP-godkendelse i wp-admin",
+      "blocked_by": "P1.5b/c kræver Pinterest-token og en IG-konto-token (P1.5a Bluesky/Mastodon er bygget 7/11 i 7.51.0); P3.1 mangler ejerens labor_rate-beslutning",
       "modules": [
         {
           "id": "p0",
@@ -78,18 +78,18 @@
         {
           "id": "p2",
           "name": "P2 — kanaler",
-          "done": 4.5,
-          "total": 7.0,
+          "done": 4.75,
+          "total": 4.75,
           "unit": "d",
-          "note": "3 af 5: Bluesky (P2.1) i 7.29.0, Mastodon + Telegram (P2.2/P2.3) i 7.30.0 og multi-sprog (P2.5) i 7.31.0 (includes/locales.php, 35 smoke-checks); Etsy (P2.4) ikke afgjort og venter på ejeren"
+          "note": "4 af 5 bygget: Bluesky (P2.1) i 7.29.0, Mastodon + Telegram (P2.2/P2.3) i 7.30.0 og multi-sprog (P2.5) i 7.31.0 (includes/locales.php, 35 smoke-checks). P2.4 Etsy blev afgjort 6/11: skjult, ikke bygget (7.33.4 — de fem nøgler afregistreret, sektionen fjernet, siden mærket manuel import, 4 smoke-checks), og de 0,25 d er booket her i stedet for i P3.1, så den samme eftermiddag ikke tælles to gange. Den 2,5 d OAuth-klient er ude af scope indtil Etsy-volumen beder om den; nævneren blev derfor rettet 7,0 → 4,75 d 7/11."
         },
         {
           "id": "p3",
           "name": "P3 — hygiejne",
-          "done": 2.7,
-          "total": 2.75,
+          "done": 2.45,
+          "total": 2.5,
           "unit": "d",
-          "note": "P3.3 (CI 8.0-8.5 + WP 7.1) udført som S0.3 i site-repoet; P3.2 (REST-tests for /feed og /reposts) og P3.5 (uninstall dækket) i 7.28.0; + 0,1 d CI på main repareret 5/11 (6 gamle zips fjernet, kvalitetsgaten blokerede sitets egne localhost-links, testdata fulgt med backoff/JPEG-preflight/32 abilities): integration 109, admin-tools 49, automation 27 PASS lokalt; 5/11: live-sitet opdateret af agenten via MCP 7.6.0 → 7.33.0 → 7.33.1 (abilities uden input crashede på WP 7.1, rettet i #16); sidste Juno-billede (corset.webp, 404) i guide 699 erstattet af medie 932; 6/11: P3.1 halvt — død metode get_setting_help_link() slettet og 9 usynlige rester fjernet (pinterest_token, instagram_token, tiktok_token, youtube_token, youtube_channel_id, reddit_username, reddit_subreddit, email_test_recipient, ai_mode); de 6 synlige (5 Etsy-felter + labor_rate) venter på ejerens byg-eller-skjul-beslutning; 6/11: Etsy skjult (7.33.4) — de fem Etsy-nøgler afregistreret, Etsy-sektionen fjernet og Etsy-siden mærket manuel import, 4 nye smoke-checks; kun labor_rate tilbage (0,05 d); 6/11: P3.4 færdig (7.34.0) — release notes i update-modalen fra ROADMAP'ens changelog med 6 timers cache og escape, 6 nye smoke-checks; P3-summen afstemt til P3.1 0,45 + P3.2 0,5 + P3.3 0,25 + P3.4 0,5 + P3.5 0,25 = 1,95 (den tidligere 1,55 talte 0,1 for meget) ; 7/11: P3.3 AI-profiler 0,75 d (7.41.2, includes/profiles.php) — P3 1,95/2,0 → 2,7/2,75 d"
+          "note": "P3.3 (CI 8.0-8.5 + WP 7.1) udført som S0.3 i site-repoet; P3.2 (REST-tests for /feed og /reposts) og P3.5 (uninstall dækket) i 7.28.0; + 0,1 d CI på main repareret 5/11 (6 gamle zips fjernet, kvalitetsgaten blokerede sitets egne localhost-links, testdata fulgt med backoff/JPEG-preflight/32 abilities): integration 109, admin-tools 49, automation 27 PASS lokalt; 5/11: live-sitet opdateret af agenten via MCP 7.6.0 → 7.33.0 → 7.33.1 (abilities uden input crashede på WP 7.1, rettet i #16); sidste Juno-billede (corset.webp, 404) i guide 699 erstattet af medie 932; 6/11: P3.1 halvt — død metode get_setting_help_link() slettet og 9 usynlige rester fjernet (pinterest_token, instagram_token, tiktok_token, youtube_token, youtube_channel_id, reddit_username, reddit_subreddit, email_test_recipient, ai_mode); de 6 synlige (5 Etsy-felter + labor_rate) venter på ejerens byg-eller-skjul-beslutning; 6/11: Etsy skjult (7.33.4) — de fem Etsy-nøgler afregistreret, Etsy-sektionen fjernet og Etsy-siden mærket manuel import, 4 nye smoke-checks (fra 7/11 booket under P2.4, ikke her); kun labor_rate tilbage (0,05 d); 6/11: P3.4 færdig (7.34.0) — release notes i update-modalen fra ROADMAP'ens changelog med 6 timers cache og escape, 6 nye smoke-checks; P3-summen afstemt til P3.1 0,2 + P3.2 0,5 + P3.3 0,25 + P3.4 0,5 + P3.5 0,25 = 1,7 (Etsy-halvdelen af P3.1 ligger nu under P2.4, hvor roadmappet estimerede den) ; 7/11: P3.3 AI-profiler 0,75 d (7.41.2, includes/profiles.php) — P3 1,95/2,0 → 2,7/2,75 d"
         },
         {
           "id": "p0s",
@@ -108,7 +108,7 @@
           "verified": true
         }
       ],
-      "total": 28.15
+      "total": 28.4
     },
     {
       "id": "rebrand",
@@ -1133,6 +1133,15 @@
       "after": 80.3,
       "delta": 0.2,
       "basis": "24,8 af 30,9 d (P0 4,65/4,7 · P1 11,7/15,2 · P2 4,5/7 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "roadmap-bogføring — Etsy afgjort, dobbelttælling fjernet (scope)",
+      "before": 80.3,
+      "after": 87.3,
+      "delta": 7.0,
+      "basis": "24,8 af 28,4 d (P0 4,65/4,7 · P1 11,7/15,2 · P2 4,75/4,75 · P3 2,45/2,5 · P0.7 1/1 · P0.7c 0,25/0,25)"
     }
   ]
 }

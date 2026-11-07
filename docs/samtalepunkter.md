@@ -25,7 +25,7 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 | Projekt | Status | Grundlag |
 | --- | --- | --- |
 | **steamgears.eu — site-optimering** | **64,4 %** | 15,65 af 24,3 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 7,35/8,05 · S3 2,5/3,55 · S4 1,5/5,25) |
-| **Steamgears Autopilot — plugin** | **80,3 %** | 24,8 af 30,9 d (P0 4,65/4,7 · P1 11,7/15,2 · P2 4,5/7 · P3 2,7/2,75 · P0S 1/1 · P0C 0,25/0,25) |
+| **Steamgears Autopilot — plugin** | **87,3 %** | 24,8 af 28,4 d (P0 4,65/4,7 · P1 11,7/15,2 · P2 4,75/4,75 · P3 2,45/2,5 · P0S 1/1 · P0C 0,25/0,25) |
 | **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5) |
 | **SEO-indholdsproduktion** | **62,5 %** | 5 af 8 guides (BATCH 0/3 · COPY 4/4 · CORSET 1/1) |
 | **Døde internlinks** | **100 %** | 39 af 39 links (FIX 39/39) |
@@ -33,29 +33,42 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 ### Åbne blokeringer
 
 - **steamgears.eu — site-optimering** — S2.7's script-loft kan ikke naas uden tre nye beslutninger (chatbot ved interaktion, GLA vaek eller flyttet til GTM, klassisk kurv) — maalt 7/11; S1.1 Herbarium kraever varianter i Printify; S0.4 5 vanity-301 kraever en Redirection-gruppe (ejer). S2.2, S2.7-trin og S2.8 er udfoert 6-7/11, S0.9 7/11.
-- **Steamgears Autopilot — plugin** — P1.5 kræver Pinterest-token (401) og Meta-review; P3.1 mangler ejerens labor_rate-beslutning
+- **Steamgears Autopilot — plugin** — P1.5b/c kræver Pinterest-token og en IG-konto-token (P1.5a Bluesky/Mastodon er bygget 7/11 i 7.51.0); P3.1 mangler ejerens labor_rate-beslutning
 - **Dark academia-rebrand** — Printify-adgang
 - **SEO-indholdsproduktion** — Intet eksternt for de tre resterende guides: copy, FAQ, priser og links ligger i docs/library/guides-2026-11-03.md. De otte /go/-id'er 411/475/481/485/497/567 kunne ikke verificeres fra sandkassen (Simplys WAF giver browser-UA en challenge), så nye produktlinks skal måles fra ejerens side eller efter WAF-hvidlistning
 
 ### Næste skridt
 
 - **steamgears.eu — site-optimering** — Vedtag loftet paa det maalte gulv (tekst 30 · lister 45 · produkt 95 · kurv 112) eller bestil trin 3 (klassisk kurv/produkt, 0,75 d); skriv de tre manglende guides fra den verificerede copy; S1.1 Herbarium kraever varianter i Printify; S0.4 kraever en Redirection-gruppe (ejer)
-- **Steamgears Autopilot — plugin** — P3.1 labor_rate (ejer); P1.5 er eksternt blokeret (Pinterest-token + Meta-review); P1.16/P1.17 er klar, men kostprisen skal importeres med woo-cost-import (kræver Printful-nøglen under Settings → Keys), før værktøjerne kan foreslå priser; P1.15 venter på ejerens MCP-godkendelse i wp-admin
+- **Steamgears Autopilot — plugin** — P1.5b/P1.5c (Pinterest- og IG-insights) kræver Trial-token og en IG-konto-token; P3.1 labor_rate (ejer); P1.16/P1.17 er klar, men kostprisen skal importeres med woo-cost-import (kræver Printful-nøglen under Settings → Keys), før værktøjerne kan foreslå priser; P1.15 venter på ejerens MCP-godkendelse i wp-admin
 - **Dark academia-rebrand** — Batch 4 — mockups (~130 billeder)
 - **SEO-indholdsproduktion** — Skriv de tre manglende guides (mens-steampunk-costume-essentials, steampunk-clothing-three-budgets, womens-steampunk-essentials) fra den verificerede copy — corset-guiden er publiceret 6/11
 - **Døde internlinks** — Vedligehold: tjek nye indlæg mod live-URL'er
 
 ### Seneste commits
 
+- `fb11620 Modul: P0.7c scheduler- og engagement-status i admin Før: 80,1 %  →  Efter: 80,3 %  (Δ +0,2) Grundlag: 24,8 af 30,9 d`
 - `e7317c4 Modul: P0.7b scheduler-adapter — alle jobs Før: 79,8 %  →  Efter: 80,1 %  (Δ +0,3) Grundlag: 24,55 af 30,65 d`
 - `3b1ab50 Modul: P0.7 Action Scheduler-adapter Før: 79,4 %  →  Efter: 79,8 %  (Δ +0,4) Grundlag: 24,05 af 30,15 d`
 - `d744812 Modul: P1.5a Bluesky + Mastodon-engagement Før: 77,7 %  →  Efter: 79,4 %  (Δ +1,7) Grundlag: 23,55 af 29,65 d`
 - `671d88e Modul: P1.5 + Action Scheduler — research af fire plugin-funktioner Før: 77,7 %  →  Efter: 77,7 %  (Δ 0) Grundlag: ingen ændring`
 - `1543db4 Modul: S2.5/S4.11 — cache-audit af sitet 7/11 (kun to sider målelige) Før: 64,4 %  →  Efter: 64,4 %  (Δ 0) Grundlag: ingen ændring`
-- `d63bd80 Modul: S0.2 robots — vej C verificeret offline, før filen lægges på sitet Før: 64,4 %  →  Efter: 64,4 %  (Δ 0) Grundlag: ingen ændring`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 7/11 — to rækker i plugin-roadmappet talte den samme eftermiddag to gange
+
+- **P2.4 (Etsy) stod stadig som »ikke afgjort og venter på ejeren«**, selv om den blev afgjort 6/11:
+  skjult, ikke bygget (7.33.4). Rækken lovede derfor stadig en 2,5 d OAuth-klient, som ingen vil bygge.
+- **De 0,25 d for at skjule Etsy lå samtidig i P3.1's note**, så den samme eftermiddag var booket to
+  steder. Nu ligger den i P2.4, hvor roadmappet estimerede den, og P3.1 er 0,2 af 0,25 d (død metode +
+  ni usynlige rester) med kun `labor_rate` tilbage.
+- **Nævneren blev derfor rettet:** P2 7,0 → 4,75 d, P3 2,75 → 2,5 d, projektet 30,9 → 28,4 d. Uden
+  rettelsen kunne P2 aldrig blive færdigt, og hver fremtidig procent ville være undervurderet med cirka
+  otte point. **Stigningen 80,3 → 87,3 % er bogføring, ikke arbejde** — der er ikke bygget noget i dette pas.
+- **P1.5 er samtidig delt op:** P1.5a (Bluesky + Mastodon) er bygget 7/11 i 7.51.0, og `next`/`blocked_by`
+  nævner nu kun P1.5b/c, som kræver et Pinterest-trial-token og en IG-konto-token.
 
 ### 7/11 — merchant-schemaet var rigtigt, men sprang produktionen over
 
