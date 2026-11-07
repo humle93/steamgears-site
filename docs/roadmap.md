@@ -276,7 +276,7 @@ this document knows what is blocked, by what, and who fixes it. Effort stays as 
 | P0.1 Failure alerting | 0.5 d | None — WP Mail SMTP 4.10.3 is installed and active | **Unblocked** |
 | P0.2 "Running dry" alert | 0.5 d | None | Unblocked |
 | P0.3 Retry with backoff | 1.0 d | None | Unblocked |
-| P0.4 Cron honesty | 0.5 d | **W3TC + `advanced-cache.php` are active**, so WP-Cron is at real risk of firing late; needs the host's cron or Action Scheduler | ⚠ Raise priority |
+| P0.4 Cron honesty | 0.5 d | None — Simply-cron er sat op, Websundhed viser Good | **Done 0,5 af 0,5 d (ejerbekræftet)** |
 | P0.5 Publish audit log | 1.0 d | None | Unblocked |
 | P0.6 Cross-system duplicate guard | 0.5 d | None | **Done 6/11 in 7.40.1** — `includes/duplicate.php` (`SGAP_Duplicate`) refuses a second hand-over with 409 and names the row it collided with; a post that is still queued blocks whatever its age, a published one only inside `dupe_days` (default 30), `failed` rows never block, and `/snapshot` carries `fingerprint` |
 | P1.1 Pre-flight channel validation | 1.0 d | None | **Done 2/11 in 7.20.0** — `includes/preflight.php` refuses an invalid post before the first Publer call (Instagram JPEG/size/aspect, Pinterest board, caption and hashtag ceilings) and repairs what is mechanical |

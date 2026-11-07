@@ -56,16 +56,16 @@
     {
       "id": "plugin",
       "name": "Steamgears Autopilot — plugin",
-      "next": "P0.4 rigtig host-cron (ejer); P3.1 labor_rate (ejer); P1.5 er eksternt blokeret (Pinterest-token + Meta-review)",
-      "blocked_by": "P1.5 kræver Pinterest-token (401) og Meta-review; P0.4 kræver host-cron (ejer); P3.1 mangler ejerens labor_rate-beslutning",
+      "next": "P3.1 labor_rate (ejer); P1.5 er eksternt blokeret (Pinterest-token + Meta-review)",
+      "blocked_by": "P1.5 kræver Pinterest-token (401) og Meta-review; P3.1 mangler ejerens labor_rate-beslutning",
       "modules": [
         {
           "id": "p0",
           "name": "P0 — reliability",
-          "done": 4.25,
+          "done": 4.35,
           "total": 4.7,
           "unit": "d",
-          "note": "P0.1 0,5 + P0.2 0,5 + P0.3 1,0 + P0.5 1,0 (alarmer i includes/alerts.php, backoff 5/15/45, auditlog i includes/audit.php) + P0.4-detektion 0,2; + 0,15 d /go-ruten: produktlink uden kø-post gik til forsiden, nu produkt-fallback i 7.32.0 med 5 checks (404 PASS); P0.6 0,5 d (7.40.1): dublet-værn pr. fingerprint med tidsvindue i includes/duplicate.php (en kø-post blokerer uanset alder, en publiceret kun inden for dupe_days = 30, failed blokerer aldrig), 409 navngiver rækken den kolliderede med, og /snapshot bærer fingerprint; 15 checks (479 → 494 PASS); + 0,2 d P0.4/CC-link (7.33.0): pluginnet registrerer Command Centers kald (X-Command-Center), viser forbindelsen og melder i selvtjekket når CC har været tavs > 2 t, og CC 7.19.0 kalder wp-cron.php hvert 5. min (integration: 8 cc-checks PASS). P0.4 0,2 → 0,4 af 0,5 d — rigtig host-cron mangler stadig; + 0,2 d P0.2 pr. kanal (7.42.0): ny indstilling channel_caps (fx pinterest=2, facebook=3) giver hver kanal sin egen cap og sin egen runway. SGAP_Alerts::caps() ignorerer ukendte kanaler og tal uden for 1-50, channel_runway() grupperer koen pr. kanal, dry_channels() melder dem under advarselsniveauet (en kanal med cap taeller altid, en uden cap kun mens den har noget i koen). Immediate: egen mail pr. kanal-saet; daily: kanal-linje + tabel, og digesten springes ikke over naar kun een kanal er toer. 11 checks (544 -> 555 PASS)"
+          "note": "P0.1 0,5 + P0.2 0,5 + P0.3 1,0 + P0.5 1,0 (alarmer i includes/alerts.php, backoff 5/15/45, auditlog i includes/audit.php) + P0.4-detektion 0,2; + 0,15 d /go-ruten: produktlink uden kø-post gik til forsiden, nu produkt-fallback i 7.32.0 med 5 checks (404 PASS); P0.6 0,5 d (7.40.1): dublet-værn pr. fingerprint med tidsvindue i includes/duplicate.php (en kø-post blokerer uanset alder, en publiceret kun inden for dupe_days = 30, failed blokerer aldrig), 409 navngiver rækken den kolliderede med, og /snapshot bærer fingerprint; 15 checks (479 → 494 PASS); + 0,2 d P0.4/CC-link (7.33.0): pluginnet registrerer Command Centers kald (X-Command-Center), viser forbindelsen og melder i selvtjekket når CC har været tavs > 2 t, og CC 7.19.0 kalder wp-cron.php hvert 5. min (integration: 8 cc-checks PASS). P0.4 0,2 → 0,4 af 0,5 d (7.18.0 + 7.33.0), og 0,1 d lukket 7/11 2026 af ejeren: Simply-cron er sat op (URL-cron mod `wp-cron.php?doing_wp_cron` hver 5. min, Websundhed viser Good) → P0.4 0,5 af 0,5 d; + 0,2 d P0.2 pr. kanal (7.42.0): ny indstilling channel_caps (fx pinterest=2, facebook=3) giver hver kanal sin egen cap og sin egen runway. SGAP_Alerts::caps() ignorerer ukendte kanaler og tal uden for 1-50, channel_runway() grupperer koen pr. kanal, dry_channels() melder dem under advarselsniveauet (en kanal med cap taeller altid, en uden cap kun mens den har noget i koen). Immediate: egen mail pr. kanal-saet; daily: kanal-linje + tabel, og digesten springes ikke over naar kun een kanal er toer. 11 checks (544 -> 555 PASS)"
         },
         {
           "id": "p1",
@@ -1000,6 +1000,15 @@
       "after": 62.0,
       "delta": 0.4,
       "basis": "14,75 af 23,8 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 6,55/7,55 · S3 2,5/3,55 · S4 1,4/5,25)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 74.9,
+      "after": 75.2,
+      "delta": 0.3,
+      "basis": "20,95 af 27,85 d (P0 4,35/4,7 · P1 9,4/13,4 · P2 4,5/7 · P3 2,7/2,75)"
     }
   ]
 }

@@ -25,7 +25,7 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 | Projekt | Status | Grundlag |
 | --- | --- | --- |
 | **steamgears.eu — site-optimering** | **62 %** | 14,75 af 23,8 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 6,55/7,55 · S3 2,5/3,55 · S4 1,4/5,25) |
-| **Steamgears Autopilot — plugin** | **74,9 %** | 20,85 af 27,85 d (P0 4,25/4,7 · P1 9,4/13,4 · P2 4,5/7 · P3 2,7/2,75) |
+| **Steamgears Autopilot — plugin** | **75,2 %** | 20,95 af 27,85 d (P0 4,35/4,7 · P1 9,4/13,4 · P2 4,5/7 · P3 2,7/2,75) |
 | **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5) |
 | **SEO-indholdsproduktion** | **62,5 %** | 5 af 8 guides (BATCH 0/3 · COPY 4/4 · CORSET 1/1) |
 | **Døde internlinks** | **100 %** | 39 af 39 links (FIX 39/39) |
@@ -33,26 +33,26 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 ### Åbne blokeringer
 
 - **steamgears.eu — site-optimering** — S2.7's resterende 0,4 d kræver tre ejerbeslutninger (annoncepixels, headerens blok-mini-kurv, loft for produkt/kurv) — målt 7/11; S1.1 Herbarium kræver varianter i Printify; S0.4 5 vanity-301 kræver én Redirection-gruppe (ejer). S2.2 og S2.8 er lukket 6–7/11, S0.9 7/11.
-- **Steamgears Autopilot — plugin** — P1.5 kræver Pinterest-token (401) og Meta-review; P0.4 kræver host-cron (ejer); P3.1 mangler ejerens labor_rate-beslutning
+- **Steamgears Autopilot — plugin** — P1.5 kræver Pinterest-token (401) og Meta-review; P3.1 mangler ejerens labor_rate-beslutning
 - **Dark academia-rebrand** — Printify-adgang
 - **SEO-indholdsproduktion** — Intet eksternt for de tre resterende guides: copy, FAQ, priser og links ligger i docs/library/guides-2026-11-03.md. De otte /go/-id'er 411/475/481/485/497/567 kunne ikke verificeres fra sandkassen (Simplys WAF giver browser-UA en challenge), så nye produktlinks skal måles fra ejerens side eller efter WAF-hvidlistning
 
 ### Næste skridt
 
 - **steamgears.eu — site-optimering** — Svar på de tre spørgsmål i docs/library/payload-loft-beslutning-2026-11-07.md §6 (annoncepixels, header-mini-kurv, klasse 3-loft), derefter trin 0–2 (0,4 d); skriv de tre manglende guides fra den verificerede copy; S1.1 Herbarium kræver varianter i Printify; S0.4 kræver én Redirection-gruppe (ejer)
-- **Steamgears Autopilot — plugin** — P0.4 rigtig host-cron (ejer); P3.1 labor_rate (ejer); P1.5 er eksternt blokeret (Pinterest-token + Meta-review)
+- **Steamgears Autopilot — plugin** — P3.1 labor_rate (ejer); P1.5 er eksternt blokeret (Pinterest-token + Meta-review)
 - **Dark academia-rebrand** — Batch 4 — mockups (~130 billeder)
 - **SEO-indholdsproduktion** — Skriv de tre manglende guides (mens-steampunk-costume-essentials, steampunk-clothing-three-budgets, womens-steampunk-essentials) fra den verificerede copy — corset-guiden er publiceret 6/11
 - **Døde internlinks** — Vedligehold: tjek nye indlæg mod live-URL'er
 
 ### Seneste commits
 
+- `3a5b734 chore(status): daglig projektstatus 2026-11-07`
+- `d6726cc Modul: roadmap — forældet S2.8-række fjernet Før: 62 %  →  Efter: 62 % Grundlag: ingen ændring (samme 14,75 af 23,8 d)`
+- `85a673e Modul: S2.7 loft pr. skabelon — script-tallet fordelt og beslutningsgrundlag Før: 61,6 %  →  Efter: 62 %  (Δ +0,4) Grundlag: 14,75 af 23,8 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 6,55/7,55 · S3 2,5/3,55 · S4 1,4/5,25)`
 - `23833d0 chore(status): daglig projektstatus 2026-11-07`
 - `7992bbe Modul: S2.8 — hub-links på de resterende indlæg Før: 59,7 % → Efter: 61,6 % (Δ +1,9) Grundlag: 14,65 af 23,8 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 6,45/7,55 · S3 2,5/3,55 · S4 1,4/5,25)`
 - `e50d0c0 chore(status): daglig projektstatus 2026-11-07`
-- `a4e0f2e Modul: S2.7 HTML-/scriptbudget pr. skabelon — inline CSS til filer Før: 57,6 %  →  Efter: 59,7 %  (Δ +2,1) Grundlag: 14,2 af 23,8 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 6/7,55 · S3 2,5/3,55 · S4 1,4/5,25)`
-- `91b2494 chore(status): daglig projektstatus 2026-11-07`
-- `d5ea466 Modul: S0.9 analytics — inline GA4-tag fjernet Før: 56,5 %  →  Efter: 57,6 %  (Δ +1,1) Grundlag: 13,7 af 23,8 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 5,5/7,55 · S3 2,5/3,55 · S4 1,4/5,25)`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)

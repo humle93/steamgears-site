@@ -105,7 +105,7 @@ Alt her er målt mod den live side eller læst i kilden. Er noget ændret siden 
 - Self-updateren virker: zip i repoet er **byte-identisk** med kilden; 20 versioner på fire dage.
 - 9 AJAX- og 5 admin_post-handlere har capability + nonce; **kun ét `wp_mail`** i hele pluginnet (ugerapport).
 - **Mangler (målt 6/11):** P1.5 platform-analytics (4,0 d), eksternt blokeret af Pinterest-token og Meta-review;
-  P0.4's cron på hosten (ejer); P3.1 mangler kun `labor_rate` (ejerbeslutning). Alt det andet er bygget:
+  P3.1 mangler kun `labor_rate` (ejerbeslutning). Alt det andet er bygget:
   fejl-alarmering, kø-udtørrings-alarm, backoff og auditlog (P0.1–P0.5), P1.4 evergreen-recycling (7.41.0),
   Etsy skjult med manuel import (7.33.4), og den døde metode plus de ni usynlige indstillinger er væk.
 - `uninstall.php` rydder 8 tabeller, alle `sgap_%` options/transients og 9 cron-hooks.
