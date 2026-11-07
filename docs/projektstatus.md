@@ -22,7 +22,7 @@ Status pr. **2026-11-07** · beregnet af `projektstatus.py` · kilder: [`projekt
 
 | Projekt | Status i dag | Grundlag |
 | --- | --- | --- |
-| **steamgears.eu — site-optimering** *(roadmap S0–S4)* | **59,7 %** | 14,2 af 23,8 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 6/7,55 · S3 2,5/3,55 · S4 1,4/5,25) |
+| **steamgears.eu — site-optimering** *(roadmap S0–S4)* | **61,6 %** | 14,65 af 23,8 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 6,45/7,55 · S3 2,5/3,55 · S4 1,4/5,25) |
 | **Steamgears Autopilot — plugin** | **74,9 %** | 20,85 af 27,85 d (P0 4,25/4,7 · P1 9,4/13,4 · P2 4,5/7 · P3 2,7/2,75) |
 | **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5) |
 | **SEO-indholdsproduktion** | **62,5 %** | 5 af 8 guides (Publicerede guides (id 292, 296, 295) 0/3 · Guide-copy klar til publicering (292, 296, 295 + corset) 4/4 · Corset-guiden publiceret (/steampunk-corset-guide/, 1394) 1/1) · drift: Daglig loop kører |
@@ -34,7 +34,7 @@ Status pr. **2026-11-07** · beregnet af `projektstatus.py` · kilder: [`projekt
 <!-- AUTO:BLOKERINGER:START -->
 | Projekt | Næste skridt | Blokering |
 | --- | --- | --- |
-| steamgears.eu — site-optimering (59,7 %) | Skriv de tre manglende guides fra den verificerede copy; S2.8 hub-links på de resterende indlæg; S2.7's sidste to kriterier kræver en ejerbeslutning om Woo-blokke/chatbot/sporing; S1.1 Herbarium kræver varianter i Printify; S0.4 kræver én Redirection-gruppe (ejer) | S1.1 Herbarium kræver varianter i Printify; S0.4 5 vanity-301 kræver én Redirection-gruppe (ejer); S2.7's mål om < 100 KB HTML og < 20 scripts pr. skabelon kan ikke nås uden at fjerne Woo-blokkenes React-stak, AI Engine-chatbot'en eller TikTok/Site Kit-sporing (ejerbeslutning, målt 7/11). S2.2 er lukket 6/11, S0.9 7/11. |
+| steamgears.eu — site-optimering (61,6 %) | Skriv de tre manglende guides fra den verificerede copy; S2.8 hub-links på de resterende indlæg; S2.7's sidste to kriterier kræver en ejerbeslutning om Woo-blokke/chatbot/sporing; S1.1 Herbarium kræver varianter i Printify; S0.4 kræver én Redirection-gruppe (ejer); S2.8 er lukket 7/11 — næste ublokerede punkt er S4.13 merchant-schema (0,25 d) og S2.4/S2.5-opfølgning | S1.1 Herbarium kræver varianter i Printify; S0.4 5 vanity-301 kræver én Redirection-gruppe (ejer); S2.7's mål om < 100 KB HTML og < 20 scripts pr. skabelon kan ikke nås uden at fjerne Woo-blokkenes React-stak, AI Engine-chatbot'en eller TikTok/Site Kit-sporing (ejerbeslutning, målt 7/11). S2.2 er lukket 6/11, S0.9 7/11. S2.8 er lukket 7/11 — 29 af 30 indlæg har et hub-link (898 har indholdet 'test'). |
 | Steamgears Autopilot — plugin (74,9 %) | P0.4 rigtig host-cron (ejer); P3.1 labor_rate (ejer); P1.5 er eksternt blokeret (Pinterest-token + Meta-review) | P1.5 kræver Pinterest-token (401) og Meta-review; P0.4 kræver host-cron (ejer); P3.1 mangler ejerens labor_rate-beslutning |
 | Dark academia-rebrand (63 %) | Batch 4 — mockups (~130 billeder) | Printify-adgang |
 | SEO-indholdsproduktion (62,5 %) | Skriv de tre manglende guides (mens-steampunk-costume-essentials, steampunk-clothing-three-budgets, womens-steampunk-essentials) fra den verificerede copy — corset-guiden er publiceret 6/11 | Intet eksternt for de tre resterende guides: copy, FAQ, priser og links ligger i docs/library/guides-2026-11-03.md. De otte /go/-id'er 411/475/481/485/497/567 kunne ikke verificeres fra sandkassen (Simplys WAF giver browser-UA en challenge), så nye produktlinks skal måles fra ejerens side eller efter WAF-hvidlistning |
@@ -50,6 +50,7 @@ Nyeste først. Append-only — rækker må ikke slettes eller ændres.
 
 | Dato | Projekt | Modul | Før → Efter | Δ | Grundlag |
 | --- | --- | --- | --- | --- | --- |
+| 2026-11-07 | steamgears.eu — site-optimering | S2.8 — hub-links på de resterende indlæg | 59,7 % → 61,6 % | +1,9 | 14,65 af 23,8 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 6,45/7,55 · S3 2,5/3,55 · S4 1,4/5,25) |
 | 2026-11-07 | steamgears.eu — site-optimering | daglig måling | 57,6 % → 59,7 % | +2,1 | 14,2 af 23,8 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 6/7,55 · S3 2,5/3,55 · S4 1,4/5,25) |
 | 2026-11-07 | steamgears.eu — site-optimering | S0.9 analytics — inline GA4-tag fjernet | 56,5 % → 57,6 % | +1,1 | 13,7 af 23,8 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 5,5/7,55 · S3 2,5/3,55 · S4 1,4/5,25) |
 | 2026-11-07 | Steamgears Autopilot — plugin | P0.2 — runway pr. kanal | 74,7 % → 74,9 % | +0,2 | 20,85 af 27,85 d = 74,9 % (11 nye checks, 555 PASS) |

@@ -24,7 +24,7 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 | Projekt | Status | Grundlag |
 | --- | --- | --- |
-| **steamgears.eu — site-optimering** | **59,7 %** | 14,2 af 23,8 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 6/7,55 · S3 2,5/3,55 · S4 1,4/5,25) |
+| **steamgears.eu — site-optimering** | **61,6 %** | 14,65 af 23,8 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 6,45/7,55 · S3 2,5/3,55 · S4 1,4/5,25) |
 | **Steamgears Autopilot — plugin** | **74,9 %** | 20,85 af 27,85 d (P0 4,25/4,7 · P1 9,4/13,4 · P2 4,5/7 · P3 2,7/2,75) |
 | **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5) |
 | **SEO-indholdsproduktion** | **62,5 %** | 5 af 8 guides (BATCH 0/3 · COPY 4/4 · CORSET 1/1) |
@@ -32,14 +32,14 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Åbne blokeringer
 
-- **steamgears.eu — site-optimering** — S1.1 Herbarium kræver varianter i Printify; S0.4 5 vanity-301 kræver én Redirection-gruppe (ejer); S2.7's mål om < 100 KB HTML og < 20 scripts pr. skabelon kan ikke nås uden at fjerne Woo-blokkenes React-stak, AI Engine-chatbot'en eller TikTok/Site Kit-sporing (ejerbeslutning, målt 7/11). S2.2 er lukket 6/11, S0.9 7/11.
+- **steamgears.eu — site-optimering** — S1.1 Herbarium kræver varianter i Printify; S0.4 5 vanity-301 kræver én Redirection-gruppe (ejer); S2.7's mål om < 100 KB HTML og < 20 scripts pr. skabelon kan ikke nås uden at fjerne Woo-blokkenes React-stak, AI Engine-chatbot'en eller TikTok/Site Kit-sporing (ejerbeslutning, målt 7/11). S2.2 er lukket 6/11, S0.9 7/11. S2.8 er lukket 7/11 — 29 af 30 indlæg har et hub-link (898 har indholdet 'test').
 - **Steamgears Autopilot — plugin** — P1.5 kræver Pinterest-token (401) og Meta-review; P0.4 kræver host-cron (ejer); P3.1 mangler ejerens labor_rate-beslutning
 - **Dark academia-rebrand** — Printify-adgang
 - **SEO-indholdsproduktion** — Intet eksternt for de tre resterende guides: copy, FAQ, priser og links ligger i docs/library/guides-2026-11-03.md. De otte /go/-id'er 411/475/481/485/497/567 kunne ikke verificeres fra sandkassen (Simplys WAF giver browser-UA en challenge), så nye produktlinks skal måles fra ejerens side eller efter WAF-hvidlistning
 
 ### Næste skridt
 
-- **steamgears.eu — site-optimering** — Skriv de tre manglende guides fra den verificerede copy; S2.8 hub-links på de resterende indlæg; S2.7's sidste to kriterier kræver en ejerbeslutning om Woo-blokke/chatbot/sporing; S1.1 Herbarium kræver varianter i Printify; S0.4 kræver én Redirection-gruppe (ejer)
+- **steamgears.eu — site-optimering** — Skriv de tre manglende guides fra den verificerede copy; S2.8 hub-links på de resterende indlæg; S2.7's sidste to kriterier kræver en ejerbeslutning om Woo-blokke/chatbot/sporing; S1.1 Herbarium kræver varianter i Printify; S0.4 kræver én Redirection-gruppe (ejer); S2.8 er lukket 7/11 — næste ublokerede punkt er S4.13 merchant-schema (0,25 d) og S2.4/S2.5-opfølgning
 - **Steamgears Autopilot — plugin** — P0.4 rigtig host-cron (ejer); P3.1 labor_rate (ejer); P1.5 er eksternt blokeret (Pinterest-token + Meta-review)
 - **Dark academia-rebrand** — Batch 4 — mockups (~130 billeder)
 - **SEO-indholdsproduktion** — Skriv de tre manglende guides (mens-steampunk-costume-essentials, steampunk-clothing-three-budgets, womens-steampunk-essentials) fra den verificerede copy — corset-guiden er publiceret 6/11
@@ -47,15 +47,39 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `e50d0c0 chore(status): daglig projektstatus 2026-11-07`
+- `a4e0f2e Modul: S2.7 HTML-/scriptbudget pr. skabelon — inline CSS til filer Før: 57,6 %  →  Efter: 59,7 %  (Δ +2,1) Grundlag: 14,2 af 23,8 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 6/7,55 · S3 2,5/3,55 · S4 1,4/5,25)`
+- `91b2494 chore(status): daglig projektstatus 2026-11-07`
 - `d5ea466 Modul: S0.9 analytics — inline GA4-tag fjernet Før: 56,5 %  →  Efter: 57,6 %  (Δ +1,1) Grundlag: 13,7 af 23,8 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 5,5/7,55 · S3 2,5/3,55 · S4 1,4/5,25)`
 - `dd09915 Modul: P0.2 — kanal-cap som reelt loft (7.43.0) Før: 74,9 % Efter: 74,9 % Δ: 0,0 Grundlag: ingen ændring`
 - `693c1f1 Modul: Docs — MCP-fladen vs. plugin-profilen (ingen ændring) Før: 74,7 %  →  Efter: 74,7 %  (Δ 0) Grundlag: ingen ændring`
-- `57e6910 Modul: P0.2 — runway pr. kanal (7.42.0) Før: 74,7 % Efter: 74,9 % Δ: +0,2 Grundlag: 20,85 af 27,85 d = 74,9 % (11 nye checks, 555 PASS)`
-- `c674b82 chore(status): daglig projektstatus 2026-11-07`
-- `65a6336 Modul: Plugin P3.3 — AI-profiler og access all (7.41.2) Før: 74,0 %  →  Efter: 74,7 %  (Δ +0,7) Grundlag: 20,65 af 27,65 d (P0 4,05/4,5 · P1 9,4/13,4 · P2 4,5/7 · P3 2,7/2,75)`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 7/11 — S2.8 lukket: 29 af 30 indlæg sender nu et hub-link
+
+Målingen før passet var **9 af 30** publicerede indlæg med et kontekstlink til `/start-here/` eller
+`/build/`. Tyve indlæg fik hver **én sætning** i brødteksten — 14 mod `/start-here/` (vælg-og-køb) og 8
+mod `/build/` (byg-og-forarbejd) — og nu står der **29 af 30**. Det sidste er indlæg 898, hvis indhold er
+ordet `test`; det er en ejerbeslutning, ikke link-arbejde.
+
+**Fælden der kostede en runde:** første indsættelse søgte det sidste `"<p>"` før `<script` — men flere
+indlæg har HTML inde i selve JSON-LD-strengen (fx et spørgsmål med `</p>` i teksten), så to links endte
+**inde i schema-JSON'en**. Løsningen er at maskere alle `<script>…</script>`-blokke med mellemrum af
+samme længde før positionssøgning, så byte-positionerne stadig passer. Hver indsættelse kontrolleres nu
+på fem punkter: præcis +1 `<p>`, `script_delta` 0, `div_delta` 0, aldrig inde i en script-blok, og det
+gemte indhold byte-identisk med det beregnede.
+
+**Kontrol:** alle 20 sider er hentet igen fra serveren selv — **200, linket i den renderede HTML, ingen
+PHP-fejl**. To batche ramte en forbigående **503 fra Simply**; siden svarede 200 igen efter ca. 45 s, og
+batchene blev derefter delt op i fem ad gangen med pause.
+
+**Og 7.41.1 er live:** opdateringen blev installeret 6/11 kl. 23:54 UTC, og den udrulles
+`includes/site-seo.php` bruger nu `$home` på linje 354–360 — der findes ikke længere en bar `home` i
+filen. Den daglige `admin_init`-fejl i wp-admin er dermed lukket i produktion.
+
+Dokument: [`library/hub-links-posts-2026-11-07.md`](library/hub-links-posts-2026-11-07.md).
 
 ### 7/11 — S2.7 målt: al inline CSS var den samme CSS, sendt forfra hver gang
 
@@ -192,7 +216,11 @@ statiske blokke; målrettede rettelser i eksisterende markup kan skrives direkte
 
 ## Næste skridt
 
-1. De tre manglende guides (SEO 62,5 % → 100 %): copy ligger færdig og verificeret i
+1. **S2.7 HTML-/scriptbudget** (1,0 d) er det næste ublokerede roadmap-punkt: forsiden er 215.638 B HTML
+   med 33 scripts og 28 inline style-blokke; budgettet er < 100 KB, < 20 scripts og ingen inline blok
+   over 4 KB. Det kræver en beslutning om hvilke plugins der må røres ved (W3TC, Simple Custom CSS/JS,
+   WPCode) — ikke bare en måling.
+2. De tre manglende guides (SEO 62,5 % → 100 %): copy ligger færdig og verificeret i
    [`library/guides-2026-11-03.md`](library/guides-2026-11-03.md).
 2. Byg fornyelsen ind i pluginnet, hvis de 30 dage skal holde uden secrets (WP-Cron + option, ingen nøgler i repo).
 3. Cirla som til/fra-modul i pluginnet efter dokumentets §9.4 — start med trin 1, modulet slukket som standard.

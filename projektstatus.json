@@ -6,8 +6,8 @@
       "id": "site",
       "name": "steamgears.eu — site-optimering",
       "note": "roadmap S0–S4",
-      "next": "Skriv de tre manglende guides fra den verificerede copy; S2.8 hub-links på de resterende indlæg; S2.7's sidste to kriterier kræver en ejerbeslutning om Woo-blokke/chatbot/sporing; S1.1 Herbarium kræver varianter i Printify; S0.4 kræver én Redirection-gruppe (ejer)",
-      "blocked_by": "S1.1 Herbarium kræver varianter i Printify; S0.4 5 vanity-301 kræver én Redirection-gruppe (ejer); S2.7's mål om < 100 KB HTML og < 20 scripts pr. skabelon kan ikke nås uden at fjerne Woo-blokkenes React-stak, AI Engine-chatbot'en eller TikTok/Site Kit-sporing (ejerbeslutning, målt 7/11). S2.2 er lukket 6/11, S0.9 7/11.",
+      "next": "Skriv de tre manglende guides fra den verificerede copy; S2.8 hub-links på de resterende indlæg; S2.7's sidste to kriterier kræver en ejerbeslutning om Woo-blokke/chatbot/sporing; S1.1 Herbarium kræver varianter i Printify; S0.4 kræver én Redirection-gruppe (ejer); S2.8 er lukket 7/11 — næste ublokerede punkt er S4.13 merchant-schema (0,25 d) og S2.4/S2.5-opfølgning",
+      "blocked_by": "S1.1 Herbarium kræver varianter i Printify; S0.4 5 vanity-301 kræver én Redirection-gruppe (ejer); S2.7's mål om < 100 KB HTML og < 20 scripts pr. skabelon kan ikke nås uden at fjerne Woo-blokkenes React-stak, AI Engine-chatbot'en eller TikTok/Site Kit-sporing (ejerbeslutning, målt 7/11). S2.2 er lukket 6/11, S0.9 7/11. S2.8 er lukket 7/11 — 29 af 30 indlæg har et hub-link (898 har indholdet 'test').",
       "modules": [
         {
           "id": "s0",
@@ -29,10 +29,10 @@
         {
           "id": "s2",
           "name": "S2 — struktur og SEO",
-          "done": 6.0,
+          "done": 6.45,
           "total": 7.55,
           "unit": "d",
-          "note": "S2.1 9 af 13 planlagte sider live 2,08 + S2.5 meta-runde 1,4 + S2.6 0,8 af 0,8 (0,4 hub-links + 0,2 guide-klynge + 0,1 hub-copy + 0,05 målt linkindsats 4/11 + 0,05 sporing 5/11: 34 af 40 planlagte /go/-links står nu på en publiceret side og er målt der, og 6 produkter nævnes slet ikke i den publicerede outfit-guide og afventer en omskrivning (de tæller hverken som indsatte eller blokerede); de ni WordPress-guides fik 20 links indsat i brødteksten, og outfit-guidens 14 direkte produktlinks blev konverteret til /go/, så alle ti ældre guides er sporet. 5/11 blev outfit-guidens sidste 20 hrefs konverteret (15 produkter, alle 21 /go/ verificeret 302 mod butikkens API), så siden nu har 34 /go/-links og 0 direkte produktlink — målt i docs/library/guide-links-live-2026-11-05.md: 54 sporede links på de ti guides, 0 afvigelser) + S2.4 H1 0,25 + S2.3 nav-links 0,5 (0,3 header 2/11 + 0,2 footer 6/11: /shipping/ og /returns/ står i footerens Support-kolonne med 1 forekomst pr. side på alle seks målte skabeloner og svarer 200, header uden cart/checkout/my-account/opt-out og uden page-list — målt i docs/library/footer-og-navigation-2026-11-06.md). Scope-korrektion 3/11: S2.6 blev først meldt 0,75, men 12 af 40 planlagte links lå stadig kun i planen — det er lukket 4/11 og målt i docs/library/guide-links-live-2026-11-05.md; + 0,5 d S2.2 (6/11): /shipping/ (1396) og /returns/ (1397) oprettet og publiceret — bygget af sitets egne publicerede politikfakta, med Rank Math-meta, canonical og indbyrdes links, og linket ind fra /delivery/ og /refund_returns/. Redirection har stadig ingen gruppe, så 301-vejen var ikke mulig; siderne er skrevet opgave-orienteret for ikke at blive tynde dubletter. + 1,5 d S2.7 HTML-/scriptbudget 1,0 + S2.8 hub-links på de resterende indlæg 0,5 (scope 6/11, endnu ikke udført). + 0,5 d S2.7 (7/11): HTML- og scriptbudgettet målt på otte skabeloner med tools/payload_audit.py — alle 148–165 KB inline CSS, 48–120 script-tags, største inline-blok 45–46 KB. Indgreb: mu-pluginnet wordpress/mu-plugins/sga-inline-css.php flytter hver <style>-blok ≥ 4 KB til cachede filer i uploads/sga-css (21 filer, 537 KB), så HTML faldt 27–54 % (forside 255.154 → 117.697 B, /faq/ 241.371 → 111.208 B, produkt 469.961 → 337.000 B) og største inline-blok er 3.455–4.064 B. De to sidste kriterier (< 100 KB HTML, < 20 scripts) kræver at Woo-blokkenes React-stak, chatbot'en eller sporingen fjernes — ejerbeslutning; målt i docs/library/payload-budget-2026-11-07.md.",
+          "note": "S2.1 9 af 13 planlagte sider live 2,08 + S2.5 meta-runde 1,4 + S2.6 0,8 af 0,8 (0,4 hub-links + 0,2 guide-klynge + 0,1 hub-copy + 0,05 målt linkindsats 4/11 + 0,05 sporing 5/11: 34 af 40 planlagte /go/-links står nu på en publiceret side og er målt der, og 6 produkter nævnes slet ikke i den publicerede outfit-guide og afventer en omskrivning (de tæller hverken som indsatte eller blokerede); de ni WordPress-guides fik 20 links indsat i brødteksten, og outfit-guidens 14 direkte produktlinks blev konverteret til /go/, så alle ti ældre guides er sporet. 5/11 blev outfit-guidens sidste 20 hrefs konverteret (15 produkter, alle 21 /go/ verificeret 302 mod butikkens API), så siden nu har 34 /go/-links og 0 direkte produktlink — målt i docs/library/guide-links-live-2026-11-05.md: 54 sporede links på de ti guides, 0 afvigelser) + S2.4 H1 0,25 + S2.3 nav-links 0,5 (0,3 header 2/11 + 0,2 footer 6/11: /shipping/ og /returns/ står i footerens Support-kolonne med 1 forekomst pr. side på alle seks målte skabeloner og svarer 200, header uden cart/checkout/my-account/opt-out og uden page-list — målt i docs/library/footer-og-navigation-2026-11-06.md). Scope-korrektion 3/11: S2.6 blev først meldt 0,75, men 12 af 40 planlagte links lå stadig kun i planen — det er lukket 4/11 og målt i docs/library/guide-links-live-2026-11-05.md; + 0,5 d S2.2 (6/11): /shipping/ (1396) og /returns/ (1397) oprettet og publiceret — bygget af sitets egne publicerede politikfakta, med Rank Math-meta, canonical og indbyrdes links, og linket ind fra /delivery/ og /refund_returns/. Redirection har stadig ingen gruppe, så 301-vejen var ikke mulig; siderne er skrevet opgave-orienteret for ikke at blive tynde dubletter. + 1,5 d S2.7 HTML-/scriptbudget 1,0 + S2.8 hub-links på de resterende indlæg 0,5 (scope 6/11, endnu ikke udført). + 0,5 d S2.7 (7/11): HTML- og scriptbudgettet målt på otte skabeloner med tools/payload_audit.py — alle 148–165 KB inline CSS, 48–120 script-tags, største inline-blok 45–46 KB. Indgreb: mu-pluginnet wordpress/mu-plugins/sga-inline-css.php flytter hver <style>-blok ≥ 4 KB til cachede filer i uploads/sga-css (21 filer, 537 KB), så HTML faldt 27–54 % (forside 255.154 → 117.697 B, /faq/ 241.371 → 111.208 B, produkt 469.961 → 337.000 B) og største inline-blok er 3.455–4.064 B. De to sidste kriterier (< 100 KB HTML, < 20 scripts) kræver at Woo-blokkenes React-stak, chatbot'en eller sporingen fjernes — ejerbeslutning; målt i docs/library/payload-budget-2026-11-07.md. + 0,45 d S2.8 (7/11): 20 publicerede indlæg uden kontekstlink til en hub fik hvert ét — 14 mod /start-here/, 8 mod /build/ — så 29 af 30 indlæg nu har et hub-link (898 har indholdet 'test' og kunne ikke tælles); hver indsættelse er kontrolleret på fem punkter og alle 20 URL'er er hentet igen med 200 og linket i den renderede HTML, målt i docs/library/hub-links-posts-2026-11-07.md.",
           "scope_change": true
         },
         {
@@ -982,6 +982,15 @@
       "after": 59.7,
       "delta": 2.1,
       "basis": "14,2 af 23,8 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 6/7,55 · S3 2,5/3,55 · S4 1,4/5,25)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "steamgears.eu — site-optimering",
+      "module": "S2.8 — hub-links på de resterende indlæg",
+      "before": 59.7,
+      "after": 61.6,
+      "delta": 1.9,
+      "basis": "14,65 af 23,8 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 6,45/7,55 · S3 2,5/3,55 · S4 1,4/5,25)"
     }
   ]
 }

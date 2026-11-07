@@ -27,10 +27,10 @@ Der er **fem aktive projekter**, alle målt i [`projektstatus.json`](../projekts
 
 | id | Projekt | Status | Enhed |
 | --- | --- | --- | --- |
-| `site` | steamgears.eu — site-optimering | 58,3 % (12,7 af 21,8 d) | developer-dage |
+| `site` | steamgears.eu — site-optimering | 61,6 % (14,65 af 23,8 d) | developer-dage |
 | `plugin` | Steamgears Autopilot — plugin | 74,0 % (19,9 af 26,9 d) | developer-dage |
 | `rebrand` | Dark academia-rebrand | 63,0 % (8,5 af 13,5 t) | timer |
-| `seo` | SEO-indholdsproduktion | 57,1 % (4 af 7 guides) | guides |
+| `seo` | SEO-indholdsproduktion | 62,5 % (5 af 8 guides) | guides |
 | `links` | Døde internlinks | 100 % (39 af 39 links) | links |
 
 Roadmap'erne: [`docs/roadmap.md`](roadmap.md) (site, S0–S4) og
@@ -83,9 +83,9 @@ Alt her er målt mod den live side eller læst i kilden. Er noget ændret siden 
 - `/shop/` tager ~5,8 s og ~470 KB; produktside har ~151 KB inline CSS og ~105 scripts.
 - GA4 fyrer **dobbelt** på hvert pageview, så konverteringer kan ikke aflæses sikkert.
 
-**Pluginnet** (`plugins/steamgears-autopilot/`, v7.41.0)
+**Pluginnet** (`plugins/steamgears-autopilot/`, v7.41.1)
 
-- **Version i repo mod live:** repo **7.41.0**, sitet **7.40.1** (målt 6/11 via Novamira MCP) — et
+- **Version i repo mod live:** begge **7.41.1** (live målt 7/11 med `get_plugins()`) — et
   plugin-folder kan kun skiftes af WordPress selv, så en release slutter med ejerens *Plugins → Update*-klik,
   ikke med et push. Status: `docs/roadmap.md` §2b; procedure og efterkontrol: plugin-README §Updates.
 - 44 klasser, 30 PHP-filer, 12.356 linjer (målt 6/11 på 7.41.0); hvert subsystem kan nås fra en rigtig
