@@ -47,15 +47,61 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `0a45621 chore(status): daglig projektstatus 2026-11-07`
+- `1af6253 Modul: P1.17 — kostpris-import fra Printful (7.46.0)`
 - `e7b163d Modul: P1.16 — shop-værktøjerne uden eget tekstlag (7.45.1) Før: 76,1 %  →  Efter: 76,1 %  (Δ 0) Grundlag: ingen ændring`
 - `d4f1ad6 chore(status): daglig projektstatus 2026-11-07`
 - `1fa4c00 Modul: P1.16 — WooCommerce/Printful som ét MCP-modul i pluginnet (7.45.0) Før: 75,7 %  →  Efter: 76,1 %  (Δ +0,4) Grundlag: 21,95 af 28,85 d (P0 4,35/4,7 · P1 10,4/14,4 · P2 4,5/7 · P3 2,7/2,75)`
 - `faed5c9 chore(status): daglig projektstatus 2026-11-07`
-- `5bd1ba8 Modul: S2.7 trin 0–2 — emoji, TikTok, Kliken, Google-login og headerens blok-kurv fjernet Før: 62 %  →  Efter: 63,7 %  (Δ +1,7) Grundlag: 15,15 af 23,8 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 6,95/7,55 · S3 2,5/3,55 · S4 1,4/5,25)`
-- `de3f1f4 chore(status): daglig projektstatus 2026-11-07`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 7/11 — jeg lagde sitet ned med et mu-plugin, og MCP kunne ikke redde det
+
+- **Hændelsen:** under S0.2 (robots.txt) skrev jeg `managed-wordpress-robots.php` med `novamira/execute-php`, men med
+  filindholdet som en **dobbelt-citeret PHP-streng**. `$output`, `$rules` og `$block` blev interpoleret til tomme
+  strenge, filen fik ` = array(` på linje 13, og en parse-fejl i et mu-plugin er en **E_COMPILE_ERROR på hvert
+  request**. Siden da svarer `/?nocache=1`, `/shop/`, `/cart/` og `/wp-json/…` med fejlen; kun W3TC's cachede
+  forside virker. Butikken kan ikke tage imod ordrer, indtil filen er rettet.
+- **Fælden der gjorde det uopretteligt over MCP:** mu-plugins indlæses **før** plugins, så Novamira/MCP er også
+  dødt. Der findes ingen anden kanal i sandkassen (ingen SFTP/SSH-credential), så genopretningen kræver
+  ejerens fil-adgang i Simply — tre veje i `docs/library/robots-og-nedbrud-2026-11-07.md` §4.
+- **Succes-kriteriet var forkert:** kaldet returnerede `bytes: 1222`, og jeg gik videre på det tal. Et
+  `file_put_contents` beviser kun at disken tog imod noget — ikke at indholdet kan parses. Fra nu: læs filen
+  tilbage, sammenlign `sha1`, kør `token_get_all(..., TOKEN_PARSE)`, hent den URL der bruger filen.
+- **Robots-ejerskabet er nu målt (S0.2's anden halvdel):** Rank Math genererer filen (ingen fysisk fil), og
+  `managed-wordpress-robots.php` er et **host-lag**, der kun tilføjer otte query-param-`Disallow`. To grupper med
+  samme user-agent er gyldigt (RFC 9309 §2.2.1), så rækken kunne være lukket som «målt og dokumenteret» uden at
+  røre en host-fil.
+- **Roadmap-gennemgangen blev standset her.** Inventory var nået igennem: S0.4's fem URL'er svarer alle 200
+  (rækken er forældet), siderne i S3.1/S3.2 ligger allerede i skraldespanden og er talt med, S4.13's
+  schema-mu-plugin ligger i repoet men er **aldrig deployet** (`wp_get_mu_plugins()` viser fire filer, ikke fem),
+  og Health Check + dets drop-in er stadig aktive (S0.5). Intet af det blev udført.
+
+
+### 7/11 — jeg lagde sitet ned med et mu-plugin, og MCP kunne ikke redde det
+
+- **Hændelsen:** under S0.2 (robots.txt) skrev jeg `managed-wordpress-robots.php` med `novamira/execute-php`, men med
+  filindholdet som en **dobbelt-citeret PHP-streng**. `$output`, `$rules` og `$block` blev interpoleret til tomme
+  strenge, filen fik ` = array(` på linje 13, og en parse-fejl i et mu-plugin er en **E_COMPILE_ERROR på hvert
+  request**. Siden da svarer `/?nocache=1`, `/shop/`, `/cart/` og `/wp-json/…` med fejlen; kun W3TC's cachede
+  forside virker. Butikken kan ikke tage imod ordrer, indtil filen er rettet.
+- **Fælden der gjorde det uopretteligt over MCP:** mu-plugins indlæses **før** plugins, så Novamira/MCP er også
+  dødt. Der findes ingen anden kanal i sandkassen (ingen SFTP/SSH-credential), så genopretningen kræver
+  ejerens fil-adgang i Simply — tre veje i `docs/library/robots-og-nedbrud-2026-11-07.md` §4.
+- **Succes-kriteriet var forkert:** kaldet returnerede `bytes: 1222`, og jeg gik videre på det tal. Et
+  `file_put_contents` beviser kun at disken tog imod noget — ikke at indholdet kan parses. Fra nu: læs filen
+  tilbage, sammenlign `sha1`, kør `token_get_all(..., TOKEN_PARSE)`, hent den URL der bruger filen.
+- **Robots-ejerskabet er nu målt (S0.2's anden halvdel):** Rank Math genererer filen (ingen fysisk fil), og
+  `managed-wordpress-robots.php` er et **host-lag**, der kun tilføjer otte query-param-`Disallow`. To grupper med
+  samme user-agent er gyldigt (RFC 9309 §2.2.1), så rækken kunne være lukket som «målt og dokumenteret» uden at
+  røre en host-fil.
+- **Roadmap-gennemgangen blev standset her.** Inventory var nået igennem: S0.4's fem URL'er svarer alle 200
+  (rækken er forældet), siderne i S3.1/S3.2 ligger allerede i skraldespanden og er talt med, S4.13's
+  schema-mu-plugin ligger i repoet men er **aldrig deployet** (`wp_get_mu_plugins()` viser fire filer, ikke fem),
+  og Health Check + dets drop-in er stadig aktive (S0.5). Intet af det blev udført.
+
 
 ### 7/11 — S2.7 trin 0–2 udført: 51 → 28 scripts, men loftet på 20 kan ikke nås
 
