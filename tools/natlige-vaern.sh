@@ -81,6 +81,10 @@ check "designsystem-selftest"                python3 tools/design_check.py --sel
 check "designsystem"                         python3 tools/design_check.py
 check "designsystem-loader"                  "$PHP_BIN" wordpress/tests/test-design-system.php
 check "produkt-schema"                       "$PHP_BIN" tools/schema_filter_test.php
+# Fejlsøgning som fast punkt (P3.6): konsistens på tværs af filer — version mod zip,
+# zip mod kilde, includes, biblioteksindekset, tokens og tests der ikke kan fejle.
+check "fejlscan-selftest"                    python3 tools/fejlscan.py --selftest
+check "fejlscan"                             python3 tools/fejlscan.py
 
 # Rendereren fejlede 2/11 på to måder der ikke gav en fejlkode: et sidebrud midt i et afsnit
 # skrev resten af dokumentet uden for papiret (niche-vurderingen blev 20 sider), og glyffer

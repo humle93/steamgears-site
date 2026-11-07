@@ -252,9 +252,50 @@ check('pinterest: the App ID is an ordinary setting with help text',
     in_array('pinterest_client_id', SGAP_Settings::TEXT_KEYS, true)
     && isset(SGAP_Settings::HELP['pinterest_client_id'])
     && in_array('pinterest_client_id', SGAP_Setup::TABS['publishing'][2], true));
-check('plugin: 7.53.0 carries the Pinterest module', SGAP_VERSION === '7.53.0' && class_exists('SGAP_Pinterest'));
+check('plugin: 7.53.1 carries the Pinterest module', SGAP_VERSION === '7.53.1' && class_exists('SGAP_Pinterest'));
 
+// --- a token with no recorded expiry is usable, not "expired" ------------------------
+$GLOBALS['opts']['sgap_pinterest_access_token'] = 'pasted-by-hand';
+update_option('sgap_pinterest_access_expires', 0);
+check('pinterest: a pasted token with no recorded expiry counts as valid, not expired',
+    SGAP_Pinterest::status()['token_valid'] === true && SGAP_Pinterest::token() === 'pasted-by-hand');
+
+// --- a refused pin listing keeps the pins that are already mapped --------------------
+$GLOBALS['opts']['sgap_pinterest_pins'] = [
+    'pin-1' => ['link' => 'https://steamgears.eu/go/7/', 'created_at' => '2026-11-01', 'synced_at' => 0]
+];
+$GLOBALS['rows'] = [
+    ['id' => '7', 'angle' => 'angle_a', 'published_at' => '2026-11-05 09:00:00', 'external_id' => '']
+];
+$GLOBALS['http_calls'] = [];
+SGAP_Pinterest::$transport = function ($method, $url, $args) {
+    $GLOBALS['http_calls'][] = [$method, $url, $args];
+    if (str_contains($url, '/pins?')) {
+        return sgap_http(403, ['message' => 'Not permitted']);
+    }
+    return sgap_http(200, ['all' => ['summary_metrics' => ['IMPRESSION' => 12, 'SAVE' => 1, 'OUTBOUND_CLICK' => 1]]]);
+};
+$partial = SGAP_Pinterest::sync(5);
+check('pinterest: a refused pin listing still measures the pins already mapped', $partial['configured'] === true
+    && $partial['matched'] === 1 && $partial['updated'] === 1 && $partial['pins'] === 1
+    && count($partial['errors']) === 1 && str_contains($partial['errors'][0], 'Pin listing'));
+$GLOBALS['opts']['sgap_pinterest_pins'] = [];
 SGAP_Pinterest::$transport = null;
+
+// --- a wp-config.php constant wins, so renewal must refuse rather than write a dead value
+// Defined last on purpose: a PHP constant cannot be removed, and the keys checks that follow
+// render the settings page, where a constant legitimately replaces the field with a note.
+define('SGAP_PINTEREST_ACCESS_TOKEN', 'constant-token');
+update_option('sgap_pinterest_access_token', 'stored-token');
+update_option('sgap_pinterest_access_expires', time() + DAY_IN_SECONDS);
+check('pinterest: a wp-config access token is used instead of the stored one',
+    SGAP_Pinterest::access_constant() === 'SGAP_PINTEREST_ACCESS_TOKEN'
+    && SGAP_Pinterest::token() === 'constant-token');
+$locked_refresh = SGAP_Pinterest::refresh();
+check('pinterest: renewal is refused when a constant would swallow the rotated token',
+    is_wp_error($locked_refresh)
+    && str_contains($locked_refresh->get_error_message(), 'SGAP_PINTEREST_ACCESS_TOKEN'));
+
 $GLOBALS['http_calls'] = [];
 $GLOBALS['rows'] = [];
 $GLOBALS['http_queue'] = [];

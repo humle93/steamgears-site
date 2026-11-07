@@ -25,7 +25,7 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 | Projekt | Status | Grundlag |
 | --- | --- | --- |
 | **steamgears.eu — site-optimering** | **64,4 %** | 15,65 af 24,3 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 7,35/8,05 · S3 2,5/3,55 · S4 1,5/5,25) |
-| **Steamgears Autopilot — plugin** | **90,9 %** | 26,05 af 28,65 d (P0 4,65/4,7 · P1 12,7/15,2 · P2 4,75/4,75 · P3 2,45/2,5 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25) |
+| **Steamgears Autopilot — plugin** | **91 %** | 26,3 af 28,9 d (P0 4,65/4,7 · P1 12,7/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25) |
 | **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5) |
 | **SEO-indholdsproduktion** | **62,5 %** | 5 af 8 guides (BATCH 0/3 · COPY 4/4 · CORSET 1/1) |
 | **Døde internlinks** | **100 %** | 39 af 39 links (FIX 39/39) |
@@ -47,15 +47,39 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `cf6e8b3 Modul: P1.5b Pinterest-analytics Før: 87,4 %  →  Efter: 90,9 %  (Δ +3,5) Grundlag: 26,05 af 28,65 d (P0 4,65/4,7 · P1 12,7/15,2 · P2 4,75/4,75 · P3 2,45/2,5 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25)`
 - `a27b054 chore(status): daglig projektstatus 2026-11-07`
 - `95c9106 Modul: P1.19 dashboard-layout — tre sektioner og én Needs you-linje Før: 87,3 %  →  Efter: 87,4 %  (Δ +0,1) Grundlag: 25,05 af 28,65 d`
 - `1619779 chore(status): daglig projektstatus 2026-11-07`
 - `1d3214f Modul: roadmap-bogføring — Etsy afgjort, dobbelttælling fjernet (scope) Før: 80,3 %  →  Efter: 87,3 %  (Δ +7) Grundlag: 24,8 af 28,4 d (P0 4,65/4,7 · P1 11,7/15,2 · P2 4,75/4,75 · P3 2,45/2,5 · P0.7 1/1 · P0.7c 0,25/0,25)`
 - `fb11620 Modul: P0.7c scheduler- og engagement-status i admin Før: 80,1 %  →  Efter: 80,3 %  (Δ +0,2) Grundlag: 24,8 af 30,9 d`
-- `e7317c4 Modul: P0.7b scheduler-adapter — alle jobs Før: 79,8 %  →  Efter: 80,1 %  (Δ +0,3) Grundlag: 24,55 af 30,65 d`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 7/11 — Fejlsøgning er nu en kørsel, ikke en lejlighed
+
+- **`tools/fejlscan.py` er værn nr. 23–24** og leder efter det `php -l` og smoke-suiten ikke kan se: version tre
+  steder (konstant, header, zip-navn), zip mod kilde byte for byte, døde og forældreløse `include`, nye
+  dokumenter uden for `docs/library/README.md`, tokens i sporede filer, `TODO`/`FIXME` og tests der ikke kan
+  fejle. **13 fixtures** i `--selftest` beviser både at hver klasse fanges, og at en ren kasse er grøn — et
+  værn der altid er rødt bliver ignoreret.
+- **Fem fejl fundet og rettet i 7.53.1.** (1) Et access-token i `wp-config.php` blev brugt til at hente data,
+  men fornyelsen skrev til en option som konstanten altid vandt over — nu afvises fornyelsen med konstantens
+  navn. (2) Et indklistret token uden registreret udløb blev kaldt *ugyldigt* i `status`. (3) Et afslag på
+  pin-listen stoppede hele kørslen, selv om de pins der allerede var kortlagt kunne måles. (4) Vinduerne blev
+  målt med `gmdate()` mod rækker skrevet med `current_time('mysql')` — op til ±14 timers forskel; nu `wp_date()`.
+  (5) Engagement-testen endte i `|| true`, kunne aldrig fejle, og læste den forrige tests kø-rækker som
+  snapshot-kolonner (tre PHP-advarsler pr. kørsel).
+- **Fejlsøgning står nu i roadmap'et som fast punkt:** plugin-roadmappet har fået rækken **P3.6**, og
+  `docs/roadmap.md` §10 beskriver hvad der køres, hvornår — og hvad det **ikke** dækker (live-sitet, eksterne
+  API'er, tredjepartskode). Det sidste er det vigtigste: grønne værn betyder ikke «sitet virker».
+- **To roadmap-totaler var forkerte, og det er den slags fejl der overlever.** P0 stod til 5,25 d (regningen:
+  5,95), P1 til 13,30 d (regningen: 15,20 — P1.5 blev tre moduler), og site-linjen i `docs/roadmap.md` §9 til
+  23,8 d (bånde-totalerne summer 24,3). Alle tre linjer følger nu `projektstatus.json`, med årsagen skrevet ind.
+- **`docs/agent-profil.md` var også bagud:** den sagde plugin 74,0 % og site 61,6 %, live-version 7.41.1 i
+  begge, 44 klasser/30 filer og 523 smoke-checks. Nu: 91,0 % og 64,4 %, repo 7.53.1 mod live 7.41.1 (målt 7/11,
+  ikke genmålt siden), 51 klasser/39 filer og 770 checks.
 
 ### 7/11 — Pinterest-analytics: match på link, ikke på titel
 

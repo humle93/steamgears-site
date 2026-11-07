@@ -115,9 +115,24 @@ class SGAP_Pinterest {
         return self::saved_token() !== '' || self::refreshable();
     }
 
-    /** A wp-config.php constant cannot be rotated, so a renewal would write a value nothing reads. */
+    /**
+     * The wp-config.php constants that would swallow a rotated token. Both the refresh
+     * token and the access token are checked: a constant always wins over the option, so
+     * renewal would write a value nothing reads and the site would keep using the old one.
+     */
     public static function constant_locked(): string {
-        return SGAP_Settings::constant_name('pinterest_refresh_token');
+        foreach (['pinterest_refresh_token', 'pinterest_access_token'] as $key) {
+            $constant = SGAP_Settings::constant_name($key);
+            if ($constant !== '') {
+                return $constant;
+            }
+        }
+        return '';
+    }
+
+    /** True when the access token itself comes from wp-config.php and therefore cannot be replaced. */
+    public static function access_constant(): string {
+        return SGAP_Settings::constant_name('pinterest_access_token');
     }
 
     /* ------------------------------------------------------------------ *
@@ -130,8 +145,13 @@ class SGAP_Pinterest {
      * of sending an empty Bearer header and calling the 401 an API problem.
      */
     public static function token(): string {
+        if (self::access_constant() !== '') {
+            return self::saved_token(); // Constant wins over anything stored; it cannot be rotated.
+        }
         $cached = (string) get_option(self::ACCESS, '');
         $expires = (int) get_option(self::EXPIRES, 0);
+        // An unknown expiry (a token pasted by hand) is used until Pinterest refuses it;
+        // treating "no expiry recorded" as expired would throw away a working token.
         if ($cached !== '' && ($expires === 0 || $expires > time() + self::MARGIN)) {
             return $cached;
         }
@@ -323,7 +343,8 @@ class SGAP_Pinterest {
     /** Published Pinterest queue rows inside the window, indexed by id. */
     public static function targets(int $days = self::WINDOW): array {
         global $wpdb;
-        $since = gmdate('Y-m-d H:i:s', time() - max(1, $days) * DAY_IN_SECONDS);
+        // published_at is written with current_time('mysql'), so the window is site time too.
+        $since = wp_date('Y-m-d H:i:s', time() - max(1, $days) * DAY_IN_SECONDS);
         $rows = $wpdb->get_results($wpdb->prepare(
             "SELECT id, angle, external_id, published_at FROM {$wpdb->prefix}sgap_queue
              WHERE channel = 'pinterest' AND status = 'published' AND published_at >= %s
@@ -337,9 +358,9 @@ class SGAP_Pinterest {
         return $out;
     }
 
-    /** The first date Pinterest will report on, never more than WINDOW days back. */
+    /** The first date Pinterest will report on, never more than WINDOW days back (site time). */
     public static function floor_date(): string {
-        return gmdate('Y-m-d', time() - (self::WINDOW - 1) * DAY_IN_SECONDS);
+        return wp_date('Y-m-d', time() - (self::WINDOW - 1) * DAY_IN_SECONDS);
     }
 
     /** A row's window start: its publication day, raised to Pinterest's 90-day floor. */
@@ -446,13 +467,16 @@ class SGAP_Pinterest {
             return $report;
         }
 
+        // A refused listing (missing boards:read, rate limit, outage) must not throw away
+        // the pins already mapped: their analytics may still be readable, and the error is
+        // reported alongside whatever the run managed to collect.
         $scan = self::scan();
         if (is_wp_error($scan)) {
-            $report['errors'][] = $scan->get_error_message();
-            self::record(['ok' => false, 'error' => $scan->get_error_message(), 'report' => $report]);
-            return $report;
+            $report['errors'][] = 'Pin listing: ' . $scan->get_error_message();
+            $report['pins'] = count(self::mapping());
+        } else {
+            $report['pins'] = (int) $scan['pins'];
         }
-        $report['pins'] = (int) $scan['pins'];
 
         $targets = self::targets();
         $map = self::mapping();
@@ -472,7 +496,7 @@ class SGAP_Pinterest {
         $report['matched'] = count($candidates);
         // Oldest snapshot first, so a backlog larger than one run's budget drains fairly.
         usort($candidates, static fn($a, $b) => $a['synced'] <=> $b['synced']);
-        $end = gmdate('Y-m-d');
+        $end = wp_date('Y-m-d');
 
         foreach (array_slice($candidates, 0, max(1, $limit)) as $candidate) {
             $row = $targets[$candidate['queue']];
@@ -511,7 +535,8 @@ class SGAP_Pinterest {
     /** Totals per channel for the window, plus how many snapshots they rest on. */
     public static function summary(int $days = self::WINDOW): array {
         global $wpdb;
-        $since = gmdate('Y-m-d H:i:s', time() - max(1, $days) * DAY_IN_SECONDS);
+        // Matches the clock SGAP_ROI::record_event() writes created_at on.
+        $since = wp_date('Y-m-d H:i:s', time() - max(1, $days) * DAY_IN_SECONDS);
         $marks = implode(',', array_fill(0, count(self::TYPES), '%s'));
         $rows = $wpdb->get_results($wpdb->prepare(
             "SELECT channel, event_type, SUM(value) AS total, COUNT(*) AS rows_count
@@ -582,7 +607,7 @@ class SGAP_Pinterest {
             'access_token_saved' => $cached !== '' || self::saved_token() !== '',
             'refresh_token_saved' => self::refresh_token() !== '',
             'token_from_constant' => self::constant_locked() !== '' ? self::constant_locked() : null,
-            'token_valid' => $cached !== '' && ($expires === 0 || $expires > time()),
+            'token_valid' => ($cached !== '' || self::saved_token() !== '') && ($expires === 0 || $expires > time()),
             'expires_at' => $expires > 0 ? wp_date('Y-m-d H:i:s', $expires) : null,
             'refresh_expires_at' => $refresh_expires > 0 ? wp_date('Y-m-d H:i:s', $refresh_expires) : null,
             'pins_mapped' => count($mapping),

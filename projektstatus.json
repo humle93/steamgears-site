@@ -86,10 +86,10 @@
         {
           "id": "p3",
           "name": "P3 — hygiejne",
-          "done": 2.45,
-          "total": 2.5,
+          "done": 2.7,
+          "total": 2.75,
           "unit": "d",
-          "note": "P3.3 (CI 8.0-8.5 + WP 7.1) udført som S0.3 i site-repoet; P3.2 (REST-tests for /feed og /reposts) og P3.5 (uninstall dækket) i 7.28.0; + 0,1 d CI på main repareret 5/11 (6 gamle zips fjernet, kvalitetsgaten blokerede sitets egne localhost-links, testdata fulgt med backoff/JPEG-preflight/32 abilities): integration 109, admin-tools 49, automation 27 PASS lokalt; 5/11: live-sitet opdateret af agenten via MCP 7.6.0 → 7.33.0 → 7.33.1 (abilities uden input crashede på WP 7.1, rettet i #16); sidste Juno-billede (corset.webp, 404) i guide 699 erstattet af medie 932; 6/11: P3.1 halvt — død metode get_setting_help_link() slettet og 9 usynlige rester fjernet (pinterest_token, instagram_token, tiktok_token, youtube_token, youtube_channel_id, reddit_username, reddit_subreddit, email_test_recipient, ai_mode); de 6 synlige (5 Etsy-felter + labor_rate) venter på ejerens byg-eller-skjul-beslutning; 6/11: Etsy skjult (7.33.4) — de fem Etsy-nøgler afregistreret, Etsy-sektionen fjernet og Etsy-siden mærket manuel import, 4 nye smoke-checks (fra 7/11 booket under P2.4, ikke her); kun labor_rate tilbage (0,05 d); 6/11: P3.4 færdig (7.34.0) — release notes i update-modalen fra ROADMAP'ens changelog med 6 timers cache og escape, 6 nye smoke-checks; P3-summen afstemt til P3.1 0,2 + P3.2 0,5 + P3.3 0,25 + P3.4 0,5 + P3.5 0,25 = 1,7 (Etsy-halvdelen af P3.1 ligger nu under P2.4, hvor roadmappet estimerede den) ; 7/11: P3.3 AI-profiler 0,75 d (7.41.2, includes/profiles.php) — P3 1,95/2,0 → 2,7/2,75 d"
+          "note": "P3.3 (CI 8.0-8.5 + WP 7.1) udført som S0.3 i site-repoet; P3.2 (REST-tests for /feed og /reposts) og P3.5 (uninstall dækket) i 7.28.0; + 0,1 d CI på main repareret 5/11 (6 gamle zips fjernet, kvalitetsgaten blokerede sitets egne localhost-links, testdata fulgt med backoff/JPEG-preflight/32 abilities): integration 109, admin-tools 49, automation 27 PASS lokalt; 5/11: live-sitet opdateret af agenten via MCP 7.6.0 → 7.33.0 → 7.33.1 (abilities uden input crashede på WP 7.1, rettet i #16); sidste Juno-billede (corset.webp, 404) i guide 699 erstattet af medie 932; 6/11: P3.1 halvt — død metode get_setting_help_link() slettet og 9 usynlige rester fjernet (pinterest_token, instagram_token, tiktok_token, youtube_token, youtube_channel_id, reddit_username, reddit_subreddit, email_test_recipient, ai_mode); de 6 synlige (5 Etsy-felter + labor_rate) venter på ejerens byg-eller-skjul-beslutning; 6/11: Etsy skjult (7.33.4) — de fem Etsy-nøgler afregistreret, Etsy-sektionen fjernet og Etsy-siden mærket manuel import, 4 nye smoke-checks (fra 7/11 booket under P2.4, ikke her); kun labor_rate tilbage (0,05 d); 6/11: P3.4 færdig (7.34.0) — release notes i update-modalen fra ROADMAP'ens changelog med 6 timers cache og escape, 6 nye smoke-checks; P3-summen afstemt til P3.1 0,2 + P3.2 0,5 + P3.3 0,25 + P3.4 0,5 + P3.5 0,25 = 1,7 (Etsy-halvdelen af P3.1 ligger nu under P2.4, hvor roadmappet estimerede den) ; 7/11: P3.3 AI-profiler 0,75 d (7.41.2, includes/profiles.php) — P3 1,95/2,0 → 2,7/2,75 d + 0,25 d P3.6 fejlsøgning som fast kørsel (7.53.1): tools/fejlscan.py er værn nr. 23 og 24 og tjekker version mod zip-navn, zip mod kilde byte for byte, døde og forældreløse includes, nye dokumenter uden for docs/library/README.md, tokens i sporede filer, TODO/FIXME og tests der ikke kan fejle (13 fixtures i --selftest, både fejl og en ren kasse). Første kørsel gav fem reelle fund, alle rettet: et access-token i wp-config.php blev overskygget af det roterede token, et indklistret token uden udløb blev kaldt ugyldigt, et afslag på pin-listen stoppede målingen af kendte pins, gmdate() blev sammenlignet med rækker skrevet på sitets ur, og engagement-testen endte i en altid-sand klausul. Samme pas: P0- og P1-totalerne i plugin-roadmappet rettet til 5,95 d og 15,20 d, og site-roadmappets S-linje fra 23,8 til 24,3 d."
         },
         {
           "id": "p0s",
@@ -1168,6 +1168,15 @@
       "after": 90.9,
       "delta": 3.5,
       "basis": "26,05 af 28,65 d (P0 4,65/4,7 · P1 12,7/15,2 · P2 4,75/4,75 · P3 2,45/2,5 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 90.9,
+      "after": 91.0,
+      "delta": 0.1,
+      "basis": "26,3 af 28,9 d (P0 4,65/4,7 · P1 12,7/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25)"
     }
   ]
 }

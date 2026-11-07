@@ -27,8 +27,8 @@ Der er **fem aktive projekter**, alle målt i [`projektstatus.json`](../projekts
 
 | id | Projekt | Status | Enhed |
 | --- | --- | --- | --- |
-| `site` | steamgears.eu — site-optimering | 61,6 % (14,65 af 23,8 d) | developer-dage |
-| `plugin` | Steamgears Autopilot — plugin | 74,0 % (19,9 af 26,9 d) | developer-dage |
+| `site` | steamgears.eu — site-optimering | 64,4 % (15,65 af 24,3 d) | developer-dage |
+| `plugin` | Steamgears Autopilot — plugin | 91,0 % (26,3 af 28,9 d) | developer-dage |
 | `rebrand` | Dark academia-rebrand | 63,0 % (8,5 af 13,5 t) | timer |
 | `seo` | SEO-indholdsproduktion | 62,5 % (5 af 8 guides) | guides |
 | `links` | Døde internlinks | 100 % (39 af 39 links) | links |
@@ -83,12 +83,13 @@ Alt her er målt mod den live side eller læst i kilden. Er noget ændret siden 
 - `/shop/` tager ~5,8 s og ~470 KB; produktside har ~151 KB inline CSS og ~105 scripts.
 - GA4 fyrer **dobbelt** på hvert pageview, så konverteringer kan ikke aflæses sikkert.
 
-**Pluginnet** (`plugins/steamgears-autopilot/`, v7.41.1)
+**Pluginnet** (`plugins/steamgears-autopilot/`, v7.53.1)
 
-- **Version i repo mod live:** begge **7.41.1** (live målt 7/11 med `get_plugins()`) — et
-  plugin-folder kan kun skiftes af WordPress selv, så en release slutter med ejerens *Plugins → Update*-klik,
-  ikke med et push. Status: `docs/roadmap.md` §2b; procedure og efterkontrol: plugin-README §Updates.
-- 44 klasser, 30 PHP-filer, 12.356 linjer (målt 6/11 på 7.41.0); hvert subsystem kan nås fra en rigtig
+- **Version i repo mod live:** repo **7.53.1**, live **7.41.1** (målt 7/11 med `get_plugins()`; ikke genmålt
+  siden, fordi sitet ikke kunne nås efter `managed-wordpress-robots.php`'s parse-fejl) — et plugin-folder kan
+  kun skiftes af WordPress selv, så en release slutter med ejerens *Plugins → Update*-klik, ikke med et push.
+  Status: `docs/roadmap.md` §2b; procedure og efterkontrol: plugin-README §Updates.
+- 51 klasser, 39 PHP-filer, 15.779 linjer (målt 7/11 på 7.53.1); hvert subsystem kan nås fra en rigtig
   indgang (cron, REST, admin-side, ability eller AJAX). Version **7.19.0** tilføjede
   helsides SEO/GEO/AEO-auditten (`includes/site-seo.php`), som erstatter den per-side-optimering der krævede
   ét klik pr. URL. **7.20.0** tilføjede pre-flight-valideringen (`includes/preflight.php`): hver kø-post tjekkes
@@ -100,15 +101,18 @@ Alt her er målt mod den live side eller læst i kilden. Er noget ændret siden 
   (`includes/meta-audit.php`): en læsende gennemgang af titler og metabeskrivelser med de værste poster først.
   **7.24.0** gjorde `utm_campaign` til en parameter:
   indstillingen *Campaign name* plus et `campaign`-felt pr. post i `/queue` og `queue-post`, så en navngivet
-  kampagne kan måles i GA4 ved siden af evergreen-strømmen. 523 smoke-checks, alle grønne.
+  kampagne kan måles i GA4 ved siden af evergreen-strømmen. **7.53.1** tilføjede fejlsøgning som fast kørsel
+  (`tools/fejlscan.py`, værn nr. 23–24) og rettede fem fejl i Pinterest-modulet og dets tests — se
+  `docs/library/fejlsogning-fast-vaern-2026-11-07.md`. **770 smoke-checks, alle grønne.**
 - Kæden virker: generér → godkend → publicér (RSS eller Publer API) → mål.
 - Self-updateren virker: zip i repoet er **byte-identisk** med kilden; 20 versioner på fire dage.
 - 9 AJAX- og 5 admin_post-handlere har capability + nonce; **kun ét `wp_mail`** i hele pluginnet (ugerapport).
-- **Mangler (målt 6/11):** P1.5 platform-analytics (4,0 d), eksternt blokeret af Pinterest-token og Meta-review;
-  P3.1 mangler kun `labor_rate` (ejerbeslutning). Alt det andet er bygget:
+- **Mangler (målt 7/11):** P1.5a (Bluesky/Mastodon) og P1.5b (Pinterest) er bygget — P1.5b er kode-færdig,
+  men **ikke kørt live**, fordi der ikke findes et Pinterest-token; P1.5c (IG-insights) kræver egen
+  konto-token. P3.1 mangler kun `labor_rate` (ejerbeslutning). Alt det andet er bygget:
   fejl-alarmering, kø-udtørrings-alarm, backoff og auditlog (P0.1–P0.5), P1.4 evergreen-recycling (7.41.0),
   Etsy skjult med manuel import (7.33.4), og den døde metode plus de ni usynlige indstillinger er væk.
-- `uninstall.php` rydder 8 tabeller, alle `sgap_%` options/transients og 9 cron-hooks.
+- `uninstall.php` rydder 9 tabeller, alle `sgap_%` options/transients og 12 cron-hooks plus `sgap`-gruppen i Action Scheduler.
 - Cron er WP-Cron på et cachet site → publicering kan blive forsinket (`DISABLE_WP_CRON` detekteres).
 
 **Rebrand**

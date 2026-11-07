@@ -428,10 +428,11 @@ under navigation (**S2.3**) og er nu 0,5 af 0,5 d.
 | P4 | Merchant-schema: fragt og retur på produkter | **Indarbejdet** — ikke udført | [`phase-0-baseline`](library/phase-0-baseline-2026-11-03.md) 3/11: JSON-LD mangler `shippingDetails` og `MerchantReturnPolicy`. Siderne med svarene er live 6/11, og koden ligger klar i [`produkt-schema-fix-2026-11-02.md`](library/produkt-schema-fix-2026-11-02.md) | 0,25 d | **S4.13** |
 | P5 | Afklar dobbelt analytics, før noget ændres | **Lukket 7/11** — målt 6/11, rettet 7/11: kilden var Rank Maths `install_code`, den er slået fra, og der er ét `page_view` igen | Forsiden indlæser **to tag-id'er**: `G-3MYLFKY8MY` (gtag) og `GT-PL9L67B4`. Påstanden »GA4 fyrer dobbelt« fra 2/11 er stadig ikke bevist; et gæt ville ødelægge målingen. Mål to `page_view` i samme session, og fjern først derefter det overskydende id | 0,25 d | **S0.9** |
 
-**Regnskabet går nu op:** S0 2,85 · S1 4,6 · S2 7,55 · S3 3,55 · S4 5,25 = **23,8 d**, præcis det
+**Regnskabet går nu op:** S0 2,85 · S1 4,6 · S2 8,05 · S3 3,55 · S4 5,25 = **24,3 d**, præcis det
 `projektstatus.json` regner. De 0,65 d der tidligere manglede i §0-linjen, er S1's 0,1 d forhåndsvalidering af
-kampagneposterne og S3's 0,55 d PDF-eksport og commit-værn; dertil S2's 0,05 d fra trust-siderne. De står nu i
-tabellerne, så et nyt punkt ikke arver et tal ingen kan genberegne.
+kampagneposterne og S3's 0,55 d PDF-eksport og commit-værn; dertil S2's 0,05 d fra trust-siderne og de 0,5 d
+S2.9 (designsystemet ind i siden, målt 7/11). Linjen stod på 7,55/23,8 d indtil 7/11, altså 0,5 d bagud i
+forhold til bånde-totalerne i §4 — rettet her, så et nyt punkt ikke arver et tal ingen kan genberegne.
 
 ### Hvad målingen ikke beviser
 
@@ -439,3 +440,34 @@ tabellerne, så et nyt punkt ikke arver et tal ingen kan genberegne.
 - Responstiderne er fra denne maskines placering og varierer med cache-tilstand; den kolde forespørgsel tog 9,4 s,
   de varme 2,4–2,6 s. Tallene er til sammenligning før/efter, ikke en Core Web Vitals-måling.
 - Analytics-id'erne er talt i HTML'en, ikke set fyre i en browser; derfor er P5 en måling, ikke en rettelse.
+
+---
+
+## 10. Løbende fejlsøgning (fast punkt fra 7/11 2026)
+
+Fejlsøgning er ikke et punkt der bliver færdigt; det er en kørsel der skal blive ved med at være grøn. Den
+kører derfor som en del af den natlige værn-kørsel (`bash tools/natlige-vaern.sh`, 24 værn) og ikke som noget
+nogen skal huske:
+
+| Hvad | Hvornår | Hvad den fanger |
+| --- | --- | --- |
+| `php -l` på alle PHP-filer | hver kørsel | syntaksfejl i plugins og i `wordpress/` |
+| plugin-smoke (`plugins/tests/smoke.php`) | hver kørsel | adfærd: 770 checks, 0 FAIL, med stubpet HTTP og stubpet `$wpdb` |
+| `tools/fejlscan.py` (nyt 7/11) | hver kørsel | version vs. zip-navn, zip mod kilde (byte), døde/forældreløse `include`, nye dokumenter uden for `docs/library/README.md`, tokens i sporede filer, `TODO`/`FIXME`, tests der ikke kan fejle |
+| `projektstatus.py --check` | hver kørsel | at `projektstatus.json` og de genererede AUTO-blokke stemmer |
+| link-plan, guide-copy, design, schema, PDF-render | hver kørsel | de øvrige aftalte værn, hver med egen selftest |
+
+**Vedligehold:** et nyt modul må ikke kunne komme ind uden at `tools/fejlscan.py` og smoke-suiten stadig er
+grønne, og en rettelse der ændrer plugin-kode skal hæve versionen, så zip-navnet og kilden følges ad (værnet
+fejler ellers). Fund der kræver ejeren — et manglende token, en manglende beslutning — skrives i
+`projektstatus.json` under `blocked_by` i stedet for at ligge i en note.
+
+**Hvad den ikke dækker** (og derfor stadig skal måles i hånden):
+
+- **Live-sitet.** Ingen af værnene ser steamgears.eu. Så længe `managed-wordpress-robots.php` har en parse-fejl
+  på sitet, og sandkassen ikke kan nå det, er enhver live-påstand i `docs/library/` en tidligere måling, ikke en
+  ny. Det gælder også P1.5b's Pinterest-kørsel, som er kode-færdig men aldrig har talt med Pinterest.
+- **Eksterne API'er.** Smoke-suiten stubber HTTP, så et svar der ændrer form (Pinterest `summary_metrics`,
+  Telegram `ok:false`, Task Scheduler) først ses ved en rigtig kørsel.
+- **Tredjeparts-kode.** Temaet, WooCommerce og de øvrige plugins er ikke læst igennem; fejlen i
+  `robots.php` blev fundet fordi den slog sitet ud, ikke fordi noget værn ledte efter den.

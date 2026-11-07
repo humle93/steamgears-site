@@ -1438,7 +1438,11 @@ $run=SGAP_Engagement::refresh();
 check('engagement: refresh follows the two supported channels and leaves the rest alone', $run['targets']===3 && $run['updated']===2 && $run['errors']===[]);
 check('engagement: every queue row is stored once per type', substr_count(implode("\n",$wpdb->log),'INSERT wp_sgap_events')===6 && substr_count(implode("\n",$wpdb->log),'likes')>=2);
 check('engagement: the old snapshot is deleted before the new one is written', substr_count(implode("\n",$wpdb->log),'DELETE FROM wp_sgap_events WHERE queue_id')===2);
-check('engagement: reach is not invented for a protocol that has none', SGAP_Engagement::summary()==[] || true);
+// The previous block left queue rows in $GLOBALS['rows'], which the fake wpdb hands to any
+// query; clear them, or this check reads queue columns as snapshot columns — and it used to
+// end in an always-true clause, so it could not fail at all. tools/fejlscan.py rejects that.
+$GLOBALS['rows']=[];
+check('engagement: no snapshots means an empty summary, not invented zeros', SGAP_Engagement::summary()===[]);
 $GLOBALS['rows']=[['channel'=>'bluesky','event_type'=>'likes','total'=>'12','rows_count'=>'3'],['channel'=>'bluesky','event_type'=>'reposts','total'=>'3','rows_count'=>'3']];
 $sum=SGAP_Engagement::summary();
 check('engagement: summary sums per channel and reports reach as null', ($sum['bluesky']['likes']??null)===12.0 && ($sum['bluesky']['reposts']??null)===3.0 && array_key_exists('reach',$sum['bluesky']) && $sum['bluesky']['reach']===null);
