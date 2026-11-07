@@ -54,9 +54,9 @@ check() { # navn, kommando...
 
 lint_php() {
   local count
-  count="$(find plugins -name '*.php' | wc -l | tr -d ' ')"
+  count="$(find plugins wordpress -name '*.php' | wc -l | tr -d ' ')"
   printf '  linter %s PHP-filer med %s\n' "$count" "$("$PHP_BIN" -r 'echo PHP_VERSION;')"
-  find plugins -name '*.php' -print0 | xargs -0 -n1 "$PHP_BIN" -l
+  find plugins wordpress -name '*.php' -print0 | xargs -0 -n1 "$PHP_BIN" -l
 }
 
 # Rækkefølgen er billig → dyr, så den første fejl ses hurtigt.
@@ -77,6 +77,9 @@ check "link-plan"                           python3 tools/link_plan_check.py
 check "guide-copy-selftest"                  python3 tools/guide_check.py --selftest
 check "guide-copy"                           python3 tools/guide_check.py
 check "samtalepunkter-selftest"              python3 tools/samtalepunkter.py --selftest
+check "designsystem-selftest"                python3 tools/design_check.py --selftest
+check "designsystem"                         python3 tools/design_check.py
+check "designsystem-loader"                  "$PHP_BIN" wordpress/tests/test-design-system.php
 
 # Rendereren fejlede 2/11 på to måder der ikke gav en fejlkode: et sidebrud midt i et afsnit
 # skrev resten af dokumentet uden for papiret (niche-vurderingen blev 20 sider), og glyffer

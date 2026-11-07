@@ -1,6 +1,6 @@
 # design.md — Steamgears' visuelle identitet
 
-**Status:** specifikation. Målt på den live side 5/11-2026. CSS'en ligger i [`css/sg-design-system.css`](css/sg-design-system.css), men er ikke indlæst på sitet endnu. Skrifterne i header-delen er skiftet 6/11 — se §13.
+**Status:** specifikation. Målt på den live side 5/11-2026. CSS'en ligger i [`css/sg-design-system.css`](css/sg-design-system.css) og lægges på siden af `wordpress/mu-plugins/sga-design-system.php` — laget er skrevet og værnet 7/11, men **ikke indlæst på sitet endnu**, se §14. Skrifterne i header-delen er skiftet 6/11 — se §13.
 **Omfatter:** steamgears.eu — temaet `extendable`, template-delene `css/header-dark-clockwork-active.html` og `css/footer-active.html`.
 
 Dokumentet er skrevet som en måling af, hvad der faktisk er på siden i dag, ikke som en ønskeliste. Hvor der står et tal, er det aflæst; hvor der står et token, er det en beslutning, der skal lægges ind i fase 1.
@@ -198,3 +198,41 @@ sløre stavelserne — og på et display-ansigt er det tydeligt.
 arbejdsgangen), klammer 333/333 → 305/305, `@font-face` 33 → 5.
 **Ikke verificeret:** hvordan det ser ud på den live side. Header-delen skal stadig ind i
 WordPress, før en besøgende ser forskellen.
+
+---
+
+## 14. Udført 7/11-2026 — designsystemet som ét lag
+
+`css/sg-design-system.css` er skrevet om fra 275 ubrugte linjer til det lag der bestemmer hele sidens
+overflade, og `wordpress/mu-plugins/sga-design-system.php` lægger det på siden.
+
+**Rækkefølge slår specificitet.** Temaet printer sine `<style>`-blokke i header-template-parten, og
+blok-temaet printer sine globale styles efter dem. Loaderen printer i `wp_footer` (prioritet 999), altså
+efter begge, og vinder derfor uden `!important`. Det er hele grunden til at der er en loader: uden den
+skulle filen slås med ~300 inline-regler i stedet for at ligge ovenpå dem.
+
+**Paletten blev den mørke, ikke pergament.** §3's lyse palette er ikke slået til: den er ikke set i en
+browser, og temaets inline-regler er skrevet mod den mørke flade, så et halvt skift ville give en hybrid
+med umålte kontraster. Pergament-udgaven ligger nederst i CSS-filen som `body.sg-theme--parchment` og kan
+slås til med én klasse, når nogen har set og målt den. Seks farveroller bærer resten.
+
+**Målte kontraster** (WCAG 2.2, `tools/design_check.py`): creme på blek 15,72:1 · creme på panel 15,11:1 ·
+messing-tekst på panel 9,52:1 · messing-tekst på blek 9,91:1 · dæmpet tekst 9,38:1 · blek på
+messing-knap 6,09:1 · messing-linje 6,09:1 · fokusring på blek 12,73:1. Fokusringen på en messing-knap
+måler kun **2,09:1**, så ringen er dobbelt: mørk inderring på messing-flader, lys ring på alt andet.
+
+| | Før | Efter |
+| --- | --- | --- |
+| Fil | 275 linjer, indlæst af intet | 778 linjer, printet sidst på siden |
+| Farveroller | spredt i temaet | 6 tokens med 42 afledte variable |
+| Typografi | 7 trin, ikke brugt | 7 `clamp()`-trin, mål 68 tegn |
+| Fokusring | temaets standard | dobbelt ring, målt på begge flader |
+| Butik | Woo's egne styles | liste, produkt, kurv, kasse, betaling |
+| Tilstande | ingen | `prefers-contrast`, `forced-colors`, reduced motion, print, reflow 900/782/480 px |
+| Værn | ingen | `tools/design_check.py` (12 fixtures) + PHP-harness (9 prøver) |
+
+**Verificeret:** `php -l` rent, 21/21 værn grønne, loaderen printer 778 linjers CSS i footeren, `body`
+får `sg-ui`, kill-switchen fjerner begge dele, og en manglende fil giver en kommentar i stedet for CSS.
+**Ikke verificeret:** laget er ikke på det levende site (ingen WordPress-adgang i sessionen) og er ikke
+set i en browser. Hvordan det lægges på, og hvad der skal kigges efter, står i
+[`library/designsystem-hele-siden-2026-11-07.md`](docs/library/designsystem-hele-siden-2026-11-07.md) §9.

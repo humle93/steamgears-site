@@ -24,7 +24,7 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 | Projekt | Status | Grundlag |
 | --- | --- | --- |
-| **steamgears.eu — site-optimering** | **63,7 %** | 15,15 af 23,8 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 6,95/7,55 · S3 2,5/3,55 · S4 1,4/5,25) |
+| **steamgears.eu — site-optimering** | **64 %** | 15,55 af 24,3 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 7,35/8,05 · S3 2,5/3,55 · S4 1,4/5,25) |
 | **Steamgears Autopilot — plugin** | **76,7 %** | 22,75 af 29,65 d (P0 4,35/4,7 · P1 11,2/15,2 · P2 4,5/7 · P3 2,7/2,75) |
 | **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5) |
 | **SEO-indholdsproduktion** | **62,5 %** | 5 af 8 guides (BATCH 0/3 · COPY 4/4 · CORSET 1/1) |
@@ -47,15 +47,42 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `3a3e010 chore(status): daglig projektstatus 2026-11-07`
+- `1c15f93 Modul: UI moderniseret — alle nøgler på ét sted (7.47.0)`
 - `602566a Modul: evergreen-rotationen — deterministisk rækkefølge (7.46.1)`
 - `a74e310 Modul: S0.2 robots.txt — ejer målt, og et nedbrud jeg selv lavede Før: 63,7 %  →  Efter: 63,7 %  (Δ 0) Grundlag: ingen ændring`
 - `0a45621 chore(status): daglig projektstatus 2026-11-07`
 - `1af6253 Modul: P1.17 — kostpris-import fra Printful (7.46.0)`
-- `e7b163d Modul: P1.16 — shop-værktøjerne uden eget tekstlag (7.45.1) Før: 76,1 %  →  Efter: 76,1 %  (Δ 0) Grundlag: ingen ændring`
-- `d4f1ad6 chore(status): daglig projektstatus 2026-11-07`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 7/11 — hele sidens overflade er nu ét lag, ikke 300 inline-regler
+
+- **Problemet var ikke mangel på CSS, men mangel på rækkefølge.** `css/sg-design-system.css` fandtes i 275
+  linjer og blev **aldrig indlæst af noget**. Temaet bærer sin flade i to base64-kodede template-parts
+  (header 50.348 B / 1.383 linjer med to `<style>`-blokke, footer 4.136 B) plus ~300 inline-regler, mange
+  med `!important` — hver rettelse hidtil blev et nyt lag oven på det forrige.
+- **Beslutningen: ét lag, printet sidst.** Filen er skrevet om til 778 linjer og lægges på siden af
+  `wordpress/mu-plugins/sga-design-system.php`, som printer den i `wp_footer` med prioritet 999 — efter
+  temaets `<head>`-styles og blokkens globale styles. Rækkefølge slår specificitet, så laget ikke skal slås
+  med temaet. Det er hele grunden til at loaderen findes; uden den var filen endnu en taber i en
+  specificitetskrig.
+- **Paletten blev den mørke, ikke pergament.** `design.md` §3's lyse palette er ikke slået til, fordi den
+  ikke er set i en browser og temaets regler er skrevet mod den mørke flade. Den ligger nederst i filen som
+  `body.sg-theme--parchment` — en fravalgt variant med én klasses afstand, ikke en glemt mulighed.
+- **Fælden: fokusringen forsvandt på messing-knapperne.** `outline: 2px solid #F0D27C` måler 12,7:1 på blek
+  og **2,09:1** mod messing-fladen, altså under WCAG's 3:1 netop der hvor brugeren er på vej hen. Ringen er
+  nu dobbelt: mørk inderring på messing, lys ring ellers. Læren er generel — en fokusring skal måles mod
+  **hver** flade den kan lande på, ikke kun mod sidens bund.
+- **Værnet fangede straks min egen fejl.** `tools/design_check.py` afviste filen fordi den krævede
+  `::where(...)` mens CSS'en (korrekt) skriver `:where(...)`; rettelsen var i værnet, ikke i filen. Det er
+  den slags der ellers først bliver opdaget uger senere.
+- **Ikke verificeret, og det skal stå klart:** laget er **ikke** på det levende site og er **ikke** set i en
+  browser. Sessionen har ingen WordPress-adgang (`connect_integration` svarede ikke-tilsluttet, ingen
+  MCP-credential). Det testede er logikken: 21/21 værn grønne, loaderen printer 778 linjers CSS, `body` får
+  `sg-ui`, kill-switchen fjerner begge dele, og en manglende fil giver en HTML-kommentar i stedet for CSS.
+  Sådan lægges det på: `library/designsystem-hele-siden-2026-11-07.md` §9.
 
 ### 7/11 — jeg lagde sitet ned med et mu-plugin, og MCP kunne ikke redde det
 
@@ -309,10 +336,14 @@ statiske blokke; målrettede rettelser i eksisterende markup kan skrives direkte
 
 ## Næste skridt
 
-1. **S2.7 HTML-/scriptbudget** (1,0 d) er det næste ublokerede roadmap-punkt: forsiden er 215.638 B HTML
-   med 33 scripts og 28 inline style-blokke; budgettet er < 100 KB, < 20 scripts og ingen inline blok
-   over 4 KB. Det kræver en beslutning om hvilke plugins der må røres ved (W3TC, Simple Custom CSS/JS,
-   WPCode) — ikke bare en måling.
+1. **S2.9 designsystem: læg laget på sitet og se det** (0,1 d tilbage af 0,5). CSS-filen og loaderen er
+   skrevet og værnet; det der mangler, er at kopiere `css/sg-design-system.css` til `uploads/sga-design/`
+   (eller ind i `mu-plugins/`), kopiere `wordpress/mu-plugins/sga-design-system.php` til
+   `wp-content/mu-plugins/`, og se forsiden, en produktliste, en produktside og kurven i en browser —
+   især fokusringen på messing-knapper, produktgriddet ved 390 px og headeren. Slå fra med
+   `add_filter( 'sga_design_enabled', '__return_false' );` hvis noget brækker.
+2. **S2.7 HTML-/scriptbudget** (1,0 d) er stadig det næste ublokerede roadmap-punkt, men script-loftet
+   kræver ejerens beslutning (chatbot, GLA, klassisk kurv).
 2. De tre manglende guides (SEO 62,5 % → 100 %): copy ligger færdig og verificeret i
    [`library/guides-2026-11-03.md`](library/guides-2026-11-03.md).
 2. ✅ MCP-fornyelsen er bygget ind i pluginnet (7.44.0). Det der mangler, er ejerens godkendelse og de to

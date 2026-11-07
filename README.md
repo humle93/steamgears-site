@@ -11,6 +11,7 @@ design/CSS, backup-data, dokumentation og status.
 | [`docs/library/sitewide-audit-2026-11-03.md`](docs/library/sitewide-audit-2026-11-03.md) | Sitewide audit: prioriterede P0–P2-risici og anbefalede funktioner til WooCommerce-butikken |
 | [`docs/library/deploy-roadmap-2026-11-03.md`](docs/library/deploy-roadmap-2026-11-03.md) | Deployment-roadmap: faser, estimater, porte for backup/rollback og testliste før og efter live |
 | [`docs/roadmap.md`](docs/roadmap.md) | Optimeringsplanen for sitet, S0–S4 med tidestimater og blokeringer |
+| [`design.md`](design.md) | **Den visuelle identitet** — typografi, farver, komponenter og det lag `css/sg-design-system.css` lægger på siden (§14) |
 | [`docs/seo.md`](docs/seo.md) | SEO-regler, GEO-skabelon og måling |
 | [`docs/library/seo-audit-2026-11-02.md`](docs/library/seo-audit-2026-11-02.md) | **Bred SEO-audit 2/11** — score 56,5/100, 21 fund med bevis, roadmap og tid til 100 % (PDF i `reports/seo-audit-2026-11-02.pdf`) |
 | [`docs/projektstatus.md`](docs/projektstatus.md) | Daglig procentstatus pr. projekt, beregnet af `projektstatus.py` |

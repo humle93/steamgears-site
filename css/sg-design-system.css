@@ -1,55 +1,73 @@
 /* ============================================================================
-   Steamgears designsystem — css/sg-design-system.css
-   Kilde: design.md (målt på den live side 5/11-2026).
-   Lægges EFTER css/header-dark-clockwork-active.html, ellers vinder temaets
-   egne regler. Filen er ikke indlæst endnu; den skal enqueues eller indsættes
-   som template-del, præcis som header og footer er.
+   Steamgears — designsystem for hele sitet
+   css/sg-design-system.css  ·  rev. 2 · 2026-11-07
 
-   Rækkefølgen filen forudsætter (design.md §11):
-     1. fonts  →  2. footer-stemmen  →  3. farve-tokens  →  4. spacing/komponenter
+   Kilden til hvordan steamgears.eu ser ud. Filen lægges på sitet af
+   wordpress/mu-plugins/sga-design-system.php, som læser den herfra og printer
+   den efter template-delene, så den vinder over temaets egne regler uden at
+   skulle slås med dem.
 
-   VIGTIGT om messing: temaets header erklærer i dag --sg-brass: #c9963f, som
-   bærer tekst i overskrifter. Denne fil erklærer --sg-brass: #B08D57, som
-   ALDRIG må bære tekst på pergament (2,7:1). Indlæses filen, bliver alle
-   messing-kanter mørkere — det er hensigten, men det er en synlig ændring og
-   skal ske sammen med font-oprydningen, ikke alene.
+   Rækkefølge (design.md §11):  1 typografi ✓  ·  2 stemme  ·  3 tokens ✓
+                                4 afstand/komponenter ✓  ·  5 billeder (ejer)
+
+   Paletten er den mørke, butikken allerede har: blek, messing, creme, vin.
+   Den lyse pergament-udgave fra design.md §3 findes nederst som en fravalgt
+   variant (.sg-theme--parchment) — den er ikke slået til, fordi den ikke er
+   set i en browser endnu, og en palette-kontrast skal måles, ikke ønskes.
+
+   Målte kontraster (WCAG 2.2, tools/design_check.py kontrollerer dem):
+     creme #F2EAD9 på blek #14110E ............... 15,7:1  (krav 4,5)
+     creme på panel #1B1510 ...................... 15,1:1
+     messing-tekst #D8B87A på panel .............. 9,5:1
+     messing-tekst på blek ....................... 9,9:1
+     blek på messing-flade #B08D57 (knap) ........ 6,1:1
+     messing #B08D57 som linje på blek ........... 6,1:1  (krav 3,0)
+     fokus-ring #F0D27C på blek .................. 12,7:1
+     fokus-ring på messing-knap .................. 2,1:1 → derfor dobbelt ring
    ========================================================================= */
 
 /* ---------------------------------------------------------------------------
-   1. TOKENS — fem roller erstatter de 18 hex-værdier
+   1 · TOKENS
+   Seks roller. Ingen ny farve uden at den erstatter en af dem.
    --------------------------------------------------------------------------- */
 :root {
-  --sg-ink: #14110E;          /* blek: brødtekst, mørke flader        */
-  --sg-parchment: #F2EAD9;    /* pergament: lyse flader, sidens bund  */
-  --sg-brass: #B08D57;        /* messing: KUN linjer, rammer, tal     */
-  --sg-brass-text: #7A5C33;   /* messing til tekst: 5,4:1 på pergament */
-  --sg-wine: #6B2B2B;         /* vin: accent, udsolgt, fare           */
+  --sg-ink: #14110E;
+  --sg-surface: #1B1510;
+  --sg-surface-2: #241D18;
+  --sg-on-dark: #F2EAD9;
+  --sg-brass: #B08D57;
+  --sg-brass-text: #D8B87A;
+  --sg-wine: #6B2B2B;
 
-  /* Afledte, ikke nye farver — kun gennemsigtighed af rollen ovenfor. */
+  /* Afledte — kun gennemsigtighed af rollerne ovenfor. */
   --sg-brass-line: rgba(176, 141, 87, .45);
   --sg-brass-wash: rgba(176, 141, 87, .08);
-  --sg-ink-70: rgba(20, 17, 14, .70);
-  --sg-ink-45: rgba(20, 17, 14, .45);
+  --sg-on-dark-muted: #C9B99A;
+  --sg-on-dark-70: rgba(242, 234, 217, .72);
+  --sg-shadow-1: 0 1px 2px rgba(0, 0, 0, .35);
+  --sg-shadow-2: 0 18px 40px -24px rgba(0, 0, 0, .9);
 
-  /* To familier. Begge ligger allerede i temaets fontmappe. */
+  /* Fokus: lys ring på mørkt, mørk ring på messing. Aldrig outline: none. */
+  --sg-focus: #F0D27C;
+  --sg-focus-on-brass: #14110E;
+
   --sg-font-display: "Marcellus", Georgia, "Times New Roman", serif;
   --sg-font-body: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 
-  /* Syv trin. Ingen ottende. */
-  --sg-text-1: 0.75rem;    /* 12 px — etiketter, lovtekst     */
-  --sg-text-2: 0.875rem;   /* 14 px — hjælpetekst, metadata   */
-  --sg-text-3: 1rem;       /* 16 px — brødtekst               */
-  --sg-text-4: 1.25rem;    /* 20 px — indledning, korttitel   */
-  --sg-text-5: 1.625rem;   /* 26 px — underoverskrift         */
-  --sg-text-6: 2.125rem;   /* 34 px — sektionsoverskrift      */
-  --sg-text-7: 2.75rem;    /* 44 px — forsideoverskrift       */
+  /* Syv trin. Flydende mellem mobil og desktop, aldrig uden for skalaen. */
+  --sg-text-1: 0.75rem;
+  --sg-text-2: 0.875rem;
+  --sg-text-3: 1rem;
+  --sg-text-4: clamp(1.125rem, 1.05rem + .35vw, 1.25rem);
+  --sg-text-5: clamp(1.375rem, 1.2rem + .8vw, 1.625rem);
+  --sg-text-6: clamp(1.625rem, 1.3rem + 1.4vw, 2.125rem);
+  --sg-text-7: clamp(2rem, 1.4rem + 2.6vw, 2.75rem);
 
   --sg-leading-1: 1.4;
-  --sg-leading-2: 1.5;
-  --sg-leading-3: 1.6;
-  --sg-leading-tight: 1.2;
+  --sg-leading-2: 1.55;
+  --sg-leading-3: 1.65;
 
-  /* 4 px-grid. Der er ingen 10, 15 eller 20. */
+  /* 4 px-grid */
   --sg-space-1: 4px;
   --sg-space-2: 8px;
   --sg-space-3: 12px;
@@ -61,215 +79,700 @@
   --sg-space-9: 96px;
 
   --sg-radius: 2px;
+  --sg-radius-lg: 6px;
   --sg-line: 1px solid var(--sg-brass-line);
-  --sg-measure: 68ch;      /* maksimal brødtekstbredde */
-  --sg-ease: cubic-bezier(.2, .0, .2, 1); /* ease-out, uden hop */
+  --sg-measure: 68ch;
+  --sg-tap: 48px;
+  --sg-ease: cubic-bezier(.2, 0, .2, 1);
 }
 
 /* ---------------------------------------------------------------------------
-   2. GRUNDTYPOGRAFI
+   2 · GRUNDLAG
+   Sidens bund er mørk, som den var. Teksten er creme, ikke hvid.
    --------------------------------------------------------------------------- */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
 body,
-.wp-block-post-content {
+body.sg-ui {
   font-family: var(--sg-font-body);
   font-size: var(--sg-text-3);
   line-height: var(--sg-leading-3);
-  color: var(--sg-ink);
-  background-color: var(--sg-parchment);
+  color: var(--sg-on-dark);
+  background-color: var(--sg-ink);
+  overflow-wrap: break-word;
 }
 
-h1, h2, h3, h4,
-.sg-hero h1,
+.wp-site-blocks,
+main,
+.entry-content,
+.wp-block-post-content {
+  background: transparent;
+}
+
+h1, h2, h3, h4, h5, h6,
 .entry-title,
-.woocommerce-loop-product__title {
+.wp-block-post-title {
   font-family: var(--sg-font-display);
   font-weight: 400;
   letter-spacing: .01em;
-  color: var(--sg-ink);
+  line-height: 1.2;
+  color: var(--sg-on-dark);
   text-wrap: balance;
+  margin-block: 0 var(--sg-space-3);
 }
 
-h1, .sg-hero h1 { font-size: var(--sg-text-7); line-height: 1.1; }
-h2              { font-size: var(--sg-text-6); line-height: var(--sg-leading-tight); }
-h3              { font-size: var(--sg-text-5); line-height: 1.3; }
-h4              { font-size: var(--sg-text-4); line-height: var(--sg-leading-1); font-weight: 500; }
+h1, .sg-hero h1, .wp-block-post-title { font-size: var(--sg-text-7); line-height: 1.1; }
+h2 { font-size: var(--sg-text-6); }
+h3 { font-size: var(--sg-text-5); line-height: 1.3; }
+h4 { font-size: var(--sg-text-4); font-weight: 500; }
 
-p, li, dd, figcaption {
+p, li, dd, dt, figcaption {
   font-size: var(--sg-text-3);
   line-height: var(--sg-leading-3);
-  max-width: var(--sg-measure);
+  color: var(--sg-on-dark);
 }
 
-small, .sg-meta, .woocommerce-result-count, .price del {
+p, li { max-width: var(--sg-measure); }
+
+small, .sg-meta, time, .woocommerce-result-count, .price del {
   font-size: var(--sg-text-2);
   line-height: var(--sg-leading-2);
-  color: var(--sg-ink-70);
+  color: var(--sg-on-dark-muted);
 }
 
-/* Messing til tekst er 2,7:1 og forbudt — her bruges messing-tekst i stedet. */
+strong, b { color: var(--sg-on-dark); font-weight: 600; }
+
+/* Links: messing-tekst er 8,8:1 på panel. Understregning, ikke kun farve. */
 a,
 .entry-content a,
-.woocommerce-info a {
+.wp-block-post-content a {
   color: var(--sg-brass-text);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
   text-decoration-color: var(--sg-brass-line);
-  text-underline-offset: 2px;
   transition: color 150ms var(--sg-ease), text-decoration-color 150ms var(--sg-ease);
 }
-a:hover { color: var(--sg-ink); text-decoration-color: var(--sg-ink); }
+a:hover { color: var(--sg-on-dark); text-decoration-color: var(--sg-on-dark); }
 
-/* ---------------------------------------------------------------------------
-   3. RYTME OG FLADER (4 px-grid)
-   --------------------------------------------------------------------------- */
-.wp-block-group,
-.entry-content > *,
-.sg-band,
-.sg-shoprow { margin-block-end: var(--sg-space-5); }
-
-.sg-hero-inner,
-.wp-block-group.has-background {
-  padding: var(--sg-space-8) var(--sg-space-5);
+/* Citater og skillerum */
+blockquote {
+  margin: var(--sg-space-5) 0;
+  padding: var(--sg-space-3) 0 var(--sg-space-3) var(--sg-space-5);
+  border-left: 2px solid var(--sg-brass);
+  color: var(--sg-on-dark);
+  font-size: var(--sg-text-4);
+  line-height: var(--sg-leading-2);
 }
 
-.sg-card,
-.sg-shoprow a {
+hr {
+  border: 0;
+  border-top: var(--sg-line);
+  margin: var(--sg-space-7) 0;
+}
+
+img, svg, video { max-width: 100%; height: auto; }
+
+/* ---------------------------------------------------------------------------
+   3 · LAYOUT OG RYTME
+   --------------------------------------------------------------------------- */
+.sg-section,
+.wp-block-group { margin-block-end: var(--sg-space-6); }
+
+.sg-section > :last-child,
+.wp-block-group > :last-child { margin-block-end: 0; }
+
+.sg-wrap,
+.entry-content > .alignwide,
+.wp-block-post-content > .alignwide { max-width: 1180px; margin-inline: auto; }
+
+.sg-prose > * + * { margin-block-start: var(--sg-space-4); }
+.sg-prose h2 { margin-block-start: var(--sg-space-7); }
+.sg-prose h3 { margin-block-start: var(--sg-space-6); }
+.sg-prose ul, .sg-prose ol { padding-inline-start: var(--sg-space-5); }
+.sg-prose li + li { margin-block-start: var(--sg-space-2); }
+
+.sg-lede {
+  font-size: var(--sg-text-4);
+  line-height: var(--sg-leading-2);
+  color: var(--sg-on-dark);
+  max-width: 60ch;
+}
+
+/* Kort: kant, ikke skygge. Kanten er 6,1:1 og kan ses uden farvesyn. */
+.sg-card {
   padding: var(--sg-space-5);
-  background: var(--sg-parchment);
+  background: var(--sg-surface);
   border: var(--sg-line);
-  border-radius: var(--sg-radius);
-}
-
-/* Kort på pergament skal have en kant, ikke en skygge. */
-.sg-card,
-.sg-shoprow a {
+  border-radius: var(--sg-radius-lg);
   box-shadow: none;
-  transition: border-color 150ms var(--sg-ease), transform 150ms var(--sg-ease);
+  transition: border-color 160ms var(--sg-ease), background-color 160ms var(--sg-ease);
 }
-.sg-card:hover,
-.sg-shoprow a:hover { border-color: var(--sg-brass); }
+.sg-card:hover { border-color: var(--sg-brass); }
+.sg-card h3 { margin-block-end: var(--sg-space-2); }
+
+/* Tal og priser stiller op, så de kan sammenlignes. */
+.sg-price, .price, .amount { font-variant-numeric: tabular-nums; }
 
 /* ---------------------------------------------------------------------------
-   4. KNAPPER
-   Messing som FLADE med blek ovenpå er 6,1:1 og lovlig.
-   Messing som tekstfarve er det ikke.
+   4 · KNAPPER OG FORMULARER
+   Primær = messing-flade med blek tekst (6,1:1). Sekundær = linje.
    --------------------------------------------------------------------------- */
-:where(button, .wp-block-button__link, .wp-element-button,
-       .woocommerce a.button, .woocommerce button.button,
-       .woocommerce input.button, input[type="submit"]) {
+.button,
+button,
+input[type="submit"],
+input[type="button"],
+.wp-block-button__link,
+.wp-element-button,
+.woocommerce a.button,
+.woocommerce button.button,
+.woocommerce input.button,
+.woocommerce #respond input#submit,
+.woocommerce a.button.alt,
+.woocommerce button.button.alt,
+.single_add_to_cart_button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--sg-space-2);
+  min-height: var(--sg-tap);
   padding: var(--sg-space-3) var(--sg-space-5);
-  min-height: 44px;                     /* touch- og klikmål */
   font-family: var(--sg-font-body);
   font-size: var(--sg-text-2);
   font-weight: 600;
-  letter-spacing: .04em;
+  line-height: 1.2;
+  letter-spacing: .02em;
   text-transform: none;
+  text-decoration: none;
+  color: var(--sg-ink);
   background: var(--sg-brass);
-  color: var(--sg-ink) !important;
-  border: 1px solid #8E7043;            /* ét trin mørkere end fladen */
+  border: 1px solid #8E7043;
   border-radius: var(--sg-radius);
   box-shadow: none;
-  text-decoration: none;
   cursor: pointer;
-  transition: background-color 150ms var(--sg-ease), border-color 150ms var(--sg-ease);
+  transition: background-color 160ms var(--sg-ease), border-color 160ms var(--sg-ease), color 160ms var(--sg-ease);
 }
-:where(button, .wp-block-button__link, .wp-element-button,
-       .woocommerce a.button, .woocommerce button.button,
-       .woocommerce input.button, input[type="submit"]):hover {
-  background: #9C7C4B;                  /* mørknes, lysnes ikke */
+.button:hover,
+button:hover,
+input[type="submit"]:hover,
+.wp-block-button__link:hover,
+.woocommerce a.button:hover,
+.woocommerce button.button:hover,
+.single_add_to_cart_button:hover {
+  background: #9C7C4B;
   border-color: var(--sg-ink);
-  color: var(--sg-ink) !important;
-}
-
-/* Sekundær: linje i stedet for flade. */
-:where(.button-outline, .btn-outline,
-       .wp-block-button.is-style-outline .wp-block-button__link) {
-  background: transparent !important;
-  border: 1px solid var(--sg-brass) !important;
-  color: var(--sg-brass-text) !important;
-}
-:where(.button-outline, .btn-outline,
-       .wp-block-button.is-style-outline .wp-block-button__link):hover {
-  border-color: var(--sg-ink) !important;
-  color: var(--sg-ink) !important;
-}
-
-/* ---------------------------------------------------------------------------
-   5. PRODUKTKORT — 4:5, ingen ramme om billedet
-   --------------------------------------------------------------------------- */
-.woocommerce ul.products li.product a img,
-.woocommerce ul.products li.product .woocommerce-loop-product__link img {
-  aspect-ratio: 4 / 5;
-  object-fit: cover;
-  width: 100%;
-  height: auto;
-  border: 0;
-  border-radius: var(--sg-radius);
-}
-
-.woocommerce ul.products li.product .woocommerce-loop-product__title {
-  margin-top: var(--sg-space-3);
-  padding: 0;
-  font-family: var(--sg-font-display);
-  font-size: var(--sg-text-4);
-  line-height: var(--sg-leading-1);
   color: var(--sg-ink);
 }
 
-.woocommerce ul.products li.product .price,
-.woocommerce div.product p.price {
-  font-size: var(--sg-text-3);
+/* Sekundær: gennemsigtig med messing-linje. */
+.button.is-style-outline,
+.wp-block-button.is-style-outline .wp-block-button__link,
+.woocommerce a.button:not(.alt):not(.single_add_to_cart_button) {
+  background: transparent;
+  border: 1px solid var(--sg-brass);
   color: var(--sg-brass-text);
-  font-variant-numeric: tabular-nums;
+}
+.button.is-style-outline:hover,
+.wp-block-button.is-style-outline .wp-block-button__link:hover,
+.woocommerce a.button:not(.alt):not(.single_add_to_cart_button):hover {
+  background: var(--sg-brass-wash);
+  border-color: var(--sg-on-dark);
+  color: var(--sg-on-dark);
 }
 
-.woocommerce ul.products li.product .onsale,
-.woocommerce span.onsale {
+button:disabled,
+button[disabled],
+.button.disabled,
+.woocommerce button.button:disabled {
+  background: var(--sg-surface-2);
+  border-color: var(--sg-brass-line);
+  color: var(--sg-on-dark-muted);
+  cursor: not-allowed;
+}
+
+.wp-block-buttons { gap: var(--sg-space-3); }
+
+/* Felter: rigtig label, 16 px tekst (ingen zoom på iOS), 48 px højde. */
+label,
+.wp-block-search__label,
+.woocommerce form .form-row label {
+  display: block;
+  font-size: var(--sg-text-2);
+  font-weight: 500;
+  color: var(--sg-on-dark);
+  margin-block-end: var(--sg-space-2);
+}
+
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="url"],
+input[type="password"],
+input[type="search"],
+input[type="number"],
+input[type="date"],
+select,
+textarea,
+.woocommerce form .form-row input.input-text,
+.woocommerce form .form-row textarea,
+.woocommerce-page form .form-row input.input-text {
+  width: 100%;
+  min-height: var(--sg-tap);
+  padding: var(--sg-space-3) var(--sg-space-4);
+  font-family: var(--sg-font-body);
+  font-size: var(--sg-text-3);
+  line-height: 1.4;
+  color: var(--sg-on-dark);
+  background: var(--sg-surface);
+  border: 1px solid var(--sg-brass-line);
+  border-radius: var(--sg-radius);
+  box-shadow: none;
+}
+textarea { min-height: 120px; }
+
+input::placeholder, textarea::placeholder { color: var(--sg-on-dark-70); }
+
+input:focus,
+select:focus,
+textarea:focus { border-color: var(--sg-brass); }
+
+/* Fejl og succes: ikon-tegn + tekst, aldrig farve alene. */
+.woocommerce-error,
+.woocommerce-message,
+.woocommerce-info,
+.sg-note {
+  display: block;
+  margin-block-end: var(--sg-space-5);
+  padding: var(--sg-space-4) var(--sg-space-5) var(--sg-space-4) var(--sg-space-6);
+  font-size: var(--sg-text-3);
+  line-height: var(--sg-leading-2);
+  color: var(--sg-on-dark);
+  background: var(--sg-surface);
+  border: 1px solid var(--sg-brass-line);
+  border-left-width: 4px;
+  border-radius: var(--sg-radius);
+  position: relative;
+  list-style: none;
+}
+.woocommerce-error { border-left-color: #C4645F; }
+.woocommerce-message { border-left-color: #7FA46B; }
+.woocommerce-info { border-left-color: var(--sg-brass); }
+.woocommerce-error::before,
+.woocommerce-message::before,
+.woocommerce-info::before {
+  position: absolute;
+  left: var(--sg-space-2);
+  top: var(--sg-space-4);
+  width: 20px;
+  text-align: center;
+  font-weight: 700;
+  color: var(--sg-brass-text);
+  background: none;
+}
+.woocommerce-error::before { content: "!"; color: #E39A95; }
+.woocommerce-message::before { content: "✓"; color: #A9C99A; }
+.woocommerce-info::before { content: "i"; }
+.woocommerce-error li + li { margin-block-start: var(--sg-space-2); }
+.woocommerce-error a, .woocommerce-message a, .woocommerce-info a { color: var(--sg-brass-text); }
+
+/* ---------------------------------------------------------------------------
+   5 · HEADER OG NAVIGATION
+   Sticky, kompakt, 48 px trykmål i menuen. Aktuel side markeres med
+   understregning + vægt, ikke kun farve.
+   --------------------------------------------------------------------------- */
+.site-header,
+header.wp-block-template-part {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  padding-block: var(--sg-space-2);
+  background: rgba(20, 17, 14, .94);
+  backdrop-filter: saturate(140%) blur(6px);
+  border-bottom: var(--sg-line);
+}
+
+.sg-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sg-space-2);
+  min-height: var(--sg-tap);
+  text-decoration: none;
+}
+.sg-logo img { width: 44px; height: 44px; }
+.sg-logo .sg-word {
+  font-family: var(--sg-font-display);
+  font-size: 1.125rem;
+  letter-spacing: .06em;
+  color: var(--sg-on-dark);
+  white-space: nowrap;
+}
+.sg-logo:hover .sg-word { color: var(--sg-brass-text); }
+
+.wp-block-navigation-item__content {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--sg-tap);
+  padding-inline: var(--sg-space-2);
+  font-size: var(--sg-text-2);
+  letter-spacing: .04em;
+  color: var(--sg-on-dark);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+}
+.wp-block-navigation-item__content:hover { color: var(--sg-brass-text); }
+
+.wp-block-navigation .current-menu-item > .wp-block-navigation-item__content,
+.wp-block-navigation .current_page_item > .wp-block-navigation-item__content,
+.wp-block-navigation .current-menu-ancestor > .wp-block-navigation-item__content {
+  color: var(--sg-on-dark);
+  font-weight: 600;
+  border-bottom-color: var(--sg-brass);
+}
+
+.wp-block-navigation__submenu-container,
+.wp-block-navigation__responsive-container-content {
+  background: var(--sg-surface);
+  border: var(--sg-line);
+  border-radius: var(--sg-radius-lg);
+  padding: var(--sg-space-2);
+}
+.wp-block-navigation__submenu-container a { min-height: 44px; }
+
+.wp-block-navigation__responsive-container-open,
+.wp-block-navigation__responsive-container-close {
+  min-width: var(--sg-tap);
+  min-height: var(--sg-tap);
+  color: var(--sg-on-dark);
+}
+
+/* Skip-link: første fokuspunkt, synligt når det får fokus. */
+.sg-skip,
+.skip-link.screen-reader-text:focus {
+  position: absolute;
+  left: var(--sg-space-4);
+  top: -100px;
+  z-index: 200;
+  padding: var(--sg-space-3) var(--sg-space-4);
+  font-size: var(--sg-text-2);
+  font-weight: 600;
+  color: var(--sg-ink);
+  background: var(--sg-brass);
+  border-radius: var(--sg-radius);
+  text-decoration: none;
+}
+.sg-skip:focus,
+.skip-link.screen-reader-text:focus { top: var(--sg-space-4); }
+
+/* ---------------------------------------------------------------------------
+   6 · WOOCOMMERCE — LISTE, PRODUKT, KURV, KASSE
+   --------------------------------------------------------------------------- */
+.woocommerce ul.products,
+.wc-block-grid__products,
+.wp-block-post-template.is-layout-grid,
+ul.wc-block-product-template {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(232px, 1fr));
+  gap: var(--sg-space-5);
+  margin: 0 0 var(--sg-space-6);
+  padding: 0;
+  list-style: none;
+}
+
+.woocommerce ul.products li.product,
+.wc-block-grid__product,
+ul.wc-block-product-template > li {
+  width: auto;
+  float: none;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+}
+
+.woocommerce ul.products li.product a img,
+.woocommerce ul.products li.product .woocommerce-loop-product__link img,
+.wc-block-grid__product-image img {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  height: auto;
+  object-fit: cover;
+  border: 1px solid var(--sg-brass-line);
+  border-radius: var(--sg-radius-lg);
+  background: var(--sg-surface);
+  transition: border-color 160ms var(--sg-ease);
+}
+.woocommerce ul.products li.product:hover img,
+.wc-block-grid__product:hover .wc-block-grid__product-image img { border-color: var(--sg-brass); }
+
+/* Titel og pris er to forskellige oplysninger — de skal ikke ligne hinanden. */
+.woocommerce ul.products li.product .woocommerce-loop-product__title,
+.wc-block-grid__product-title {
+  margin: var(--sg-space-3) 0 var(--sg-space-1);
+  padding: 0;
+  font-family: var(--sg-font-display);
+  font-size: var(--sg-text-4);
+  font-weight: 400;
+  line-height: var(--sg-leading-1);
+  color: var(--sg-on-dark);
+}
+.woocommerce ul.products li.product .price,
+.wc-block-grid__product-price {
+  font-size: var(--sg-text-2);
+  font-weight: 600;
+  letter-spacing: .02em;
+  color: var(--sg-brass-text);
+}
+.woocommerce ul.products li.product .price del { color: var(--sg-on-dark-muted); }
+
+/* Kortet skal kunne ses på 232 px uden at knække. */
+.woocommerce ul.products li.product .button { margin-block-start: var(--sg-space-2); }
+
+.woocommerce span.onsale,
+.wc-block-grid__product-onsale {
   background: var(--sg-wine);
-  color: var(--sg-parchment);
+  color: var(--sg-on-dark);
+  border: 1px solid var(--sg-brass-line);
   border-radius: var(--sg-radius);
   font-size: var(--sg-text-1);
+  font-weight: 600;
   letter-spacing: .04em;
+  line-height: 1.4;
   min-height: 0;
+  min-width: 0;
   padding: var(--sg-space-1) var(--sg-space-2);
 }
 
-/* ---------------------------------------------------------------------------
-   6. FOKUS — må ikke fjernes, uanset hvor pænere det ser ud uden
-   --------------------------------------------------------------------------- */
-:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
-  outline: 2px solid var(--sg-brass-text);
-  outline-offset: 2px;
+/* Produktside */
+.woocommerce div.product div.images img {
+  border: 1px solid var(--sg-brass-line);
+  border-radius: var(--sg-radius-lg);
+  background: var(--sg-surface);
+}
+.woocommerce div.product .product_title {
+  font-size: var(--sg-text-6);
+  line-height: 1.15;
+  margin-block-end: var(--sg-space-2);
+}
+.woocommerce div.product p.price,
+.woocommerce div.product span.price {
+  font-size: var(--sg-text-5);
+  color: var(--sg-brass-text);
+  margin-block-end: var(--sg-space-4);
+}
+.woocommerce div.product .woocommerce-product-details__short-description {
+  color: var(--sg-on-dark);
+  max-width: 60ch;
+}
+.woocommerce div.product form.cart {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sg-space-3);
+  margin-block: var(--sg-space-5);
+  padding-block: var(--sg-space-5);
+  border-block: var(--sg-line);
+}
+.woocommerce div.product form.cart .quantity { display: inline-flex; }
+.woocommerce .quantity .qty {
+  width: 88px;
+  min-height: var(--sg-tap);
+  text-align: center;
+}
+.woocommerce div.product form.cart .button { flex: 1 1 220px; }
+
+/* Faner bliver til accordion-sektioner på små skærme. */
+.woocommerce div.product .woocommerce-tabs ul.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sg-space-2);
+  margin: 0 0 var(--sg-space-4);
+  padding: 0;
+  list-style: none;
+  border: 0;
+}
+.woocommerce div.product .woocommerce-tabs ul.tabs::before { display: none; }
+.woocommerce div.product .woocommerce-tabs ul.tabs li {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: 1px solid var(--sg-brass-line);
   border-radius: var(--sg-radius);
+}
+.woocommerce div.product .woocommerce-tabs ul.tabs li a {
+  display: block;
+  min-height: 44px;
+  padding: var(--sg-space-3) var(--sg-space-4);
+  color: var(--sg-on-dark);
+  text-decoration: none;
+}
+.woocommerce div.product .woocommerce-tabs ul.tabs li.active { border-color: var(--sg-brass); }
+.woocommerce div.product .woocommerce-tabs ul.tabs li.active a { font-weight: 600; }
+
+/* Kurv og kasse */
+.woocommerce table.shop_table {
+  width: 100%;
+  border: var(--sg-line);
+  border-radius: var(--sg-radius-lg);
+  border-collapse: separate;
+  border-spacing: 0;
+  color: var(--sg-on-dark);
+}
+.woocommerce table.shop_table th {
+  font-family: var(--sg-font-body);
+  font-size: var(--sg-text-2);
+  font-weight: 600;
+  letter-spacing: .02em;
+  color: var(--sg-on-dark-muted);
+  text-align: left;
+}
+.woocommerce table.shop_table td,
+.woocommerce table.shop_table th { padding: var(--sg-space-3) var(--sg-space-4); border-top: var(--sg-line); }
+.woocommerce table.shop_table tr:first-child th { border-top: 0; }
+
+.woocommerce .cart-collaterals .cart_totals h2 { font-size: var(--sg-text-5); }
+
+/* Samtykke, betaling og ordregennemgang får luft nok til at blive læst. */
+.woocommerce-checkout #payment {
+  background: var(--sg-surface);
+  border: var(--sg-line);
+  border-radius: var(--sg-radius-lg);
+}
+.woocommerce-checkout #payment ul.payment_methods { border-bottom: var(--sg-line); }
+.woocommerce-checkout #payment div.payment_box {
+  background: var(--sg-surface-2);
+  color: var(--sg-on-dark);
+}
+.woocommerce-checkout #payment div.payment_box::before { display: none; }
+
+/* ---------------------------------------------------------------------------
+   7 · FOKUS — 2 px ring med luft, og en mørk inderring så den også ses på messing
+   --------------------------------------------------------------------------- */
+:where(a, button, input, select, textarea, summary, [tabindex], [role="button"]):focus-visible {
+  outline: 2px solid var(--sg-focus);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 1px var(--sg-ink);
+  border-radius: var(--sg-radius);
+}
+/* På messing-flader er den lyse ring 2,1:1 — der vendes rækkefølgen. */
+:where(.button, button, input[type="submit"], .wp-block-button__link, .single_add_to_cart_button):focus-visible {
+  outline-color: var(--sg-focus-on-brass);
+  box-shadow: 0 0 0 4px var(--sg-brass);
 }
 
 /* ---------------------------------------------------------------------------
-   7. BEVÆGELSE — næsten usynlig, og slået helt fra når den skal
+   8 · TILGÆNGELIGHED UD OVER FOKUS
+   --------------------------------------------------------------------------- */
+.screen-reader-text {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+[aria-current="page"] { text-decoration: underline; text-underline-offset: 4px; }
+
+@media (prefers-contrast: more) {
+  :root {
+    --sg-brass-line: rgba(240, 210, 124, .75);
+    --sg-on-dark-muted: #E4D8BC;
+    --sg-brass-text: #F0D27C;
+  }
+  .sg-card, input, select, textarea { border-width: 2px; }
+}
+
+@media (forced-colors: active) {
+  .sg-card, input, select, textarea, .woocommerce table.shop_table { border: 1px solid CanvasText; }
+  .button, button, .wp-block-button__link { border: 1px solid ButtonText; }
+  :where(a, button, input, select, textarea):focus-visible { outline: 3px solid Highlight; }
+}
+
+/* Zoom til 400 % og 320 px bredde må ikke give vandret rul. */
+@media (max-width: 480px) {
+  .woocommerce ul.products,
+  .wc-block-grid__products,
+  ul.wc-block-product-template,
+  .wp-block-post-template.is-layout-grid {
+    grid-template-columns: 1fr !important;
+    gap: var(--sg-space-4) !important;
+  }
+  .wp-block-buttons { flex-direction: column; align-items: stretch; }
+  .wp-block-button__link,
+  .woocommerce div.product form.cart .button,
+  button.single_add_to_cart_button { width: 100%; }
+  .woocommerce table.shop_table { display: block; overflow-x: auto; }
+  .woocommerce div.product .woocommerce-tabs ul.tabs li { flex: 1 1 100%; }
+}
+
+@media (max-width: 782px) {
+  .site-header, header.wp-block-template-part { position: static; }
+  .sg-logo img { width: 36px; height: 36px; }
+  .sg-logo .sg-word { font-size: 1rem; }
+  .entry-content, .wp-block-post-content { padding-inline: var(--sg-space-4); }
+  .woocommerce ul.products { grid-template-columns: 1fr 1fr; }
+}
+
+/* To kolonner i kassen bliver én rækkefølge, ikke en side-om-side. */
+@media (max-width: 900px) {
+  .woocommerce-checkout .col2-set,
+  .woocommerce-account .woocommerce-MyAccount-content { width: 100% !important; float: none !important; }
+  .woocommerce .cart-collaterals .cart_totals { width: 100% !important; float: none !important; }
+}
+
+/* ---------------------------------------------------------------------------
+   9 · BEVÆGELSE — kun farve og kant, og helt fra når brugeren beder om det
    --------------------------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
   *, *::before, *::after {
     animation-duration: .01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: .01ms !important;
-    scroll-behavior: auto !important;
   }
 }
 
 /* ---------------------------------------------------------------------------
-   8. KOMPATIBILITETS-BRO — kun mens oprydningen kører (design.md §11, trin 3)
-   De gamle navne peger videre på de nye roller, så temaet ikke knækker midt i
-   udskiftningen. Blokken skal fjernes til sidst; ellers findes de 18 gamle
-   hex-værdier stadig, bare et andet sted.
-
-   :root {
-     --sg-bg: var(--sg-ink);
-     --sg-panel: var(--sg-ink);
-     --sg-text: var(--sg-parchment);
-     --sg-muted: var(--sg-ink-70);
-     --sg-gold: var(--sg-brass);
-     --sg-gold-light: var(--sg-brass-text);
-     --sg-border: var(--sg-brass-line);
-   }
+   10 · PRINT — politikker og ordrebekræftelse skal kunne læses på papir
    --------------------------------------------------------------------------- */
+@media print {
+  .site-header, footer.wp-block-template-part, .wp-block-navigation,
+  .woocommerce-breadcrumb, .sg-skip, .button { display: none !important; }
+  body { background: #fff; color: #000; font-size: 11pt; }
+  a { color: #000; text-decoration: underline; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 9pt; }
+}
+
+/* ---------------------------------------------------------------------------
+   11 · LYS VARIANT — design.md §3, fravalgt indtil den er set i en browser
+   Slås til med class="sg-theme--parchment" på <body>, ikke ved at ændre tokens.
+   --------------------------------------------------------------------------- */
+body.sg-theme--parchment {
+  --sg-ink: #14110E;
+  --sg-surface: #F2EAD9;
+  --sg-surface-2: #E7DCC6;
+  --sg-on-dark: #14110E;
+  --sg-on-dark-muted: #4A4137;
+  --sg-on-dark-70: rgba(20, 17, 14, .72);
+  --sg-brass-text: #7A5C33;
+  --sg-brass-line: rgba(176, 141, 87, .55);
+  --sg-brass-wash: rgba(176, 141, 87, .10);
+  --sg-focus: #7A5C33;
+  --sg-focus-on-brass: #14110E;
+  background-color: #F2EAD9;
+  color: #14110E;
+}
+body.sg-theme--parchment .site-header,
+body.sg-theme--parchment header.wp-block-template-part {
+  background: rgba(242, 234, 217, .95);
+}
+body.sg-theme--parchment h1,
+body.sg-theme--parchment h2,
+body.sg-theme--parchment h3,
+body.sg-theme--parchment h4 { color: #14110E; }
