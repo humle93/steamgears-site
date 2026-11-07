@@ -47,12 +47,12 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `f5b8187 Modul: P1.22-fejlretning — REST-nedbruddet i 7.58.0 Før: 96,5 % Efter: 96,5 % Δ: 0 Grundlag: ingen ændring`
 - `1ec840b Merge main (S4.10-anmeldelser) — og nedbruddet konstateret overstået`
 - `fb6e015 Sitet svarer igen — og Facebook-nøglen kan først komme på efter Update`
 - `8654be5 S4.10: butikken spørger nu om en anmeldelse — én gang, 14 dage efter levering`
 - `1054691 Værnene hærdet: registeret lemper kun den regel det gælder`
 - `77148a2 P2.6: Facebook-siden kan styres — med direkte publicering som opt-in (7.58.0)`
-- `3d7a3ff Merge main (S0.4-forbehold) ind i S4.12`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
@@ -78,6 +78,12 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
   `/wp-json/`, ikke forsiden.
 - **SEO-missionen er derfor stadig blokeret:** de tre guides kan ikke publiceres (ingen MCP-skrivning), og
   S4.13 kan ikke måles, før REST svarer igen.
+- **Den authenticatede flade er også lukket for agenten** (målt 7/11 17:52 UTC): `/wp-admin/*` redirecter til
+  `wp-login.php`, og både GET og POST dertil — samt `xmlrpc.php` — svarer **455 “Security Incident Detected …
+  Do not retry”** fra Simplys WAF, dvs. før PHP. `admin-ajax.php` uden nonce svarer 400/`0`. Der findes ingen
+  credential i sandkassen, og selv et application password ville ramme den døde REST. **Forsøg derfor ikke
+  wp-login/xmlrpc/admin-ajax igen** — det er boardet, og et genforsøg er hvad blokeringen frabeder. Kun ejerens
+  eget klik i *Plugins → Update* kan installere 7.58.1.
 
 ### 7/11 — Sitet er tilbage, og Facebook venter på to ejerklik
 
