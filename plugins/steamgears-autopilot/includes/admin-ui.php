@@ -81,6 +81,9 @@ class SGAP_UI {
 .sgap table.widefat td,.sgap table.widefat th{padding:9px 10px;vertical-align:middle}
 .sgap .sgap-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
 .sgap .sgap-scroll table{min-width:640px}
+.sgap .sgap-caveat{margin:10px 0 0;padding:6px 0 0 10px;border-left:3px solid var(--brass);color:var(--muted);font-size:12px;line-height:1.5}
+.sgap .sgap-caveats{margin:6px 0 0;padding-left:18px}
+.sgap .sgap-caveats li{margin:0 0 8px;font-size:13px;line-height:1.55;color:#3c434a}
 .sgap .sgap-drafts{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
 .sgap .sgap-draft{background:var(--card);border:1px solid var(--line);border-top:3px solid var(--gold);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:8px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
 .sgap .sgap-draft h3{margin:0;font-size:15px;line-height:1.35}
@@ -346,6 +349,20 @@ class SGAP_UI {
     public static function channel(string $channel): string {
         $icon = self::ICONS[$channel] ?? 'share';
         return '<span class="sgap-chan"><span class="dashicons dashicons-' . esc_attr($icon) . '"></span>' . esc_html($channel) . '</span>';
+    }
+
+    /**
+     * The line under a module's numbers that says what they leave out. Kept short here and
+     * spelled out on the Fejlsøgning page, so the card stays readable and nothing is hidden.
+     */
+    public static function caveat(string $key): void {
+        if (!class_exists('SGAP_Diagnostics')) {
+            return;
+        }
+        $text = SGAP_Diagnostics::caveat($key);
+        if ($text !== '') {
+            echo '<p class="sgap-caveat"><strong>Caveat:</strong> ' . esc_html($text) . '</p>';
+        }
     }
 
     public static function status_pill(string $status): string {

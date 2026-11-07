@@ -465,6 +465,11 @@ class SGAP_Auto {
         if (class_exists('SGAP_Instagram') && ($instagram = SGAP_Instagram::problem()) !== '') {
             $problems[] = $instagram;
         }
+        // The channel lines above describe the state right now. A failure that the next run
+        // fixed is only in the log, and that is the one worth walking back to.
+        if (class_exists('SGAP_Diagnostics') && ($logged = SGAP_Diagnostics::problem()) !== '') {
+            $problems[] = $logged;
+        }
         $rescue = SGAP_Rescue::status();
         if ($rescue['given_up'] > 0) {
             $problems[] = "{$rescue['given_up']} images on another server could not be copied.";

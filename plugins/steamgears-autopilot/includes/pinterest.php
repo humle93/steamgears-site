@@ -573,6 +573,11 @@ class SGAP_Pinterest {
     private static function record(array $data): array {
         $state = array_merge(self::state(), ['ok' => false, 'error' => ''], $data, ['at' => current_time('mysql')]);
         update_option(self::STATE, $state, false);
+        // Same reason as the Instagram module: one error slot is cleared by the next good
+        // run, so the log is the only place a failure survives.
+        if (empty($data['ok']) && (string) ($data['error'] ?? '') !== '' && class_exists('SGAP_Diagnostics')) {
+            SGAP_Diagnostics::log('pinterest', (string) $data['error']);
+        }
         return $state;
     }
 
@@ -682,6 +687,7 @@ class SGAP_Pinterest {
         if ($status['problem'] !== '') {
             echo '<p class="description" style="color:#b32d2e">' . esc_html($status['problem']) . '</p>';
         }
+        SGAP_UI::caveat('pinterest');
         SGAP_UI::card_close();
     }
 

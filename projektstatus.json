@@ -130,9 +130,17 @@
           "total": 0.25,
           "unit": "d",
           "verified": true
+        },
+        {
+          "id": "p1g",
+          "name": "P1.22 — Fejlsøgning i pluginnet og forbehold pr. modul",
+          "done": 0.5,
+          "total": 0.5,
+          "unit": "d",
+          "verified": true
         }
       ],
-      "total": 29.4
+      "total": 29.9
     },
     {
       "id": "rebrand",
@@ -1220,6 +1228,26 @@
       "after": 96.3,
       "delta": 5.1,
       "basis": "28,3 af 29,4 d (P0 4,65/4,7 · P1 14,2/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 96.3,
+      "after": 96.4,
+      "delta": 0.1,
+      "basis": "29,3 af 30,4 d (P0 4,65/4,7 · P1 14,7/15,7 · P2 4,75/4,75 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 96.4,
+      "after": 96.3,
+      "delta": -0.1,
+      "basis": "28,8 af 29,9 d (P0 4,65/4,7 · P1 14,2/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5)",
+      "scope_change": true,
+      "note": "P1.22 blev først bogført både inde i P1's total (15,2 → 15,7) og som eget modul, så de 0,5 d blev talt to gange. Rettet til eget modul alene; faldet er korrektion af dobbelttællingen, ikke tabt arbejde."
     }
   ]
 }

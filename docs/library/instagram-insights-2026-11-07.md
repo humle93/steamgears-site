@@ -64,7 +64,22 @@ for de sidste to år, og hukommelse er den dyreste kilde her:
   værter, fornyelse (URL, lagring, throttle, afvist fornyelse), paginering, fem metric, delvist svar, tomt
   svar, smal fallback, code-190-fornyelse, budget, kanal-afgrænset sletning, opsummering og kortet.
 
-## 5. Verifikation — og hvad der stadig ikke er målt
+## 5. Forbehold
+
+Tallene på kortet er **det Instagram havde rapporteret da vi spurgte**, og de har tre grænser:
+
+- **En metric Instagram ikke har offentliggjort endnu (op til 48 timer) er udeladt, ikke gemt som 0.**
+  Opslaget tælles som *waiting* og prøves igen ved næste kørsel.
+- **Hvert medie rapporterer sine egne livstidstal**, så tabellen er ikke en sum over en periode, og et opslag
+  der er slettet på Instagram forsvinder ud af grundlaget ved næste scanning.
+- **Kun det Instagram selv tæller** står i tabellen. Vores egne `/go/`-klik og ordrer er en anden måling i
+  `sgap_events`, og de to kan ikke lægges sammen.
+
+Forbeholdet står også i pluginnet: under Instagram-kortet og samlet på **Steamgears → Fejlsøgning**, sammen med
+en log over fejl der ellers ville være ryddet af næste kørsel (se
+[fejlsogning-i-pluginnet-2026-11-07.md](fejlsogning-i-pluginnet-2026-11-07.md)).
+
+## 6. Verifikation — og hvad der stadig ikke er målt
 
 | Kontrol | Resultat |
 | --- | --- |
@@ -72,7 +87,7 @@ for de sidste to år, og hukommelse er den dyreste kilde her:
 | `plugins/tests/smoke.php` | **838 PASS / 0 FAIL**, ingen PHP-advarsler |
 | `tools/fejlscan.py` | ingen fund (version, zip, includes, bibliotek, tokens, tests) |
 | `bash tools/natlige-vaern.sh` | **24 af 24 grønne** |
-| zip mod kilde | byte-identisk (7.56.0) |
+| zip mod kilde | byte-identisk (7.56.0 ved udgivelsen; 7.57.0 efter P1.22) |
 
 **Ikke gjort:** der findes ingen Instagram-token i repoet eller i sandkassen, så modulet har aldrig talt med
 Meta. Første rigtige kørsel skal bekræfte tre ting: at `views` faktisk kommer tilbage (og ikke kun `likes`), at

@@ -1823,6 +1823,7 @@ class SGAP_Admin {
         echo '</div><div>';
         self::chat_card();
         SGAP_Auto::health_card();
+        SGAP_Diagnostics::dashboard_card();
         SGAP_Auto::scheduler_card();
         echo '</div></div>';
 

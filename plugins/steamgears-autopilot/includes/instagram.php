@@ -563,6 +563,11 @@ class SGAP_Instagram {
     private static function record(array $data): array {
         $state = array_merge(self::state(), ['ok' => false, 'error' => ''], $data, ['at' => current_time('mysql')]);
         update_option(self::STATE, $state, false);
+        // The state holds one error and it is cleared by the next successful run, which is
+        // how a nightly failure disappears before anyone reads it. The log keeps it.
+        if (empty($data['ok']) && (string) ($data['error'] ?? '') !== '' && class_exists('SGAP_Diagnostics')) {
+            SGAP_Diagnostics::log('instagram', (string) $data['error'], ['host' => self::host()]);
+        }
         return $state;
     }
 
@@ -671,6 +676,7 @@ class SGAP_Instagram {
         if ($status['problem'] !== '') {
             echo '<p class="description" style="color:#b32d2e">' . esc_html($status['problem']) . '</p>';
         }
+        SGAP_UI::caveat('instagram');
         SGAP_UI::card_close();
     }
 

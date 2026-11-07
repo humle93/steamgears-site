@@ -313,6 +313,7 @@ class SGAP_Engagement {
                 . '<td>' . esc_html((string) (int) ($counts['replies'] ?? 0)) . '</td></tr>';
         }
         echo '</tbody></table></div>';
+        SGAP_UI::caveat('engagement');
         SGAP_UI::card_close();
     }
 
