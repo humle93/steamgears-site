@@ -25,7 +25,7 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 | Projekt | Status | Grundlag |
 | --- | --- | --- |
 | **steamgears.eu — site-optimering** | **64,4 %** | 15,65 af 24,3 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 7,35/8,05 · S3 2,5/3,55 · S4 1,5/5,25) |
-| **Steamgears Autopilot — plugin** | **91 %** | 26,3 af 28,9 d (P0 4,65/4,7 · P1 12,7/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25) |
+| **Steamgears Autopilot — plugin** | **91,1 %** | 26,55 af 29,15 d (P0 4,65/4,7 · P1 12,7/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25 · P1E 0,25/0,25) |
 | **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5) |
 | **SEO-indholdsproduktion** | **62,5 %** | 5 af 8 guides (BATCH 0/3 · COPY 4/4 · CORSET 1/1) |
 | **Døde internlinks** | **100 %** | 39 af 39 links (FIX 39/39) |
@@ -47,15 +47,40 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `ed2aec9 Modul: CI-vagt — mål live-tilstanden nu i stedet for at vente på kl. 03 Før: 91,0 % Efter: 91,0 % Δ: 0 Grundlag: ingen ændring`
+- `731c0e9 Modul: P3.6 fejlsøgning — fast scan, fem fejl rettet Før: 90,9 %  →  Efter: 91,0 %  (Δ +0,1) Grundlag: 26,3 af 28,9 d (P0 4,65/4,7 · P1 12,7/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25) Fejlsøgning er nu en kørsel i stedet for en lejlighed: tools/fejlscan.py er værn nr. 23-24 i den natlige kontrol og leder efter det php -l og smoke-suiten ikke kan se — version tre steder, zip mod kilde byte for byte, døde og forældreløse includes, nye dokumenter uden for biblioteksindekset, tokens i sporede filer, TODO/FIXME og tests der ikke kan fejle. 13 fixtures beviser både at hver klasse fanges, og at en ren kasse er grøn.`
 - `cf6e8b3 Modul: P1.5b Pinterest-analytics Før: 87,4 %  →  Efter: 90,9 %  (Δ +3,5) Grundlag: 26,05 af 28,65 d (P0 4,65/4,7 · P1 12,7/15,2 · P2 4,75/4,75 · P3 2,45/2,5 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25)`
 - `a27b054 chore(status): daglig projektstatus 2026-11-07`
 - `95c9106 Modul: P1.19 dashboard-layout — tre sektioner og én Needs you-linje Før: 87,3 %  →  Efter: 87,4 %  (Δ +0,1) Grundlag: 25,05 af 28,65 d`
 - `1619779 chore(status): daglig projektstatus 2026-11-07`
-- `1d3214f Modul: roadmap-bogføring — Etsy afgjort, dobbelttælling fjernet (scope) Før: 80,3 %  →  Efter: 87,3 %  (Δ +7) Grundlag: 24,8 af 28,4 d (P0 4,65/4,7 · P1 11,7/15,2 · P2 4,75/4,75 · P3 2,45/2,5 · P0.7 1/1 · P0.7c 0,25/0,25)`
-- `fb11620 Modul: P0.7c scheduler- og engagement-status i admin Før: 80,1 %  →  Efter: 80,3 %  (Δ +0,2) Grundlag: 24,8 af 30,9 d`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 7/11 — sektionsmønstret blev bredt ud, og en skjult gren kom frem
+
+- **Settings-fanerne åbnede direkte på felt-rækker** uden at sige hvad de afgjorde. Nu har hver fane
+  overskrift + én linje (`SGAP_Setup::TAB_HINTS`, ni faner; Keys har sin egen overskrift), og et
+  smoke-check kræver at hints' nøgler er præcis `TABS` minus `keys` — så en ny fane ikke kan komme
+  til uden at få sit svar med.
+- **Kø-siden var én tabel med en statuskolonne.** »Venter« og »sendt« lå blandet sammen sorteret
+  efter id, så det man skulle handle på lå sammen med historikken. Nu *Waiting* (queued, sending,
+  reminded, pending, approved) og *Done* (published, failed), hver med optælling i overskriften.
+  Ingen SQL-ændring — samme 50 rækker, filtreret i PHP. Øverst en *Held*-linje der genbruger
+  `SGAP_Queue::blocked_message()` i stedet for at opfinde en ny formulering af quiet hours/blackout.
+- **Content Studio** var fire kort i to ens grids med resultatet imellem; nu *Write* og *Fix* med
+  resultatboksene under hver sektion.
+- **Fælden:** `plugins/tests/smoke.php` havde **ingen `mysql2date()`**. Den blev først nødt til at
+  findes, da en kø-række fik en rigtig `scheduled_at` — hver tidligere test-række havde `null`, så
+  datogrenen i tabellen var aldrig blevet kørt. Stubben er tilføjet, og de nye checks bruger en
+  række med både planlagt og publiceret tid. Samme slags hul som 7.46.0's `wp_next_scheduled()`: en
+  test der altid får »tom« svarer grønt uden at have rørt grenen.
+- **Parallelle chats igen:** P1.5b (Pinterest-analytics) og P3.6 (fejlscan) blev pushet mens dette pas
+  kørte, så UI-arbejdet blev rebaseret oven på dem og udgivet som **7.54.0** i stedet for 7.53.0 —
+  versionsnummeret var taget. Tallene her er efter rebasen.
+- **Verificeret:** 770 → **781 PASS**, 0 FAIL. UI'et er stadig **ikke** set i en wp-admin; 7.54.0
+  venter på ejerens *Plugins → Update*-klik.
+- **Bogføring:** P1.20 0,25 d, projektet 28,90 → 29,15 d, 91,0 → 91,1 %.
 
 ### 7/11 — Fejlsøgning er nu en kørsel, ikke en lejlighed
 

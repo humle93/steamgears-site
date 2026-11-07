@@ -114,9 +114,17 @@
           "total": 0.25,
           "unit": "d",
           "verified": true
+        },
+        {
+          "id": "p1e",
+          "name": "P1.20 — Settings, Queue og Studio i sektioner",
+          "done": 0.25,
+          "total": 0.25,
+          "unit": "d",
+          "verified": true
         }
       ],
-      "total": 28.65
+      "total": 29.15
     },
     {
       "id": "rebrand",
@@ -1177,6 +1185,15 @@
       "after": 91.0,
       "delta": 0.1,
       "basis": "26,3 af 28,9 d (P0 4,65/4,7 · P1 12,7/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 91.0,
+      "after": 91.1,
+      "delta": 0.1,
+      "basis": "26,55 af 29,15 d (P0 4,65/4,7 · P1 12,7/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25)"
     }
   ]
 }

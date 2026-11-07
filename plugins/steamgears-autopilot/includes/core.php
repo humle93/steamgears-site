@@ -2100,9 +2100,15 @@ class SGAP_Admin {
     public static function queue(): void {
         global $wpdb;
         self::open('Queue', 'Posts waiting to go out, and what happened to the ones that did.');
-        if (SGAP_Blackout::active() !== null) {
-            echo '<p class="sgap-notice"><strong>Blackout.</strong> ' . esc_html(SGAP_Queue::blocked_message('blackout')) . '</p>';
+
+        // Why nothing is going out right now, in the owner's words, before any table.
+        $blocked = SGAP_Queue::blocked_reason();
+        if ($blocked !== '') {
+            echo '<div class="sgap-attn"><strong>Held</strong>'
+                . SGAP_UI::pill(ucfirst(SGAP_Queue::blocked_message($blocked)), $blocked === 'autopilot_disabled' ? 'bad' : 'warn')
+                . '</div>';
         }
+
         $table = $wpdb->prefix . 'sgap_queue';
         $rows = self::table_exists($table)
             ? $wpdb->get_results("SELECT id, channel, title, status, remind, attempts, scheduled_at, published_at, error FROM {$table} ORDER BY id DESC LIMIT 50")
@@ -2112,7 +2118,38 @@ class SGAP_Admin {
             self::close();
             return;
         }
-        echo '<div class="sgap-card"><div class="sgap-scroll"><table class="widefat striped sgap-qtable"><thead><tr><th>#</th><th>Channel</th><th>Title</th><th>Status</th><th>Scheduled</th><th>Published</th><th>Tracking link</th><th></th></tr></thead><tbody>';
+
+        // Two questions, not one table with a status column: what is about to go out, and what
+        // already did. A row in `sending` is still on its way, so it belongs in the first group.
+        $waiting = [];
+        $finished = [];
+        foreach ($rows as $r) {
+            if (in_array((string) $r->status, ['queued', 'sending', 'reminded', 'pending', 'approved'], true)) {
+                $waiting[] = $r;
+            } else {
+                $finished[] = $r;
+            }
+        }
+
+        SGAP_UI::section('Waiting', count($waiting) === 1 ? 'One post still has to go out.' : count($waiting) . ' posts still have to go out.');
+        if ($waiting) {
+            self::queue_table($waiting);
+        } else {
+            echo '<p class="description">Nothing is waiting. The next post queued shows up here.</p>';
+        }
+
+        SGAP_UI::section('Done', 'Published and failed rows among the last 50 queue entries — the same list the publish log describes in detail.');
+        if ($finished) {
+            self::queue_table($finished);
+        } else {
+            echo '<p class="description">Nothing has gone out yet.</p>';
+        }
+        self::close();
+    }
+
+    /** One queue table. Every action is a small form, so the buttons work without JavaScript. */
+    private static function queue_table(array $rows): void {
+        echo '<div class="sgap-card sgap-qgroup"><div class="sgap-scroll"><table class="widefat striped sgap-qtable"><thead><tr><th>#</th><th>Channel</th><th>Title</th><th>Status</th><th>Scheduled</th><th>Published</th><th>Tracking link</th><th></th></tr></thead><tbody>';
         foreach ($rows as $r) {
             echo '<tr><td data-label="#">' . esc_html($r->id) . '</td><td data-label="Channel">' . SGAP_UI::channel($r->channel) . '</td><td class="sgap-qtitle" data-label="Title">' . esc_html($r->title)
                 . ($r->error ? '<br><small style="color:#b32d2e">' . esc_html($r->error) . '</small>' : '') . '</td><td data-label="Status">'
@@ -2128,7 +2165,6 @@ class SGAP_Admin {
                 . '<button class="button button-small sgap-danger" name="cmd" value="delete">Delete</button></form></td></tr>';
         }
         echo '</tbody></table></div></div>';
-        self::close();
     }
 
     public static function queue_action(): void {
