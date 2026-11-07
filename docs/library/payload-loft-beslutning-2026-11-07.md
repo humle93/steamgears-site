@@ -85,6 +85,11 @@ kurv-scripts på sider uden produkt-UI (`add-to-cart`, `blockUI`, `js-cookie`, `
 `sourcebuster`, `order-attribution`) plus 2 inline-blokke, der kan lægges sammen — det hører med i
 trin 2 som dequeue pr. skabelon.
 
+> **Målt 7/11 (trin 0–2 udført):** indgrebene virkede — forside 51 → **28** scripts og 117.697 → **80.307 B** — men
+> anslaget i tabellen ovenfor holdt ikke: klasse 1 lander på **25–28**, ikke ~26, og `< 20` kan ikke nås, fordi de sidste
+> 5–8 scripts er chatbot, React-parret, GLA og Complianz. Den målte tabel og det reviderede loft (30/45/95/112) står i
+> [`payload-trin-0-2-2026-11-07.md`](payload-trin-0-2-2026-11-07.md).
+
 ## 4. Forslag: loft pr. skabelonklasse
 
 Et enkelt loft for alle otte skabeloner er forkert, fordi markup'en er forskellig: et produktgrid

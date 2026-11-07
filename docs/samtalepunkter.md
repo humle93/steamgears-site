@@ -24,7 +24,7 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 | Projekt | Status | Grundlag |
 | --- | --- | --- |
-| **steamgears.eu — site-optimering** | **62 %** | 14,75 af 23,8 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 6,55/7,55 · S3 2,5/3,55 · S4 1,4/5,25) |
+| **steamgears.eu — site-optimering** | **63,7 %** | 15,15 af 23,8 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 6,95/7,55 · S3 2,5/3,55 · S4 1,4/5,25) |
 | **Steamgears Autopilot — plugin** | **75,7 %** | 21,45 af 28,35 d (P0 4,35/4,7 · P1 9,9/13,9 · P2 4,5/7 · P3 2,7/2,75) |
 | **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5) |
 | **SEO-indholdsproduktion** | **62,5 %** | 5 af 8 guides (BATCH 0/3 · COPY 4/4 · CORSET 1/1) |
@@ -32,14 +32,14 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Åbne blokeringer
 
-- **steamgears.eu — site-optimering** — S2.7's resterende 0,4 d kræver tre ejerbeslutninger (annoncepixels, headerens blok-mini-kurv, loft for produkt/kurv) — målt 7/11; S1.1 Herbarium kræver varianter i Printify; S0.4 5 vanity-301 kræver én Redirection-gruppe (ejer). S2.2 og S2.8 er lukket 6–7/11, S0.9 7/11.
+- **steamgears.eu — site-optimering** — S2.7's script-loft kan ikke naas uden tre nye beslutninger (chatbot ved interaktion, GLA vaek eller flyttet til GTM, klassisk kurv) — maalt 7/11; S1.1 Herbarium kraever varianter i Printify; S0.4 5 vanity-301 kraever en Redirection-gruppe (ejer). S2.2, S2.7-trin og S2.8 er udfoert 6-7/11, S0.9 7/11.
 - **Steamgears Autopilot — plugin** — P1.5 kræver Pinterest-token (401) og Meta-review; P3.1 mangler ejerens labor_rate-beslutning
 - **Dark academia-rebrand** — Printify-adgang
 - **SEO-indholdsproduktion** — Intet eksternt for de tre resterende guides: copy, FAQ, priser og links ligger i docs/library/guides-2026-11-03.md. De otte /go/-id'er 411/475/481/485/497/567 kunne ikke verificeres fra sandkassen (Simplys WAF giver browser-UA en challenge), så nye produktlinks skal måles fra ejerens side eller efter WAF-hvidlistning
 
 ### Næste skridt
 
-- **steamgears.eu — site-optimering** — Svar på de tre spørgsmål i docs/library/payload-loft-beslutning-2026-11-07.md §6 (annoncepixels, header-mini-kurv, klasse 3-loft), derefter trin 0–2 (0,4 d); skriv de tre manglende guides fra den verificerede copy; S1.1 Herbarium kræver varianter i Printify; S0.4 kræver én Redirection-gruppe (ejer)
+- **steamgears.eu — site-optimering** — Vedtag loftet paa det maalte gulv (tekst 30 · lister 45 · produkt 95 · kurv 112) eller bestil trin 3 (klassisk kurv/produkt, 0,75 d); skriv de tre manglende guides fra den verificerede copy; S1.1 Herbarium kraever varianter i Printify; S0.4 kraever en Redirection-gruppe (ejer)
 - **Steamgears Autopilot — plugin** — P3.1 labor_rate (ejer); P1.5 er eksternt blokeret (Pinterest-token + Meta-review); P1.15 er bygget i 7.44.0 og venter kun på ejerens godkendelse og de to MCP-værdier i wp-admin
 - **Dark academia-rebrand** — Batch 4 — mockups (~130 billeder)
 - **SEO-indholdsproduktion** — Skriv de tre manglende guides (mens-steampunk-costume-essentials, steampunk-clothing-three-budgets, womens-steampunk-essentials) fra den verificerede copy — corset-guiden er publiceret 6/11
@@ -47,15 +47,37 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
-- `9893145 Modul: P1.15 — MCP-fornyelsen kører nu i pluginnet (7.44.0) Før: 75,2 %  →  Efter: 75,7 %  (Δ +0,5) Grundlag: 21,45 af 28,35 d (P0 4,35/4,7 · P1 9,9/13,9 · P2 4,5/7 · P3 2,7/2,75)`
+- `de3f1f4 chore(status): daglig projektstatus 2026-11-07`
+- `da254f3 Modul: P1.15 — MCP-fornyelsen kører nu i pluginnet (7.44.0) Før: 75,2 %  →  Efter: 75,7 %  (Δ +0,5) Grundlag: 21,45 af 28,35 d (P0 4,35/4,7 · P1 9,9/13,9 · P2 4,5/7 · P3 2,7/2,75)`
 - `fb787cf chore(status): samtalepunkter opdateret efter CI-vagten`
 - `e5ee7e7 Modul: CI-vagt — 14 fixtures og version læst fra plugin-headeren i live_state Før: 74,9 % Efter: 74,9 % Δ: 0 Grundlag: ingen ændring`
 - `bcfbde4 Modul: CI-vagt — natlig måling af MCP-adgang og AI-profil (live_state) Før: 74,9 % Efter: 74,9 % Δ: 0 Grundlag: ingen ændring`
 - `97f3eeb Modul: S1.5 — alle /go/-links målt efter rewrite-flush Før: 62,0 %  →  Efter: 62,0 %  (Δ +0) Grundlag: ingen ændring`
-- `c59fff7 chore(status): daglig projektstatus 2026-11-07`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 7/11 — S2.7 trin 0–2 udført: 51 → 28 scripts, men loftet på 20 kan ikke nås
+
+- **Fem indgreb, ikke tretten scripts:** emoji-scriptet (2), TikTok-pixelens fire scripts, Kliken-modulet (1),
+  Site Kits Google-login (2) og headerens blok-mini-kurv/-konto (~9) er væk. Woo's seks kurv-scripts loades nu kun
+  på butik, kurv, kasse og konto.
+- **To fælder kostede runder:** TikTok registrerer sit script **inde i renderingen**, og Kliken er et script-modul
+  udenom script-køen — et tidligt `wp_dequeue_script` rammer for sent, så det blev et præcist output-filter på de
+  kendte URLs/ids. Og Woo **hooker mini-kurven ind igen** efter den er fjernet fra template-parten: uden
+  `hooked_block_types`-filteret faldt kun 11 scripts, med det 23.
+- **Google Listings & Ads blev bevidst ikke fjernet.** Dets `AW-18518250875` er den eneste Ads-konvertering tilbage
+  efter S0.9; at fjerne det ville slukke konverteringssporingen uden at nogen bad om det. Derfor lander teksten på
+  28 og ikke 26.
+- **Målt:** forside 117.697 → 80.307 B og 51 → 28 scripts, `/faq/` → 73.818, søgning → 97.796, indlæg → 104.230,
+  produkt → 289.569 (105 → 94), kurv → 336.263 (120 → 111), `/shop/` → 257.065 (54 → 43), kategori → 133.496.
+  HTML-kravet er nu opfyldt på de fire tekstskabeloner; **script-loftet nås ikke på nogen af de otte**.
+- **Loftet skal vedtages på det målte gulv (30/45/95/112)** — eller trin 3 (klassisk kurv/produkt, 0,75 d) bestilles.
+  De sidste 5–8 scripts er chatbot, React-parret, GLA og Complianz, ikke sporingsstøj.
+- **Rollback:** `add_filter( 'sga_payload_trim_enabled', … false … )` pr. indgreb, og backup af header-parten ligger i
+  `wp-content/novamira-sandbox/s2-7-backup-header-part-12.html`.
+- **Ikke verificeret:** hvordan "Add to cart" opfører sig visuelt nu hvor drawer'en er væk — der er ikke kørt browser-test.
+
 
 ### 7/11 — MCP-fornyelsen er flyttet ind i pluginnet (7.44.0)
 

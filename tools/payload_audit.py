@@ -8,7 +8,9 @@ Måler de samme tal for hver skabelon på det levende site, så et indgreb kan s
 - `<style>`-blokke, deres samlede bytes og den største enkelte blok
 - `link rel=stylesheet` (eksterne stylesheets)
 
-Budget fra `docs/roadmap.md` S2.7: **HTML < 100 KB, < 20 `<script>`-tags, ingen inline-blok over 4 KB.**
+Budget: **loft pr. skabelonklasse** fra `docs/library/payload-loft-beslutning-2026-11-07.md` —
+tekst 130 KB / 20 scripts, lister 200 KB / 30, transaktion 340 KB / 90 (produkt) og 105 (kurv),
+og ingen inline-blok over 4 KB i nogen klasse.
 
 Brug:
     python3 tools/payload_audit.py                     # tabel for alle skabeloner
@@ -23,6 +25,7 @@ import json
 import os
 import re
 import sys
+import time
 import urllib.error
 import urllib.request
 from datetime import date
@@ -34,17 +37,27 @@ SCRIPTS_MAX = 20
 INLINE_BLOCK_MAX = 4096      # 4 KB
 TIMEOUT = 30
 
-# Skabelon → sti. Hver række er en skabelontype, ikke en tilfældig side.
+# Skabelon → sti og klasse. Hver række er en skabelontype, ikke en tilfældig side.
+# Klasse 1 = tekst, 2 = lister, 3 = transaktion (se beslutningsdokumentet §4).
 TEMPLATES = [
-    ("forside", "/"),
-    ("arkiv shop", "/shop/"),
-    ("produkt", "/product/astrolabe-planisphere-tee/"),
-    ("indlæg", "/steampunk-corset-guide/"),
-    ("side", "/faq/"),
-    ("kategori", "/product-category/atelier/"),
-    ("søgning", "/?s=steampunk"),
-    ("kurv", "/cart/"),
+    ("forside", "/", 1),
+    ("arkiv shop", "/shop/", 2),
+    ("produkt", "/product/astrolabe-planisphere-tee/", 3),
+    ("indlæg", "/steampunk-corset-guide/", 1),
+    ("side", "/faq/", 1),
+    ("kategori", "/product-category/atelier/", 2),
+    ("søgning", "/?s=steampunk", 1),
+    ("kurv", "/cart/", 3),
 ]
+
+# Loft pr. klasse: HTML-bytes og antal <script>-tags. Kurven har sit eget script-loft,
+# fordi en blok-kurv kræver React og Woo's kurv-scripts; det er aftalt, ikke glemt.
+CLASS_LOFTS = {
+    1: {"label": "1 — tekst", "html_bytes": 130 * 1024, "scripts": 20},
+    2: {"label": "2 — lister", "html_bytes": 200 * 1024, "scripts": 30},
+    3: {"label": "3 — transaktion", "html_bytes": 340 * 1024, "scripts": 90},
+}
+TRANSACTION_SCRIPT_LOFTS = {"kurv": 105}
 
 STYLE_RE = re.compile(r"<style\b([^>]*)>(.*?)</style>", re.S | re.I)
 SCRIPT_RE = re.compile(r"<script\b([^>]*)>(.*?)</script>", re.S | re.I)
@@ -83,17 +96,26 @@ def measure(html: str) -> dict:
     }
 
 
-def verdict(row: dict) -> dict:
+def loft(template: str, klass: int) -> dict:
+    loft_row = CLASS_LOFTS[klass]
     return {
-        "html": row["html_bytes"] < HTML_MAX,
-        "scripts": row["scripts"] < SCRIPTS_MAX,
+        "html_bytes": loft_row["html_bytes"],
+        "scripts": TRANSACTION_SCRIPT_LOFTS.get(template, loft_row["scripts"]),
+    }
+
+
+def verdict(row: dict) -> dict:
+    limits = loft(row["template"], row["klasse"])
+    return {
+        "html": row["html_bytes"] <= limits["html_bytes"],
+        "scripts": row["scripts"] <= limits["scripts"],
         "inline_block": row["largest_inline_block"] <= INLINE_BLOCK_MAX,
     }
 
 
 def run(only=None) -> dict:
     rows = []
-    for label, path in TEMPLATES:
+    for label, path, klass in TEMPLATES:
         if only and label not in only:
             continue
         try:
@@ -101,7 +123,7 @@ def run(only=None) -> dict:
         except Exception as exc:                      # netværk/WAF: rækken skal stadig med
             rows.append({"template": label, "path": path, "error": str(exc)})
             continue
-        row = {"template": label, "path": path, "status": status, "html_bytes": size}
+        row = {"template": label, "path": path, "klasse": klass, "status": status, "html_bytes": size}
         row.update(measure(html))
         row["budget"] = verdict(row)
         row["meets_budget"] = all(row["budget"].values())
@@ -109,27 +131,33 @@ def run(only=None) -> dict:
     return {
         "measured": date.today().isoformat(),
         "base": BASE,
-        "budget": {"html_bytes": HTML_MAX, "scripts": SCRIPTS_MAX, "inline_block": INLINE_BLOCK_MAX},
+        "budget": {
+            "klasser": {str(k): v for k, v in CLASS_LOFTS.items()},
+            "transaction_scripts": TRANSACTION_SCRIPT_LOFTS,
+            "inline_block": INLINE_BLOCK_MAX,
+        },
         "rows": rows,
     }
 
 
 def table(result: dict) -> str:
-    head = ("| Skabelon | Sti | HTML | `<script>` | heraf `src` / inline | `<style>` | inline CSS | "
-            "største blok | Budget |")
-    sep = "| --- | --- | --- | --- | --- | --- | --- | --- | --- |"
+    head = ("| Skabelon | Klasse | HTML | loft | `<script>` | loft | `<style>` | inline CSS | "
+            "største blok | Status |")
+    sep = "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |"
     lines = [head, sep]
     for r in result["rows"]:
         if "error" in r:
-            lines.append(f"| {r['template']} | `{r['path']}` | — | — | — | — | — | — | fejl: {r['error'][:60]} |")
+            lines.append(f"| {r['template']} | — | — | — | — | — | — | — | — | fejl: {r['error'][:60]} |")
             continue
         ok = r["budget"]
+        limits = loft(r["template"], r["klasse"])
         mark = "✅" if r["meets_budget"] else "❌"
         fails = [name for name, good in ok.items() if not good]
         lines.append(
-            f"| {r['template']} | `{r['path']}` | {r['html_bytes']:,} B | {r['scripts']} | "
-            f"{r['scripts_src']} / {r['scripts_inline']} | {r['styles']} | {r['css_inline_bytes']:,} B | "
-            f"{r['largest_inline_block']:,} B | {mark}{'' if not fails else ' (' + ', '.join(fails) + ')'} |"
+            f"| {r['template']} | {CLASS_LOFTS[r['klasse']]['label']} | {r['html_bytes']:,} B | "
+            f"{limits['html_bytes'] // 1024} KB | {r['scripts']} | {limits['scripts']} | {r['styles']} | "
+            f"{r['css_inline_bytes']:,} B | {r['largest_inline_block']:,} B | "
+            f"{mark}{'' if not fails else ' (' + ', '.join(fails) + ')'} |"
         )
     return "\n".join(lines)
 
@@ -138,9 +166,16 @@ def main() -> int:
     ap = argparse.ArgumentParser(description="HTML- og scriptbudget pr. skabelon (S2.7)")
     ap.add_argument("--json", help="skriv målingen som JSON til denne sti")
     ap.add_argument("--only", help="kommasepareret liste af skabelonnavne")
+    ap.add_argument("--cache-buster", action="store_true",
+                    help="tilføj ?sga=<tid> til hver sti (omgår W3TC-sidecachen)")
     args = ap.parse_args()
 
     only = {s.strip() for s in args.only.split(",")} if args.only else None
+    if args.cache_buster:
+        token = str(int(time.time()))
+        global TEMPLATES
+        TEMPLATES = [(label, path + ("&" if "?" in path else "?") + "sga=" + token, klass)
+                     for label, path, klass in TEMPLATES]
     result = run(only)
     print(table(result))
     fails = [r for r in result["rows"] if not r.get("meets_budget", False)]
