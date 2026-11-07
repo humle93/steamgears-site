@@ -49,6 +49,25 @@ require __DIR__.'/../steamgears-autopilot/steamgears-autopilot.php';
 function check($name,$ok){ echo ($ok?'PASS ':'FAIL ')."$name\n"; if(!$ok) $GLOBALS['fail']=1; }
 do_action('init'); do_action('admin_init'); do_action('admin_menu');
 check('install: 9 tables', count($GLOBALS['ddl']??[])===9); check('install: publish log table', str_contains(implode("\n",$GLOBALS['ddl']??[]),'sgap_publish_log')); check('install: cleanup cron', in_array('sgap_daily_cleanup',$GLOBALS['cron']??[])); check('install: /go/ rule + flush', ($GLOBALS['rules'][0]??'')==='^go/([0-9]+)/?$' && !empty($GLOBALS['flushed'])); check('install: secrets not autoloaded', isset($GLOBALS['noauto']['sgap_ai_api_key'])); check('version stored', $opts['sgap_version']===SGAP_VERSION);
+// P3.3 — AI-profiler: persona, værktøjsadgang og access all
+check('profiles: three profiles', count(SGAP_Profiles::all())===3 && isset(SGAP_Profiles::all()['site_admin'], SGAP_Profiles::all()['wp_seo_expert']));
+check('profiles: default is the limited assistant', SGAP_Profiles::id()==='assistant' && !SGAP_Profiles::is_full());
+check('profiles: assistant keeps the chat exclusions', in_array('manage-plugin', SGAP_Profiles::excluded(), true));
+check('profiles: an unknown id never becomes full access', SGAP_Profiles::valid('root')==='assistant');
+SGAP_Settings::set('ai_profile','wp_seo_expert');
+check('profiles: seo profile still refuses update-settings', in_array('update-settings', SGAP_Profiles::excluded(), true) && SGAP_Profiles::access()==='limited');
+check('profiles: seo persona is a WordPress SEO expert', str_contains(SGAP_Profiles::prompt(),'SEO expert'));
+check('profiles: seo boosts the seo category first', in_array('seo', SGAP_Profiles::boost(), true));
+check('profiles: chat system prompt carries the persona', str_contains(SGAP_Chat::system_prompt(),'SEO expert'));
+$GLOBALS['opts']['mwai_options']=['mcp_dynamic_rest'=>false,'mcp_abilities'=>false];
+$r=SGAP_Profiles::activate('site_admin');
+check('profiles: site_admin activates access all', ($r['access']??'')==='all' && get_option('mwai_options')['mcp_dynamic_rest']===true && get_option('mwai_options')['mcp_abilities']===true);
+check('profiles: access all drops the exclusions but keeps the full-access switch shut', SGAP_Profiles::excluded()===['enable-full-access']);
+check('profiles: site_admin persona is a site administrator', str_contains(SGAP_Profiles::prompt(),'site administrator') && str_contains(SGAP_Chat::system_prompt(),'full access'));
+check('profiles: unknown profile is refused', SGAP_Profiles::activate('nope') instanceof WP_Error);
+check('profiles: set-ai-profile switches back to the assistant', (SGAP_AdminTools::set_ai_profile(['profile'=>'assistant'])['profile']??'')==='assistant' && SGAP_Profiles::id()==='assistant');
+check('profiles: the switch is offered in Settings', isset(SGAP_Settings::CHOICE_KEYS['ai_profile']) && in_array('ai_profile', SGAP_Settings::SECTIONS['AI content'], true));
+unset($GLOBALS['opts']['mwai_options']);
 foreach(['steamgears-autopilot','sgap-settings','sgap-queue','sgap-ai','sgap-campaigns','sgap-etsy','sgap-reports','sgap-fullauto','sgap-merchant','sgap-setup','sgap-studio','sgap-chat','sgap-tools','sgap-log'] as $p){ ob_start(); do_action('page_'.$p); $html=ob_get_clean(); check("page $p renders", strlen($html)>20); }
 // Etsy er manuel import: felterne er væk fra indstillingerne, og siden lover ikke en API der ikke findes.
 ob_start(); do_action('page_sgap-settings'); $set_html=ob_get_clean();

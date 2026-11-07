@@ -23,9 +23,24 @@ The whole social autopilot runs inside WordPress (Command Center is retired):
 4. **Measure** – every post links via `/go/<id>/`, so clicks (and WooCommerce
    orders) are counted per channel.
 
-Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.41.0.zip` → Activate. On an existing
+Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.41.2.zip` → Activate. On an existing
 install the same zip arrives through the self-updater (see *Updates*), so an upload is only needed for the
 first install or a recovery.
+
+## AI profiles (7.41.2)
+
+The chat's persona and what it may touch are one setting — *Settings → AI content → AI profile* — and one
+tool, `set-ai-profile`, so the assistant can switch when it is asked to:
+
+| Profile | Who it is | Tools |
+|---|---|---|
+| **Autopilot assistant** (default) | The social autopilot's own assistant | Reads everything; the site-changing tools are withheld |
+| **Site administration** | WordPress and WooCommerce administrator | Every tool the site has — and **access all**: AI Engine's Dynamic REST + Abilities are switched on the moment the profile is chosen, so the whole REST surface is reachable after the MCP client reconnects |
+| **WordPress SEO expert** | Technical and on-page SEO | Everything read-only, plus content, SEO fields, products and media; plugin and settings work is refused |
+
+`enable-full-access` itself stays out of the chat in every profile: the profile is the switch, so the assistant
+cannot quietly change its own access level. Switching away from *Site administration* leaves full REST access as
+it is — turn it off on the same page if you want it off.
 
 ## Run it from Claude
 

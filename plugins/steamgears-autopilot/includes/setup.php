@@ -29,7 +29,7 @@ class SGAP_Setup {
     /** Settings page tabs: id => [label, icon, keys]. */
     const TABS = [
         'basics' => ['Basics', 'admin-home', ['autopilot_enabled', 'full_auto_enabled', 'channels', 'posts_per_day']],
-        'ai' => ['AI & images', 'superhero-alt', ['ai_provider', 'ai_api_key', 'ai_model', 'ai_base_url', 'content_language', 'image_model', 'image_api_key', 'serpapi_key']],
+        'ai' => ['AI & images', 'superhero-alt', ['ai_profile', 'ai_provider', 'ai_api_key', 'ai_model', 'ai_base_url', 'content_language', 'image_model', 'image_api_key', 'serpapi_key']],
         'publishing' => ['Publishing', 'megaphone', ['publish_mode', 'publer_api_key', 'publer_workspace_id', 'publer_pinterest_board', 'quality_gate', 'banned_words', 'dupe_days']],
         'schedule' => ['Schedule & limits', 'clock', ['quiet_start', 'quiet_end', 'blackout_ranges', 'daily_cap', 'batch_size', 'repost_cooldown_days']],
         'evergreen' => ['Evergreen', 'update', ['evergreen_enabled', 'evergreen_after_days', 'evergreen_max_shares', 'evergreen_batch']],

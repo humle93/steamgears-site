@@ -20,8 +20,13 @@ class SGAP_Chat {
     /** Ring buffer of the last calls, so a provider rejection can be read without guessing. */
     const LOG_CACHE = 'sgap_chat_tool_log';
     const LOG_KEEP = 3;
-    /** Abilities the chat may not use: they change the site beyond the autopilot. */
+    /** Abilities the chat may not use under the default profile. */
     const EXCLUDED = ['manage-plugin', 'enable-full-access', 'update', 'run-cron', 'update-settings'];
+
+    /** The current profile's exclusions (SGAP_Profiles); the list above is the default. */
+    public static function excluded(): array {
+        return class_exists('SGAP_Profiles') ? SGAP_Profiles::excluded() : self::EXCLUDED;
+    }
 
     public static function init(): void {
         add_action('admin_menu', [__CLASS__, 'menu'], 20);
@@ -94,14 +99,19 @@ class SGAP_Chat {
         $own = SGAP_Abilities::CATEGORY;
         $site = class_exists('SGAP_MCP_Tools') ? SGAP_MCP_Tools::CATEGORY : '';
         $site_readonly = $site !== '' ? SGAP_MCP_Tools::readonly_names() : [];
+        $excluded = self::excluded();
+        $boost = class_exists('SGAP_Profiles') ? SGAP_Profiles::boost() : [];
+        $full = class_exists('SGAP_Profiles') && SGAP_Profiles::is_full();
         $ranked = [];
         foreach (self::available() as $entry) {
             $name = $entry['short'];
-            if (in_array($name, self::EXCLUDED, true)) {
+            if (in_array($name, $excluded, true)) {
                 continue;
             }
             if ($entry['category'] === $own) {
                 $rank = 1;
+            } elseif ($boost && in_array($entry['category'], $boost, true)) {
+                $rank = 2;
             } elseif ($site !== '' && $entry['category'] === $site) {
                 if (!in_array($entry['short'], $site_readonly, true)) {
                     continue;
@@ -109,6 +119,8 @@ class SGAP_Chat {
                 $rank = 2;
             } elseif ($entry['readonly']) {
                 $rank = 3;
+            } elseif ($full) {
+                $rank = 4; // access all: the write tools are bound too, not only reachable by run-tool
             } else {
                 continue;
             }
@@ -175,7 +187,7 @@ class SGAP_Chat {
             if ($query !== '' && strpos($haystack, $query) === false) {
                 continue;
             }
-            if (in_array($entry['short'], self::EXCLUDED, true)) {
+            if (in_array($entry['short'], self::excluded(), true)) {
                 continue;
             }
             $hits[] = ['name' => $entry['name'], 'category' => $entry['category'], 'readonly' => $entry['readonly'], 'description' => $entry['description']];
@@ -211,7 +223,7 @@ class SGAP_Chat {
             if ($want !== $entry['name'] && $want !== $entry['short']) {
                 continue;
             }
-            if (in_array($entry['short'], self::EXCLUDED, true)) {
+            if (in_array($entry['short'], self::excluded(), true)) {
                 return ['error' => "The chat may not use {$entry['name']}."];
             }
             if (!method_exists($entry['ability'], 'execute')) {
@@ -378,15 +390,23 @@ class SGAP_Chat {
             . 'costumes, accessories and DIY guides. You help the site owner run the social media autopilot: the AI writes drafts for site '
             . 'pages, the owner approves them, approved posts go into a queue and are released every 15 minutes (quiet hours and a daily cap apply) '
             . 'to per-channel RSS feeds that Publer auto-posts from (or straight to Publer on its API plan); clicks and orders are tracked per channel. '
-            . 'Use the tools to look things up and to act instead of guessing. The site tools can read posts, products, media, plugins, cron '
-            . 'and options (never credentials) — reading is always allowed; changing a post, a product or an option happens on the site\'s MCP '
-            . 'surface, not here, so say what you would change and let the owner do it. You cannot change this plugin\'s settings yourself, and you must '
-            . 'never guess at a model name for the AI provider: name the setting and the new value and let the owner write it on the Settings page. '
+            . 'Use the tools to look things up and to act instead of guessing. ' . self::profile_prompt()
             . 'Only a subset of the site\'s abilities is bound here; when you '
             . 'are unsure whether a tool exists, call find-tools first, describe-tool for its arguments, and run-tool to run it by name. Before deleting anything, rejecting drafts in bulk or '
             . 'changing settings, say what you are about to do and ask, unless the owner already asked for exactly that. Never reveal API keys. '
             . 'Answer in the language the owner writes in (usually Danish), short and practical, with Markdown lists where they help. '
             . 'Site time now: ' . wp_date('Y-m-d H:i (l)') . '.';
+    }
+
+    /** Persona plus what this profile may change; the default keeps the original wording. */
+    public static function profile_prompt(): string {
+        if (!class_exists('SGAP_Profiles')) {
+            return 'The site tools can read posts, products, media, plugins, cron and options (never credentials) — reading is always '
+                . 'allowed; changing a post, a product or an option happens on the site\'s MCP surface, not here, so say what you '
+                . 'would change and let the owner do it. ';
+        }
+        $parts = array_filter([SGAP_Profiles::prompt(), SGAP_Profiles::note()]);
+        return $parts ? implode(' ', $parts) . ' ' : '';
     }
 
     public static function history(): array {

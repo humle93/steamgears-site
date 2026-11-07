@@ -96,6 +96,12 @@ class SGAP_AdminTools {
                 'Switches on AI Engine\'s "Dynamic REST" MCP module (and Abilities), which exposes the whole WordPress REST API (posts, pages, media, users, settings, plugins, WooCommerce, ...) as MCP tools. Takes effect when the MCP connection is reopened. enabled=false turns it off again.',
                 ['enabled' => ['type' => 'boolean', 'default' => true]],
                 [], [__CLASS__, 'enable_full_access'], false, true, false
+            ],
+            'set-ai-profile' => [
+                'Switch the AI profile',
+                'Switches the AI Chat between its profiles: assistant (autopilot only), site_admin (site administration — the chat may use every tool, and AI Engine\'s full REST access is switched on) and wp_seo_expert (WordPress SEO — content, SEO fields, products and media; no ops). Switching to site_admin is what activates access all; switching away does not turn it off again.',
+                ['profile' => ['type' => 'string', 'enum' => ['assistant', 'site_admin', 'wp_seo_expert']]],
+                ['profile'], [__CLASS__, 'set_ai_profile'], false, true, false
             ]
         ];
     }
@@ -520,6 +526,16 @@ class SGAP_AdminTools {
             'ai_engine_mcp' => $mcp,
             'autopilot_version' => SGAP_VERSION
         ];
+    }
+
+    /* ---- AI profile ---- */
+
+    /** @return array|WP_Error */
+    public static function set_ai_profile($input = null) {
+        if (!class_exists('SGAP_Profiles')) {
+            return new WP_Error('sgap_no_profiles', 'The profile layer is not loaded.');
+        }
+        return SGAP_Profiles::activate(sanitize_key((string) ($input['profile'] ?? '')));
     }
 
     /* ---- AI Engine full access ---- */

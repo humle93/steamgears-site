@@ -2,7 +2,7 @@
 /**
 * Plugin Name: Steamgears Autopilot
 * Description: Premium multichannel growth autopilot for Steamgears.eu.
-* Version: 7.41.1
+* Version: 7.41.2
 * Requires at least: 6.4
 * Requires PHP: 8.0
 * Author: Steamgears.eu
@@ -26,7 +26,7 @@ if (defined('SGAP_VERSION')) {
     return;
 }
 
-define('SGAP_VERSION', '7.41.1');
+define('SGAP_VERSION', '7.41.2');
 define('SGAP_FILE', __FILE__);
 
 require_once __DIR__ . '/includes/admin-ui.php';
@@ -50,6 +50,7 @@ require_once __DIR__ . '/includes/keycheck.php';
 require_once __DIR__ . '/includes/rss.php';
 require_once __DIR__ . '/includes/updater.php';
 require_once __DIR__ . '/includes/admin-tools.php';
+require_once __DIR__ . '/includes/profiles.php';
 require_once __DIR__ . '/includes/chat.php';
 require_once __DIR__ . '/includes/studio.php';
 require_once __DIR__ . '/includes/site-seo.php';

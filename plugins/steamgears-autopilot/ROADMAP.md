@@ -1,9 +1,9 @@
 # Steamgears Autopilot — audit, roadmap and effort estimates
 
-_Last audited: 2026-11-01 · audit was of **7.15.0** (`ab676db` on `main`); current release **7.41.0**, and
+_Last audited: 2026-11-01 · audit was of **7.15.0** (`ab676db` on `main`); current release **7.41.2**, and
 **7.22.0 is what steamgears.eu runs** (measured 2026-11-02 after the update click, with `wp_list_plugins`
 and `steamgears-autopilot/status`; see `docs/roadmap.md` §2b) — the zip that waits for that click is
-**7.41.0** · update this file in the same commit as any release._
+**7.41.2** · update this file in the same commit as any release._
 
 This is the working roadmap for `plugins/steamgears-autopilot`. It answers three questions: does every
 function in the plugin actually do something, what is missing before the plugin can truly run unattended,
@@ -13,7 +13,7 @@ and how long each missing piece takes.
 
 ## 0. Short version
 
-- **44 classes, 30 PHP files, 12.356 lines** (measured 6/11 2026 on 7.41.0). Every subsystem is reachable
+- **45 classes. 33 PHP files. 12.706 lines** (measured 7/11 2026 on 7.41.2). Every subsystem is reachable
   from a real entry point (cron, REST, admin page, ability or AJAX); the last dead method,
   `SGAP_Admin::get_setting_help_link()`, was deleted in 7.33.3.
 - **1 setting is registered but never read** (down from 17). Nine invisible leftovers were removed in

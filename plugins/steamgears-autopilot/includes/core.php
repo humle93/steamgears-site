@@ -67,6 +67,7 @@ class SGAP_Install {
         'sgap_alert_dry_days' => 2,
         'sgap_audit_keep_days' => 90,
         'sgap_dupe_days' => 30,
+        'sgap_ai_profile' => 'assistant',
         'sgap_articles_per_week' => 0,
         'sgap_rescue_hosts' => 'steamgears.juno.page',
         'sgap_evergreen_enabled' => 'no',
@@ -350,14 +351,15 @@ class SGAP_Settings {
         'publish_mode' => ['rss' => 'RSS feeds (Publer Professional)', 'api' => 'Publer API (Publer Business)'],
         'ai_provider' => ['anthropic' => 'Anthropic (Claude)', 'aimlapi' => 'AIMLAPI (Claude and 300+ other models)', 'openai_compatible' => 'Other OpenAI-compatible API (OpenAI, OpenRouter, ...)'],
         'quality_gate' => ['block' => 'Block — keep the post out of the queue until it is fixed', 'warn' => 'Warn — queue it and report what is wrong', 'off' => 'Off — do not check'],
-        'alert_mode' => ['immediate' => 'Immediate — one mail per failed post, plus one when the queue runs dry', 'daily' => 'Daily digest — one mail a day from the self-check', 'off' => 'Off — the dashboard still shows the problems']
+        'alert_mode' => ['immediate' => 'Immediate — one mail per failed post, plus one when the queue runs dry', 'daily' => 'Daily digest — one mail a day from the self-check', 'off' => 'Off — the dashboard still shows the problems'],
+        'ai_profile' => ['assistant' => 'Autopilot assistant — drafts, queue and results', 'site_admin' => 'Site administration — full access, everything on the site', 'wp_seo_expert' => 'WordPress SEO expert — content and SEO, no ops']
     ];
 
     /** Shown in the settings page. Keys not listed here stay registered for older data but are unused. */
     const SECTIONS = [
         'General' => ['autopilot_enabled','full_auto_enabled','daily_cap','batch_size','quiet_start','quiet_end','blackout_ranges','quality_gate','banned_words','dupe_days','utm_campaign','command_center_url'],
         'Publer' => ['publish_mode','publer_api_key','publer_workspace_id','publer_pinterest_board','channels','bluesky_handle','bluesky_app_password','mastodon_instance','mastodon_token','mastodon_limit','telegram_bot_token','telegram_chat_id'],
-        'AI content' => ['ai_provider','ai_api_key','ai_model','ai_base_url','posts_per_day','content_language','locale_source','locales','image_model','image_api_key','serpapi_key'],
+        'AI content' => ['ai_profile','ai_provider','ai_api_key','ai_model','ai_base_url','posts_per_day','content_language','locale_source','locales','image_model','image_api_key','serpapi_key'],
         'Economics' => ['labor_rate','monthly_budget','target_roi','winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max'],
         'Evergreen' => ['evergreen_enabled','evergreen_after_days','evergreen_max_shares','evergreen_batch'],
         'Alerts and log' => ['alert_mode','alert_email','alert_dry_days','audit_keep_days'],
@@ -370,6 +372,7 @@ class SGAP_Settings {
         'evergreen_max_shares' => 'Default budget per page: how many recycled posts it may produce. A page can override it in the editor, and 0 there means this number.',
         'evergreen_batch' => 'How many evergreen pages may be recycled per day, each on its own channel in rotation. 1 keeps the queue balanced; the button on the Evergreen page can recycle more at once.',
         'command_center_url' => 'Address of your Steamgears Command Center dashboard, e.g. https://cc.example.com. Adds a Log ind button to the dashboard. Empty = no button.',
+        'ai_profile' => 'Who the AI Chat is and what it may touch. Autopilot assistant: drafts, queue and results, with the site-changing tools withheld. Site administration: every tool the site has, and AI Engine full REST access is switched on when the profile is chosen. WordPress SEO expert: content, SEO fields, products and media, with no plugin or settings work. Switching away from site administration does not turn full REST access off — that is the switch below it.',
         'dupe_days' => 'How far back an identical post blocks a new one: same channel, destination and title. 30 days by default, 0 = the whole history. A post that is still queued always blocks, however old it is.',
         'locale_source' => 'The language the source posts are written in. Every other language in the list gets its own translated caption.',
         'locales' => 'Comma-separated languages, e.g. da,sv,de. A queued post also queues one translated caption per language, linking to that language\'s version of the page (WPML or Polylang). Languages without a translated page are reported, not posted. Needs an AI API key.',
