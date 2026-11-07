@@ -65,6 +65,7 @@ class SGAP_Install {
         'sgap_alert_mode' => 'immediate',
         'sgap_alert_email' => '',
         'sgap_alert_dry_days' => 2,
+        'sgap_channel_caps' => '',
         'sgap_audit_keep_days' => 90,
         'sgap_dupe_days' => 30,
         'sgap_ai_profile' => 'assistant',
@@ -342,7 +343,7 @@ class SGAP_Settings {
     const TEXT_KEYS = [
         'publer_workspace_id','publer_pinterest_board','channels','ai_model','ai_base_url','image_model','content_language','rescue_hosts',
         'telegram_chat_id',
-        'alert_email',
+        'alert_email','channel_caps',
         'blackout_ranges','banned_words','utm_campaign','bluesky_handle','mastodon_instance',
         'locale_source','locales','command_center_url'
     ];
@@ -362,7 +363,7 @@ class SGAP_Settings {
         'AI content' => ['ai_profile','ai_provider','ai_api_key','ai_model','ai_base_url','posts_per_day','content_language','locale_source','locales','image_model','image_api_key','serpapi_key'],
         'Economics' => ['labor_rate','monthly_budget','target_roi','winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max'],
         'Evergreen' => ['evergreen_enabled','evergreen_after_days','evergreen_max_shares','evergreen_batch'],
-        'Alerts and log' => ['alert_mode','alert_email','alert_dry_days','audit_keep_days'],
+        'Alerts and log' => ['alert_mode','alert_email','alert_dry_days','channel_caps','audit_keep_days'],
         'Google Feed' => ['merchant_feed_secret']
     ];
 
@@ -415,6 +416,7 @@ class SGAP_Settings {
         'alert_mode' => 'Immediate: a mail the moment a post gives up after three attempts, and one when the queue has less than the warning level left. Daily: the same information collected into one mail after the daily self-check. Off: nothing.',
         'alert_email' => 'Where alerts go. Empty = the site admin address.',
         'alert_dry_days' => 'Warn when the queue has fewer days of posts left than this, measured as queued posts divided by the daily cap. 0 = never warn.',
+        'channel_caps' => 'Optional cap per channel, one per line or comma-separated: pinterest=2, facebook=3. Each channel then gets its own runway, and a channel with a cap warns when its own queue runs below the warning level — a healthy total can hide a channel that is about to stop. A channel without a cap is measured against Max posts per day.',
         'audit_keep_days' => 'How long the publish log is kept: one row per attempt, with channel, HTTP status, response and who started it. 0 = keep everything.',
         'rescue_hosts' => 'Images on these servers are copied into your media library and every link is rewritten (comma-separated).',
         'utm_campaign' => 'The campaign name every link from this site carries as utm_campaign: set it once per campaign (e.g. clockwork_punk_2026_11) and GA4 can tell campaigns apart. A single post can override it with its own campaign. Letters, digits, - and _ only; empty = steamgears_premium_evergreen. Posts queued before the change keep the value they were queued with.'

@@ -23,7 +23,7 @@ The whole social autopilot runs inside WordPress (Command Center is retired):
 4. **Measure** – every post links via `/go/<id>/`, so clicks (and WooCommerce
    orders) are counted per channel.
 
-Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.41.2.zip` → Activate. On an existing
+Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.42.0.zip` → Activate. On an existing
 install the same zip arrives through the self-updater (see *Updates*), so an upload is only needed for the
 first install or a recovery.
 
@@ -580,7 +580,9 @@ unattended:
 
 - A post that fails is retried with backoff (5 → 15 → 45 minutes) and then stays `failed` in the queue.
   Settings → Alerts mails you when that happens and when the queue is running dry; `daily` mode collects
-  both into one digest after the self-check.
+  both into one digest after the self-check. Give a channel its own cap (`channel_caps`, e.g.
+  `pinterest=2, facebook=3`) and it gets its own runway, so a quiet channel is named even when the total
+  looks healthy.
 - Every attempt is also written to the **Publish log**: channel, outcome, HTTP status, a response excerpt and
   the actor (cron, admin, REST, WP-CLI). The queue shows the current state; the log keeps the history the
   `error` column overwrites. Rows are kept for `audit_keep_days` (default 90, `0` = forever) and pruned by

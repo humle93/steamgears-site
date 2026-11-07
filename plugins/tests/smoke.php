@@ -41,7 +41,7 @@ class WP_REST_Request implements ArrayAccess{ function __construct(public array 
  function offsetGet($k):mixed{return $this->p[$k]??null;} function offsetExists($k):bool{return isset($this->p[$k]);} function offsetSet($k,$v):void{} function offsetUnset($k):void{} }
 function wp_next_scheduled($h){return false;} function wp_schedule_event(...$a){$GLOBALS['cron'][]=$a[2];} function flush_rewrite_rules($h=true){$GLOBALS['flushed']=1;} function add_rewrite_rule(...$a){$GLOBALS['rules'][]=$a[0];} function wp_set_option_autoload_values($a){$GLOBALS['noauto']=$a;}
 class W{ public $prefix='wp_'; public $posts='wp_posts'; public $postmeta='wp_postmeta'; public $options='wp_options'; function get_charset_collate(){return '';} public $insert_id=0; public $log=[]; public $next=null; public $row=null;
- function get_var($q){$this->log[]=$q; return $this->next;} function prepare($q,...$a){ if(count($a)==1&&is_array($a[0]))$a=$a[0]; return vsprintf(str_replace(['%s','%d','%f'],["'%s'",'%d','%F'],$q),$a);} function esc_like($s){return $s;}
+ function get_var($q){$this->log[]=$q; return is_array($this->next)?array_shift($this->next):$this->next;} function prepare($q,...$a){ if(count($a)==1&&is_array($a[0]))$a=$a[0]; return vsprintf(str_replace(['%s','%d','%f'],["'%s'",'%d','%F'],$q),$a);} function esc_like($s){return $s;}
  function get_results($q,$o=null){$this->log[]=$q;return $GLOBALS['rows']??[];} function get_row($q){$this->log[]=$q;return $this->row ?? null;} function query($q){$this->log[]=$q;return 0;}
  function insert($t,$d){$this->log[]="INSERT $t ".json_encode($d); $this->insert_id=42; return 1;} function update($t,$d,$w){$this->log[]="UPDATE $t ".json_encode($d);return 1;} }
 $wpdb=new W; $wpdb->row=null;
@@ -257,6 +257,35 @@ check('alerts: one day of queue sends the dry warning', count($GLOBALS['mails'])
 update_option('sgap_alert_mode','daily'); delete_option('sgap_alerts_last');
 $wpdb->next=0; SGAP_Alerts::after_health(['problems'=>['The autopilot is off.']]);
 check('alerts: daily mode sends one digest listing the problems', count($GLOBALS['mails'])===4 && str_contains($GLOBALS['mails'][3][2],'The autopilot is off.'));
+// --- P0.2 per channel: a healthy total must not hide one channel running dry ---
+$GLOBALS['rows']=[]; $GLOBALS['mails']=[]; update_option('sgap_alert_mode','immediate'); delete_option('sgap_alerts_last');
+update_option('sgap_channel_caps','pinterest=2, facebook=3, pinterest99=2, instagram=0');
+check('alerts: caps parse, unknown channels and bad numbers ignored', SGAP_Alerts::caps()===['pinterest'=>2,'facebook'=>3]);
+$GLOBALS['rows']=[['channel'=>'pinterest','n'=>4],['channel'=>'facebook','n'=>8],['channel'=>'twitter','n'=>16]];
+$chan=SGAP_Alerts::channel_runway();
+check('alerts: a capped channel uses its own cap, the rest the daily cap', $chan['pinterest']['days']===2.0 && $chan['facebook']['cap']===3 && $chan['twitter']['cap']===8);
+check('alerts: per-channel runway is queued divided by that cap', $chan['facebook']['days']===2.7 && $chan['twitter']['days']===2.0);
+$GLOBALS['rows']=[['channel'=>'pinterest','n'=>1],['channel'=>'facebook','n'=>40]];
+$dry=SGAP_Alerts::dry_channels();
+check('alerts: a capped channel with a thin queue is dry', isset($dry['pinterest']) && $dry['pinterest']['queued']===1 && $dry['pinterest']['days']===0.5);
+check('alerts: a channel above the warning level is not dry', !isset($dry['facebook']));
+update_option('sgap_channel_caps',''); $GLOBALS['rows']=[['channel'=>'facebook','n'=>40]];
+check('alerts: without a cap a healthy channel is never a gap', SGAP_Alerts::dry_channels()===[]);
+update_option('sgap_channel_caps','pinterest=2'); $GLOBALS['rows']=[['channel'=>'pinterest','n'=>0],['channel'=>'facebook','n'=>40]];
+$wpdb->next=[8,0]; SGAP_Alerts::after_health([]);
+$pins=array_values(array_filter($GLOBALS['mails'],fn($m)=>str_contains($m[1],'pinterest is running dry')));
+check('alerts: a dry channel gets its own mail', count($pins)===1);
+check('alerts: the channel mail names the queue and the cap', str_contains($pins[0][2],'0 queued') && str_contains($pins[0][2],'2/day'));
+$before=count($GLOBALS['mails']); SGAP_Alerts::after_health([]);
+check('alerts: the same dry channel is not mailed twice', count($GLOBALS['mails'])===$before);
+update_option('sgap_alert_mode','daily'); delete_option('sgap_alerts_last'); $GLOBALS['mails']=[];
+$wpdb->next=[40,0]; $GLOBALS['rows']=[['channel'=>'pinterest','n'=>0],['channel'=>'facebook','n'=>40]];
+SGAP_Alerts::after_health([]);
+check('alerts: the digest lists each channel runway', count($GLOBALS['mails'])===1 && str_contains($GLOBALS['mails'][0][2],'pinterest: 0 queued') && str_contains($GLOBALS['mails'][0][2],'Channels below the warning level: pinterest'));
+update_option('sgap_alert_dry_days',0); update_option('sgap_alert_mode','immediate'); delete_option('sgap_alerts_last'); $GLOBALS['mails']=[];
+$wpdb->next=[8,0]; SGAP_Alerts::after_health([]);
+check('alerts: warning level 0 turns the channel alarm off too', SGAP_Alerts::dry_channels()===[] && $GLOBALS['mails']===[]);
+update_option('sgap_alert_dry_days',2); update_option('sgap_channel_caps',''); $GLOBALS['rows']=[]; $wpdb->next=0;
 // --- Retry with backoff (P0.3) ---
 check('backoff: 5, 15, 45 minutes by attempt', SGAP_Queue::retry_delay_minutes(1)===5 && SGAP_Queue::retry_delay_minutes(2)===15 && SGAP_Queue::retry_delay_minutes(3)===45);
 check('backoff: clamped at both ends', SGAP_Queue::retry_delay_minutes(0)===5 && SGAP_Queue::retry_delay_minutes(99)===45);
