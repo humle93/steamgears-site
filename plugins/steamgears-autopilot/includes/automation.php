@@ -457,6 +457,11 @@ class SGAP_Auto {
         if (class_exists('SGAP_MCP_Auth') && ($mcp = SGAP_MCP_Auth::problem()) !== '') {
             $problems[] = $mcp;
         }
+        // A Pinterest token that expired, or a run the API refused, is a problem the
+        // owner has to act on; silence would look like "no pins were seen this month".
+        if (class_exists('SGAP_Pinterest') && ($pinterest = SGAP_Pinterest::problem()) !== '') {
+            $problems[] = $pinterest;
+        }
         $rescue = SGAP_Rescue::status();
         if ($rescue['given_up'] > 0) {
             $problems[] = "{$rescue['given_up']} images on another server could not be copied.";

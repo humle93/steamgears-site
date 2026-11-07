@@ -84,6 +84,15 @@ class SGAP_Keys {
             'optional' => true,
             'instance_link' => 'mastodon_instance'
         ],
+        'pinterest' => [
+            'title' => 'Pinterest analytics',
+            'icon' => 'chart-line',
+            'keys' => ['pinterest_access_token', 'pinterest_refresh_token', 'pinterest_client_secret'],
+            'body' => 'Reads impressions, saves and outbound clicks for the pins the account owns. Publishing still goes through Publer.',
+            'links' => [['Pinterest developers', 'https://developers.pinterest.com/apps/']],
+            'hint' => 'The App ID lives under Publishing. Scopes: boards:read and pins:read. The access token lives 30 days; with the app secret and a refresh token it renews itself on every run, and the rotated token is saved here automatically.',
+            'optional' => true
+        ],
         'telegram' => [
             'title' => 'Telegram',
             'icon' => 'email-alt',

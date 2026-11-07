@@ -347,7 +347,8 @@ class SGAP_Settings {
         'publer_api_key','ai_api_key','image_api_key','serpapi_key',
         'telegram_bot_token',
         'merchant_feed_secret','bluesky_app_password','mastodon_token',
-        'mcp_refresh_token','printful_api_key'
+        'mcp_refresh_token','printful_api_key',
+        'pinterest_access_token','pinterest_refresh_token','pinterest_client_secret'
     ];
     /** Multi-line text settings, shown as a textarea. */
     const TEXTAREA_KEYS = ['blackout_ranges', 'banned_words'];
@@ -356,6 +357,7 @@ class SGAP_Settings {
         'telegram_chat_id',
         'alert_email','channel_caps',
         'blackout_ranges','banned_words','utm_campaign','bluesky_handle','mastodon_instance',
+        'pinterest_client_id',
         'locale_source','locales','command_center_url','mcp_client_id',
         'printful_store_id'
     ];
@@ -371,7 +373,7 @@ class SGAP_Settings {
     /** Shown in the settings page. Keys not listed here stay registered for older data but are unused. */
     const SECTIONS = [
         'General' => ['autopilot_enabled','full_auto_enabled','daily_cap','batch_size','quiet_start','quiet_end','blackout_ranges','quality_gate','banned_words','dupe_days','utm_campaign','command_center_url'],
-        'Publer' => ['publish_mode','publer_api_key','publer_workspace_id','publer_pinterest_board','channels','bluesky_handle','bluesky_app_password','mastodon_instance','mastodon_token','mastodon_limit','telegram_bot_token','telegram_chat_id'],
+        'Publer' => ['publish_mode','publer_api_key','publer_workspace_id','publer_pinterest_board','pinterest_client_id','channels','bluesky_handle','bluesky_app_password','mastodon_instance','mastodon_token','mastodon_limit','telegram_bot_token','telegram_chat_id'],
         'AI content' => ['ai_profile','ai_provider','ai_api_key','ai_model','ai_base_url','posts_per_day','content_language','locale_source','locales','image_model','image_api_key','serpapi_key'],
         'Economics' => ['labor_rate','monthly_budget','target_roi','winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max'],
         'Evergreen' => ['evergreen_enabled','evergreen_after_days','evergreen_max_shares','evergreen_batch'],
@@ -410,6 +412,7 @@ class SGAP_Settings {
         'bluesky_app_password' => 'Bluesky → Settings → Privacy and security → App passwords (not the account password). Stays on this server: it is never shown again after saving, and an empty field keeps the stored value.',
         'mastodon_instance' => 'Address of the server the account lives on, e.g. mastodon.social. There is no central Mastodon, so the token only works on the instance it was created on.',
         'mastodon_token' => 'Mastodon → Preferences → Development → New application, then the access token of that application (scopes: write:statuses). Never shown again after saving; an empty field keeps the stored value.',
+        'pinterest_client_id' => 'The App ID of your Pinterest developer app (developers.pinterest.com → My apps). Not a secret — it is sent with the secret to renew the access token. Analytics need the boards:read and pins:read scopes, and only work for pins the token account owns.',
         'mastodon_limit' => 'Characters the instance accepts in one post. 500 is what every server allows; raise it only when the instance documents a higher limit. The tracking link is always kept whole.',
         'telegram_bot_token' => 'BotFather → /newbot (or /token for an existing bot). The token is what authorises the message; it is never shown again after saving.',
         'telegram_chat_id' => 'Where the message lands: @channelname for a public channel, or the numeric id (a group is negative). The bot must be an administrator of the channel, or the API answers ok=false.',
@@ -1201,6 +1204,9 @@ class SGAP_REST {
         register_rest_route(self::NS, '/engagement/refresh', [
             'methods' => 'POST', 'callback' => ['SGAP_Engagement', 'rest_refresh'], 'permission_callback' => $auth
         ]);
+        register_rest_route(self::NS, '/pinterest/refresh', [
+            'methods' => 'POST', 'callback' => ['SGAP_Pinterest', 'rest_refresh'], 'permission_callback' => $auth
+        ]);
     }
 
     private static function key(WP_REST_Request $r, string $name, string $default, int $max): string {
@@ -1815,6 +1821,7 @@ class SGAP_Admin {
         self::render_rows($stats['channels'], ['channel', 'published', 'clicks', 'orders', 'revenue']);
         SGAP_UI::card_close();
         SGAP_Engagement::dashboard_card();
+        SGAP_Pinterest::dashboard_card();
         echo '</div><div>';
         self::feeds_panel();
         self::keys_panel();

@@ -1448,6 +1448,7 @@ $failed=SGAP_Engagement::refresh();
 check('engagement: a 500 is reported and stores nothing', $failed['updated']===0 && count($failed['errors'])===1 && str_contains($failed['errors'][0],'500'));
 SGAP_Engagement::$transport=null; $GLOBALS['rows']=[];
 
+require __DIR__.'/pinterest.php';
 require __DIR__.'/mcp-woo.php';
 require __DIR__.'/mcp.php';
 require __DIR__.'/evergreen.php';
