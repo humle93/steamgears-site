@@ -32,30 +32,55 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Åbne blokeringer
 
-- **steamgears.eu — site-optimering** — Sitet svarer PHP-parsefejl på alle dynamiske kald (målt igen 7/11: /wp-json, robots.txt, sitemap_index.xml, /?sgap_feed=, og admin-ajax 500 — MCP-fladen svarer selv 500) — kun W3TC-cachede HTML-sider virker, og wp-admin er nede, så rettelsen kræver File Manager/SFTP (ejer). Der findes ingen deploy-vej i repoet: ingen FTP/SFTP/SSH-workflow, ingen .env, ingen gh-login og ingen MCP-credential i sandkassen. S2.7-loftet kræver tre ejerbeslutninger; S1.4/S1.6 kræver live-skrivning; S2.5 mangler OG-billedet.
-- **Steamgears Autopilot — plugin** — P1.5b/P1.5c kræver et Pinterest- og Instagram-token (Settings → Keys); P3.1 mangler ejerens labor_rate-beslutning; P1.15 kræver ejerens MCP-godkendelse i wp-admin — og wp-admin er nede indtil mu-plugin-fejlen er ryddet, ligesom RSS-feedet (?sgap_feed=) som publiceringen bruger.
+- **steamgears.eu — site-optimering** — Sitet svarer igen — målt 7/11 17:25 UTC: /wp-json 200 (1.521.253 B JSON), robots.txt 200 (319 B, én User-agent-gruppe uden de otte host-regler), sitemap_index.xml 200, /?sgap_feed=facebook 200 som RSS og /?nocache=1 200; ingen Parse error. Tilbage: S2.7-loftet kræver tre ejerbeslutninger, S1.4/S1.6 og S2.9/S4.13 kræver live-skrivning (ingen .env, ingen MCP-credential i sandkassen), og S2.5 mangler OG-billedet.
+- **Steamgears Autopilot — plugin** — P2.6 kræver at ejeren selv indtaster Page access token og side-id i wp-admin — en nøgle må ikke gennem chat eller repo, og der findes ingen credential i sandkassen. Live kører stadig 7.41.1: /wp-json/sgap/v1 annoncerer 12 ruter og ingen /facebook/refresh, /reply eller /hide, som 7.58.0 registrerer, så Plugins → Update skal køres før felterne findes. P1.5b/P1.5c kræver et Pinterest- og Instagram-token; P3.1 mangler ejerens labor_rate-beslutning; P1.15 kræver ejerens MCP-godkendelse. wp-admin er tilgængeligt igen (sitet målt raskt 7/11 17:25 UTC).
 - **Dark academia-rebrand** — Printify-adgang
 - **SEO-indholdsproduktion** — Intet eksternt for de tre resterende guides: copy, FAQ, priser og links ligger i docs/library/guides-2026-11-03.md. De otte /go/-id'er 411/475/481/485/497/567 kunne ikke verificeres fra sandkassen (Simplys WAF giver browser-UA en challenge), så nye produktlinks skal måles fra ejerens side eller efter WAF-hvidlistning
 
 ### Næste skridt
 
-- **steamgears.eu — site-optimering** — Ryd op i hostens mu-plugin først: erstat wp-content/mu-plugins/managed-wordpress-robots.php med den rettede fil i repoet (wordpress/mu-plugins/, 8/8 offline-checks) via Simplys File Manager — derefter genmåles robots/sitemap/REST/feed. Så: S2.9 + S4.13 ud på siden, OG-billede pr. indlæg og /shop/s H1 (kræver live-adgang), og tre ejerbeslutninger til S2.7-loftet.
-- **Steamgears Autopilot — plugin** — P1.5b (Pinterest) og P1.5c (Instagram) er kode-færdige, men den første live-kørsel kræver et token af hver (Settings → Keys); P3.1 mangler ejerens labor_rate-beslutning; P1.15 kræver ejerens MCP-godkendelse i wp-admin.
+- **steamgears.eu — site-optimering** — S2.9 + S4.13 ud på siden: OG-billede pr. indlæg og /shop/s H1 (kræver live-skrivning), og tre ejerbeslutninger til S2.7-loftet. S0.2 behøver intet: host-laget er væk og robots.txt er én gruppe (målt 7/11 17:25 UTC).
+- **Steamgears Autopilot — plugin** — P2.6: opdatér pluginnet til 7.58.0 (Plugins → Update), indsæt Page access token under Settings → Keys og side-id under Publishing, og kør «Kør nu» på Facebook-siden — så er den første rigtige synk målt. P1.5b (Pinterest) og P1.5c (Instagram) er kode-færdige og venter på hvert sit token; P3.1 mangler ejerens labor_rate-beslutning; P1.15 kræver ejerens MCP-godkendelse.
 - **Dark academia-rebrand** — Batch 4 — mockups (~130 billeder)
 - **SEO-indholdsproduktion** — Skriv de tre manglende guides (mens-steampunk-costume-essentials, steampunk-clothing-three-budgets, womens-steampunk-essentials) fra den verificerede copy — corset-guiden er publiceret 6/11
 - **Døde internlinks** — Vedligehold: tjek nye indlæg mod live-URL'er
 
 ### Seneste commits
 
+- `77148a2 P2.6: Facebook-siden kan styres — med direkte publicering som opt-in (7.58.0)`
 - `3d7a3ff Merge main (S0.4-forbehold) ind i S4.12`
 - `9f77099 Merge main (roadmap-rækker lukket, commit-værn rettet) ind i S4.12`
 - `0165d79 S0.4: forbehold om at «ingen 404» er målt før nedbruddet`
 - `7431166 S4.12: fortrydelsesoplysningerne ind i ordremailen`
 - `0a628a2 Roadmap-rækker lukket med bevis, og CI's commit-værn gjort grøn`
-- `1bed4d8 Ryd op efter sammenfletningen: de genererede filer fik deres rigtige tal`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 7/11 — Sitet er tilbage, og Facebook venter på to ejerklik
+
+- **Nedbruddet er overstået, målt 17:25 UTC:** `/wp-json/` 200 (1.521.253 B `application/json`), `/robots.txt`
+  200 (319 B), `/sitemap_index.xml` 200 (1.063 B), `/?sgap_feed=facebook` 200 som `application/rss+xml`
+  (11.810 B) og `/?nocache=1` 200 (80.338 B) — ingen `Parse error` i nogen af dem. Målt på størrelse og
+  `content_type`, ikke statuskode: under nedbruddet svarede alle fejl også 200.
+- **Host-laget er ikke rettet — det er væk.** `robots.txt` har nu **én** `User-agent`-gruppe og ingen af de otte
+  query-param-`Disallow`-linjer som `managed-wordpress-robots.php` tilføjede. Så S0.2's læsbarhedsproblem
+  eksisterer ikke længere, og den rettede fil i `wordpress/mu-plugins/` skal **ikke** lægges ind; den bliver
+  liggende som reserve.
+- **Live kører stadig 7.41.1, og det kan ses uden credential:** `/wp-json/sgap/v1` annoncerer 12 ruter
+  (`queue`, `drafts`, `suppression`, `reposts`, `etsy/orders`, `feed`, `stats`, `snapshot` …) og **ingen**
+  `/facebook/*`, mens 7.58.0 registrerer `/facebook/refresh`, `/reply` og `/hide`. Facebook-felterne findes
+  altså ikke i wp-admin endnu — *Plugins → Update* skal køres først, og selvopdateringen henter 7.58.0 fra
+  `main`, hvor zippen nu ligger.
+- **Tokenet kan ikke kobles på herfra:** ingen MCP-credential, ingen `.env`, ingen application password i
+  sandkassen — og en nøgle må ikke gennem chat eller repo. Ejerens to indtastninger: Page access token under
+  *Settings → Keys*, side-id under *Publishing* (og `facebook_direct` = *Yes* kun hvis publiceringen skal ud af
+  Publer). Derefter kører `sgap_facebook_refresh` dagligt af sig selv, og *Kør nu* på Facebook-siden giver
+  første synk med det samme.
+- **Det jeg kan verificere uden nøglen, og vil kigge efter ved næste pas:** at ruterne dukker op i
+  `/wp-json/sgap/v1`, at Facebook-rækken i Fejlsøgning står «Connected» med side-navn og fans, at
+  post-mappingen vokser ved den første publicering, og at kommentartabellen viser Metas `can_hide`. Intet af
+  det er målt endnu.
 
 ### 7/11 — Facebook-siden kan nu styres, men først når nogen slår det til (P2.6, 7.58.0)
 

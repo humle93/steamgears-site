@@ -2,8 +2,9 @@
 
 _Last audited: 2026-11-01 · audit was of **7.15.0** (`ab676db` on `main`); current release **7.58.0**, and
 **7.41.1 is what steamgears.eu runs** (measured 2026-11-07 with `get_plugins()` and
-`steamgears-autopilot/status`; see `docs/roadmap.md` §2b — not re-measured since, because the site could not be
-reached after the parse error in `managed-wordpress-robots.php`) — the zip in `plugins/` is **7.58.0**, and
+`steamgears-autopilot/status`, then confirmed the same evening without a credential: `/wp-json/sgap/v1`
+announces 12 routes and none of the `/facebook/*` routes 7.58.0 registers; see `docs/roadmap.md` §2b) — the
+zip in `plugins/` is **7.58.0**, and
 nothing reaches the site until the owner clicks *Update* · update this file in the same commit as any release._
 
 This is the working roadmap for `plugins/steamgears-autopilot`. It answers three questions: does every

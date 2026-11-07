@@ -6,8 +6,8 @@
       "id": "site",
       "name": "steamgears.eu — site-optimering",
       "note": "roadmap S0–S4",
-      "next": "Ryd op i hostens mu-plugin først: erstat wp-content/mu-plugins/managed-wordpress-robots.php med den rettede fil i repoet (wordpress/mu-plugins/, 8/8 offline-checks) via Simplys File Manager — derefter genmåles robots/sitemap/REST/feed. Så: S2.9 + S4.13 ud på siden, OG-billede pr. indlæg og /shop/s H1 (kræver live-adgang), og tre ejerbeslutninger til S2.7-loftet.",
-      "blocked_by": "Sitet svarer PHP-parsefejl på alle dynamiske kald (målt igen 7/11: /wp-json, robots.txt, sitemap_index.xml, /?sgap_feed=, og admin-ajax 500 — MCP-fladen svarer selv 500) — kun W3TC-cachede HTML-sider virker, og wp-admin er nede, så rettelsen kræver File Manager/SFTP (ejer). Der findes ingen deploy-vej i repoet: ingen FTP/SFTP/SSH-workflow, ingen .env, ingen gh-login og ingen MCP-credential i sandkassen. S2.7-loftet kræver tre ejerbeslutninger; S1.4/S1.6 kræver live-skrivning; S2.5 mangler OG-billedet.",
+      "next": "S2.9 + S4.13 ud på siden: OG-billede pr. indlæg og /shop/s H1 (kræver live-skrivning), og tre ejerbeslutninger til S2.7-loftet. S0.2 behøver intet: host-laget er væk og robots.txt er én gruppe (målt 7/11 17:25 UTC).",
+      "blocked_by": "Sitet svarer igen — målt 7/11 17:25 UTC: /wp-json 200 (1.521.253 B JSON), robots.txt 200 (319 B, én User-agent-gruppe uden de otte host-regler), sitemap_index.xml 200, /?sgap_feed=facebook 200 som RSS og /?nocache=1 200; ingen Parse error. Tilbage: S2.7-loftet kræver tre ejerbeslutninger, S1.4/S1.6 og S2.9/S4.13 kræver live-skrivning (ingen .env, ingen MCP-credential i sandkassen), og S2.5 mangler OG-billedet.",
       "modules": [
         {
           "id": "s0",
@@ -56,8 +56,8 @@
     {
       "id": "plugin",
       "name": "Steamgears Autopilot — plugin",
-      "next": "P1.5b (Pinterest) og P1.5c (Instagram) er kode-færdige, men den første live-kørsel kræver et token af hver (Settings → Keys); P3.1 mangler ejerens labor_rate-beslutning; P1.15 kræver ejerens MCP-godkendelse i wp-admin.",
-      "blocked_by": "P1.5b/P1.5c kræver et Pinterest- og Instagram-token (Settings → Keys); P3.1 mangler ejerens labor_rate-beslutning; P1.15 kræver ejerens MCP-godkendelse i wp-admin — og wp-admin er nede indtil mu-plugin-fejlen er ryddet, ligesom RSS-feedet (?sgap_feed=) som publiceringen bruger.",
+      "next": "P2.6: opdatér pluginnet til 7.58.0 (Plugins → Update), indsæt Page access token under Settings → Keys og side-id under Publishing, og kør «Kør nu» på Facebook-siden — så er den første rigtige synk målt. P1.5b (Pinterest) og P1.5c (Instagram) er kode-færdige og venter på hvert sit token; P3.1 mangler ejerens labor_rate-beslutning; P1.15 kræver ejerens MCP-godkendelse.",
+      "blocked_by": "P2.6 kræver at ejeren selv indtaster Page access token og side-id i wp-admin — en nøgle må ikke gennem chat eller repo, og der findes ingen credential i sandkassen. Live kører stadig 7.41.1: /wp-json/sgap/v1 annoncerer 12 ruter og ingen /facebook/refresh, /reply eller /hide, som 7.58.0 registrerer, så Plugins → Update skal køres før felterne findes. P1.5b/P1.5c kræver et Pinterest- og Instagram-token; P3.1 mangler ejerens labor_rate-beslutning; P1.15 kræver ejerens MCP-godkendelse. wp-admin er tilgængeligt igen (sitet målt raskt 7/11 17:25 UTC).",
       "modules": [
         {
           "id": "p0",

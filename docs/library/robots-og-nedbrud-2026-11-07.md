@@ -7,6 +7,8 @@ forhindrer gentagelsen.
 > **Status da dette blev skrevet:** sitet svarer **fatal parse-fejl** på alle dynamiske URL'er
 > (`/?nocache=1`, `/shop/`, `/cart/`, `/wp-json/…`). Kun W3TC's cachede forside virker. Fixen tager under et
 > minut og kræver kun fil-adgang — se §4.
+>
+> **Opdateret 7/11 2026, 17:25 UTC: nedbruddet er overstået, og host-laget er væk — se §7.**
 
 ## 1. Hvem ejer robots.txt (målt)
 
@@ -175,3 +177,32 @@ blank-linje-skade og en fallback når der ikke er nogen Sitemap-linje. Resultat:
 
 Intet andet på sitet blev rørt i dette pas: ingen poster, ingen plugin-tilstand, ingen indstillinger. Den
 eneste live-ændring var filen i §3. Repoet indeholder den rettede fil og dette dokument.
+
+## 7. Nedbruddet er overstået — målt 7/11 2026, 17:25 UTC
+
+Målt fra sandkassen med neutral UA og uden credential:
+
+| URL | Svar | Indhold |
+| --- | --- | --- |
+| `/wp-json/` | **200** | 1.521.253 B `application/json` — PHP kører, REST-indekset er læsbart |
+| `/robots.txt` | **200** | 319 B `text/plain`, **én** `User-agent: *`-gruppe og Sitemap-linjen |
+| `/sitemap_index.xml` | **200** | 1.063 B `text/xml` |
+| `/?sgap_feed=facebook` | **200** | 11.810 B `application/rss+xml` — RSS-publiceringen virker igen |
+| `/?nocache=1` | **200** | 80.338 B `text/html` — den cache-bustede rute er rask |
+
+Ingen af svarene indeholder `Parse error`. Det var netop den fælde der blev betalt for: alle fejl svarede
+**200** med 193 bytes, så et statuskode-tjek alene kunne ikke se forskel. Størrelse og `content_type` kan.
+
+**Host-laget er ikke rettet — det er væk.** Den fil der nu svarer har **én** gruppe og **ingen** af de otte
+query-param-`Disallow`-linjer (`filter_cat`, `min_price`, `orderby`, …) som `managed-wordpress-robots.php`
+tilføjede. Rank Math alene genererer den. Det betyder at vej A, B og C i §4 ikke blev brugt: filen blev
+fjernet eller afregistreret i stedet for repareret. Konsekvens for roadmap-rækken **S0.2**: læsbarhedsproblemet
+(fem regler efter Sitemap, to grupper) findes ikke længere, og den rettede fil i
+[`wordpress/mu-plugins/managed-wordpress-robots.php`](../../wordpress/mu-plugins/managed-wordpress-robots.php)
+behøver **ikke** lægges ind. Den bliver liggende som klar reserve, hvis host-laget en dag kommer tilbage —
+den er `php -l`-ren og har 8/8 offline-checks.
+
+Det der stadig ikke kan måles herfra: om `admin-ajax.php` og wp-admin er raske (WAF'en svarer `455` på
+HTML-ruter fra datacenter-IP'er, så login-siden kan ikke hentes udefra), og hvilken plugin-version der kører.
+Den sidste blev målt ad en omvej — se `docs/samtalepunkter.md` samme dag: `/wp-json/sgap/v1` annoncerer
+12 ruter og ingen `/facebook/*`, så live er ældre end 7.58.0.
