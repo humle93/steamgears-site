@@ -47,12 +47,12 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `3103982 Modul: A-adgang — Simply.com-connectoren (simplycom) dokumenteret Før: 91,0 % Efter: 91,0 % Δ: 0 Grundlag: ingen ændring`
+- `055db56 chore(status): daglig projektstatus 2026-11-07`
+- `e90932c Modul: P1.20 Settings, Queue og Studio — ét spørgsmål pr. side Før: 91,0 %  →  Efter: 91,1 %  (Δ +0,1) Grundlag: 26,55 af 29,15 d`
 - `ed2aec9 Modul: CI-vagt — mål live-tilstanden nu i stedet for at vente på kl. 03 Før: 91,0 % Efter: 91,0 % Δ: 0 Grundlag: ingen ændring`
 - `731c0e9 Modul: P3.6 fejlsøgning — fast scan, fem fejl rettet Før: 90,9 %  →  Efter: 91,0 %  (Δ +0,1) Grundlag: 26,3 af 28,9 d (P0 4,65/4,7 · P1 12,7/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25) Fejlsøgning er nu en kørsel i stedet for en lejlighed: tools/fejlscan.py er værn nr. 23-24 i den natlige kontrol og leder efter det php -l og smoke-suiten ikke kan se — version tre steder, zip mod kilde byte for byte, døde og forældreløse includes, nye dokumenter uden for biblioteksindekset, tokens i sporede filer, TODO/FIXME og tests der ikke kan fejle. 13 fixtures beviser både at hver klasse fanges, og at en ren kasse er grøn.`
 - `cf6e8b3 Modul: P1.5b Pinterest-analytics Før: 87,4 %  →  Efter: 90,9 %  (Δ +3,5) Grundlag: 26,05 af 28,65 d (P0 4,65/4,7 · P1 12,7/15,2 · P2 4,75/4,75 · P3 2,45/2,5 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25)`
-- `a27b054 chore(status): daglig projektstatus 2026-11-07`
-- `95c9106 Modul: P1.19 dashboard-layout — tre sektioner og én Needs you-linje Før: 87,3 %  →  Efter: 87,4 %  (Δ +0,1) Grundlag: 25,05 af 28,65 d`
-- `1619779 chore(status): daglig projektstatus 2026-11-07`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
