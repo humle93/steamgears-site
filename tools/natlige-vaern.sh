@@ -77,6 +77,7 @@ check "link-plan-selftest"                  python3 tools/link_plan_check.py --s
 check "link-plan"                           python3 tools/link_plan_check.py
 check "guide-copy-selftest"                  python3 tools/guide_check.py --selftest
 check "guide-copy"                           python3 tools/guide_check.py
+check "og-image-selftest"                    python3 tools/og_image_check.py --selftest
 check "samtalepunkter-selftest"              python3 tools/samtalepunkter.py --selftest
 check "designsystem-selftest"                python3 tools/design_check.py --selftest
 check "designsystem"                         python3 tools/design_check.py

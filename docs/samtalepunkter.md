@@ -24,7 +24,7 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 | Projekt | Status | Grundlag |
 | --- | --- | --- |
-| **steamgears.eu — site-optimering** | **67,4 %** | 16,2 af 24,05 d (S0 2,15/2,35 · S1 2,15/4,6 · S2 7,35/8,3 · S3 2,55/3,55 · S4 2/5,25) |
+| **steamgears.eu — site-optimering** | **68 %** | 16,35 af 24,05 d (S0 2,15/2,35 · S1 2,15/4,6 · S2 7,5/8,3 · S3 2,55/3,55 · S4 2/5,25) |
 | **Steamgears Autopilot — plugin** | **97,2 %** | 29,6 af 30,45 d (P0 4,65/4,65 · P1 14,2/15,05 · P2 4,75/4,75 · P3 2/2 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25 · P1E 0,25/0,25 · P1F 0,25/0,25 · P1G 0,5/0,5 · P2F 1,5/1,5) |
 | **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5) |
 | **SEO-indholdsproduktion** | **62,5 %** | 5 af 8 guides (BATCH 0/3 · COPY 4/4 · CORSET 1/1) |
@@ -32,14 +32,14 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Åbne blokeringer
 
-- **steamgears.eu — site-optimering** — REST er stadig nede, målt 7/11 med cache-buster: /wp-json/, /wp-json/sgap/v1 og /wp-json/novamira/v1/oauth/token svarer 200 med 1.650 B PHP-fatal (SGAP_Admin::NS, diagnostics.php:531 i live-versionen 7.58.0), og Store API svarer 404-HTML. Repoet har 7.58.2, som retter både fatalen og opdateringsfælden (dashboard-kortet kunne sige “Up to date” i 6 timer, så et Update-klik havde intet at installere). Installationen kræver en adgang der ikke findes i agentens sandkasse: ingen SSH/SFTP-nøgle, ingen wp-cli, ingen WP-credential, og wp-login.php/xmlrpc.php svarer 455 fra Simplys WAF. Derfor kan S2.9, S4.13, S1.4, S1.6 og de tre guides ikke udføres nu.
+- **steamgears.eu — site-optimering** — Sitet og REST svarer 200 igen med Autopilot 7.59.0 aktiv (19 ruter i /wp-json/sgap/v1, S0.4's fem URL'er bekræftet 200 med ?nocache=20261107). Det der stadig blokerer de resterende site-punkter er skriveadgang fra sandkassen: (1) File Manager/SFTP til wp-content/mu-plugins/ for S0.2 (robots.txt har nu tre User-agent-grupper), S2.9 (0,1 d), S4.10 (0,05 d), S4.12 (0,05 d) og S4.13 (0,15 d), og (2) en godkendt MCP OAuth-session i denne sandkasse for S1.4, S1.5, S1.6 og de sidste 0,10 d af S2.5b.
 - **Steamgears Autopilot — plugin** — P1.5 kræver ejerens Pinterest- og Instagram-tokens (må ikke gennem chat eller repo). Målt 7/11 er alle seks nøgler tomme, diagnostics svarer pinterest: off / instagram: off, og ruterne svarer 200 med deres egen besked: pinterest/refresh → "save a Pinterest access token, or the app credentials plus a refresh token"; instagram/refresh → "save the professional account id and a long-lived Instagram User token". Roadmappet er afstemt linje for linje 7/11 (åbent = 0,85 d = dette punkt). Uden for roadmappet: mu-plugin-rettelsen 1.3.1 ligger stadig kun i repoet og kræver ejerens File Manager.
 - **Dark academia-rebrand** — Printify-adgang
-- **SEO-indholdsproduktion** — Intet eksternt for de tre resterende guides: copy, FAQ, priser og links ligger i docs/library/guides-2026-11-03.md. De otte /go/-id'er 411/475/481/485/497/567 kunne ikke verificeres fra sandkassen (Simplys WAF giver browser-UA en challenge), så nye produktlinks skal måles fra ejerens side eller efter WAF-hvidlistning
+- **SEO-indholdsproduktion** — Publicering af de tre resterende guides (292, 296, 295) kræver en godkendt MCP OAuth-session, og målt 7/11 med neutral UA (curl/8.5.0) mod de 20 live produkter i Store API lander kun 6 af de 18 /go/-links i docs/library/guides-2026-11-03.md på HTTP 200 (413, 483, 489, 491, 493, 495), mens 12 lander på 404 (397, 411, 475, 481, 485, 487, 497, 561, 563, 567, 724, 728) — produktreferencer og priser ($49–$279) i guide-kladden skal derfor afstemmes mod det nuværende 20-produkts katalog ved publicering.
 
 ### Næste skridt
 
-- **steamgears.eu — site-optimering** — Installér 7.58.2 (Plugins → Update, eller pluginets eget dashboard-kort “Check again and update”, som nu læser versionen friskt). Derefter S2.9 + S4.13 ud på siden og de tre guides live. Kræver en adgangskanal: SFTP/SSH til Simply, ejer-whitelistet admin-session eller et application password på et site hvor REST svarer.
+- **steamgears.eu — site-optimering** — Læg de fire færdigbyggede mu-plugins i wp-content/mu-plugins/ via Simply File Manager (managed-wordpress-robots.php, sga-design-system.php + css/sg-design-system.css, sgap-withdrawal-email.php, sgap-review-request.php, samt sga-payload-trim.php 1.3.1), og ret de fire OG-billedfund fra S2.5b (indlæg 615 bredde 576 px, indlæg 751 PNG 1,38 MB og de tre delte covers 1082/488/474) når en MCP-session er godkendt.
 - **Steamgears Autopilot — plugin** — P1.5's live-verifikation er det eneste åbne punkt (0,85 d): plugin 7.59.0 kører live, men hverken Pinterest- eller Instagram-token findes på sitet (målt 7/11: begge tomme, diagnostics svarer off). Når ejeren har indtastet dem i wp-admin, køres pinterest/refresh og instagram/refresh, og svarene bogføres som P1.5's sidste 0,85 d.
 - **Dark academia-rebrand** — Batch 4 — mockups (~130 billeder)
 - **SEO-indholdsproduktion** — Skriv de tre manglende guides (mens-steampunk-costume-essentials, steampunk-clothing-three-budgets, womens-steampunk-essentials) fra den verificerede copy — corset-guiden er publiceret 6/11
@@ -47,15 +47,42 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `0570740 Modul: samtalepunkter — afstemningen og det ene åbne punkt skrevet ned Før: 97,2 %  →  Efter: 97,2 %  (Δ 0) Grundlag: ingen ændring`
+- `fb91b39 chore(status): daglig projektstatus 2026-11-07`
 - `419d594 Modul: roadmap-afstemning — de 0,2 d var regnefejl, og P3 havde 0,75 d fantom Før: 96,7 %  →  Efter: 97,2 %  (Δ +0,5) Grundlag: 29,6 af 30,45 d (P0 4,65/4,65 · P1 14,2/15,05 · P2 4,75/4,75 · P3 2/2 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5)`
 - `850e8c4 Modul: P3.1 — regnestykket bag de sidste 0,2 d skrevet ned Før: 96,7 %  →  Efter: 96,7 %  (Δ 0) Grundlag: 30,35 af 31,4 d (P0 4,65/4,7 · P1 14,2/15,2 · P2 4,75/4,75 · P3 2,75/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5)`
 - `7c25a13 Modul: P3.1 — dokumentation og bibliotek for labor_rate-lukningen Før: 96,7 %  →  Efter: 96,7 %  (Δ 0) Grundlag: 30,35 af 31,4 d (P0 4,65/4,7 · P1 14,2/15,2 · P2 4,75/4,75 · P3 2,75/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5)`
 - `f36e716 chore(status): daglig projektstatus 2026-11-07`
-- `eddf8fe Modul: P3.1 — labor_rate læses nu: ROI-kortet viser arbejdstimer Før: 96,5 %  →  Efter: 96,7 %  (Δ +0,2) Grundlag: 30,35 af 31,4 d (P0 4,65/4,7 · P1 14,2/15,2 · P2 4,75/4,75 · P3 2,75/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5)`
-- `778b317 Modul: dokumentation — antallet af beholdte plugins rettet til fire Før: 96,5 %  →  Efter: 96,5 %  (Δ 0) Grundlag: ingen ændring`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 7/11 — S2.5b målt på alle 30 indlæg, S0.4 bekræftet uden cache og 12 døde `/go/`-id'er i guide-kladden
+
+- **Sitet og REST svarer 200 igen (`Autopilot 7.59.0`, 19 ruter i `/wp-json/sgap/v1`):** dermed bortfaldt den
+  midlertidige PHP-parse-error-blokering på S2.5b's måledel og S0.4's cache-busted efterkontrol.
+- **S0.4 er nu verificeret med `?nocache=20261107`:** `/start-here/` (73.402 B), `/build/` (71.346 B),
+  `/inspiration/` (75.209 B), `/shipping/` (69.496 B) og `/returns/` (70.254 B) svarer alle HTTP 200 uden om
+  sidecachen. Samtidig har `/robots.txt` nu **tre** `User-agent: *`-grupper (to duplikerede `filter_cat`-blokke
+  nederst) og venter på `wordpress/mu-plugins/managed-wordpress-robots.php`.
+- **S2.5b (`0,15 af 0,25 d` → S2 `7,50 af 8,30 d`, site `67,4 % → 68,0 %`):** alle 30 publicerede indlæg er
+  målt med [`tools/og_image_check.py`](../tools/og_image_check.py) (10 offline-fixtures, værn nr. 29 i
+  `tools/natlige-vaern.sh`) og dokumenteret i [`library/og-billeder-indlaeg-2026-11-07.md`](library/og-billeder-indlaeg-2026-11-07.md)
+  (+ PDF). 30/30 har `featured_media`, `og:image`, `width`/`height`/`alt` og `twitter:card=summary_large_image`;
+  27/27 unikke billed-URL'er svarer 200, og de deklarerede dimensioner matcher filernes binære header 30/30.
+- **Fire fund udestår til de sidste `0,10 d` (kræver WP-/MCP-skriveadgang):**
+  1. **Fælde med WordPress' `large`-skalering på stående billeder:** indlæg `615` (`casual-steampunk-outfits`,
+     medie `1096`) har en original på `1280×2276`, men fordi billedet er `9:16`, skalerer `large` (`max 1024×1024`)
+     bredden ned til **`576×1024 px`** — under 600 px-grænsen for stort link-kort på Facebook og LinkedIn.
+  2. **To tunge filer:** indlæg `751` bruger en **1.378 KB PNG** (`pin-pirate-01.png`, det eneste PNG blandt de
+     30 indlæg), og indlæg `806` bruger en **845 KB JPEG** (`upcycle-1.jpg`).
+  3. **Tre delte fremhævede billeder på seks indlæg:** `1082` på `15`+`699`, `488` på `791`+`913` og `474` på
+     `798`+`875` (`/wp/v2/media/474` svarer 401 uden auth, fordi `post_parent` er et ikke-publiceret produkt).
+  4. **Billedformater:** 21 liggende, 4 kvadratiske (`960×960`) og 5 stående (`572`, `615`, `751`, `804`, `805`).
+- **De 18 `/go/`-id'er i `docs/library/guides-2026-11-03.md` kan måles uden WAF-blokering med neutral UA
+  (`curl/8.5.0`):** alle 18 svarer 302, men kun **6 lander på HTTP 200** (`413, 483, 489, 491, 493, 495`), mens
+  **12 lander på 404** (`397, 411, 475, 481, 485, 487, 497, 561, 563, 567, 724, 728`) mod det nuværende katalog
+  på 20 produkter i Store API (hvor priserne desuden er ændret til `$49–$279`).
 
 ### 7/11 — roadmap-afstemning: de 0,2 d var regnefejl, og P3 havde 0,75 d fantom
 
