@@ -326,6 +326,85 @@ class SGAP_UI {
 .sgap .sgap-bar span,.sgap .sgap-progress progress::-webkit-progress-value{background:Highlight}
 .sgap .sgap-panel-head,.sgap .sgap-section-head:after{border-color:CanvasText}
 }
+/* 7.60.0 — modern layer: same markup, new surface. Tokens first, then components; nothing below changes layout. */
+.sgap{--brass:#14110e;--brass-d:#000;--brass-l:#f4efe6;--gold:#b08d57;--gold-d:#7a5c33;--ink:#17140f;--muted:#5b5348;--line:#e7dfd0;--card:#fff;--surface:#faf7f1;--r-sm:8px;--r-md:12px;--r-lg:18px;--hair:1px solid color-mix(in srgb,#b08d57 28%,#e7dfd0);--shadow-1:0 1px 1px rgba(20,17,14,.04),0 2px 6px -2px rgba(20,17,14,.08);--shadow-2:0 1px 1px rgba(20,17,14,.04),0 18px 36px -18px rgba(20,17,14,.28);--ring:0 0 0 3px color-mix(in srgb,#b08d57 45%,transparent);--ease:cubic-bezier(.16,1,.3,1);font-feature-settings:"tnum" 1,"cv11" 1;text-wrap:pretty}
+.sgap h1,.sgap h2,.sgap h3{text-wrap:balance}
+.sgap .sgap-head{position:relative;overflow:hidden;gap:16px;padding:22px 26px;border:0;border-radius:var(--r-lg);background:radial-gradient(120% 160% at 100% 0,rgba(176,141,87,.28),transparent 55%),linear-gradient(135deg,#14110e,#26201a);color:#e9dec4;box-shadow:var(--shadow-2),inset 0 0 0 1px rgba(176,141,87,.45)}
+.sgap .sgap-head::after{content:"";position:absolute;inset:auto 26px 0 26px;height:1px;background:linear-gradient(90deg,transparent,#b08d57,transparent);opacity:.7}
+.sgap .sgap-head h1{color:#f2eada;font-size:clamp(20px,1.2rem + .6vw,26px);font-weight:500;letter-spacing:.01em;text-shadow:none}
+.sgap .sgap-head p{color:#c9b99a}
+.sgap .sgap-logo{color:#d8b87a;font-size:28px}
+.sgap .sgap-pill{border-radius:999px;padding:3px 11px;font-weight:600;letter-spacing:.01em;background:var(--surface);border:var(--hair);color:var(--ink)}
+.sgap .sgap-pill.brass{background:var(--brass-l);color:#5a4326;border-color:#d9c7a3}
+.sgap .sgap-pill.ok{background:#eaf5ee;color:#175c2c;border-color:#bfe0c9}
+.sgap .sgap-pill.warn{background:#fff5dc;color:#7a5200;border-color:#efd9a0}
+.sgap .sgap-pill.bad{background:#fcecec;color:#9b2323;border-color:#f0c6c6}
+.sgap .sgap-card,.sgap .sgap-keycard,.sgap .sgap-draft,.sgap .sgap-toolcard,.sgap .sgap-stat,.sgap .sgap-rail,.sgap .form-table{border:var(--hair);border-top:var(--hair);border-radius:var(--r-lg);background:var(--card);box-shadow:var(--shadow-1)}
+.sgap .sgap-stat{border-top:var(--hair);position:relative;transition:transform .35s var(--ease),box-shadow .35s var(--ease)}
+.sgap .sgap-stat::before{content:"";position:absolute;inset:0 auto 0 0;width:3px;border-radius:var(--r-lg) 0 0 var(--r-lg);background:linear-gradient(#b08d57,#7a5c33)}
+.sgap .sgap-stat b{font-weight:500;font-size:clamp(24px,1.2rem + .9vw,32px);letter-spacing:-.01em}
+.sgap .sgap-stat span{letter-spacing:.1em;font-size:11px}
+.sgap .sgap-card:hover,.sgap .sgap-keycard:hover,.sgap .sgap-stat:hover,.sgap .sgap-toolcard:hover{box-shadow:var(--shadow-2);transform:translateY(-2px)}
+.sgap .sgap-card>h2,.sgap .sgap-panel-head h2{font-size:15px;font-weight:600;letter-spacing:.01em}
+.sgap .sgap-card>h2 .dashicons,.sgap .sgap-panel-head h2 .dashicons{color:var(--gold-d)}
+.sgap .sgap-section-head h2{letter-spacing:.16em;color:var(--gold-d)}
+.sgap .sgap-section-head:after{background:linear-gradient(90deg,#d9c7a3,transparent)}
+.sgap .button{border-radius:var(--r-sm);min-height:36px;font-weight:600;letter-spacing:.01em;transition:background-color .25s var(--ease),color .25s,border-color .25s,box-shadow .25s,transform .25s var(--ease)}
+.sgap .button:active{transform:translateY(1px)}
+.sgap .button-primary{background:#14110e;border:1px solid #14110e;color:#f2eada;box-shadow:inset 0 0 0 1px rgba(176,141,87,.5)}
+.sgap .button-primary:hover,.sgap .button-primary:focus{background:#2a231b;border-color:#2a231b;color:#fff;box-shadow:inset 0 0 0 1px #b08d57}
+.sgap .button:not(.button-primary){background:#fff;color:var(--ink);border:var(--hair)}
+.sgap .button:not(.button-primary):hover{background:var(--brass-l);border-color:#b08d57;color:#000}
+.sgap .button:focus-visible,.sgap a:focus-visible,.sgap summary:focus-visible{outline:2px solid #14110e;outline-offset:2px;box-shadow:0 0 0 4px #d8b87a}
+.sgap .button.sgap-danger{color:#9b2323;border-color:#ebc4c4}
+.sgap .sgap-field-input input,.sgap .sgap-field-input select,.sgap .sgap-key-field input[type=password],.sgap .sgap-key-field input[type=text],.sgap .sgap-studio-form input:not([type=checkbox]),.sgap .sgap-studio-form textarea,.sgap .sgap-studio-form select,.sgap .sgap-chat-form textarea{border-radius:var(--r-sm);border:1px solid #d8cdb8;background:#fffefb;min-height:40px;transition:border-color .2s,box-shadow .2s}
+.sgap .sgap-field-input input:focus,.sgap .sgap-field-input select:focus,.sgap .sgap-key-field input:focus,.sgap .sgap-studio-form input:focus,.sgap .sgap-studio-form textarea:focus,.sgap .sgap-chat-form textarea:focus{border-color:#b08d57;box-shadow:var(--ring);outline:none}
+.sgap .sgap-tabs{border:var(--hair);border-radius:var(--r-lg);background:color-mix(in srgb,#fff 82%,transparent);backdrop-filter:blur(14px) saturate(1.2);padding:5px}
+.sgap .sgap-tab{border-radius:var(--r-md);color:var(--muted);font-weight:600;letter-spacing:.01em}
+.sgap .sgap-tab:hover{background:var(--brass-l);color:var(--ink)}
+.sgap .sgap-tab.on{background:#14110e;border-color:#14110e;color:#f2eada;box-shadow:0 6px 16px -8px rgba(20,17,14,.6)}
+.sgap .sgap-tab.on .dashicons{color:#d8b87a}
+.sgap .sgap-savebar{border:var(--hair);border-radius:var(--r-lg);background:color-mix(in srgb,#fff 88%,transparent);backdrop-filter:blur(14px) saturate(1.2);box-shadow:0 20px 40px -22px rgba(20,17,14,.5)}
+.sgap .sgap-channel-card,.sgap .sgap-choice{border:var(--hair);border-radius:var(--r-md);background:#fff;transition:border-color .2s,box-shadow .2s,transform .3s var(--ease)}
+.sgap .sgap-channel-card:hover,.sgap .sgap-choice:hover{transform:translateY(-1px);border-color:#b08d57}
+.sgap .sgap-channel-card.on,.sgap .sgap-choice.on{border-color:#14110e;background:var(--brass-l);box-shadow:inset 0 0 0 1px #14110e}
+.sgap .sgap-channel-card.on .dashicons{color:var(--gold-d)}
+.sgap .sgap-switch input:checked+.sgap-slider{background:#14110e;box-shadow:inset 0 0 0 1px #b08d57}
+.sgap .sgap-slider{background:#d6ccb8}
+.sgap .sgap-bar{background:#eee6d6}.sgap .sgap-bar span,.sgap .sgap-progress progress::-webkit-progress-value{background:linear-gradient(90deg,#7a5c33,#d8b87a)}
+.sgap .sgap-progress progress::-moz-progress-bar{background:linear-gradient(90deg,#7a5c33,#d8b87a)}
+.sgap .sgap-rail li.on{background:var(--brass-l);color:var(--ink)}
+.sgap .sgap-rail li.on .sgap-num{background:#14110e;border-color:#14110e}
+.sgap .sgap-rail li.past .sgap-num,.sgap .sgap-steps li.done .sgap-dot{background:#1a7f37;border-color:#1a7f37}
+.sgap .sgap-dot{border-color:#b08d57}
+.sgap .sgap-attn{border:var(--hair);border-left:4px solid #b08d57;border-radius:var(--r-md);background:var(--surface)}
+.sgap .sgap-metric,.sgap .sgap-connected{border:var(--hair);border-radius:var(--r-md);background:var(--surface)}
+.sgap .sgap-key-icon{background:#14110e;color:#d8b87a;border-radius:var(--r-md)}
+.sgap .sgap-keycard--saved{border-left:3px solid #1a7f37}.sgap .sgap-keycard--constant{border-left:3px solid #b08d57}
+.sgap .sgap-key-links a,.sgap .sgap-more summary,.sgap .sgap-call summary{color:#5a4326}
+.sgap .sgap-chat-log{background:var(--surface);border:var(--hair);border-radius:var(--r-lg)}
+.sgap .sgap-user{background:#14110e;border-color:#14110e;color:#f2eada}
+.sgap .sgap-assistant{background:#fff;border:var(--hair)}
+.sgap .sgap-chip,.sgap .sgap-cat{border:var(--hair);background:#fff;color:var(--ink)}
+.sgap .sgap-chip:hover,.sgap .sgap-cat:hover{background:var(--brass-l);border-color:#b08d57}
+.sgap .sgap-cat.is-on{background:#14110e;border-color:#14110e;color:#f2eada}.sgap .sgap-cat.is-on span{color:#d8b87a}
+.sgap .sgap-toolsbar{border:var(--hair);border-radius:var(--r-lg);background:color-mix(in srgb,#fff 85%,transparent);backdrop-filter:blur(14px)}
+.sgap .sgap-toolcard{border-left:var(--hair)}
+.sgap .sgap-toolcard code,.sgap .sgap-feed code{background:var(--surface);color:#5a4326}
+.sgap table.widefat{border:var(--hair);border-radius:var(--r-lg)}
+.sgap table.widefat thead th{background:var(--surface);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.sgap table.widefat tbody tr{transition:background-color .2s}.sgap table.widefat tbody tr:hover td{background:#fcfaf5}
+.sgap .sgap-empty .dashicons{color:#b08d57}
+.sgap .notice{border-radius:var(--r-md);box-shadow:var(--shadow-1)}
+/* Cards reflow by their own width, not the viewport: the same card works in a narrow column or a wide grid. */
+.sgap .sgap-card,.sgap .sgap-keycard{container-type:inline-size}
+@container (max-width:300px){.sgap .sgap-actions .button{flex:1 1 100%;justify-content:center}.sgap .sgap-key-foot{flex-direction:column}}
+.sgap .sgap-field:has(input:focus-visible,select:focus-visible){background:linear-gradient(90deg,rgba(176,141,87,.07),transparent 70%);border-radius:var(--r-sm)}
+.sgap .sgap-card:has(.sgap-bad),.sgap .sgap-card.sgap-bad{border-top-color:#b32d2e}
+@media (prefers-reduced-motion:no-preference){@supports (animation-timeline:view()){.sgap .sgap-card,.sgap .sgap-keycard,.sgap .sgap-stat,.sgap .sgap-draft,.sgap .sgap-toolcard{animation:sgap-rise linear both;animation-timeline:view();animation-range:entry 0% entry 35%}}@keyframes sgap-rise{from{opacity:0;translate:0 14px}to{opacity:1;translate:0 0}}}
+@media (prefers-reduced-motion:reduce){.sgap .sgap-card,.sgap .sgap-keycard,.sgap .sgap-stat,.sgap .sgap-channel-card,.sgap .sgap-choice,.sgap .button{transition:none!important;transform:none!important}}
+@media (prefers-contrast:more){.sgap{--hair:1px solid #6b5a3c}.sgap .sgap-pill{border-color:#6b5a3c}}
+@media (max-width:782px){.sgap .sgap-head{padding:16px 18px;border-radius:var(--r-md)}}
 </style>';
     }
 
