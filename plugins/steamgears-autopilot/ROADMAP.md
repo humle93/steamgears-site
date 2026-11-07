@@ -1,7 +1,7 @@
 # Steamgears Autopilot — audit, roadmap and effort estimates
 
-_Last audited: 2026-11-01 · audit was of **7.15.0** (`ab676db` on `main`); current release **7.58.2**, and
-**7.58.0 is what steamgears.eu runs** — and that build takes the whole REST API down: `includes/diagnostics.php`
+_Last audited: 2026-11-01 · audit was of **7.15.0** (`ab676db` on `main`); current release **7.59.0**, and
+**7.59.0 is what steamgears.eu runs** (installed 7/11) — 7.58.0 took the whole REST API down: `includes/diagnostics.php`
 registered its route with `SGAP_Admin::NS`, a constant that has never existed, so `rest_api_init` dies with
 a fatal on every `/wp-json/` request (measured 2026-11-07, see
 `docs/library/rest-nedbrud-7-58-0-2026-11-07.md`). **7.58.1 fixes that** with `SGAP_REST::NS`; **7.58.2** adds
@@ -270,7 +270,7 @@ Threads and LinkedIn stay behind Publer.
 
 | # | Item | Effort |
 | --- | --- | --- |
-| P3.1 | 🟢 **Done 6/11 except 0.05 d (7.33.3)** — the dead method `get_setting_help_link()` is deleted and nine invisible leftovers are gone from `SECRET_KEYS`/`TEXT_KEYS`. The Etsy half (7.33.4) is booked under **P2.4**, where the roadmap estimated it, so the same afternoon is not counted twice. **Only `labor_rate` is left (0.05 d):** it is visible under Economics, and hiding it changes what ROI promises, so it waits for the owner (section 8). | 0.25 d (0.2 done) |
+| P3.1 | ✅ **Done (7.33.3 + 7.59.0)** — the dead method `get_setting_help_link()` is deleted and nine invisible leftovers are gone from `SECRET_KEYS`/`TEXT_KEYS`. The Etsy half (7.33.4) is booked under **P2.4**, where the roadmap estimated it, so the same afternoon is not counted twice. **`labor_rate` (the last 0.05 d) is now read (7.59.0):** section 8's third ending — “rename it to what it is today” — is the one that needed no invented number, so the ROI card computes `SGAP_ROI::hours()` and shows *Labour equivalent: X h at N/h (budget ≈ Y h)*. Five smoke checks in `plugins/tests/roi.php` prove the division, the null on a zero rate, and that the card actually reads the setting back. No scope removed, no pricing promise added. | 0.25 d ✅ |
 | P3.2 | ✅ **Done 3/11 (7.28.0)** — tests for `/feed` and `/reposts`. `merchant_feed()` printed the XML and called `exit`, so the feed could not be tested at all; it now returns a `WP_HTTP_Response` with `Content-Type: application/xml` (and stops calling `header()` after output). 12 checks cover the secret gate (missing secret, wrong key), the 501 without WooCommerce, the Google namespace, SKU falling back to the product id, price with the store currency, XML-escaped titles, stripped HTML in the description, skipped products without price or image, both availability states and the content type; 5 cover the reposts (list, 400 without ids, numbering, 422 at the cap, the insert); 5 cover the uninstall (table list, drops, options, post meta). The `/snapshot` auth gap is closed too: `integration.php` signs out and asserts **401**, and that the refused call is not counted as a Command Center call. | 0.5 d |
 | P3.3 | ✅ **Done as S0.3** — PHP 8.0–8.5 and WordPress 6.4 / 7.1 / latest are in the CI matrix | 0.25 d |
 | P3.4 | ✅ **Done 6/11 (7.34.0)** — the “View details”/update modal now shows the three newest rows from this file's changelog instead of a bare GitHub link. `SGAP_Updater::changelog_notes()` is a pure parser (regex on the `| date | version | change |` table, newest first, `**bold**` and backticked code converted) and `remote_changelog()` fetches `ROADMAP.md` from `main` behind a 6-hour site transient; when GitHub is unreachable the modal falls back to a link rather than an empty tab. Note text is escaped, so nothing in the repo can inject markup. Six smoke-checks cover the parser, the escaping, the limit, the empty case and the modal contract | 0.5 d |
@@ -347,12 +347,13 @@ Platform limits: [Instagram content publishing](https://developers.facebook.com/
    [docs/library/plugin-funktioner-research-2026-11-07.md](../../docs/library/plugin-funktioner-research-2026-11-07.md).
 5. **Command Center direction** — one-way (CC reads `/snapshot` and hands drafts to
    `POST /wp-json/sgap/v1/drafts`) remains the recommendation; confirm before CC work starts.
-6. **`labor_rate`** — the last registered-but-unread setting, and the decision this section already pointed at
-   ("it waits for the owner"). Three endings, each a small code change rather than a guess: **remove** the field
-   (Settings → Economics stops offering a rate ROI never spends — the treatment the nine invisible leftovers got
-   in 7.33.3), **use** it (ROI gains a labour line, which needs the owner's minutes-per-post before any number is
-   computed), or **rename** it to what it is today (a budget-to-hours reference). Until one is chosen the field
-   stays visible and P3.1 stays at 0,2 of 0,25 d.
+6. **`labor_rate`** — ✅ **decided and shipped 7/11 (7.59.0), P3.1 closed.** Of the three endings, the third was the
+   only one that needs no number the plugin cannot measure: the field stays visible under Economics and now does
+   what its label honestly says — it turns money into **hours**. The ROI card divides the 30-day attributed
+   revenue and the monthly budget by the rate and prints *Labour equivalent: X h at N/h (budget ≈ Y h)*; a rate of
+   0 prints “off” instead of dividing by zero. ROI, ROAS and the target are untouched, so no economics changed —
+   a registered-but-unread setting stopped being unread. Removing the field or costing minutes-per-post remain
+   available later if the owner wants them, but they are no longer what P3.1 waits for.
 7. **Activate WooCommerce and the plugin** — both are inactive (measured 7/11 evening), so the store answers 500
    and the autopilot cannot run or be measured. Once both are active, the first proof is `/wp-json/sgap/v1` → 200
    with the three `/facebook/*` routes, and the front page returning 200 instead of the `is_woocommerce()` fatal.
@@ -361,6 +362,14 @@ Platform limits: [Instagram content publishing](https://developers.facebook.com/
 
 ## 9. Change log for this document
 
+- **7.59.0 (7/11)** — **`labor_rate` læses nu: P3.1 lukket.** Indstillingen har været registreret siden 7.15.0 og
+  læst af intet (den sidste af slagsen, §8 punkt 6). Den er ikke fjernet og der er ikke gættet et minutforbrug:
+  §8's tredje udgang — “omdøb den til det den er i dag”, en budget-til-timer-reference — er gennemført i stedet.
+  `SGAP_ROI::hours($amount, $rate)` dividerer med timeprisen, og ROI-kortet viser nu
+  *Labour equivalent: 4 h at 250.00/h (budget ≈ 4 h)* ved siden af omsætning, budget, ROI og ROAS; en pris på 0
+  giver “off” i stedet for en division med nul, så kortet aldrig viser uendeligt. ROI/ROAS/target er urørte, så
+  ingen økonomi er ændret — kun at feltet faktisk bliver læst. Fem smoke-checks i `plugins/tests/roi.php`
+  (990 → 995 PASS, 0 FAIL) dækker divisionen, nul-prisen, afrundingen og at kortet læser indstillingen tilbage.
 - **7.58.2 (7/11)** — **opdateringsfælden: kortet kunne sige “Up to date” i seks timer.** Ejeren trykkede
   *Plugins → Update*, og der skete intet — ikke fordi knappen fejlede, men fordi der ikke var noget at
   installere: `SGAP_Updater::remote_version()` cacher GitHubs versionsnummer i et site-transient i **6 timer**,

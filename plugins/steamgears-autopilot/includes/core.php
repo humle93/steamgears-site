@@ -696,6 +696,15 @@ class SGAP_ROI {
     public static function roas(float $revenue, float $ad_spend): float {
         return $ad_spend > 0 ? round($revenue / $ad_spend, 2) : 0.0;
     }
+    /**
+     * Hvor mange arbejdstimer en sum svarer til ved ejerens timepris.
+     * `labor_rate` blev registreret i 7.15.0 og laest af intet; den bruges nu her,
+     * saa ROI-kortet kan sige hvad omsaetningen er vaerd i ejerens timer.
+     * Null naar prisen er 0, saa linjen kan skjules i stedet for at vise uendeligt.
+     */
+    public static function hours(float $amount, float $rate): ?float {
+        return $rate > 0 ? round($amount / $rate, 1) : null;
+    }
 }
 
 /* ---------------- CLICK TRACKING ---------------- */
@@ -2366,11 +2375,19 @@ class SGAP_Admin {
         ));
         $roi = SGAP_ROI::roi($rev_30d, $budget);
         $roas = SGAP_ROI::roas($rev_30d, $budget);
+        $labor_rate = (float) SGAP_Settings::get('labor_rate', 250);
+        $labour_hours = SGAP_ROI::hours($rev_30d, $labor_rate);
+        $budget_hours = SGAP_ROI::hours($budget, $labor_rate);
 
         echo '<p><strong>30-Day Attributed Revenue:</strong> ' . esc_html(number_format($rev_30d, 2))
             . ' &middot; <strong>Monthly Budget:</strong> ' . esc_html(number_format($budget, 2))
             . ' &middot; <strong>ROI:</strong> ' . esc_html((string) $roi) . '% (Target: ' . esc_html((string) $target_roi) . '%)'
-            . ' &middot; <strong>ROAS:</strong> ' . esc_html((string) $roas) . 'x</p>';
+            . ' &middot; <strong>ROAS:</strong> ' . esc_html((string) $roas) . 'x'
+            . (null !== $labour_hours
+                ? ' &middot; <strong>Labour equivalent:</strong> ' . esc_html((string) $labour_hours) . ' h at ' . esc_html(number_format($labor_rate, 2)) . '/h'
+                    . ' (budget &asymp; ' . esc_html((string) $budget_hours) . ' h)'
+                : ' &middot; <strong>Labour equivalent:</strong> off (set your hourly rate to see it)')
+            . '</p>';
 
         echo '<h2>Recent Attributed Conversions</h2>';
         $conversions = $wpdb->get_results(
