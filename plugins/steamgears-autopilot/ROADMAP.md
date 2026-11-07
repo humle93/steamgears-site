@@ -313,9 +313,14 @@ Platform limits: [Instagram content publishing](https://developers.facebook.com/
 2. **Direct network tokens** — ✅ **decided 2026-11-06: removed** (7.33.3). All publishing goes through Publer,
    so `pinterest_token`, `instagram_token`, `tiktok_token`, `youtube_*`, `reddit_*` and `ai_mode` are gone.
 3. **Action Scheduler** — accept the 2 d migration, or stay on WP-Cron with detection and documentation
-   (P0.4)?
+   (P0.4)? **Research 7/11:** WooCommerce 11.x leverer Action Scheduler (GPL-3.0, L-2-politik), så en adapter på ~0,5 d
+   (`function_exists('as_schedule_recurring_action')` → AS med `sgap`-gruppe, ellers WP-Cron) slår den fulde 2,0 d-migration — se
+   [docs/library/plugin-funktioner-research-2026-11-07.md](../../docs/library/plugin-funktioner-research-2026-11-07.md).
 4. **Analytics** — is platform-side reach/engagement worth 4 d plus API review, or are click and revenue
-   attribution (already built) enough?
+   attribution (already built) enough? **Research 7/11:** review-kravet gælder kun *andre folks* konti — Pinterest-analytics er med i Trial,
+   IG-insights på egen konto kræver intet App Review, og Bluesky/Mastodon er offentlige reads. P1.5 kan derfor deles i
+   **0,5 + 1,0 + 1,5 d** i stedet for 4,0 d — se
+   [docs/library/plugin-funktioner-research-2026-11-07.md](../../docs/library/plugin-funktioner-research-2026-11-07.md).
 5. **Command Center direction** — one-way (CC reads `/snapshot` and hands drafts to
    `POST /wp-json/sgap/v1/drafts`) remains the recommendation; confirm before CC work starts.
 
