@@ -25,7 +25,7 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 | Projekt | Status | Grundlag |
 | --- | --- | --- |
 | **steamgears.eu — site-optimering** | **64,6 %** | 15,7 af 24,3 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 7,35/8,05 · S3 2,55/3,55 · S4 1,5/5,25) |
-| **Steamgears Autopilot — plugin** | **96,3 %** | 28,3 af 29,4 d (P0 4,65/4,7 · P1 14,2/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25 · P1E 0,25/0,25 · P1F 0,25/0,25) |
+| **Steamgears Autopilot — plugin** | **96,3 %** | 28,8 af 29,9 d (P0 4,65/4,7 · P1 14,2/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25 · P1E 0,25/0,25 · P1F 0,25/0,25 · P1G 0,5/0,5) |
 | **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5) |
 | **SEO-indholdsproduktion** | **62,5 %** | 5 af 8 guides (BATCH 0/3 · COPY 4/4 · CORSET 1/1) |
 | **Døde internlinks** | **100 %** | 39 af 39 links (FIX 39/39) |
@@ -47,7 +47,7 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
-- `2124512 S3.5: ugens kontrol kørt — 24/24 værn, 781 smoke-checks`
+- `f104f72 P1.22: fejlsøgning i pluginnet og forbehold pr. modul (7.57.0)`
 - `d0e86a9 Merge main (P1.20/P1.21, 7.55.0) ind i P1.5c Instagram-insights — udgivet som 7.56.0`
 - `c38acb4 chore(status): daglig projektstatus 2026-11-07`
 - `c747a47 Modul: P1.5c Instagram-insights — fem metrics, caption-match og in-place fornyelse Før: 91,0 %  →  Efter: 96,2 %  (Δ +5,2) Grundlag: 27,8 af 28,9 d (P0 4,65/4,7 · P1 14,2/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25)`
@@ -56,6 +56,32 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 7/11 — Fejlsøgning i pluginnet (P1.22, 7.57.0) og forbehold som en del af svaret
+
+- **Fejlsøgning er nu også inde i pluginnet**, ikke kun i repoet: **Steamgears → Fejlsøgning**
+  (`includes/diagnostics.php`) har ni tjek der **læses** ud af den tilstand modulerne allerede holder — PHP,
+  tabeller, planlagte job, fejlede posts, AI-nøgle, Pinterest, Instagram, MCP og modulfejl — hvert med en
+  tilstand, en sætning om hvad det fandt, og en om hvad man gør. Siden skriver ikke til den tilstand, så den
+  kan ikke selv blive en ny fejlkilde.
+- **En kanal der aldrig er blevet forbundet er `off`, ikke `bad`.** Det er ikke en fejl at have slået en kanal
+  fra, og et dashboard der råber op om det, lærer ejeren at ignorere farverne. Et token i `wp-config.php` er
+  derimod en fejl, fordi det ikke kan fornyes.
+- **Loggen findes, fordi modulerne kun holder én fejltekst.** `sgap_instagram_state['error']` bliver ryddet af
+  den næste kørsel der lykkes — et natligt afslag kl. 03 var væk kl. 09. `SGAP_Diagnostics::log()` skriver til
+  en ringbuffer på 40 rækker, **tæller gentagelser i stedet for at duplikere**, og skiller visnings-`at` (sitets
+  ur) fra regne-`ts` (`time()`) — 24-timers-vinduet må ikke arve den gamle `gmdate`-fejl på ±14 timer.
+- **Logningen sidder i `record()`** i Instagram- og Pinterest-modulet, ikke i hvert kaldested: det er det ene
+  sted tilstanden skrives, så en ny fejlvej ikke kan glemme loggen.
+- **Forbeholdet er blevet indhold:** `SGAP_UI::caveat()` står under Instagram-, Pinterest- og
+  engagement-kortet og samlet på fejlsøgningssiden. Teksterne siger hvad der er *uden for* tallet — at en
+  metric Instagram ikke har rapporteret endnu er **udeladt, ikke 0**; at Pinterest-forespørgsler er afgrænset
+  til kanalen fordi `saves`/`likes` deles med andre kanaler; at ROI er last-click, så en ordre uden klik hører
+  til ingen kanal; og at et opslag der aldrig kom afsted slet ingen tal har.
+- **Bogføringsfejl fanget og rettet i samme pas:** P1.22 blev først lagt både ind i P1's total (15,2 → 15,7) og
+  ind som eget modul, så de 0,5 d blev talt to gange (96,4 %). Rettet til eget modul alene → **96,3 %
+  (28,8 af 29,9 d)**; korrektionen står som historik-række med `scope_change`, ikke som en slettet række.
+- **905 smoke-checks, 0 FAIL**, 24/24 værn grønne. Ikke kørt live — intet token findes.
 
 ### 7/11 — Nedbruddet målt igen: hele den dynamiske del er nede
 

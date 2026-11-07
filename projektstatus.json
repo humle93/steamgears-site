@@ -1250,6 +1250,7 @@
       "note": "P1.22 blev først bogført både inde i P1's total (15,2 → 15,7) og som eget modul, så de 0,5 d blev talt to gange. Rettet til eget modul alene; faldet er korrektion af dobbelttællingen, ikke tabt arbejde."
     },
     {
+      "date": "2026-11-07",
       "project": "steamgears.eu — site-optimering",
       "module": "daglig måling",
       "before": 64.4,

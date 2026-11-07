@@ -23,7 +23,7 @@ Status pr. **2026-11-07** · beregnet af `projektstatus.py` · kilder: [`projekt
 | Projekt | Status i dag | Grundlag |
 | --- | --- | --- |
 | **steamgears.eu — site-optimering** *(roadmap S0–S4)* | **64,6 %** | 15,7 af 24,3 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 7,35/8,05 · S3 2,55/3,55 · S4 1,5/5,25) |
-| **Steamgears Autopilot — plugin** | **96,3 %** | 28,3 af 29,4 d (P0 4,65/4,7 · P1 14,2/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25) |
+| **Steamgears Autopilot — plugin** | **96,3 %** | 28,8 af 29,9 d (P0 4,65/4,7 · P1 14,2/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5) |
 | **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5) |
 | **SEO-indholdsproduktion** | **62,5 %** | 5 af 8 guides (Publicerede guides (id 292, 296, 295) 0/3 · Guide-copy klar til publicering (292, 296, 295 + corset) 4/4 · Corset-guiden publiceret (/steampunk-corset-guide/, 1394) 1/1) · drift: Daglig loop kører |
 | **Døde internlinks** | **100 %** | 39 af 39 links |
@@ -51,6 +51,8 @@ Nyeste først. Append-only — rækker må ikke slettes eller ændres.
 | Dato | Projekt | Modul | Før → Efter | Δ | Grundlag |
 | --- | --- | --- | --- | --- | --- |
 | 2026-11-07 | steamgears.eu — site-optimering | daglig måling | 64,4 % → 64,6 % | +0,2 | 15,7 af 24,3 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 7,35/8,05 · S3 2,55/3,55 · S4 1,5/5,25) |
+| 2026-11-07 | Steamgears Autopilot — plugin | daglig måling | 96,4 % → 96,3 % | -0,1 | 28,8 af 29,9 d (P0 4,65/4,7 · P1 14,2/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5) |
+| 2026-11-07 | Steamgears Autopilot — plugin | daglig måling | 96,3 % → 96,4 % | +0,1 | 29,3 af 30,4 d (P0 4,65/4,7 · P1 14,7/15,7 · P2 4,75/4,75 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5) |
 | 2026-11-07 | Steamgears Autopilot — plugin | daglig måling | 91,2 % → 96,3 % | +5,1 | 28,3 af 29,4 d (P0 4,65/4,7 · P1 14,2/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25) |
 | 2026-11-07 | Steamgears Autopilot — plugin | daglig måling | 91,1 % → 91,2 % | +0,1 | 26,8 af 29,4 d (P0 4,65/4,7 · P1 12,7/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25) |
 | 2026-11-07 | Steamgears Autopilot — plugin | daglig måling | 91 % → 91,1 % | +0,1 | 26,55 af 29,15 d (P0 4,65/4,7 · P1 12,7/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25) |
