@@ -159,6 +159,28 @@ Sitet kører **Novamira 1.12.14** ved siden af AI Engine. Den har sin egen OAuth
 3. **`tools/list` kræver `Mcp-Session-Id`** fra `initialize`-svarets header. Uden den svarer fladen `400` med
    0 værktøjer, selv om `initialize` gik igennem.
 
+### Fornyelse i pluginnet (7.44)
+
+Siden 7.44 holder **sitet selv** Novamira-tokenet i live, så adgangen ikke afhænger af repository-secrets eller
+af et loop i en sandkasse. [`plugins/steamgears-autopilot/includes/mcp-auth.php`](../plugins/steamgears-autopilot/includes/mcp-auth.php)
+(`SGAP_MCP_Auth`) kører cron-hooket `sgap_mcp_refresh` **hvert 30. minut**:
+
+1. fornyer med det gemte refresh-token (form-encoded kald til `/wp-json/novamira/v1/oauth/token`),
+2. gemmer det nye access-token og det **roterede** refresh-token med det samme,
+3. verificerer med `initialize` → `Mcp-Session-Id` → `tools/list`, og
+4. gemmer resultatet: tid, antal værktøjer, rotation og API'ets egen fejltekst.
+
+Et token der er udstedt men ikke virker bliver **ikke** meldt som fornyet. Fejlen står i det daglige selvtjek
+(samme mail-vej som de øvrige alarmer), i værktøjet `steamgears-tools/mcp-status` og på *Settings → MCP access*,
+hvor **MCP client ID** og **MCP refresh token** indtastes. Refresh-tokenet er en secret: det gemmes med
+autoload `false` og vises aldrig igen. Det skal ligge i databasen — en konstant i `wp-config.php` afvises, fordi
+serveren roterer tokenet og ikke kan skrive konstanten tilbage. `steamgears-tools/mcp-refresh` fornyer på
+kommando efter en afbrydelse.
+
+**Godkendelsen er stadig ejerens:** `python3 tools/mcp_oauth.py --start` giver linket, `--finish '<kode>'`
+gemmer parret uden for repoet, og de to værdier indsættes i wp-admin. Den vej nedenfor (worktree-loop og
+CI-workflow) virker stadig, men er nu kun et supplement.
+
 ### Hold adgangen i live
 
 Access-tokenet lever **3600 s**, og refresh-tokenet **roteres** ved hver fornyelse (målt 6/11: `refresh_token`

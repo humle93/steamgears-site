@@ -56,7 +56,7 @@
     {
       "id": "plugin",
       "name": "Steamgears Autopilot — plugin",
-      "next": "P3.1 labor_rate (ejer); P1.5 er eksternt blokeret (Pinterest-token + Meta-review)",
+      "next": "P3.1 labor_rate (ejer); P1.5 er eksternt blokeret (Pinterest-token + Meta-review); P1.15 er bygget i 7.44.0 og venter kun på ejerens godkendelse og de to MCP-værdier i wp-admin",
       "blocked_by": "P1.5 kræver Pinterest-token (401) og Meta-review; P3.1 mangler ejerens labor_rate-beslutning",
       "modules": [
         {
@@ -70,10 +70,10 @@
         {
           "id": "p1",
           "name": "P1 — paritet",
-          "done": 9.4,
-          "total": 13.4,
+          "done": 9.9,
+          "total": 13.9,
           "unit": "d",
-          "note": "P1.1 pre-flight pr. kanal 1,0 d (7.20.0) + P1.3 blackout-kalender 0,5 d (7.21.0) + P1.6 quality gate 1,0 d (includes/quality.php, 7.22.0 — nu også målt live på sitet) + P1.7 helsides SEO/GEO/AEO-audit 1,0 d (7.19.0) + P1.8 utm_campaign som parameter 0,25 d (7.23.0, venter på Update-klik) + 0,1 d queue-post bærer angle/format/kampagne (7.25.0, krævet fordi OAuth-tokenet ikke gælder pluginets REST-namespace) = 5,5 af 8 punkter. P1.5 er eksternt blokeret (Pinterest-token) + P1.2 remind me i stedet for at poste 1,0 d (7.27.0, includes/reminder.php, 20 smoke-checks) + P1.9 botten læser sitet via de 13 læsende MCP-værktøjer 0,25 d (7.35.0, includes/chat.php + mcp-tools.php, skrive-værktøjerne bliver på MCP-fladen) + P1.10 værktøjskataloget kan opdateres og udvides via filter 0,25 d (7.36.0, sgap_chat_tools-filter, signatur, Refresh tools-knap) + P1.11 botten ser hele sitets ability- og MCP-katalog via find/describe/run-tool 0,5 d (7.37.0) + P1.12 ability-indeks, kategorisøgning og Tools-side 0,75 d (7.38.0, ability-index + search-abilities + sgap-tools med søgning og badges); 6/11: 7.38.1 rettede ugyldige værktøjsnavne (AIMLAPI/Gemini afviste skråstreg/cifre-start) — fejlretning i P1.12, 0 nye dage; 7.38.2 tilføjede provider-log med culprit-oversættelse P1.14 model-dropdown 0,3 d (7.39.0). + P1.4 evergreen-recycling 2,5 d (7.41.0): includes/evergreen.php markerer indlæg/produkter, genbruger dem efter 60 dage med en frisk AI-variation på næste kanal og stopper på budget eller dato; egen daglig cron, editor-metabox, Evergreen-side og tre abilities. 29 nye smoke-checks (494 → 523 PASS)."
+          "note": "P1.1 pre-flight pr. kanal 1,0 d (7.20.0) + P1.3 blackout-kalender 0,5 d (7.21.0) + P1.6 quality gate 1,0 d (includes/quality.php, 7.22.0 — nu også målt live på sitet) + P1.7 helsides SEO/GEO/AEO-audit 1,0 d (7.19.0) + P1.8 utm_campaign som parameter 0,25 d (7.23.0, venter på Update-klik) + 0,1 d queue-post bærer angle/format/kampagne (7.25.0, krævet fordi OAuth-tokenet ikke gælder pluginets REST-namespace) = 5,5 af 8 punkter. P1.5 er eksternt blokeret (Pinterest-token) + P1.2 remind me i stedet for at poste 1,0 d (7.27.0, includes/reminder.php, 20 smoke-checks) + P1.9 botten læser sitet via de 13 læsende MCP-værktøjer 0,25 d (7.35.0, includes/chat.php + mcp-tools.php, skrive-værktøjerne bliver på MCP-fladen) + P1.10 værktøjskataloget kan opdateres og udvides via filter 0,25 d (7.36.0, sgap_chat_tools-filter, signatur, Refresh tools-knap) + P1.11 botten ser hele sitets ability- og MCP-katalog via find/describe/run-tool 0,5 d (7.37.0) + P1.12 ability-indeks, kategorisøgning og Tools-side 0,75 d (7.38.0, ability-index + search-abilities + sgap-tools med søgning og badges); 6/11: 7.38.1 rettede ugyldige værktøjsnavne (AIMLAPI/Gemini afviste skråstreg/cifre-start) — fejlretning i P1.12, 0 nye dage; 7.38.2 tilføjede provider-log med culprit-oversættelse P1.14 model-dropdown 0,3 d (7.39.0). + P1.4 evergreen-recycling 2,5 d (7.41.0): includes/evergreen.php markerer indlæg/produkter, genbruger dem efter 60 dage med en frisk AI-variation på næste kanal og stopper på budget eller dato; egen daglig cron, editor-metabox, Evergreen-side og tre abilities. 29 nye smoke-checks (494 → 523 PASS). + P1.15 MCP-fornyelse i pluginnet 0,5 d (7.44.0): includes/mcp-auth.php fornyer Novamira-tokenet på sitets egen WP-Cron hvert 30. minut, verificerer med initialize + Mcp-Session-Id + tools/list og gemmer det roterede refresh-token før noget andet; mcp-status (læsende) og mcp-refresh er nye værktøjer, indstillingerne ligger under Settings → MCP access, og en afvist fornyelse rejses i det daglige selvtjek. 20 nye smoke-checks (564 → 584 PASS, 0 FAIL)."
         },
         {
           "id": "p2",
@@ -1009,6 +1009,15 @@
       "after": 75.2,
       "delta": 0.3,
       "basis": "20,95 af 27,85 d (P0 4,35/4,7 · P1 9,4/13,4 · P2 4,5/7 · P3 2,7/2,75)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 75.2,
+      "after": 75.7,
+      "delta": 0.5,
+      "basis": "21,45 af 28,35 d (P0 4,35/4,7 · P1 9,9/13,9 · P2 4,5/7 · P3 2,7/2,75)"
     }
   ]
 }

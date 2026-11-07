@@ -103,10 +103,31 @@ run end to end from an MCP client instead of a browser tab. All administrator-on
 | `steamgears-tools/sitemap-audit` | Reads `sitemap_index.xml`, follows every child sitemap, counts URLs, checks one URL |
 | `steamgears-tools/list-abilities` | **Every** ability on the site, from every plugin, with its input schema |
 | `steamgears-tools/call-ability` | Run any ability by name, after its own permission check |
+| `steamgears-tools/mcp-status` | State of this plugin's own MCP credential: client ID and refresh token saved, expiry, verified tool count, why the last renewal failed |
+| `steamgears-tools/mcp-refresh` | Renew the MCP access token now, verify it with `initialize` + `tools/list` and store the rotated refresh token |
 
 The last two are the point: `list-abilities` shows what exists — WordPress core,
 WooCommerce, Rank Math, AI Engine, this plugin — and `call-ability` runs it. New
 plugins that register abilities become reachable without another code change.
+
+### MCP access that renews itself (7.44)
+
+The site's MCP credential is a Novamira OAuth pair: the access token lives 3600 seconds and the refresh token
+is **rotated** on every renewal, so the old one is dead afterwards. 7.44 moves the renewal onto the site, so
+access no longer depends on repository secrets or on a loop running in a sandbox:
+
+- `sgap_mcp_refresh` runs every 30 minutes: it renews, proves the new token with `initialize` +
+  `Mcp-Session-Id` + `tools/list`, and writes the rotated refresh token back before anything else.
+- *Settings → MCP access* holds the public client ID and the refresh token. The token is a secret (autoload
+  off) and is never shown again; an empty field keeps the stored value.
+- A token that is issued but does not verify is **not** reported as renewed. The API's own reason
+  (`invalid_grant`, `unsupported_grant_type`, an empty `tools/list`) is stored, shown by `mcp-status` and
+  raised as a problem in the daily self-check — so the alarm comes from the site.
+- A refresh token set in `wp-config.php` is refused with an explanation: the server rotates it, and a
+  constant cannot be written back.
+
+Approval is still one owner click: `python3 tools/mcp_oauth.py --start` prints the link, `--finish '<code>'`
+saves the pair outside the repo, and the two values are pasted under *Settings → MCP access*.
 
 ### IndexNow key
 

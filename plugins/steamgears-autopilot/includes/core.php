@@ -24,6 +24,8 @@ class SGAP_Install {
     const GENERATE_CRON = 'sgap_generate';
     const EVERGREEN_CRON = 'sgap_evergreen';
     const QUARTER_HOUR = 'sgap_quarter_hour';
+    const MCP_CRON = 'sgap_mcp_refresh';
+    const MCP_HALF_HOUR = 'sgap_mcp_half_hour';
 
     const TABLES = [
         'sgap_queue', 'sgap_events', 'sgap_cro', 'sgap_learning',
@@ -74,7 +76,8 @@ class SGAP_Install {
         'sgap_evergreen_enabled' => 'no',
         'sgap_evergreen_after_days' => 60,
         'sgap_evergreen_max_shares' => 3,
-        'sgap_evergreen_batch' => 1
+        'sgap_evergreen_batch' => 1,
+        'sgap_mcp_client_id' => ''
     ];
 
     public static function activate(): void {
@@ -83,7 +86,7 @@ class SGAP_Install {
 
     public static function deactivate(): void {
         self::clear_legacy_cron();
-        foreach ([self::CLEANUP_CRON, self::PUBLISH_CRON, self::GENERATE_CRON, self::EVERGREEN_CRON] as $hook) {
+        foreach ([self::CLEANUP_CRON, self::PUBLISH_CRON, self::GENERATE_CRON, self::EVERGREEN_CRON, self::MCP_CRON] as $hook) {
             wp_clear_scheduled_hook($hook);
         }
         if (class_exists('SGAP_Auto')) {
@@ -112,6 +115,9 @@ class SGAP_Install {
     /** Adds the 15-minute interval the publisher runs on. */
     public static function cron_schedules(array $schedules): array {
         $schedules[self::QUARTER_HOUR] = ['interval' => 15 * MINUTE_IN_SECONDS, 'display' => 'Every 15 minutes (Steamgears)'];
+        // The MCP access token lives 3600 s and the refresh token is rotated on use:
+        // half an hour between renewals leaves room for one failed attempt.
+        $schedules[self::MCP_HALF_HOUR] = ['interval' => 30 * MINUTE_IN_SECONDS, 'display' => 'Every 30 minutes (Steamgears MCP)'];
         return $schedules;
     }
 
@@ -306,7 +312,8 @@ class SGAP_Install {
             self::CLEANUP_CRON => ['daily', HOUR_IN_SECONDS],
             self::GENERATE_CRON => ['daily', 10 * MINUTE_IN_SECONDS],
             self::EVERGREEN_CRON => ['daily', 20 * MINUTE_IN_SECONDS],
-            self::PUBLISH_CRON => [self::QUARTER_HOUR, 5 * MINUTE_IN_SECONDS]
+            self::PUBLISH_CRON => [self::QUARTER_HOUR, 5 * MINUTE_IN_SECONDS],
+            self::MCP_CRON => [self::MCP_HALF_HOUR, 12 * MINUTE_IN_SECONDS]
         ] as $hook => [$recurrence, $delay]) {
             if (!wp_next_scheduled($hook)) {
                 wp_schedule_event(time() + $delay, $recurrence, $hook);
@@ -336,7 +343,8 @@ class SGAP_Settings {
     const SECRET_KEYS = [
         'publer_api_key','ai_api_key','image_api_key','serpapi_key',
         'telegram_bot_token',
-        'merchant_feed_secret','bluesky_app_password','mastodon_token'
+        'merchant_feed_secret','bluesky_app_password','mastodon_token',
+        'mcp_refresh_token'
     ];
     /** Multi-line text settings, shown as a textarea. */
     const TEXTAREA_KEYS = ['blackout_ranges', 'banned_words'];
@@ -345,7 +353,7 @@ class SGAP_Settings {
         'telegram_chat_id',
         'alert_email','channel_caps',
         'blackout_ranges','banned_words','utm_campaign','bluesky_handle','mastodon_instance',
-        'locale_source','locales','command_center_url'
+        'locale_source','locales','command_center_url','mcp_client_id'
     ];
     /** Settings with a fixed list of values, shown as a select. */
     const CHOICE_KEYS = [
@@ -364,7 +372,8 @@ class SGAP_Settings {
         'Economics' => ['labor_rate','monthly_budget','target_roi','winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max'],
         'Evergreen' => ['evergreen_enabled','evergreen_after_days','evergreen_max_shares','evergreen_batch'],
         'Alerts and log' => ['alert_mode','alert_email','alert_dry_days','channel_caps','audit_keep_days'],
-        'Google Feed' => ['merchant_feed_secret']
+        'Google Feed' => ['merchant_feed_secret'],
+        'MCP access' => ['mcp_client_id','mcp_refresh_token']
     ];
 
     const HELP = [
@@ -419,7 +428,9 @@ class SGAP_Settings {
         'channel_caps' => 'Optional cap per channel, one per line or comma-separated: pinterest=2, facebook=3. Each channel then gets its own runway, and a channel with a cap warns when its own queue runs below the warning level — a healthy total can hide a channel that is about to stop. A channel without a cap is measured against Max posts per day.',
         'audit_keep_days' => 'How long the publish log is kept: one row per attempt, with channel, HTTP status, response and who started it. 0 = keep everything.',
         'rescue_hosts' => 'Images on these servers are copied into your media library and every link is rewritten (comma-separated).',
-        'utm_campaign' => 'The campaign name every link from this site carries as utm_campaign: set it once per campaign (e.g. clockwork_punk_2026_11) and GA4 can tell campaigns apart. A single post can override it with its own campaign. Letters, digits, - and _ only; empty = steamgears_premium_evergreen. Posts queued before the change keep the value they were queued with.'
+        'utm_campaign' => 'The campaign name every link from this site carries as utm_campaign: set it once per campaign (e.g. clockwork_punk_2026_11) and GA4 can tell campaigns apart. A single post can override it with its own campaign. Letters, digits, -            and _ only; empty = steamgears_premium_evergreen. Posts queued before the change keep the value they were queued with.',
+        'mcp_client_id' => 'The public client ID from the one-time MCP approval (tools/mcp_oauth.py --start prints it). It is not a secret.',
+        'mcp_refresh_token' => 'The refresh token from that approval (tools/mcp_oauth.py --finish saves it in ~/.config/steamgears-mcp/tokens.json). The plugin renews the access token every 30 minutes and writes the rotated refresh token back here, so it must live in the database — a wp-config.php constant cannot be updated by the server. Never shown again after saving; an empty field keeps the stored value.'
     ];
 
     public static function get(string $key, $default = '') {

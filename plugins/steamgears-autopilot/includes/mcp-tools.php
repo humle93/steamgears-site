@@ -313,6 +313,16 @@ class SGAP_MCP_Tools {
                 ],
                 [], [__CLASS__, 'search_abilities_tool'], true, true
             ],
+            'mcp-status' => [
+                'MCP access status',
+                'State of this site\'s own MCP credential: whether a client ID and an approved refresh token are saved, when the access token expires, how many tools the last verification found, and why the last renewal failed. Read-only.',
+                [], [], [__CLASS__, 'mcp_status'], true, true
+            ],
+            'mcp-refresh' => [
+                'Renew the MCP token now',
+                'Renews the MCP access token with the saved refresh token, verifies it with initialize + tools/list, and stores the rotated refresh token. The 30-minute cron does this on its own; use it after an outage or a fresh approval.',
+                [], [], [__CLASS__, 'mcp_refresh'], false, true
+            ],
             'call-ability' => [
                 'Run any ability',
                 'Runs any registered ability by name with the given input, after checking that ability\'s own permission callback. This is the escape hatch: anything exposed as an ability on this site is reachable through it.',
@@ -1275,6 +1285,17 @@ class SGAP_MCP_Tools {
             'matched' => $result['matched'],
             'abilities' => $result['abilities']
         ];
+    }
+
+    public static function mcp_status($input = null): array {
+        return class_exists('SGAP_MCP_Auth') ? SGAP_MCP_Auth::status() : ['problem' => 'The MCP auth module is not loaded.'];
+    }
+
+    public static function mcp_refresh($input = null) {
+        if (!class_exists('SGAP_MCP_Auth')) {
+            return new WP_Error('sgap_mcp_unavailable', 'The MCP auth module is not loaded.');
+        }
+        return SGAP_MCP_Auth::refresh_and_report();
     }
 
     public static function call_ability($input = null) {

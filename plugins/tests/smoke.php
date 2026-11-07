@@ -566,7 +566,7 @@ class SGAP_Fake_Ability { function __construct(public string $n, public array $a
 do_action('wp_abilities_api_categories_init'); do_action('wp_abilities_api_init');
 $tools=array_filter($GLOBALS['abilities'],fn($k)=>str_starts_with($k,'steamgears-tools/'),ARRAY_FILTER_USE_KEY);
 check('tools: category registered', isset($GLOBALS['ability_categories']['steamgears-tools']));
-check('tools: full catalogue registered', count($tools)===28);
+check('tools: full catalogue registered', count($tools)===30);
 check('tools: the actions we kept needing are there', !array_diff([
     'steamgears-tools/get-option','steamgears-tools/update-option','steamgears-tools/undo','steamgears-tools/set-plugin-state',
     'steamgears-tools/flush-rewrites','steamgears-tools/flush-caches','steamgears-tools/list-posts','steamgears-tools/update-post',
@@ -865,6 +865,7 @@ function wp_remote_post($url,$args=[]){ $GLOBALS['http_calls'][]=[$url,$args]; $
 function wp_remote_request($url,$args=[]){ return wp_remote_post($url,$args); }
 function wp_remote_retrieve_response_code($r){ return is_array($r)?(int)($r['response']['code']??0):0; }
 function wp_remote_retrieve_body($r){ return is_array($r)?(string)($r['body']??''):''; }
+function wp_remote_retrieve_header($r,$h){ $h=strtolower((string)$h); return is_array($r)&&isset($r['headers'])?(string)($r['headers'][$h]??''):''; }
 function sgap_http($code,$body){ return ['response'=>['code'=>$code],'body'=>is_array($body)?json_encode($body):(string)$body]; }
 
 // 7.38.4 — et gemt modelnavn AIMLAPI ikke kender må ikke lamme chatten: kaldet prøver én gang
@@ -1283,6 +1284,7 @@ check('evergreen: the AI variation is one structured call', is_array($ai) && cou
 check('evergreen: the prompt asks for a new angle and forbids invented offers', str_contains((string)$GLOBALS['http_calls'][0][1]['body'],'genuinely different angle') && str_contains((string)$GLOBALS['http_calls'][0][1]['body'],'do not invent a discount'));
 check('evergreen: the AI answer is what reaches the queue', str_contains(implode("\n",$wpdb->log),'A second look at the corset') && str_contains(implode("\n",$wpdb->log),'#corset'));
 $GLOBALS['opts']['sgap_ai_api_key']='';
+require __DIR__.'/mcp.php';
 require __DIR__.'/evergreen.php';
 // P3.2/P3.5-slut
 exit(empty($GLOBALS['fail'])?0:1);

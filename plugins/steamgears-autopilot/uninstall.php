@@ -26,7 +26,7 @@ delete_post_meta_by_key('_sgap_promoted_at');
 
 foreach ([
     'sgap_daily_cleanup', 'sgap_publish_tick', 'sgap_generate', 'sgap_process_queue', 'sgap_etsy_sync', 'sgap_etsy_inventory',
-    'sgap_weekly_report', 'sgap_repost_check', 'sgap_suppression_check'
+    'sgap_weekly_report', 'sgap_repost_check', 'sgap_suppression_check', 'sgap_mcp_refresh'
 ] as $hook) {
     wp_clear_scheduled_hook($hook);
 }

@@ -25,7 +25,7 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 | Projekt | Status | Grundlag |
 | --- | --- | --- |
 | **steamgears.eu — site-optimering** | **62 %** | 14,75 af 23,8 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 6,55/7,55 · S3 2,5/3,55 · S4 1,4/5,25) |
-| **Steamgears Autopilot — plugin** | **75,2 %** | 20,95 af 27,85 d (P0 4,35/4,7 · P1 9,4/13,4 · P2 4,5/7 · P3 2,7/2,75) |
+| **Steamgears Autopilot — plugin** | **75,7 %** | 21,45 af 28,35 d (P0 4,35/4,7 · P1 9,9/13,9 · P2 4,5/7 · P3 2,7/2,75) |
 | **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5) |
 | **SEO-indholdsproduktion** | **62,5 %** | 5 af 8 guides (BATCH 0/3 · COPY 4/4 · CORSET 1/1) |
 | **Døde internlinks** | **100 %** | 39 af 39 links (FIX 39/39) |
@@ -40,22 +40,36 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 ### Næste skridt
 
 - **steamgears.eu — site-optimering** — Svar på de tre spørgsmål i docs/library/payload-loft-beslutning-2026-11-07.md §6 (annoncepixels, header-mini-kurv, klasse 3-loft), derefter trin 0–2 (0,4 d); skriv de tre manglende guides fra den verificerede copy; S1.1 Herbarium kræver varianter i Printify; S0.4 kræver én Redirection-gruppe (ejer)
-- **Steamgears Autopilot — plugin** — P3.1 labor_rate (ejer); P1.5 er eksternt blokeret (Pinterest-token + Meta-review)
+- **Steamgears Autopilot — plugin** — P3.1 labor_rate (ejer); P1.5 er eksternt blokeret (Pinterest-token + Meta-review); P1.15 er bygget i 7.44.0 og venter kun på ejerens godkendelse og de to MCP-værdier i wp-admin
 - **Dark academia-rebrand** — Batch 4 — mockups (~130 billeder)
 - **SEO-indholdsproduktion** — Skriv de tre manglende guides (mens-steampunk-costume-essentials, steampunk-clothing-three-budgets, womens-steampunk-essentials) fra den verificerede copy — corset-guiden er publiceret 6/11
 - **Døde internlinks** — Vedligehold: tjek nye indlæg mod live-URL'er
 
 ### Seneste commits
 
+- `9893145 Modul: P1.15 — MCP-fornyelsen kører nu i pluginnet (7.44.0) Før: 75,2 %  →  Efter: 75,7 %  (Δ +0,5) Grundlag: 21,45 af 28,35 d (P0 4,35/4,7 · P1 9,9/13,9 · P2 4,5/7 · P3 2,7/2,75)`
+- `fb787cf chore(status): samtalepunkter opdateret efter CI-vagten`
 - `e5ee7e7 Modul: CI-vagt — 14 fixtures og version læst fra plugin-headeren i live_state Før: 74,9 % Efter: 74,9 % Δ: 0 Grundlag: ingen ændring`
 - `bcfbde4 Modul: CI-vagt — natlig måling af MCP-adgang og AI-profil (live_state) Før: 74,9 % Efter: 74,9 % Δ: 0 Grundlag: ingen ændring`
 - `97f3eeb Modul: S1.5 — alle /go/-links målt efter rewrite-flush Før: 62,0 %  →  Efter: 62,0 %  (Δ +0) Grundlag: ingen ændring`
 - `c59fff7 chore(status): daglig projektstatus 2026-11-07`
-- `71a742a Luk P0.4 cron-honesty: host-cron sat op i Simply`
-- `3a5b734 chore(status): daglig projektstatus 2026-11-07`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 7/11 — MCP-fornyelsen er flyttet ind i pluginnet (7.44.0)
+
+- **Beslutning:** Novamira-adgangen holdes i live af sitets egen WP-Cron i stedet for repository-secrets eller
+  et loop i en sandkasse. `includes/mcp-auth.php` (`SGAP_MCP_Auth`) fornyer hvert 30. minut, verificerer med
+  `initialize` + `Mcp-Session-Id` + `tools/list` og gemmer det roterede refresh-token **før** noget andet.
+- **Hvorfor det ikke kan være en konstant:** refresh-tokenet roteres ved hver fornyelse, så det skal skrives
+  tilbage til databasen. Et token i `wp-config.php` afvises derfor med en forklaring i stedet for at give
+  indtryk af at virke.
+- **Synligt for ejeren:** *Settings → MCP access* (client ID + refresh token), `mcp-status` (læsende) og
+  `mcp-refresh`, plus en linje i det daglige selvtjek når en fornyelse afvises. Et token der ikke virker bliver
+  aldrig meldt som fornyet.
+- **Ikke målt mod live endnu:** fornyelsen kræver ejerens godkendelse og de to værdier indtastet i wp-admin.
+  20 nye smoke-checks kører begge veje med stubbede HTTP-svar (584 PASS, 0 FAIL).
 
 ### 7/11 — S2.7: script-tallet forklaret, loft pr. skabelon foreslået
 
@@ -218,7 +232,9 @@ statiske blokke; målrettede rettelser i eksisterende markup kan skrives direkte
 
 ## Åbne beslutninger til ejeren
 
-- **Novamira-fornyelse:** CI med to secrets, eller fornyelse i pluginnet via WP-Cron (ingen secrets)?
+- ~~**Novamira-fornyelse:** CI med to secrets, eller fornyelse i pluginnet via WP-Cron (ingen secrets)?~~
+  **Afgjort 7/11:** fornyelsen ligger nu i pluginnet (7.44.0, WP-Cron + option). CI-workflowet og
+  worktree-loopet er stadig mulige, men ikke længere nødvendige.
 - **Cirlas produktionsrolle:** hvilke rettigheder præcist, og hvornår må modulet slås til i produktion?
 - **De tre resterende guides:** publiceres de som de er skrevet, eller skal der fotos og gennemlæsning først?
 - **S0.4:** én Redirection-gruppe skal oprettes af ejer, før de fem vanity-301 kan laves.
@@ -231,7 +247,8 @@ statiske blokke; målrettede rettelser i eksisterende markup kan skrives direkte
    WPCode) — ikke bare en måling.
 2. De tre manglende guides (SEO 62,5 % → 100 %): copy ligger færdig og verificeret i
    [`library/guides-2026-11-03.md`](library/guides-2026-11-03.md).
-2. Byg fornyelsen ind i pluginnet, hvis de 30 dage skal holde uden secrets (WP-Cron + option, ingen nøgler i repo).
+2. ✅ MCP-fornyelsen er bygget ind i pluginnet (7.44.0). Det der mangler, er ejerens godkendelse og de to
+   værdier under *Settings → MCP access* — derefter holder adgangen i 30 dage uden secrets.
 3. Cirla som til/fra-modul i pluginnet efter dokumentets §9.4 — start med trin 1, modulet slukket som standard.
 4. Plugin 7.41.0 er i repo, 7.40.1 er live: opdateringen kræver ejerens klik i wp-admin.
 

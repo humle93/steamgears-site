@@ -448,6 +448,11 @@ class SGAP_Auto {
         if (class_exists('SGAP_CC') && ($cc = SGAP_CC::problem()) !== '') {
             $problems[] = $cc;
         }
+        // The MCP credential is renewed by this plugin; a refused renewal is a
+        // problem the owner has to act on, not something to discover by accident.
+        if (class_exists('SGAP_MCP_Auth') && ($mcp = SGAP_MCP_Auth::problem()) !== '') {
+            $problems[] = $mcp;
+        }
         $rescue = SGAP_Rescue::status();
         if ($rescue['given_up'] > 0) {
             $problems[] = "{$rescue['given_up']} images on another server could not be copied.";
