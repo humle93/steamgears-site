@@ -98,6 +98,14 @@
           "total": 1.0,
           "unit": "d",
           "verified": true
+        },
+        {
+          "id": "p0c",
+          "name": "P0.7c — scheduler- og engagement-status i admin",
+          "done": 0.25,
+          "total": 0.25,
+          "unit": "d",
+          "verified": true
         }
       ],
       "total": 28.15
@@ -1116,6 +1124,15 @@
       "after": 80.1,
       "delta": 0.3,
       "basis": "24,55 af 30,65 d (P0 4,65/4,7 · P1 11,7/15,2 · P2 4,5/7 · P3 2,7/2,75 · P0.7 1/1)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 80.1,
+      "after": 80.3,
+      "delta": 0.2,
+      "basis": "24,8 af 30,9 d (P0 4,65/4,7 · P1 11,7/15,2 · P2 4,5/7 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25)"
     }
   ]
 }

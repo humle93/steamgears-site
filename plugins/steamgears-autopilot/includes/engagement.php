@@ -280,6 +280,29 @@ class SGAP_Engagement {
         return $out;
     }
 
+    /** Read-only dashboard summary of the snapshots collected in the last 30 days. */
+    public static function dashboard_card(): void {
+        $summary = self::summary();
+        SGAP_UI::card_open('Engagement · last 30 days', 'chart-bar');
+        if ($summary === []) {
+            echo '<p class="description">No engagement snapshots yet. Bluesky and Mastodon counts appear after the daily refresh.</p>';
+            SGAP_UI::card_close();
+            return;
+        }
+
+        echo '<div class="sgap-scroll"><table class="widefat striped"><thead><tr>'
+            . '<th>Channel</th><th>Likes</th><th>Reposts</th><th>Replies</th>'
+            . '</tr></thead><tbody>';
+        foreach ($summary as $channel => $counts) {
+            echo '<tr><td>' . SGAP_UI::channel((string) $channel) . '</td>'
+                . '<td>' . esc_html((string) (int) ($counts['likes'] ?? 0)) . '</td>'
+                . '<td>' . esc_html((string) (int) ($counts['reposts'] ?? 0)) . '</td>'
+                . '<td>' . esc_html((string) (int) ($counts['replies'] ?? 0)) . '</td></tr>';
+        }
+        echo '</tbody></table></div>';
+        SGAP_UI::card_close();
+    }
+
     /** REST: run once and return what changed. */
     public static function rest_refresh(): WP_REST_Response {
         return new WP_REST_Response(self::refresh() + ['summary' => self::summary()], 200);

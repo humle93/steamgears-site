@@ -529,6 +529,40 @@ class SGAP_Auto {
             . site_url('wp-cron.php') . ' every 5 minutes (e.g. cron-job.org or your host\'s cron), or add the feeds in Publer – its polling also keeps cron running.';
     }
 
+    /** Dashboard card for the active scheduler and the publishing tick. Read-only: it never runs a job. */
+    public static function scheduler_card(): void {
+        $health = SGAP_Scheduler::health();
+        $next = SGAP_Scheduler::next(SGAP_Install::PUBLISH_CRON);
+        $lag = self::cron_lag();
+        $using_as = $health['backend'] === 'action-scheduler';
+
+        SGAP_UI::card_open('Scheduler', 'clock');
+        echo '<p>' . SGAP_UI::pill($using_as ? 'Action Scheduler' : 'WP-Cron', $using_as ? 'ok' : 'brass');
+        if ($using_as && $health['as_version'] !== '') {
+            echo ' ' . SGAP_UI::pill('v' . $health['as_version']);
+        }
+        echo '</p>';
+
+        if ($next === false) {
+            echo '<p>' . SGAP_UI::pill('Publish tick not scheduled', 'bad') . '</p>'
+                . '<p class="description">The publishing hook has no next run in the active scheduler.</p>';
+        } else {
+            echo '<p class="description">' . esc_html('Next publish tick: ' . wp_date('Y-m-d H:i:s', $next)) . '</p>';
+            if ($lag >= 30) {
+                echo '<p>' . SGAP_UI::pill(sprintf('Late by %d min', $lag), 'bad') . '</p>';
+            } elseif ($lag > 0) {
+                echo '<p>' . SGAP_UI::pill(sprintf('Overdue by %d min', $lag), 'warn') . '</p>';
+            } else {
+                echo '<p>' . SGAP_UI::pill('Publish tick scheduled', 'ok') . '</p>';
+            }
+        }
+
+        if (!$using_as && defined('DISABLE_WP_CRON') && DISABLE_WP_CRON) {
+            echo '<p class="description">DISABLE_WP_CRON is active; a host cron must call wp-cron.php.</p>';
+        }
+        SGAP_UI::card_close();
+    }
+
     /** Dashboard card with the last self-check (plus a live cron check). */
     public static function health_card(): void {
         $h = get_option(self::HEALTH);

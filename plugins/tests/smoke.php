@@ -1363,6 +1363,33 @@ check('scheduler: a zero next run in AS still means not scheduled', SGAP_Schedul
 $GLOBALS['as']['next']=0; $GLOBALS['as']['recurring']=[]; $GLOBALS['as']['unschedule']=[];
 
 
+// P0.7c — adminkort viser backend, næste publicering, forsinkelse og engagement-snapshots.
+$GLOBALS['as']['next']=time()+15*MINUTE_IN_SECONDS;
+ob_start(); SGAP_Auto::scheduler_card(); $scheduler_card=ob_get_clean();
+check('scheduler admin: dashboard names Action Scheduler and the next publish tick', str_contains($scheduler_card,'Action Scheduler') && str_contains($scheduler_card,'Next publish tick:') && str_contains($scheduler_card,'Publish tick scheduled'));
+$GLOBALS['as']['next']=time()-35*MINUTE_IN_SECONDS;
+ob_start(); SGAP_Auto::scheduler_card(); $scheduler_card=ob_get_clean();
+check('scheduler admin: overdue publish tick is shown with its measured lag', str_contains($scheduler_card,'Late by 35 min'));
+$GLOBALS['as']['next']=0;
+ob_start(); SGAP_Auto::scheduler_card(); $scheduler_card=ob_get_clean();
+check('scheduler admin: missing publish event is not shown as healthy', str_contains($scheduler_card,'Publish tick not scheduled') && !str_contains($scheduler_card,'Publish tick scheduled'));
+$GLOBALS['filters']['sgap_scheduler_action_scheduler']=fn($v)=>false;
+$GLOBALS['next_scheduled']=[SGAP_Install::PUBLISH_CRON=>time()+15*MINUTE_IN_SECONDS];
+ob_start(); SGAP_Auto::scheduler_card(); $scheduler_card=ob_get_clean();
+check('scheduler admin: dashboard reports WP-Cron when the fallback is selected', str_contains($scheduler_card,'WP-Cron') && str_contains($scheduler_card,'Next publish tick:'));
+unset($GLOBALS['filters']['sgap_scheduler_action_scheduler']); unset($GLOBALS['next_scheduled']); $GLOBALS['as']['next']=0;
+$GLOBALS['rows']=[];
+ob_start(); SGAP_Engagement::dashboard_card(); $engagement_card=ob_get_clean();
+check('engagement admin: empty state explains that snapshots arrive after refresh', str_contains($engagement_card,'No engagement snapshots yet') && str_contains($engagement_card,'Bluesky and Mastodon'));
+$GLOBALS['rows']=[
+    ['channel'=>'bluesky','event_type'=>'likes','total'=>'12','rows_count'=>'3'],
+    ['channel'=>'bluesky','event_type'=>'reposts','total'=>'3','rows_count'=>'3'],
+    ['channel'=>'mastodon','event_type'=>'replies','total'=>'2','rows_count'=>'1'],
+];
+ob_start(); SGAP_Engagement::dashboard_card(); $engagement_card=ob_get_clean();
+check('engagement admin: dashboard renders per-channel likes, reposts and replies', str_contains($engagement_card,'bluesky') && str_contains($engagement_card,'mastodon') && str_contains($engagement_card,'>12</td>') && str_contains($engagement_card,'>3</td>') && str_contains($engagement_card,'>2</td>'));
+$GLOBALS['rows']=[];
+
 // P1.5a — Bluesky- og Mastodon-engagement ind i sgap_events. Netværket går gennem
 // SGAP_Engagement::$transport, fordi smoke-suiten allerede har defineret wp_remote_get.
 $GLOBALS['opts']['sgap_mastodon_instance']='https://mastodon.social';

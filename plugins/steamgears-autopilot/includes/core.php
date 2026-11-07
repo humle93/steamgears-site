@@ -1807,6 +1807,8 @@ class SGAP_Admin {
         SGAP_UI::card_close();
         echo SGAP_CC::dashboard_button();
         SGAP_Auto::health_card();
+        SGAP_Auto::scheduler_card();
+        SGAP_Engagement::dashboard_card();
         self::feeds_panel();
         self::keys_panel();
         SGAP_Updater::panel();
