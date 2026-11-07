@@ -84,6 +84,23 @@ Det er ikke en fejl i koden: begge ruter svarer 200 og siger hvad der mangler. D
 ikke må gå gennem chat eller repo. Når de er indtastet i wp-admin, er verifikationen to kald til de samme
 ruter, og de 0,85 d kan bogføres på målte tal.
 
+## Hvorfor værktøjet ikke kan nå 100 % endnu
+
+Roadmappet står på **30,35 af 31,4 d**. De 1,05 d der mangler, fordeler sig sådan:
+
+| Modul | Mangler | Kan henføres til |
+| --- | --- | --- |
+| P1 | 1,0 d | **0,85 d = P1.5's live-verifikation** (Pinterest 1,5 + Instagram 1,5 bygget; 3,0 af 3,85 d) |
+| P1 | — | **0,15 d uden punkt** — P1's egne linjer summer til 15,05 d, mens nævneren er 15,2 d |
+| P0 | 0,05 d | **intet punkt** — alle P0-punkter er ✅, og de bogførte linjer summer til 4,65 d mod en nævner på 4,7 d |
+
+De 0,2 d er altså **bogføringsrest, ikke arbejde**: ingen række i ROADMAP'en mangler at blive gjort. De er *ikke*
+rettet ved at sænke nævneren, fordi et fald i nævneren hæver procenten uden at noget er udført — præcis det
+denne opgave forbyder. Konsekvensen er åben og skal siges højt: **selv når P1.5's 0,85 d er verificeret, vil
+værktøjet vise 31,2 af 31,4 d (99,4 %), ikke 100 %**, medmindre ejeren beslutter at nævneren skal rettes til
+summen af de dokumenterede linjer. Det er en bogføringsbeslutning, ikke et stykke arbejde, og den kræver
+ejerens ord.
+
 ## Status
 
 | Før | Efter |
