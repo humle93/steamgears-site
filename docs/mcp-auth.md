@@ -229,7 +229,7 @@ To ting er værd at kende, hvis målingen skal køres i hånden:
 ```bash
 python3 tools/live_state.py                 # lokalt: kræver token i ~/.config/steamgears-mcp/novamira/ eller NOVAMIRA_ACCESS_TOKEN
 python3 tools/live_state.py --out /tmp/x    # skriv et andet sted
-python3 tools/test_live_state.py            # 13 offline-fixtures, ingen token
+python3 tools/test_live_state.py            # 14 offline-fixtures, ingen token
 ```
 
 ## Kildesporet: hvad AI Engine og adapteren kan kalde (læst 2/11 2026)
@@ -359,7 +359,7 @@ printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | python3 tools/m
   `--status` viser om der er et gyldigt token.
 - [`tools/live_state.py`](../tools/live_state.py) — måler `mwai_options`' MCP-nøgler og profilen gennem
   Novamira-fladen og skriver `reports/live-tilstand-<dato>.md`/`.json`; `tools/test_live_state.py` er dets
-  13 offline-fixtures.
+  14 offline-fixtures.
 - [`tools/mcp_rest.py`](../tools/mcp_rest.py) — `--check`, `--abilities`, `--diff`, `--csv`, `--call`.
 - [`tools/test_mcp_oauth.py`](../tools/test_mcp_oauth.py) og [`tools/test_mcp_rest.py`](../tools/test_mcp_rest.py)
   — 24 fixtures mod lokale efterligninger, ingen credential nødvendig.

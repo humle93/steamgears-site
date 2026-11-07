@@ -18,6 +18,7 @@ from __future__ import annotations
 import io
 import json
 import os
+import re
 import sys
 import tempfile
 import threading
@@ -126,7 +127,8 @@ class LiveStateTest(unittest.TestCase):
         self._resource = live_state.RESOURCE
         live_state.RESOURCE = self.base
         self.addCleanup(lambda: setattr(live_state, "RESOURCE", self._resource))
-        STATE["health"] = good_health()
+        # Versionen følger repoet, så testen ikke skal rettes hver gang plugin'et bumpes.
+        STATE["health"] = good_health(version=live_state.repo_version() or "7.42.0")
         STATE["settings"] = good_settings()
         STATE["schema"] = ("name", "input")
         STATE["tool_name"] = "execute-ability"
@@ -139,7 +141,8 @@ class LiveStateTest(unittest.TestCase):
 
     def test_01_bestaar_naar_dynamic_rest_og_abilities_er_taendt(self):
         measured = live_state.measure(TOKEN)
-        checks = live_state.evaluate(measured, expect_profile="site_admin", expect_version="7.42.0")
+        checks = live_state.evaluate(measured, expect_profile="site_admin",
+                                     expect_version=live_state.repo_version() or "7.42.0")
         self.assertEqual(live_state.verdict(checks), "bestået", checks)
         self.assertEqual(live_state.failed(checks), 0)
         self.assertEqual(measured["ai_profile"], "site_admin")
@@ -222,6 +225,13 @@ class LiveStateTest(unittest.TestCase):
         self.assertIn("site_admin", blob)
         self.assertIn("Dynamic REST", blob)
         self.assertEqual(json.loads(payload.read_text(encoding="utf-8"))["verdict"], "bestået")
+
+    def test_10b_versionen_laeses_fra_repoet(self):
+        # Rapporten sammenligner med plugin-headeren, ikke med et hardkodet tal.
+        header = live_state.PLUGIN_FILE.read_text(encoding="utf-8", errors="replace")[:4000]
+        match = re.search(r"Version:\s*([0-9][0-9A-Za-z.\-]*)", header)
+        self.assertIsNotNone(match, "plugin-headeren skal have en Version-linje")
+        self.assertEqual(live_state.repo_version(), match.group(1))
 
     def test_11_rapporten_fortæller_hvad_der_gik_galt(self):
         STATE["health"] = None  # værktøjet svarer isError
