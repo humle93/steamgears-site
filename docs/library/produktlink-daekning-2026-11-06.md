@@ -12,30 +12,22 @@ påstand om at linkene virker: hvert link er talt i den HTML, WordPress selv lev
   Et link der står to gange i samme tekst tæller altså én gang.
 - Et indlæg kaldes en **guide**, når det er vejledende indhold. Tre short stories (973, 993, 994) og
   produktlanceringen 572 holdes ude af guide-tallet, men står i tabellen for gennemsigtighed.
-- Tabeldelen følger ikke redirects. Opfølgningen 6/11 fulgte derimod alle **31 unikke** `/go/<id>/`
+- Tabeldelen følger ikke redirects. Opfølgningen **7/11** fulgte derimod alle **31 unikke** `/go/<id>/`
   (53 forekomster; de 40 i tabellen er unikke pr. indlæg).
 
-## Kritisk fund: `/go/`-ruten redirecter ikke
+## Opfølgning 7/11: ruten virker, men 21 links er døde
 
-Alle **31 unikke** `/go/<id>/` svarede **HTTP 200** uden `Location`, med titlen
-*Workshop Journal — Build Guides & Field Notes* og canonical `https://steamgears.eu/journal/`. Kunden
-ender altså i journalen i stedet for på produktet.
+Efter ejerens rewrite-flush er den gamle 200/journal-måling historisk. Alle **31 unikke** `/go/<id>/`
+svarer nu **302**, og **0** ender i `/journal/`. Men kun **10** ender på en live produktside;
+**21** ender på `?post_type=product&p=<id>` med **404**, fordi produkt-ID'et ikke findes i det
+aktuelle katalog. Det er **35 af de 53 forekomster**.
 
-Det er ikke produktopslaget der fejler. Den direkte query-variabel virker:
+Den fulde måling med de 21 døde IDs, linktekster og indlæg står i
+[`go-links-verifikation-2026-11-07.md`](go-links-verifikation-2026-11-07.md). Kort: post 699
+(`steampunk-outfit-ideas-for-women`) bærer 17 af de 21 døde IDs; **401** peger på en live hoodie,
+men linkteksten siger “Tee”.
 
-```text
-GET /?sgap_go=405        -> 302  Location: /?post_type=product&p=405
-GET /go/405              -> 301  Location: /go/405/
-GET /go/405/             -> 200  Workshop Journal, canonical /journal/
-```
-
-Det peger på at **rewrite-reglen for `/go/` mangler i den kørende installation** — ikke at
-`SGAP_Tracking::redirect()` er død. Fixen er et rewrite-flush: **Settings → Permalinks → Save**, eller
-deaktivér/genaktivér pluginnet. Purge W3TC bagefter, hvis journalen ligger i sidecachen. Test med
-`/go/405/`: den skal give **302** til produktet, ikke 200.
-
-Indtil det er gjort, er alle ni guides der allerede bruger `/go/`, også ramt. Det gør fixen til det
-første skridt — før nye links konverteres.
+Ruten er altså ikke længere problemet. Det er kataloget og de gamle ID'er.
 
 ## Resultat
 
@@ -112,8 +104,9 @@ Tabellen er delt efter status, så hver gruppe starter med sin egen header.
 
 ## Rækkefølge for rettelsen
 
-0. **Fix `/go/`-ruten først:** flush rewrite-reglerne og mål `/go/405/` til 302. Uden det virker
-   hverken de nye eller de eksisterende tracking-links.
+0. **Ruten er fixed 7/11:** 31/31 `/go/`-links giver 302. Næste spærring er de 21 døde produkt-ID'er
+   (35 forekomster); ret dem efter [verifikationen](go-links-verifikation-2026-11-07.md), før nye links
+   konverteres.
 1. **Konvertér de 73 direkte links i de 10 guides** til `/go/<produkt-id>/`. Produkt-id'et slås op i
    butikkens eget API, ikke gættes. Det er den største gevinst: alle linkene findes allerede, og kun
    `href`-værdien skal ændres.
@@ -135,6 +128,7 @@ Tabellen er delt efter status, så hver gruppe starter med sin egen header.
 ## Filer
 
 - Roadmap-punktet: [`../roadmap.md`](../roadmap.md) §S1.5.
+- Verifikationen 7/11: [`go-links-verifikation-2026-11-07.md`](go-links-verifikation-2026-11-07.md).
 - Den tidligere måling af de ti ældre guides:
   [`guide-links-live-2026-11-05.md`](guide-links-live-2026-11-05.md).
 - Linkplanen: [`guide-links-aeldre-2026-11-03.md`](guide-links-aeldre-2026-11-03.md).
