@@ -1,6 +1,6 @@
 # design.md — Steamgears' visuelle identitet
 
-**Status:** specifikation. Målt på den live side 5/11-2026. CSS'en ligger i [`css/sg-design-system.css`](css/sg-design-system.css) og lægges på siden af `wordpress/mu-plugins/sga-design-system.php` — laget er skrevet og værnet 7/11, men **ikke indlæst på sitet endnu**, se §14. Skrifterne i header-delen er skiftet 6/11 — se §13.
+**Status:** specifikation. Målt på den live side 5/11-2026. CSS'en ligger i [`css/sg-design-system.css`](css/sg-design-system.css) og lægges på siden af `wordpress/mu-plugins/sga-design-system.php` — laget er skrevet og værnet 7/11, og er **indlæst på sitet 7/11 kl. 22:05 UTC** (se §14). Skrifterne i header-delen er skiftet 6/11 — se §13.
 **Omfatter:** steamgears.eu — temaet `extendable`, template-delene `css/header-dark-clockwork-active.html` og `css/footer-active.html`.
 
 Dokumentet er skrevet som en måling af, hvad der faktisk er på siden i dag, ikke som en ønskeliste. Hvor der står et tal, er det aflæst; hvor der står et token, er det en beslutning, der skal lægges ind i fase 1.
@@ -236,3 +236,10 @@ får `sg-ui`, kill-switchen fjerner begge dele, og en manglende fil giver en kom
 **Ikke verificeret:** laget er ikke på det levende site (ingen WordPress-adgang i sessionen) og er ikke
 set i en browser. Hvordan det lægges på, og hvad der skal kigges efter, står i
 [`library/designsystem-hele-siden-2026-11-07.md`](docs/library/designsystem-hele-siden-2026-11-07.md) §9.
+
+### Live 7/11-2026 (Novamira)
+
+- Loaderen ligger som `wp-content/novamira-sandbox/sga-design-system.php` — Novamira afviser PHP uden for sandkassen (`php_sandbox_required`), så den kunne ikke lægges i `mu-plugins/`.
+- CSS'en (inkl. luksus-laget, sektion 12) ligger i `wp-content/uploads/sga-design/sg-design-system.css` (kandidat 2 i loaderen).
+- Målt efter `steamgears-tools/flush-caches`: forsiden bærer `sg-ui` på `<body>`, og den eksternaliserede inline-CSS indeholder `--sg-lux-*`. `/`, `/shop/`, `/cart/`, `/my-account/` og `/shipping/` svarer 200.
+- **Ikke set i en browser endnu.** Rollback: slet loaderen i sandkassen, eller `add_filter( 'sga_design_enabled', '__return_false' );`.
