@@ -120,7 +120,7 @@ lukkedes research-bibliotek.
 | Dokument | Indhold | Dato |
 | --- | --- | --- |
 | [vedligehold-daglig-log.md](vedligehold-daglig-log.md) | Daglig driftslog (løbende) — PDF i `reports/vedligehold-daglig-log.pdf` | 2026-11-01 |
-| [vedligehold-ugentlig-log.md](vedligehold-ugentlig-log.md) | Ugentlig backup + 1 indholdselement — PDF i `reports/vedligehold-ugentlig-log.pdf` | 2026-10-27 |
+| [vedligehold-ugentlig-log.md](vedligehold-ugentlig-log.md) | **Ugentlig kontrol 7/11 (S3.5):** anden post — 24/24 værn, 781 smoke-checks / 0 FAIL, 110 historik-rækker uden drift, og to fund: en `v7.43.0`-zip der var ældre end kilden (droppet; `main` udgiver 7.54.0, hvis zip er `diff -r`-identisk) og `tools/setup-agent-tools.sh`, der ikke kunne hente PHP (`IndentationError`, rettet og efterprøvet) — PDF i `reports/vedligehold-ugentlig-log.pdf` | 2026-11-07 |
 | [vedligehold-kvartalsvis-log.md](vedligehold-kvartalsvis-log.md) | Kvartalsvis fuld crawl + top-20 — PDF i `reports/vedligehold-kvartalsvis-log.pdf` | 2026-10-27 |
 
 ## Research og analyser

@@ -22,7 +22,7 @@ Status pr. **2026-11-07** · beregnet af `projektstatus.py` · kilder: [`projekt
 
 | Projekt | Status i dag | Grundlag |
 | --- | --- | --- |
-| **steamgears.eu — site-optimering** *(roadmap S0–S4)* | **64,4 %** | 15,65 af 24,3 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 7,35/8,05 · S3 2,5/3,55 · S4 1,5/5,25) |
+| **steamgears.eu — site-optimering** *(roadmap S0–S4)* | **64,6 %** | 15,7 af 24,3 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 7,35/8,05 · S3 2,55/3,55 · S4 1,5/5,25) |
 | **Steamgears Autopilot — plugin** | **96,3 %** | 28,3 af 29,4 d (P0 4,65/4,7 · P1 14,2/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25) |
 | **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5) |
 | **SEO-indholdsproduktion** | **62,5 %** | 5 af 8 guides (Publicerede guides (id 292, 296, 295) 0/3 · Guide-copy klar til publicering (292, 296, 295 + corset) 4/4 · Corset-guiden publiceret (/steampunk-corset-guide/, 1394) 1/1) · drift: Daglig loop kører |
@@ -34,7 +34,7 @@ Status pr. **2026-11-07** · beregnet af `projektstatus.py` · kilder: [`projekt
 <!-- AUTO:BLOKERINGER:START -->
 | Projekt | Næste skridt | Blokering |
 | --- | --- | --- |
-| steamgears.eu — site-optimering (64,4 %) | Vedtag loftet paa det maalte gulv (tekst 30 · lister 45 · produkt 95 · kurv 112) eller bestil trin 3 (klassisk kurv/produkt, 0,75 d); skriv de tre manglende guides fra den verificerede copy; S1.1 Herbarium kraever varianter i Printify; S0.4 kraever en Redirection-gruppe (ejer) | S2.7's script-loft kan ikke naas uden tre nye beslutninger (chatbot ved interaktion, GLA vaek eller flyttet til GTM, klassisk kurv) — maalt 7/11; S1.1 Herbarium kraever varianter i Printify; S0.4 5 vanity-301 kraever en Redirection-gruppe (ejer). S2.2, S2.7-trin og S2.8 er udfoert 6-7/11, S0.9 7/11. |
+| steamgears.eu — site-optimering (64,6 %) | Vedtag loftet paa det maalte gulv (tekst 30 · lister 45 · produkt 95 · kurv 112) eller bestil trin 3 (klassisk kurv/produkt, 0,75 d); skriv de tre manglende guides fra den verificerede copy; S1.1 Herbarium kraever varianter i Printify; S0.4 kraever en Redirection-gruppe (ejer) | S2.7's script-loft kan ikke naas uden tre nye beslutninger (chatbot ved interaktion, GLA vaek eller flyttet til GTM, klassisk kurv) — maalt 7/11; S1.1 Herbarium kraever varianter i Printify; S0.4 5 vanity-301 kraever en Redirection-gruppe (ejer). S2.2, S2.7-trin og S2.8 er udfoert 6-7/11, S0.9 7/11. |
 | Steamgears Autopilot — plugin (96,3 %) | P1.5b (Pinterest) og P1.5c (Instagram) er kode-færdige, men den første live-kørsel kræver et token af hver (Settings → Keys); P3.1 mangler ejerens labor_rate-beslutning; P1.15 kræver ejerens MCP-godkendelse i wp-admin. | P1.5b (Pinterest) og P1.5c (Instagram) er kode-færdige, men den første live-kørsel kræver et token af hver (Settings → Keys); P3.1 mangler ejerens labor_rate-beslutning; P1.15 kræver ejerens MCP-godkendelse i wp-admin. |
 | Dark academia-rebrand (63 %) | Batch 4 — mockups (~130 billeder) | Printify-adgang |
 | SEO-indholdsproduktion (62,5 %) | Skriv de tre manglende guides (mens-steampunk-costume-essentials, steampunk-clothing-three-budgets, womens-steampunk-essentials) fra den verificerede copy — corset-guiden er publiceret 6/11 | Intet eksternt for de tre resterende guides: copy, FAQ, priser og links ligger i docs/library/guides-2026-11-03.md. De otte /go/-id'er 411/475/481/485/497/567 kunne ikke verificeres fra sandkassen (Simplys WAF giver browser-UA en challenge), så nye produktlinks skal måles fra ejerens side eller efter WAF-hvidlistning |
@@ -50,6 +50,7 @@ Nyeste først. Append-only — rækker må ikke slettes eller ændres.
 
 | Dato | Projekt | Modul | Før → Efter | Δ | Grundlag |
 | --- | --- | --- | --- | --- | --- |
+| 2026-11-07 | steamgears.eu — site-optimering | daglig måling | 64,4 % → 64,6 % | +0,2 | 15,7 af 24,3 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 7,35/8,05 · S3 2,55/3,55 · S4 1,5/5,25) |
 | 2026-11-07 | Steamgears Autopilot — plugin | daglig måling | 91,2 % → 96,3 % | +5,1 | 28,3 af 29,4 d (P0 4,65/4,7 · P1 14,2/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25) |
 | 2026-11-07 | Steamgears Autopilot — plugin | daglig måling | 91,1 % → 91,2 % | +0,1 | 26,8 af 29,4 d (P0 4,65/4,7 · P1 12,7/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25) |
 | 2026-11-07 | Steamgears Autopilot — plugin | daglig måling | 91 % → 91,1 % | +0,1 | 26,55 af 29,15 d (P0 4,65/4,7 · P1 12,7/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25) |

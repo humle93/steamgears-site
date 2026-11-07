@@ -38,10 +38,10 @@
         {
           "id": "s3",
           "name": "S3 — hygiejne",
-          "done": 2.5,
+          "done": 2.55,
           "total": 3.55,
           "unit": "d",
-          "note": "S3.1 0,25 + S3.2 0,1 + S3.3 alt-tekst 0,3 + S3.4 plugin-audit 0,35 + tidligere 0,6; plugin-oprydning (slet/fjern) og webp mangler stadig; + 0,1 d PDF-eksport til research-biblioteket (2 rapporter) og rettet ordombrydning i tools/md_to_pdf.py; + 0,2 d PDF-eksport af de 12 ældste biblioteksdokumenter og to renderer-fejl rettet (sidebrud midt i afsnit, kodeblok-højde); + 0,25 d PDF-eksport af resten af biblioteket (26 dokumenter), renderer-retning af kursiv/glyffer/overskrifter og nyt PDF-værn; + 0,3 d commit-besked-værn (tools/commit_check.py med 24 fixtures, commit-msg-hook, CI-workflow); + 0,05 d S3.5 (6/11): første ugentlige roadmap-statuspost med målte procenter, 530 smoke-checks, 17/17 værn og de præcise ejerblokeringer — 0,05 af 0,5 d."
+          "note": "S3.1 0,25 + S3.2 0,1 + S3.3 alt-tekst 0,3 + S3.4 plugin-audit 0,35 + tidligere 0,6; plugin-oprydning (slet/fjern) og webp mangler stadig; + 0,1 d PDF-eksport til research-biblioteket (2 rapporter) og rettet ordombrydning i tools/md_to_pdf.py; + 0,2 d PDF-eksport af de 12 ældste biblioteksdokumenter og to renderer-fejl rettet (sidebrud midt i afsnit, kodeblok-højde); + 0,25 d PDF-eksport af resten af biblioteket (26 dokumenter), renderer-retning af kursiv/glyffer/overskrifter og nyt PDF-værn; + 0,3 d commit-besked-værn (tools/commit_check.py med 24 fixtures, commit-msg-hook, CI-workflow); + 0,05 d S3.5 (6/11): første ugentlige roadmap-statuspost med målte procenter, 530 smoke-checks, 17/17 værn og de præcise ejerblokeringer — 0,1 af 0,5 d; + 0,05 d S3.5 (7/11): anden ugentlige kontrol kørt og målt — 24/24 værn grønne, 781 smoke-checks / 0 FAIL, historikken uden drift, og den udbudte zip 7.54.0 er `diff -r`-identisk med kilden (v7.43.0-zip'en i denne worktree var ældre end kilden og blev droppet ved rebase til 7.54.0). `tools/setup-agent-tools.sh` kunne ikke hente PHP (`IndentationError` i sin `python3 -c`-streng) — rettet og efterprøvet."
         },
         {
           "id": "s4",
@@ -1220,6 +1220,15 @@
       "after": 96.3,
       "delta": 5.1,
       "basis": "28,3 af 29,4 d (P0 4,65/4,7 · P1 14,2/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 64.4,
+      "after": 64.6,
+      "delta": 0.2,
+      "basis": "15,7 af 24,3 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 7,35/8,05 · S3 2,55/3,55 · S4 1,5/5,25)"
     }
   ]
 }

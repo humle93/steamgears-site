@@ -24,7 +24,7 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 | Projekt | Status | Grundlag |
 | --- | --- | --- |
-| **steamgears.eu — site-optimering** | **64,4 %** | 15,65 af 24,3 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 7,35/8,05 · S3 2,5/3,55 · S4 1,5/5,25) |
+| **steamgears.eu — site-optimering** | **64,6 %** | 15,7 af 24,3 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 7,35/8,05 · S3 2,55/3,55 · S4 1,5/5,25) |
 | **Steamgears Autopilot — plugin** | **96,3 %** | 28,3 af 29,4 d (P0 4,65/4,7 · P1 14,2/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25 · P1E 0,25/0,25 · P1F 0,25/0,25) |
 | **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5) |
 | **SEO-indholdsproduktion** | **62,5 %** | 5 af 8 guides (BATCH 0/3 · COPY 4/4 · CORSET 1/1) |
@@ -47,15 +47,23 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `d0e86a9 Merge main (P1.20/P1.21, 7.55.0) ind i P1.5c Instagram-insights — udgivet som 7.56.0`
+- `c38acb4 chore(status): daglig projektstatus 2026-11-07`
 - `c747a47 Modul: P1.5c Instagram-insights — fem metrics, caption-match og in-place fornyelse Før: 91,0 %  →  Efter: 96,2 %  (Δ +5,2) Grundlag: 27,8 af 28,9 d (P0 4,65/4,7 · P1 14,2/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25)`
-- `731c0e9 Modul: P3.6 fejlsøgning — fast scan, fem fejl rettet Før: 90,9 %  →  Efter: 91,0 %  (Δ +0,1) Grundlag: 26,3 af 28,9 d (P0 4,65/4,7 · P1 12,7/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25) Fejlsøgning er nu en kørsel i stedet for en lejlighed: tools/fejlscan.py er værn nr. 23-24 i den natlige kontrol og leder efter det php -l og smoke-suiten ikke kan se — version tre steder, zip mod kilde byte for byte, døde og forældreløse includes, nye dokumenter uden for biblioteksindekset, tokens i sporede filer, TODO/FIXME og tests der ikke kan fejle. 13 fixtures beviser både at hver klasse fanges, og at en ren kasse er grøn.`
-- `cf6e8b3 Modul: P1.5b Pinterest-analytics Før: 87,4 %  →  Efter: 90,9 %  (Δ +3,5) Grundlag: 26,05 af 28,65 d (P0 4,65/4,7 · P1 12,7/15,2 · P2 4,75/4,75 · P3 2,45/2,5 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25)`
-- `a27b054 chore(status): daglig projektstatus 2026-11-07`
-- `95c9106 Modul: P1.19 dashboard-layout — tre sektioner og én Needs you-linje Før: 87,3 %  →  Efter: 87,4 %  (Δ +0,1) Grundlag: 25,05 af 28,65 d`
-- `1619779 chore(status): daglig projektstatus 2026-11-07`
+- `f1670e5 Modul: P1.21 AI Drafts og Publish log — grupperet og talt op Før: 91,1 %  →  Efter: 91,2 %  (Δ +0,1) Grundlag: 26,8 af 29,4 d`
+- `185645c chore(status): samtalepunkter opdateret efter Simply-afsnittet`
+- `3103982 Modul: A-adgang — Simply.com-connectoren (simplycom) dokumenteret Før: 91,0 % Efter: 91,0 % Δ: 0 Grundlag: ingen ændring`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 7/11 — S3.5: ugens kontrol kørt, og en zip var ældre end kilden
+
+- **Sandkassen havde ingen PHP og ingen MCP-credential.** `tools/natlige-vaern.sh` stoppede derfor før første værn (`tools/_deps/bin/php` manglede), og `tools/mcp_oauth.py --status` svarede »Ingen klient registreret endnu«. PHP blev hentet som den statiske binær AGENTS §7.3 angiver (8.3.14); derefter gik alle **24/24** værn grønne.
+- **Zip-sammenligningen var det værd:** `diff -r` mellem kilden og den udpakkede `v7.43.0.zip` viste at den indlejrede `ROADMAP.md` stadig havde P0.4 som »Delvist (0,4 af 0,5 d)«. `main` udgiver nu **7.54.0**, hvis zip er `diff -r`-identisk med kilden, så den gamle pakke blev droppet. **Konklusion: mål zip'en efter en rebase, før push — tal fra før rebasen er ikke status for det der udgives.**
+- **`tools/setup-agent-tools.sh` kunne ikke hente PHP:** `python3 -c`-strengen var ombrudt med indrykning → `IndentationError`, så PHP-trinnet døde før download. Rettet til én linje og efterprøvet (vælger nu `php-8.5.8`).
+- **Målt efter rebasen:** 781 smoke-checks / 0 FAIL, ingen drift i historikken, PDF renderet og set. S3.5 0,05 → **0,1 af 0,5 d**; site 64,4 % → **64,6 %** (15,7 af 24,3 d).
+- **Backup blev ikke kørt** i dette pas, og det står i loggen i stedet for at blive skjult.
 
 ### 7/11 — Instagram-insights (P1.5c, 7.56.0): `views`, ikke `impressions` — og nul betyder «ved det ikke»
 
@@ -517,6 +525,8 @@ statiske blokke; målrettede rettelser i eksisterende markup kan skrives direkte
 
 ## Næste skridt
 
+0. **Sandkassen mangler et MCP-token** — uden det kan intet skrives til sitet, kun måles. `python3 tools/mcp_oauth.py --start`
+   giver linket, ejeren godkender i browseren, `--finish '<kode>'` gemmer token uden for repoet.
 1. **S2.9 designsystem: læg laget på sitet og se det** (0,1 d tilbage af 0,5). CSS-filen og loaderen er
    skrevet og værnet; det der mangler, er at kopiere `css/sg-design-system.css` til `uploads/sga-design/`
    (eller ind i `mu-plugins/`), kopiere `wordpress/mu-plugins/sga-design-system.php` til
