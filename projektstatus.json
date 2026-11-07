@@ -57,7 +57,7 @@
       "id": "plugin",
       "name": "Steamgears Autopilot — plugin",
       "next": "P1.5's live-verifikation er det eneste åbne roadmap-punkt (0,85 d): plugin 7.59.0 kører live, men hverken Pinterest- eller Instagram-token findes på sitet (målt 7/11: begge tomme, `diagnostics` svarer «off»). Når ejeren har indtastet dem i wp-admin, køres `pinterest/refresh` og `instagram/refresh`, og svarene bogføres som P1.5's sidste 0,85 d.",
-      "blocked_by": "P1.5 kræver ejerens Pinterest- og Instagram-tokens (må ikke gennem chat eller repo). Målt 7/11: `sgap_pinterest_access_token`, `sgap_pinterest_refresh_token`, `sgap_instagram_access_token`, `sgap_instagram_user_id` og `sgap_facebook_access_token` er alle tomme, så API-svarene kan ikke fremkaldes. P3.1 er lukket (7.59.0). mu-plugin-rettelsen 1.3.1 ligger stadig kun i repoet: Novamira skriver kun PHP i sin sandkasse, så den kræver ejerens File Manager.",
+      "blocked_by": "P1.5's live-verifikation (0,85 d) kræver ejerens Pinterest- og Instagram-nøgler, som ikke må gennem chat eller repo. Målt 7/11 er alle seks nøgler tomme, og de to ruter svarer 200 med »not connected«: `/sgap/v1/pinterest/refresh` → \"save a Pinterest access token, or the app credentials plus a refresh token\"; `/sgap/v1/instagram/refresh` → \"save the professional account id and a long-lived Instagram User token\". P3.1 er lukket i 7.59.0 (verificeret live). mu-plugin-rettelsen 1.3.1 ligger stadig kun i repoet: Novamira skriver kun PHP i sin sandkasse, så den kræver ejerens File Manager.",
       "modules": [
         {
           "id": "p0",
