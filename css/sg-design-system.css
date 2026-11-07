@@ -776,3 +776,254 @@ body.sg-theme--parchment h1,
 body.sg-theme--parchment h2,
 body.sg-theme--parchment h3,
 body.sg-theme--parchment h4 { color: #14110E; }
+
+/* ---------------------------------------------------------------------------
+   12 · LUKSUS-LAG (rev. 3, 2026-11-07)
+   Ligger ovenpå sektion 1-11 og ændrer ingen palette-token, så de målte kontraster
+   stadig gælder. Retningen: mere luft, hårfine messinglinjer, langsom bevægelse,
+   spærret versal-mikrotypografi — "galleri", ikke "butik". Moderne CSS bruges kun
+   progressivt: hver nyere funktion ligger bag @supports eller har en rolig fallback.
+   --------------------------------------------------------------------------- */
+:root {
+  --sg-lux-gap: clamp(2.5rem, 2rem + 4vw, 6rem);       /* luft mellem sektioner */
+  --sg-lux-track: .18em;                                /* spærring på versaler */
+  --sg-lux-hair: 1px solid color-mix(in srgb, var(--sg-brass) 38%, transparent);
+  --sg-lux-glass: color-mix(in srgb, var(--sg-ink) 72%, transparent);
+  --sg-lux-sheen: linear-gradient(115deg, transparent 30%, rgba(240, 210, 124, .18) 50%, transparent 70%);
+  --sg-lux-ease: cubic-bezier(.16, 1, .3, 1);           /* lang, blød udløb */
+  --sg-lux-slow: 700ms;
+}
+
+@view-transition { navigation: auto; }
+
+html { scrollbar-color: var(--sg-brass) var(--sg-ink); scrollbar-width: thin; }
+::selection { background: var(--sg-brass); color: var(--sg-ink); }
+body { font-kerning: normal; font-optical-sizing: auto; text-rendering: optimizeLegibility; }
+
+/* Typografi: rolige linjeskift og Marcellus med lidt luft */
+h1, h2, h3, .entry-title, .wp-block-post-title { text-wrap: balance; letter-spacing: .01em; }
+p, li, .sg-lede { text-wrap: pretty; }
+h1, .entry-title, .wp-block-post-title { line-height: 1.08; letter-spacing: .02em; }
+
+/* Eyebrow: lille spærret versaltekst over en overskrift */
+.sg-eyebrow {
+  display: block;
+  font-family: var(--sg-font-body);
+  font-size: var(--sg-text-1);
+  font-weight: 500;
+  letter-spacing: .28em;
+  text-transform: uppercase;
+  color: var(--sg-brass-text);
+  margin-block-end: var(--sg-space-4);
+}
+.sg-eyebrow::after {
+  content: "";
+  display: block;
+  inline-size: 3rem;
+  block-size: 1px;
+  margin-block-start: var(--sg-space-3);
+  background: var(--sg-brass);
+}
+
+/* Sektionsrytme og sidebredde */
+.wp-block-post-content > .wp-block-group,
+.entry-content > .wp-block-group { margin-block: var(--sg-lux-gap); }
+.sg-prose { max-inline-size: var(--sg-measure); margin-inline: auto; }
+.sg-prose > p:first-of-type::first-letter {
+  font-family: var(--sg-font-display);
+  float: inline-start;
+  font-size: 3.4em;
+  line-height: .9;
+  padding-inline-end: .12em;
+  color: var(--sg-brass-text);
+}
+
+/* Header: mat glas der aldrig stjæler opmærksomhed */
+.site-header, header.wp-block-template-part {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 50;
+  background: var(--sg-lux-glass);
+  border-block-end: var(--sg-lux-hair);
+}
+@supports (backdrop-filter: blur(1px)) {
+  .site-header, header.wp-block-template-part {
+    backdrop-filter: blur(14px) saturate(1.15);
+    -webkit-backdrop-filter: blur(14px) saturate(1.15);
+  }
+}
+.wp-block-navigation-item__content {
+  letter-spacing: var(--sg-lux-track);
+  text-transform: uppercase;
+  font-size: var(--sg-text-1);
+  background: linear-gradient(var(--sg-brass), var(--sg-brass)) 0 100% / 0 1px no-repeat;
+  transition: background-size var(--sg-lux-slow) var(--sg-lux-ease), color 300ms;
+}
+.wp-block-navigation-item__content:hover,
+.wp-block-navigation-item__content:focus-visible { background-size: 100% 1px; }
+
+/* Knapper: skarpe hjørner, spærret tekst, et glid af lys ved hover */
+.single_add_to_cart_button,
+.wp-block-button__link,
+.woocommerce a.button.alt,
+.woocommerce button.button.alt {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  letter-spacing: var(--sg-lux-track);
+  text-transform: uppercase;
+  font-size: var(--sg-text-2);
+  font-weight: 500;
+  padding-inline: var(--sg-space-7);
+  min-block-size: var(--sg-tap);
+  transition: background-color 400ms var(--sg-lux-ease), color 400ms var(--sg-lux-ease), border-color 400ms;
+}
+.single_add_to_cart_button::after,
+.wp-block-button__link::after,
+.woocommerce a.button.alt::after,
+.woocommerce button.button.alt::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--sg-lux-sheen);
+  transform: translateX(-120%);
+  transition: transform 900ms var(--sg-lux-ease);
+}
+.single_add_to_cart_button:hover::after,
+.wp-block-button__link:hover::after,
+.woocommerce a.button.alt:hover::after,
+.woocommerce button.button.alt:hover::after { transform: translateX(120%); }
+
+/* Kort: hårfin ramme, indre ramme på hover, ingen tunge skygger */
+.sg-card {
+  position: relative;
+  padding: var(--sg-space-6);
+  background: linear-gradient(160deg, var(--sg-surface-2), var(--sg-surface));
+  border: var(--sg-lux-hair);
+  border-radius: var(--sg-radius);
+  box-shadow: var(--sg-shadow-2);
+  transition: border-color 500ms var(--sg-lux-ease), transform 500ms var(--sg-lux-ease);
+}
+.sg-card::before {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border: var(--sg-lux-hair);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 500ms var(--sg-lux-ease);
+}
+.sg-card:hover { transform: translateY(-3px); }
+.sg-card:hover::before { opacity: 1; }
+
+/* Produktgitter: ensartet 4:5 portræt, billedet zoomer langsomt, titlen står centreret */
+.woocommerce ul.products,
+.wc-block-grid__products { gap: var(--sg-space-7) var(--sg-space-5); }
+.woocommerce ul.products li.product,
+.wc-block-grid__product { text-align: center; container-type: inline-size; }
+.woocommerce ul.products li.product img,
+.wc-block-grid__product-image img {
+  aspect-ratio: 4 / 5;
+  inline-size: 100%;
+  object-fit: cover;
+  transition: transform 1200ms var(--sg-lux-ease), border-color 500ms;
+}
+.woocommerce ul.products li.product a:has(> img),
+.wc-block-grid__product-image { display: block; overflow: hidden; border-radius: var(--sg-radius); }
+.woocommerce ul.products li.product:hover img,
+.wc-block-grid__product:hover .wc-block-grid__product-image img { transform: scale(1.045); }
+.woocommerce-loop-product__title,
+.wc-block-grid__product-title {
+  font-family: var(--sg-font-display);
+  font-size: var(--sg-text-4);
+  letter-spacing: .04em;
+  margin-block: var(--sg-space-4) var(--sg-space-2);
+}
+.woocommerce ul.products li.product .price,
+.wc-block-grid__product-price { letter-spacing: .08em; font-size: var(--sg-text-2); color: var(--sg-brass-text); }
+@container (max-width: 180px) {
+  .woocommerce-loop-product__title, .wc-block-grid__product-title { font-size: var(--sg-text-3); }
+}
+
+/* Produktside: galleriet står stille, mens teksten ruller */
+@media (min-width: 900px) {
+  .woocommerce div.product { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); column-gap: var(--sg-space-8); align-items: start; }
+  .woocommerce div.product div.images { position: sticky; inset-block-start: calc(var(--sg-space-9) + var(--sg-space-4)); }
+  .woocommerce div.product .woocommerce-tabs,
+  .woocommerce div.product .related,
+  .woocommerce div.product .upsells { grid-column: 1 / -1; }
+}
+.woocommerce div.product .product_title { letter-spacing: .02em; margin-block-end: var(--sg-space-3); }
+.woocommerce div.product span.price { font-size: var(--sg-text-5); letter-spacing: .04em; }
+
+/* Felter: kun bundlinje, som på et brevpapir */
+.woocommerce form .form-row input.input-text,
+.woocommerce form .form-row textarea,
+.woocommerce form .form-row select {
+  background: transparent;
+  border-width: 0 0 1px;
+  border-radius: 0;
+  transition: border-color 300ms, box-shadow 300ms;
+}
+.woocommerce form .form-row input.input-text:focus-visible,
+.woocommerce form .form-row textarea:focus-visible { box-shadow: 0 1px 0 0 var(--sg-focus); }
+
+/* Fine detaljer */
+hr, .wp-block-separator {
+  border: 0;
+  block-size: 1px;
+  background: linear-gradient(90deg, transparent, var(--sg-brass), transparent);
+  opacity: .6;
+  margin-block: var(--sg-lux-gap);
+}
+.wp-block-quote, blockquote {
+  border: 0;
+  border-inline-start: 2px solid var(--sg-brass);
+  padding-inline-start: var(--sg-space-6);
+  font-family: var(--sg-font-display);
+  font-size: var(--sg-text-5);
+  line-height: 1.4;
+}
+.woocommerce-breadcrumb { letter-spacing: .14em; text-transform: uppercase; font-size: var(--sg-text-1); }
+
+/* Billeder lægges til rette uden spring */
+img { block-size: auto; max-inline-size: 100%; }
+.wp-block-image img, .woocommerce div.product div.images img { border-radius: var(--sg-radius); }
+
+/* Bevægelse ved scroll — kun hvor browseren kan, og kun hvis brugeren ikke har bedt om ro */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .woocommerce ul.products li.product,
+    .wc-block-grid__product,
+    .sg-card,
+    .wp-block-post-content > .wp-block-group {
+      animation: sg-lux-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 40%;
+    }
+  }
+  @keyframes sg-lux-rise {
+    from { opacity: 0; translate: 0 28px; }
+    to   { opacity: 1; translate: 0 0; }
+  }
+}
+
+/* Mørk grundflade får et næsten umærkeligt lysfald, ikke en flad farve */
+@supports (background: radial-gradient(at top, red, blue)) {
+  body:not(.sg-theme--parchment) {
+    background-image:
+      radial-gradient(ellipse 80% 40% at 50% -10%, color-mix(in srgb, var(--sg-brass) 14%, transparent), transparent 70%);
+    background-repeat: no-repeat;
+    background-attachment: scroll;
+  }
+}
+
+@media (max-width: 782px) {
+  .single_add_to_cart_button, .wp-block-button__link { padding-inline: var(--sg-space-5); inline-size: 100%; }
+  .woocommerce ul.products, .wc-block-grid__products { gap: var(--sg-space-6) var(--sg-space-4); }
+}
+@media (prefers-contrast: more) {
+  .sg-card::before { opacity: 1; }
+  .wp-block-navigation-item__content { background-size: 100% 1px; }
+}
