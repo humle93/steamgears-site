@@ -35,9 +35,14 @@ dengang repoet var offentligt**, ikke adgang. **Målt fra sitets egen IP er den 
 `wp_remote_get(SGAP_Updater::package_url('7.65.0'))` giver **404** (se §3), så der er ingen cache at
 regne med i praksis.
 
-Agentens egen vej er intakt: `cloud_git fetch` mod `origin` virker fortsat efter skiftet (samme
+Agentens egen vej er intakt: `cloud_git fetch` og `push` mod `origin` virker fortsat efter skiftet (samme
 credentials, samme remote-URL `https://github.com/humle93/steamgears-site.git`), og `git remote -v` er
-uændret. Privat betyder altså ikke »agenten kan ikke komme ind« — det betyder »anonyme kan ikke«.
+uændret.
+
+**Verifikationsmetoden ændrer sig også, og det er værd at huske:** `git ls-remote origin` uden credentials og
+de anonyme Actions-badges virker ikke længere (henholdsvis `could not read Username` og `Not Found`). CI
+læses nu gennem GitHub-integrationen (`GITHUB_LIST_CHECK_RUNS_FOR_A_REF` / `…_WORKFLOW_RUNS…`) eller af
+`cloud_git`; en agent der forsøger med de gamle kommandoer vil tro at repoet er væk. Privat betyder altså ikke »agenten kan ikke komme ind« — det betyder »anonyme kan ikke«.
 
 ## 3. Regningen: plugin'ets selvopdatering læser de URL'er anonymt
 
