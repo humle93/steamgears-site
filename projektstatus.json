@@ -6,7 +6,7 @@
       "id": "site",
       "name": "steamgears.eu — site-optimering",
       "note": "roadmap S0–S4",
-      "next": "Kun S4 tilbage (2,25 af 5,25 d): CVR/telefon i footer, valuta og prisomregning, moms/OSS, betalingsmetoder og fortrydelsesfunktionen. S2.7's script-loft er en beslutning om tredjeparter (31 scripts på forsiden, 46 på /shop/). Alt andet i SEO-sporet er målt og lukket.",
+      "next": "S4 (2,25 af 5,25 d) er det eneste tilbage af site-roadmappet. Det andet roadmap, docs/seo.md §8, er målt punkt for punkt: 5 af 7 lukket, og de to sidste er performance (caching-lag) og GPSR (S4.2).",
       "blocked_by": "S4 er juridisk bindende valg: CVR/telefon i footer, USD→EUR/DKK med omregning af 39 priser, moms/OSS, betalingsmetoder (MobilePay/PayPal/Klarna) og en fortrydelsesfunktion. S2.7's loft kræver en beslutning om hvilke tredjeparts-scripts der må køre.",
       "modules": [
         {
@@ -21,7 +21,7 @@
         {
           "id": "s1",
           "name": "S1 — butik og indhold",
-          "done": 3.75,
+          "done": 3.9,
           "total": 4.6,
           "unit": "d",
           "note": "S1.1 Herbarium 0,5 (12 SKU'er 953–972 publiceret og alle 12 linket fra historien, verificeret 2/11) + S1.3 kladde-triage 1,0 + S1.5 butikslink 30/30 indlæg 0,55; /go/-tracking mangler; + 0,1 d forhåndsvalidering af de 12 kampagneposter mod live-gaten (12 rene, 0 advarsler)."
@@ -38,7 +38,7 @@
         {
           "id": "s3",
           "name": "S3 — hygiejne",
-          "done": 3.3,
+          "done": 3.4,
           "total": 3.55,
           "unit": "d",
           "note": "S3.1 0,25 + S3.2 0,1 + S3.3 alt-tekst 0,3 + S3.4 plugin-audit 0,35 + tidligere 0,6; plugin-oprydning (slet/fjern) og webp mangler stadig; + 0,1 d PDF-eksport til research-biblioteket (2 rapporter) og rettet ordombrydning i tools/md_to_pdf.py; + 0,2 d PDF-eksport af de 12 ældste biblioteksdokumenter og to renderer-fejl rettet (sidebrud midt i afsnit, kodeblok-højde); + 0,25 d PDF-eksport af resten af biblioteket (26 dokumenter), renderer-retning af kursiv/glyffer/overskrifter og nyt PDF-værn; + 0,3 d commit-besked-værn (tools/commit_check.py med 24 fixtures, commit-msg-hook, CI-workflow); + 0,05 d S3.5 (6/11): første ugentlige roadmap-statuspost med målte procenter, 530 smoke-checks, 17/17 værn og de præcise ejerblokeringer — 0,1 af 0,5 d; + 0,05 d S3.5 (7/11): anden ugentlige kontrol kørt og målt — 24/24 værn grønne, 781 smoke-checks / 0 FAIL, historikken uden drift, og den udbudte zip 7.54.0 er `diff -r`-identisk med kilden (v7.43.0-zip'en i denne worktree var ældre end kilden og blev droppet ved rebase til 7.54.0). `tools/setup-agent-tools.sh` kunne ikke hente PHP (`IndentationError` i sin `python3 -c`-streng) — rettet og efterprøvet."
@@ -177,8 +177,8 @@
     {
       "id": "seo",
       "name": "SEO-indholdsproduktion",
-      "next": "Skriv de tre manglende guides (mens-steampunk-costume-essentials, steampunk-clothing-three-budgets, womens-steampunk-essentials) fra den verificerede copy — corset-guiden er publiceret 6/11",
-      "blocked_by": "Publicering af de tre resterende guides (292, 296, 295) kræver en godkendt MCP OAuth-session, og målt 7/11 med neutral UA (curl/8.5.0) mod de 20 live produkter i Store API lander kun 6 af de 18 /go/-links i docs/library/guides-2026-11-03.md på HTTP 200 (413, 483, 489, 491, 493, 495), mens 12 lander på 404 (397, 411, 475, 481, 485, 487, 497, 561, 563, 567, 724, 728) — produktreferencer og priser ($49–$279) i guide-kladden skal derfor afstemmes mod det nuværende 20-produkts katalog ved publicering.",
+      "next": "Fire guides er skrevet færdige som kladder (1410: 11 403 tegn, 1361: 11 454, 1359: 11 237, 1357). Publicering er ejerens redaktionelle valg; intet er publiceret uden den.",
+      "blocked_by": "Publicering af guide-kladderne kræver ejerens valg af hvilke der skal ud og hvornår. Tidligere modulnavn pegede på id 292/296/295, som er produktvarianter (t-shirt L/M/S), ikke guides.",
       "modules": [
         {
           "id": "batch",
@@ -1428,6 +1428,15 @@
       "after": 80.2,
       "delta": 3.7,
       "basis": "19,3 af 24,05 d (S0 2,15/2,35 · S1 3,75/4,6 · S2 7,85/8,3 · S3 3,3/3,55 · S4 2,25/5,25)"
+    },
+    {
+      "date": "2026-11-08",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 80.2,
+      "after": 81.3,
+      "delta": 1.1,
+      "basis": "19,55 af 24,05 d (S0 2,15/2,35 · S1 3,9/4,6 · S2 7,85/8,3 · S3 3,4/3,55 · S4 2,25/5,25)"
     }
   ]
 }

@@ -24,7 +24,7 @@ _Opdateret 2026-11-08 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 | Projekt | Status | Grundlag |
 | --- | --- | --- |
-| **steamgears.eu — site-optimering** | **80,2 %** | 19,3 af 24,05 d (S0 2,15/2,35 · S1 3,75/4,6 · S2 7,85/8,3 · S3 3,3/3,55 · S4 2,25/5,25) |
+| **steamgears.eu — site-optimering** | **81,3 %** | 19,55 af 24,05 d (S0 2,15/2,35 · S1 3,9/4,6 · S2 7,85/8,3 · S3 3,4/3,55 · S4 2,25/5,25) |
 | **Steamgears Autopilot — plugin** | **97,2 %** | 29,6 af 30,45 d (P0 4,65/4,65 · P1 14,2/15,05 · P2 4,75/4,75 · P3 2/2 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25 · P1E 0,25/0,25 · P1F 0,25/0,25 · P1G 0,5/0,5 · P2F 1,5/1,5) |
 | **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5) |
 | **SEO-indholdsproduktion** | **62,5 %** | 5 af 8 guides (BATCH 0/3 · COPY 4/4 · CORSET 1/1) |
@@ -35,24 +35,24 @@ _Opdateret 2026-11-08 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 - **steamgears.eu — site-optimering** — S4 er juridisk bindende valg: CVR/telefon i footer, USD→EUR/DKK med omregning af 39 priser, moms/OSS, betalingsmetoder (MobilePay/PayPal/Klarna) og en fortrydelsesfunktion. S2.7's loft kræver en beslutning om hvilke tredjeparts-scripts der må køre.
 - **Steamgears Autopilot — plugin** — P1.5 kræver ejerens tokens (må ikke gennem chat eller repo). Målt 8/11 med 7.60.1: ruten /sgap/v1/pinterest/refresh svarer 200, men Pinterest afviser det gemte token med HTTP 401 «Authentication failed.» (0 pins, 0 matched, 0 events), og refreshable er false, fordi der hverken er refresh-token eller app-credentials. instagram/refresh svarer configured:false — instagram_access_token og instagram_user_id er begge tomme. Det gamle sgap_pinterest_token bliver nu læst og migreret (access_len 101, migrated_equal true), se docs/library/pinterest-noegle-gammelt-felt-2026-11-08.md. Roadmappet er afstemt linje for linje 7/11 (åbent = 0,85 d = dette punkt). Uden for roadmappet: mu-plugin-rettelsen 1.3.1 ligger stadig kun i repoet og kræver ejerens File Manager.
 - **Dark academia-rebrand** — Printify-adgang
-- **SEO-indholdsproduktion** — Publicering af de tre resterende guides (292, 296, 295) kræver en godkendt MCP OAuth-session, og målt 7/11 med neutral UA (curl/8.5.0) mod de 20 live produkter i Store API lander kun 6 af de 18 /go/-links i docs/library/guides-2026-11-03.md på HTTP 200 (413, 483, 489, 491, 493, 495), mens 12 lander på 404 (397, 411, 475, 481, 485, 487, 497, 561, 563, 567, 724, 728) — produktreferencer og priser ($49–$279) i guide-kladden skal derfor afstemmes mod det nuværende 20-produkts katalog ved publicering.
+- **SEO-indholdsproduktion** — Publicering af guide-kladderne kræver ejerens valg af hvilke der skal ud og hvornår. Tidligere modulnavn pegede på id 292/296/295, som er produktvarianter (t-shirt L/M/S), ikke guides.
 
 ### Næste skridt
 
-- **steamgears.eu — site-optimering** — Kun S4 tilbage (2,25 af 5,25 d): CVR/telefon i footer, valuta og prisomregning, moms/OSS, betalingsmetoder og fortrydelsesfunktionen. S2.7's script-loft er en beslutning om tredjeparter (31 scripts på forsiden, 46 på /shop/). Alt andet i SEO-sporet er målt og lukket.
+- **steamgears.eu — site-optimering** — S4 (2,25 af 5,25 d) er det eneste tilbage af site-roadmappet. Det andet roadmap, docs/seo.md §8, er målt punkt for punkt: 5 af 7 lukket, og de to sidste er performance (caching-lag) og GPSR (S4.2).
 - **Steamgears Autopilot — plugin** — P1.5's live-verifikation er det eneste åbne punkt (0,85 d): 7.60.1 kører live og Pinterest-tokenet er migreret til det felt Keys viser, men Pinterest afviser det med HTTP 401, og Instagram har intet token. Når ejeren har indsat et friskt Pinterest-token (og gerne app-credentials + refresh token) samt Instagrams professionelle konto-id og long-lived user token, køres pinterest/refresh og instagram/refresh, og de målte tal bogføres som P1.5's sidste 0,85 d.
 - **Dark academia-rebrand** — Batch 4 — mockups (~130 billeder)
-- **SEO-indholdsproduktion** — Skriv de tre manglende guides (mens-steampunk-costume-essentials, steampunk-clothing-three-budgets, womens-steampunk-essentials) fra den verificerede copy — corset-guiden er publiceret 6/11
+- **SEO-indholdsproduktion** — Fire guides er skrevet færdige som kladder (1410: 11 403 tegn, 1361: 11 454, 1359: 11 237, 1357). Publicering er ejerens redaktionelle valg; intet er publiceret uden den.
 - **Døde internlinks** — Vedligehold: tjek nye indlæg mod live-URL'er
 
 ### Seneste commits
 
+- `40ae2b1 SEO-sporet lukket: billedvægt 0 over 300 KB, lead-formular målt, scripts væk`
+- `113389a chore(status): daglig projektstatus 2026-11-08`
 - `00f3682 SEO-sporet: døde /go/-links rettet, indlæg 898 fik indhold, 46 kladder tømt`
 - `16e6fce chore(status): daglig projektstatus 2026-11-08`
 - `e8e2817 S1.5: 29 af 30 indlæg har nu et /go/-link — men 33 af 45 id'er er kladder`
 - `a3fcae3 chore(status): daglig projektstatus 2026-11-08`
-- `123000d P1.5 målt live: Pinterest 401, Instagram uden nøgle — 0,85 d ikke bogført`
-- `73926b9 Pinterest: læs og migrér nøglen fra det gamle feltnavn`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)

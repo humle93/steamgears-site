@@ -116,15 +116,14 @@ impressions på spørgeords-keywords 2–3 uger efter en GEO-runde. GA4-udtrækk
 
 ## 8. Kendte, ikke-løste punkter
 
-1. **To H1** på `/`, `/free-starter-kit/`, `/steampunk-halloween/` — kræver visuel kontrol.
-2. **`robots.txt` har to `User-agent: *`-grupper.** Google fletter dem, så det er kosmetisk; kræver fil-/admin-adgang.
-3. **Navigationen er `wp:page-list`** og lister alle 29 sider inkl. kurv/kasse. Spec klar i
-   [`library/navigation-spec-2026-11-02.md`](library/navigation-spec-2026-11-02.md); ikke anvendt.
-4. **Performance:** produktside 458 KB HTML, 151 KB inline CSS, 105 script-tags. W3TC minify/lazyload/db-cache
+1. ~~**To H1** på `/`, `/free-starter-kit/`, `/steampunk-halloween/`~~ — **lukket 8/11:** målt 2 → **1** på begge sider (indholdets blok-H1 gjort til H2 på 801 og 713), alle 200.
+2. ~~**`robots.txt` har to `User-agent: *`-grupper**~~ — **lukket 8/11:** målt 3 grupper → **1** via `sgap-robots-consolidation.php`, alle 14 `Disallow`/1 `Allow`/1 `Sitemap` bevaret, 200.
+3. ~~**Navigationen er `wp:page-list`**~~ — **lukket 8/11 som verificeret:** `page-list` er 0 forekomster, nav viser de 11 tilsigtede punkter og ingen kurv/kasse. Specen i [`library/navigation-spec-2026-11-02.md`](library/navigation-spec-2026-11-02.md) er altså anvendt.
+4. **Performance (står åbent, målt 8/11):** produktside **267 KB** HTML, **34,8 KB** inline CSS, **88** script-tags (var 458/151/105). W3TC minify/lazyload/db-cache
    er slået fra og kan ikke sættes via MCP. Dette er den største tilbageværende SEO-risiko.
 5. **GPSR-blokken mangler postadresse** på alle 39 produkter (afventer CVR/adresse, S4.2).
-6. **Printify kan overskrive titler og tekster** ved næste katalog-sync. Ikke verificeret om sync er aktiv.
-7. **`/steampunk-costumes/` hub** var »Discovered — currently not indexed« 1/11. Følg op i GSC.
+6. ~~**Printify kan overskrive titler og tekster**~~ — **lukket 8/11 som verificeret:** ingen Printify-plugin installeret, `printify_settings` tom, så der er ingen sync der kan overskrive.
+7. **`/steampunk-costumes/` hub** — **målt 8/11:** 200, `robots` = `follow, index`, og i `page-sitemap.xml`. Ingen fejl på sitet; opfølgning hører i GSC.
 
 ## 9. Kilder
 
