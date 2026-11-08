@@ -7,8 +7,8 @@ Konkret kortlægning af hvordan det eksisterende katalog kan flyttes fra "steamp
 **Vigtige forbehold, læs før udførelse:**
 
 1. **Slugs ændres ikke.** 39 produkter har allerede 39 indgående links fra 15 artikler, og vi har 24 døde link-mål i forvejen. Nye titler + gamle slugs er acceptabelt; nye slugs uden redirects ville skabe 39 nye 404'ere.
-2. **Printify overskriver WooCommerce-tekst ved næste sync.** Titler og beskrivelser skal derfor rettes i Printify, ikke (kun) i butikken. Dette er den vigtigste praktiske detalje i hele planen.
-3. **Mockups kan ikke laves via MCP.** De skal genereres i Printify (deres mockup-værktøj) eller uploades — det er ejerarbejde eller kræver adgang til Printify-kontoen.
+2. **Printful overskriver WooCommerce-tekst ved næste sync.** Titler og beskrivelser skal derfor rettes i Printful, ikke (kun) i butikken. Dette er den vigtigste praktiske detalje i hele planen.
+3. **Mockups kan ikke laves via MCP.** De skal genereres i Printful (deres mockup-værktøj) eller uploades — det er ejerarbejde eller kræver adgang til Printful-kontoen.
 4. **Priser røres ikke her.** Valutabeslutningen (USD → EUR/DKK) er en separat opgave og skal køres først, så priserne kun genberegnes én gang.
 
 ## Søgeord der bærer om-mærkningen
@@ -114,7 +114,7 @@ Overlap er tilsigtet: et produkt må gerne ligge i to kollektioner, hvis kunden 
 Alle 39 produkter har i dag under 3 billeder. Det er den største enkeltmangel i kataloget, og om-mærkningen virker ikke uden den.
 
 **T-shirts og hoodies — 5 billeder hver:**
-1. Nuværende Printify-mockup (behold som første)
+1. Nuværende Printful-mockup (behold som første)
 2. Livsstilsbillede: model i dagslys, akademisk/victoriansk setting (bibliotek, stentrappe, regnvejr gennem vindue)
 3. Fladlæg på mørkt stof (mørkebrun, flaske grøn eller oxblood — ikke hvid, det er hele pointen)
 4. Close-up af printkvalitet, 1:1 beskræring
@@ -140,10 +140,10 @@ Alle 39 produkter har i dag under 3 billeder. Det er den største enkeltmangel i
 | 1 | Nye titler + SEO-titel/beskrivelse på **32** produkter (gruppe A + B) | Mig (via MCP) | 2,5–3 t | ✓ **Udført 1/11** — 32/32 omdøbt, SEO-titel + meta description + fokus-søgeord sat på alle |
 | 2 | Seks kollektioner + tildeling af produkter | Mig | 1 t | ✓ **Udført 1/11** — se nedenfor |
 | 3 | Omskrivning af produkttekst: fit, produktionstid, levering, GPSR-blok | Mig | 3–4 t |
-| 4 | Mockups: 5 billeder pr. tøjprodukt, 4 pr. plakat — 39 produkter | Ejer i Printify | 4–6 t |
+| 4 | Mockups: 5 billeder pr. tøjprodukt, 4 pr. plakat — 39 produkter | Ejer i Printful | 4–6 t |
 | 5 | Krydsreferencer: dark academia-artikler linker dark academia-kollektionen, steampunk-artikler linker kapslen | Mig | 1–2 t |
 
-**Samlet: 11–16 timer ≈ 1,5–2 arbejdsdage**, hvoraf mockup-arbejdet (4–6 t) er det eneste der kræver Printify-adgang.
+**Samlet: 11–16 timer ≈ 1,5–2 arbejdsdage**, hvoraf mockup-arbejdet (4–6 t) er det eneste der kræver Printful-adgang.
 
 ## Udført 1/11 2026
 
@@ -163,7 +163,7 @@ Alle 39 produkter har i dag under 3 billeder. Det er den største enkeltmangel i
 **Verifikation:** alle seks arkivsider svarer 200 (`/product-category/dark-academia/` osv.), de nye titler vises på produktsiderne og på `/shop/`, og W3TC blev purget efter ændringerne.
 
 **Stadig åbent:**
-- **Printify-sync.** Titlerne er sat i WooCommerce. Hvis Printify har katalog-synkronisering kørende, kan de blive overskrevet ved næste push — de skal derfor spejles i Printify. Det er ikke verificeret, om sync er aktiv.
+- **Printful-sync.** Titlerne er sat i WooCommerce. Hvis Printful har katalog-synkronisering kørende, kan de blive overskrevet ved næste push — de skal derfor spejles i Printful. Det er ikke verificeret, om sync er aktiv.
 - Slugs er bevaret (fx `/product/clockwork-owl-steampunk-unisex-hoodie/`), så titel og URL nu afviger fra hinanden. Det er et bevidst valg for at undgå 404'ere.
 - Batch 3 (produkttekster) og 4 (mockups) er ikke rørt — uden dem er omdøbningen kun halvt virksom.
 

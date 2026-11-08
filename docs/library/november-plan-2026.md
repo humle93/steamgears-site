@@ -7,7 +7,7 @@ Alle kilder verificeret live 27/10 (HTTP 200).
 
 ### Spor A — Gift Guide-artikel + posters (INDHOLD, først)
 Deadline: klar inden Black Friday (27/11 2026 → mål: publiceret senest 7/11).
-1. Upscale 12 steampunk-motiver (GG-001..012) til print-res → Printify-varianter → CSV upload
+1. Upscale 12 steampunk-motiver (GG-001..012) til print-res → Printful-varianter → CSV upload
 2. Gift Guide-artikel: "Steampunk Wall Art Gift Guide 2026" — 12 motiver, 2 størrelser (30×40/50×70), $29.95/$39.95, sg-buy CTA'er
 3. Product-schema på de 5 poster-produkter (Offer, ItemAvailability)
 4. Buffer-kø: 5 poster-pins til Pinterest/FB/IG

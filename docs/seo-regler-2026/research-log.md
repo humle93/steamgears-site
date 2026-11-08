@@ -67,7 +67,7 @@ Top-signaler: 40K 11th ed. launch (Armageddon-box, warhammer-community 26/3), co
 - Kvalitet: alle enkeltvist inspiceret; 10 re-gens/edits pga. pseudo-tekst (diesel 02/03/05/06, atompunk 06+08, solar 03+12, cyber 03/05/06/10/12, west 03/05/09/12). Cyberpunk-skilte er abstrakte geometriske glød-symboler (ulæselige med vilje).
 - Generering: Juno indbygget billedmodel (Gemini image) — IKKE fal (balance tom) og IKKE aimlapi (mangler image-endpoint fra CLI; scripts blokerer netværk). Henning spurgte om aimlapi til billeder — svar givet: indbygget model er vejen.
 - Canvas-arkitektur: "Posters & Wall Art — Gift Guide Mockups 2026" (id 7b09a4c9) med art-masters, art-masters-genres + 12 mockup-asset-sider (2 størrelser × 6 linjer). SKU'er forudbestilt SG-POSTER-GG/DG/AT/SL/CY/WW-001..012, $29.95/$39.95.
-- Næste: upscale til print-res → Printify-varianter → CSV → Gift Guide-artikel med sg-buy CTA'er før Black Friday.
+- Næste: upscale til print-res → Printful-varianter → CSV → Gift Guide-artikel med sg-buy CTA'er før Black Friday.
 
 ## 2026-11-02 (uge 45) — Ugentlig SEO-research ✅
 

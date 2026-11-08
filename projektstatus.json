@@ -6,8 +6,8 @@
    "id": "site",
    "name": "steamgears.eu — site-optimering",
    "note": "roadmap S0–S4",
-   "next": "Intet agent-arbejde tilbage i S0–S4. De åbne poster er ejer-blokerede og navngivet i docs/roadmap.md §4c: GSC-svar (S0.6), ja/nej pr. produkt 942/765/766/767 (S1.2), Complianz EU-valg (S4.1), CVR/adresse/telefon (S4.2, S4.9), valuta + 39 priser (S4.3), betalingsaftaler (S4.5), forsendelseszoner (S4.6), Printify (S4.7). Køen og cron er derimod ryddet og kører nu af sig selv (S3.6).",
-   "blocked_by": "Ejerens oplysninger og aftaler: CVR/registreret navn/postadresse/telefon, valuta og 39 priser, betalingsaftaler (MobilePay/PayPal/Klarna), forsendelseszoner og fragtklasser, Complianz EU-model, Printify-adgang, GSC Crawl stats, og ja/nej til publicering af 942/765/766/767.",
+   "next": "Intet agent-arbejde tilbage i S0–S4. De åbne poster er ejer-blokerede og navngivet i docs/roadmap.md §4c: GSC-svar (S0.6), ja/nej pr. produkt 942/765/766/767 (S1.2), Complianz EU-valg (S4.1), CVR/adresse/telefon (S4.2, S4.9), valuta + 39 priser (S4.3), betalingsaftaler (S4.5), forsendelseszoner (S4.6), Printful (S4.7). Køen og cron er derimod ryddet og kører nu af sig selv (S3.6).",
+   "blocked_by": "Ejerens oplysninger og aftaler: CVR/registreret navn/postadresse/telefon, valuta og 39 priser, betalingsaftaler (MobilePay/PayPal/Klarna), forsendelseszoner og fragtklasser, Complianz EU-model, Printful-adgang, GSC Crawl stats, og ja/nej til publicering af 942/765/766/767.",
    "modules": [
     {
      "id": "s0",
@@ -155,7 +155,7 @@
    "id": "rebrand",
    "name": "Dark academia-rebrand",
    "next": "Batch 4 er det eneste tilbage — og det er ejer-blokeret.",
-   "blocked_by": "Batch 4 (mockups, 0 af 5 t) kræver Printify-adgang eller 5–8 færdige mockups pr. produkt uploadet af ejeren; teksten (batch 1–3, 8,5 t) er 100 % færdig og verificeret. Derfor er 63 % = 8,5/13,5, mens 100 % af den ikke-ejer-blokerede del er leveret.",
+   "blocked_by": "Batch 4 (mockups, 0 af 5 t) kræver Printful-adgang eller 5–8 færdige mockups pr. produkt uploadet af ejeren; teksten (batch 1–3, 8,5 t) er 100 % færdig og verificeret. Derfor er 63 % = 8,5/13,5, mens 100 % af den ikke-ejer-blokerede del er leveret.",
    "modules": [
     {
      "id": "tekster",
@@ -171,7 +171,7 @@
      "done": 0,
      "total": 5,
      "unit": "t",
-     "note": "ejer-blokeret: kræver Printify-adgang eller upload af 5–8 mockups pr. produkt; målt i dag har 39 produkter max 2 billeder"
+     "note": "ejer-blokeret: kræver Printful-adgang eller upload af 5–8 mockups pr. produkt; målt i dag har 39 produkter max 2 billeder"
     }
    ]
   },

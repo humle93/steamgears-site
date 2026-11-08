@@ -1,6 +1,6 @@
 # Mockup-brief — 38 produkter — 1/11 2026
 
-Tjekliste til Printify, produkt for produkt. Hører til [om-maerkning-dark-academia-2026-11-01.md](om-maerkning-dark-academia-2026-11-01.md).
+Tjekliste til Printful, produkt for produkt. Hører til [om-maerkning-dark-academia-2026-11-01.md](om-maerkning-dark-academia-2026-11-01.md).
 
 **Status nu:** alle 39 produkter har **1 billede** (plakaterne 2). Målet er 4–5. Det er 38 fysiske produkter × ca. 4 nye billeder ≈ **150 billeder**, men kun ca. 25 unikke opsætninger — resten er samme scene med et andet motiv.
 
@@ -8,14 +8,14 @@ Tjekliste til Printify, produkt for produkt. Hører til [om-maerkning-dark-acade
 
 ## Sådan gør du, pr. produkt
 
-1. Printify → **My Products** → find produktet (søg på motivnavnet, fx "Clockwork Owl").
+1. Printful → **My Products** → find produktet (søg på motivnavnet, fx "Clockwork Owl").
 2. Åbn produktet → **Mockup / Images**.
 3. Behold det nuværende mockup som **billede 1** — det viser motivet rent og tydeligt. Flyt det ikke.
 4. Tilføj de nye billeder i den rækkefølge, der står i tabellen nedenfor.
 5. Sæt **alt-tekst** på hvert billede, mens du er der (skabelon nederst). Det er 20 sekunder pr. billede og det eneste SEO-arbejde, billederne kan give.
-6. Gem. Printify pusher til WooCommerce — **læg ikke billeder ind direkte i WooCommerce**, de forsvinder ved næste sync.
+6. Gem. Printful pusher til WooCommerce — **læg ikke billeder ind direkte i WooCommerce**, de forsvinder ved næste sync.
 
-**Vigtigt om kilder:** Printifys mockup-generator har scener og modeller pr. blueprint. Hvis en scene ikke findes til din blueprint (gælder især frakker, corsets og hatte), brug **"Upload your own photo"** med et foto af tøjet på en person eller på bøjle. Et rigtigt foto slår et generisk mockup hver gang — også når det er taget med telefon, så længe lyset er dæmpet og baggrunden er mørk.
+**Vigtigt om kilder:** Printfuls mockup-generator har scener og modeller pr. blueprint. Hvis en scene ikke findes til din blueprint (gælder især frakker, corsets og hatte), brug **"Upload your own photo"** med et foto af tøjet på en person eller på bøjle. Et rigtigt foto slår et generisk mockup hver gang — også når det er taget med telefon, så længe lyset er dæmpet og baggrunden er mørk.
 
 ## Regler der gælder alle 38
 

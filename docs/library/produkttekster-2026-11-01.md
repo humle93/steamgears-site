@@ -39,9 +39,9 @@ Blokken indeholder materiale, producent, kontaktadresse og en henvisning til kon
 
 GPSR (EU 2023/988) kræver producentens navn, varemærke, **postadresse** og e-mail. Linjen »Postal address on request via the contact page« er sand og bedre end ingenting, men den opfylder ikke kravet. Så snart CVR og adresse foreligger, skal fire linjer skiftes på alle 39 produkter — det er et script, ikke manuelt arbejde.
 
-## Risiko: Printify kan overskrive det hele
+## Risiko: Printful kan overskrive det hele
 
-Teksterne er skrevet i WooCommerce. Hvis Printify har katalog-synkronisering kørende, kan næste push erstatte både titler og beskrivelser. De tidligere beskrivelser indeholdt håndskrevne sektioner (»The Steamgears Promise«, FAQ), som Printify ikke genererer — det tyder på, at sync ikke har rørt beskrivelserne hidtil. **Det er ikke verificeret.** Hvis det sker, er teksten i dette dokument og i `copygen`-logikken kilden til at genskabe den.
+Teksterne er skrevet i WooCommerce. Hvis Printful har katalog-synkronisering kørende, kan næste push erstatte både titler og beskrivelser. De tidligere beskrivelser indeholdt håndskrevne sektioner (»The Steamgears Promise«, FAQ), som Printful ikke genererer — det tyder på, at sync ikke har rørt beskrivelserne hidtil. **Det er ikke verificeret.** Hvis det sker, er teksten i dette dokument og i `copygen`-logikken kilden til at genskabe den.
 
 ## Verifikation
 

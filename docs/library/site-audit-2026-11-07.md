@@ -59,7 +59,7 @@ includeSubDomains; preload`, `x-content-type-options: nosniff`. **Ingen** `conte
 
 - **Produktsider og deres JSON-LD** — 20+ produkter, `shippingDetails` og `MerchantReturnPolicy` (S4.13).
 - **`/robots.txt` og `/sitemap_index.xml`** — og dermed om de 20 produkter overhovedet er annonceret.
-- **Kurv og kasse** — Printify-rater, W3TC-udelukkelse, betalingsmetoder (S4.6, S4.5).
+- **Kurv og kasse** — Printful-rater, W3TC-udelukkelse, betalingsmetoder (S4.6, S4.5).
 - **De 24 indlæg** — meta-titler, descriptions, fokusnøgleord og OG-billeder (S2.5).
 - **Mediefilerne** — 245 filer, webp-dækning og alt-tekst uden for de to sider (S3.3).
 - **Alle 121 sitemap-URL'er** — S0.7's crawl kan ikke gentages, før sitet svarer.

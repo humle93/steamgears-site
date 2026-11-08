@@ -69,7 +69,7 @@ produkter og undgår, at en tee koster 179,32 kr.
 
 1. **Moms.** Kontrollér, om de nuværende priser er sat inkl. eller ekskl. moms i WooCommerce →
    Indstillinger → Moms. Skiftet må ikke ændre, hvad kunden reelt betaler, med mere end afrundingen.
-2. **Fragt.** Printify-priser er i USD; en DKK-butik skal have fragttabellerne genberegnet, ellers
+2. **Fragt.** Printful-priser er i USD; en DKK-butik skal have fragttabellerne genberegnet, ellers
    æder kursudsving margenen (S4.6).
 3. **Betalingsgebyrer.** Stripe tager et procentgebyr plus et fast beløb pr. valuta. MobilePay og
    PayPal har egne satser — regn dem ind, før priserne låses.

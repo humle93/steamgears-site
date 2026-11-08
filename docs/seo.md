@@ -20,7 +20,7 @@ Sidens status og næste skridt står i [`roadmap.md`](roadmap.md) (S2 og S4). De
 | --- | --- |
 | **Title + H1** | Primært søgeord inden for de første 50 tegn. Titel max 62 tegn, H1 max ~70. Kun **én H1** pr. side — den ekstra H1 i hero-sektionerne på `/`, `/free-starter-kit/` og `/steampunk-halloween/` er stadig ikke rettet, fordi det ændrer typografien og skal ses i browser først |
 | **Meta description** | 140–155 tegn, søgeord først, konkret løfte eller CTA. Ingen auto-trunkerede excerpts (runde 1/11 rettede de sidste 3) |
-| **Produkttekster** | Aldrig Printify-standardtekst. 150–300 ord unik tekst med materialer, pasform og cosplay-anvendelse |
+| **Produkttekster** | Aldrig Printful-standardtekst. 150–300 ord unik tekst med materialer, pasform og cosplay-anvendelse |
 | **Billeder** | Alt-tekst på alt. Beskriv motivet, ikke filnavnet. 210 billeder verificeret 2/11 |
 | **Intern linking** | Hvert indlæg linker mindst ét produkt via `/go/<id>/` og mindst to guides plus den relevante hub |
 | **Schema** | Product + Offer + ItemAvailability på produkter, HowTo på guides, BreadcrumbList sitebredt. Valuta i schema følger butikkens valuta — **USD i dag**, se S4.3 |
@@ -122,7 +122,7 @@ impressions på spørgeords-keywords 2–3 uger efter en GEO-runde. GA4-udtrækk
 4. ⛔ **Ejer-blokeret — performance (målt 8/11):** produktside **268 KB** HTML, **34,8 KB** inline CSS, **88** script-tags (var 458/151/105), og `payload_audit` viser **8/8 skabeloner inden for det vedtagne loft**. Det der stadig ikke er gjort, er W3TC's egen minify/lazyload/database-cache: indstillingerne ligger i `wp-content/w3tc-config/master.php`, ikke i options, og kan derfor ikke sættes gennem de tilgængelige abilities. **Ejeren skal levere:** (a) slå **Minify (JS+CSS), Lazy load images og Database cache** til i W3TC → General Settings, og (b) bagefter gennemføre **én rigtig testordre** i checkout, så vi ved at kurven og betalingen stadig virker. Uden (a) kan agenten ikke måle effekten, og uden (b) må den ikke slå det til. Derefter måler agenten de fire skabeloner igen og skriver resultatet her.
    er slået fra og kan ikke sættes via MCP. Dette er den største tilbageværende SEO-risiko.
 5. ⛔ **Ejer-blokeret — GPSR-blokken mangler postadresse** på alle 39 produkter. **Ejeren skal levere CVR-nummer, registreret firmanavn og postadresse** (samme oplysninger som roadmap S4.2); så snart de findes, indsættes de i `sgap-product-schema` på under en time.
-6. ~~**Printify kan overskrive titler og tekster**~~ — **lukket 8/11 som verificeret:** ingen Printify-plugin installeret, `printify_settings` tom, så der er ingen sync der kan overskrive.
+6. ~~**Printful kan overskrive titler og tekster**~~ — **lukket 8/11 som verificeret:** ingen POD-connector installeret (hverken Printful eller Printify), `printify_settings` tom, så der er ingen sync der kan overskrive.
 7. ~~**`/steampunk-costumes/` hub**~~ — **lukket 8/11:** målt 200, `robots` = `follow, index` og med i `page-sitemap.xml`; der er ingen fejl på sitet. Den eneste opfølgning er GSC's indekseringsstatus, som ligger hos ejeren under S0.6.
 
 ## 9. Kilder

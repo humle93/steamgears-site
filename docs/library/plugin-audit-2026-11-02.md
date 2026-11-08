@@ -100,7 +100,7 @@ fra "blokeret af ejerens klik" til "kan gøres nu".
 | --- | --- | --- |
 | **Database Cleaner** 1.4.8 | Kan slette revisionshistorik og transienter automatisk | At ingen automatisk oprydning er slået til. Revisionshistorik er den eneste fortrydelse der findes på indhold |
 | **W3 Total Cache** 2.11.0 + `advanced-cache.php` + `object-cache.php` | Sidecache mod WooCommerce-kurv. Verificeret: `/cart/` og `/checkout/` svarer `private, no-cache` — det er korrekt. Ingen W3TC-cache-headere ses på `/shop/`, så siden caches muligvis slet ikke (S4.11 måler 5,8 s) | Om siden faktisk caches, og om minify/lazyload er slået til (det er ikke, jf. S4.11) |
-| **Printify Shipping Method** 3.2 | Eneste Printify-plugin. Der er **ingen fulfilment-connector**, hvilket er hele blokeringen for tees og Herbarium | Ikke et plugin-problem, men det gør plugin-listen til beviset på blokeringen |
+| **Printify Shipping Method** 3.2 | Eneste Printify-plugin (leverandøren er Printful). Der er **ingen fulfilment-connector**, hvilket er hele blokeringen for tees og Herbarium | Ikke et plugin-problem, men det gør plugin-listen til beviset på blokeringen |
 | **WP Pusher** 3.0.20 | Deploy-vej uden om GitHub Actions + zip, som repoet dokumenterer | Om den er i brug. Hvis ikke: fjern, så der kun er én deploy-vej |
 | **Coming Soon** 6.20.10 | Kan sætte hele butikken i "kommer snart" for gæster | Verificeret 2/11: `/shop/` svarer 200 med produkter for en anonym klient, og teksten "maintenance" på siden er et produktnavn, ikke en holding page. Ingen aktuel risiko |
 | **Pinterest for WooCommerce** 1.6.1 | Token giver 401 (roadmap P1.5) | Plugin'et kører blindt. Enten forny token eller deaktivér |

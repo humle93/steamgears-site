@@ -1,12 +1,12 @@
 # Punk — upload klar: 31 filer, to destinationer
 
-Alt der kan forberedes uden billederne er nu forberedt: filnavne, alt-tekster, trykkrav, medie-upload til WordPress og produktkladserne. Det der mangler er filerne — og Printify-delen, som ingen MCP dækker.
+Alt der kan forberedes uden billederne er nu forberedt: filnavne, alt-tekster, trykkrav, medie-upload til WordPress og produktkladserne. Det der mangler er filerne — og Printful-delen, som ingen MCP dækker.
 
 Skrevet 2/11 2026. Bygger på [punk-lancering-2026-11-02.md](punk-lancering-2026-11-02.md) (teksterne og mockup-planen) og [mockup-brief-2026-11-01.md](mockup-brief-2026-11-01.md) (billedreglerne).
 
 ## De 31 filer
 
-| Design | Trykfil (Printify) | Krav | Mockups (WordPress) |
+| Design | Trykfil (Printful) | Krav | Mockups (WordPress) |
 |---|---|---|---|
 | T1 Coil No. 1 | `assets/punk/t1/print-master.png` | 28 cm bred → **3307 px**, transp. baggrund | 4 |
 | D1 Zeppelin Line No. 9 | `assets/punk/d1/print-master.png` | 50 × 70 cm → **5906 × 8268 px** | 4 |
@@ -17,7 +17,7 @@ Skrevet 2/11 2026. Bygger på [punk-lancering-2026-11-02.md](punk-lancering-2026
 
 Pixel-tallene er ikke valgte — de er de solgte mål gange 300 DPI. Plakaterne har 50 × 70 som master, fordi den mindste størrelse kan skaleres ned, men ikke op.
 
-**De to destinationer må ikke blandes sammen.** Trykfilen går til Printify og bliver aldrig et produktbillede. Mockups går til WordPress' mediebibliotek og bliver galleriet, i den rækkefølge kataloget angiver — 01 er altid det rene produktmockup, som på de 39 eksisterende.
+**De to destinationer må ikke blandes sammen.** Trykfilen går til Printful og bliver aldrig et produktbillede. Mockups går til WordPress' mediebibliotek og bliver galleriet, i den rækkefølge kataloget angiver — 01 er altid det rene produktmockup, som på de 39 eksisterende.
 
 Filnavne, alt-tekster og rækkefølge står i [punk-catalogue.json](../../deploy/steamgears/punk-catalogue.json); de er ikke frie at ændre, fordi de er nøglerne i upload-flowet.
 
@@ -34,7 +34,7 @@ python3 tools/deploy/build_punk.py            # produkttrinnene får nu images
 
 ## Det der stadig er manuelt
 
-**Printify.** Der findes ingen MCP til Printify, så produktopsætningen dér kan ikke forberedes herfra. Den består af blueprint, print provider, printområde, farver og størrelser pr. design — og den skal spejle WooCommerce, ellers kan en sync overskrive teksterne (samme uafklarede risiko som på de 39). Tallene til opsætningen er de samme som i tabellen ovenfor.
+**Printful.** Der findes ingen MCP til Printful, så produktopsætningen dér kan ikke forberedes herfra. Den består af blueprint, print provider, printområde, farver og størrelser pr. design — og den skal spejle WooCommerce, ellers kan en sync overskrive teksterne (samme uafklarede risiko som på de 39). Tallene til opsætningen er de samme som i tabellen ovenfor.
 
 **Fire ting kan ikke tjekkes maskinelt** og skal ses med øjnene:
 

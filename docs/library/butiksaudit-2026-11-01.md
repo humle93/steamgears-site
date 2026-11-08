@@ -1,10 +1,10 @@
-# Butiksaudit — WooCommerce + Printify — 1/11 2026
+# Butiksaudit — WooCommerce + Printful — 1/11 2026
 
-Fuld gennemgang af steamgears.eu som Printify-dropshippingbutik, målt mod gældende praksis for print-on-demand i WooCommerce og mod danske/EU-krav til netbutikker. Supplerer [indholdsaudit-2026-11-01.md](indholdsaudit-2026-11-01.md), [dode-links-2026-11-01.md](dode-links-2026-11-01.md) og [roadmap.md](../roadmap.md).
+Fuld gennemgang af steamgears.eu som Printful-dropshippingbutik, målt mod gældende praksis for print-on-demand i WooCommerce og mod danske/EU-krav til netbutikker. Supplerer [indholdsaudit-2026-11-01.md](indholdsaudit-2026-11-01.md), [dode-links-2026-11-01.md](dode-links-2026-11-01.md) og [roadmap.md](../roadmap.md).
 
 ## Metode
 
-Læst via MCP og direkte HTTP: alle 37 aktive plugins, WooCommerce Store API (39 produkter), ordrehistorik, Complianz-konfiguration og -dokumenter, betalingsside-markering, produkt- og kurvside-HTML, load-tider, samt de 15 sider med døde links fra linkauditten. Juridisk og POD-fagligt grundlag er hentet fra Forbrugerombudsmanden, forbrug.dk, Sikkerhedsstyrelsen, Dansk Erhverv, Dansk Industri, Europa-Kommissionen, Printifys vilkår og Baymards nedbrudsdata.
+Læst via MCP og direkte HTTP: alle 37 aktive plugins, WooCommerce Store API (39 produkter), ordrehistorik, Complianz-konfiguration og -dokumenter, betalingsside-markering, produkt- og kurvside-HTML, load-tider, samt de 15 sider med døde links fra linkauditten. Juridisk og POD-fagligt grundlag er hentet fra Forbrugerombudsmanden, forbrug.dk, Sikkerhedsstyrelsen, Dansk Erhverv, Dansk Industri, Europa-Kommissionen, Printfuls vilkår og Baymards nedbrudsdata.
 
 **Vigtig kontekst:** butikken har haft **2 ordrer i alt** (én gennemført på 0,00 USD, én refundert på 49,95 USD). Det er ikke en butik der skal optimeres — det er en butik der skal sættes rigtigt op, før der kommer trafik.
 
@@ -20,10 +20,10 @@ Læst via MCP og direkte HTTP: alle 37 aktive plugins, WooCommerce Store API (39
 | Anmeldelser | 0 på hele sitet, ingen indsamling | P1 |
 | Produktbilleder | **Alle 39 produkter har under 3 billeder** (max 2) | P1 |
 | Størrelsesguides | Findes som side, men ikke på produktsiderne | P1 |
-| Fragt (Printify live rates) | Plugin aktivt, konfiguration ikke verificeret | P1 |
+| Fragt (Printful live rates) | Plugin aktivt, konfiguration ikke verificeret | P1 |
 | Ydeevne | `/shop/` 5,8 s, 470 KB | P1 |
 | Døde links | 39 forekomster på 15 sider | P1 |
-| Printify-fulfillment | Plugin installeret, forbindelse ikke verificeret | P2 |
+| Printful-fulfillment | Plugin installeret, forbindelse ikke verificeret | P2 |
 
 ## P0 — skal løses før annoncering
 
@@ -42,7 +42,7 @@ Store API bekræfter `currency_code: USD` på alle produkter (`$21.90`–`$29.90
 
 Det kan **ikke** løses ved at skifte valutakode — WooCommerce omregner ikke beløb, så 21,90 USD ville blive 21,90 kr. Priserne skal genberegnes.
 
-**Handling:** beslut valuta (EUR er det brede EU-valg, DKK det danske), genberegn 39 produktpriser ud fra Printify-kostpris + fragt + margen, og sæt butikken til visning inkl. moms med "Prices entered with tax: Yes".
+**Handling:** beslut valuta (EUR er det brede EU-valg, DKK det danske), genberegn 39 produktpriser ud fra Printful-kostpris + fragt + margen, og sæt butikken til visning inkl. moms med "Prices entered with tax: Yes".
 **Estimat:** 3–5 t (mest beslutning og priskalkule, ikke klik).
 
 ### 3. Juridisk identitet mangler
@@ -76,14 +76,14 @@ Fra **19. juni 2026** skal webshops mod EU-forbrugere tilbyde en tydelig, lettil
 
 ### 7. Produktbilleder: alle 39 produkter har under 3 billeder
 
-Ingen produkt har 3 eller flere billeder; de fleste har 2. Printify-mockups alene konverterer dårligt, og Printifys egne vilkår fraskriver sig, at varen ligner mockuppen. POD-kataloger, der sælger, har typisk 5–8 billeder: mockup, livsstilsfoto, close-up af print, bagside, størrelsestabel og mål.
+Ingen produkt har 3 eller flere billeder; de fleste har 2. Printful-mockups alene konverterer dårligt, og Printfuls egne vilkår fraskriver sig, at varen ligner mockuppen. POD-kataloger, der sælger, har typisk 5–8 billeder: mockup, livsstilsfoto, close-up af print, bagside, størrelsestabel og mål.
 **Estimat:** 6–10 t for 39 produkter (eller prioritér de 10 bedste: 2–3 t).
 
 ### 8. Størrelsesguides er ikke på produktsiderne
 
-`/size-guide/` findes, men ingen produktbeskrivelse indeholder mål. Forkert størrelse er den største enkeltårsag til tøjretur, og "bracket buying" (køb to størrelser, returnér én) dræber POD-marginen, fordi Printify ikke refunderer produktion.
+`/size-guide/` findes, men ingen produktbeskrivelse indeholder mål. Forkert størrelse er den største enkeltårsag til tøjretur, og "bracket buying" (køb to størrelser, returnér én) dræber POD-marginen, fordi Printful ikke refunderer produktion.
 **Handling:** tabel i cm **og** tommer, brystvidde + længde, "læg din yndlingsshirt fladt og mål fra ærmegab til ærmegab", plus fit-note pr. model. Skal ind i både billedkarrusel og beskrivelse — og screenshottes som dokumentation.
-**Estimat:** 3–5 t (afhænger af, om Printify-blankens mål findes).
+**Estimat:** 3–5 t (afhænger af, om Printful-blankens mål findes).
 
 ### 9. Fragtkonfiguration er ikke verificeret
 
@@ -104,11 +104,11 @@ Se [dode-links-2026-11-01.md](dode-links-2026-11-01.md). 11 af dem forsvinder ve
 
 ## P2 — skal verificeres, ikke nødvendigvis ændres
 
-- **Printify-forbindelse:** plugin er installeret og aktivt, men om butikken faktisk er koblet til Printify, og om auto-approve er slået fra, kan ikke læses via MCP. Med 2 ordrer er der ingen driftshistorik at måle på. Anbefaling: kør de første 20–30 ordrer med manuel godkendelse.
+- **Printful-forbindelse:** plugin er installeret og aktivt, men om butikken faktisk er koblet til Printful, og om auto-approve er slået fra, kan ikke læses via MCP. Med 2 ordrer er der ingen driftshistorik at måle på. Anbefaling: kør de første 20–30 ordrer med manuel godkendelse.
 - **Ordrebekræftelse:** fortrydelsesoplysningerne skal gives på **varigt medium** — altså i selve bekræftelsesmailen, ikke kun som link. Bør tjekkes i WooCommerce-mailopsætningen.
 - **GPSR:** fra 13/12 2024 skal hvert produkt angive en EU-ansvarlig økonomisk aktør med navn og postadresse. Ingen produktside har det. Lettest løst ved at vælge EU-leverandører og skrive blokken ind i produktbeskrivelsen.
 - **EU-leverandører:** samme valg løser fragtpris (ca. 4–6 USD mod 11–18 USD), leveringstid (3–7 dage mod 10–20), importmoms og GPSR i ét træk. Bør være standardvalg for alle SKU'er.
-- **Moms:** butikken er merchant of record. Ved EU-salg over 10.000 EUR/år kræves destination-moms via **Union OSS**. Printify opkræver moms på produktion i EU — få momsundtagelse ved at sende CVR til Printify Support.
+- **Moms:** butikken er merchant of record. Ved EU-salg over 10.000 EUR/år kræves destination-moms via **Union OSS**. Printful opkræver moms på produktion i EU — få momsundtagelse ved at sende CVR til Printful Support.
 - **Tilgængelighed:** Tilgængelighedsloven gælder fra 28/6 2025, men mikrovirksomheder (under 10 årsværk **og** under 2 mio. EUR) er undtaget for tjenester. Butikken er derfor formentlig undtaget — men bør alligevel rette alt-tekster, kontrast og tastaturnavigation i checkout.
 
 ## Anbefalet rækkefølge med tidsestimater
@@ -132,4 +132,4 @@ Se [dode-links-2026-11-01.md](dode-links-2026-11-01.md). 11 af dem forsvinder ve
 5. Er butikken momsregistreret, og er der registreret OSS?
 6. Valutabeslutning: EUR eller DKK som butiksvaluta?
 7. Findes der en domæne-mail (fx kontakt@steamgears.eu), eller skal gmail-adressen bruges?
-8. Printify: er butikken koblet til, og er auto-approve slået fra?
+8. Printful: er butikken koblet til, og er auto-approve slået fra?

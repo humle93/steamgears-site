@@ -65,7 +65,7 @@
 - **Steamgears — 25 Posters Beskrivelser og Prompts (2026-10-26).md** — NY (17:12)
 - **Arbejdsrutine — Gemini Posterproduktion (2026-10-26).md** — NY (17:12)
 - **steamgears-25-posters-5-kategorier-75-rows.csv** — NY (17:12)
-- **Steamgears - Steam Rail Legends: WooCommerce SEO & Pinterest Køreplan** (Google Docs) — NY/opdateret (17:57); 15 poster-tekster med SEO metatitler, beskrivelser, alt-text + Printify/Woo spec. Læst og resumeret.
+- **Steamgears - Steam Rail Legends: WooCommerce SEO & Pinterest Køreplan** (Google Docs) — NY/opdateret (17:57); 15 poster-tekster med SEO metatitler, beskrivelser, alt-text + Printful/Woo spec. Læst og resumeret.
 - newStartPageToken: 41804
 
 ## 2026-10-26 19:00 (UTC)
@@ -140,7 +140,7 @@ Drive-watch 2026-10-26T23:00:00Z: ingen ændringer (token 41871 uændret).
 
 ## 30/10 2026 (16:00-tjek)
 - 1 ændring siden sidst (token 42351 → 42353):
-  - "Steamgears — Arbejdsseddel til Gemini (28/10)" (Google Doc) — NY/opdateret 15:55 UTC. Arbejdsseddel fra Claude (Anthropic) til en Gemini-agent: sikkerhedsgennemgang af steamgears.eu (webhooks, "Site Assistant"-plugin, eksterne billed-URL'er), CSS-verificering, Atelier-linjen (drafts 940-942), ny produkttype-kategoristruktur (Watches 86, Jewelry 87, Phone Cases 88, Botanical Prints 89, Collections 90-93), printfil-pipeline (Aimlapi + Python/PIL), Publer som connector-anbefaling, Printify-nøgle skal roteres.
+  - "Steamgears — Arbejdsseddel til Gemini (28/10)" (Google Doc) — NY/opdateret 15:55 UTC. Arbejdsseddel fra Claude (Anthropic) til en Gemini-agent: sikkerhedsgennemgang af steamgears.eu (webhooks, "Site Assistant"-plugin, eksterne billed-URL'er), CSS-verificering, Atelier-linjen (drafts 940-942), ny produkttype-kategoristruktur (Watches 86, Jewelry 87, Phone Cases 88, Botanical Prints 89, Collections 90-93), printfil-pipeline (Aimlapi + Python/PIL), Publer som connector-anbefaling, Printful-nøgle skal roteres.
 
 ## 2026-10-30 17:00
 - ingen ændringer
@@ -159,7 +159,7 @@ Drive-watch 2026-10-26T23:00:00Z: ingen ændringer (token 41871 uændret).
 
 ## 2026-10-30 23:00 (22:00 UTC) — drive-watch
 - "Steamgears Gem — instruktioner (indsæt i Gemini → Gems)" — NY (21:04 UTC) — instruktioner til Gemini Gem "Steamgears Optimizer"
-- "Steamgears — Arbejdsseddel til Gemini (28/10)" — OPDATERET (21:12 UTC) — aftenlog 30/10: 3 noveller udgivet (Herbarium 973, Clockwork Seer 993, Meridian 994), Publer-connector mangler fuldførelse, Printify-nøgle blev delt i chat (skal skiftes), Hennings opgaveliste i morgen
+- "Steamgears — Arbejdsseddel til Gemini (28/10)" — OPDATERET (21:12 UTC) — aftenlog 30/10: 3 noveller udgivet (Herbarium 973, Clockwork Seer 993, Meridian 994), Publer-connector mangler fuldførelse, Printful-nøgle blev delt i chat (skal skiftes), Hennings opgaveliste i morgen
 - 2026-10-31 00:00 UTC — ingen ændringer
 - 2026-10-31 00:00 UTC: ingen ændringer (token 42384)
 ## 2026-10-31 01:00 UTC — ingen ændringer (token 42384)
@@ -180,7 +180,7 @@ Ingen ændringer (token 42384 uændret).
 2026-10-31 10:00 UTC — ingen ændringer
 ## 2026-10-31 11:00 (UTC 11:00) — ingen ændringer siden sidst
 === 2026-10-31T12:01:55Z ===
-- 1 ændring: "Steamgears — Arbejdsseddel til Gemini (28/10)" (Google Docs) opdateret 12:00 — ny log fra Claude: 3 noveller udgivet + illustrerede (12 billeder, flux), Rank Math sat på 18 kladder, guides 988/989 som kladder, Publer-login mangler, GA4/GTM data mangler, Henning-opgaveliste (Printify-nøgle skift, Printify→Woo, Social Autopilot v3.1, CURCY+GPay/Apple Pay, Gemini-gem, godkend kladder).
+- 1 ændring: "Steamgears — Arbejdsseddel til Gemini (28/10)" (Google Docs) opdateret 12:00 — ny log fra Claude: 3 noveller udgivet + illustrerede (12 billeder, flux), Rank Math sat på 18 kladder, guides 988/989 som kladder, Publer-login mangler, GA4/GTM data mangler, Henning-opgaveliste (Printful-nøgle skift, Printful→Woo, Social Autopilot v3.1, CURCY+GPay/Apple Pay, Gemini-gem, godkend kladder).
 
 ## 31/10 2026 – 13:00 run
 Token 42389 → 42392. 3 ændringer:

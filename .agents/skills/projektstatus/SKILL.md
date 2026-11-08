@@ -59,7 +59,7 @@ Grundlag: 12,05 af 21,75 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,45/6 · S3 2,15/3,
 - **Grundlaget skal kunne genberegnes** — `3 af 5 faser`, `0,25 af 5 t`, `39 af 39 links`. Ingen tal uden
   regnestykke.
 - **Blokeret arbejde tæller ikke som fremgang.** Står et punkt fast på en ekstern blokering (manglende nøgle,
-  ejerens klik, Printify-adgang), bliver procenten stående, og blokeringen skrives i svaret.
+  ejerens klik, Printful-adgang), bliver procenten stående, og blokeringen skrives i svaret.
 - **100 % = færdigt og verificeret**, ikke "kode skrevet".
 - **Daglig status for alle fem projekter** skal også stå i svaret til ejeren, ikke kun i filen:
 

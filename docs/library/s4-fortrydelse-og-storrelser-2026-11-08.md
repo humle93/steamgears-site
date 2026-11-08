@@ -41,7 +41,7 @@ Det der virker: `woocommerce_short_description`-filteret, som temaet faktisk kal
 | S4.3 Valuta og priser | USD → EUR/DKK kræver omregning af alle 39 priser og en beslutning om prispunkt |
 | S4.5 Betalingsmetoder | MobilePay/PayPal/Klarna kræver aftaler og nøgler |
 | S4.6 Forsendelse | Zoner, klasser og fri fragt-grænse er forretningsvalg; W3TC-indstillingerne kan ikke sættes over MCP |
-| S4.7 Produktbilleder | Printify-adgang (samme blokering som rebrand-batch 4) |
+| S4.7 Produktbilleder | Printful-adgang (samme blokering som rebrand-batch 4) |
 | S4.9 Produkttekst, GPSR-del | GPSR-blokken kræver CVR/adresse (S4.2). Fit/produktion/levering blev forsøgt lagt i samme filter, men temaet afskærer uddraget efter tabellen, så blokken er **ikke** synlig — derfor 0 d bogført |
 | S4.11 `/shop/` performance | Målt 8/11: **262 736 bytes / 1,39 s** (roadmap'ens tal var 470 KB / 5,8 s). Caching-laget kan stadig ikke styres over MCP |
 

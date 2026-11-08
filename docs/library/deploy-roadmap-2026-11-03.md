@@ -2,7 +2,7 @@
 
 **Dato:** 2026-11-03
 **Formål:** sikker, målbar rækkefølge for at omsætte [`sitewide-audit-2026-11-03.md`](sitewide-audit-2026-11-03.md) til ændringer på den hostede WordPress/WooCommerce-butik.
-**Estimater:** udviklingstid for én person; ventetid på ejer, host, betalingsudbyder eller Printify er ikke medregnet.
+**Estimater:** udviklingstid for én person; ventetid på ejer, host, betalingsudbyder eller Printful er ikke medregnet.
 **Samlet indsats:** ca. **6–9 udviklerdage**, plus eksterne godkendelser og ejerbeslutninger. Dette er et nyt, separat scope-estimat og ændrer ikke den autoritative status i `projektstatus.json`.
 
 ## Deploy-model og sikkerhedsgrænser
@@ -27,7 +27,7 @@ Tilgængelighedsnotatet [`../agent-profil.md`](../agent-profil.md) dokumenterer,
 | 0. Bekræft nuværende tilstand | Bekræft audittens kritiske fund, teknologier, ejerskab, live-URL'er og adgang; tag nye målinger. | 0,5–1 dag | Hvert P0-fund har frisk bevis, ejer og beslutning; gammel viden behandles ikke som nuværende tilstand. |
 | 1. Sikkert udrulningsgrundlag | Backup/gendannelsesøvelse, staging eller tilsvarende testvej, adgangsgrænser, ændringslog, vedligeholdelsesvindue og tilbagerulningsprocedure. | 0,5–1 dag | Gendannelse fra backup er testet eller dokumenteret gendanbar; en live-ændring kan fortrydes. |
 | 2. Compliance og analysemæssigt grundlag | Ejer bekræfter virksomhedsoplysninger, cookie-/consent-konfiguration, GA4-dublettering og checkout-politikker; der rettes kun godkendte forhold. | 1–1,5 dag | Juridiske data er autoriserede; samtykke er testet; hver analytikhændelse fyrer én gang; intet kritisk checkout-fund. |
-| 3. Pris, fragt og betaling | Afklar valuta, genberegn priser, bekræft moms, Printify-zoner/-rater, gateways og cache-undtagelser. Testordre i kontrolleret flow. | 1–1,5 dag + udbyderventetid | Totalpris og levering stemmer gennem hele flowet for DK/EU; betaling, e-mail og refund-/annulleringsprocedure er testet. |
+| 3. Pris, fragt og betaling | Afklar valuta, genberegn priser, bekræft moms, Printful-zoner/-rater, gateways og cache-undtagelser. Testordre i kontrolleret flow. | 1–1,5 dag + udbyderventetid | Totalpris og levering stemmer gennem hele flowet for DK/EU; betaling, e-mail og refund-/annulleringsprocedure er testet. |
 | 4. Produktoplevelse | Prioritér produkter først: varianter, SKU, billeder, størrelse, fit, levering, retur, GPSR og relationer/kollektioner. | 1–2 dage | Testkataloget dækker hver produkttype; ingen uoverensstemmelse mellem produkttekst, variantdata, feed og checkout. |
 | 5. Ydeevne, SEO og tilgængelighed | Mobil-baseline, billeder/CWV, H1/meta/alt/schema, kritiske URL'er, tastatur og kontrast. Ret afgrænset. | 1–1,5 dag | Nye målinger er skrevet ned; checkout er ikke cachet; schema svarer til den synlige produktoplysning; ingen kritiske regressioner. |
 | 6. Accept og gradvis udrulning | Staging-test, accept, udrulning til production i små kurve, smoke-test efter hver, overvågning og overdragelse. | 0,5–1 dag | Alle acceptkriterier er gennemført; overvågning kører; tilbagerulningsberedskab og ejer er bekræftet. |
@@ -49,14 +49,14 @@ Fase 0 er målt 3/11 med read-only HTTP: se [`phase-0-baseline-2026-11-03.md`](p
 ### Udrulningskurv B — kommercielle grundlag
 
 - Beslut valuta og priser, og bekræft moms- og leveringsvilkår.
-- Test shipping zones, Printify-rater og cache-undtagelser.
+- Test shipping zones, Printful-rater og cache-undtagelser.
 - Slå først gateway-ændringer til efter udbydergodkendelse og en testbetaling.
 - Rollback: gendan de tidligere priser/gateway-/shipping-indstillinger; stands trafikstyringen hvis totalpris eller betaling er uklar.
 
 ### Udrulningskurv C — produktkatalog
 
 - Start med 3–5 prioritetsprodukter, inkl. de relevante produkttyper (apparel/poster/accessory).
-- Bekræft SKU-, lager-, variant- og Printify-kobling før masseredigering af tekster og billeder.
+- Bekræft SKU-, lager-, variant- og Printful-kobling før masseredigering af tekster og billeder.
 - Når modelrunden er godkendt, føres samme tjekliste videre til katalogets øvrige produkter.
 - Rollback: gendan de pågældende produkters tidligere indhold/tilstand, hvis købsmulighed eller produktionskobling brækker.
 
@@ -87,7 +87,7 @@ Der gættes ikke, og der udgives ikke placeholder-oplysninger. Der skal bruges:
 
 1. Virksomhedens officielle navn, CVR, adresse, telefon og korrekte kundeserviceadresse.
 2. Beslutning om valuta og en godkendt prisberegning med moms/marginer.
-3. Printifys aktive variant-/SKU-kort og leveringsvilkår for de vigtigste produkter.
+3. Printfuls aktive variant-/SKU-kort og leveringsvilkår for de vigtigste produkter.
 4. Retur-/annulleringsvilkår og juridisk godkendelse ved tvivl.
 5. Merchant-/sandbox-godkendelse hos betalingsudbyderne.
 6. Backup-, staging-, WordPress-admin- og analytics-/GSC-adgang.

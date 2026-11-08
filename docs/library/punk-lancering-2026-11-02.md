@@ -236,7 +236,7 @@ Filnavn: `{design}-{motiv}-{view}.jpg` — fx `t1-coil-no1-onmodel.jpg`. Omdøb 
 | 4 | Fladlæg | Oppefra, ærmerne ud, mørkt underlag | `Flat lay of the Static Saint hoodie on a dark surface` |
 | 5 | Detalje | 1:1 på ansigtet og buerne ved tindingen | `Close-up of the porcelain face and arc detail on the Static Saint hoodie` |
 
-**Egne fotos er nødvendige** til T5 billede 2 og 3 (Printifys hoodie-scener giver ikke det portrætudsnit), og til D1 billede 2 hvis der ikke findes en træramme-scene til plakat-blueprinten. Alt andet kan køres i Printify.
+**Egne fotos er nødvendige** til T5 billede 2 og 3 (Printfuls hoodie-scener giver ikke det portrætudsnit), og til D1 billede 2 hvis der ikke findes en træramme-scene til plakat-blueprinten. Alt andet kan køres i Printful.
 
 ---
 
@@ -287,7 +287,7 @@ Sæt først tal ind, når valutaen er besluttet — ellers skal de seks røres t
 | 1 | Kør prompterne, vælg på 200 px-aftryk | 4–5 t (inkl. ventetid) | Adgang til billedmodel |
 | 2 | Oprensning + typografi i layout | 3 t | 1 |
 | 3 | Printprøve i 30 cm, alle seks | 1,5 t | 2 |
-| 4 | Opret produkter i Printify, læg mockups ind | 2 t | 3 |
+| 4 | Opret produkter i Printful, læg mockups ind | 2 t | 3 |
 | 5 | Opret tre kollektioner, tildel produkter | 0,5 t | Credentials |
 | 6 | Sæt teksterne ind via MCP, sæt priser | 1 t | Valutabeslutning + 5 |
 | 7 | Verificér 6/6 produktsider live, purge W3TC | 0,5 t | 6 |
@@ -306,7 +306,7 @@ Sæt først tal ind, når valutaen er besluttet — ellers skal de seks røres t
 - Kollektionsslugene er nye og kolliderer ikke med de seks eksisterende (94–99).
 - Plakatmål er rettet til butikkens faktiske 30 × 40 og 50 × 70 cm.
 
-**Ikke kontrolleret:** om Printify har de nævnte scener til hver blueprint (det kræver adgang til kontoen), og om teksterne kan lægges ind uden at Printify-sync overskriver dem — samme uafklarede risiko som på de 39.
+**Ikke kontrolleret:** om Printful har de nævnte scener til hver blueprint (det kræver adgang til kontoen), og om teksterne kan lægges ind uden at Printful-sync overskriver dem — samme uafklarede risiko som på de 39.
 
 ---
 
@@ -327,6 +327,6 @@ Fire ting ved runneren er lavet om, alle additive: `--manifest` (så warpstorm-m
 
 **Ikke idempotent for produkter.** `wc_create_product` har ingen upsert: en anden `--apply` laver seks nye kladser med `-2` i sluggen. Kør produkt-trinnene én gang, notér id'erne, og skift til `wc_update_product` bagefter.
 
-**Filerne er også forberedt:** `assets/punk/{design}/` med fastlagte filnavne, alt-tekster, udregnede pixelmål pr. trykfil (`check_assets.py`) og medie-upload til WordPress med id-capture. Se [punk-upload-2026-11-02.md](punk-upload-2026-11-02.md), der også lister det der stadig er manuelt i Printify.
+**Filerne er også forberedt:** `assets/punk/{design}/` med fastlagte filnavne, alt-tekster, udregnede pixelmål pr. trykfil (`check_assets.py`) og medie-upload til WordPress med id-capture. Se [punk-upload-2026-11-02.md](punk-upload-2026-11-02.md), der også lister det der stadig er manuelt i Printful.
 
 **Verificeret offline:** 0 fejl, 6 advarsler (alle "ingen pris"), 3 trin klar og 6 blokeret med begrundelse. Beskrivelserne er tjekket for løse tokens og for at måletabellen ikke havner inde i en `<p>`. **Ikke verificeret:** kollektionsværktøjets faktiske navn, om det tager `parent`, om `wc_create_product` accepterer kategorier som slug, og Rank Math-værktøjet — det første svarer `deploy.py tools` på, resten fejler synligt på en kladse.

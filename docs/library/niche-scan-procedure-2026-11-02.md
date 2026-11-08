@@ -140,5 +140,5 @@ trin (§2) der faktisk blev kørt. Tre-dages-gaten gør den første kørsel til 
 - Stabilitet: Rovetta 2021, [Trends varierer med indsamlingsdagen](https://pmc.ncbi.nlm.nih.gov/articles/PMC8186442/);
   Cebrián & Domenech 2024, *Technological Forecasting & Social Change* 202 — udtræksgennemsnit og cachen
 - Praksis-tærskler (opinion): [Jungle Scout — valideringspunkter](https://www.junglescout.com/blog/seller-strategies-how-to-validate-products/)
-- Markedsføring uden metode: [Printify](https://printify.com/blog/trending-products/),
+- Markedsføring uden metode: [Printful](https://printify.com/blog/trending-products/),
   [Exploding Topics' metodside](https://explodingtopics.com/methodology) — kilder til kandidater, ikke til bevis

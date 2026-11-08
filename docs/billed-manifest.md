@@ -86,5 +86,5 @@ Note 2026-11-02: Simply WAF gav 456-block i store dele af run'en (også på GET)
   - 1276 Midnight Workshop
   - 1279 Alchemist Terrarium
   - 1282 Astrolabe Planisphere
-- Alle produkt-URLs verificeret 200. Printify: IKKE oprettet (ingen connector/API-token) — som Vol 4: Printify-ID skal oprettes manuelt/importeres; Printify-ID-placeholder-CSV til Vol 5 IKKE genereret endnu (kan bygges på anmodning).
+- Alle produkt-URLs verificeret 200. Printful: IKKE oprettet (ingen connector/API-token) — som Vol 4: Printful-ID skal oprettes manuelt/importeres; Printful-ID-placeholder-CSV til Vol 5 IKKE genereret endnu (kan bygges på anmodning).
 - fal_ai: flux/dev + nano-banana-2 afvist (403 exhausted balance) → hele batchen på Juno image create.

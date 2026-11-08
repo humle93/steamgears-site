@@ -33,7 +33,7 @@ Men der er en rigtig beslutning indeni: **steampunk bør være designsproget, ik
 | steampunk corset | ca. 1.900–2.270 | 7.114 | 33/100 |
 | steampunk top hat | 1.600 | 10.686 | — |
 
-Tallene er tredjepartsestimater (RankHero, Etsy-baseret), ikke målte Etsy-data — retningen er mere troværdig end de præcise tal. Printifys tommelfingerregel: under 2.000 listings = grøn, 2.000–50.000 = gul, over 50.000 = "hårdt nej for nye butikker". Steampunk ligger i **gul**, og "steampunk goggles" er direkte i grøn.
+Tallene er tredjepartsestimater (RankHero, Etsy-baseret), ikke målte Etsy-data — retningen er mere troværdig end de præcise tal. Printfuls tommelfingerregel: under 2.000 listings = grøn, 2.000–50.000 = gul, over 50.000 = "hårdt nej for nye butikker". Steampunk ligger i **gul**, og "steampunk goggles" er direkte i grøn.
 
 **Sæsonen er hård:** "steampunk costume" går fra 90.500 søgninger i oktober til 5.400 i juni — en **17x svingning**. 60–70 % af årets omsætning ligger i ca. otte uger. Det er ikke et argument for at skifte niche (hele kostume-kategorien har samme form, også "witchy outfit"), men det er et argument for at planlægge likviditet over ti flade måneder.
 

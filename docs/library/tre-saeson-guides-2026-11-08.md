@@ -50,6 +50,6 @@ slugs står nu i den.
 
 - **SEO-indholdsproduktion: 100 %** — batch 3/3 guides, loop 1/1, copy 4/4, corset 1/1.
 - **Site-optimering: 88,6 %** — de syv S4-punkter der kræver ejeren (CVR/adresse/telefon og dermed GPSR, valuta og
-  priser, betalingsaftaler, forsendelsesvalg, Printify-billeder, EU-samtykkemodel i Complianz).
+  priser, betalingsaftaler, forsendelsesvalg, Printful-billeder, EU-samtykkemodel i Complianz).
 - **Plugin: 98,0 %** — P1.5's sidste 0,60 d er live-verifikation og kræver ejerens tokens.
-- **Dark academia-rebrand: 63 %** — batch 4-mockups kræver Printify-adgang.
+- **Dark academia-rebrand: 63 %** — batch 4-mockups kræver Printful-adgang.

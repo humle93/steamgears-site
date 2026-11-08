@@ -18,7 +18,7 @@ typisk en voksen, der skal til cosplay, halloween, marked eller et temafest — 
 | --- | --- |
 | Platform | WordPress 7.1.4 + WooCommerce, PHP 8.5.12, hostet hos **Simply** |
 | Repo | Dokumentation, assets, plugin-kilde og status — **ikke** live-koden. Sitet ændres over MCP |
-| Katalog | **56 publicerede produkter** (målt 2/11; heraf Herbarium-serien 953–972), produceret via **Printify** |
+| Katalog | **56 publicerede produkter** (målt 2/11; heraf Herbarium-serien 953–972), produceret via **Printful** (print-on-demand-leverandøren; ældre logger nævner Printify-plugin'et, som ikke er leverandøren) |
 | Indhold | **29 sider** + 18 guides i guide-stakken; sitemap har **108 URL'er** der alle svarer 200 |
 | Sprog | Engelsk på sitet, **dansk i commits og dokumentation** (tekniske termer på engelsk) |
 | Design | "Dark Clockwork Theatre v3"; template part til headeren ligger i [`css/`](../css/) |
@@ -160,7 +160,7 @@ tools/_deps/bin/php -l plugins/steamgears-autopilot/steamgears-autopilot.php
 
 **Blokeringer der kræver ejeren** (skriv dem i svaret, forsøg dem ikke): ét klik på OAuth-linket fra
 `tools/mcp_oauth.py --start` (eller et WordPress application password til REST-skrivning), Publer-nøgle,
-repo-secrets `GEMINI_API_KEY`/`WP_USER`/`WP_APP_PASS`, CVR/adresse til GPSR og imprint, Printify-variantmapping,
+repo-secrets `GEMINI_API_KEY`/`WP_USER`/`WP_APP_PASS`, CVR/adresse til GPSR og imprint, Printful-variantmapping,
 én Redirection-gruppe til de fem vanity-301'er, og **et nyt OAuth-token i hver ny sandkasse** (`--start` → klik →
 `--finish '<kode>'`; token gemmes uden for repoet).
 

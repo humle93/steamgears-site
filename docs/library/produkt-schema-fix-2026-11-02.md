@@ -92,4 +92,4 @@ har sin egen genindlæsning.
 
 1. `priceCurrency` — afklar med ejeren om butikken skal prissætte i DKK (fund E5).
 2. Anmeldelser — den eneste ærlige vej til `aggregateRating` er en review-funktion med rigtige kunder.
-3. `hasVariant`/størrelser, hvis Printify-variantmapping bliver tilgængelig (kræver ejerens variantdata).
+3. `hasVariant`/størrelser, hvis Printful-variantmapping bliver tilgængelig (kræver ejerens variantdata).

@@ -8,7 +8,7 @@
 
 Kan: HTTP-status, HTML-størrelse, svarstid for selve HTML, titler, H1-antal, schema-indhold, plugin- og tag-spor i kilden, pris/valuta i markup.
 
-Kan ikke: Core Web Vitals (kræver browser), checkout-flow med kurv (kræver session), GA4-hændelser i realtid, GSC/Crawl Stats, Printify-mapping og gateway-godkendelser. De punkter står stadig åbne, uanset hvad tabellerne nedenfor viser.
+Kan ikke: Core Web Vitals (kræver browser), checkout-flow med kurv (kræver session), GA4-hændelser i realtid, GSC/Crawl Stats, Printful-mapping og gateway-godkendelser. De punkter står stadig åbne, uanset hvad tabellerne nedenfor viser.
 
 ## 1. Status på de vigtige sider
 
@@ -83,14 +83,14 @@ Der er **ét** GA4-config-kald i den statiske HTML. Den tidligere dobbelte pagev
 - Live-skriveadgang (MCP/OAuth eller application password) — uden den kan fase 1–6 ikke udføres, kun specificeres.
 - Staging og backup-adgang hos Simply.
 - GSC/Crawl Stats, GA4-realtid og browserbaseret Lighthouse/CWV.
-- Printify-variantkort, fragtprofiler og gateway-godkendelser.
+- Printful-variantkort, fragtprofiler og gateway-godkendelser.
 - Ejergodkendte virksomhedsoplysninger (navn, CVR, adresse, telefon, kundeserviceadresse).
 
 ## 6. Næste skridt
 
 1. **Fase 1-porten:** test en gendannelse fra backup, og skriv ned hvordan `/shipping/`, `/returns/` og priser rulles tilbage.
 2. **Fase 2:** beslut valuta (DKK/EUR), og få de juridiske oplysninger fra ejeren — de kan ikke gættes.
-3. **Fase 3:** genberegn priser mod Printify-kostpris, og test en ordre i et kontrolleret flow.
+3. **Fase 3:** genberegn priser mod Printful-kostpris, og test en ordre i et kontrolleret flow.
 4. **Før nogen af dem:** tag en frisk backup, og gem de nuværende indstillinger, så porten i roadmappen er opfyldt.
 
 Alle tal ovenfor er fra 2026-11-03 og skal genmåles samme dag som en ændring udføres — de er et grundlag, ikke en varig sandhed.

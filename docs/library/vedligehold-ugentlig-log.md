@@ -25,7 +25,7 @@
   `schema_check` **20/20**).
 - **Ejer-blokeret med navngivet mangel:** S0.6 (GSC Crawl stats), S1.2 (ja/nej pr. produkt), S3.4b (de to
   inaktive plugins), S4.1/4.2/4.3/4.5/4.6/4.7/4.9 (Complianz-valg, CVR/adresse/telefon, valuta+priser,
-  betalingsaftaler, forsendelseszoner, Printify, GPSR-adresse), kladde 750, `seo.md` #4 (W3TC) og #5 (GPSR),
+  betalingsaftaler, forsendelseszoner, Printful, GPSR-adresse), kladde 750, `seo.md` #4 (W3TC) og #5 (GPSR),
   plugin P1.5 (tokens) og P2.1–P2.3 (Command Center-beslutning).
 - **Målt:** site **91,3 %** (20,05/21,95 d), plugin **98,0 %** (35,6/36,2 d), SEO-indhold **100 %**,
   dark academia **63 %** hvor hele den ikke-ejer-blokerede del (8,5 t tekst) er leveret.
@@ -86,7 +86,7 @@ repo-værn og live-målinger fra samme dag.
 - Lead-endpoint: `POST /wp-json/sgap/v1/lead` → `{"ok":true,"count":1}` (testpost ryddet igen)
 
 **3) Status (beregnet):** site-optimering **82,5 %** (19,85 af 24,05 d) · plugin **97,2 %**
-· Dark academia-rebrand **63 %** (batch 4-mockups blokeret på Printify-adgang) · SEO-indhold **66,7 %**
+· Dark academia-rebrand **63 %** (batch 4-mockups blokeret på Printful-adgang) · SEO-indhold **66,7 %**
 (publiceringsvalg).
 
 ## 2026-11-07 — ugentlig kontrol (værn, smoke, zip)
@@ -126,7 +126,7 @@ Rettet til én linje og efterprøvet: den vælger nu `php-8.5.8-cli-linux-x86_64
 produktionen. `bash -n` er grøn.
 
 **5) Blokeret — uændret:** S0.2/S0.6 (robots-ejerskab og GSC Crawl stats kræver ejerens login), S0.4 (én
-Redirection-gruppe), S1.1/S1.2 (Printify-varianter), S2.7's resterende del (ejerbeslutninger), S3.1–S3.4 og
+Redirection-gruppe), S1.1/S1.2 (Printful-varianter), S2.7's resterende del (ejerbeslutninger), S3.1–S3.4 og
 S4.1–S4.13 (ejerklik, betaling/forsendelse eller live-skrivning), plugin P1.5 (Pinterest-token 401 + Meta-review)
 og P3.1 (`labor_rate`). **Live-skrivning kræver et nyt OAuth-token i denne sandkasse**
 (`python3 tools/mcp_oauth.py --start` → ejerens klik → `--finish '<kode>'`).
@@ -168,7 +168,7 @@ i dette pas, fordi MySQL ikke kører i sandkassen (port 3306 lukket).
 **4) Blokeret — og hvad der skal til:**
 - **S0.4:** én Redirection-gruppe i wp-admin; derefter kan de fem 301'er oprettes.
 - **S0.2 / S0.6:** robots.txt-ejerskab kræver WordPress-adgang; GSC Crawl stats kræver ejerens login.
-- **S1.1 / S1.2 / S1.4 / S1.5 / S1.6 / S2.5 / S2.7 / S2.8:** live-skrivning eller Printify-varianter.
+- **S1.1 / S1.2 / S1.4 / S1.5 / S1.6 / S2.5 / S2.7 / S2.8:** live-skrivning eller Printful-varianter.
 - **S3.1–S3.4 / S4.1–S4.13:** ejerklik, betalings-/forsendelsesopsætning eller live-skrivning.
 - **Plugin P0.4:** rigtig host-cron; **P1.5:** Pinterest-token og Meta-review; **P3.1:** ejerens `labor_rate`.
 
