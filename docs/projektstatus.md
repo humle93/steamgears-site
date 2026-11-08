@@ -22,7 +22,7 @@ Status pr. **2026-11-08** · beregnet af `projektstatus.py` · kilder: [`projekt
 
 | Projekt | Status i dag | Grundlag |
 | --- | --- | --- |
-| **steamgears.eu — site-optimering** *(roadmap S0–S4)* | **81,3 %** | 19,55 af 24,05 d (S0 2,15/2,35 · S1 3,9/4,6 · S2 7,85/8,3 · S3 3,4/3,55 · S4 2,25/5,25) |
+| **steamgears.eu — site-optimering** *(roadmap S0–S4)* | **82,5 %** | 19,85 af 24,05 d (S0 2,35/2,35 · S1 3,9/4,6 · S2 7,85/8,3 · S3 3,5/3,55 · S4 2,25/5,25) |
 | **Steamgears Autopilot — plugin** | **97,2 %** | 29,6 af 30,45 d (P0 4,65/4,65 · P1 14,2/15,05 · P2 4,75/4,75 · P3 2/2 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5) |
 | **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5) |
 | **SEO-indholdsproduktion** | **62,5 %** | 5 af 8 guides (Publicerede guides (id 292, 296, 295) 0/3 · Guide-copy klar til publicering (292, 296, 295 + corset) 4/4 · Corset-guiden publiceret (/steampunk-corset-guide/, 1394) 1/1) · drift: Daglig loop kører |
@@ -34,9 +34,9 @@ Status pr. **2026-11-08** · beregnet af `projektstatus.py` · kilder: [`projekt
 <!-- AUTO:BLOKERINGER:START -->
 | Projekt | Næste skridt | Blokering |
 | --- | --- | --- |
-| steamgears.eu — site-optimering (81,3 %) | S4 (2,25 af 5,25 d) er det eneste tilbage af site-roadmappet. Det andet roadmap, docs/seo.md §8, er målt punkt for punkt: 5 af 7 lukket, og de to sidste er performance (caching-lag) og GPSR (S4.2). | S4 er juridisk bindende valg: CVR/telefon i footer, USD→EUR/DKK med omregning af 39 priser, moms/OSS, betalingsmetoder (MobilePay/PayPal/Klarna) og en fortrydelsesfunktion. S2.7's loft kræver en beslutning om hvilke tredjeparts-scripts der må køre. |
+| steamgears.eu — site-optimering (82,5 %) | S4 (2,25 af 5,25 d) er det eneste tilbage af site-roadmappet, og det kræver ejerens juridiske valg. S0 er 100 % (robots.txt lukket 8/11), S3 mangler 0,05 d i vedligeholdelsesloggen. | S4 er juridisk bindende valg: CVR/telefon i footer, USD→EUR/DKK med omregning af 39 priser, moms/OSS, betalingsmetoder (MobilePay/PayPal/Klarna) og en fortrydelsesfunktion. S2.7's loft kræver en beslutning om hvilke tredjeparts-scripts der må køre. |
 | Steamgears Autopilot — plugin (97,2 %) | P1.5's live-verifikation er det eneste åbne punkt (0,85 d): 7.60.1 kører live og Pinterest-tokenet er migreret til det felt Keys viser, men Pinterest afviser det med HTTP 401, og Instagram har intet token. Når ejeren har indsat et friskt Pinterest-token (og gerne app-credentials + refresh token) samt Instagrams professionelle konto-id og long-lived user token, køres pinterest/refresh og instagram/refresh, og de målte tal bogføres som P1.5's sidste 0,85 d. | P1.5 kræver ejerens tokens (må ikke gennem chat eller repo). Målt 8/11 med 7.60.1: ruten /sgap/v1/pinterest/refresh svarer 200, men Pinterest afviser det gemte token med HTTP 401 «Authentication failed.» (0 pins, 0 matched, 0 events), og refreshable er false, fordi der hverken er refresh-token eller app-credentials. instagram/refresh svarer configured:false — instagram_access_token og instagram_user_id er begge tomme. Det gamle sgap_pinterest_token bliver nu læst og migreret (access_len 101, migrated_equal true), se docs/library/pinterest-noegle-gammelt-felt-2026-11-08.md. Roadmappet er afstemt linje for linje 7/11 (åbent = 0,85 d = dette punkt). Uden for roadmappet: mu-plugin-rettelsen 1.3.1 ligger stadig kun i repoet og kræver ejerens File Manager. |
-| Dark academia-rebrand (63 %) | Batch 4 — mockups (~130 billeder) | Printify-adgang |
+| Dark academia-rebrand (63 %) | Batch 4 — mockups (~130 billeder) | Batch 4-mockups (0 af 5 t) kan ikke laves her: baade roadmap og library/om-maerkning-dark-academia-2026-11-01.md siger at mockups skal genereres i Printify eller uploades, og der er ingen Printify-adgang i dette miljoe. Kræver ejerens Printify-adgang eller upload. |
 | SEO-indholdsproduktion (62,5 %) | Fire guides er skrevet færdige som kladder (1410: 11 403 tegn, 1361: 11 454, 1359: 11 237, 1357). Publicering er ejerens redaktionelle valg; intet er publiceret uden den. | Publicering af guide-kladderne kræver ejerens valg af hvilke der skal ud og hvornår. Tidligere modulnavn pegede på id 292/296/295, som er produktvarianter (t-shirt L/M/S), ikke guides. |
 | Døde internlinks (100 %) | Vedligehold: tjek nye indlæg mod live-URL'er | ingen |
 <!-- AUTO:BLOKERINGER:END -->
@@ -50,6 +50,7 @@ Nyeste først. Append-only — rækker må ikke slettes eller ændres.
 
 | Dato | Projekt | Modul | Før → Efter | Δ | Grundlag |
 | --- | --- | --- | --- | --- | --- |
+| 2026-11-08 | steamgears.eu — site-optimering | daglig måling | 81,3 % → 82,5 % | +1,2 | 19,85 af 24,05 d (S0 2,35/2,35 · S1 3,9/4,6 · S2 7,85/8,3 · S3 3,5/3,55 · S4 2,25/5,25) |
 | 2026-11-08 | steamgears.eu — site-optimering | daglig måling | 80,2 % → 81,3 % | +1,1 | 19,55 af 24,05 d (S0 2,15/2,35 · S1 3,9/4,6 · S2 7,85/8,3 · S3 3,4/3,55 · S4 2,25/5,25) |
 | 2026-11-08 | steamgears.eu — site-optimering | daglig måling | 76,5 % → 80,2 % | +3,7 | 19,3 af 24,05 d (S0 2,15/2,35 · S1 3,75/4,6 · S2 7,85/8,3 · S3 3,3/3,55 · S4 2,25/5,25) |
 | 2026-11-08 | steamgears.eu — site-optimering | daglig måling | 71,9 % → 76,5 % | +4,6 | 18,4 af 24,05 d (S0 2,15/2,35 · S1 3,45/4,6 · S2 7,65/8,3 · S3 2,9/3,55 · S4 2,25/5,25) |

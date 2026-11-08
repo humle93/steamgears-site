@@ -1,5 +1,27 @@
 # Ugentlig backup + 1 indholdselement — log
 
+## 2026-11-08 — ugentlig kontrol (værn, smoke, zip, live-målinger)
+**Formål:** S3.5's tredje post. Kørt i agentens cloud-sandkasse med Novamira-adgang, så tallene er både
+repo-værn og live-målinger fra samme dag.
+
+**1) Repo-værn:**
+- `plugins/tests/smoke.php`: **1016 PASS / 0 FAIL**
+- `python3 tools/fejlscan.py`: **0 fund** (version, zip, includes, bibliotek, testfiler konsistente)
+- `python3 projektstatus.py --check`: **uden drift**, 133 historik-rækker
+- `plugins/steamgears-autopilot-v7.60.1.zip` er den eneste zip og `diff -r`-identisk med kilden
+
+**2) Live-målinger (samme dag):**
+- `/`, `/shop/`, `/wp-json/sgap/v1`: **200**
+- Billedvægt: **0 af 41** i brug værende billeder over 300 KB (var 8)
+- H1: **1** på `/`, `/free-starter-kit/` og `/steampunk-halloween/` (var 1/2/2)
+- `robots.txt`: **1** `User-agent: *`-gruppe (var 3), 14 `Disallow` + 1 `Allow` + `Sitemap` bevaret
+- Scripts: `wp-emoji`/TikTok/Kliken **0** forekomster; 31 scripts på `/`, 46 på `/shop/`
+- Lead-endpoint: `POST /wp-json/sgap/v1/lead` → `{"ok":true,"count":1}` (testpost ryddet igen)
+
+**3) Status (beregnet):** site-optimering **82,5 %** (19,85 af 24,05 d) · plugin **97,2 %**
+· Dark academia-rebrand **63 %** (batch 4-mockups blokeret på Printify-adgang) · SEO-indhold **66,7 %**
+(publiceringsvalg).
+
 ## 2026-11-07 — ugentlig kontrol (værn, smoke, zip)
 **Formål:** S3.5's anden post: ugens kontrol kørt efter opskriften i [`../projektstatus.md`](../projektstatus.md) og
 roadmap'ens tjekliste. Backup blev **ikke** kørt i dette pas, og der er ingen live-skrivning: sandkassen har ingen

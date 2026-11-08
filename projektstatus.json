@@ -6,17 +6,18 @@
       "id": "site",
       "name": "steamgears.eu — site-optimering",
       "note": "roadmap S0–S4",
-      "next": "S4 (2,25 af 5,25 d) er det eneste tilbage af site-roadmappet. Det andet roadmap, docs/seo.md §8, er målt punkt for punkt: 5 af 7 lukket, og de to sidste er performance (caching-lag) og GPSR (S4.2).",
+      "next": "S4 (2,25 af 5,25 d) er det eneste tilbage af site-roadmappet, og det kræver ejerens juridiske valg. S0 er 100 % (robots.txt lukket 8/11), S3 mangler 0,05 d i vedligeholdelsesloggen.",
       "blocked_by": "S4 er juridisk bindende valg: CVR/telefon i footer, USD→EUR/DKK med omregning af 39 priser, moms/OSS, betalingsmetoder (MobilePay/PayPal/Klarna) og en fortrydelsesfunktion. S2.7's loft kræver en beslutning om hvilke tredjeparts-scripts der må køre.",
       "modules": [
         {
           "id": "s0",
           "name": "S0 — brudt/akut",
-          "done": 2.15,
+          "done": 2.35,
           "total": 2.35,
           "unit": "d",
           "scope_change": true,
-          "note": "S0.7 trukket tilbage 2/11: sitemap-URL'er svarer 200 til browsere, men 455 til Googlebot og bingbot (Simply.com bot-regel), så S0.7 er ikke verificeret for søgemaskiner. Skal genmåles efter hosten har hvidlistet bots. S0.1, S0.3, S0.8 + meta-/link-/alt-runde 1/11 + 0,25 d S0.9 analytics-afklaring (scope 6/11, endnu ikke udført: to tag-id'er skal måles, ikke gættes). + 0,25 d S0.9 analytics lukket 7/11: kilden var Rank Maths option rank_math_google_analytic_options, ikke et snippet — install_code 1 → tom (gammel værdi gemt), og der er målt ét g/collect med en=page_view på /, /?nocache=1 og /shop/, alle på G-0HC9BLQ88R; Ads-tagget fyrer stadig. S0.4 lukket 7/11 som overflødig: de fem URL'er svarer 200 (bekræftet med ?nocache=20261107 efter PHP kører igen: 69–75 KB), så 301-kortet og Redirection-gruppen behøves ikke — de 0,5 d er taget ud af nævneren (2,85 → 2,35 d), ikke ført som fremgang."
+          "note": "S0.7 trukket tilbage 2/11: sitemap-URL'er svarer 200 til browsere, men 455 til Googlebot og bingbot (Simply.com bot-regel), så S0.7 er ikke verificeret for søgemaskiner. Skal genmåles efter hosten har hvidlistet bots. S0.1, S0.3, S0.8 + meta-/link-/alt-runde 1/11 + 0,25 d S0.9 analytics-afklaring (scope 6/11, endnu ikke udført: to tag-id'er skal måles, ikke gættes). + 0,25 d S0.9 analytics lukket 7/11: kilden var Rank Maths option rank_math_google_analytic_options, ikke et snippet — install_code 1 → tom (gammel værdi gemt), og der er målt ét g/collect med en=page_view på /, /?nocache=1 og /shop/, alle på G-0HC9BLQ88R; Ads-tagget fyrer stadig. S0.4 lukket 7/11 som overflødig: de fem URL'er svarer 200 (bekræftet med ?nocache=20261107 efter PHP kører igen: 69–75 KB), så 301-kortet og Redirection-gruppen behøves ikke — de 0,5 d er taget ud af nævneren (2,85 → 2,35 d), ikke ført som fremgang.",
+          "verified": true
         },
         {
           "id": "s1",
@@ -38,7 +39,7 @@
         {
           "id": "s3",
           "name": "S3 — hygiejne",
-          "done": 3.4,
+          "done": 3.5,
           "total": 3.55,
           "unit": "d",
           "note": "S3.1 0,25 + S3.2 0,1 + S3.3 alt-tekst 0,3 + S3.4 plugin-audit 0,35 + tidligere 0,6; plugin-oprydning (slet/fjern) og webp mangler stadig; + 0,1 d PDF-eksport til research-biblioteket (2 rapporter) og rettet ordombrydning i tools/md_to_pdf.py; + 0,2 d PDF-eksport af de 12 ældste biblioteksdokumenter og to renderer-fejl rettet (sidebrud midt i afsnit, kodeblok-højde); + 0,25 d PDF-eksport af resten af biblioteket (26 dokumenter), renderer-retning af kursiv/glyffer/overskrifter og nyt PDF-værn; + 0,3 d commit-besked-værn (tools/commit_check.py med 24 fixtures, commit-msg-hook, CI-workflow); + 0,05 d S3.5 (6/11): første ugentlige roadmap-statuspost med målte procenter, 530 smoke-checks, 17/17 værn og de præcise ejerblokeringer — 0,1 af 0,5 d; + 0,05 d S3.5 (7/11): anden ugentlige kontrol kørt og målt — 24/24 værn grønne, 781 smoke-checks / 0 FAIL, historikken uden drift, og den udbudte zip 7.54.0 er `diff -r`-identisk med kilden (v7.43.0-zip'en i denne worktree var ældre end kilden og blev droppet ved rebase til 7.54.0). `tools/setup-agent-tools.sh` kunne ikke hente PHP (`IndentationError` i sin `python3 -c`-streng) — rettet og efterprøvet."
@@ -154,7 +155,7 @@
       "id": "rebrand",
       "name": "Dark academia-rebrand",
       "next": "Batch 4 — mockups (~130 billeder)",
-      "blocked_by": "Printify-adgang",
+      "blocked_by": "Batch 4-mockups (0 af 5 t) kan ikke laves her: baade roadmap og library/om-maerkning-dark-academia-2026-11-01.md siger at mockups skal genereres i Printify eller uploades, og der er ingen Printify-adgang i dette miljoe. Kræver ejerens Printify-adgang eller upload.",
       "modules": [
         {
           "id": "tekster",
@@ -1437,6 +1438,15 @@
       "after": 81.3,
       "delta": 1.1,
       "basis": "19,55 af 24,05 d (S0 2,15/2,35 · S1 3,9/4,6 · S2 7,85/8,3 · S3 3,4/3,55 · S4 2,25/5,25)"
+    },
+    {
+      "date": "2026-11-08",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 81.3,
+      "after": 82.5,
+      "delta": 1.2,
+      "basis": "19,85 af 24,05 d (S0 2,35/2,35 · S1 3,9/4,6 · S2 7,85/8,3 · S3 3,5/3,55 · S4 2,25/5,25)"
     }
   ]
 }
