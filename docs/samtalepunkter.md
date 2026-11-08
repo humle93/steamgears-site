@@ -18,7 +18,7 @@ konteksten komprimeres. Filen er repoets hukommelse om **hvorfor** tingene blev 
   hvad blev målt, og hvad var fælden.
 
 <!-- AUTO:SAMTALEPUNKTER:START -->
-_Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt genereret — ret i `projektstatus.json`, ikke her._
+_Opdateret 2026-11-08 af `tools/samtalepunkter.py`. Blokken er maskinelt genereret — ret i `projektstatus.json`, ikke her._
 
 ### Status
 
@@ -33,26 +33,26 @@ _Opdateret 2026-11-07 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 ### Åbne blokeringer
 
 - **steamgears.eu — site-optimering** — Sitet og REST svarer 200 igen med Autopilot 7.59.0 aktiv (19 ruter i /wp-json/sgap/v1, S0.4's fem URL'er bekræftet 200 med ?nocache=20261107). Det der stadig blokerer de resterende site-punkter er skriveadgang fra sandkassen: (1) File Manager/SFTP til wp-content/mu-plugins/ for S0.2 (robots.txt har nu tre User-agent-grupper), S2.9 (0,1 d), S4.10 (0,05 d), S4.12 (0,05 d) og S4.13 (0,15 d), og (2) en godkendt MCP OAuth-session i denne sandkasse for S1.4, S1.5, S1.6 og de sidste 0,10 d af S2.5b.
-- **Steamgears Autopilot — plugin** — P1.5 kræver ejerens Pinterest- og Instagram-tokens (må ikke gennem chat eller repo). Målt 7/11 er alle seks nøgler tomme, diagnostics svarer pinterest: off / instagram: off, og ruterne svarer 200 med deres egen besked: pinterest/refresh → "save a Pinterest access token, or the app credentials plus a refresh token"; instagram/refresh → "save the professional account id and a long-lived Instagram User token". Roadmappet er afstemt linje for linje 7/11 (åbent = 0,85 d = dette punkt). Uden for roadmappet: mu-plugin-rettelsen 1.3.1 ligger stadig kun i repoet og kræver ejerens File Manager.
+- **Steamgears Autopilot — plugin** — P1.5 kræver ejerens tokens (må ikke gennem chat eller repo). Målt 8/11 med 7.60.1: ruten /sgap/v1/pinterest/refresh svarer 200, men Pinterest afviser det gemte token med HTTP 401 «Authentication failed.» (0 pins, 0 matched, 0 events), og refreshable er false, fordi der hverken er refresh-token eller app-credentials. instagram/refresh svarer configured:false — instagram_access_token og instagram_user_id er begge tomme. Det gamle sgap_pinterest_token bliver nu læst og migreret (access_len 101, migrated_equal true), se docs/library/pinterest-noegle-gammelt-felt-2026-11-08.md. Roadmappet er afstemt linje for linje 7/11 (åbent = 0,85 d = dette punkt). Uden for roadmappet: mu-plugin-rettelsen 1.3.1 ligger stadig kun i repoet og kræver ejerens File Manager.
 - **Dark academia-rebrand** — Printify-adgang
 - **SEO-indholdsproduktion** — Publicering af de tre resterende guides (292, 296, 295) kræver en godkendt MCP OAuth-session, og målt 7/11 med neutral UA (curl/8.5.0) mod de 20 live produkter i Store API lander kun 6 af de 18 /go/-links i docs/library/guides-2026-11-03.md på HTTP 200 (413, 483, 489, 491, 493, 495), mens 12 lander på 404 (397, 411, 475, 481, 485, 487, 497, 561, 563, 567, 724, 728) — produktreferencer og priser ($49–$279) i guide-kladden skal derfor afstemmes mod det nuværende 20-produkts katalog ved publicering.
 
 ### Næste skridt
 
 - **steamgears.eu — site-optimering** — Læg de fire færdigbyggede mu-plugins i wp-content/mu-plugins/ via Simply File Manager (managed-wordpress-robots.php, sga-design-system.php + css/sg-design-system.css, sgap-withdrawal-email.php, sgap-review-request.php, samt sga-payload-trim.php 1.3.1), og ret de fire OG-billedfund fra S2.5b (indlæg 615 bredde 576 px, indlæg 751 PNG 1,38 MB og de tre delte covers 1082/488/474) når en MCP-session er godkendt.
-- **Steamgears Autopilot — plugin** — P1.5's live-verifikation er det eneste åbne punkt (0,85 d): plugin 7.59.0 kører live, men hverken Pinterest- eller Instagram-token findes på sitet (målt 7/11: begge tomme, diagnostics svarer off). Når ejeren har indtastet dem i wp-admin, køres pinterest/refresh og instagram/refresh, og svarene bogføres som P1.5's sidste 0,85 d.
+- **Steamgears Autopilot — plugin** — P1.5's live-verifikation er det eneste åbne punkt (0,85 d): 7.60.1 kører live og Pinterest-tokenet er migreret til det felt Keys viser, men Pinterest afviser det med HTTP 401, og Instagram har intet token. Når ejeren har indsat et friskt Pinterest-token (og gerne app-credentials + refresh token) samt Instagrams professionelle konto-id og long-lived user token, køres pinterest/refresh og instagram/refresh, og de målte tal bogføres som P1.5's sidste 0,85 d.
 - **Dark academia-rebrand** — Batch 4 — mockups (~130 billeder)
 - **SEO-indholdsproduktion** — Skriv de tre manglende guides (mens-steampunk-costume-essentials, steampunk-clothing-three-budgets, womens-steampunk-essentials) fra den verificerede copy — corset-guiden er publiceret 6/11
 - **Døde internlinks** — Vedligehold: tjek nye indlæg mod live-URL'er
 
 ### Seneste commits
 
+- `73926b9 Pinterest: læs og migrér nøglen fra det gamle feltnavn`
+- `e88f88a CSS snapshot 08/11 + docs snapshot 08/11`
+- `9a07f21 S2.9, S4.10, S4.12 og S4.13 deployet og verificeret live (20/20 produkter har schema)`
 - `9b44bd2 Design live via Novamira, S3.1/S3.2 verificeret`
 - `7862cce Plugin 7.60.0: moderne admin-overflade (tokens, kort, knapper, faner, fokus, container queries, scroll-reveal)`
 - `1e4e0a7 Plugin 7.60.0: ryddet sidemenu, Printful-forbindelse under Keys, tydeligere knapper`
-- `d040b33 Modul: samtalepunkter — AUTO-blok opdateret med S2.5b-status og seneste commits Før: 68,0 %  →  Efter: 68,0 %  (Δ 0) Grundlag: ingen ændring`
-- `373fcc5 Luksus-lag rev. 3 i designsystemet (css sektion 12)`
-- `565d326 Modul: S2.5b — OG-billede målt på alle 30 indlæg og fast værn (+0,15 d) + S0.4 bekræftet uden cache Før: 67,4 %  →  Efter: 68,0 %  (Δ +0,6) Grundlag: 16,35 af 24,05 d (S0 2,15/2,35 · S1 2,15/4,6 · S2 7,5/8,3 · S3 2,55/3,55 · S4 2/5,25)`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)

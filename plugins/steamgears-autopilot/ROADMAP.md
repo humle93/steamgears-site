@@ -374,6 +374,10 @@ Platform limits: [Instagram content publishing](https://developers.facebook.com/
   urørt som tilbagerulningsvej. Seks smoke-checks (1010 → 1016 PASS, 0 FAIL) dækker fallbacken, at anmodningen
   sender det gamle token, kopien til det synlige felt, at en ny nøgle ikke overskrives, og at ingen af felterne
   stadig betyder intet token.
+  **Målt live 8/11:** 7.60.1 aktiv på sitet, `access_len = 101`, `migrated_equal = true`, `configured = true` — og
+  Pinterest afviser det gamle token med **HTTP 401 `Authentication failed.`** (0 pins, 0 events), mens Instagram
+  fortsat ikke har noget token (`configured = false`). P1.5's 0,85 d er derfor **ikke** bogført; målingen står i
+  `docs/library/pinterest-noegle-gammelt-felt-2026-11-08.md`.
 - **Afstemning 7/11 (7.59.0)** — **roadmappet er afstemt linje for linje, og der var intet skjult punkt.** Tre totaler
   var regnet forkert: P0 sagde 4,70 (CC-linkets 0,20 talt to gange, `/go/`'s 0,15 udeladt) → **4,65**; P1 sagde 15,20
   (P1.19's 0,25 talt to gange, queue-post 0,10 udeladt) → **15,05**; P3 sagde 2,75 (0,75 d der aldrig blev fjernet da
