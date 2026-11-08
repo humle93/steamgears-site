@@ -1,5 +1,20 @@
 # Ugentlig backup + 1 indholdselement — log
 
+## 2026-11-08 (kø- og cron-pas) — S3.6 lukket, S1.2 og S4.6 delvist
+- **Målt:** 326 ventende `woocommerce_deliver_webhook_async` (alle forfaldne), 1 084 fejlede
+  `facebook_for_woocommerce_*` (plugin findes ikke), 40 aktive webhooks med op til 5 dubletter pr. emne,
+  `DISABLE_WP_CRON` sand, `wp-cron.php` uden effekt og W3TC der cacher foran PHP.
+- **Bygget:** `wordpress/mu-plugins/sgap-queue-hygiene.php` (daglig oprydning: forældreløse handlinger,
+  gamle fejl, webhook-dubletter, cron-events, kø-tømning) og `wordpress/mu-plugins/sgap-cron-kicker.php`
+  (shutdown-kicker + offentligt `/wp-json/sgap/v1/tick`), plus `.github/workflows/cron-tick.yml` hvert 15. minut.
+- **Verificeret:** tick kørte 8 opgaver og skrev log; køen gik **326 → 0**, Facebook-handlinger **1 084 → 0**,
+  webhooks **40 → 29** (11 disabled), cron-events −3; anden hygiejne-kørsel gav 0 ændringer (idempotent).
+- **S1.2:** 940/941 er publiceret og målt (200, Product-schema, 129/149); 942/765/766/767 gendannet fra
+  papirkurv til kladde med pris, SKU, beskrivelse og SEO intakt. 0,2 af 0,5 d.
+- **S4.6:** kurv/kasse/konto svarer `cache-control: private, no-cache` (målt) — cache-bekymringen afkræftet;
+  kun DK-zone med fri fragt uden minimum, ingen EU/UK/RoW-zone. 0,1 af 0,4 d.
+- **Status:** site **91,3 → 92,9 %** (20,85 af 22,45 d).
+
 ## 2026-11-08 (afsluttende pas) — begge roadmaps lukket, 7.63.0
 - **Lukket og målt:** S0.5 (Health Checks mu-drop-in slettet), S1.4 (46 produktkladder → 0), S1.5 (**33/33**
   indlæg med `/go/`, 22 id'er 302 → produkt, 0 mod kladder), S1.6 (lead-formular testet med rigtig indsendelse),

@@ -6,8 +6,8 @@
       "id": "site",
       "name": "steamgears.eu — site-optimering",
       "note": "roadmap S0–S4",
-      "next": "Intet agent-arbejde tilbage i S0–S4. De 12 åbne poster er ejer-blokerede og navngivet i docs/roadmap.md §4c: GSC-svar (S0.6), ja/nej pr. produkt (S1.2), Complianz EU-valg (S4.1), CVR/adresse/telefon (S4.2, S4.9), valuta + 39 priser (S4.3), betalingsaftaler (S4.5), forsendelseszoner (S4.6), Printify (S4.7).",
-      "blocked_by": "Ejerens oplysninger og aftaler: CVR/registreret navn/postadresse/telefon, valuta og 39 priser, betalingsaftaler (MobilePay/PayPal/Klarna), forsendelseszoner, Complianz EU-beslutning, Printify-adgang, GSC Crawl stats. Ingen af dem kan agenten gætte.",
+      "next": "Intet agent-arbejde tilbage i S0–S4. De åbne poster er ejer-blokerede og navngivet i docs/roadmap.md §4c: GSC-svar (S0.6), ja/nej pr. produkt 942/765/766/767 (S1.2), Complianz EU-valg (S4.1), CVR/adresse/telefon (S4.2, S4.9), valuta + 39 priser (S4.3), betalingsaftaler (S4.5), forsendelseszoner (S4.6), Printify (S4.7). Køen og cron er derimod ryddet og kører nu af sig selv (S3.6).",
+      "blocked_by": "Ejerens oplysninger og aftaler: CVR/registreret navn/postadresse/telefon, valuta og 39 priser, betalingsaftaler (MobilePay/PayPal/Klarna), forsendelseszoner og fragtklasser, Complianz EU-model, Printify-adgang, GSC Crawl stats, og ja/nej til publicering af 942/765/766/767.",
       "modules": [
         {
           "id": "s0",
@@ -22,10 +22,10 @@
         {
           "id": "s1",
           "name": "S1 — butik og indhold",
-          "done": 3.4,
+          "done": 3.6,
           "total": 3.9,
           "unit": "d",
-          "note": "S1.1 Herbarium 0,5 (12 SKU'er publiceret og linket) + S1.3 sitemap 0,35 + S1.4 ryddet 46 produktkladder → 0,5 + S1.5 nu 33/33 publicerede indlæg med /go/ (22 id'er målt 302 → produkt, 0 mod kladder) 1,0 + S1.6 lead-formular målt med rigtig indsendelse 0,3 + S1.7 0,1 = 3,4. Kun S1.2 (0,5) står åben og er ejer-blokeret: ja/nej pr. produkt 940–942 og 765–767."
+          "note": "S1.1 Herbarium 0,5 + S1.3 sitemap 0,35 + S1.4 ryddet 46 produktkladder 0,5 + S1.5 33/33 indlæg med /go/ 1,0 + S1.6 lead-formular 0,3 + S1.7 0,1 + S1.2 0,2 (940/941 publiceret og målt, 942/765/766/767 gendannet fra papirkurv til kladde med pris/SKU/SEO intakt) = 3,6. De sidste 0,3 af S1.2 er ejerens ja/nej pr. produkt."
         },
         {
           "id": "s2",
@@ -39,26 +39,26 @@
         {
           "id": "s3",
           "name": "S3 — hygiejne",
-          "done": 3.55,
-          "total": 3.55,
+          "done": 4.05,
+          "total": 4.05,
           "unit": "d",
-          "note": "S3.1 0,25 + S3.2 0,1 + S3.3 alt-tekst 0,3 + S3.4 plugin-revision 0,35 (22 aktive, 2 inaktive, 0 uafklarede dubletter) + S3.5 fjerde ugentlige post 0,35 + PDF/commit-værn 0,55; Health Checks mu-drop-in slettet 8/11."
+          "note": "S3.1 0,25 + S3.2 0,1 + S3.3 alt-tekst 0,3 + S3.4 plugin-revision 0,35 + S3.5 fjerde ugentlige post 0,35 + S3.6 kø- og cron-hygiejne 0,5 (326 → 0 ventende webhook-leveringer, 1 084 → 0 forældreløse Facebook-handlinger, 40 → 29 aktive webhooks, 3 cron-events fjernet, tick-endpoint + GitHub-workflow) + PDF/commit-værn 0,55"
         },
         {
           "id": "s4",
           "name": "S4 — salgsklar butik",
-          "done": 3.85,
+          "done": 3.95,
           "total": 5.25,
           "unit": "d",
-          "note": "S4.4 formular-del + produkttekster + S4.10/4.12/4.13 nu live (schema_check 20/20, review- og withdrawal-hooks, OG-billeder) = 3,85. Tilbage er kun ejer-blokeret: S4.1 Complianz EU-valg, S4.2 CVR/adresse/telefon, S4.3 valuta+39 priser, S4.5 betalingsaftaler, S4.6 forsendelseszoner, S4.7 mockups/Printify, S4.9 GPSR-adresse."
+          "note": "S4.4 0,45 + S4.8 0,5 + S4.10 0,4 + S4.11 0,4 + S4.12 0,2 + S4.13 0,25 + S4.9 (ikke-GPSR) 0,25 + S4.6 0,1 (cache-delen målt: kurv/kasse/konto er private/no-cache; DK har fri fragt uden minimum, EU/UK/RoW mangler zone) = 3,95. Tilbage er ejer-blokeret: S4.1 Complianz EU-valg (kræver også CVR/adresse), S4.2/S4.9 CVR+adresse, S4.3 valuta+39 priser, S4.5 betalingsaftaler, S4.6 zoner/fragtklasser/fri fragt, S4.7 mockups"
         }
       ]
     },
     {
       "id": "plugin",
       "name": "Steamgears Autopilot — plugin",
-      "next": "Kun P1.5 står åben, og den er ejer-blokeret: live-verifikationen kræver tokens til Pinterest, Instagram, Bluesky, Mastodon, Telegram og Facebook, indtastet på Settings → Keys.",
-      "blocked_by": "Tokens: Pinterest (i dag 401), Instagram (langlivet token + professional account-id), Bluesky (handle + app password), Mastodon (instans + token), Telegram (bot-token + chat-id), Facebook (page-id + page token). Samt P2.1–P2.3's Command Center-beslutning.",
+      "next": "Kun P1.5 står åben i plugin-roadmappet, og den er ejer-blokeret (tokens). Driften er derimod målt: cron kører nu gennem tick-endpointet, køen er tom, og de fire led der kræver ejeren står i blocked_by.",
+      "blocked_by": "Fire driftspunkter kræver ejeren, og de er målt 8/11: (1) **AIMLAPI-kredit** — sidste generering 7/11 fejlede med »You've run out of funds«, så der laves ingen nye kladder; (2) **`sgap_alert_email`** er tom, så fejl registreres men ingen mail sendes; (3) **Full auto vs. godkendelse** — `sgap_full_auto_enabled = no`, og 40 elementer venter på godkendelse; (4) **distributionsvej** — `publish_mode = rss` og 0 Publer-konti, mens Pinterest svarer 401 og fem kanaler mangler token. Dertil P1.5's tokens (Pinterest, Instagram, Bluesky, Mastodon, Telegram, Facebook) og P2.1–P2.3's Command Center-beslutning. Intet af det må gættes.",
       "modules": [
         {
           "id": "p0",
@@ -1496,6 +1496,15 @@
       "after": 91.3,
       "delta": 2.7,
       "basis": "20,05 af 21,95 d (S0 2,35/2,35 · S1 3,40/3,90 · S2 6,90/6,90 · S3 3,55/3,55 · S4 3,85/5,25)"
+    },
+    {
+      "date": "2026-11-08",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 91.3,
+      "after": 92.9,
+      "delta": 1.6,
+      "basis": "20,85 af 22,45 d (S0 2,35/2,35 · S1 3,6/3,9 · S2 6,9/6,9 · S3 4,05/4,05 · S4 3,95/5,25)"
     }
   ]
 }
