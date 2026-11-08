@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Steamgears cron kicker
  * Description: Kører forfaldne cron-opgaver på et almindeligt sidevisning, når webhotellet har slået WP-Cron fra (DISABLE_WP_CRON) og der ikke er sat et server-cron. Svaret sendes til brugeren først, så kørslen ikke koster ventetid.
- * Version: 1.1.0
+ * Version: 1.3.0
  */
 
 if (!defined('ABSPATH')) {
@@ -25,6 +25,8 @@ final class SGAP_Cron_Kicker
     public const OPTION = 'sgap_cron_kicker';
     public const HISTORY = 'sgap_cron_kicker_history';
     public const HISTORY_MAX = 12;
+    public const WP_HOOK = 'sgap_cron_tick';
+    public const RECURRENCE = 'sgap_five_minutes';
     public const LOCK = 'sgap_cron_kicker_lock';
     public const LOCK_TTL = 120;
     public const MAX_HOOKS = 8;
@@ -33,10 +35,40 @@ final class SGAP_Cron_Kicker
     /** Sider hvor en kørende cron-opgave ville kunne mærkes af en kunde. */
     private const SKIP_PATHS = ['/cart', '/checkout', '/my-account', '/wc-ajax', '/wp-login', '/wp-cron', '/wp-admin'];
 
+    /** Værn mod at run_due kalder sig selv gennem en planlagt hook. */
+    private static bool $busy = false;
+
     public static function boot(): void
     {
         add_action('shutdown', [self::class, 'maybe_run'], 0);
         add_action('rest_api_init', [self::class, 'register_tick']);
+        add_filter('cron_schedules', [self::class, 'add_schedule']);
+        add_action('init', [self::class, 'schedule']);
+    }
+
+    /**
+     * Site-planlagt tick hvert femte minut. Den er den vej der ikke afhænger af GitHub:
+     * når et PHP-request alligevel eksekveres, kører kicker'en de forfaldne opgaver —
+     * også denne — så køen bliver tømt uden en ekstern scheduler.
+     *
+     * @param array<string,array<string,mixed>> $schedules
+     * @return array<string,array<string,mixed>>
+     */
+    public static function add_schedule(array $schedules): array
+    {
+        $schedules[self::RECURRENCE] = [
+            'interval' => 300,
+            'display' => 'Hvert 5. minut (Steamgears cron kicker)',
+        ];
+
+        return $schedules;
+    }
+
+    public static function schedule(): void
+    {
+        if (!wp_next_scheduled(self::WP_HOOK)) {
+            wp_schedule_event(time() + 60, self::RECURRENCE, self::WP_HOOK);
+        }
     }
 
     /**
@@ -212,6 +244,19 @@ final class SGAP_Cron_Kicker
             return ['skipped' => 'no-api'];
         }
 
+        set_transient(self::LOCK, time(), self::LOCK_TTL);
+
+        // Site-planlagt tick: er fem-minutters-eventet forfaldent, flyttes det og kørslen
+        // markeres som `wp-schedule`. Det er den vej der ikke afhænger af GitHub — den
+        // kræver kun at der kommer et PHP-request, hvilket et levende site har.
+        $wpDue = false;
+        $next = wp_next_scheduled(self::WP_HOOK);
+        if ($next && (int) $next <= time()) {
+            wp_clear_scheduled_hook(self::WP_HOOK);
+            wp_schedule_event(time() + 300, self::RECURRENCE, self::WP_HOOK);
+            $wpDue = true;
+        }
+
         $report = self::run_due(self::MAX_HOOKS, self::MAX_SECONDS);
 
         if (($report['ran'] ?? []) === [] && ($report['due_before'] ?? 0) === 0) {
@@ -222,7 +267,7 @@ final class SGAP_Cron_Kicker
             SGAP_Queue_Hygiene::drain_now(3);
         }
 
-        $report['source'] = 'shutdown';
+        $report['source'] = $wpDue ? 'wp-schedule' : 'shutdown';
         update_option(self::OPTION, $report, false);
         self::record($report);
 
@@ -236,10 +281,16 @@ final class SGAP_Cron_Kicker
      */
     private static function run_due(int $maxHooks, int $maxSeconds): array
     {
+        if (self::$busy) {
+            return ['at' => gmdate('c'), 'seconds' => 0, 'ran' => [], 'due_before' => 0, 'skipped' => 'busy'];
+        }
+
         $jobs = wp_get_ready_cron_jobs();
         if (empty($jobs)) {
             return ['at' => gmdate('c'), 'seconds' => 0, 'ran' => [], 'due_before' => 0];
         }
+
+        self::$busy = true;
 
         if (function_exists('fastcgi_finish_request')) {
             fastcgi_finish_request();
@@ -286,6 +337,8 @@ final class SGAP_Cron_Kicker
                 }
             }
         }
+
+        self::$busy = false;
 
         return [
             'at' => gmdate('c'),

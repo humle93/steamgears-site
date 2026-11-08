@@ -79,6 +79,21 @@ og skriver derefter resultatet (`ran`, `seconds`, `due_before`) i optionen `sgap
 holder `sgap_cron_kicker_history` de seneste 12 kørsler, så det kan bevises at uret tikker over tid —
 optionen med det seneste resultat alene kunne ikke vise det.
 
+### 2.3.0 Site-planlagt tick (uafhængig af GitHub)
+
+GitHub's `schedule` er ikke den eneste ur. Kicker 1.3.0 lægger også et **site-planlagt
+fem-minutters-event** (`sgap_cron_tick`, interval `sgap_five_minutes` = 300 s) i WordPress. Er
+eventet forfaldent når et PHP-request alligevel eksekveres, flytter kicker'en det fem minutter
+frem og kører de forfaldne opgaver med `source: wp-schedule` i historikken. Målt efter deploy:
+
+```
+wp_next_scheduled('sgap_cron_tick') = 2026-11-08T13:55:41+00:00
+wp_get_schedule('sgap_cron_tick')   = sgap_five_minutes (300 s)
+```
+
+Det gør køen uafhængig af én ekstern scheduler: GitHub-jobbet og site-planen dækker hver sin vej,
+og begge skriver til `sgap_cron_kicker_history`.
+
 ### 2.3.1 Den faktiske GitHub-kørsel
 
 Workflowen blev startet med `workflow_dispatch` (den havde ikke haft en planlagt slot endnu). Tre kørsler,
