@@ -26,13 +26,14 @@ kan hentes anonymt.
 | `raw.githubusercontent.com/…/main/docs/roadmap.md` | `200` | **`404`** |
 | `raw.githubusercontent.com/…/main/plugins/steamgears-autopilot/steamgears-autopilot.php` | `200` | **`404`** |
 | `codeload.github.com/humle93/steamgears-site/zip/refs/heads/main` | `200` | **`404`** |
-| `raw.githubusercontent.com/…/plugins/steamgears-autopilot-v7.65.0.zip` | `200` | `200` — **kun CDN-cachen** |
+| `raw.githubusercontent.com/…/plugins/steamgears-autopilot-v7.65.0.zip` | `200` | `200` fra min maskine (**kun CDN-cachen**) — **404 fra sitet selv** |
 | samme zip under et navn der aldrig har eksisteret (`v1.0.0.zip`) | `404` | `404` |
 
-Den sidste række er den vigtige nuance: den eksisterende zip svarer stadig 200, også med
-cache-buster i query-strengen, mens et ikke-eksisterende zip-navn giver 404. Forskellen er altså
-**edge-cachen fra dengang repoet var offentligt**, ikke adgang — og den forsvinder, når posten udløber.
-Man kan derfor ikke regne med zip-linket som en stabil vej efter dette skift.
+Den næstsidste række er en cache-effekt: den eksisterende zip svarer stadig 200 fra min maskine, også
+med cache-buster i query-strengen, mens et ikke-eksisterende zip-navn giver 404 — altså **edge-cachen fra
+dengang repoet var offentligt**, ikke adgang. **Målt fra sitets egen IP er den også væk:**
+`wp_remote_get(SGAP_Updater::package_url('7.65.0'))` giver **404** (se §3), så der er ingen cache at
+regne med i praksis.
 
 Agentens egen vej er intakt: `cloud_git fetch` mod `origin` virker fortsat efter skiftet (samme
 credentials, samme remote-URL `https://github.com/humle93/steamgears-site.git`), og `git remote -v` er
@@ -51,7 +52,12 @@ const RAW = 'https://raw.githubusercontent.com/humle93/steamgears-site/main/plug
 - Uden versionsnummer bliver `inject_update()` s tavle tom og `run()` svarer
   **»Could not read the latest version from GitHub.«** — *Update now*-knappen i wp-admin kan altså ikke
   længere hente en nyere version af sig selv.
-- `package_url()` peger på zip'en, som kun er levende, så længe CDN-cachen holder (rækken ovenfor).
+- `package_url()` peger på zip'en, som sitet selv får **404** på (målt nedenfor).
+
+**Målt på sitet selv 8/11, gennem `execute-php` (site'ts eget netværk, ikke min maskine):**
+`SGAP_Updater::remote_version(true)` → `""`, `update_available(true)` → `false`, og
+`wp_remote_get(package_url('7.65.0'))` → **404**. Det er ikke en formodning om koden — det er det svar
+sitet får lige nu.
 
 Det er ikke en fejl i koden; den er skrevet til et offentligt repo og gjorde det rigtigt indtil i dag.
 `reports/release-preflight-2026-11-08.md` og `docs/library/live-7-64-9-2026-11-08.md` målte 200 på
