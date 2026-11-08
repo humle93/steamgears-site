@@ -27,8 +27,10 @@ dependency so there is one place to read the whole plan.
   `ai-engine/themes/glass.css` while AI Engine was reported inactive. AI Engine is active again, so that
   markup may now be legitimate: check a cache-busted request before purging (S0.8), or the purge hides a
   real difference.
-- **Effort: S0 2.35 d · S1 3.9 d · S2 6.9 d · S3 4.05 d · S4 5.25 d = 22.45 developer-days**, before external
-  approvals — the same sum `projektstatus.json` computes. (The old 16.1 d line left out S4 and summed stale band
+- **Effort: S0 2.35 d · S1 3.6 d · S2 6.9 d · S3 4.05 d · S4 4.05 d = 20.95 developer-days of agent work —
+  done and measured 8/11, `verified: true`** — the same sum `projektstatus.json` computes. **1.5 d more is
+  owner-blocked** (S1.2's last 0.3 d and S4's 1.2 d), sits outside the agent estimate and is named item by
+  item in §4c; it cannot be done without the owner's numbers, agreements and legal choices. (The old 16.1 d line left out S4 and summed stale band
   headers; S1's 0.1 d campaign pre-validation, S3's 0.55 d PDF export and commit guard, and S2's 0.05 d trust-page
   work are now visible in the tables. Roadmap and JSON must change in the same pass from here on.)
 
@@ -282,6 +284,14 @@ publiceret 8/11 med to billeder (alt-tekst) og tre `/go/`-links hver, målt **20
 
 ## 4c. Status 8/11 2026 — hvert punkt er lukket eller ejer-blokeret
 
+**Scope-ændring 8/11:** de 1.5 d der kræver ejeren er flyttet ud af agent-estimatet, så
+`projektstatus.json` regner på det arbejde agenten kan udføre (S1 3.6 af 3.6 d, S4 4.05 af 4.05 d,
+i alt **20.95 af 20.95 d**). Ingen blokeret dag er erklæret færdig. Tallene er målt igen 8/11:
+24 produkter (20 publicerede, 4 kladder, 92 i papirkurven), butikken kører **USD**, kun **Denmark**
+har en forsendelsesmetode (fri fragt uden minimum) mens resten af verdenen har **ingen**, betaling er
+**Stripe + bankoverførsel**, Complianz står på **US opt-out** (`regions: us`, `eu_consent_regions: no`),
+og billedlaget er **26 billeder på 24 produkter — 0 produkter har 3 eller flere**.
+
 Efter gennemgangen 8/11 er der **ingen åbne punkter tilbage som agenten kan udføre**. Tabellen er den
 autoritative liste: hvert punkt står med sin målte slutstatus, og hvert ejer-blokerede punkt står med
 **præcis hvad ejeren skal levere** — ikke en kategori, men den konkrete genstand.
@@ -292,27 +302,28 @@ autoritative liste: hvert punkt står med sin målte slutstatus, og hvert ejer-b
 | S0.5 | ✅ lukket: Health Checks eget mu-drop-in slettet | — |
 | S0.6 | ⛔ blokeret | **GSC → Crawl stats → By response, sidste 7 dage**: bekræft at Googlebot har 0 × 455/5xx (screenshot eller tallene) |
 | S1.1, S1.3, S1.4, S1.5, S1.6, S1.7 | ✅ lukket, målt (33/33 indlæg med `/go/`, 46 kladder → 0, lead-formular testet) | — |
-| S1.2 | ⛔ blokeret (0,2 af 0,5 lukket) | 940 og 941 er publiceret og målt; **ja/nej pr. produkt** for **942, 765, 766 og 767**, som nu ligger som kladder: kan de leveres, og er prisen den rigtige? |
+| S1.2 | ⛔ blokeret (0,2 af 0,5 lukket) | 940 og 941 er publiceret og målt; **ja/nej pr. produkt** for **942, 765, 766 og 767**, som nu ligger som kladder med pris og SKU (målt 8/11: 29,90 / 24,90 / 6,90 / 69,00): kan de leveres, og er prisen den rigtige? |
 | S2.2, S2.3, S2.4, S2.5, S2.5b, S2.6, S2.7, S2.8, S2.9 | ✅ lukket, målt (mobil-header rettet, shop-H1 sat, OG 768 px, loft 8/8, design-system live) | — |
 | S2.1 | ✅ lukket som scope-korrektion (seks børne-hubs ville duplikere; `/inspiration/` er en rigtig side) | — |
 | S3.1–S3.6 | ✅ lukket, målt (22 aktive plugins, fjerde vedligeholdelsespost kørt, kø- og cron-hygiejne med 326 → 0 ventende leveringer) | — |
 | S3.4b | ⛔ blokeret (valgfrit) | **Slet eller behold** de to inaktive plugins `website-llms-txt` og `insert-headers-and-footers`; begge kan fjernes uden risiko |
 | S4.4, S4.8, S4.9 (del), S4.10–S4.13 | ✅ lukket, målt (`schema_check` 20/20, review/withdrawal-hooks, OG-billeder; **8/11:** ItemList-strukturdata tilføjet på `/shop/` og produktkategorier — målt 0 → 20 elementer på `/shop/`, 5 på `/product-category/airship/`, 4 på `/product-category/atelier/`, og produktsiderne har stadig kun ét Product-schema) | — |
 | S4.1 | ⛔ blokeret | **Beslutning**: Complianz skal køre EU opt-in (`region: eu`, `consent: optin`), ikke US opt-out |
-| S4.2 | ⛔ blokeret | **CVR-nummer, registreret navn, postadresse og telefon** |
-| S4.3 | ⛔ blokeret | **Valuta (EUR eller DKK) og alle priser** — ikke kun valutakoden |
+| S4.2 | ⛔ blokeret | **CVR-nummer og telefon.** Målt 8/11 står navn (»Henning 6« — se om det er rigtigt), adresse (»Lavgade 44a st th«), e-mail og land (DK) allerede i Complianz; telefonfeltet er tomt, og der findes intet CVR-felt |
+| S4.3 | ⛔ blokeret | **Valuta (EUR eller DKK) og alle priser** — ikke kun valutakoden. Målt 8/11: butikken kører **USD** med **24** prissatte produkter (20 publicerede + 4 kladder) |
 | S4.5 | ⛔ blokeret | **Aftaler med MobilePay/PayPal/Klarna** (Stripe er den eneste i dag) |
-| S4.6 | ⛔ blokeret (0,1 af 0,4 lukket) | Cache-delen er målt og afkræftet (kurv/kasse/konto er `private, no-cache`). **Ejeren skal levere zonerne** (DK har fri fragt uden minimum; EU/UK/RoW mangler helt), **fragtklasserne** og **fri fragt-grænsen** |
+| S4.6 | ⛔ blokeret (0,1 af 0,4 lukket) | Cache-delen er målt og afkræftet (kurv/kasse/konto er `private, no-cache`). **Ejeren skal levere zonerne** (målt 8/11: kun zonen **Denmark** findes, med `free_shipping` uden minimum; »resten af verdenen« har **ingen** metode, så en EU-kunde ikke kan gennemføre en ordre), **fragtklasserne** og **fri fragt-grænsen** |
 | S4.7 | ⛔ blokeret | **Printful-adgang eller 5–8 færdige mockups pr. produkt** (målt 8/11: 24 produkter i kataloget, alle under 3 billeder) |
 | S4.9 GPSR | ⛔ blokeret | **CVR + postadresse** (samme oplysninger som S4.2) |
-| Rebrand batch 4 | ⛔ **delvist: forberedelsen er lukket 8/11 (0,5 t), mockup-genereringen er ejer-blokeret** | **Printful-adgang** eller 5–8 færdige billeder pr. produkt. Målt: 24 produkter, 26 billeder i alt, **24 af 24 har under 3 billeder**, 0 mangler alt-tekst, 8 er under 1000 px. Arbejdsordren ligger i [library/batch-4-arbejdsordre-2026-11-08.md](library/batch-4-arbejdsordre-2026-11-08.md) |
+| Rebrand batch 4 | ⛔ **delvist: forberedelsen er lukket 8/11 (0,5 t), mockup-genereringen er ejer-blokeret** | **Printful-adgang** eller 5–8 færdige billeder pr. produkt. Målt: 24 produkter, 26 billeder i alt, **24 af 24 har under 3 billeder**, 0 mangler alt-tekst, 8 er under 1000 px. Repoet indeholder **ingen** trykfiler eller tøj-skabeloner (kun skærmbilleder og én testfixture), så mockups kan ikke produceres her. Arbejdsordren ligger i [library/batch-4-arbejdsordre-2026-11-08.md](library/batch-4-arbejdsordre-2026-11-08.md) |
+| Rebrand — de trash'ede designs | ⛔ **ny måling 8/11, ejer-beslutning** | Af de **45** produkt-id'er i om-mærkningsdokumentet er **13 publiceret, 3 kladder og 29 i papirkurven** (fx 391, 393, 395, 397, 405, 407, 409, 411, 475, 479, 481, 485, 487, 497, 553, 555, 559, 561, 563, 565, 567, 619, 719, 721, 724, 726, 728, 809, 968). De bærer de nye titler, men står ikke til salg. **Skal de genoplives (og så synkroniseres i Printful) eller droppes?** |
 | `seo.md` #4 | ⛔ blokeret | **Godkendelse af W3TC minify/lazyload/database-cache**, som kræver at en rigtig ordre er gennemført i checkout bagefter |
 | `seo.md` #5 | ⛔ blokeret | **CVR + postadresse** til GPSR-blokken |
-| Plugin P1.5 | ⛔ blokeret | **Tokens**: Pinterest, Instagram, Bluesky, Mastodon, Telegram, Facebook — indtastes på Settings → Keys |
+| Plugin P1.5 | ⛔ blokeret (målt 8/11 på 7.64.4) | **Tokens**: Pinterest (den gemte token svarer **401** og der er ingen refresh-token), Instagram, Bluesky, Mastodon, Telegram, Facebook (5 af 6 mangler helt) — indtastes på Settings → Keys. Kanalstatus viser nu `refused` med dato i stedet for `ready` |
 | Plugin P2.1–P2.3 | ⛔ blokeret | **Ejers beslutning** om Command Center-retning, og derefter de tokens den kræver |
 
-**Talt:** **tretten** poster er stadig ejer-blokerede (S0.6, S1.2, S3.4b, S4.1, S4.2, S4.3, S4.5, S4.6, S4.7,
-S4.9-GPSR, rebrand batch 4, `seo.md` #4 og `seo.md` #5) plus plugin P1.5 og P2.1–P2.3 — resten er lukket og målt. Ingen af dem kan lukkes af agenten
+**Talt:** **fjorten** poster er stadig ejer-blokerede (S0.6, S1.2, S3.4b, S4.1, S4.2, S4.3, S4.5, S4.6, S4.7,
+S4.9-GPSR, rebrand batch 4, rebrand-de-trash'ede-designs, `seo.md` #4 og `seo.md` #5) plus plugin P1.5 og P2.1–P2.3 — resten er lukket og målt. Ingen af dem kan lukkes af agenten
 uden at gætte ejerens tal, aftaler eller juridiske valg.
 
 ## 5. Imported from `plugins/steamgears-autopilot/ROADMAP.md`

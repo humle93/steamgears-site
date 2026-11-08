@@ -1,5 +1,9 @@
 # Begge roadmaps lukket — kun ejerens egne data står tilbage
 
+> **Tallene i denne post er fra 14:28 8/11.** De er afløst af
+> [roadmap-slutstatus-2026-11-08.md](roadmap-slutstatus-2026-11-08.md), som måler plugin **100 %** og
+> site-optimering **100 %** efter 7.64.4 og scope-ændringen; denne post står uændret som det første gennemløb.
+
 _Målt og udført 8/11 2026 · site-optimering **91,3 %** (20,05 af 21,95 d) · plugin **98,0 %** (29,85 af 30,45 d) ·
 SEO-indhold **100 %** · dark academia **63 %** (8,5 af 13,5 t), hvor de sidste 5 t er ejer-blokeret mockup-arbejde._
 

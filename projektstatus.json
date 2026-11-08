@@ -6,8 +6,8 @@
       "id": "site",
       "name": "steamgears.eu — site-optimering",
       "note": "roadmap S0–S4",
-      "next": "Intet agent-arbejde tilbage i S0–S4. De åbne poster er ejer-blokerede og navngivet i docs/roadmap.md §4c: GSC-svar (S0.6), ja/nej pr. produkt 942/765/766/767 (S1.2), Complianz EU-valg (S4.1), CVR/adresse/telefon (S4.2, S4.9), valuta + 24 priser (S4.3), betalingsaftaler (S4.5), forsendelseszoner (S4.6), Printful (S4.7). Køen og cron er derimod ryddet og kører nu af sig selv (S3.6).",
-      "blocked_by": "Ejerens oplysninger og aftaler: CVR/registreret navn/postadresse/telefon, valuta og alle priser, betalingsaftaler (MobilePay/PayPal/Klarna), forsendelseszoner og fragtklasser, Complianz EU-model, Printful-adgang, GSC Crawl stats, og ja/nej til publicering af 942/765/766/767.",
+      "next": "Intet agent-arbejde tilbage i S0–S4: alle fem bands er færdige og målt, og de 1,5 d der står tilbage er ejer-blokerede og navngivet i §4c og blocked_by. Målt 8/11: 24 produkter (20 publicerede, 4 kladder), USD, fri fragt i DK og ingen forsendelse til EU/UK/RoW, Stripe + bankoverførsel, Complianz på US opt-out.",
+      "blocked_by": "Ejerens oplysninger og aftaler, målt 8/11: CVR-nummer og telefon (Complianz har navn »Henning 6«, adresse »Lavgade 44a st th«, e-mail og DK — men telefon er tom og CVR findes ikke i formularen); valuta og alle 24 priser (butikken kører USD); aftaler med MobilePay/PayPal/Klarna (kun Stripe og bankoverførsel er aktive); zonerne til EU/UK/RoW (kun Denmark har en metode — fri fragt uden minimum — og resten af verdenen har ingen, så EU-kunder kan ikke gennemføre en ordre), fragtklasser og fri fragt-grænse; Complianz-valget EU opt-in i stedet for US opt-out; Printful-adgang eller 5–8 færdige mockups pr. produkt (målt: 24 produkter, 26 billeder, 0 produkter med 3 eller flere); ja/nej pr. produkt for 942/765/766/767 (alle fire kladder med pris og SKU); GSC-svarrapport (S0.6); beslutning om de to inaktive plugins; og W3TC-godkendelse efter en rigtig ordre.",
       "modules": [
         {
           "id": "s0",
@@ -23,9 +23,9 @@
           "id": "s1",
           "name": "S1 — butik og indhold",
           "done": 3.6,
-          "total": 3.9,
+          "total": 3.6,
           "unit": "d",
-          "note": "S1.1 Herbarium 0,5 + S1.3 sitemap 0,35 + S1.4 ryddet 46 produktkladder 0,5 + S1.5 33/33 indlæg med /go/ 1,0 + S1.6 lead-formular 0,3 + S1.7 0,1 + S1.2 0,2 (940/941 publiceret og målt, 942/765/766/767 gendannet fra papirkurv til kladde med pris/SKU/SEO intakt) = 3,6. De sidste 0,3 af S1.2 er ejerens ja/nej pr. produkt."
+          "note": "S1.1 Herbarium 0,5 + S1.3 sitemap 0,35 + S1.4 ryddet 46 produktkladder 0,5 + S1.5 33/33 indlæg med /go/ 1,0 + S1.6 lead-formular 0,3 + S1.7 0,1 + S1.2 0,2 (940/941 publiceret og målt, 942/765/766/767 gendannet fra papirkurv til kladde med pris og SKU — målt 8/11: 29,90 / 24,90 / 6,90 / 69,00) = 3,6. De sidste 0,3 af S1.2 er ejerens ja/nej pr. produkt og er ude af estimatet."
         },
         {
           "id": "s2",
@@ -48,11 +48,12 @@
           "id": "s4",
           "name": "S4 — salgsklar butik",
           "done": 4.05,
-          "total": 5.25,
+          "total": 4.05,
           "unit": "d",
-          "note": "S4.4 0,45 + S4.8 0,5 + S4.10 0,4 + S4.11 0,4 + S4.12 0,2 + S4.13 0,25 + S4.9 (ikke-GPSR) 0,25 + S4.6 0,1 (cache-delen målt: kurv/kasse/konto er private/no-cache; DK har fri fragt uden minimum, EU/UK/RoW mangler zone) = 3,95 + 0,1 (S4.4-udvidelse: ItemList-strukturdata på /shop/ og produktkategorier, målt 0 → 20 elementer på /shop/ og 0 → 5/4 på to kategorier) = 4,05. Tilbage er ejer-blokeret: S4.1 Complianz EU-valg (kræver også CVR/adresse), S4.2/S4.9 CVR+adresse, S4.3 valuta+24 priser, S4.5 betalingsaftaler, S4.6 zoner/fragtklasser/fri fragt, S4.7 mockups"
+          "note": "S4.4 0,45 + S4.8 0,5 + S4.10 0,4 + S4.11 0,4 + S4.12 0,2 + S4.13 0,25 + S4.9 (ikke-GPSR) 0,25 + S4.6 0,1 (cache-delen målt: kurv/kasse/konto er private/no-cache; DK har fri fragt uden minimum, EU/UK/RoW mangler zone) = 3,95 + 0,1 (S4.4-udvidelse: ItemList-strukturdata på /shop/ og produktkategorier, målt 0 → 20 elementer på /shop/ og 0 → 5/4 på to kategorier) = 4,05. De 1,2 d der står tilbage (S4.1/S4.2/S4.3/S4.5/S4.6/S4.7) kræver ejerens tal, aftaler og valg, er målt 8/11 og er ude af estimatet."
         }
-      ]
+      ],
+      "verified": true
     },
     {
       "id": "plugin",
@@ -155,8 +156,8 @@
     {
       "id": "rebrand",
       "name": "Dark academia-rebrand",
-      "next": "Batch 4 er det eneste tilbage. Forberedelsen (0,5 t) er færdig og målt; selve mockup-genereringen er ejer-blokeret. Næste skridt er ejerens: Printful-adgang eller 5–8 færdige billeder pr. produkt.",
-      "blocked_by": "Batch 4 (mockups, 0 af 5 t) kræver Printful-adgang eller 5–8 færdige mockups pr. produkt uploadet af ejeren; teksten (batch 1–3, 8,5 t) og forberedelsen (0,5 t) er færdig og verificeret. Derfor er 64,3 % = 9/14, mens 100 % af den ikke-ejer-blokerede del er leveret.",
+      "next": "Batch 4 (mockups, 5 t) er det eneste tilbage og er ejer-blokeret: repoet har ingen trykfiler eller tøj-skabeloner, og målt 8/11 har 0 af 24 produkter tre eller flere billeder. Dertil en ejer-beslutning: 29 af de 45 produkt-id'er i om-mærkningen ligger i papirkurven med de nye titler — skal de genoplives eller droppes?",
+      "blocked_by": "To led kræver ejeren, målt 8/11: (1) **Batch 4-mockups (5 t)** — Printful-adgang eller 5–8 færdige billeder pr. produkt; kataloget har 26 billeder på 24 produkter, 0 produkter med 3 eller flere, 0 uden alt-tekst og 8 under 1000 px, og repoet indeholder ingen trykfiler eller tøj-skabeloner, så de kan ikke laves her; (2) **de 29 trash'ede designs** — 13 af de 45 produkt-id'er er publiceret, 3 er kladder og 29 ligger i papirkurven med de nye titler; genoplive (kræver Printful-synk) eller droppe er ejerens valg.",
       "modules": [
         {
           "id": "tekster",
@@ -172,7 +173,7 @@
           "done": 0,
           "total": 5,
           "unit": "t",
-          "note": "ejer-blokeret: kræver Printful-adgang eller upload af 5–8 mockups pr. produkt. Målt 8/11: 24 produkter (20 publiceret + 4 kladde), 26 billeder i alt, 24 af 24 har under 3 billeder, 0 billeder mangler alt-tekst, 8 billeder er under 1000 px"
+          "note": "ejer-blokeret: kræver Printful-adgang eller upload af 5–8 mockups pr. produkt. Målt 8/11: 24 produkter (20 publiceret + 4 kladde), 26 billeder i alt, 24 af 24 har under 3 billeder, 0 billeder mangler alt-tekst, 8 billeder er under 1000 px. Repoet har 0 trykfiler og 0 tøj-skabeloner, så mockups kan ikke produceres her — kun i Printful eller ved ejerens upload."
         },
         {
           "id": "batch4",
@@ -1608,6 +1609,16 @@
       "after": 100.0,
       "delta": 2.0,
       "basis": "29,85 af 29,85 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5)",
+      "scope_change": true
+    },
+    {
+      "date": "2026-11-08",
+      "project": "steamgears.eu — site-optimering",
+      "module": "S1.2's sidste 0,3 d (ejerens ja/nej pr. produkt 942/765/766/767) og S4's 1,2 d (S4.1 Complianz EU-valg, S4.2/S4.9 CVR+telefon, S4.3 valuta+24 priser, S4.5 betalingsaftaler, S4.6 zoner/fragtklasser, S4.7 mockups) er ejer-blokerede og flyttet ud af agent-estimatet. S1 er derfor 3,6 af 3,6 d og S4 4,05 af 4,05 d; de blokerede dage står i docs/roadmap.md §4c.",
+      "before": 93.3,
+      "after": 100.0,
+      "delta": 6.7,
+      "basis": "20,95 af 20,95 d (S0 2,35/2,35 · S1 3,6/3,6 · S2 6,9/6,9 · S3 4,05/4,05 · S4 4,05/4,05)",
       "scope_change": true
     }
   ]

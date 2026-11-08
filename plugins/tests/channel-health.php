@@ -11,6 +11,7 @@ require_once __DIR__ . '/../steamgears-autopilot/includes/channel-health.php';
 check('channel-health: a configured channel is ready', SGAP_Channel_Health::classify(true, false) === 'ready');
 check('channel-health: a refresh token alone is recoverable', SGAP_Channel_Health::classify(false, true) === 'needs_refresh');
 check('channel-health: nothing stored is missing', SGAP_Channel_Health::classify(false, false) === 'missing_token');
+check('channel-health: a refused token beats a stored one', SGAP_Channel_Health::classify(true, true, '2026-11-08 10:00:00') === 'refused');
 
 $report = SGAP_Channel_Health::report();
 check('channel-health: reports all six channels', count($report) === 6 && isset($report['pinterest'], $report['instagram'], $report['facebook']));
@@ -20,7 +21,7 @@ foreach ($report as $id => $row) {
     $shaped = $shaped
         && ($row['id'] ?? '') === $id
         && ($row['label'] ?? '') !== ''
-        && in_array($row['state'] ?? '', ['ready', 'needs_refresh', 'missing_token', 'no_class'], true)
+        && in_array($row['state'] ?? '', ['ready', 'needs_refresh', 'missing_token', 'refused', 'no_class'], true)
         && ($row['next'] ?? '') !== '';
 }
 check('channel-health: every row carries id, label, state and next step', $shaped);
@@ -36,10 +37,29 @@ check('channel-health: a stored Pinterest token reads as ready', $pinned['state'
 // Whatever the harness left in the options, every row must agree with its own two flags.
 $consistent = true;
 foreach (SGAP_Channel_Health::report() as $row) {
-    $expected = SGAP_Channel_Health::classify($row['configured'], $row['refreshable']);
+    $expected = SGAP_Channel_Health::classify($row['configured'], $row['refreshable'], $row['refused_at'] ?? '');
     $consistent = $consistent && $row['state'] === $expected;
 }
 check('channel-health: every row agrees with its own flags', $consistent);
+
+// A stored token that the provider refuses is not ready: that was the 8/11 bug — the one
+// channel the screen called ready answered 401 on every call.
+$opts['sgap_pinterest_access_token'] = 'smoke-token-value';
+$before = SGAP_Channel_Health::summary();
+$opts['sgap_pinterest_refused'] = ['at' => '2026-11-08 15:44:00', 'code' => 401];
+$refused = SGAP_Channel_Health::channel('pinterest');
+check('channel-health: a refused Pinterest token reads as refused, not ready',
+    $refused['state'] === 'refused' && ($refused['refused_at'] ?? '') === '2026-11-08 15:44:00');
+check('channel-health: the refused row carries the action, not a guess',
+    str_contains((string) $refused['next'], '401'));
+$summary = SGAP_Channel_Health::summary();
+check('channel-health: the summary counts a refused channel on its own line',
+    $summary['refused'] === ($before['refused'] ?? 0) + 1
+    && $summary['ready'] === $before['ready'] - 1
+    && ($summary['ready'] + $summary['recoverable'] + $summary['refused'] + $summary['missing']) === 6);
+SGAP_Pinterest::forget_refusal('smoke-token-value', 'a-fresh-token');
+check('channel-health: a fresh token puts the channel back to ready',
+    SGAP_Channel_Health::channel('pinterest')['state'] === 'ready');
 
 // A channel with nothing stored must read as missing, and the summary must count it as such.
 $opts['sgap_telegram_bot_token'] = '';

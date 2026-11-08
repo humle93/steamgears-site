@@ -147,6 +147,25 @@ check('pinterest: an expired token is renewed once and the call retried', is_arr
     && str_contains((string) $GLOBALS['http_calls'][1][1], '/oauth/token')
     && str_contains((string) $GLOBALS['http_calls'][2][1], '/pins/55/analytics'));
 
+// --- a refused token is remembered, so the health screen can say so ------------------
+unset($GLOBALS['opts']['sgap_pinterest_refresh_token'], $GLOBALS['opts']['sgap_pinterest_client_secret'], $GLOBALS['opts']['sgap_pinterest_refused']);
+$GLOBALS['opts']['sgap_pinterest_access_token'] = 'pina_dead';
+SGAP_Pinterest::$transport = fn($method, $url, $args) => sgap_http(401, ['message' => 'Authentication failed']);
+$refused = SGAP_Pinterest::analytics('56', '2026-11-01', '2026-11-07');
+check('pinterest: a 401 with nothing to renew is an error', is_wp_error($refused) && $refused->code === 'sgap_pinterest_401');
+check('pinterest: the refusal is remembered with a date', (SGAP_Pinterest::refused()['code'] ?? 0) === 401
+    && (SGAP_Pinterest::refused()['at'] ?? '') !== '');
+SGAP_Pinterest::$transport = fn($method, $url, $args) => sgap_http(200, ['all' => ['summary_metrics' => []]]);
+SGAP_Pinterest::analytics('56', '2026-11-01', '2026-11-07');
+check('pinterest: a working call clears the refusal', SGAP_Pinterest::refused() === []);
+$GLOBALS['opts']['sgap_pinterest_refused'] = ['at' => '2026-11-08 10:00:00', 'code' => 401];
+SGAP_Pinterest::forget_refusal('old-token', 'new-token');
+check('pinterest: a new token forgets the old refusal', SGAP_Pinterest::refused() === []);
+$GLOBALS['opts']['sgap_pinterest_refused'] = ['at' => '2026-11-08 10:00:00', 'code' => 401];
+SGAP_Pinterest::forget_refusal('same', 'same');
+check('pinterest: saving an unchanged token keeps the refusal', (SGAP_Pinterest::refused()['code'] ?? 0) === 401);
+unset($GLOBALS['opts']['sgap_pinterest_refused']);
+
 // --- pin listing: bookmark paging, mapping kept across runs -------------------------
 $GLOBALS['opts']['sgap_pinterest_pins'] = [];
 $GLOBALS['opts']['sgap_pinterest_bookmark'] = '';

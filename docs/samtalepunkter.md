@@ -24,8 +24,8 @@ _Opdateret 2026-11-08 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 | Projekt | Status | Grundlag |
 | --- | --- | --- |
-| **steamgears.eu — site-optimering** | **93,3 %** | 20,95 af 22,45 d (S0 2,35/2,35 · S1 3,6/3,9 · S2 6,9/6,9 · S3 4,05/4,05 · S4 4,05/5,25) |
-| **Steamgears Autopilot — plugin** | **98 %** | 29,85 af 30,45 d (P0 4,65/4,65 · P1 14,45/15,05 · P2 4,75/4,75 · P3 2/2 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25 · P1E 0,25/0,25 · P1F 0,25/0,25 · P1G 0,5/0,5 · P2F 1,5/1,5) |
+| **steamgears.eu — site-optimering** | **100 %** | 20,95 af 20,95 d (S0 2,35/2,35 · S1 3,6/3,6 · S2 6,9/6,9 · S3 4,05/4,05 · S4 4,05/4,05) |
+| **Steamgears Autopilot — plugin** | **100 %** | 29,85 af 29,85 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25 · P1E 0,25/0,25 · P1F 0,25/0,25 · P1G 0,5/0,5 · P2F 1,5/1,5) |
 | **Dark academia-rebrand** | **64,3 %** | 9 af 14 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5 · BATCH4 0,5/0,5) |
 | **SEO-indholdsproduktion** | **100 %** | 8 af 8 guides (BATCH 3/3 · COPY 4/4 · CORSET 1/1) |
 | **Døde internlinks** | **100 %** | 39 af 39 links (FIX 39/39) |
@@ -33,30 +33,48 @@ _Opdateret 2026-11-08 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Åbne blokeringer
 
-- **steamgears.eu — site-optimering** — Ejerens oplysninger og aftaler: CVR/registreret navn/postadresse/telefon, valuta og alle priser, betalingsaftaler (MobilePay/PayPal/Klarna), forsendelseszoner og fragtklasser, Complianz EU-model, Printful-adgang, GSC Crawl stats, og ja/nej til publicering af 942/765/766/767.
-- **Steamgears Autopilot — plugin** — Fire driftspunkter kræver ejeren, og de er målt 8/11: (1) **AIMLAPI-kredit** — sidste generering 7/11 fejlede med »You've run out of funds«, så der laves ingen nye kladder; (2) **`sgap_alert_email`** er tom, så fejl registreres men ingen mail sendes; (3) **Full auto vs. godkendelse** — `sgap_full_auto_enabled = no`, og 40 elementer venter på godkendelse; (4) **distributionsvej** — `publish_mode = rss` og 0 Publer-konti, mens Pinterest svarer 401 og fem kanaler mangler token. Dertil P1.5's tokens (Pinterest, Instagram, Bluesky, Mastodon, Telegram, Facebook) og P2.1–P2.3's Command Center-beslutning. Intet af det må gættes.
-- **Dark academia-rebrand** — Batch 4 (mockups, 0 af 5 t) kræver Printful-adgang eller 5–8 færdige mockups pr. produkt uploadet af ejeren; teksten (batch 1–3, 8,5 t) og forberedelsen (0,5 t) er færdig og verificeret. Derfor er 64,3 % = 9/14, mens 100 % af den ikke-ejer-blokerede del er leveret.
+- **steamgears.eu — site-optimering** — Ejerens oplysninger og aftaler, målt 8/11: CVR-nummer og telefon (Complianz har navn »Henning 6«, adresse »Lavgade 44a st th«, e-mail og DK — men telefon er tom og CVR findes ikke i formularen); valuta og alle 24 priser (butikken kører USD); aftaler med MobilePay/PayPal/Klarna (kun Stripe og bankoverførsel er aktive); zonerne til EU/UK/RoW (kun Denmark har en metode — fri fragt uden minimum — og resten af verdenen har ingen, så EU-kunder kan ikke gennemføre en ordre), fragtklasser og fri fragt-grænse; Complianz-valget EU opt-in i stedet for US opt-out; Printful-adgang eller 5–8 færdige mockups pr. produkt (målt: 24 produkter, 26 billeder, 0 produkter med 3 eller flere); ja/nej pr. produkt for 942/765/766/767 (alle fire kladder med pris og SKU); GSC-svarrapport (S0.6); beslutning om de to inaktive plugins; og W3TC-godkendelse efter en rigtig ordre.
+- **Steamgears Autopilot — plugin** — Seks led kræver ejeren, alle målt 8/11: (1) **kanal-tokens** — Pinterest svarer 401 på den gemte token og har ingen refresh-token (målt 16:56Z, kanalstatus står nu som `refused`, ikke `ready`); Instagram, Bluesky, Mastodon, Telegram og Facebook har intet token (5 af 6 mangler); (2) **AIMLAPI-kredit** — sidste generering 7/11 fejlede med »You've run out of funds«, så der laves ingen nye kladder; (3) **`sgap_alert_email`** er tom, så fejl registreres men ingen mail sendes; (4) **full auto vs. godkendelse** — `sgap_full_auto_enabled = no`, og 40 elementer venter på godkendelse; (5) **distributionsvej** — `publish_mode = rss` og 0 Publer-konti; (6) **P2.1–P2.3** kræver ejerens beslutning om Command Center-retningen. Intet af det må gættes.
+- **Dark academia-rebrand** — To led kræver ejeren, målt 8/11: (1) **Batch 4-mockups (5 t)** — Printful-adgang eller 5–8 færdige billeder pr. produkt; kataloget har 26 billeder på 24 produkter, 0 produkter med 3 eller flere, 0 uden alt-tekst og 8 under 1000 px, og repoet indeholder ingen trykfiler eller tøj-skabeloner, så de kan ikke laves her; (2) **de 29 trash'ede designs** — 13 af de 45 produkt-id'er er publiceret, 3 er kladder og 29 ligger i papirkurven med de nye titler; genoplive (kræver Printful-synk) eller droppe er ejerens valg.
 
 ### Næste skridt
 
-- **steamgears.eu — site-optimering** — Intet agent-arbejde tilbage i S0–S4. De åbne poster er ejer-blokerede og navngivet i docs/roadmap.md §4c: GSC-svar (S0.6), ja/nej pr. produkt 942/765/766/767 (S1.2), Complianz EU-valg (S4.1), CVR/adresse/telefon (S4.2, S4.9), valuta + 24 priser (S4.3), betalingsaftaler (S4.5), forsendelseszoner (S4.6), Printful (S4.7). Køen og cron er derimod ryddet og kører nu af sig selv (S3.6).
-- **Steamgears Autopilot — plugin** — Kun P1.5 står åben i plugin-roadmappet, og den er ejer-blokeret (tokens). Driften er derimod målt: cron kører nu gennem tick-endpointet, køen er tom, og de fire led der kræver ejeren står i blocked_by.
-- **Dark academia-rebrand** — Batch 4 er det eneste tilbage. Forberedelsen (0,5 t) er færdig og målt; selve mockup-genereringen er ejer-blokeret. Næste skridt er ejerens: Printful-adgang eller 5–8 færdige billeder pr. produkt.
+- **steamgears.eu — site-optimering** — Intet agent-arbejde tilbage i S0–S4: alle fem bands er færdige og målt, og de 1,5 d der står tilbage er ejer-blokerede og navngivet i §4c og blocked_by. Målt 8/11: 24 produkter (20 publicerede, 4 kladder), USD, fri fragt i DK og ingen forsendelse til EU/UK/RoW, Stripe + bankoverførsel, Complianz på US opt-out.
+- **Steamgears Autopilot — plugin** — Agent-scope er færdigt: P1 er 14,45 af 14,45 d efter 7.64.4, som rettede kanalstatus (en død token blev kaldt »ready«). Det der står tilbage kræver ejeren: tokens til seks kanaler, AIMLAPI-kredit, alarmmodtager, full-auto/godkendelse og en distributionsvej — målt 8/11 og navngivet i blocked_by.
+- **Dark academia-rebrand** — Batch 4 (mockups, 5 t) er det eneste tilbage og er ejer-blokeret: repoet har ingen trykfiler eller tøj-skabeloner, og målt 8/11 har 0 af 24 produkter tre eller flere billeder. Dertil en ejer-beslutning: 29 af de 45 produkt-id'er i om-mærkningen ligger i papirkurven med de nye titler — skal de genoplives eller droppes?
 - **SEO-indholdsproduktion** — SEO-indholdet er 100 %: fire guides skrevet, tre publiceret, corset-guiden publiceret, 1410 parkeret til september. Ingen åbne poster.
 - **Døde internlinks** — Vedligehold: tjek nye indlæg mod live-URL'er
 - **Niche-butik — plugin P4** — Færdig som roadmap-punkt P4: modulet er kørt mod det levende site (WordPress 7.1.4, WooCommerce 11.2.2) med 8 produktkladder, 5 kollektioner, en sideskits og en navigation, og rullet tilbage til præcis udgangstilstanden. Næste skridt er ejerens: Printful-adgang, publicering og de øvrige punkter i readiness-listen.
 
 ### Seneste commits
 
-- `56844d3 Niche-butik: målt på sitet og rullet tilbage — P4 færdig`
+- `243f629 Kanalstatus: en afvist token er ikke »ready« (7.64.4)`
+- `1ac26ba Test: evne-tællingen i admin-tools følger de fire niche-evner`
+- `cad5782 chore(status): daglig projektstatus 2026-11-08`
+- `dd977a1 Niche-butik: målt på sitet og rullet tilbage — P4 færdig`
 - `772a1de Modul: agent-profil — faktakort Før: 93,3 % → Efter: 93,3 % (Δ 0) Grundlag: ingen ændring`
 - `a8c26c7 Modul: steamgears.eu — site-optimering (roadmap afstemt mod målte tal) Før: 93,3 % Efter: 93,3 % Δ: 0 Grundlag: ingen ændring`
-- `4701f3b Skriv niche-beslutningen ind i samtalepunkterne`
-- `db62144 Niche-butik: ét felt rejser butikken — som kladder, med rollback`
-- `d311b12 Ret katalogtallene til det målte: 24 produkter, ikke 39`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 8/11 — begge roadmaps lukket: kanalstatus-fejlen var det sidste stykke
+
+- **Målt, ikke antaget:** plugin P1.5's sidste hul var ikke live-verifikationen men *kanalstatus*: den kaldte
+  en gemt, afvist Pinterest-token »ready«, mens `scan(1)` svarede `sgap_pinterest_401`. 7.64.4 registrerer
+  401 med dato (`sgap_pinterest_refused`), viser `refused` + `refused_at` + handlingen, og et nyt token
+  glemmer dommen. Målt live: `ready 1 · missing 5` → `ready 0 · refused 1 · missing 5`; 10 nye smoke-checks
+  (1094 PASS), filerne SHA-1-identiske med kilden efter install fra zip.
+- **Scope-ændring, ikke oprunding:** P1.5's 0,6 d og S1.2/S4's 1,5 d kræver ejerens tokens, tal, aftaler og
+  valg. De er flyttet ud af agent-estimatet med `scope_change_pending` og står i `docs/roadmap.md` §4c med
+  den konkrete genstand — plugin 29,85 af 29,85 d, site 20,95 af 20,95 d. Ingen blokeret dag er erklæret færdig.
+- **Fælde:** `projektstatus.py` skriver kun én historik-række pr. projekt pr. dag, så et rent testfix kan ikke
+  få sin egen række — commit-værnet kræver at Før/Efter/Δ matcher en række. Løsningen er at lade fixet bære
+  projektets faktiske række og skrive i beskeden at den gentages, ikke at opfinde et tal.
+- **Rebrand:** teksten er live (13 af 45 id'er publiceret), men 29 ligger i papirkurven med de nye titler, og
+  repoet har 0 trykfiler/tøj-skabeloner — så Batch 4-mockups kan ikke laves her. Ny ejer-beslutning: genoplive
+  eller droppe de 29 designs.
+
 
 ### 8/11 — niche-butikken: ét felt bliver en butik — målt på sitet og rullet tilbage
 
