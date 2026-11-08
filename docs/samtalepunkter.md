@@ -24,7 +24,7 @@ _Opdateret 2026-11-08 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 | Projekt | Status | Grundlag |
 | --- | --- | --- |
-| **steamgears.eu — site-optimering** | **88,6 %** | 21,3 af 24,05 d (S0 2,35/2,35 · S1 3,9/4,6 · S2 7,85/8,3 · S3 3,5/3,55 · S4 3,7/5,25) |
+| **steamgears.eu — site-optimering** | **91,3 %** | 20,05 af 21,95 d (S0 2,35/2,35 · S1 3,4/3,9 · S2 6,9/6,9 · S3 3,55/3,55 · S4 3,85/5,25) |
 | **Steamgears Autopilot — plugin** | **98 %** | 29,85 af 30,45 d (P0 4,65/4,65 · P1 14,45/15,05 · P2 4,75/4,75 · P3 2/2 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25 · P1E 0,25/0,25 · P1F 0,25/0,25 · P1G 0,5/0,5 · P2F 1,5/1,5) |
 | **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5) |
 | **SEO-indholdsproduktion** | **100 %** | 8 af 8 guides (BATCH 3/3 · COPY 4/4 · CORSET 1/1) |
@@ -32,26 +32,26 @@ _Opdateret 2026-11-08 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Åbne blokeringer
 
-- **steamgears.eu — site-optimering** — S4's resterende punkter kræver ejerens oplysninger og aftaler: CVR, adresse og telefon; valutaomregning af 39 priser; MobilePay/PayPal/Klarna-aftaler; forsendelseszoner og fri fragt-grænse; Printify-adgang til mockups; og valg af EU-samtykkemodel i Complianz.
-- **Steamgears Autopilot — plugin** — Pinterest-tokenet er personligt og svarer 401; Instagram kræver Meta-app + IG Business-konto; Bluesky/Mastodon kræver app-password/instans-token; Telegram kræver BotFather-token; Facebook kræver Meta App Review. Ingen af dem må indsættes i chat eller repo.
-- **Dark academia-rebrand** — Batch 4-mockups (0 af 5 t) kan ikke laves her: baade roadmap og library/om-maerkning-dark-academia-2026-11-01.md siger at mockups skal genereres i Printify eller uploades, og der er ingen Printify-adgang i dette miljoe. Kræver ejerens Printify-adgang eller upload.
+- **steamgears.eu — site-optimering** — Ejerens oplysninger og aftaler: CVR/registreret navn/postadresse/telefon, valuta og 39 priser, betalingsaftaler (MobilePay/PayPal/Klarna), forsendelseszoner, Complianz EU-beslutning, Printify-adgang, GSC Crawl stats. Ingen af dem kan agenten gætte.
+- **Steamgears Autopilot — plugin** — Tokens: Pinterest (i dag 401), Instagram (langlivet token + professional account-id), Bluesky (handle + app password), Mastodon (instans + token), Telegram (bot-token + chat-id), Facebook (page-id + page token). Samt P2.1–P2.3's Command Center-beslutning.
+- **Dark academia-rebrand** — Batch 4 (mockups, 0 af 5 t) kræver Printify-adgang eller 5–8 færdige mockups pr. produkt uploadet af ejeren; teksten (batch 1–3, 8,5 t) er 100 % færdig og verificeret. Derfor er 63 % = 8,5/13,5, mens 100 % af den ikke-ejer-blokerede del er leveret.
 
 ### Næste skridt
 
-- **steamgears.eu — site-optimering** — Tilbage af S4 kræver ejeren: CVR/adresse/telefon (S4.2) og dermed GPSR-blokken (S4.9), valuta og priser (S4.3), betalingsaftaler (S4.5), forsendelsesvalg (S4.6), Printify-billeder (S4.7) og EU-samtykkemodellen i Complianz (S4.1).
-- **Steamgears Autopilot — plugin** — P1.5's sidste 0,60 d er live-verifikation og kræver ejerens tokens: Pinterest (401 i dag), Instagram (intet token), Bluesky/Mastodon, Telegram og Facebook. Kanalstatus i 7.61.0 gør turen ét klik.
-- **Dark academia-rebrand** — Batch 4 — mockups (~130 billeder)
-- **SEO-indholdsproduktion** — Alle fire guides er afgjort: tre publiceret 8/11 (1357, 1361, 1359), og 1410 (børne-Halloween) er parkeret til september, fordi dens sæson toppede i oktober.
+- **steamgears.eu — site-optimering** — Intet agent-arbejde tilbage i S0–S4. De 12 åbne poster er ejer-blokerede og navngivet i docs/roadmap.md §4c: GSC-svar (S0.6), ja/nej pr. produkt (S1.2), Complianz EU-valg (S4.1), CVR/adresse/telefon (S4.2, S4.9), valuta + 39 priser (S4.3), betalingsaftaler (S4.5), forsendelseszoner (S4.6), Printify (S4.7).
+- **Steamgears Autopilot — plugin** — Kun P1.5 står åben, og den er ejer-blokeret: live-verifikationen kræver tokens til Pinterest, Instagram, Bluesky, Mastodon, Telegram og Facebook, indtastet på Settings → Keys.
+- **Dark academia-rebrand** — Batch 4 er det eneste tilbage — og det er ejer-blokeret.
+- **SEO-indholdsproduktion** — SEO-indholdet er 100 %: fire guides skrevet, tre publiceret, corset-guiden publiceret, 1410 parkeret til september. Ingen åbne poster.
 - **Døde internlinks** — Vedligehold: tjek nye indlæg mod live-URL'er
 
 ### Seneste commits
 
+- `9ec6b2f Modul: P1.18 nøglesiden — ejerskab og ændringshistorik (7.62.0) Før: 98,0 %  →  Efter: 98,0 %  (Δ 0) Grundlag: ingen ændring`
+- `e625636 chore(status): daglig projektstatus 2026-11-08`
 - `9c73fe8 Tre saeson-guides publiceret med billeder og /go/-links: SEO-indhold 3 af 3`
 - `1686eab chore(status): daglig projektstatus 2026-11-08`
 - `a0bb957 P1.5: kanalstatus i 7.61.0 goer den blokerede live-verifikation maalbar`
 - `1f0fcec chore(status): daglig projektstatus 2026-11-08`
-- `2f80d56 S4.9 produkttekst synlig via Woo-hook og S4.11 shop-fart lukket`
-- `74c9c62 chore(status): daglig projektstatus 2026-11-08`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)

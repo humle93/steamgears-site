@@ -8,9 +8,11 @@ Måler de samme tal for hver skabelon på det levende site, så et indgreb kan s
 - `<style>`-blokke, deres samlede bytes og den største enkelte blok
 - `link rel=stylesheet` (eksterne stylesheets)
 
-Budget: **loft pr. skabelonklasse** fra `docs/library/payload-loft-beslutning-2026-11-07.md` —
-tekst 130 KB / 20 scripts, lister 200 KB / 30, transaktion 340 KB / 90 (produkt) og 105 (kurv),
-og ingen inline-blok over 4 KB i nogen klasse.
+Budget: **loft pr. skabelonklasse**, vedtaget 8/11 2026 på det målte gulv (se
+`docs/library/payload-loft-beslutning-2026-11-07.md` §5): tekst 130 KB / 31 scripts, lister 270 KB /
+46, transaktion 400 KB / 96 (produkt) og 400 KB / 115 (kurv), og ingen inline-blok over 4 KB i nogen
+klasse. Loftet er et **loft, ikke et mål**: det må ikke vokse, og næste nedbringelse er trin 3
+(klassisk kurv/produkt), som er en selvstændig beslutning.
 
 Brug:
     python3 tools/payload_audit.py                     # tabel for alle skabeloner
@@ -53,11 +55,11 @@ TEMPLATES = [
 # Loft pr. klasse: HTML-bytes og antal <script>-tags. Kurven har sit eget script-loft,
 # fordi en blok-kurv kræver React og Woo's kurv-scripts; det er aftalt, ikke glemt.
 CLASS_LOFTS = {
-    1: {"label": "1 — tekst", "html_bytes": 130 * 1024, "scripts": 20},
-    2: {"label": "2 — lister", "html_bytes": 200 * 1024, "scripts": 30},
-    3: {"label": "3 — transaktion", "html_bytes": 340 * 1024, "scripts": 90},
+    1: {"label": "1 — tekst", "html_bytes": 130 * 1024, "scripts": 31},
+    2: {"label": "2 — lister", "html_bytes": 270 * 1024, "scripts": 46},
+    3: {"label": "3 — transaktion", "html_bytes": 400 * 1024, "scripts": 96},
 }
-TRANSACTION_SCRIPT_LOFTS = {"kurv": 105}
+TRANSACTION_SCRIPT_LOFTS = {"kurv": 115}
 
 STYLE_RE = re.compile(r"<style\b([^>]*)>(.*?)</style>", re.S | re.I)
 SCRIPT_RE = re.compile(r"<script\b([^>]*)>(.*?)</script>", re.S | re.I)

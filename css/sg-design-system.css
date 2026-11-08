@@ -713,8 +713,12 @@ ul.wc-block-product-template > li {
 
 @media (max-width: 782px) {
   .site-header, header.wp-block-template-part { position: static; }
+  /* Headeren er en nowrap-flexrække: på smalle skærme klippede logoet og menu-knappen
+     overlappede ordmærket (målt 8/11 ved 640 px). Rækken må ombryde, og logoet må krympe. */
+  header .wp-block-group.is-content-justification-space-between.is-nowrap { flex-wrap: wrap; row-gap: var(--sg-space-3); }
+  .sg-logo { min-width: 0; max-width: 100%; }
   .sg-logo img { width: 36px; height: 36px; }
-  .sg-logo .sg-word { font-size: 1rem; }
+  .sg-logo .sg-word { font-size: 1rem; letter-spacing: .06em; }
   .entry-content, .wp-block-post-content { padding-inline: var(--sg-space-4); }
   .woocommerce ul.products { grid-template-columns: 1fr 1fr; }
 }
@@ -1026,4 +1030,10 @@ img { block-size: auto; max-inline-size: 100%; }
 @media (prefers-contrast: more) {
   .sg-card::before { opacity: 1; }
   .wp-block-navigation-item__content { background-size: 100% 1px; }
+}
+
+/* Smalle telefoner: ordmærket skal ikke skubbe menu-knappen ud over kanten. */
+@media (max-width: 480px) {
+  .sg-logo .sg-word { font-size: .82rem; letter-spacing: .04em; }
+  .sg-logo { gap: var(--sg-space-2); }
 }

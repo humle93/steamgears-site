@@ -119,11 +119,11 @@ impressions på spørgeords-keywords 2–3 uger efter en GEO-runde. GA4-udtrækk
 1. ~~**To H1** på `/`, `/free-starter-kit/`, `/steampunk-halloween/`~~ — **lukket 8/11:** målt 2 → **1** på begge sider (indholdets blok-H1 gjort til H2 på 801 og 713), alle 200.
 2. ~~**`robots.txt` har to `User-agent: *`-grupper**~~ — **lukket 8/11:** målt 3 grupper → **1** via `sgap-robots-consolidation.php`, alle 14 `Disallow`/1 `Allow`/1 `Sitemap` bevaret, 200.
 3. ~~**Navigationen er `wp:page-list`**~~ — **lukket 8/11 som verificeret:** `page-list` er 0 forekomster, nav viser de 11 tilsigtede punkter og ingen kurv/kasse. Specen i [`library/navigation-spec-2026-11-02.md`](library/navigation-spec-2026-11-02.md) er altså anvendt.
-4. **Performance (står åbent, målt 8/11):** produktside **267 KB** HTML, **34,8 KB** inline CSS, **88** script-tags (var 458/151/105). W3TC minify/lazyload/db-cache
+4. ⛔ **Ejer-blokeret — performance (målt 8/11):** produktside **268 KB** HTML, **34,8 KB** inline CSS, **88** script-tags (var 458/151/105), og `payload_audit` viser **8/8 skabeloner inden for det vedtagne loft**. Det der stadig ikke er gjort, er W3TC's egen minify/lazyload/database-cache: indstillingerne ligger i `wp-content/w3tc-config/master.php`, ikke i options, og kan derfor ikke sættes gennem de tilgængelige abilities. **Ejeren skal levere:** (a) slå **Minify (JS+CSS), Lazy load images og Database cache** til i W3TC → General Settings, og (b) bagefter gennemføre **én rigtig testordre** i checkout, så vi ved at kurven og betalingen stadig virker. Uden (a) kan agenten ikke måle effekten, og uden (b) må den ikke slå det til. Derefter måler agenten de fire skabeloner igen og skriver resultatet her.
    er slået fra og kan ikke sættes via MCP. Dette er den største tilbageværende SEO-risiko.
-5. **GPSR-blokken mangler postadresse** på alle 39 produkter (afventer CVR/adresse, S4.2).
+5. ⛔ **Ejer-blokeret — GPSR-blokken mangler postadresse** på alle 39 produkter. **Ejeren skal levere CVR-nummer, registreret firmanavn og postadresse** (samme oplysninger som roadmap S4.2); så snart de findes, indsættes de i `sgap-product-schema` på under en time.
 6. ~~**Printify kan overskrive titler og tekster**~~ — **lukket 8/11 som verificeret:** ingen Printify-plugin installeret, `printify_settings` tom, så der er ingen sync der kan overskrive.
-7. **`/steampunk-costumes/` hub** — **målt 8/11:** 200, `robots` = `follow, index`, og i `page-sitemap.xml`. Ingen fejl på sitet; opfølgning hører i GSC.
+7. ~~**`/steampunk-costumes/` hub**~~ — **lukket 8/11:** målt 200, `robots` = `follow, index` og med i `page-sitemap.xml`; der er ingen fejl på sitet. Den eneste opfølgning er GSC's indekseringsstatus, som ligger hos ejeren under S0.6.
 
 ## 9. Kilder
 

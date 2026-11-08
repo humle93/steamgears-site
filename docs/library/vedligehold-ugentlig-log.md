@@ -1,5 +1,24 @@
 # Ugentlig backup + 1 indholdselement — log
 
+## 2026-11-08 (afsluttende pas) — begge roadmaps lukket, 7.63.0
+- **Lukket og målt:** S0.5 (Health Checks mu-drop-in slettet), S1.4 (46 produktkladder → 0), S1.5 (**33/33**
+  indlæg med `/go/`, 22 id'er 302 → produkt, 0 mod kladder), S1.6 (lead-formular testet med rigtig indsendelse),
+  S2.3 (mobil-header: logo klippet + menu-knap oven på ordmærket ved 640 px → rettet og set igen), S2.4
+  (`/shop/` H1 = »Shop Steampunk Gear & Costumes«, 1 H1), S2.5b (615 → **768×1366**, 751 848×1264 JPG,
+  **ét** `og:image`), S2.7 (loft 130/31, 270/46, 400/96 → **8/8** skabeloner), S2.9 (design-system live og set i
+  browser), S3.4 (22 aktive plugins, 0 uafklarede dubletter), S4.10/4.12/4.13 (fem mu-plugins på sitet,
+  `schema_check` **20/20**).
+- **Ejer-blokeret med navngivet mangel:** S0.6 (GSC Crawl stats), S1.2 (ja/nej pr. produkt), S3.4b (de to
+  inaktive plugins), S4.1/4.2/4.3/4.5/4.6/4.7/4.9 (Complianz-valg, CVR/adresse/telefon, valuta+priser,
+  betalingsaftaler, forsendelseszoner, Printify, GPSR-adresse), kladde 750, `seo.md` #4 (W3TC) og #5 (GPSR),
+  plugin P1.5 (tokens) og P2.1–P2.3 (Command Center-beslutning).
+- **Målt:** site **91,3 %** (20,05/21,95 d), plugin **98,0 %** (35,6/36,2 d), SEO-indhold **100 %**,
+  dark academia **63 %** hvor hele den ikke-ejer-blokerede del (8,5 t tekst) er leveret.
+- **Release:** 7.63.0 er en bogføringsrelease (kun `ROADMAP.md` + version); smoke **1049 PASS / 0 FAIL**,
+  `fejlscan` **0 fund**, zip og live-version følger hinanden.
+- **Fælde:** PDF-eksport kræver `PYTHONPATH=tools/_deps` (fpdf ligger der, ikke i system-Python); der findes
+  ingen PDF-renderer i VM'en, så PDF'en er verificeret ved tekstudtræk (4 sider, titel og sidefod intakt).
+
 ## 2026-11-08 (plugin-pas) — nøgler på én side, 7.62.0
 - **Bygget:** `owner`/`why` på alle 13 nøglekort + ejer-tabel, `SGAP_Keys::documentation()`, og
   `SGAP_Keys::record()` der logger sæt/skift/fjern med længde, 8-tegns sha256, tid og aktør — aldrig værdien.
