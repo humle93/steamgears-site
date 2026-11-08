@@ -13,6 +13,8 @@ install is the owner's ***Plugins → Update*** click, not something a push can 
 `autopilot_version` and writes the channel measurement by itself. Evidence, rejected paths and the
 rollback gap: [`docs/library/live-7-64-9-2026-11-08.md`](../../docs/library/live-7-64-9-2026-11-08.md).
 
+**Opdateringsvejen er prøvet 8/11 2026, så klikket ikke kan fejle på et manglende pakke-link:** `remote_version()` læser `Version: 7.64.9` fra `main` (HTTP 200), og det link `package_url()` bygger svarer 200 med et arkiv der er byte-identisk med zip'en i repoet — størrelse og SHA-256 står i [`reports/release-preflight-2026-11-08.md`](../../reports/release-preflight-2026-11-08.md), målt på den publicerede fil. Zip'en har én rodmappe (`steamgears-autopilot/`), 49 poster, `Version: 7.64.9` i plugin-headeren og hverken `tests/` eller stier ud af mappen. Det var netop den fælde 7.58.2 lukkede: et *Update*-klik uden noget at installere.
+
 **History, kept because it explains the rituals:** 7.58.0 took the whole REST API down —
 `includes/diagnostics.php` registered its route with `SGAP_Admin::NS`, a constant that has never existed, so
 `rest_api_init` died with a fatal on every `/wp-json/` request (measured 7/11 2026, see

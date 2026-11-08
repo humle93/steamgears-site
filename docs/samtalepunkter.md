@@ -48,15 +48,29 @@ _Opdateret 2026-11-08 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `3de9c53 MCP-login: opskriften deles med de andre — hvert token bliver hos den der fik det`
 - `a350872 Live kører stadig 7.64.6, og nu står der hvorfor — der findes intet MCP-credential`
 - `e4eb037 Roadmap-headeren stod stadig på 7.64.8 efter bumpet til 7.64.9`
 - `45a3afc Zip'en til 7.64.9 var pakket uden filrettigheder — nu med mode og fast dato`
 - `6b3a155 P1.5-målingen: et plugin uden abilityen er blokeret, ikke fejlet`
 - `f136581 P1.5: kanalstatus kan nu måles pr. kanal — platformstallene i sgap_events (7.64.9)`
-- `baf9941 Roadmap: §1–§4 er historik, og hvert åbent punkt har sin ejerblokering (7.64.8)`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 8/11 — det sidste åbne punkt er ejerens, og opdateringsvejen er prøvet
+
+- **Begge roadmaps har nul agent-handlinger tilbage.** Alt der står åbent kræver ejeren: *Plugins → Update*
+  til 7.64.9, Pinterest-scope + fem kanal-tokens (P1.5), CVR/telefon/valuta/priser/zoner/betalinger
+  (S4.2–S4.6), mockups (S4.7, rebrand batch 4), GSC-adgang (S0.6), ja/nej til 942/765/766/767 (S1.2),
+  Complianz EU opt-in (S4.1), W3TC-godkendelse (`seo.md` #4), de to inaktive plugins (S3.4b), de 29
+  trash'ede designs og Command Center-retningen (§8 punkt 5).
+- **Det der kunne prøves uden admin blev prøvet:** `remote_version()` læser `Version: 7.64.9` fra `main`, og
+  `package_url()`-linket svarer 200 med et arkiv der er byte-identisk med repoets zip. Tallene står i
+  [release-preflight-2026-11-08.md](../reports/release-preflight-2026-11-08.md).
+- **Fælden passet selv ramte:** hash og størrelse blev først skrevet ind i ROADMAP.md — som ligger *inde i*
+  zip'en, så enhver rettelse der ændrede zip'en gjorde tallene forkerte med det samme. Derfor bærer
+  ROADMAP'en nu et link til preflight-rapporten i stedet for tal, og tallene står kun uden for zip'en.
 
 ### 8/11 — MCP-login: opskriften deles, tokenet gør ikke
 
