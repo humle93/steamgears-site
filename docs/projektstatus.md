@@ -22,9 +22,9 @@ Status pr. **2026-11-08** · beregnet af `projektstatus.py` · kilder: [`projekt
 
 | Projekt | Status i dag | Grundlag |
 | --- | --- | --- |
-| **steamgears.eu — site-optimering** *(roadmap S0–S4)* | **92,9 %** | 20,85 af 22,45 d (S0 2,35/2,35 · S1 3,6/3,9 · S2 6,9/6,9 · S3 4,05/4,05 · S4 3,95/5,25) |
+| **steamgears.eu — site-optimering** *(roadmap S0–S4)* | **93,3 %** | 20,95 af 22,45 d (S0 2,35/2,35 · S1 3,6/3,9 · S2 6,9/6,9 · S3 4,05/4,05 · S4 4,05/5,25) |
 | **Steamgears Autopilot — plugin** | **98 %** | 29,85 af 30,45 d (P0 4,65/4,65 · P1 14,45/15,05 · P2 4,75/4,75 · P3 2/2 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5) |
-| **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5) |
+| **Dark academia-rebrand** | **64,3 %** | 9 af 14 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5 · Batch 4-forberedelse: arbejdsordre, filnavne, alt-tekster, rækkefølge 0,5/0,5) |
 | **SEO-indholdsproduktion** | **100 %** | 8 af 8 guides (Publicerede guides (1357, 1361, 1359) 3/3 · Guide-copy klar til publicering (1357, 1361, 1359 + corset) 4/4 · Corset-guiden publiceret (/steampunk-corset-guide/, 1394) 1/1) · drift: Daglig loop kører |
 | **Døde internlinks** | **100 %** | 39 af 39 links |
 <!-- AUTO:DAGLIG:END -->
@@ -34,9 +34,9 @@ Status pr. **2026-11-08** · beregnet af `projektstatus.py` · kilder: [`projekt
 <!-- AUTO:BLOKERINGER:START -->
 | Projekt | Næste skridt | Blokering |
 | --- | --- | --- |
-| steamgears.eu — site-optimering (92,9 %) | Intet agent-arbejde tilbage i S0–S4. De åbne poster er ejer-blokerede og navngivet i docs/roadmap.md §4c: GSC-svar (S0.6), ja/nej pr. produkt 942/765/766/767 (S1.2), Complianz EU-valg (S4.1), CVR/adresse/telefon (S4.2, S4.9), valuta + 39 priser (S4.3), betalingsaftaler (S4.5), forsendelseszoner (S4.6), Printful (S4.7). Køen og cron er derimod ryddet og kører nu af sig selv (S3.6). | Ejerens oplysninger og aftaler: CVR/registreret navn/postadresse/telefon, valuta og 39 priser, betalingsaftaler (MobilePay/PayPal/Klarna), forsendelseszoner og fragtklasser, Complianz EU-model, Printful-adgang, GSC Crawl stats, og ja/nej til publicering af 942/765/766/767. |
+| steamgears.eu — site-optimering (93,3 %) | Intet agent-arbejde tilbage i S0–S4. De åbne poster er ejer-blokerede og navngivet i docs/roadmap.md §4c: GSC-svar (S0.6), ja/nej pr. produkt 942/765/766/767 (S1.2), Complianz EU-valg (S4.1), CVR/adresse/telefon (S4.2, S4.9), valuta + 39 priser (S4.3), betalingsaftaler (S4.5), forsendelseszoner (S4.6), Printful (S4.7). Køen og cron er derimod ryddet og kører nu af sig selv (S3.6). | Ejerens oplysninger og aftaler: CVR/registreret navn/postadresse/telefon, valuta og 39 priser, betalingsaftaler (MobilePay/PayPal/Klarna), forsendelseszoner og fragtklasser, Complianz EU-model, Printful-adgang, GSC Crawl stats, og ja/nej til publicering af 942/765/766/767. |
 | Steamgears Autopilot — plugin (98 %) | Kun P1.5 står åben i plugin-roadmappet, og den er ejer-blokeret (tokens). Driften er derimod målt: cron kører nu gennem tick-endpointet, køen er tom, og de fire led der kræver ejeren står i blocked_by. | Fire driftspunkter kræver ejeren, og de er målt 8/11: (1) **AIMLAPI-kredit** — sidste generering 7/11 fejlede med »You've run out of funds«, så der laves ingen nye kladder; (2) **`sgap_alert_email`** er tom, så fejl registreres men ingen mail sendes; (3) **Full auto vs. godkendelse** — `sgap_full_auto_enabled = no`, og 40 elementer venter på godkendelse; (4) **distributionsvej** — `publish_mode = rss` og 0 Publer-konti, mens Pinterest svarer 401 og fem kanaler mangler token. Dertil P1.5's tokens (Pinterest, Instagram, Bluesky, Mastodon, Telegram, Facebook) og P2.1–P2.3's Command Center-beslutning. Intet af det må gættes. |
-| Dark academia-rebrand (63 %) | Batch 4 er det eneste tilbage — og det er ejer-blokeret. | Batch 4 (mockups, 0 af 5 t) kræver Printful-adgang eller 5–8 færdige mockups pr. produkt uploadet af ejeren; teksten (batch 1–3, 8,5 t) er 100 % færdig og verificeret. Derfor er 63 % = 8,5/13,5, mens 100 % af den ikke-ejer-blokerede del er leveret. |
+| Dark academia-rebrand (64,3 %) | Batch 4 er det eneste tilbage. Forberedelsen (0,5 t) er færdig og målt; selve mockup-genereringen er ejer-blokeret. Næste skridt er ejerens: Printful-adgang eller 5–8 færdige billeder pr. produkt. | Batch 4 (mockups, 0 af 5 t) kræver Printful-adgang eller 5–8 færdige mockups pr. produkt uploadet af ejeren; teksten (batch 1–3, 8,5 t) og forberedelsen (0,5 t) er færdig og verificeret. Derfor er 64,3 % = 9/14, mens 100 % af den ikke-ejer-blokerede del er leveret. |
 | SEO-indholdsproduktion (100 %) | SEO-indholdet er 100 %: fire guides skrevet, tre publiceret, corset-guiden publiceret, 1410 parkeret til september. Ingen åbne poster. | ingen |
 | Døde internlinks (100 %) | Vedligehold: tjek nye indlæg mod live-URL'er | ingen |
 <!-- AUTO:BLOKERINGER:END -->
@@ -50,6 +50,8 @@ Nyeste først. Append-only — rækker må ikke slettes eller ændres.
 
 | Dato | Projekt | Modul | Før → Efter | Δ | Grundlag |
 | --- | --- | --- | --- | --- | --- |
+| 2026-11-08 | Dark academia-rebrand | daglig måling | 63 % → 64,3 % | +1,3 | 9 af 14 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5 · Batch 4-forberedelse: arbejdsordre, filnavne, alt-tekster, rækkefølge 0,5/0,5) |
+| 2026-11-08 | steamgears.eu — site-optimering | daglig måling | 92,9 % → 93,3 % | +0,4 | 20,95 af 22,45 d (S0 2,35/2,35 · S1 3,6/3,9 · S2 6,9/6,9 · S3 4,05/4,05 · S4 4,05/5,25) |
 | 2026-11-08 | steamgears.eu — site-optimering | daglig måling | 91,3 % → 92,9 % | +1,6 | 20,85 af 22,45 d (S0 2,35/2,35 · S1 3,6/3,9 · S2 6,9/6,9 · S3 4,05/4,05 · S4 3,95/5,25) |
 | 2026-11-08 | steamgears.eu — site-optimering | afsluttende roadmap-pas | 88,6 % → 91,3 % | +2,7 | 20,05 af 21,95 d (S0 2,35/2,35 · S1 3,40/3,90 · S2 6,90/6,90 · S3 3,55/3,55 · S4 3,85/5,25) |
 | 2026-11-08 | SEO-indholdsproduktion | daglig måling | 62,5 % → 100 % | +37,5 | 8 af 8 guides (Publicerede guides (id 292, 296, 295) 3/3 · Guide-copy klar til publicering (292, 296, 295 + corset) 4/4 · Corset-guiden publiceret (/steampunk-corset-guide/, 1394) 1/1) |
