@@ -61,15 +61,15 @@ repoet, fordi importformatet ikke kan verificeres herfra, og en forkert header g
 
 ## Rækkefølgen afhænger af routing
 
-- **Printify-appen på sikt:** appen opretter og mapper selv varianterne, når den synkroniserer produktet.
+- **Printful-appen på sikt:** appen opretter og mapper selv varianterne, når den synkroniserer produktet.
   Så skal der **ikke** oprettes varianter manuelt først — de ville blive dubletter.
-- **Manuel ordrebehandling (Printify uden app):** varianterne skal oprettes som ovenfor, ellers ved
+- **Manuel ordrebehandling (Printful uden app):** varianterne skal oprettes som ovenfor, ellers ved
   hverken du eller kunden, hvilken størrelse der er bestilt. Det er den vej spec'en er lavet til.
 
 ## Sekundært fund: hoodiernes SKU'er er ikke unikke
 
 Alle fem variationer på et hoodie har **samme** SKU (`SG-HOOD-23` for S, M, L, XL og 2XL på produkt 391).
-Det er ikke fatalt for Printify, som mapper på variations-ID, men det gør pluklister, lager og
+Det er ikke fatalt for Printful, som mapper på variations-ID, men det gør pluklister, lager og
 fejlsøgning på ordrer upræcise — en ordre på `SG-HOOD-23` siger ikke hvilken størrelse der skal trykkes.
 `wc_update_variation` understøtter `sku`, så det kan rettes til `SG-HOOD-23-S` … `-2XL` uden risiko.
 Det er ikke gjort her, fordi det ikke var en del af opgaven.

@@ -203,8 +203,8 @@ class SGAP_Rescue {
         update_option(self::FAILED, $failed, false);
         $places = self::rewrite($map);
         $waiting = max(0, count($todo) - $copied - $errors);
-        if ($waiting > 0 && !wp_next_scheduled(self::CRON)) {
-            wp_schedule_single_event(time() + 120, self::CRON);
+        if ($waiting > 0 && SGAP_Scheduler::next(self::CRON) === false) {
+            SGAP_Scheduler::single(self::CRON, time() + 120);
         }
         return ['copied' => $copied, 'failed' => $errors, 'places_updated' => $places, 'waiting' => $waiting];
     }
@@ -282,7 +282,7 @@ class SGAP_Auto {
             $desc = '<p>DISABLE_WP_CRON is set, so WordPress will not run cron on page loads. Make sure a real cron job calls <code>wp-cron.php</code> every 5 minutes, or posts will be released late.</p>';
         } else {
             $status = 'good';
-            $desc = '<p>The 15-minute publisher is on time.</p>';
+            $desc = '<p>' . esc_html('The 15-minute publisher is on time (' . SGAP_Scheduler::backend() . ').') . '</p>';
         }
         $badge = $status === 'critical' ? 'red' : ($status === 'recommended' ? 'orange' : 'blue');
         return [
@@ -295,16 +295,20 @@ class SGAP_Auto {
     }
 
     public static function schedule(): void {
-        foreach ([self::HEALTH_CRON => ['daily', 2 * HOUR_IN_SECONDS], self::ARTICLE_CRON => ['weekly', DAY_IN_SECONDS], self::REPORT_CRON => ['weekly', 3 * DAY_IN_SECONDS], SGAP_Rescue::CRON => ['hourly', 15 * MINUTE_IN_SECONDS]] as $hook => [$rec, $delay]) {
-            if (!wp_next_scheduled($hook)) {
-                wp_schedule_event(time() + $delay, $rec, $hook);
-            }
+        // [interval in seconds, WP-Cron recurrence name, first-run delay]
+        foreach ([
+            self::HEALTH_CRON => [DAY_IN_SECONDS, 'daily', 2 * HOUR_IN_SECONDS],
+            self::ARTICLE_CRON => [WEEK_IN_SECONDS, 'weekly', DAY_IN_SECONDS],
+            self::REPORT_CRON => [WEEK_IN_SECONDS, 'weekly', 3 * DAY_IN_SECONDS],
+            SGAP_Rescue::CRON => [HOUR_IN_SECONDS, 'hourly', 15 * MINUTE_IN_SECONDS]
+        ] as $hook => [$interval, $rec, $delay]) {
+            SGAP_Scheduler::recurring($hook, $interval, [], $delay, $rec);
         }
     }
 
     public static function clear(): void {
         foreach ([self::HEALTH_CRON, self::ARTICLE_CRON, self::REPORT_CRON, self::NEW_CONTENT_CRON, SGAP_Rescue::CRON] as $hook) {
-            wp_clear_scheduled_hook($hook);
+            SGAP_Scheduler::unschedule($hook);
         }
     }
 
@@ -340,8 +344,8 @@ class SGAP_Auto {
         $pending = (array) get_option('sgap_new_content', []);
         $pending[] = (int) $post->ID;
         update_option('sgap_new_content', array_values(array_unique($pending)), false);
-        if (!wp_next_scheduled(self::NEW_CONTENT_CRON)) {
-            wp_schedule_single_event(time() + 5 * MINUTE_IN_SECONDS, self::NEW_CONTENT_CRON);
+        if (SGAP_Scheduler::next(self::NEW_CONTENT_CRON) === false) {
+            SGAP_Scheduler::single(self::NEW_CONTENT_CRON, time() + 5 * MINUTE_IN_SECONDS);
         }
     }
 
@@ -445,6 +449,31 @@ class SGAP_Auto {
         if (!SGAP_Settings::enabled('full_auto_enabled') && $pending >= 12) {
             $problems[] = "{$pending} drafts are waiting for approval – nothing goes out until you approve them (or switch on Full auto).";
         }
+        if (class_exists('SGAP_CC') && ($cc = SGAP_CC::problem()) !== '') {
+            $problems[] = $cc;
+        }
+        // The MCP credential is renewed by this plugin; a refused renewal is a
+        // problem the owner has to act on, not something to discover by accident.
+        if (class_exists('SGAP_MCP_Auth') && ($mcp = SGAP_MCP_Auth::problem()) !== '') {
+            $problems[] = $mcp;
+        }
+        // A Pinterest token that expired, or a run the API refused, is a problem the
+        // owner has to act on; silence would look like "no pins were seen this month".
+        if (class_exists('SGAP_Pinterest') && ($pinterest = SGAP_Pinterest::problem()) !== '') {
+            $problems[] = $pinterest;
+        }
+        if (class_exists('SGAP_Instagram') && ($instagram = SGAP_Instagram::problem()) !== '') {
+            $problems[] = $instagram;
+        }
+        // A page that was connected but cannot be read looks exactly like a quiet week.
+        if (class_exists('SGAP_Facebook') && ($facebook = SGAP_Facebook::problem()) !== '') {
+            $problems[] = $facebook;
+        }
+        // The channel lines above describe the state right now. A failure that the next run
+        // fixed is only in the log, and that is the one worth walking back to.
+        if (class_exists('SGAP_Diagnostics') && ($logged = SGAP_Diagnostics::problem()) !== '') {
+            $problems[] = $logged;
+        }
         $rescue = SGAP_Rescue::status();
         if ($rescue['given_up'] > 0) {
             $problems[] = "{$rescue['given_up']} images on another server could not be copied.";
@@ -502,7 +531,7 @@ class SGAP_Auto {
      * WordPress handles a request; a full page cache plus quiet hours of traffic can stop it.
      */
     public static function cron_lag(): int {
-        $next = wp_next_scheduled(SGAP_Install::PUBLISH_CRON);
+        $next = SGAP_Scheduler::next(SGAP_Install::PUBLISH_CRON);
         if (!$next || (defined('DISABLE_WP_CRON') && DISABLE_WP_CRON && $next > time() - 1800)) {
             return 0;
         }
@@ -510,8 +539,45 @@ class SGAP_Auto {
     }
 
     public static function cron_advice(int $lag): string {
+        if (SGAP_Scheduler::backend() === 'action-scheduler') {
+            return "Action Scheduler is {$lag} minutes behind, so posts are released late. Check WooCommerce → Status → Scheduled Actions; from a shell, `wp action-scheduler run --group=sgap` runs the queue now.";
+        }
         return "WP-Cron is {$lag} minutes behind, so posts are released late. Set up a free external cron that calls "
             . site_url('wp-cron.php') . ' every 5 minutes (e.g. cron-job.org or your host\'s cron), or add the feeds in Publer – its polling also keeps cron running.';
+    }
+
+    /** Dashboard card for the active scheduler and the publishing tick. Read-only: it never runs a job. */
+    public static function scheduler_card(): void {
+        $health = SGAP_Scheduler::health();
+        $next = SGAP_Scheduler::next(SGAP_Install::PUBLISH_CRON);
+        $lag = self::cron_lag();
+        $using_as = $health['backend'] === 'action-scheduler';
+
+        SGAP_UI::card_open('Scheduler', 'clock');
+        echo '<p>' . SGAP_UI::pill($using_as ? 'Action Scheduler' : 'WP-Cron', $using_as ? 'ok' : 'brass');
+        if ($using_as && $health['as_version'] !== '') {
+            echo ' ' . SGAP_UI::pill('v' . $health['as_version']);
+        }
+        echo '</p>';
+
+        if ($next === false) {
+            echo '<p>' . SGAP_UI::pill('Publish tick not scheduled', 'bad') . '</p>'
+                . '<p class="description">The publishing hook has no next run in the active scheduler.</p>';
+        } else {
+            echo '<p class="description">' . esc_html('Next publish tick: ' . wp_date('Y-m-d H:i:s', $next)) . '</p>';
+            if ($lag >= 30) {
+                echo '<p>' . SGAP_UI::pill(sprintf('Late by %d min', $lag), 'bad') . '</p>';
+            } elseif ($lag > 0) {
+                echo '<p>' . SGAP_UI::pill(sprintf('Overdue by %d min', $lag), 'warn') . '</p>';
+            } else {
+                echo '<p>' . SGAP_UI::pill('Publish tick scheduled', 'ok') . '</p>';
+            }
+        }
+
+        if (!$using_as && defined('DISABLE_WP_CRON') && DISABLE_WP_CRON) {
+            echo '<p class="description">DISABLE_WP_CRON is active; a host cron must call wp-cron.php.</p>';
+        }
+        SGAP_UI::card_close();
     }
 
     /** Dashboard card with the last self-check (plus a live cron check). */
@@ -537,6 +603,9 @@ class SGAP_Auto {
             }
             echo '</ul><p class="description">' . esc_html('Checked ' . $h['at']) . '</p>';
         }
+        if (class_exists('SGAP_CC') && ($cc = SGAP_CC::line()) !== '') {
+            echo '<p>' . $cc . '</p>';
+        }
         SGAP_UI::card_close();
     }
 }
@@ -560,7 +629,7 @@ add_action('wp_abilities_api_init', function () {
     foreach ($defs as $name => [$label, $description, $props, $cb]) {
         $args = [
             'label' => $label, 'description' => $description, 'category' => SGAP_Abilities::CATEGORY,
-            'output_schema' => ['type' => 'object'], 'execute_callback' => $cb,
+            'output_schema' => ['type' => 'object'], 'execute_callback' => static fn($input = null) => call_user_func($cb, $input),
             'permission_callback' => [SGAP_Abilities::class, 'can_manage'], 'meta' => SGAP_Abilities::meta(false, false, false)
         ];
         if ($props) {

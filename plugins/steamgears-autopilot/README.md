@@ -23,9 +23,45 @@ The whole social autopilot runs inside WordPress (Command Center is retired):
 4. **Measure** – every post links via `/go/<id>/`, so clicks (and WooCommerce
    orders) are counted per channel.
 
-Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.24.0.zip` → Activate. On an existing
+Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.64.7.zip` → Activate. On an existing
 install the same zip arrives through the self-updater (see *Updates*), so an upload is only needed for the
 first install or a recovery.
+
+## Keys in one place (7.47)
+
+Every credential the plugin uses sits on **one** screen, *Settings → Keys*, one card per service:
+AI text, AI images, Publer, Printful, SerpApi, Bluesky, Mastodon, Telegram, the product-feed secret
+and the MCP token. Each card says what the key is for, where to get it (a link to the service or to
+your own Mastodon instance), whether it is saved, and whether the last test passed. Nothing else in
+the plugin renders a key field: the AI, Publishing, Shop and MCP tabs carry settings only, and the
+settings page strips any secret that is listed outside the Keys tab, so a key added to the wrong tab
+later still appears in exactly one place.
+
+A saved key is never printed back. The field is always empty with the placeholder *saved – leave empty
+to keep*; typing a new value replaces it and ticking *Remove saved key* deletes it. A key that lives in
+`wp-config.php` as `SGAP_<KEY>` replaces the field with a note naming the constant. *Test the saved keys*
+runs the same check as the setup guide and shows the answer next to the button. The setup guide no longer
+asks for the AI key once one is saved — it points at *Settings → Keys* instead.
+
+The screen is built the way WordPress 7.x builds *Settings → Connectors*: a grid of cards, each with an
+icon, a purpose, its source and a status pill; the tab bar and the save bar are sticky, focus rings follow
+`:focus-visible`, and the layout collapses to one column below 782 px. The plugin still ships its own
+stylesheet — no build step, no `@wordpress/ui` — and picks up the WordPress design tokens where they exist.
+
+## AI profiles (7.41.2)
+
+The chat's persona and what it may touch are one setting — *Settings → AI content → AI profile* — and one
+tool, `set-ai-profile`, so the assistant can switch when it is asked to:
+
+| Profile | Who it is | Tools |
+|---|---|---|
+| **Autopilot assistant** (default) | The social autopilot's own assistant | Reads everything; the site-changing tools are withheld |
+| **Site administration** | WordPress and WooCommerce administrator | Every tool the site has — and **access all**: AI Engine's Dynamic REST + Abilities are switched on the moment the profile is chosen, so the whole REST surface is reachable after the MCP client reconnects |
+| **WordPress SEO expert** | Technical and on-page SEO | Everything read-only, plus content, SEO fields, products and media; plugin and settings work is refused |
+
+`enable-full-access` itself stays out of the chat in every profile: the profile is the switch, so the assistant
+cannot quietly change its own access level. Switching away from *Site administration* leaves full REST access as
+it is — turn it off on the same page if you want it off.
 
 ## Run it from Claude
 
@@ -36,6 +72,7 @@ all admin-only, none of them deleting anything:
 | Tool | What it does |
 |---|---|
 | `steamgears-autopilot/status` | Switches, channels, setup state, why sending is paused, queue counts, pending drafts, recent errors, 30-day results |
+| `steamgears-autopilot/channel-health` | Per channel: is a token stored, what is the next step, and which platform numbers actually landed in `sgap_events` (default 90 days). Telegram reports `no_metric` — the Bot API has no per-post numbers — and a channel that is `ready` but `empty` is a token that worked and returned nothing. Read-only; `tools/live_channels.py` uses it to verify P1.5 from outside the site |
 | `steamgears-autopilot/list-drafts` | AI drafts (default: waiting for approval) with the page they promote |
 | `steamgears-autopilot/review-draft` | `queue` (approve + queue), `approve` or `reject` one draft |
 | `steamgears-autopilot/list-queue` | Queue items with status, attempts, errors, tracking links |
@@ -46,6 +83,9 @@ all admin-only, none of them deleting anything:
 | `steamgears-autopilot/update` | Install the newest version from GitHub |
 | `steamgears-autopilot/check-keys` | Test the Publer and AI keys (see below) |
 | `steamgears-autopilot/check-publer` | Workspaces, accounts, channels without an account |
+| `steamgears-autopilot/list-evergreen` | Evergreen pages with budget, expiry, last share and whether they are ready — read-only |
+| `steamgears-autopilot/mark-evergreen` | Mark or unmark a post/product, with an optional budget and expiry date |
+| `steamgears-autopilot/recycle-evergreen` | Write and queue the next variation for the due pages now |
 | `steamgears-autopilot/meta-audit` | Title and meta-description audit on published posts: missing, too long, too short — read-only |
 | `steamgears-autopilot/optimize-site-seo` | Whole-site SEO/AEO/GEO scan in one pass; `fix=true` also writes the missing meta |
 
@@ -85,10 +125,69 @@ run end to end from an MCP client instead of a browser tab. All administrator-on
 | `steamgears-tools/sitemap-audit` | Reads `sitemap_index.xml`, follows every child sitemap, counts URLs, checks one URL |
 | `steamgears-tools/list-abilities` | **Every** ability on the site, from every plugin, with its input schema |
 | `steamgears-tools/call-ability` | Run any ability by name, after its own permission check |
+| `steamgears-tools/mcp-status` | State of this plugin's own MCP credential: client ID and refresh token saved, expiry, verified tool count, why the last renewal failed |
+| `steamgears-tools/mcp-refresh` | Renew the MCP access token now, verify it with `initialize` + `tools/list` and store the rotated refresh token |
 
 The last two are the point: `list-abilities` shows what exists — WordPress core,
 WooCommerce, Rank Math, AI Engine, this plugin — and `call-ability` runs it. New
 plugins that register abilities become reachable without another code change.
+
+### MCP access that renews itself (7.44)
+
+The site's MCP credential is a Novamira OAuth pair: the access token lives 3600 seconds and the refresh token
+is **rotated** on every renewal, so the old one is dead afterwards. 7.44 moves the renewal onto the site, so
+access no longer depends on repository secrets or on a loop running in a sandbox:
+
+- `sgap_mcp_refresh` runs every 30 minutes: it renews, proves the new token with `initialize` +
+  `Mcp-Session-Id` + `tools/list`, and writes the rotated refresh token back before anything else.
+- *Settings → MCP access* holds the public client ID and the refresh token. The token is a secret (autoload
+  off) and is never shown again; an empty field keeps the stored value.
+- A token that is issued but does not verify is **not** reported as renewed. The API's own reason
+  (`invalid_grant`, `unsupported_grant_type`, an empty `tools/list`) is stored, shown by `mcp-status` and
+  raised as a problem in the daily self-check — so the alarm comes from the site.
+- A refresh token set in `wp-config.php` is refused with an explanation: the server rotates it, and a
+  constant cannot be written back.
+
+Approval is still one owner click: `python3 tools/mcp_oauth.py --start` prints the link, `--finish '<code>'`
+saves the pair outside the repo, and the two values are pasted under *Settings → MCP access*.
+
+### Shop tools that cannot underprice themselves (7.45, cost import 7.46)
+
+The WooCommerce/Printful side is no longer a second plugin. Six tools live in the same
+`steamgears-tools` category as everything else, so the site's MCP server exposes them without
+another credential:
+
+| Tool | What it does |
+| --- | --- |
+| `woo-catalog` | Products with price, cost, **where that cost came from**, the margin, and the lowest price your setting allows |
+| `woo-propose` | Builds a proposal (title, description, price) and queues it — the shop is not touched |
+| `woo-queue` | The proposals waiting for approval, with before and after |
+| `woo-apply` | Writes one proposal; dry run unless `confirm` is true |
+| `woo-discard` | Drops a proposal without touching the product |
+| `woo-cost-import` | Writes each product's cost from its Printful sync variant — dry run unless `confirm` is true |
+
+A cost is **never invented**. It is the product's `_sgap_cost` field, or the Printful sync
+variant's own price (matched on the WooCommerce id or SKU, never on the product name); without
+either, the call is refused and names both fixes. The floor is
+`floor(cost × (1 + margin)) + 0.95`, raised by one when that would land *under* the margin, and
+it is recomputed at apply time — so a cost that rose while a proposal was waiting raises the
+price instead of quietly breaking the promise. The tools do not write the copy themselves: the MCP
+client is an assistant already, and *Content Studio* writes product texts for the owner — so
+`woo-propose` takes the text you send and carries the rest over unchanged.
+
+`woo-cost-import` is how that cost field gets filled. It reads the Printful sync variants
+(paginated, cached for six hours, `fresh` bypasses the cache) and writes each variant's **own
+price** as the product's cost, matched on the WooCommerce id first and the SKU second — never on
+the name. It is a dry run unless `confirm` is true, so the first call only shows the plan. A cost
+you already typed wins: without `overwrite` it is reported as `kept`, and a second run reports
+`unchanged` rather than churning the same number. A variant without its own price is listed as
+`no_price` and left alone; a product Printful does not know is `unmatched` and left alone. A
+variable product gets each variation's cost, and the parent gets the lowest of them. The source is
+stored next to the number (`_sgap_cost_source`, e.g. *Printful import: sync variant 56 (matched on
+Woo id)*), so `woo-catalog` can say where a cost came from instead of pretending it is the owner's.
+
+*Settings → Shop & feeds* holds the Printful token (a secret, autoload off), the store id and
+the minimum margin (45 % by default: a cost of 100 refuses anything under 145.95).
 
 ### IndexNow key
 
@@ -103,9 +202,10 @@ so the failure is visible instead of silent. A 202 from the API only means
 
 Queue page with Re-queue / Delete, *Approve & Queue* / *Approve only* / *Reject*
 on drafts, Campaigns (learning matrix, winners and losers), Reports (30-day ROI and
-ROAS against the budget, attributed orders), Etsy orders and profit, Full Auto
-(suppressed combinations, reposts) and an XML product feed for Google Merchant
-Center and Pinterest Catalogs (*Google Feed*, needs a feed secret and WooCommerce).
+ROAS against the budget, attributed orders), **Evergreen** (mark a page, see its
+budget and next share, recycle now), Etsy orders and profit, Full Auto (suppressed
+combinations, reposts) and an XML product feed for Google Merchant Center and
+Pinterest Catalogs (*Google Feed*, needs a feed secret and WooCommerce).
 
 ## Whole-site SEO, GEO and AEO (7.19)
 
@@ -125,6 +225,33 @@ Rules by group:
 The scan is stored in one option (`sgap_seo_site`) and refreshed lazily once a week when an
 administrator opens wp-admin, because WP-Cron is not dependable on this cached host. Body text is
 never rewritten by this screen; content suggestions stay in *Optimise SEO of a page*.
+
+## Channel status tells a dead token from a missing one (7.61, tightened 7.64.4 and 7.64.8)
+
+`GET /sgap/v1/channel-health` answers, per channel, which of six states it is in — `ready`,
+`needs_refresh`, `missing_token`, `refused`, `needs_scope` or `no_class` — plus the sentence that says
+what to do next. `no_class` means the channel's own class did not load: that is a code regression, not
+an empty field, and the summary has its own `broken` counter for it so the screen never asks the owner
+to paste a token to fix a missing file. Since
+7.64.4 a stored token that the provider refuses is **`refused`, not `ready`**: Pinterest records the
+401 with a date (`sgap_pinterest_refused`), the report shows `refused_at`, and the summary counts it on
+its own line. Saving a new access token forgets the old verdict, and the next successful call clears
+it. Before 7.64.4 the one channel the screen called ready answered 401 on every call.
+
+**7.64.6** adds two things. The token is read from **Pinterest for WooCommerce** when that
+integration is connected — through its own `get_access_token()`, because the value stored in
+`pinterest_for_woocommerce_data` is encrypted and answers 401 as-is; the integration also renews
+it, so it is preferred over a pasted token. And a **scope** answer is no longer reported as a
+dead token: Pinterest's *insufficient permissions … Missing: ['boards:read']* is recorded as
+`sgap_pinterest_scope` and shown as `needs_scope` with the missing scope named.
+
+**7.64.7** closes the three holes that came with the token change. A 401 on the integration's token is
+**never renewed with this plugin's own app credentials** — those would rotate a token that is not the one
+being sent — and a scope answer is not retried at all. A refusal is stamped with the credential it is
+about (source plus an 8-character sha256 prefix, never the token), so an integration that rotates its
+token does not inherit last week's `refused`. And a scope verdict belongs to **the endpoint that was
+denied**: `/user_account` answering 200 proves the token, not that `/pins` may be read, so only a
+successful `/pins` clears the `boards:read` verdict.
 
 ## Pre-flight per channel (7.20)
 
@@ -202,6 +329,50 @@ outbound HTTP dependency in the queueing path — slow, rate-limited and wrong t
 briefly down. So the gate catches what it can prove without the network: placeholders (`example.com`),
 links with no domain, `http` instead of `https`, and internal addresses that do not resolve. A Pinterest pin
 that 404s is still only found by opening it.
+
+## Duplicate guard across systems (7.40.1)
+
+The queue has more than one writer: the AI generator, the Studio, the REST API, an MCP client and
+Command Center can all add a post, and two of them can hand over the same one. Command Center syncs
+every 30 minutes, so a dashboard that retries a hand-over would post twice.
+
+`includes/duplicate.php` (`SGAP_Duplicate`) keys on the fingerprint the database already indexes —
+`channel|destination_url|title`, sha256 — and refuses the second one with **409** and a message that
+names the row it collided with:
+
+> Already queued as #412 (queued, 2026-11-08 10:00). The same channel, destination and title went in
+> in the last 30 days — change the title, or delete the old row if this repeat is deliberate.
+
+- **Still queued always blocks**, however old the row is: it is about to go out.
+- **A published post blocks for `dupe_days`** (Settings → Publishing, default **30**, `0` = the whole
+  history), so an evergreen campaign can legitimately repeat a title next quarter.
+- **Failed rows never block** — a post that gave up is the owner's to retry.
+- `/snapshot` carries `fingerprint` on every queue row, so an outside dashboard can recognise its own
+  hand-over instead of learning from a 409.
+
+## Evergreen recycling (7.41)
+
+Some pages keep earning long after their first post: a fitting guide, the goggles everyone searches for,
+the corset explainer. Mark one as **evergreen** — in the editor sidebar, on the **Evergreen** page, or with
+the `mark-evergreen` ability — and the plugin brings it back on a schedule with a **freshly written
+caption**, not the same one again.
+
+- **Settings → Evergreen** holds the four numbers: the switch, the days between two shares (default 60),
+the default share budget per page (default 3) and how many pages may be recycled per day (default 1).
+- A page can override the budget and set an **expiry date** in the editor; `0` shares and an empty date mean
+"use the setting" and "never expires".
+- Each share rotates to the next channel (and the next angle) and goes through the normal queue, so the
+  quality gate, pre-flight, blackout calendar and duplicate guard all apply. A share is counted when the
+  post reaches the queue; a page with a post still queued is skipped, not doubled.
+- The variation prompt gets the page, the channel, the angle and the last captions for that page, and is
+  told what not to repeat. The `sgap_evergreen_variation` filter replaces the AI call with a human editor or
+  another model.
+- An expired page or one that has used its budget stays marked but stops; the Evergreen page says which
+  of the two it is, in words.
+
+The daily cron runs the recycler after the normal generator (20 minutes past the hour), and the **Evergreen**
+page has a *Recycle now* button plus `recycle-evergreen` for an MCP client. Nothing is published by the
+recycler itself: it only queues, exactly like the AI writer.
 
 ## Post meta audit (7.23)
 
@@ -328,6 +499,59 @@ The **Queue** page shows that on the row itself: a *Language* column names the l
 *original* or *translation*, and a *Source* column links a translation to the queued post it came from — one
 click jumps to that row. A source that has since been deleted still shows its id instead of a guess.
 
+## Command Center link (7.33)
+
+Command Center (the self-hosted dashboard) talks to this plugin **one way**: it reads `GET /wp-json/sgap/v1/snapshot`
+every 30 minutes and sends posts as drafts with `POST /drafts`, using an administrator application password.
+Nothing on the site calls Command Center.
+
+- Every Command Center call carries `X-Command-Center: <version>`. The plugin notes it (option `sgap_cc_seen`,
+  at most once a minute, only for administrators on the `sgap/v1` routes).
+- The Self-check card shows **"Command Center … connected · last sync N min ago"**; `status` and `/snapshot`
+  report it as `command_center` (`connected` / `stale` / `never`).
+- If a Command Center that used to call has been silent for **more than 2 hours**, the daily self-check lists it
+  as a problem (and so the alerts fire). A site that never had Command Center is not nagged.
+- Command Center 7.19+ also calls `wp-cron.php` every 5 minutes, so the publishing cron runs on time even on a
+  quiet site. A real host cron (below) is still the better fix.
+- The **Command Center URL** setting (General) adds a "Log ind i Command Center" button to the dashboard. It opens
+  the dashboard in a new tab. Leave it empty to hide the button. The plugin does not call Command Center; the link is only a shortcut.
+
+## One niche, one shop (7.64)
+
+*Steamgears → Shop → Niche shop* answers one question: **what is the shop about?** Type a niche
+— `steampunk airship`, `cottagecore mushroom`, `celestial zodiac` — and the plugin turns it into a
+shop skeleton you can publish from:
+
+1. **A plan, before anything is written.** Ten archetypes (steampunk, dark academia, gothic,
+   cottagecore, nautical, botanical, cyberpunk, celestial, retro, and a neutral fallback) decide the
+   five collections, the motifs, the voice and the brand suggestions. The plan holds priced products
+   across the print-on-demand families (tee, hoodie, art print, tote, mug, phone case), five page
+   drafts, a menu and the schema types the shop needs. Same niche and settings give the same plan
+   key, so a plan can be reviewed and shared before it is created.
+2. **Drafts, never live products.** *Create drafts* writes `product_cat` terms, WooCommerce product
+   drafts (price, SKU, `_sgap_niche` marker), page drafts and the menu — as a `wp_navigation` post on
+   a block theme, as a nav menu elsewhere, with real links to the shop, the collection archives and
+   the pages that exist. Nothing is published, no existing product is touched, and every id is
+   stored under the run key. The menu is not pointed at the header automatically: swapping the live
+   navigation is the owner's decision, but the navigation sits ready to be picked.
+3. **Roll back in one click.** The Runs table keeps the ten newest runs. A rollback deletes the
+   drafts, empty terms and menu *that run* created and keeps anything already published — the report
+   says which is which. Running the same plan twice writes nothing new; the page says so with the
+   date of the first run.
+4. **Honest about the rest.** Every plan ends with the steps only the owner can take: Printful access
+   (real costs and 5–8 mockups), publishing approval, currency and prices, payment methods,
+   CVR/name/address/phone, the EU consent model, shipping zones, and confirming the shop name. The
+   page copy marks each owner-only fact with `[EJER: …]` instead of inventing it.
+
+Prices always clear the margin floor in *Settings → Shop & feeds* (`woo_min_margin`); the price is
+the higher of `cost × 2.6` and `SGAP_MCP_Woo::floor_price()`, ending in `,95`. Costs are marked
+`estimate` until Printful is connected, so no number in the plan pretends to be measured.
+
+From Claude or any MCP client: `niche-plan` (read-only), `niche-apply`, `niche-runs` and
+`niche-rollback`. Over REST: `POST /wp-json/sgap/v1/niche` (`niche`, `count`, `margin`, `apply`),
+`POST /sgap/v1/niche/rollback` (`plan_key`, `dry`) and `GET /sgap/v1/niche/runs`. All of them need
+`manage_options`.
+
 ## Updates
 
 From 7.6 the plugin updates itself from GitHub (`humle93/steamgears-site`, branch `main`):
@@ -343,8 +567,16 @@ before it, because the MCP surface can read plugins but cannot install or activa
 1. Bump `Version:` in `steamgears-autopilot.php` and `SGAP_VERSION` — they must agree, CI fails otherwise.
 2. Rebuild the zip from the folder so the name and the contents match:
    `cd plugins && rm -f steamgears-autopilot-*.zip && zip -qr steamgears-autopilot-v<version>.zip steamgears-autopilot`
-3. `php plugins/tests/smoke.php` (407 checks) and `diff -r` the zipped copy against the source. CI repeats
-   both, plus `php -l` on PHP 8.0–8.5 and WordPress 6.4 / 7.1 / latest.
+3. `php plugins/tests/smoke.php` (1136 checks) and `diff -r` the zipped copy against the source. CI repeats
+   both, plus `php -l` on PHP 8.0–8.5 and WordPress 6.4 / 7.1 / latest. The plugin is also exercised inside
+   a real WordPress: `bash plugins/tests/integration.sh` (needs `php` with `mysqli`, `wp-cli`, `curl` and a
+   reachable MySQL; 249 checks, including the four model rules, the Anthropic/custom-provider key checks and evergreen recycling) — it installs
+   WordPress, activates the plugin, runs the in-process, admin-tool and automation suites, then hits `/go/`,
+   the feeds, the REST routes and uninstall over HTTP. On WordPress 6.4 the same run passes 184 checks;
+   the ability groups are skipped because the Abilities API starts at 6.9. The model dropdown is proven
+   against the real catalogue with `curl -s -o /tmp/models.json https://api.aimlapi.com/v1/models` and
+   `SGAP_LIVE_CATALOG=/tmp/models.json php plugins/tests/smoke.php` — every `<option>` must match an id AIMLAPI
+   actually offers.
 4. Commit code, zip, README and `ROADMAP.md` together and push to `main`.
 5. **Click *Plugins → Update*** (or *Dashboard → Updates*). Auto-updates can be switched on in the same
    screen, which makes step 5 happen on its own after the next WP-Cron run.
@@ -434,7 +666,11 @@ define('SGAP_TELEGRAM_BOT_TOKEN', '...');
 ## Click tracking
 
 Every queue item gets a short link `https://steamgears.eu/go/<id>/`. Use that link
-in the post instead of the raw URL. A visit:
+in the post instead of the raw URL. **A `/go/<id>/` with no queue item is treated as a product short
+link** and resolves to that product's permalink (7.32.0), so the same route can be used in guides,
+newsletters and print; only an id that is neither a queue item nor a product falls back to the front
+page. Product links are not counted in the per-channel click stats, because they have no queue item
+to attribute to. A visit:
 
 1. logs a `click` event (bots and link-preview crawlers are ignored),
 2. sets a first-party cookie `sgap_click` (30 days, HttpOnly),
@@ -492,11 +728,13 @@ unattended:
 
 - A post that fails is retried with backoff (5 → 15 → 45 minutes) and then stays `failed` in the queue.
   Settings → Alerts mails you when that happens and when the queue is running dry; `daily` mode collects
-  both into one digest after the self-check.
+  both into one digest after the self-check. Give a channel its own cap (`channel_caps`, e.g.
+  `pinterest=2, facebook=3`) and it gets its own runway, so a quiet channel is named even when the total
+  looks healthy. The cap is also a ceiling: once a channel has published or started sending its cap for the
+  day, the publisher skips that channel and the rest of the queue still goes out.
 - Every attempt is also written to the **Publish log**: channel, outcome, HTTP status, a response excerpt and
   the actor (cron, admin, REST, WP-CLI). The queue shows the current state; the log keeps the history the
   `error` column overwrites. Rows are kept for `audit_keep_days` (default 90, `0` = forever) and pruned by
   the daily maintenance job.
-- The Etsy API settings and the direct Instagram/Pinterest/TikTok/YouTube/Reddit/Telegram keys are
-  registered but unused. Publishing goes through Publer (RSS feeds or API), and `/etsy/orders` takes a
-  manual import.
+- Etsy is a manual import: there is no Etsy API client, and the five Etsy fields were removed from Settings
+  in 7.33.4. Publishing goes through Publer (RSS feeds or API), and `/etsy/orders` takes the import.

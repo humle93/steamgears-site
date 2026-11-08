@@ -54,9 +54,9 @@ check() { # navn, kommando...
 
 lint_php() {
   local count
-  count="$(find plugins -name '*.php' | wc -l | tr -d ' ')"
+  count="$(find plugins wordpress -name '*.php' | wc -l | tr -d ' ')"
   printf '  linter %s PHP-filer med %s\n' "$count" "$("$PHP_BIN" -r 'echo PHP_VERSION;')"
-  find plugins -name '*.php' -print0 | xargs -0 -n1 "$PHP_BIN" -l
+  find plugins wordpress -name '*.php' -print0 | xargs -0 -n1 "$PHP_BIN" -l
 }
 
 # Rækkefølgen er billig → dyr, så den første fejl ses hurtigt.
@@ -66,13 +66,42 @@ check "projektstatus --check"                python3 projektstatus.py --check
 check "commit-besked --selftest"             python3 tools/commit_check.py --selftest
 check "kampagne-indlæser --selftest"         python3 tools/load_campaign.py --selftest
 check "plugin-smoke"                         "$PHP_BIN" plugins/tests/smoke.php
+check "updater-cache"                       "$PHP_BIN" plugins/tests/updater_cache.php
 check "MCP REST-klient"                      python3 tools/test_mcp_rest.py
+check "MCP-klassificering"                   python3 tools/test_mcp_klassificer.py
 check "MCP OAuth"                            python3 tools/test_mcp_oauth.py
+check "MCP keep-alive"                       python3 tools/test_mcp_keepalive.py
+check "live-tilstand (MCP + profil)"         python3 tools/test_live_state.py
+check "live-kanaler (P1.5)"                python3 tools/test_live_channels.py
 check "niche-scanner"                        python3 tools/test_niche_scanner.py
 check "link-plan-selftest"                  python3 tools/link_plan_check.py --selftest
 check "link-plan"                           python3 tools/link_plan_check.py
 check "guide-copy-selftest"                  python3 tools/guide_check.py --selftest
 check "guide-copy"                           python3 tools/guide_check.py
+check "og-image-selftest"                    python3 tools/og_image_check.py --selftest
+check "samtalepunkter-selftest"              python3 tools/samtalepunkter.py --selftest
+check "designsystem-selftest"                python3 tools/design_check.py --selftest
+check "designsystem"                         python3 tools/design_check.py
+check "designsystem-loader"                  "$PHP_BIN" wordpress/tests/test-design-system.php
+check "produkt-schema"                       "$PHP_BIN" tools/schema_filter_test.php
+# S2.7: payload-trimmen kostede forsiden 7/11 2026, fordi is_woocommerce() blev kaldt
+# uden at WooCommerce var indlaest. Vaernet kraever at fravaeret af Woo er en no-op.
+check "payload-trim"                         "$PHP_BIN" tools/test_payload_trim.php
+# S4.12: fortrydelsesoplysningerne i ordremailen — teksten er kundens durable medium,
+# så en regression må ikke kunne snige sig ind uden at en test bliver rød.
+check "fortrydelsesmail"                     "$PHP_BIN" tools/withdrawal_email_test.php
+# S4.10: anmeldelses-anmodningen — én mail pr. ordre, 14 dage efter levering, ingen
+# incitamenter. En regression her koster kunder, ikke en fejlkode, så den skal fanges her.
+check "anmeldelsesmail"                      "$PHP_BIN" wordpress/tests/test-review-request.php
+# Fejlsøgning som fast punkt (P3.6): konsistens på tværs af filer — version mod zip,
+# zip mod kilde, includes, biblioteksindekset, tokens og tests der ikke kan fejle.
+# Om-mærkningen (S4): titler/kollektioner/billedkrav måles udefra — selftesten er offline og fanger
+# at familiekrav eller dommen driver, uden at CI nogensinde rammer netværket.
+check "rebrand-audit-selftest"               python3 tools/rebrand_audit.py --selftest
+# Tildelingen (batch 2) er ren funktion: kortet, overlap og idempotens testes offline.
+check "rebrand-apply-selftest"               python3 tools/rebrand_apply.py --selftest
+check "fejlscan-selftest"                    python3 tools/fejlscan.py --selftest
+check "fejlscan"                             python3 tools/fejlscan.py
 
 # Rendereren fejlede 2/11 på to måder der ikke gav en fejlkode: et sidebrud midt i et afsnit
 # skrev resten af dokumentet uden for papiret (niche-vurderingen blev 20 sider), og glyffer

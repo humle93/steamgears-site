@@ -9,12 +9,17 @@ uden credential.
 | `publer` | `https://mcp.publer.com/` | `Bearer ${PUBLER_API_KEY}` | Publer MCP API key (Business/Enterprise) |
 | `steamgears-profil` | `tools/mcp_project_profile.py` (stdio) | ingen | ingen — læser kun repoet |
 
-**Status 2/11 2026, sent: forbindelsen virker.** OAuth-klienten blev godkendt af ejeren, tokenet lever 3600 s med
-refresh, og `python3 tools/mcp_rest.py --check` svarer `ok: true` med serveren `AI Engine - Steamgears` og
-**206 værktøjer**. Læsning virker hele vejen (`wp_list_plugins`, `list-queue`, `check-post`). Skrivning gør
-**ikke**: AI Engine har *Drafts Only* slået til, så `queue-post` afvises med »This site lets assistants work on
-drafts only«, før plugin'et ser kaldet. Skal agenten skrive, skal den switch slås fra i
-*Meow Apps → AI Engine → Settings → MCP* — det er en beslutning om risikoprofil, ikke en fejl.
+**Status 4/11 2026: både læsning og skrivning virker.** OAuth-klienten blev godkendt af ejeren i browseren,
+tokenet lever 3600 s med refresh, og `python3 tools/mcp_rest.py --check` svarer `ok: true` med serveren
+`AI Engine - Steamgears` og **236 værktøjer**, rolle `admin`. `mcp_drafts_only` er nu **`false`** (målt i
+`mwai_options` 4/11), så skrivende kald går igennem: 4/11 blev 20 `/go/`-links indsat i ni guides med
+`wp_alter_post`, og 14 hrefs blev konverteret med `wp_update_post`. Opskriften og fælderne står i
+[`library/mcp-skriveadgang-2026-11-04.md`](library/mcp-skriveadgang-2026-11-04.md).
+
+Indtil 4/11 var svaret det modsatte: *Drafts Only* var slået til, så `queue-post` blev afvist med »This site lets
+assistants work on drafts only«, før plugin'et så kaldet. Den switch slås til og fra i
+*Meow Apps → AI Engine → Settings → MCP*, og den er den eneste der holder et admin-token tilbage — den kan ikke
+slås fra over MCP, fordi spærren også dækker `wp_update_option`. Det er med vilje.
 
 **Sådan tjekkes spærren uden at skrive** (målt 2/11 2026, efter ejeren havde slået den fra — den var stadig
 til): AI Engines indstillinger ligger i option `mwai_options`, og læsende værktøjer må gerne læse den. Med
@@ -26,8 +31,8 @@ python3 tools/mcp_rest.py --call wp_get_option '{"key":"mwai_options","raw":true
 
 | Nøgle | Målt 2/11 | Betydning |
 | --- | --- | --- |
-| `mcp_drafts_only` | **true** | spærren: alle skrivende kald afvises, også plugin'ets egne |
-| `mcp_role` | `admin` | tokenet har administratorkraft, så kun Drafts Only holder det tilbage |
+| `mcp_drafts_only` | 2/11: true · **4/11: false** | spærren: da den var `true`, blev alle skrivende kald afvist, også plugin'ets egne |
+| `mcp_role` | `admin` | tokenet har administratorkraft, så kun Drafts Only holdt det tilbage |
 | `mcp_approvals` | `off` | ingen godkendelse pr. værktøj — spærren er den eneste |
 | `mcp_default_readonly` | false | læse-only er ikke slået til |
 | `mcp_dynamic_rest` | true | Dynamic REST er allerede tændt, så `wp_update_option` m.fl. er tilgængelige |
@@ -35,6 +40,15 @@ python3 tools/mcp_rest.py --call wp_get_option '{"key":"mwai_options","raw":true
 
 Pointen: en switch der ikke blev gemt, eller som blev sat på en anden fane, kan ses her med det samme — og
 agenten kan ikke selv slå den fra, fordi spærren også dækker `wp_update_option`. Det er med vilje.
+
+**Profilen i pluginnet rører chattens værktøjer, ikke denne flade.** `sgap_ai_profile` (7.41.2) afgør hvem
+Autopilotens *egen* AI Chat er, og hvilke af pluginnets værktøjer den må kalde; profilen *Site administration*
+slår `mcp_dynamic_rest` og `mcp_abilities` til gennem `enable_full_access()`. Begge nøgler stod **allerede** på
+`true` her (målt 2/11 og 4/11), så aktiveringen er idempotent på dette site og ændrer intet i `mwai_options` —
+og den eksterne MCP-klient fik ikke mere adgang af profilen, fordi den havde `mcp_role: admin` i forvejen.
+Det der faktisk kan ses efter et profilskift, er chattens egen værktøjsliste og persona, ikke REST-fladen.
+Tilstanden læses uden at skrive med `wp_get_option mwai_options raw` eller pluginnets `site_health`, der svarer
+`ai_engine_mcp: {abilities, dynamic_rest, role}` plus `autopilot_version`.
 
 Sitet kører **AI Engine (Meow Apps)** som MCP-server. Det er standard MCP over HTTP med `Mcp-Session-Id`, og
 det kræver en credential på hvert kald: uden en svarer ruten `401 rest_forbidden`. Den gamle site-side
@@ -121,6 +135,167 @@ OAuth-flowet i `tools/test_mcp_oauth.py` (10 fixtures, lokal authorization serve
 | `454` / `455` | Simplys WAF på HTML | åbn linket i en rigtig browser, ikke fra worktreen |
 | `404 rest_no_route` | forkert sti | ruten er `/wp-json/mcp/v1/http`, ikke `/mcp` |
 | tomt `tools/list` | forbundet, men ingen værktøjer eksponeret | tjek AI Engines MCP-indstillinger i wp-admin |
+
+## Novamira (`novamira`) — den anden MCP-flade (målt 6/11 2026)
+
+Sitet kører **Novamira 1.12.14** ved siden af AI Engine. Den har sin egen OAuth-server og sin egen flade:
+
+| | |
+| --- | --- |
+| Resource | `https://steamgears.eu/wp-json/mcp/novamira-oauth` — `401` uden token, med `resource_metadata` i `WWW-Authenticate` |
+| Authorization server | `https://steamgears.eu/.well-known/oauth-authorization-server` (issuer `https://steamgears.eu`) |
+| Endpoints | authorize `admin.php?page=novamira-oauth-authorize`, token/register/revoke/introspect/device under `/wp-json/novamira/v1/oauth/` |
+| Scope | `full_access` (eneste understøttede) |
+| Flera | **3 meta-værktøjer** — `discover-abilities`, `get-ability-info`, `execute-ability` — over **207 abilities**, heraf 60 fra plugin'et og resten fra WordPress, WooCommerce, Rank Math m.fl. |
+
+**Tre ting der koster en runde, hvis man ikke ved dem:**
+
+1. **DCR registrerer ikke device-grant.** Metadata annoncerer `urn:ietf:params:oauth:grant-type:device_code`, men
+   en dynamisk registreret klient får kun `authorization_code` + `refresh_token` tilbage, og `/oauth/device`
+   svarer `unauthorized_client`. Brug authorization code + PKCE med redirect `http://127.0.0.1:8765/callback`.
+2. **Token-endepunkterne kræver form-encoding.** JSON giver `unsupported_grant_type` — serveren kan ikke læse
+   `grant_type` og afviser, før den ser koden. `tools/mcp_oauth.py` sender nu form-data til token-kald og JSON
+   til DCR (RFC 6749 §4.1.3).
+3. **`tools/list` kræver `Mcp-Session-Id`** fra `initialize`-svarets header. Uden den svarer fladen `400` med
+   0 værktøjer, selv om `initialize` gik igennem.
+
+### Fornyelse i pluginnet (7.44)
+
+Siden 7.44 holder **sitet selv** Novamira-tokenet i live, så adgangen ikke afhænger af repository-secrets eller
+af et loop i en sandkasse. [`plugins/steamgears-autopilot/includes/mcp-auth.php`](../plugins/steamgears-autopilot/includes/mcp-auth.php)
+(`SGAP_MCP_Auth`) kører cron-hooket `sgap_mcp_refresh` **hvert 30. minut**:
+
+1. fornyer med det gemte refresh-token (form-encoded kald til `/wp-json/novamira/v1/oauth/token`),
+2. gemmer det nye access-token og det **roterede** refresh-token med det samme,
+3. verificerer med `initialize` → `Mcp-Session-Id` → `tools/list`, og
+4. gemmer resultatet: tid, antal værktøjer, rotation og API'ets egen fejltekst.
+
+Et token der er udstedt men ikke virker bliver **ikke** meldt som fornyet. Fejlen står i det daglige selvtjek
+(samme mail-vej som de øvrige alarmer), i værktøjet `steamgears-tools/mcp-status` og på *Settings → MCP access*,
+hvor **MCP client ID** og **MCP refresh token** indtastes. Refresh-tokenet er en secret: det gemmes med
+autoload `false` og vises aldrig igen. Det skal ligge i databasen — en konstant i `wp-config.php` afvises, fordi
+serveren roterer tokenet og ikke kan skrive konstanten tilbage. `steamgears-tools/mcp-refresh` fornyer på
+kommando efter en afbrydelse.
+
+**Godkendelsen er stadig ejerens:** `python3 tools/mcp_oauth.py --start` giver linket, `--finish '<kode>'`
+gemmer parret uden for repoet, og de to værdier indsættes i wp-admin. Den vej nedenfor (worktree-loop og
+CI-workflow) virker stadig, men er nu kun et supplement.
+
+### Del adgangen med en anden agent eller person
+
+Det der deles er **opskriften, ikke tokenet**. Hver agent registrerer sin egen offentlige klient (DCR), får sit
+eget token-par og kan tilbagekaldes for sig i wp-admin — et token der sendes videre i chat eller mail kan ikke
+tilbagekaldes særskilt, og det er hele grunden til at det ikke gøres.
+
+**Vælg flade først** — de to servere har hver sit resource og scope, og et token udstedt til den ene virker
+ikke på den anden:
+
+| Flade | `MCP_METADATA_URL` | `MCP_RESOURCE` | `MCP_SCOPE` |
+| --- | --- | --- | --- |
+| AI Engine (`/wp-json/mcp/v1/http`, 206 værktøjer) | `https://steamgears.eu/wp-json/mcp/v1/.well-known/oauth-authorization-server` | `https://steamgears.eu/wp-json/mcp/v1/http` | `mcp` |
+| Novamira (3 meta-værktøjer over 207 abilities) | `https://steamgears.eu/.well-known/oauth-authorization-server` | `https://steamgears.eu/wp-json/mcp/novamira-oauth` | `full_access` |
+
+**De fire trin, som den nye agent kører** (alt ligger uden for repoet, mode 600):
+
+```bash
+# 1. egen token-mappe pr. agent, så to agenter ikke overskriver hinandens par
+export MCP_CONFIG_DIR="$HOME/.config/steamgears-mcp/agent-2"
+export MCP_RESOURCE="https://steamgears.eu/wp-json/mcp/novamira-oauth"
+export MCP_SCOPE="full_access"
+python3 tools/mcp_oauth.py --start          # registrerer klient og printer godkendelseslinket
+
+# 2. EJEREN (eller en administrator) åbner linket, logger ind og godkender
+
+# 3. agenten bytter koden — koden er éngangs og lever kun kort
+python3 tools/mcp_oauth.py --finish '<hele redirect-adressen eller code=-værdien>'
+python3 tools/mcp_oauth.py --status
+```
+
+4. **Verificér med et kald, ikke med et håb:** `python3 tools/live_state.py` (Novamira) eller
+   `python3 tools/mcp_rest.py --check` (AI Engine). Et token der er udstedt men ikke virker, skal meldes som
+   fejl — ikke som adgang.
+
+**Hvad den nye agent ikke skal have:** `~/.config/steamgears-mcp/tokens.json` fra en anden maskine, et
+refresh-token i en besked, eller `NOVAMIRA_REFRESH_TOKEN` fra repository-secrets. Skal adgangen køre uden
+ejerens hænder i CI, oprettes `NOVAMIRA_REFRESH_TOKEN` + `NOVAMIRA_SECRETS_TOKEN` som beskrevet nedenfor — det
+er den eneste vej der ikke kræver et menneske ved hver fornyelse, fordi refresh-tokenet **roteres** og det gamle
+dør.
+
+**Tilbagekaldelse:** wp-admin → Novamira → OAuth-apps (eller AI Engine → Settings → MCP for den anden flade).
+Slet klienten, ikke bare filen lokalt — ellers lever tokenet videre indtil det udløber.
+
+### Hold adgangen i live
+
+Access-tokenet lever **3600 s**, og refresh-tokenet **roteres** ved hver fornyelse (målt 6/11: `refresh_token`
+ændres, `expires_in` er 3600, ingen `refresh_token_expires_in` oplyses). Introspection er admin-only, så
+refresh-tokenets levetid kan ikke læses udefra — derfor skal fornyelsen køre planlagt, ikke på held.
+
+[`tools/mcp_keepalive.py`](../tools/mcp_keepalive.py) fornyer, verificerer med `initialize` + `tools/list` og
+gemmer det nye par (mode 600, uden for repoet). Kør den manuelt med:
+
+```bash
+python3 tools/mcp_keepalive.py          # lokalt: forny + verificér + gem
+python3 tools/mcp_keepalive.py --ci --emit-refresh-file /tmp/refresh   # CI: skriv det roterede token til fil
+```
+
+**Løbende fornyelse i sandkassen (hvert 58. minut):**
+[`tools/keepalive-loop.sh`](../tools/keepalive-loop.sh) kalder keep-alive hvert 3480 s, så access-tokenet aldrig
+når at udløbe, og logger hver kørsel i `.tools/keepalive-loop.log`. Den tåler enkelte netværksfejl (prøver igen
+efter 5 min, op til 5 gange i træk) og stopper selv med en klar besked, hvis tokenet er dødt.
+
+```bash
+setsid nohup bash tools/keepalive-loop.sh 3480 >/dev/null 2>&1 < /dev/null &   # start
+kill "$(cat .tools/keepalive-loop.pid)"                                        # stop
+```
+
+Grænsen er arkivering: processen lever kun, mens worktreen kører, og efter en genstart skal kommandoen køres
+igen. Det dækker arbejdsdage, ikke 30 dage uden at nogen åbner chatten — det gør kun CI-varianten nedenfor.
+
+**Planlagt fornyelse (30+ dage uden ejerens hænder):**
+[`novamira-keepalive.yml`](../.github/workflows/novamira-keepalive.yml) kører dagligt kl. 03 dansk tid,
+fornyer og gemmer det roterede token tilbage som repository-secret. Den springer sig selv over med en
+`::notice`, indtil disse findes:
+
+| Navn | Type | Hvad |
+| --- | --- | --- |
+| `NOVAMIRA_REFRESH_TOKEN` | secret | refresh-tokenet fra den lokale godkendelse |
+| `NOVAMIRA_SECRETS_TOKEN` | secret | fine-grained PAT med **Secrets: write** (`PINTEREST_SECRETS_TOKEN` bruges som fallback) |
+| `NOVAMIRA_CLIENT_ID` | variabel, valgfri | den offentlige klient-id; ellers bruges klienten fra 6/11 2026 |
+
+Uden dem virker adgangen kun så længe refresh-tokenet lever, og et nyt kræver ejerens godkendelse igen.
+
+### Natlig måling af site-tilstanden
+
+Den samme kørsel **måler** sitet, ikke bare forbindelsen: [`tools/live_state.py`](../tools/live_state.py) kaldes af
+`mcp_keepalive.py --live-report reports` med det netop fornyede token og spørger fladen om fire ting — det er
+svaret på »har *Site administration*-profilen faktisk tændt Dynamic REST og Abilities?«, som ellers kræver et
+token i en sandkasse:
+
+| Krav | Hvor det kommer fra | Dom |
+| --- | --- | --- |
+| AI Engine **Dynamic REST** | `steamgears-autopilot/site-health` → `ai_engine_mcp.dynamic_rest` | `true` kræves |
+| AI Engine **Abilities** | samme svar → `ai_engine_mcp.abilities` | `true` kræves |
+| `mcp_role` | samme svar → `ai_engine_mcp.role` | advarsel hvis ikke `admin` |
+| Profilen `sgap_ai_profile` | `steamgears-autopilot/get-settings` → `ai_profile` | oplyses; krav kun hvis `LIVE_EXPECT_PROFILE` er sat |
+| Plugin-version på sitet | `site-health` → `autopilot_version` | **advarsel** ved forskel fra repoet — et plugin-folder skiftes kun af WordPress |
+
+Rapporten skrives til `reports/live-tilstand-<dato>.md` og `.json` og committes af workflowet; er et **krævet**
+krav ikke opfyldt, får jobbet en `::error`-annotation. Rækkefølgen er med vilje: refresh-tokenet gemmes som
+repository-secret **før** målingen kan farve jobbet rødt, så en målefejl aldrig koster adgangen.
+
+To ting er værd at kende, hvis målingen skal køres i hånden:
+
+- **Argumentnavnene læses af `tools/list`, ikke gættet.** Meta-værktøjet har heddet både `{name, input}` og
+  `{ability, arguments}`; skemaet afgør formen, og rapporten skriver hvilken der virkede.
+- **To kald, ikke flere.** `discover-abilities`/`get-ability-info` bruges ikke: de to abilities kaldes direkte,
+  og et svar der ikke kan læses (fx et ældre plugin uden `ai_engine_mcp`) bliver `fejl`/`ukendt` — aldrig
+  »bestået«.
+
+```bash
+python3 tools/live_state.py                 # lokalt: kræver token i ~/.config/steamgears-mcp/novamira/ eller NOVAMIRA_ACCESS_TOKEN
+python3 tools/live_state.py --out /tmp/x    # skriv et andet sted
+python3 tools/test_live_state.py            # 14 offline-fixtures, ingen token
+```
 
 ## Kildesporet: hvad AI Engine og adapteren kan kalde (læst 2/11 2026)
 
@@ -227,6 +402,42 @@ Test uden MCP-klient:
 printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | python3 tools/mcp_project_profile.py
 ```
 
+## Simply.com (`simplycom`)
+
+Simply har en MCP-server ved siden af WordPress-fladen: den rører **hosten**, ikke sitet. Den er registreret i
+[`.mcp.json`](../.mcp.json) som `simplycom`, og opsætningen er Simplys egen vejledning:
+<https://www.simply.com/agent-setup/prompt.md>.
+
+| | |
+| --- | --- |
+| Endpoint | `https://mcp.simply.com/v2` |
+| Transport | streamable HTTP |
+| Auth | OAuth 2.1 — **ingen nøgle at kopiere**; ejeren logger ind i browseren ved første kald |
+| Navn | `simplycom` (den offentlige udgave uden login hedder `simplycom-public` og ligger på `https://mcp.simply.com/public`) |
+
+Målt 7/11 2026 fra cloud-worktreen: `GET /v2` svarer `401` — serveren lever og kræver auth — og
+`/.well-known/oauth-protected-resource` svarer `200`, så discovery virker. Et kald uden token fejler altså på
+**auth**, ikke på netværk. Selve login-flowet kan ikke gennemføres herfra: OAuth'en kræver ejerens browser, og
+Simplys WAF svarer `454` på HTML-ruter fra datacenter-IP'er (se fejlsøgningstabellen).
+
+Fladen giver DNS-poster, nameservere og DNSSEC, domænetilgængelighed og ordrelinks, mailkonti og
+videresendinger, subdomæner, MySQL-databaser, website- og MySQL slow-logs, deploy-oplysninger til
+SSH/SFTP/FTP/rsync samt support-sager — og agenten har samme rettigheder som brugeren. Den kan **ikke**
+bestille, opsige eller betale.
+
+### Sådan tages den i brug
+
+1. `simplycom` står allerede i [`.mcp.json`](../.mcp.json) med `"type": "http"` og URL'en ovenfor. Andre
+   klienter registreres med deres egen kommando fra Simplys side — brug samme navn, så henvisningerne passer.
+2. Genstart agenten, så MCP-serveren bliver læst.
+3. Første gang et Simply-værktøj kaldes, åbner klienten browser-login. **Kun ejeren kan gennemføre det** —
+   agenten kan ikke logge ind på brugerens vegne, og der er ingen nøgle at indsætte i stedet.
+4. Virker det ikke: tjek at URL'en er præcis `https://mcp.simply.com/v2` (ikke `/mcp` eller `/v1`), at
+   klienten understøtter streamable HTTP + OAuth, og at adgangen ikke er tilbagekaldt.
+
+Adgangen tilbagekaldes under *Connected apps* i Simplys kontrolpanel
+(<https://www.simply.com/en/controlpanel/user/>) — det er den vej en agent fratages adgang igen.
+
 ## Sikkerhed
 
 - Tokenet arver den WP-bruger der godkender OAuth-flowet. Godkend som en dedikeret administratorkonto, ikke
@@ -241,12 +452,17 @@ printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | python3 tools/m
 - Publer-nøglen hører i `PUBLER_API_KEY`, ikke i URL'en: `?api_key=` lækker nemt gennem logs, historik og
   skærmbilleder. Nøglen giver adgang til workspaces og konti, og scopes afgør hvor meget agenten kan.
 - Har en nøgle været eksponeret: tilbagekald den i WordPress **først**, og opret derefter en ny.
+- Simply.com-connectoren har ingen nøgle at lække — den arver brugerens rettigheder gennem OAuth og
+  tilbagekaldes under *Connected apps*. Giv den derfor ikke adgang fra en konto der også kan betale.
 
 ## Referencer
 
 - [`.mcp.json`](../.mcp.json) — `steamgears`-serveren med `Bearer ${MCP_ACCESS_TOKEN}`.
 - [`tools/mcp_oauth.py`](../tools/mcp_oauth.py) — registrering, PKCE-link, token-udveksling og fornyelse.
   `--status` viser om der er et gyldigt token.
+- [`tools/live_state.py`](../tools/live_state.py) — måler `mwai_options`' MCP-nøgler og profilen gennem
+  Novamira-fladen og skriver `reports/live-tilstand-<dato>.md`/`.json`; `tools/test_live_state.py` er dets
+  14 offline-fixtures.
 - [`tools/mcp_rest.py`](../tools/mcp_rest.py) — `--check`, `--abilities`, `--diff`, `--csv`, `--call`.
 - [`tools/test_mcp_oauth.py`](../tools/test_mcp_oauth.py) og [`tools/test_mcp_rest.py`](../tools/test_mcp_rest.py)
   — 24 fixtures mod lokale efterligninger, ingen credential nødvendig.

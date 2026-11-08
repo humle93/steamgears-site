@@ -7,8 +7,8 @@ Konkret kortlægning af hvordan det eksisterende katalog kan flyttes fra "steamp
 **Vigtige forbehold, læs før udførelse:**
 
 1. **Slugs ændres ikke.** 39 produkter har allerede 39 indgående links fra 15 artikler, og vi har 24 døde link-mål i forvejen. Nye titler + gamle slugs er acceptabelt; nye slugs uden redirects ville skabe 39 nye 404'ere.
-2. **Printify overskriver WooCommerce-tekst ved næste sync.** Titler og beskrivelser skal derfor rettes i Printify, ikke (kun) i butikken. Dette er den vigtigste praktiske detalje i hele planen.
-3. **Mockups kan ikke laves via MCP.** De skal genereres i Printify (deres mockup-værktøj) eller uploades — det er ejerarbejde eller kræver adgang til Printify-kontoen.
+2. **Printful overskriver WooCommerce-tekst ved næste sync.** Titler og beskrivelser skal derfor rettes i Printful, ikke (kun) i butikken. Dette er den vigtigste praktiske detalje i hele planen.
+3. **Mockups kan ikke laves via MCP.** De skal genereres i Printful (deres mockup-værktøj) eller uploades — det er ejerarbejde eller kræver adgang til Printful-kontoen.
 4. **Priser røres ikke her.** Valutabeslutningen (USD → EUR/DKK) er en separat opgave og skal køres først, så priserne kun genberegnes én gang.
 
 ## Søgeord der bærer om-mærkningen
@@ -114,7 +114,7 @@ Overlap er tilsigtet: et produkt må gerne ligge i to kollektioner, hvis kunden 
 Alle 39 produkter har i dag under 3 billeder. Det er den største enkeltmangel i kataloget, og om-mærkningen virker ikke uden den.
 
 **T-shirts og hoodies — 5 billeder hver:**
-1. Nuværende Printify-mockup (behold som første)
+1. Nuværende Printful-mockup (behold som første)
 2. Livsstilsbillede: model i dagslys, akademisk/victoriansk setting (bibliotek, stentrappe, regnvejr gennem vindue)
 3. Fladlæg på mørkt stof (mørkebrun, flaske grøn eller oxblood — ikke hvid, det er hele pointen)
 4. Close-up af printkvalitet, 1:1 beskræring
@@ -140,10 +140,10 @@ Alle 39 produkter har i dag under 3 billeder. Det er den største enkeltmangel i
 | 1 | Nye titler + SEO-titel/beskrivelse på **32** produkter (gruppe A + B) | Mig (via MCP) | 2,5–3 t | ✓ **Udført 1/11** — 32/32 omdøbt, SEO-titel + meta description + fokus-søgeord sat på alle |
 | 2 | Seks kollektioner + tildeling af produkter | Mig | 1 t | ✓ **Udført 1/11** — se nedenfor |
 | 3 | Omskrivning af produkttekst: fit, produktionstid, levering, GPSR-blok | Mig | 3–4 t |
-| 4 | Mockups: 5 billeder pr. tøjprodukt, 4 pr. plakat — 39 produkter | Ejer i Printify | 4–6 t |
+| 4 | Mockups: 5 billeder pr. tøjprodukt, 4 pr. plakat — 39 produkter | Ejer i Printful | 4–6 t |
 | 5 | Krydsreferencer: dark academia-artikler linker dark academia-kollektionen, steampunk-artikler linker kapslen | Mig | 1–2 t |
 
-**Samlet: 11–16 timer ≈ 1,5–2 arbejdsdage**, hvoraf mockup-arbejdet (4–6 t) er det eneste der kræver Printify-adgang.
+**Samlet: 11–16 timer ≈ 1,5–2 arbejdsdage**, hvoraf mockup-arbejdet (4–6 t) er det eneste der kræver Printful-adgang.
 
 ## Udført 1/11 2026
 
@@ -160,12 +160,63 @@ Alle 39 produkter har i dag under 3 billeder. Det er den største enkeltmangel i
 | Witchy & Tarot | 98 | 3 |
 | Steampunk Capsule | 99 | 7 |
 
-**Verifikation:** alle seks arkivsider svarer 200 (`/product-category/dark-academia/` osv.), de nye titler vises på produktsiderne og på `/shop/`, og W3TC blev purget efter ændringerne.
+**Verifikation 1/11:** alle seks arkivsider svarede 200 (`/product-category/dark-academia/` osv.), de nye titler vises på produktsiderne og på `/shop/`, og W3TC blev purget efter ændringerne.
 
 **Stadig åbent:**
-- **Printify-sync.** Titlerne er sat i WooCommerce. Hvis Printify har katalog-synkronisering kørende, kan de blive overskrevet ved næste push — de skal derfor spejles i Printify. Det er ikke verificeret, om sync er aktiv.
+- **Printful-sync.** Titlerne er sat i WooCommerce. Hvis Printful har katalog-synkronisering kørende, kan de blive overskrevet ved næste push — de skal derfor spejles i Printful. Det er ikke verificeret, om sync er aktiv.
 - Slugs er bevaret (fx `/product/clockwork-owl-steampunk-unisex-hoodie/`), så titel og URL nu afviger fra hinanden. Det er et bevidst valg for at undgå 404'ere.
 - Batch 3 (produkttekster) og 4 (mockups) er ikke rørt — uden dem er omdøbningen kun halvt virksom.
+
+## Målt 8/11 2026 — tildelingen er væk, titlerne er der
+
+Målt udefra med den offentlige Store API, ikke på tillid:
+
+```
+python3 tools/rebrand_audit.py          # exit 1 = mindst ét krav mangler
+```
+
+| Kollektion | Produkter 1/11 (dokumenteret) | Produkter 8/11 (målt) |
+|---|---:|---:|
+| Dark Academia | 24 | **0** |
+| Gothic & Victorian | 6 | **0** |
+| Natural History | 6 | **0** |
+| Vintage Maritime Prints (`vintage-maritime`) | 7 | **0** (termen findes, ID 97 — den er bare tom) |
+| Witchy & Tarot | 3 | **0** |
+| Steampunk Capsule | 7 | **0** |
+| airship, herbarium, curiosities, atelier (gamle) | — | 5 + 5 + 6 + 4 = **alle 20** |
+
+Tre uafhængige mål siger det samme: `?category=<slug>` giver 0 rækker for alle seks, term-tællingerne i
+`/wp-json/wp/v2/product_cat` står på `count: 0` for ID 94–99, og `/product-category/dark-academia/` svarer 200
+med tomt grid. Samtidig **er titlerne i effekt** — 413, 401, 399,
+403 og 557 bærer de nye navne — så det er tildelingen alene der er forsvundet, formentlig overskrevet af en
+katalog-synk eller af at termene er blevet genskabt. Det er præcis den risiko »Stadig åbent« ovenfor advarede om,
+og den er nu indtruffet.
+
+**Konsekvens for planen:** de 8,5 t for batch 1–3 dækker arbejde der *blev* udført; effekten af batch 2 skal
+laves igen. Det er skilt ud som eget modul (0,4 t) i `projektstatus.json` med en dokumenteret scope-korrektion,
+så rebrand står på 9 af 14,4 t = 62,5 % — ikke 64,3 %.
+
+**Sådan gentildeles det — værktøjet er bygget, så det ikke skal gøres i hånden:**
+
+```bash
+python3 tools/rebrand_apply.py            # plan: hvem mangler hvad (offentlig læsning, intet skrives)
+WP_USER=… WP_APP_PASSWORD=… python3 tools/rebrand_apply.py --apply
+python3 tools/rebrand_apply.py --verify   # acceptkriterium: 0 tomme kollektioner
+```
+
+Tildelingen ligger i `ASSIGNMENT` i `tools/rebrand_apply.py` — de samme 39 id'er som tabellen ovenfor,
+inkl. det tilsigtede overlap (401 i både Dark Academia og Vintage Maritime, 399 i både Dark Academia og
+Natural History). Værktøjet **lægger kun til**: de gamle kategorier (airship, herbarium, curiosities,
+atelier) bevares, og kørslen er idempotent. Termerne findes allerede med ID 94–99, så der oprettes intet.
+
+I CI gør workflowen `.github/workflows/rebrand-apply.yml` det samme med repo-secrets `WP_USER` +
+`WP_APP_PASS` (samme navne som `seo_audit.yml` bruger): *Actions → Rebrand apply → Run workflow*.
+Uden secrets skriver den intet, men viser planen, så den kan køres af hvem som helst uden adgang.
+
+Til sidst: tøm cachen (W3TC) og kør `python3 tools/rebrand_audit.py`. Hvis Printful-synk er aktiv, skal
+tildelingen også spejles der, ellers gentager regressionen sig.
+
+Tallene i detaljer: [`reports/rebrand-status-2026-11-08.md`](../../reports/rebrand-status-2026-11-08.md).
 
 ## Rækkefølge-rationale
 

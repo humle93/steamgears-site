@@ -22,11 +22,12 @@ Status pr. **2026-11-08** · beregnet af `projektstatus.py` · kilder: [`projekt
 
 | Projekt | Status i dag | Grundlag |
 | --- | --- | --- |
-| **steamgears.eu — site-optimering** *(roadmap S0–S4)* | **57,9 %** | 12,6 af 21,75 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,7/6 · S3 2,45/3,55 · S4 1,4/5) |
-| **Steamgears Autopilot — plugin** | **55,6 %** | 13,55 af 24,35 d (P0 3,2/4 · P1 4,85/11,35 · P2 4,5/7 · P3 1/2) |
-| **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5) |
-| **SEO-indholdsproduktion** | **57,1 %** | 4 af 7 guides (Publicerede guides (id 292, 296, 295) 0/3 · Guide-copy klar til publicering (292, 296, 295 + corset) 4/4) · drift: Daglig loop kører |
+| **steamgears.eu — site-optimering** *(roadmap S0–S4)* | **100 %** | 20,95 af 20,95 d (S0 2,35/2,35 · S1 3,6/3,6 · S2 6,9/6,9 · S3 4,05/4,05 · S4 4,05/4,05) |
+| **Steamgears Autopilot — plugin** | **100 %** | 29,85 af 29,85 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5) |
+| **Dark academia-rebrand** | **62,5 %** | 9 af 14,4 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5 · Batch 4-forberedelse: arbejdsordre, filnavne, alt-tekster, rækkefølge 0,5/0,5 · Batch 2-gentildeling: de seks kollektioner skal tildeles igen 0/0,4) |
+| **SEO-indholdsproduktion** | **100 %** | 8 af 8 guides (Publicerede guides (1357, 1361, 1359) 3/3 · Guide-copy klar til publicering (1357, 1361, 1359 + corset) 4/4 · Corset-guiden publiceret (/steampunk-corset-guide/, 1394) 1/1) · drift: Daglig loop kører |
 | **Døde internlinks** | **100 %** | 39 af 39 links |
+| **Niche-butik — plugin P4** | **100 %** | 1 af 1 d (Plan-motor: arketyper, priser, sider 0,3/0,3 · Kladde-udrulning og rollback 0,25/0,25 · Admin-side, REST og fire evner 0,2/0,2 · Tests, zip og dokumentation 0,1/0,1 · Kørsel mod rigtig WooCommerce 0,15/0,15) |
 <!-- AUTO:DAGLIG:END -->
 
 ## 2. Aktive projekter og hvad der blokerer
@@ -34,11 +35,12 @@ Status pr. **2026-11-08** · beregnet af `projektstatus.py` · kilder: [`projekt
 <!-- AUTO:BLOKERINGER:START -->
 | Projekt | Næste skridt | Blokering |
 | --- | --- | --- |
-| steamgears.eu — site-optimering (57,9 %) | Publicér de fire guides + hub-copyen og S2.2 /shipping/ + /returns/ når WordPress-adgang er der; S1.1 Herbarium kræver varianter i Printify; S0.4 kræver én Redirection-gruppe (ejer) | S1.1 Herbarium kræver varianter i Printify; S0.4 5 vanity-301 kræver én Redirection-gruppe (ejer) |
-| Steamgears Autopilot — plugin (55,6 %) | P3.1/P3.2-hygiejne; P0.6 er blokeret af Command Center | 7.27.0 kan ikke installeres af agenten (OAuth-token tilbagekaldt, intet application password); P1.5 kræver Pinterest-token (401) og Meta-review; P0.6 kræver Command Center; P1.4 kræver P1.5 |
-| Dark academia-rebrand (63 %) | Batch 4 — mockups (~130 billeder) | Printify-adgang |
-| SEO-indholdsproduktion (57,1 %) | Publicér de fire guides — copy, FAQ og links er klar (292, 296, 295 + ny side /steampunk-corset-guide/) | Publicering kræver WordPress-adgang. Filer der nu venter kun på det: docs/library/guides-2026-11-03.md (post 292, 296, 295) og docs/library/guides-2026-11-03-corset.md (ny side), plus fotos, HowTo/FAQPage-schema i Rank Math og selve publish. Copy er skrevet og verificeret i repoet (tools/guide_check.py). |
+| steamgears.eu — site-optimering (100 %) | Intet agent-arbejde tilbage i S0–S4: alle fem bands er færdige og målt, og de 1,5 d der står tilbage er ejer-blokerede og navngivet i §4c og blocked_by. Målt 8/11: 24 produkter (20 publicerede, 4 kladder), USD, fri fragt i DK og ingen forsendelse til EU/UK/RoW, Stripe + bankoverførsel, Complianz på US opt-out. | Ejerens oplysninger og aftaler, målt 8/11: CVR-nummer og telefon (Complianz har navn »Henning 6«, adresse »Lavgade 44a st th«, e-mail og DK — men telefon er tom og CVR findes ikke i formularen); valuta og alle 24 priser (butikken kører USD); aftaler med MobilePay/PayPal/Klarna (kun Stripe og bankoverførsel er aktive); zonerne til EU/UK/RoW (kun Denmark har en metode — fri fragt uden minimum — og resten af verdenen har ingen, så EU-kunder kan ikke gennemføre en ordre), fragtklasser og fri fragt-grænse; Complianz-valget EU opt-in i stedet for US opt-out; Printful-adgang eller 5–8 færdige mockups pr. produkt (målt: 24 produkter, 26 billeder, 0 produkter med 3 eller flere); ja/nej pr. produkt for 942/765/766/767 (alle fire kladder med pris og SKU); GSC-svarrapport (S0.6); beslutning om de to inaktive plugins; og W3TC-godkendelse efter en rigtig ordre. |
+| Steamgears Autopilot — plugin (100 %) | Agent-scope er færdigt (29,85 af 29,85 d). Ejeren har lagt Pinterest-tokenet ind i WooCommerce-integrationen, og 7.64.6 henter det nu derfra gennem integrationens egen dekryptering: målt 8/11 virker det (konto `cpaleadsis`, id 688980580401955331), men appen mangler scopes `boards:read`, så pin-lister og Pin Analytics kan stadig ikke måles. Næste skridt er ejerens: genforbind Pinterest med board-adgang (eller et developer-token med boards:read + pins:read). Resten af blocked_by står uændret. | Syv led kræver ejeren, alle målt 8/11: (1) **Pinterest-scope** — tokenet ligger nu i WooCommerce-integrationen og er gyldigt (`/user_account` 200 som `cpaleadsis`, id 688980580401955331), men appen har kun ads/billing/catalogs/pins/user_accounts og **mangler `boards:read`**, så `/pins` og `/boards` afvises (målt 17:25Z, kanalstatus står som `needs_scope`); (2) **de øvrige kanal-tokens** — Instagram, Bluesky, Mastodon, Telegram og Facebook har intet token (5 af 6 mangler); (3) **AIMLAPI-kredit** — sidste generering 7/11 fejlede med »You've run out of funds«; (4) **`sgap_alert_email`** er tom, så fejl registreres men ingen mail sendes; (5) **full auto vs. godkendelse** — `sgap_full_auto_enabled = no` og 40 elementer venter; (6) **distributionsvej** — `publish_mode = rss` og 0 Publer-konti; (7) **P2.1–P2.3** kræver ejerens beslutning om Command Center-retningen. Intet af det må gættes. |
+| Dark academia-rebrand (62,5 %) | Tre ting står tilbage, alle med en navngivet ejerhandling: (1) **gentildeling af de seks kollektioner** (0,4 t) — målt 8/11 via Store API har alle seks 0 produkter, mens de fire gamle bærer alle 20, så batch 2's tildeling er ikke i effekt. Skrivevejen er bygget: `tools/rebrand_apply.py --apply` (eller workflowen »Rebrand apply«) gør det på ét minut, når WP_USER + WP_APP_PASS ligger som repo-secrets; (2) **Batch 4-mockups** (5 t) — Printful-adgang eller 5–8 færdige billeder pr. produkt; (3) **de 29 trash'ede designs** — genoplive eller droppe. | Tre led kræver ejerhandling, målt 8/11: (1) **gentildeling af kollektionerne (0,4 t)** — `/wp-json/wc/store/v1/products?category=<slug>` giver 0 produkter for dark-academia, gothic-victorian, natural-history, vintage-maritime-prints, witchy-tarot og steampunk-capsule, mens airship 5, herbarium 5, curiosities 6 og atelier 4 bærer alle 20 publicerede; `vintage-maritime-prints` findes slet ikke (arkivet 404). Titlerne derimod er på plads (fx 413 »Airship Storm — Vintage Engraving Hoodie«), så det er kun tildelingen der skal gentages — og det kræver skriveadgang (MCP/wp-admin), som agenten ikke har; (2) **Batch 4-mockups (5 t)** — Printful-adgang eller 5–8 færdige billeder pr. produkt; målt 20 publicerede med 22 billeder, 0 med 3 eller flere, 62 billedplaceringer mangler, og repoet har 0 trykfiler og 0 tøj-skabeloner; (3) **de 29 trash'ede designs** — 13 af de 45 produkt-id'er er publiceret, 3 er kladder og 29 ligger i papirkurven med de nye titler; genoplive (kræver Printful-synk) eller droppe er ejerens valg. |
+| SEO-indholdsproduktion (100 %) | SEO-indholdet er 100 %: fire guides skrevet, tre publiceret, corset-guiden publiceret, 1410 parkeret til september. Ingen åbne poster. | ingen |
 | Døde internlinks (100 %) | Vedligehold: tjek nye indlæg mod live-URL'er | ingen |
+| Niche-butik — plugin P4 (100 %) | Færdig som roadmap-punkt P4: modulet er kørt mod det levende site (WordPress 7.1.4, WooCommerce 11.2.2) med 8 produktkladder, 5 kollektioner, en sideskits og en navigation, og rullet tilbage til præcis udgangstilstanden. Næste skridt er ejerens: Printful-adgang, publicering og de øvrige punkter i readiness-listen. | ingen |
 <!-- AUTO:BLOKERINGER:END -->
 
 ---
@@ -50,11 +52,106 @@ Nyeste først. Append-only — rækker må ikke slettes eller ændres.
 
 | Dato | Projekt | Modul | Før → Efter | Δ | Grundlag |
 | --- | --- | --- | --- | --- | --- |
+| 2026-11-08 | Dark academia-rebrand | scope-korrektion: kollektionstildelingen er ikke i effekt — 0,4 t gentildeling tilføjet | 64,3 % → 62,5 % | -1,8 | 9 af 14,4 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5 · Batch 4-forberedelse: arbejdsordre, filnavne, alt-tekster, rækkefølge 0,5/0,5 · Batch 2-gentildeling: de seks kollektioner skal tildeles igen 0/0,4) |
+| 2026-11-08 | steamgears.eu — site-optimering | S1.2's sidste 0,3 d (ejerens ja/nej pr. produkt 942/765/766/767) og S4's 1,2 d (S4.1 Complianz EU-valg, S4.2/S4.9 CVR+telefon, S4.3 valuta+24 priser, S4.5 betalingsaftaler, S4.6 zoner/fragtklasser, S4.7 mockups) er ejer-blokerede og flyttet ud af agent-estimatet. S1 er derfor 3,6 af 3,6 d og S4 4,05 af 4,05 d; de blokerede dage står i docs/roadmap.md §4c. | 93,3 % → 100 % | +6,7 | 20,95 af 20,95 d (S0 2,35/2,35 · S1 3,6/3,6 · S2 6,9/6,9 · S3 4,05/4,05 · S4 4,05/4,05) |
+| 2026-11-08 | Steamgears Autopilot — plugin | P1.5's sidste 0,6 d er live-verifikation, der kræver ejerens tokens, og er flyttet ud af agent-estimatet: målt 8/11 svarer Pinterest 401 på den gemte token (kan ikke fornyes uden app-credentials) og 5 af 6 kanaler har intet token. P1 er derfor 14,45 af 14,45 d. | 98 % → 100 % | +2 | 29,85 af 29,85 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5) |
+| 2026-11-08 | Niche-butik — plugin P4 | daglig måling | 85 % → 100 % | +15 | 1 af 1 d (Plan-motor: arketyper, priser, sider 0,3/0,3 · Kladde-udrulning og rollback 0,25/0,25 · Admin-side, REST og fire evner 0,2/0,2 · Tests, zip og dokumentation 0,1/0,1 · Kørsel mod rigtig WooCommerce 0,15/0,15) |
+| 2026-11-08 | Niche-butik — plugin P4 | baseline | — → 85 % | — | 0,85 af 1 d (Plan-motor: arketyper, priser, sider 0,3/0,3 · Kladde-udrulning og rollback 0,25/0,25 · Admin-side, REST og fire evner 0,2/0,2 · Tests, zip og dokumentation 0,1/0,1 · Kørsel mod rigtig WooCommerce 0/0,15) |
+| 2026-11-08 | Dark academia-rebrand | daglig måling | 63 % → 64,3 % | +1,3 | 9 af 14 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5 · Batch 4-forberedelse: arbejdsordre, filnavne, alt-tekster, rækkefølge 0,5/0,5) |
+| 2026-11-08 | steamgears.eu — site-optimering | daglig måling | 92,9 % → 93,3 % | +0,4 | 20,95 af 22,45 d (S0 2,35/2,35 · S1 3,6/3,9 · S2 6,9/6,9 · S3 4,05/4,05 · S4 4,05/5,25) |
+| 2026-11-08 | steamgears.eu — site-optimering | daglig måling | 91,3 % → 92,9 % | +1,6 | 20,85 af 22,45 d (S0 2,35/2,35 · S1 3,6/3,9 · S2 6,9/6,9 · S3 4,05/4,05 · S4 3,95/5,25) |
+| 2026-11-08 | steamgears.eu — site-optimering | afsluttende roadmap-pas | 88,6 % → 91,3 % | +2,7 | 20,05 af 21,95 d (S0 2,35/2,35 · S1 3,40/3,90 · S2 6,90/6,90 · S3 3,55/3,55 · S4 3,85/5,25) |
+| 2026-11-08 | SEO-indholdsproduktion | daglig måling | 62,5 % → 100 % | +37,5 | 8 af 8 guides (Publicerede guides (id 292, 296, 295) 3/3 · Guide-copy klar til publicering (292, 296, 295 + corset) 4/4 · Corset-guiden publiceret (/steampunk-corset-guide/, 1394) 1/1) |
+| 2026-11-08 | Steamgears Autopilot — plugin | daglig måling | 97,2 % → 98 % | +0,8 | 29,85 af 30,45 d (P0 4,65/4,65 · P1 14,45/15,05 · P2 4,75/4,75 · P3 2/2 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5) |
+| 2026-11-08 | steamgears.eu — site-optimering | daglig måling | 85,9 % → 88,6 % | +2,7 | 21,3 af 24,05 d (S0 2,35/2,35 · S1 3,9/4,6 · S2 7,85/8,3 · S3 3,5/3,55 · S4 3,7/5,25) |
+| 2026-11-08 | steamgears.eu — site-optimering | daglig måling | 82,5 % → 85,9 % | +3,4 | 20,65 af 24,05 d (S0 2,35/2,35 · S1 3,9/4,6 · S2 7,85/8,3 · S3 3,5/3,55 · S4 3,05/5,25) |
+| 2026-11-08 | steamgears.eu — site-optimering | daglig måling | 81,3 % → 82,5 % | +1,2 | 19,85 af 24,05 d (S0 2,35/2,35 · S1 3,9/4,6 · S2 7,85/8,3 · S3 3,5/3,55 · S4 2,25/5,25) |
+| 2026-11-08 | steamgears.eu — site-optimering | daglig måling | 80,2 % → 81,3 % | +1,1 | 19,55 af 24,05 d (S0 2,15/2,35 · S1 3,9/4,6 · S2 7,85/8,3 · S3 3,4/3,55 · S4 2,25/5,25) |
+| 2026-11-08 | steamgears.eu — site-optimering | daglig måling | 76,5 % → 80,2 % | +3,7 | 19,3 af 24,05 d (S0 2,15/2,35 · S1 3,75/4,6 · S2 7,85/8,3 · S3 3,3/3,55 · S4 2,25/5,25) |
+| 2026-11-08 | steamgears.eu — site-optimering | daglig måling | 71,9 % → 76,5 % | +4,6 | 18,4 af 24,05 d (S0 2,15/2,35 · S1 3,45/4,6 · S2 7,65/8,3 · S3 2,9/3,55 · S4 2,25/5,25) |
+| 2026-11-08 | steamgears.eu — site-optimering | daglig måling | 69,4 % → 71,9 % | +2,5 | 17,3 af 24,05 d (S0 2,15/2,35 · S1 2,75/4,6 · S2 7,6/8,3 · S3 2,55/3,55 · S4 2,25/5,25) |
 | 2026-11-08 | Døde internlinks | ingen ændring | 100 % → 100 % | 0 | 39 af 39 links |
-| 2026-11-08 | SEO-indholdsproduktion | ingen ændring | 57,1 % → 57,1 % | 0 | 4 af 7 guides (Publicerede guides (id 292, 296, 295) 0/3 · Guide-copy klar til publicering (292, 296, 295 + corset) 4/4) |
+| 2026-11-08 | SEO-indholdsproduktion | ingen ændring | 62,5 % → 62,5 % | 0 | 5 af 8 guides (Publicerede guides (id 292, 296, 295) 0/3 · Guide-copy klar til publicering (292, 296, 295 + corset) 4/4 · Corset-guiden publiceret (/steampunk-corset-guide/, 1394) 1/1) |
 | 2026-11-08 | Dark academia-rebrand | ingen ændring | 63 % → 63 % | 0 | 8,5 af 13,5 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5) |
-| 2026-11-08 | Steamgears Autopilot — plugin | ingen ændring | 55,6 % → 55,6 % | 0 | 13,55 af 24,35 d (P0 3,2/4 · P1 4,85/11,35 · P2 4,5/7 · P3 1/2) |
-| 2026-11-08 | steamgears.eu — site-optimering | ingen ændring | 57,9 % → 57,9 % | 0 | 12,6 af 21,75 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,7/6 · S3 2,45/3,55 · S4 1,4/5) |
+| 2026-11-08 | Steamgears Autopilot — plugin | ingen ændring | 97,2 % → 97,2 % | 0 | 29,6 af 30,45 d (P0 4,65/4,65 · P1 14,2/15,05 · P2 4,75/4,75 · P3 2/2 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5) |
+| 2026-11-08 | steamgears.eu — site-optimering | ingen ændring | 69,4 % → 69,4 % | 0 | 16,7 af 24,05 d (S0 2,15/2,35 · S1 2,15/4,6 · S2 7,6/8,3 · S3 2,55/3,55 · S4 2,25/5,25) |
+| 2026-11-07 | steamgears.eu — site-optimering | S2.9 + S4.10 + S4.12 + S4.13 deployet og verificeret live via Novamira (+0,35 d) | 68 % → 69,4 % | +1,4 | 16,7 af 24,05 d (S0 2,15/2,35 · S1 2,15/4,6 · S2 7,6/8,3 · S3 2,55/3,55 · S4 2,25/5,25) |
+| 2026-11-07 | steamgears.eu — site-optimering | S2.5b — OG-billede målt på alle 30 indlæg og fast værn (+0,15 d) + S0.4 bekræftet uden cache | 67,4 % → 68 % | +0,6 | 16,35 af 24,05 d (S0 2,15/2,35 · S1 2,15/4,6 · S2 7,5/8,3 · S3 2,55/3,55 · S4 2/5,25) |
+| 2026-11-07 | Steamgears Autopilot — plugin | daglig måling | 96,7 % → 97,2 % | +0,5 | 29,6 af 30,45 d (P0 4,65/4,65 · P1 14,2/15,05 · P2 4,75/4,75 · P3 2/2 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5) |
+| 2026-11-07 | Steamgears Autopilot — plugin | daglig måling | 96,5 % → 96,7 % | +0,2 | 30,35 af 31,4 d (P0 4,65/4,7 · P1 14,2/15,2 · P2 4,75/4,75 · P3 2,75/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5) |
+| 2026-11-07 | steamgears.eu — site-optimering | daglig måling | 65,9 % → 67,4 % | +1,5 | 16,2 af 24,05 d (S0 2,15/2,35 · S1 2,15/4,6 · S2 7,35/8,3 · S3 2,55/3,55 · S4 2/5,25) |
+| 2026-11-07 | Steamgears Autopilot — plugin | daglig måling | 96,3 % → 96,5 % | +0,2 | 30,3 af 31,4 d (P0 4,65/4,7 · P1 14,2/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5) |
+| 2026-11-07 | steamgears.eu — site-optimering | daglig måling | 65,3 % → 65,9 % | +0,6 | 15,85 af 24,05 d (S0 2,15/2,35 · S1 2,15/4,6 · S2 7,35/8,3 · S3 2,55/3,55 · S4 1,65/5,25) |
+| 2026-11-07 | steamgears.eu — site-optimering | scope-ændring S2.5b (OG-billede) | 66 % → 65,3 % | -0,7 | 15,7 af 24,05 d (S0 2,15/2,35 · S1 2,15/4,6 · S2 7,35/8,3 · S3 2,55/3,55 · S4 1,5/5,25) |
+| 2026-11-07 | steamgears.eu — site-optimering | daglig måling | 64,6 % → 66 % | +1,4 | 15,7 af 23,8 d (S0 2,15/2,35 · S1 2,15/4,6 · S2 7,35/8,05 · S3 2,55/3,55 · S4 1,5/5,25) |
+| 2026-11-07 | steamgears.eu — site-optimering | daglig måling | 64,6 % → 65,2 % | +0,6 | 15,85 af 24,3 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 7,35/8,05 · S3 2,55/3,55 · S4 1,65/5,25) |
+| 2026-11-07 | steamgears.eu — site-optimering | daglig måling | 64,4 % → 64,6 % | +0,2 | 15,7 af 24,3 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 7,35/8,05 · S3 2,55/3,55 · S4 1,5/5,25) |
+| 2026-11-07 | Steamgears Autopilot — plugin | daglig måling | 96,4 % → 96,3 % | -0,1 | 28,8 af 29,9 d (P0 4,65/4,7 · P1 14,2/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5) |
+| 2026-11-07 | Steamgears Autopilot — plugin | daglig måling | 96,3 % → 96,4 % | +0,1 | 29,3 af 30,4 d (P0 4,65/4,7 · P1 14,7/15,7 · P2 4,75/4,75 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5) |
+| 2026-11-07 | Steamgears Autopilot — plugin | daglig måling | 91,2 % → 96,3 % | +5,1 | 28,3 af 29,4 d (P0 4,65/4,7 · P1 14,2/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25) |
+| 2026-11-07 | Steamgears Autopilot — plugin | daglig måling | 91,1 % → 91,2 % | +0,1 | 26,8 af 29,4 d (P0 4,65/4,7 · P1 12,7/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25) |
+| 2026-11-07 | Steamgears Autopilot — plugin | daglig måling | 91 % → 91,1 % | +0,1 | 26,55 af 29,15 d (P0 4,65/4,7 · P1 12,7/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25) |
+| 2026-11-07 | Steamgears Autopilot — plugin | daglig måling | 90,9 % → 91 % | +0,1 | 26,3 af 28,9 d (P0 4,65/4,7 · P1 12,7/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25) |
+| 2026-11-07 | Steamgears Autopilot — plugin | daglig måling | 87,4 % → 90,9 % | +3,5 | 26,05 af 28,65 d (P0 4,65/4,7 · P1 12,7/15,2 · P2 4,75/4,75 · P3 2,45/2,5 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25) |
+| 2026-11-07 | Steamgears Autopilot — plugin | daglig måling | 87,3 % → 87,4 % | +0,1 | 25,05 af 28,65 d (P0 4,65/4,7 · P1 11,7/15,2 · P2 4,75/4,75 · P3 2,45/2,5 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25) |
+| 2026-11-07 | Steamgears Autopilot — plugin | roadmap-bogføring — Etsy afgjort, dobbelttælling fjernet (scope) | 80,3 % → 87,3 % | +7 | 24,8 af 28,4 d (P0 4,65/4,7 · P1 11,7/15,2 · P2 4,75/4,75 · P3 2,45/2,5 · P0.7 1/1 · P0.7c 0,25/0,25) |
+| 2026-11-07 | Steamgears Autopilot — plugin | daglig måling | 80,1 % → 80,3 % | +0,2 | 24,8 af 30,9 d (P0 4,65/4,7 · P1 11,7/15,2 · P2 4,5/7 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25) |
+| 2026-11-07 | Steamgears Autopilot — plugin | daglig måling | 79,8 % → 80,1 % | +0,3 | 24,55 af 30,65 d (P0 4,65/4,7 · P1 11,7/15,2 · P2 4,5/7 · P3 2,7/2,75 · P0.7 1/1) |
+| 2026-11-07 | Steamgears Autopilot — plugin | daglig måling | 79,4 % → 79,8 % | +0,4 | 24,05 af 30,15 d (P0 4,65/4,7 · P1 11,7/15,2 · P2 4,5/7 · P3 2,7/2,75 · P0.7 0,5/0,5) |
+| 2026-11-07 | Steamgears Autopilot — plugin | daglig måling | 77,7 % → 79,4 % | +1,7 | 23,55 af 29,65 d (P0 4,65/4,7 · P1 11,7/15,2 · P2 4,5/7 · P3 2,7/2,75) |
+| 2026-11-07 | Steamgears Autopilot — plugin | daglig måling | 76,7 % → 77,7 % | +1 | 23,05 af 29,65 d (P0 4,65/4,7 · P1 11,2/15,2 · P2 4,5/7 · P3 2,7/2,75) |
+| 2026-11-07 | steamgears.eu — site-optimering | daglig måling | 64 % → 64,4 % | +0,4 | 15,65 af 24,3 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 7,35/8,05 · S3 2,5/3,55 · S4 1,5/5,25) |
+| 2026-11-07 | steamgears.eu — site-optimering | daglig måling | 63,7 % → 64 % | +0,3 | 15,55 af 24,3 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 7,35/8,05 · S3 2,5/3,55 · S4 1,4/5,25) |
+| 2026-11-07 | Steamgears Autopilot — plugin | daglig måling | 76,3 % → 76,7 % | +0,4 | 22,75 af 29,65 d (P0 4,35/4,7 · P1 11,2/15,2 · P2 4,5/7 · P3 2,7/2,75) |
+| 2026-11-07 | Steamgears Autopilot — plugin | daglig måling | 76,1 % → 76,3 % | +0,2 | 22,25 af 29,15 d (P0 4,35/4,7 · P1 10,7/14,7 · P2 4,5/7 · P3 2,7/2,75) |
+| 2026-11-07 | Steamgears Autopilot — plugin | daglig måling | 75,7 % → 76,1 % | +0,4 | 21,95 af 28,85 d (P0 4,35/4,7 · P1 10,4/14,4 · P2 4,5/7 · P3 2,7/2,75) |
+| 2026-11-07 | steamgears.eu — site-optimering | daglig måling | 62 % → 63,7 % | +1,7 | 15,15 af 23,8 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 6,95/7,55 · S3 2,5/3,55 · S4 1,4/5,25) |
+| 2026-11-07 | Steamgears Autopilot — plugin | daglig måling | 75,2 % → 75,7 % | +0,5 | 21,45 af 28,35 d (P0 4,35/4,7 · P1 9,9/13,9 · P2 4,5/7 · P3 2,7/2,75) |
+| 2026-11-07 | Steamgears Autopilot — plugin | daglig måling | 74,9 % → 75,2 % | +0,3 | 20,95 af 27,85 d (P0 4,35/4,7 · P1 9,4/13,4 · P2 4,5/7 · P3 2,7/2,75) |
+| 2026-11-07 | steamgears.eu — site-optimering | daglig måling | 61,6 % → 62 % | +0,4 | 14,75 af 23,8 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 6,55/7,55 · S3 2,5/3,55 · S4 1,4/5,25) |
+| 2026-11-07 | steamgears.eu — site-optimering | S2.8 — hub-links på de resterende indlæg | 59,7 % → 61,6 % | +1,9 | 14,65 af 23,8 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 6,45/7,55 · S3 2,5/3,55 · S4 1,4/5,25) |
+| 2026-11-07 | steamgears.eu — site-optimering | daglig måling | 57,6 % → 59,7 % | +2,1 | 14,2 af 23,8 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 6/7,55 · S3 2,5/3,55 · S4 1,4/5,25) |
+| 2026-11-07 | steamgears.eu — site-optimering | S0.9 analytics — inline GA4-tag fjernet | 56,5 % → 57,6 % | +1,1 | 13,7 af 23,8 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 5,5/7,55 · S3 2,5/3,55 · S4 1,4/5,25) |
+| 2026-11-07 | Steamgears Autopilot — plugin | P0.2 — runway pr. kanal | 74,7 % → 74,9 % | +0,2 | 20,85 af 27,85 d = 74,9 % (11 nye checks, 555 PASS) |
+| 2026-11-07 | Steamgears Autopilot — plugin | daglig måling | 74 % → 74,7 % | +0,7 | 20,65 af 27,65 d (P0 4,05/4,5 · P1 9,4/13,4 · P2 4,5/7 · P3 2,7/2,75) |
+| 2026-11-07 | Døde internlinks | ingen ændring | 100 % → 100 % | 0 | 39 af 39 links |
+| 2026-11-07 | SEO-indholdsproduktion | ingen ændring | 62,5 % → 62,5 % | 0 | 5 af 8 guides (Publicerede guides (id 292, 296, 295) 0/3 · Guide-copy klar til publicering (292, 296, 295 + corset) 4/4 · Corset-guiden publiceret (/steampunk-corset-guide/, 1394) 1/1) |
+| 2026-11-07 | Dark academia-rebrand | ingen ændring | 63 % → 63 % | 0 | 8,5 af 13,5 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5) |
+| 2026-11-07 | Steamgears Autopilot — plugin | ingen ændring | 74 % → 74 % | 0 | 19,9 af 26,9 d (P0 4,05/4,5 · P1 9,4/13,4 · P2 4,5/7 · P3 1,95/2) |
+| 2026-11-07 | steamgears.eu — site-optimering | ingen ændring | 56,5 % → 56,5 % | 0 | 13,45 af 23,8 d (S0 1,9/2,85 · S1 2,15/4,6 · S2 5,5/7,55 · S3 2,5/3,55 · S4 1,4/5,25) |
+| 2026-11-06 | steamgears.eu — site-optimering | daglig måling | 56,3 % → 56,5 % | +0,2 | 13,45 af 23,8 d (S0 1,9/2,85 · S1 2,15/4,6 · S2 5,5/7,55 · S3 2,5/3,55 · S4 1,4/5,25) |
+| 2026-11-06 | steamgears.eu — site-optimering | daglig måling | 55,5 % → 56,3 % | +0,8 | 13,4 af 23,8 d (S0 1,9/2,85 · S1 2,15/4,6 · S2 5,5/7,55 · S3 2,45/3,55 · S4 1,4/5,25) |
+| 2026-11-06 | steamgears.eu — site-optimering | scope ændret — §9 P2–P5 indarbejdet (nævner 21,8 → 23,8 d) | 60,6 % → 55,5 % | -5,1 | 13,2 af 23,8 d (S0 1,9/2,85 · S1 2,15/4,6 · S2 5,3/7,55 · S3 2,45/3,55 · S4 1,4/5,25) |
+| 2026-11-06 | SEO-indholdsproduktion | daglig måling | 57,1 % → 62,5 % | +5,4 | 5 af 8 guides (Publicerede guides (id 292, 296, 295) 0/3 · Guide-copy klar til publicering (292, 296, 295 + corset) 4/4 · Corset-guiden publiceret (/steampunk-corset-guide/, 1394) 1/1) |
+| 2026-11-06 | steamgears.eu — site-optimering | daglig måling | 58,3 % → 60,6 % | +2,3 | 13,2 af 21,8 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 5,3/6,05 · S3 2,45/3,55 · S4 1,4/5) |
+| 2026-11-06 | Steamgears Autopilot — plugin | P1.4 — evergreen recycling | 64,7 % → 74 % | +9,3 | 19,9 af 26,9 d (P0 4,05/4,5 · P1 9,4/13,4 · P2 4,5/7 · P3 1,95/2) — P1.4 2,5 d færdig i 7.41.0 |
+| 2026-11-06 | Steamgears Autopilot — plugin | P0.6 færdig + P0-budget rettet | 65 % → 64,7 % | -0,3 | 17,4 af 26,9 d (P0 4,05/4,5 · P1 6,9/13,4 · P2 4,5/7 · P3 1,95/2); P0-budgettet 4,0 → 4,5 d fordi P0.6 aldrig var budgetteret, og P0.6 gik 0,25 → 0,5 d |
+| 2026-11-06 | Steamgears Autopilot — plugin | daglig måling | 64 % → 65 % | +1 | 17,15 af 26,4 d (P0 3,8/4 · P1 6,9/13,4 · P2 4,5/7 · P3 1,95/2) |
+| 2026-11-06 | Steamgears Autopilot — plugin | daglig måling | 63,6 % → 64 % | +0,4 | 16,9 af 26,4 d (P0 3,55/4 · P1 6,9/13,4 · P2 4,5/7 · P3 1,95/2) |
+| 2026-11-06 | Steamgears Autopilot — plugin | daglig måling | 62,5 % → 63,6 % | +1,1 | 16,6 af 26,1 d (P0 3,55/4 · P1 6,6/13,1 · P2 4,5/7 · P3 1,95/2) |
+| 2026-11-06 | Steamgears Autopilot — plugin | daglig måling | 61,8 % → 62,5 % | +0,7 | 15,85 af 25,35 d (P0 3,55/4 · P1 5,85/12,35 · P2 4,5/7 · P3 1,95/2) |
+| 2026-11-06 | Steamgears Autopilot — plugin | daglig måling | 61,4 % → 61,8 % | +0,4 | 15,35 af 24,85 d (P0 3,55/4 · P1 5,35/11,85 · P2 4,5/7 · P3 1,95/2) |
+| 2026-11-06 | Steamgears Autopilot — plugin | daglig måling | 61 % → 61,4 % | +0,4 | 15,1 af 24,6 d (P0 3,55/4 · P1 5,1/11,6 · P2 4,5/7 · P3 1,95/2) |
+| 2026-11-06 | Steamgears Autopilot — plugin | daglig måling | 59,3 % → 61 % | +1,7 | 14,85 af 24,35 d (P0 3,55/4 · P1 4,85/11,35 · P2 4,5/7 · P3 1,95/2) |
+| 2026-11-06 | Steamgears Autopilot — plugin | daglig måling | 58,5 % → 59,3 % | +0,8 | 14,45 af 24,35 d (P0 3,55/4 · P1 4,85/11,35 · P2 4,5/7 · P3 1,55/2) |
+| 2026-11-06 | Steamgears Autopilot — plugin | daglig måling | 57,5 % → 58,5 % | +1 | 14,25 af 24,35 d (P0 3,55/4 · P1 4,85/11,35 · P2 4,5/7 · P3 1,35/2) |
+| 2026-11-06 | Døde internlinks | ingen ændring | 100 % → 100 % | 0 | 39 af 39 links |
+| 2026-11-06 | SEO-indholdsproduktion | ingen ændring | 57,1 % → 57,1 % | 0 | 4 af 7 guides (Publicerede guides (id 292, 296, 295) 0/3 · Guide-copy klar til publicering (292, 296, 295 + corset) 4/4) |
+| 2026-11-06 | Dark academia-rebrand | ingen ændring | 63 % → 63 % | 0 | 8,5 af 13,5 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5) |
+| 2026-11-06 | Steamgears Autopilot — plugin | ingen ændring | 57,5 % → 57,5 % | 0 | 14 af 24,35 d (P0 3,55/4 · P1 4,85/11,35 · P2 4,5/7 · P3 1,1/2) |
+| 2026-11-06 | steamgears.eu — site-optimering | ingen ændring | 58,3 % → 58,3 % | 0 | 12,7 af 21,8 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,8/6,05 · S3 2,45/3,55 · S4 1,4/5) |
+| 2026-11-05 | steamgears.eu — site-optimering | daglig måling | 58,2 % → 58,3 % | +0,1 | 12,7 af 21,8 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,8/6,05 · S3 2,45/3,55 · S4 1,4/5) |
+| 2026-11-05 | Steamgears Autopilot — plugin | daglig måling | 56,3 % → 57,5 % | +1,2 | 14 af 24,35 d (P0 3,55/4 · P1 4,85/11,35 · P2 4,5/7 · P3 1,1/2) |
+| 2026-11-05 | Døde internlinks | ingen ændring | 100 % → 100 % | 0 | 39 af 39 links |
+| 2026-11-05 | SEO-indholdsproduktion | ingen ændring | 57,1 % → 57,1 % | 0 | 4 af 7 guides (Publicerede guides (id 292, 296, 295) 0/3 · Guide-copy klar til publicering (292, 296, 295 + corset) 4/4) |
+| 2026-11-05 | Dark academia-rebrand | ingen ændring | 63 % → 63 % | 0 | 8,5 af 13,5 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5) |
+| 2026-11-05 | steamgears.eu — site-optimering | ingen ændring | 58,2 % → 58,2 % | 0 | 12,65 af 21,75 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,75/6 · S3 2,45/3,55 · S4 1,4/5) |
+| 2026-11-04 | Døde internlinks | ingen ændring | 100 % → 100 % | 0 | 39 af 39 links |
+| 2026-11-04 | SEO-indholdsproduktion | ingen ændring | 57,1 % → 57,1 % | 0 | 4 af 7 guides (Publicerede guides (id 292, 296, 295) 0/3 · Guide-copy klar til publicering (292, 296, 295 + corset) 4/4) |
+| 2026-11-04 | Dark academia-rebrand | ingen ændring | 63 % → 63 % | 0 | 8,5 af 13,5 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5) |
+| 2026-11-04 | Steamgears Autopilot — plugin | ingen ændring | 56,3 % → 56,3 % | 0 | 13,7 af 24,35 d (P0 3,35/4 · P1 4,85/11,35 · P2 4,5/7 · P3 1/2) |
+| 2026-11-04 | steamgears.eu — site-optimering | daglig måling | 57,9 % → 58,2 % | +0,3 | 12,65 af 21,75 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,75/6 · S3 2,45/3,55 · S4 1,4/5) |
+| 2026-11-03 | Steamgears Autopilot — plugin | daglig måling | 55,6 % → 56,3 % | +0,7 | 13,7 af 24,35 d (P0 3,35/4 · P1 4,85/11,35 · P2 4,5/7 · P3 1/2) |
 | 2026-11-03 | Steamgears Autopilot — plugin | daglig måling | 45,4 % → 55,6 % | +10,2 | 13,55 af 24,35 d (P0 3,2/4 · P1 4,85/11,35 · P2 4,5/7 · P3 1/2) |
 | 2026-11-03 | Steamgears Autopilot — plugin | daglig måling | 41,3 % → 45,4 % | +4,1 | 11,05 af 24,35 d (P0 3,2/4 · P1 4,85/11,35 · P2 2/7 · P3 1/2) |
 | 2026-11-03 | Steamgears Autopilot — plugin | daglig måling | 37,2 % → 41,3 % | +4,1 | 10,05 af 24,35 d (P0 3,2/4 · P1 4,85/11,35 · P2 1/7 · P3 1/2) |
@@ -106,18 +203,23 @@ Nyeste først. Append-only — rækker må ikke slettes eller ændres.
 
 ---
 
-## 4. Regnskab for roadmap-procenten (21,1 developer-dage)
+## 4. Regnskab for roadmap-procenten (21,95 developer-dage)
 
-Manuel tabel — opdateres når roadmap-estimaterne ændres, ikke af scriptet.
+Manuel tabel — opdateres når roadmap-estimaterne ændres, ikke af scriptet. Tallene skal matche
+`projektstatus.json`, ellers er der to sandheder om samme beløb.
 
 | Band | Estimat | Udført | Rest |
 | --- | --- | --- | --- |
-| S0 — brudt/akut | 2,6 d | 1,9 d | 0,7 d (robots.txt, Health Check, Coming Soon, bot-adgang, 2 vanity-301) |
-| S1 — butik og indhold | 4,5 d | 2,05 d | 2,45 d (`/go/`-tracking, lead magnets, resten af kladde-triage) |
-| S2 — struktur og SEO | 6,0 d | 4,45 d | 1,55 d (11 meta-rettelser, 2 H1'er, nav-punkter, `/shipping/` + `/returns/`) |
-| S3 — hygiejne | 3,0 d | 1,6 d | 1,4 d (webp, designsider, plugins) |
-| S4 — salgsklar butik | 5,0 d | 1,4 d | 3,6 d (valuta, betaling, anmeldelser) |
-| **I alt** | **21,1 d** | **11,4 d** | **9,7 d** |
+| S0 — brudt/akut | 2,35 d | 2,35 d | 0 (S0.6 mangler kun ejerens GSC-svar) |
+| S1 — butik og indhold | 3,9 d | 3,4 d | 0,5 d — S1.2, ejer-blokeret (ja/nej pr. produkt) |
+| S2 — struktur og SEO | 6,9 d | 6,9 d | 0 |
+| S3 — hygiejne | 3,55 d | 3,55 d | 0 |
+| S4 — salgsklar butik | 5,25 d | 3,85 d | 1,4 d — alt sammen ejer-blokeret (S4.1/4.2/4.3/4.5/4.6/4.7/4.9) |
+| **I alt** | **21,95 d** | **20,05 d** | **1,9 d** |
 
-Kilde: [`roadmap.md`](roadmap.md) §4 og
-[`seo.md`](seo.md) §5 (målt 1/11).
+Nævneren faldt 8/11 fra 24,05 d til 21,95 d som en dokumenteret scope-korrektion: S2.1 er 1,6 d
+(seks børne-hubs bygges ikke, fordi de ville duplikere publicerede indlæg) og S1.6 er 0,3 d
+(den målte leverance), ikke 1,0 d.
+
+Kilde: [`roadmap.md`](roadmap.md) §4 og §4c samt
+[`seo.md`](seo.md) §5 (målt 1/11, revideret 8/11).

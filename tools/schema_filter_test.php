@@ -88,6 +88,36 @@ t('levering: DK 6-10 dage',
 t('levering: unitCode DAY', ($dk['deliveryTime']['transitTime']['unitCode'] ?? '') === 'DAY');
 t('levering: ingen opdigtet fragtpris', !isset($dk['shippingRate']));
 
+// Produktionstiden er sitets egen tekst (/shipping/): 3-7 hverdage foer afsendelse. Google
+// forventer at den staar som handlingTime ved siden af transitTime, ikke som en del af den.
+t('levering: DK har produktionstid 3-7 dage',
+    ($dk['deliveryTime']['handlingTime']['minValue'] ?? 0) === 3
+    && ($dk['deliveryTime']['handlingTime']['maxValue'] ?? 0) === 7, $dk['deliveryTime'] ?? null);
+t('levering: produktionstid i DAY',
+    ($dk['deliveryTime']['handlingTime']['unitCode'] ?? '') === 'DAY');
+
+$eu = null;
+foreach ((array) $ship as $detail) {
+    $dest = $detail['shippingDestination']['addressCountry'] ?? null;
+    if (is_array($dest) && count($dest) === 26) {
+        $eu = $detail;
+    }
+}
+t('levering: resten af EU findes (26 lande)', $eu !== null);
+t('levering: EU 7-12 dage',
+    ($eu['deliveryTime']['transitTime']['minValue'] ?? 0) === 7
+    && ($eu['deliveryTime']['transitTime']['maxValue'] ?? 0) === 12, $eu);
+t('levering: EU har ogsaa produktionstid', ($eu['deliveryTime']['handlingTime']['maxValue'] ?? 0) === 7);
+t('levering: kun ét deliveryTime pr. destination', count((array) ($dk['deliveryTime'] ?? [])) === 3);
+
+// Nye varer, ikke brugte: butikken er print-on-demand og saelger ikke retourvarer.
+t('offer: itemCondition = NewCondition',
+    ($enriched['offers']['itemCondition'] ?? '') === 'https://schema.org/NewCondition',
+    $enriched['offers']['itemCondition'] ?? null);
+t('offer: en allerede sat itemCondition overskrives ikke',
+    (sgap_schema_enrich_offer(['itemCondition' => 'https://schema.org/UsedCondition'])['itemCondition'] ?? '')
+    === 'https://schema.org/UsedCondition');
+
 // --- idempotens: filtre kan køre flere gange (Rank Math + cache)
 $twice = sgap_product_schema_enrich($after);
 $twiceProduct = null;
@@ -110,6 +140,13 @@ $multiple = ['@type' => 'Product', 'offers' => [
 $enrichedMulti = sgap_schema_enrich_product($multiple);
 t('flere offers: begge beriget',
     isset($enrichedMulti['offers'][0]['hasMerchantReturnPolicy'], $enrichedMulti['offers'][1]['hasMerchantReturnPolicy']));
+t('flere offers: begge har itemCondition',
+    isset($enrichedMulti['offers'][0]['itemCondition'], $enrichedMulti['offers'][1]['itemCondition']));
+
+// Graensen mod fabrikation: returfragten maa ikke pludselig staa som gratis.
+t('returret: ingen opdigtet returnFees', !isset($policy['returnFees']), $policy['returnFees'] ?? null);
+t('returret: returnMethod er ReturnByMail',
+    ($policy['returnMethod'] ?? '') === 'https://schema.org/ReturnByMail');
 
 echo PHP_EOL;
 echo $failures === 0 ? "OK — alle påstande består\n" : "FEJL — $failures påstand(e) fejlede\n";

@@ -11,11 +11,14 @@ design/CSS, backup-data, dokumentation og status.
 | [`docs/library/sitewide-audit-2026-11-03.md`](docs/library/sitewide-audit-2026-11-03.md) | Sitewide audit: prioriterede P0–P2-risici og anbefalede funktioner til WooCommerce-butikken |
 | [`docs/library/deploy-roadmap-2026-11-03.md`](docs/library/deploy-roadmap-2026-11-03.md) | Deployment-roadmap: faser, estimater, porte for backup/rollback og testliste før og efter live |
 | [`docs/roadmap.md`](docs/roadmap.md) | Optimeringsplanen for sitet, S0–S4 med tidestimater og blokeringer |
+| [`design.md`](design.md) | **Den visuelle identitet** — typografi, farver, komponenter og det lag `css/sg-design-system.css` lægger på siden (§14) |
 | [`docs/seo.md`](docs/seo.md) | SEO-regler, GEO-skabelon og måling |
 | [`docs/library/seo-audit-2026-11-02.md`](docs/library/seo-audit-2026-11-02.md) | **Bred SEO-audit 2/11** — score 56,5/100, 21 fund med bevis, roadmap og tid til 100 % (PDF i `reports/seo-audit-2026-11-02.pdf`) |
 | [`docs/projektstatus.md`](docs/projektstatus.md) | Daglig procentstatus pr. projekt, beregnet af `projektstatus.py` |
+| [`docs/samtalepunkter.md`](docs/samtalepunkter.md) | Samtalens vigtigste punkter — beslutninger, fund og næste skridt, opdateret ved ~95 % context af `tools/samtalepunkter.py` |
 | [`AGENTS.md`](AGENTS.md) | Arbejdsregler: hvert pass melder % før → efter med grundlag, og §7 dækker plugin-arbejdet |
 | [`docs/agent-profil.md`](docs/agent-profil.md) | **Agentprofil** — alt en bot skal vide: fakta, adgang, opskrifter, fælder. Kan også hentes over MCP |
+| [`docs/steamgears-autopilot-projektbeskrivelse-2026-11-06.md`](docs/steamgears-autopilot-projektbeskrivelse-2026-11-06.md) | **Projektbeskrivelse af Autopilot-pluginnet** (7.38.2): filstruktur, roadmap, AIMLAPI- og nøglehåndtering — copy-paste-klar til et eksternt AI-værktøj |
 
 Nye audits og research lægges i `docs/library/` og skrives ind i [dokumentindekset](docs/library/README.md),
 så de ikke bliver forældreløse (`AGENTS.md` §5).
@@ -30,7 +33,7 @@ så de ikke bliver forældreløse (`AGENTS.md` §5).
 | `docs/daily-briefs/` | Én brief pr. dag (`AUTO:PROJEKTSTATUS` skrives af CI) |
 | `docs/site-checks/` | Rutine-tjek af den live side: PageSpeed, GSC, meta, alt-tekster |
 | `reports/` | PDF-projektrapport pr. projekt: status med regnestykket, roadmap-indeks, udviklingsvej og hvad der virker/ikke virker |
-| `wordpress/mu-plugins/` | Deploybare mu-plugins til sitet — i dag `sgap-product-schema.php` (brand, returret, leveringstid) |
+| `wordpress/mu-plugins/` | Deploybare mu-plugins til sitet — i dag `sgap-product-schema.php` (brand, returret, leveringstid) og `sgap-mcp-schema-fix.php` + `aimlapi-tool-schema-sanitizer.php` (folder oneOf/anyOf/allOf ud af ability-skemaer) |
 | `plugins/steamgears-autopilot/` | Autopilot-pluginnet, dets egen `ROADMAP.md` og release-zip i `plugins/` |
 | `css/` | Live template part `extendable//header` (Dark Clockwork Theatre v3) |
 | `knowledge_base/` | Høstede Google-kilder; læses af `seo_agent.py` sammen med `docs/seo.md` |

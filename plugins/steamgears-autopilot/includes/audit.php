@@ -63,8 +63,10 @@ class SGAP_Audit {
 
     /** HTTP status carried by a WP_Error from the Publer client, or 0 when the failure was local. */
     public static function status_of($error): int {
-        if (is_wp_error($error) && is_array($error->data) && isset($error->data['status'])) {
-            return self::clamp_status((int) $error->data['status']);
+        // WP_Error has no public $data: read it through get_error_data() (the real class warns otherwise).
+        $data = is_wp_error($error) ? $error->get_error_data() : null;
+        if (is_array($data) && isset($data['status'])) {
+            return self::clamp_status((int) $data['status']);
         }
         return 0;
     }
@@ -173,8 +175,6 @@ class SGAP_Audit {
         $per_page = 50;
 
         SGAP_Admin::open('Publish log', 'Every publish attempt: what was sent, what came back, and who started it.');
-        echo '<div class="notice notice-info inline"><p>Kept for ' . esc_html((string) self::keep_days()) . ' days (Settings → Alerts and log). '
-            . 'The Queue page shows the current state; this page shows the history behind it.</p></div>';
 
         if (!SGAP_Admin::table_exists(self::table())) {
             SGAP_UI::empty_state('warning', 'The log table is missing: deactivate and reactivate the plugin.');
@@ -182,6 +182,8 @@ class SGAP_Audit {
             return;
         }
 
+        // Two questions, in the order they are asked: what am I looking at, and what happened.
+        SGAP_UI::section('Filter', 'Kept for ' . self::keep_days() . ' days (Settings → Alerts and log). The Queue page shows the current state; this page shows the history behind it.');
         $filters = '';
         foreach (['' => 'All'] + self::OUTCOMES as $key => $label) {
             $filters .= '<a class="sgap-pill' . ($outcome === $key ? ' on' : '') . '" style="text-decoration:none" href="'
@@ -191,14 +193,34 @@ class SGAP_Audit {
 
         $total = self::total($outcome, $channel);
         $rows = self::rows($outcome, $channel, $per_page, ($paged - 1) * $per_page);
-        if (!$rows && $paged === 1 && $outcome === '' && $channel === '') {
-            SGAP_UI::empty_state('list-view', 'Nothing has been published yet. The first attempt shows up here.');
+        if (!$rows) {
+            $unfiltered = $outcome === '' && $channel === '' && $total === 0;
+            SGAP_UI::empty_state($unfiltered ? 'list-view' : 'search', $unfiltered
+                ? 'Nothing has been published yet. The first attempt shows up here.'
+                : 'No attempts match this filter.');
             SGAP_Admin::close();
             return;
         }
-        if (!$rows) {
-            SGAP_UI::empty_state('search', 'No attempts match this filter.');
+
+        // Counted from the rows on screen, so the numbers always describe what is below them.
+        $ok = 0;
+        $failed = 0;
+        $other = 0;
+        foreach ($rows as $row) {
+            if (in_array($row->outcome, ['sent', 'rss', 'published'], true)) {
+                $ok++;
+            } elseif ($row->outcome === 'failed') {
+                $failed++;
+            } else {
+                $other++;
+            }
         }
+        SGAP_UI::section('Attempts', $total === 1 ? 'One attempt in total, newest first.' : $total . ' attempts in total, newest first.');
+        echo '<div class="sgap-metrics">'
+            . SGAP_UI::metric('Sent', $ok, 'on this page')
+            . SGAP_UI::metric('Failed', $failed, 'on this page')
+            . SGAP_UI::metric('Requeued or held', $other, 'on this page')
+            . '</div>';
 
         echo '<div class="sgap-scroll"><table class="widefat striped sgap-qtable"><thead><tr>'
             . '<th>When</th><th>Channel</th><th>Outcome</th><th>HTTP</th><th>Actor</th><th>Response</th><th>Queue</th>'

@@ -18,23 +18,24 @@ typisk en voksen, der skal til cosplay, halloween, marked eller et temafest — 
 | --- | --- |
 | Platform | WordPress 7.1.4 + WooCommerce, PHP 8.5.12, hostet hos **Simply** |
 | Repo | Dokumentation, assets, plugin-kilde og status — **ikke** live-koden. Sitet ændres over MCP |
-| Katalog | **56 publicerede produkter** (målt 2/11; heraf Herbarium-serien 953–972), produceret via **Printify** |
-| Indhold | **29 sider** + 18 guides i guide-stakken; sitemap har **108 URL'er** der alle svarer 200 |
+| Katalog | **24 produkter** målt 8/11: **20 publicerede, 4 kladder**, 26 billeder i alt (højst 2 pr. produkt); produceret via **Printful**. Ældre logger nævner Printify-plugin'et, som ikke er leverandøren |
+| Indhold | **29 sider** + 18 guides i guide-stakken; seneste roadmap måler sitemap og live-siderne |
 | Sprog | Engelsk på sitet, **dansk i commits og dokumentation** (tekniske termer på engelsk) |
 | Design | "Dark Clockwork Theatre v3"; template part til headeren ligger i [`css/`](../css/) |
 
-Der er **fem aktive projekter**, alle målt i [`projektstatus.json`](../projektstatus.json):
+Der er **seks aktive projekter**, alle målt i [`projektstatus.json`](../projektstatus.json) (status pr. 8/11 2026):
 
 | id | Projekt | Status | Enhed |
 | --- | --- | --- | --- |
-| `site` | steamgears.eu — site-optimering | 54,0 % (11,4 af 21,1 d) | developer-dage |
-| `plugin` | Steamgears Autopilot — plugin | 29,0 % (6,95 af 24,0 d) | developer-dage |
-| `rebrand` | Dark academia-rebrand | 63,0 % (8,5 af 13,5 t) | timer |
-| `seo` | SEO-indholdsproduktion | 0,0 % (0 af 3 guides) | guides |
-| `links` | Døde internlinks | 100 % (39 af 39 links) | links |
+| `site` | steamgears.eu — site-optimering | **100 %** (20,95 af 20,95 d) | developer-dage |
+| `plugin` | Steamgears Autopilot — plugin | **100 %** (29,85 af 29,85 d) | developer-dage |
+| `rebrand` | Dark academia-rebrand | **62,5 %** (9 af 14,4 t) | timer |
+| `seo` | SEO-indholdsproduktion | **100 %** (8 af 8 guides) | guides |
+| `links` | Døde internlinks | **100 %** (39 af 39 links) | links |
+| `niche` | Niche-butik — plugin P4 | **100 %** (1 af 1 d) | developer-dage |
 
 Roadmap'erne: [`docs/roadmap.md`](roadmap.md) (site, S0–S4) og
-[`plugins/steamgears-autopilot/ROADMAP.md`](../plugins/steamgears-autopilot/ROADMAP.md) (plugin, P0–P3).
+[`plugins/steamgears-autopilot/ROADMAP.md`](../plugins/steamgears-autopilot/ROADMAP.md) (plugin, P0–P4).
 PDF-rapport pr. projekt ligger i [`reports/`](../reports/).
 
 ---
@@ -67,28 +68,41 @@ funktionen, ikke en fejl.
 
 ## 3. Faktakort — verificeret, ikke antaget
 
-Alt her er målt mod den live side eller læst i kilden. Er noget ændret siden 2/11 2026, mål igen.
+Dette kort er afstemt mod målinger og status pr. **8/11 2026**. Nyere live-tal findes i [`docs/roadmap.md`](roadmap.md), [`projektstatus.json`](../projektstatus.json) og de daterede kilder i `docs/library/`; gamle målinger nedenfor er markeret som historik.
 
 **Sitet**
 
-- 108 sitemap-URL'er svarer 200; 0 fejl i sitemap; 0 døde interne links (39 rettet, hvert mål crawlet igen).
-- Titler over 62 tegn: 19 → 0. Manglende meta descriptions: 3 → 0. Billeder uden alt-tekst: 0 af 210.
-- Tre hubs er bygget: `/start-here/` (id 1183, børn 1205/1208/1211), `/build/` (id 1185, børn 1214/1217)
-  og `/inspiration/` (id **1243**, verificeret 2/11 via REST). Det er 9 af de 13 sider S2.1 beskriver.
-- `/shipping/` og `/returns/` **findes ikke** (REST `pages?slug=` → `[]`). Copy ligger klar i
-  `library/roadmap-status-2026-11-02.md` §5, med `[EJER]`-felter markeret.
-- Navigationen er `wp:page-list` og viser **alle 29 sider**, inkl. `/cart/`, `/checkout/`, `/my-account/`,
-  `/opt-out-preferences/`. Spec ligger klar i `docs/library/navigation-spec-2026-11-02.md` (S2.3).
-- Butikken prissætter i **USD**; Complianz kører **US opt-out**; kun **Stripe** som betaling.
-- `/shop/` tager ~5,8 s og ~470 KB; produktside har ~151 KB inline CSS og ~105 scripts.
-- GA4 fyrer **dobbelt** på hvert pageview, så konverteringer kan ikke aflæses sikkert.
+- Kataloget blev målt 8/11 til **24 produkter (20 publiceret, 4 kladder)**; 46 gamle kladder er i papirkurven.
+  Alle 24 har færre end 3 billeder (26 samlet), og 0 af 41 billeder i brug mangler alt-tekst.
+- Alle **33 af 33 publicerede indlæg** har mindst ét `/go/`-link; de 22 unikke id'er er målt 302 → produkt → 200,
+  og ingen peger på en kladde. Se [`library/s15-produktlink-daekning-2026-11-08.md`](library/s15-produktlink-daekning-2026-11-08.md).
+- `/start-here/`, `/build/`, `/inspiration/`, `/shipping/` og `/returns/` er live; shop-H1, mobilheader,
+  designsystem og payload-loft er målt og lukket i [`docs/roadmap.md`](roadmap.md) §4.
+- `/shop/` målte 263 070 bytes og 2,93–3,16 s 8/11 (mod tidligere 470 KB / 5,8 s). Shoppen bruger fortsat USD,
+  Complianz er fortsat US opt-out, og Stripe er den eneste betalingsaftale — ejerbeslutninger står i §4c.
+- GA4-dobbelttællingen blev rettet 7/11 i Rank Maths option: én `page_view` blev målt på `/`, `/?nocache=1`
+  og `/shop/`; Ads-tagget blev bevaret. Kilde: [`library/analytics-dobbelt-2026-11-06.md`](library/analytics-dobbelt-2026-11-06.md).
+- GSC Crawl stats → By response er stadig ejer-blokeret; se S0.6 i roadmappet. Tal og resterende butikspunkter
+  skal læses fra den aktuelle roadmap frem for de gamle audits.
 
-**Pluginnet** (`plugins/steamgears-autopilot/`, v7.25.0)
+**Pluginnet** (`plugins/steamgears-autopilot/`)
 
-- **Version i repo mod live:** repo **7.25.0**, sitet **7.22.0** (målt 2/11 med `wp_get_plugins`) — et
-  plugin-folder kan kun skiftes af WordPress selv, så en release slutter med ejerens *Plugins → Update*-klik,
-  ikke med et push. Status: `docs/roadmap.md` §2b; procedure og efterkontrol: plugin-README §Updates.
-- 22 PHP-filer, 8.460 linjer, 1.203 linjer tests; **21 af 22 subsystemer er live**. Version **7.19.0** tilføjede
+- **Version i repo mod live:** repo **7.64.9**, live **7.64.6, aktív** (8/11 2026: `Plugin_Upgrader` fra
+  release-zippen, og de installerede filer er SHA-1-identiske med kilden; `SGAP_VERSION` svarer 7.64.6 i et
+  frisk request. 7.64.7 er tokenrettelsen, 7.64.8 gør kanalstatus entydig, og 7.64.9 gør P1.5 målbar
+  (`channel-health`-abilityen + `tools/live_channels.py`); alle tre venter på ejerens *Plugins → Update*-klik). Ældre
+  historik: 7.58.2 blev lagt på 7/11 med `wp plugin install` fra
+  repoets zip og `wp plugin activate` gennem Novamira; `/wp-json/sgap/v1` svarer 200 med 19 ruter, inkl. de tre
+  `/facebook/*`). Vejen dertil kostede en runde: 7.58.0 lå på disken men var **inaktiv**, WooCommerce var også
+  inaktiv, og `mu-plugins/sga-payload-trim.php:134` kaldte `is_woocommerce()` → **500 på hver side**. Efter
+  aktiveringen blev 500 ved med at komme fra **W3 Total Caches cachede fatale side**, indtil `w3tc_flush_all()`.
+  Plugin-listen er ryddet (18 slettet, 5 beholdt inaktive fordi de har data): se
+  [library/genaktivering-og-oprydning-2026-11-07.md](library/genaktivering-og-oprydning-2026-11-07.md). 7.58.1 retter de fire referencer til
+  `SGAP_REST::NS`; se `docs/library/rest-nedbrud-7-58-0-2026-11-07.md`. Et plugin-folder kan kun skiftes af
+  WordPress selv, så en release slutter med ejerens *Plugins → Update*-klik, ikke med et push.
+  Status: `docs/roadmap.md` §2b; procedure og efterkontrol: plugin-README §Updates.
+- 58 klasser, 45 PHP-filer, 20.424 linjer (målt 8/11 på 7.64.9); hvert subsystem kan nås fra en rigtig
+  indgang (cron, REST, admin-side, ability eller AJAX). Version **7.19.0** tilføjede
   helsides SEO/GEO/AEO-auditten (`includes/site-seo.php`), som erstatter den per-side-optimering der krævede
   ét klik pr. URL. **7.20.0** tilføjede pre-flight-valideringen (`includes/preflight.php`): hver kø-post tjekkes
   mod nettets egne grænser før det første Publer-kald, og det der kan rettes mekanisk (caption-længde, hashtags)
@@ -99,20 +113,40 @@ Alt her er målt mod den live side eller læst i kilden. Er noget ændret siden 
   (`includes/meta-audit.php`): en læsende gennemgang af titler og metabeskrivelser med de værste poster først.
   **7.24.0** gjorde `utm_campaign` til en parameter:
   indstillingen *Campaign name* plus et `campaign`-felt pr. post i `/queue` og `queue-post`, så en navngivet
-  kampagne kan måles i GA4 ved siden af evergreen-strømmen. 233 smoke-checks, alle grønne.
+  kampagne kan måles i GA4 ved siden af evergreen-strømmen. **7.53.1** tilføjede fejlsøgning som fast kørsel
+  (`tools/fejlscan.py`, værn nr. 23–24) og rettede fem fejl i Pinterest-modulet og dets tests — se
+  `docs/library/fejlsogning-fast-vaern-2026-11-07.md`. **7.54.0** tilføjede Instagram-insights (P1.5c):
+  `includes/instagram.php` læser `views`, `likes`, `comments`, `shares` og `saved` pr. medie — `views` afløser
+  det deprecerede `impressions`, en metric Instagram endnu ikke har rapporteret udelades i stedet for at blive
+  gemt som 0, og matchningen sker på captionen mod `/go/<id>/`. **7.57.0** gjorde fejlsøgningen til et fast
+værn, og **7.58.0** tilføjede Facebook-siden som kanal (P2.6): publicering, insights og moderation med
+direkte publicering som opt-in. **1 128 smoke-checks, alle grønne** (målt 8/11 2026, efter 7.64.9).
+- **Niche-butikken (P4) er færdig og målt live:** ét niche-navn blev til 5 kollektioner (210–214), 8
+  produktkladder (1517–1524) med `_price`/`_regular_price`/SKU/`_sgap_niche`, en sideskits (1525) og en
+  `wp_navigation` (1526) med 8 links — og rollback via admin-knappen slettede alle 15 rækker og gav en
+  tilstand identisk med før-kørslen. 1,0 af 1,0 d, 100 %. Kilde:
+  [`library/niche-butik-2026-11-08.md`](library/niche-butik-2026-11-08.md).
 - Kæden virker: generér → godkend → publicér (RSS eller Publer API) → mål.
 - Self-updateren virker: zip i repoet er **byte-identisk** med kilden; 20 versioner på fire dage.
 - 9 AJAX- og 5 admin_post-handlere har capability + nonce; **kun ét `wp_mail`** i hele pluginnet (ugerapport).
-- Mangler: fejl-alarmering, backoff, auditlog, kø-udtørrings-alarm, 15 ubrugte indstillinger, 1 død metode
-  (`SGAP_Admin::get_setting_help_link()`), og fem Etsy-felter der lover en integration der ikke findes.
-- `uninstall.php` rydder 8 tabeller, alle `sgap_%` options/transients og 9 cron-hooks.
+- **Mangler (målt 8/11):** kun den **live-verifikation** der kræver ejerens tokens. Alle seks kanaler er bygget
+  (P1.5a–c) og kanalstatus skelner `ready`/`needs_refresh`/`missing_token`/`refused`/`needs_scope`.
+  Pinterest har nu et token — det ligger i **Pinterest for WooCommerce**, og 7.64.6 læser det gennem
+  integrationens egen dekryptering, men appen mangler `boards:read`, så `/pins` afvises; de fem andre kanaler
+  har intet token. P3.1 er lukket: `labor_rate` læses (7.59.0). Alt det andet er bygget:
+  fejl-alarmering, kø-udtørrings-alarm, backoff og auditlog (P0.1–P0.5), P1.4 evergreen-recycling (7.41.0),
+  Etsy skjult med manuel import (7.33.4), og den døde metode plus de ni usynlige indstillinger er væk.
+- `uninstall.php` rydder 9 tabeller, alle `sgap_%` options/transients og 12 cron-hooks plus `sgap`-gruppen i Action Scheduler.
 - Cron er WP-Cron på et cachet site → publicering kan blive forsinket (`DISABLE_WP_CRON` detekteres).
 
 **Rebrand**
 
-- 39 designs kortlagt: 21 dark academia, 6 gothic, 7 steampunk. 32 af 39 har nye titler + SEO-titel + meta.
-- 6 kollektioner, 39 nye produkttekster med GPSR-blok. **Mockups er 0 af 5 timer** — hvert produkt har 1–2 billeder.
-- Slugs er urørte, så indgående links stadig virker. GPSR mangler postadresse (ingen CVR-data endnu).
+- De oprindelige 39 designs er kortlagt; batch 1–3 (8,5/8,5 t) er udført. Målt 8/11 via Store API er titlerne i
+  effekt, men **alle seks nye kollektioner har 0 produkter** — tildelingen skal gentages (0,4/0,4 t, kræver
+  skriveadgang). Batch 4 mockups står på 0/5 t, forberedelsen er lukket med 0,5/0,5 t.
+- Samlet status er **62,5 % (9 af 14,4 t)**. Gentildelingen kræver MCP/wp-admin; mockup-generering kræver ejerens
+  Printful-adgang eller færdige billeder;
+  GPSR-oplysninger kræver CVR og postadresse. Se `projektstatus.json` og `docs/library/batch-4-arbejdsordre-2026-11-08.md`.
 
 ---
 
@@ -125,8 +159,8 @@ Alt her er målt mod den live side eller læst i kilden. Er noget ændret siden 
 | Læse live HTML + REST (`wp-json`) | ✅ | strukturelle tjek, linkcrawl, produktdata |
 | Python 3.12 + PDF-biblioteker | ✅ i `tools/_deps` | rapporter i `reports/` |
 | PHP 8.5.8 (statisk binær) | ✅ i `tools/_deps/bin/php` | `php -l`, ikke tests |
-| **Skrive til sitet** | ❌ 401 | S2.3, S4.1, S4.3, S0.4 kan forberedes, ikke udføres |
-| MCP mod sitet | ⚪ **ny server, venter på ejerens godkendelse** | `/wp-json/mcp/v1/http` (AI Engine) svarer `401 rest_forbidden` uden credential og har OAuth med PKCE. `python3 tools/mcp_oauth.py --start` giver linket, `--finish '<kode>'` gemmer token uden for repoet; `tools/mcp_rest.py --check` tester det. Application password (Basic) er fallback og ikke målt endnu — se `docs/mcp-auth.md` |
+| **Skrive til sitet** | ✅ via autoriseret MCP, når OAuth er godkendt i den aktuelle sandkasse | Hver ny sandkasse kræver ejerens browsergodkendelse. Plugin-installation kræver ejerens *Plugins → Update*-klik. Opret kun kladder efter tydelig opgave, og publicér aldrig ejerafhængige data på et gæt |
+| MCP mod sitet | ✅ når ejeren har godkendt OAuth i denne sandkasse | AI Engine `/wp-json/mcp/v1/http` og Novamira `/wp-json/mcp/novamira-oauth`; credential ligger uden for repoet. Hver ny sandkasse kræver ejerens browsergodkendelse igen. Se `docs/mcp-auth.md`; antag ikke at token eller værktøjsantal fra en tidligere sandkasse gælder her |
 | Publer MCP | ❌ ingen `PUBLER_API_KEY` | kan ikke planlægge opslag |
 | Browser / Lighthouse | ❌ | ingen visuel eller ydelsesverifikation |
 | Root / `apt` | ❌ | brug statiske binærer (se opskrifter) |
@@ -140,10 +174,11 @@ PYTHONPATH=tools/_deps python3 tools/project_reports.py
 tools/_deps/bin/php -l plugins/steamgears-autopilot/steamgears-autopilot.php
 ```
 
-**Blokeringer der kræver ejeren** (skriv dem i svaret, forsøg dem ikke): ét klik på OAuth-linket fra
-`tools/mcp_oauth.py --start` (eller et WordPress application password til REST-skrivning), Publer-nøgle,
-repo-secrets `GEMINI_API_KEY`/`WP_USER`/`WP_APP_PASS`, CVR/adresse til GPSR og imprint, Printify-variantmapping,
-én Redirection-gruppe til de fem vanity-301'er.
+**Blokeringer der kræver ejeren:** OAuth-browsergodkendelse i en ny sandkasse; *Plugins → Update* til 7.64.9
+(tokenrettelsen, kanalstatus-entydigheden og P1.5-målingen) og en genforbindelse af Pinterest med `boards:read`; P1.5-kanalnøgler; Printful-kostpriser/mockups; ja/nej for produkterne
+942/765/766/767; samt CVR, navn, adresse, telefon, valuta/priser, betalingsaftaler, Complianz-valg og
+forsendelseszoner. GSC Crawl stats → By response kræver ejerens adgang. Se den aktuelle og komplette liste i
+[`docs/roadmap.md`](roadmap.md) §4c. S0.4's vanity-301'er er lukket som overflødige — opret ikke en Redirection-gruppe.
 
 ### Simply.com-connectoren (`simplycom`)
 
@@ -171,7 +206,8 @@ hvidliste noget. Det der stadig venter:
 
 Crawl og verifikation kører med **neutral UA** ([`tools/waf_check.sh`](../tools/waf_check.sh) bekræfter at den
 giver 200). At efterligne Googlebot er både unødvendigt og det der udløser 455. Alt andet i auditten — titler,
-schema, intern linkning, ydeevne — kræver WordPress-skriveadgang eller en ejerbeslutning.
+schema, intern linkning, ydeevne — kræver WordPress-skriveadgang (findes nu over MCP, se `docs/mcp-auth.md`)
+eller en ejerbeslutning.
 
 ---
 

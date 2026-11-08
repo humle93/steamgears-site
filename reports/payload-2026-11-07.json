@@ -1,0 +1,171 @@
+{
+  "measured": "2026-11-07",
+  "base": "https://steamgears.eu",
+  "budget": {
+    "html_bytes": 102400,
+    "scripts": 20,
+    "inline_block": 4096
+  },
+  "rows": [
+    {
+      "template": "forside",
+      "path": "/",
+      "status": 200,
+      "html_bytes": 255154,
+      "scripts": 51,
+      "scripts_src": 28,
+      "scripts_inline": 23,
+      "styles": 34,
+      "css_inline_bytes": 155734,
+      "js_inline_bytes": 0,
+      "largest_inline_block": 45052,
+      "stylesheets": 12,
+      "budget": {
+        "html": false,
+        "scripts": false,
+        "inline_block": false
+      },
+      "meets_budget": false
+    },
+    {
+      "template": "arkiv shop",
+      "path": "/shop/",
+      "status": 200,
+      "html_bytes": 420097,
+      "scripts": 54,
+      "scripts_src": 30,
+      "scripts_inline": 24,
+      "styles": 39,
+      "css_inline_bytes": 164957,
+      "js_inline_bytes": 0,
+      "largest_inline_block": 45450,
+      "stylesheets": 17,
+      "budget": {
+        "html": false,
+        "scripts": false,
+        "inline_block": false
+      },
+      "meets_budget": false
+    },
+    {
+      "template": "produkt",
+      "path": "/product/astrolabe-planisphere-tee/",
+      "status": 200,
+      "html_bytes": 469961,
+      "scripts": 105,
+      "scripts_src": 65,
+      "scripts_inline": 40,
+      "styles": 39,
+      "css_inline_bytes": 163060,
+      "js_inline_bytes": 0,
+      "largest_inline_block": 45587,
+      "stylesheets": 24,
+      "budget": {
+        "html": false,
+        "scripts": false,
+        "inline_block": false
+      },
+      "meets_budget": false
+    },
+    {
+      "template": "indlæg",
+      "path": "/steampunk-corset-guide/",
+      "status": 200,
+      "html_bytes": 272119,
+      "scripts": 51,
+      "scripts_src": 27,
+      "scripts_inline": 24,
+      "styles": 42,
+      "css_inline_bytes": 161277,
+      "js_inline_bytes": 0,
+      "largest_inline_block": 45798,
+      "stylesheets": 12,
+      "budget": {
+        "html": false,
+        "scripts": false,
+        "inline_block": false
+      },
+      "meets_budget": false
+    },
+    {
+      "template": "side",
+      "path": "/faq/",
+      "status": 200,
+      "html_bytes": 241371,
+      "scripts": 51,
+      "scripts_src": 28,
+      "scripts_inline": 23,
+      "styles": 33,
+      "css_inline_bytes": 148336,
+      "js_inline_bytes": 0,
+      "largest_inline_block": 45052,
+      "stylesheets": 12,
+      "budget": {
+        "html": false,
+        "scripts": false,
+        "inline_block": false
+      },
+      "meets_budget": false
+    },
+    {
+      "template": "kategori",
+      "path": "/product-category/atelier/",
+      "status": 200,
+      "html_bytes": 286639,
+      "scripts": 54,
+      "scripts_src": 30,
+      "scripts_inline": 24,
+      "styles": 39,
+      "css_inline_bytes": 154396,
+      "js_inline_bytes": 0,
+      "largest_inline_block": 45052,
+      "stylesheets": 17,
+      "budget": {
+        "html": false,
+        "scripts": false,
+        "inline_block": false
+      },
+      "meets_budget": false
+    },
+    {
+      "template": "søgning",
+      "path": "/?s=steampunk",
+      "status": 200,
+      "html_bytes": 266477,
+      "scripts": 48,
+      "scripts_src": 26,
+      "scripts_inline": 22,
+      "styles": 42,
+      "css_inline_bytes": 159170,
+      "js_inline_bytes": 0,
+      "largest_inline_block": 46116,
+      "stylesheets": 12,
+      "budget": {
+        "html": false,
+        "scripts": false,
+        "inline_block": false
+      },
+      "meets_budget": false
+    },
+    {
+      "template": "kurv",
+      "path": "/cart/",
+      "status": 200,
+      "html_bytes": 476407,
+      "scripts": 120,
+      "scripts_src": 85,
+      "scripts_inline": 35,
+      "styles": 32,
+      "css_inline_bytes": 147986,
+      "js_inline_bytes": 0,
+      "largest_inline_block": 45132,
+      "stylesheets": 17,
+      "budget": {
+        "html": false,
+        "scripts": false,
+        "inline_block": false
+      },
+      "meets_budget": false
+    }
+  ]
+}

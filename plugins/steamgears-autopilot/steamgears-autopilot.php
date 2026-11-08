@@ -2,7 +2,7 @@
 /**
 * Plugin Name: Steamgears Autopilot
 * Description: Premium multichannel growth autopilot for Steamgears.eu.
-* Version: 7.32.0
+* Version: 7.65.0
 * Requires at least: 6.4
 * Requires PHP: 8.0
 * Author: Steamgears.eu
@@ -26,7 +26,7 @@ if (defined('SGAP_VERSION')) {
     return;
 }
 
-define('SGAP_VERSION', '7.32.0');
+define('SGAP_VERSION', '7.65.0');
 define('SGAP_FILE', __FILE__);
 
 require_once __DIR__ . '/includes/admin-ui.php';
@@ -40,14 +40,21 @@ require_once __DIR__ . '/includes/locales.php';
 require_once __DIR__ . '/includes/preflight.php';
 require_once __DIR__ . '/includes/blackout.php';
 require_once __DIR__ . '/includes/quality.php';
+require_once __DIR__ . '/includes/duplicate.php';
+require_once __DIR__ . '/includes/evergreen.php';
 require_once __DIR__ . '/includes/generator.php';
 require_once __DIR__ . '/includes/meta-audit.php';
 require_once __DIR__ . '/includes/abilities.php';
 require_once __DIR__ . '/includes/mcp-tools.php';
+require_once __DIR__ . '/includes/keys.php';
+require_once __DIR__ . '/includes/channel-health.php';
+require_once __DIR__ . '/includes/mcp-auth.php';
+require_once __DIR__ . '/includes/mcp-woo.php';
 require_once __DIR__ . '/includes/keycheck.php';
 require_once __DIR__ . '/includes/rss.php';
 require_once __DIR__ . '/includes/updater.php';
 require_once __DIR__ . '/includes/admin-tools.php';
+require_once __DIR__ . '/includes/profiles.php';
 require_once __DIR__ . '/includes/chat.php';
 require_once __DIR__ . '/includes/studio.php';
 require_once __DIR__ . '/includes/site-seo.php';
@@ -56,11 +63,22 @@ require_once __DIR__ . '/includes/automation.php';
 require_once __DIR__ . '/includes/alerts.php';
 require_once __DIR__ . '/includes/reminder.php';
 require_once __DIR__ . '/includes/audit.php';
+require_once __DIR__ . '/includes/scheduler.php';
+require_once __DIR__ . '/includes/engagement.php';
+require_once __DIR__ . '/includes/pinterest.php';
+require_once __DIR__ . '/includes/instagram.php';
+require_once __DIR__ . '/includes/diagnostics.php';
+require_once __DIR__ . '/includes/facebook.php';
+require_once __DIR__ . '/includes/command-center.php';
+require_once __DIR__ . '/includes/niche-shop.php';
+require_once __DIR__ . '/includes/admin-menu.php';
 
 SGAP_Publer::init();
 SGAP_Generator::init();
+SGAP_Evergreen::init();
 SGAP_Abilities::init();
 SGAP_KeyCheck::init();
+SGAP_Keys::init();
 SGAP_RSS::init();
 SGAP_Updater::init();
 SGAP_AdminTools::init();
@@ -72,5 +90,13 @@ SGAP_Rescue::init();
 SGAP_Auto::init();
 SGAP_Alerts::init();
 SGAP_Audit::init();
+SGAP_Engagement::init();
+SGAP_Pinterest::init();
+SGAP_Instagram::init();
+SGAP_Diagnostics::init();
+SGAP_Facebook::init();
 SGAP_MCP_Tools::init();
+SGAP_Niche_Shop::init();
 SGAP_MCP_Key::init();
+SGAP_MCP_Auth::init();
+SGAP_Menu::init();

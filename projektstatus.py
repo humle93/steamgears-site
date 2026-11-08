@@ -188,6 +188,14 @@ def validate_state(state: dict, today: str | None = None) -> list[str]:
         if not str(project.get("name", "")).strip():
             errors.append(f"{label}: name mangler")
 
+        # En planlagt scope-ændring skal være en sætning der forklarer hvad der er taget ud/ind,
+        # så den kan læses i historikken bagefter. "true" eller en tom streng er ikke en grund.
+        pending = project.get("scope_change_pending")
+        if pending is not None and (not isinstance(pending, str) or len(pending.strip()) < 8):
+            errors.append(
+                f"{label}.scope_change_pending skal være en sætning der forklarer scope-ændringen (fik {pending!r})"
+            )
+
         modules = project.get("modules")
         if not isinstance(modules, list) or not modules:
             errors.append(f"{label}: modules skal være en ikke-tom liste")
@@ -252,6 +260,19 @@ def validate_state(state: dict, today: str | None = None) -> list[str]:
     return errors
 
 
+# Et scope_change må ikke være en tom etiket: faldet skal siges højt i "module", ikke bare
+# markeres. Et fald under tærsklen er afrundingsstøj og kræver ingen begrundelse.
+GENERIC_MODULES = frozenset(
+    {"daglig måling", "daglig maling", "baseline", "ingen ændring", "ingen aendring", "scope-ændring", "scope-aendring"}
+)
+SCOPE_REASON_FALL = 0.5
+
+
+def _has_scope_reason(row: dict) -> bool:
+    module = str(row.get("module") or "").strip().lower()
+    return bool(module) and module not in GENERIC_MODULES
+
+
 def validate_history(state: dict, project_names: set, today: str) -> list[str]:
     errors: list[str] = []
     history = state.get("history", [])
@@ -299,6 +320,15 @@ def validate_history(state: dict, project_names: set, today: str) -> list[str]:
                     f"{label}: procenten falder ({before} → {after}) uden \"scope_change\": true — "
                     "fald kræver dokumenteret årsag"
                 )
+            if (
+                row.get("scope_change") is True
+                and float(before) - float(after) >= SCOPE_REASON_FALL
+                and not _has_scope_reason(row)
+            ):
+                errors.append(
+                    f"{label}: scope_change dækker et fald på {round(float(before) - float(after), 1)} pp, men "
+                    f"\"module\" er '{row.get('module')}' — skriv hvad der blev ændret (fx 'scope-korrektion S2.6')"
+                )
 
         name = row.get("project")
         if name not in project_names:
@@ -312,6 +342,15 @@ def validate_history(state: dict, project_names: set, today: str) -> list[str]:
                 errors.append(
                     f"{label}: {name} falder fra {previous['after']} til {after} i forhold til forrige række "
                     "uden scope_change"
+                )
+            if (
+                row.get("scope_change") is True
+                and float(previous["after"]) - float(after) >= SCOPE_REASON_FALL
+                and not _has_scope_reason(row)
+            ):
+                errors.append(
+                    f"{label}: scope_change dækker et fald fra {previous['after']} til {after}, men \"module\" "
+                    f"er '{row.get('module')}' — skriv hvad der blev ændret"
                 )
         last_by_project[name] = row
     return errors
@@ -597,7 +636,12 @@ def cmd_check(state_path: Path = STATE_PATH, doc_path: Path = DOC_PATH, today: s
 
 
 def plan_history(state: dict, computed: dict, today: str) -> list[dict]:
-    """Nye historik-rækker: én pr. projekt pr. dag, og kun når noget ændrer sig."""
+    """Nye historik-rækker: én pr. projekt pr. dag, og kun når noget ændrer sig.
+
+    En planlagt scope-ændring markeres på projektet med `scope_change_pending` (en tekst der
+    beskriver ændringen). Den sætter `scope_change: true` på den række den gælder og forbruges
+    bagefter — så et fald i procent kun accepteres én gang, og kun for den række.
+    """
     rows: list[dict] = []
     for project in state["projects"]:
         info = computed[str(project["id"])]
@@ -619,18 +663,32 @@ def plan_history(state: dict, computed: dict, today: str) -> list[dict]:
                 }
             )
             continue
-        rows.append(
-            {
-                "date": today,
-                "project": project["name"],
-                "module": "daglig måling" if last else "baseline",
-                "before": None if last is None else last.get("after"),
-                "after": pct,
-                "delta": None if last is None else round(pct - float(last.get("after", 0)), 1),
-                "basis": info["basis"],
-            }
-        )
+        row = {
+            "date": today,
+            "project": project["name"],
+            "module": "daglig måling" if last else "baseline",
+            "before": None if last is None else last.get("after"),
+            "after": pct,
+            "delta": None if last is None else round(pct - float(last.get("after", 0)), 1),
+            "basis": info["basis"],
+        }
+        pending = project.get("scope_change_pending")
+        if isinstance(pending, str) and pending.strip():
+            row["scope_change"] = True
+            row["module"] = pending.strip()
+        rows.append(row)
     return rows
+
+
+def consume_scope_flags(state: dict, rows: list[dict]) -> None:
+    """Fjern `scope_change_pending` for de projekter der faktisk fik en række.
+
+    Flaget er bundet til den række det gælder: en række for et andet projekt må ikke brænde det.
+    """
+    planned = {row["project"] for row in rows}
+    for project in state["projects"]:
+        if project["name"] in planned:
+            project.pop("scope_change_pending", None)
 
 
 def cmd_update(
@@ -656,6 +714,9 @@ def cmd_update(
     new_state = copy.deepcopy(state)
     new_state["history"] = list(state.get("history", [])) + new_rows
     new_state["updated"] = today
+    # En brugt scope-ændring skal ikke gælde igen ved næste kørsel — og kun den række den
+    # gælder må forbruge den.
+    consume_scope_flags(new_state, new_rows)
 
     history_errors = validate_state(new_state, today)
     if history_errors:
@@ -860,6 +921,46 @@ def cmd_selftest(today: str | None = None) -> int:
             )
         ),
     )
+    case(
+        "planlagt scope-ændring mærker kun sin egen række",
+        lambda: _expect_scope_pending(mutated()),
+    )
+    case(
+        "scope-flag brændes ikke af et andet projekts række",
+        lambda: _expect_flag_survives_other_project(mutated()),
+    )
+    case(
+        "scope_change_pending som boolean fanges",
+        lambda: expect_error(
+            _with_module(mutated(), "links", "fix", {}, project_patch={"scope_change_pending": True}),
+            "scope_change_pending",
+        ),
+    )
+    case(
+        "scope_change_pending som tom streng fanges",
+        lambda: expect_error(
+            _with_module(mutated(), "links", "fix", {}, project_patch={"scope_change_pending": "   "}),
+            "scope_change_pending",
+        ),
+    )
+    case(
+        "scope_change uden årsag i module fanges",
+        lambda: expect_error(
+            _with_history(mutated(), {"before": 90.0, "after": 10.0, "delta": -80.0,
+                                      "module": "daglig måling", "scope_change": True}),
+            "skriv hvad der blev ændret",
+        ),
+    )
+    case(
+        "scope_change med årsag accepteres",
+        lambda: assert_no_errors(
+            validate_state(
+                _with_history(mutated(), {"before": 90.0, "after": 10.0, "delta": -80.0,
+                                          "module": "scope-korrektion S2.6", "scope_change": True}),
+                today,
+            )
+        ),
+    )
     case("ukendt projekt i historik fanges", lambda: expect_error(_with_history(mutated(), {"project": "spøgelse"}), "findes ikke"))
     case("manglende grundlag fanges", lambda: expect_error(_with_history(mutated(), {"basis": ""}), "basis"))
 
@@ -958,6 +1059,33 @@ def cmd_selftest(today: str | None = None) -> int:
         return 1
     print(f"[OK] alle {len(results)} værn bestået")
     return 0
+
+
+def _expect_flag_survives_other_project(state: dict) -> None:
+    """Et flag på projekt A må ikke forbruges af en række for projekt B."""
+    a, b = state["projects"][0], state["projects"][1]
+    a["scope_change_pending"] = "scope-ændring kun for projekt A"
+    consume_scope_flags(state, [{"project": b["name"]}])
+    assert "scope_change_pending" in a, "flaget blev brændt af et andet projekts række"
+    consume_scope_flags(state, [{"project": a["name"]}])
+    assert "scope_change_pending" not in a, "flaget blev ikke forbrugt af sin egen række"
+
+
+def _expect_scope_pending(state: dict) -> None:
+    """`scope_change_pending` skal give én række med scope_change og den nævnte grund, så et
+    planlagt fald i nævneren accepteres — og kun den ene gang."""
+    project = state["projects"][0]
+    last = [r for r in state["history"] if r.get("project") == project["name"]][-1]
+    project["modules"][0]["total"] = float(project["modules"][0]["total"]) + 10
+    project["scope_change_pending"] = "scope-ændring i fixture"
+    rows = plan_history(state, compute(state), today_iso())
+    row = next((r for r in rows if r["project"] == project["name"]), None)
+    assert row is not None, "der blev ikke planlagt en række for projektet"
+    assert row.get("scope_change") is True, "rækken mangler scope_change"
+    assert row["module"] == "scope-ændring i fixture", f"rækken har modul {row['module']!r}"
+    assert row["after"] < float(last["after"]), "fixturen skulle give et fald"
+    errors = validate_state({**state, "history": list(state["history"]) + rows}, today_iso())
+    assert not [e for e in errors if "scope_change" in e], f"faldet blev afvist: {errors}"
 
 
 def assert_no_errors(errors: list[str]) -> None:

@@ -46,9 +46,9 @@ Hvert **aktivt projekt** skal have en procentstatus hver dag i [`docs/projektsta
 ## 3. Format
 
 ```
-Modul: Dark academia-rebrand — batch 4 (mockups)
-Før: 63 %  →  Efter: 78 %  (Δ +15)
-Grundlag: 2 af 5 mockup-faser klar (4,5 t af 6,5 t i mockup-brief)
+Modul: S2.3 navigation — nav-links
+Før: 55,4 %  →  Efter: 56,3 %  (Δ +0,9)
+Grundlag: 12,25 af 21,75 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,65/6 · S3 2,15/3,55 · S4 1,4/5)
 ```
 
 ## 4. Automation og værn (`projektstatus.py`)
@@ -72,6 +72,10 @@ Reglen over holdes automatisk, så lidt som muligt afhænger af hukommelse:
 - **100 % kræver `"verified": true`** — ellers er tallet en påstand, ikke en status.
 - **Fald i procent afvises** både i forhold til forrige række og til modulernes tal, medmindre rækken har
   `"scope_change": true` (og så skal årsagen stå i `module`/`basis`).
+- En **planlagt** scope-ændring markeres med `scope_change_pending` på projektet: en sætning der forklarer
+  hvad der tages ud/ind. Den sætter `scope_change: true` på den ene række den gælder og forbruges derefter;
+  en række for et andet projekt kan ikke brænde den. `true` eller en tom streng afvises, og en
+  `scope_change`-række med et fald på 0,5 pp eller mere skal navngive ændringen i `module`.
 - `delta` skal passe med `after - before`. Drift i dokumentet (håndredigerede AUTO-blokke) fanges.
 
 **Værn efter skrivning:**
@@ -89,8 +93,8 @@ Reglen over holdes automatisk, så lidt som muligt afhænger af hukommelse:
   ligger i repoet — ucommittet arbejde i en agent-sandkasse ser den ikke — så reglen om at committe og pushe i
   samme tur gælder stadig; nattens kørsel er sikkerhedsnettet, ikke en erstatning.
   Efter pushet kører kørslen **alle repoets værn** via [`tools/natlige-vaern.sh`](tools/natlige-vaern.sh):
-  `php -l` på alle plugin-filer, `projektstatus.py --selftest` og `--check`, `load_campaign.py --selftest`,
-  `plugins/tests/smoke.php`, `test_mcp_rest.py`, `test_mcp_oauth.py`, `test_niche_scanner.py` og en
+  `php -l` på alle plugin-filer,  `projektstatus.py --selftest` og `--check`, `load_campaign.py --selftest`,
+  `plugins/tests/smoke.php`, `test_mcp_rest.py`, `test_mcp_oauth.py`, `test_live_state.py`, `test_niche_scanner.py` og en
   PDF-render-kontrol af tre biblioteksdokumenter. Et rødt værn
   giver en `::error`-annotation, skriver en tabel og de fejlende linjer i job-summaryen og fejler jobbet. Det
   ligger bevidst efter pushet, så en testfejl ikke holder status-dokumenterne tilbage — men det kan ikke
@@ -105,15 +109,33 @@ Reglen over holdes automatisk, så lidt som muligt afhænger af hukommelse:
   roterer refresh-tokenet, så det gamle er dødt bagefter. Hvad der kræves, og hvad kørslen ikke kan: se
   [`docs/library/pinterest-token-fornyelse-2026-11-03.md`](docs/library/pinterest-token-fornyelse-2026-11-03.md).
 
+- **Novamira keep-alive** (`.github/workflows/novamira-keepalive.yml`): MCP-adgangen til Novamira-fladen
+  (`/wp-json/mcp/novamira-oauth`) har et access-token på 3600 s og et refresh-token der **roteres** ved hver
+  fornyelse. Kørslen fornyer dagligt kl. 03 dansk tid med [`tools/mcp_keepalive.py`](tools/mcp_keepalive.py),
+  verificerer med `initialize` + `tools/list` og gemmer det nye token tilbage som repository-secret. Uden
+  `NOVAMIRA_REFRESH_TOKEN` og en PAT med Secrets: write springer den sig selv over med en `::notice`.
+  Den samme fornyelse **måler site-tilstanden** med [`tools/live_state.py`](tools/live_state.py): AI Engines
+  `mcp_dynamic_rest` og `mcp_abilities`, `mcp_role`, den gemte profil `sgap_ai_profile` og sitets
+  plugin-version — det token kræver, findes kun i CI. Rapporten skrives til
+  `reports/live-tilstand-<dato>.md`/`.json` og committes; det roterede token gemmes **før** målingen kan gøre
+  jobbet rødt, så en målefejl aldrig koster adgangen. Det er den vej et spørgsmål som »har profilen tændt
+  Dynamic REST på det levende site?« besvares uden ejerens browser.
+  I en sandkasse kan [`tools/keepalive-loop.sh`](tools/keepalive-loop.sh) i stedet forny hvert 58. minut
+  (`setsid nohup bash tools/keepalive-loop.sh 3480 &`) — den dækker kun mens worktreen kører.
+  Opsætning og fælder: [`docs/mcp-auth.md`](docs/mcp-auth.md) → Novamira.
+
 - **Commit-besked-værnet** ([`tools/commit_check.py`](tools/commit_check.py)): reglen i §1 bliver kontrolleret
   maskinelt på tre flader — `--message-file` er **commit-msg-hooken** (`python3 tools/commit_check.py --install`,
   som [`tools/setup-agent-tools.sh`](tools/setup-agent-tools.sh) også kører), `--range A..B` tjekker de commits
   der blev pushet (CI: [`.github/workflows/commit-vaern.yml`](.github/workflows/commit-vaern.yml)), og
-  `--selftest` kører 24 fixtures. Værnet kræver `Modul:`, `Før:`, `Efter:`, `Δ:` og `Grundlag:` — også når de
-  står som `Før: 63 % → Efter: 78 % (Δ +15)` på én linje — afviser procentfelter der ikke er et tal eller en
+  `--selftest` kører 29 fixtures. Værnet kræver `Modul:`, `Før:`, `Efter:`, `Δ:` og `Grundlag:` — også når de
+  står som `Før: 55,4 % → Efter: 56,3 % (Δ +0,9)` på én linje — afviser procentfelter der ikke er et tal eller en
   streg, kræver at `Grundlag` kan genberegnes (tal eller `ingen ændring`), og at `Δ` passer med `Efter − Før`.
-  Merge-, revert- og bot-committene fra de to workflows er undtaget, fordi de ikke kan bære procenter;
-  historikken før 3/11 er ikke tjekket efter.
+  Tallene krydstjekkes desuden mod `projektstatus.json`: `Før`/`Efter`/`Δ` skal matche en historik-række, og
+  `Grundlag` skal kunne læses ud af den rækkes `basis` (også når beskeden kun citerer rækkens `X af Y enhed`-del),
+  så et opdigtet regnestykke afvises. Kan JSON-filen ikke læses, springes kun krydstjekket over — formen kræves
+  stadig. Et pas der ikke flytter noget kan skrive `ingen ændring` uden en række. Merge-, revert- og bot-committene
+  fra de to workflows er undtaget, fordi de ikke kan bære procenter; historikken før 3/11 er ikke tjekket efter. Commits der ligger fast i historikken og ikke kan rettes, står i et **verificeret register** ([`docs/commit-vaern-register.md`](docs/commit-vaern-register.md)) med grund og bevis — og registret lemper **kun den enkelte commit og kun den regel der er efterprøvet** (`basis` eller `history`). Formkravene, `Δ = Efter − Før` og kravet om et regnestykke gælder også de registrerede commits, så et nyt værn rammer dem medmindre det udtrykkeligt står i posten. `--range` skriver hver undtagelse med sin grund og hvilken regel der blev lempet.
 
 Automationen dækker **den daglige status**, og commit-beskeden bliver holdt op på formen. Det manuelle i §1 — at
 vurdere hvad der reelt blev udført og melde `% før → % efter` i svaret — kan scriptet ikke gøre og falder stadig
@@ -197,6 +219,26 @@ Gælder alt arbejde i `plugins/`.
 - Melder `php -l` fejl, rettes fejlen med det samme, før der gås videre.
 - Ved 100 %: pak pluginnet i en installationsklar `.zip` i `plugins/` (uden `.git`, `AGENTS.md`, `node_modules`
   og `.tools`), så den kan uploades direkte under *Plugins → Tilføj nyt*.
+- Der ligger **præcis én** zip i `plugins/` — den aktuelle versions. [`plugin-ci.yml`](.github/workflows/plugin-ci.yml)
+  fejler hvis der er flere, så den gamle zip slettes i samme commit som den nye version er lagt ind.
 - Zip-filen **skal** ligge i `plugins/` på `main` og hedde `steamgears-autopilot-v<version>.zip`. Selvopdateringen
   henter præcis `https://raw.githubusercontent.com/humle93/steamgears-site/main/plugins/steamgears-autopilot-v<version>.zip`
   (`SGAP_Updater::package_url()`), så en zip i rodmappen eller på en sidegren bliver aldrig fundet.
+
+## 8. Context-håndtering — samtalens vigtigste punkter
+
+Når klientens **context meter nærmer sig 95 %**, eller når samtalen står foran en komprimering, skal det
+vigtigste fra samtalen over i [`docs/samtalepunkter.md`](docs/samtalepunkter.md) — ellers forsvinder
+begrundelserne, når historikken komprimeres, og næste pas skal gætte dem igen.
+
+- **Skriv først prosaen:** beslutninger, fund og fælder i "Beslutninger og fund" (nyeste først) og det der
+  stadig mangler i "Næste skridt". Kort og konkret — hvad blev besluttet, hvad blev målt, hvad var fælden.
+- **Opdatér derefter de maskinelle dele:** `python3 tools/samtalepunkter.py --update` skriver AUTO-blokken ud
+  fra [`projektstatus.json`](projektstatus.json) og git-historikken; `--check` bekræfter at den matcher.
+  Blokken må ikke håndredigeres, og den indeholder dagens dato og de seneste commits — derfor skal den
+  **opdateres, ikke bare tjekkes**.
+- **Commit og push i samme tur**, som §5 kræver. Filen er kun værd noget, hvis den ligger på `main`.
+- Filen er **hukommelse om hvorfor**, ikke en kopi af [`docs/projektstatus.md`](docs/projektstatus.md), der har
+  tallene. Står de to uenige, vinder `projektstatus.json`.
+- Værktøjet har 10 selftest-fixtures og kører som værn i [`tools/natlige-vaern.sh`](tools/natlige-vaern.sh).
+  Det regner procenter som `projektstatus.py` — undtagen `recurring`-moduler, som ikke tæller med.

@@ -216,6 +216,11 @@ def parse(lines):
             i += 1
             continue
 
+        if line.strip() in ("<!-- sidebrud -->", "<!-- pagebreak -->"):
+            blocks.append(("pagebreak", None))
+            i += 1
+            continue
+
         m = re.match(r"^(#{1,3})\s+(.*)$", line)
         if m:
             blocks.append((f"h{len(m.group(1))}", m.group(2).strip()))
@@ -543,12 +548,18 @@ def render(md_path: Path, pdf_path: Path, kicker: str):
                            if w - 2.4 > 4 else TABLE_LEAD for w, c in zip(widths, cells)]
                 return max(heights) + 2.2
 
-            def draw_row(cells, bold=False, fill=None, color=INK):
+            def draw_row(cells, bold=False, fill=None, color=INK, is_header=False):
                 nonlocal_y = doc.get_y()
                 h = row_height(cells, bold)
                 if nonlocal_y + h > 297 - MARGIN_B:
                     doc.add_page()
                     nonlocal_y = doc.get_y()
+                    # Et tabelhoved der fortsætter over et sidebrud skal have sin header med,
+                    # ellers står rækkerne uden kolonnenavne på den nye side.
+                    header_h = row_height(header, True)
+                    if not is_header and nonlocal_y + header_h + h <= 297 - MARGIN_B:
+                        draw_row(header, bold=True, fill=NAVY, color=(255, 255, 255), is_header=True)
+                        nonlocal_y = doc.get_y()
                 if fill:
                     doc.set_fill_color(*fill)
                     doc.rect(left, nonlocal_y, CONTENT_W, h, style="F")
@@ -567,10 +578,13 @@ def render(md_path: Path, pdf_path: Path, kicker: str):
                 doc.set_xy(left, nonlocal_y + h)
 
             doc.ln(1)
-            draw_row(header, bold=True, fill=NAVY, color=(255, 255, 255))
+            draw_row(header, bold=True, fill=NAVY, color=(255, 255, 255), is_header=True)
             for n, row in enumerate(body_rows):
                 draw_row(row, fill=ZEBRA if n % 2 else None)
             doc.ln(4)
+
+        elif kind == "pagebreak":
+            doc.add_page()
 
         elif kind == "hr":
             doc.ln(2)

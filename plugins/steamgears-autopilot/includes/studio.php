@@ -454,7 +454,7 @@ class SGAP_Studio {
                 'category' => SGAP_Abilities::CATEGORY,
                 'input_schema' => SGAP_Abilities::object($props, $required),
                 'output_schema' => ['type' => 'object'],
-                'execute_callback' => $cb,
+                'execute_callback' => static fn($input = null) => call_user_func($cb, $input),
                 'permission_callback' => [SGAP_Abilities::class, 'can_manage'],
                 'meta' => SGAP_Abilities::meta(false, false, false)
             ]);
@@ -495,6 +495,7 @@ class SGAP_Studio {
         foreach ($recent as $p) {
             $options .= '<option value="' . (int) $p->ID . '">' . esc_html(get_the_title($p) . ' (' . $p->post_type . ($p->post_status === 'draft' ? ', draft' : '') . ')') . '</option>';
         }
+        SGAP_UI::section('Write', 'New content: a draft you edit and publish yourself, and the images that go with it. Nothing is published from here.');
         echo '<div class="sgap-grid"><div>';
         SGAP_UI::card_open('Write an article or guide', 'edit-page');
         echo '<form class="sgap-studio-form" data-task="write">'
@@ -518,11 +519,14 @@ class SGAP_Studio {
             . ' <label>Featured image of<br><select name="post_id"><option value="0">– just the media library –</option>' . $options . '</select></label></p>'
             . '<p><button class="button button-primary"' . ($img_ok ? '' : ' disabled') . '><span class="dashicons dashicons-format-image"></span>Create image</button></p></form>';
         SGAP_UI::card_close();
+        echo '</div></div><div id="sgap-studio-out"></div>';
+
+        SGAP_UI::section('Fix', 'Pages you already have: better meta for one of them, or one pass over the whole site.');
+        echo '<div class="sgap-grid"><div>';
         SGAP_UI::card_open('Optimise SEO of a page', 'search');
         echo '<form class="sgap-studio-form" data-task="optimize"><p><select name="post_id" style="max-width:100%">' . $options . '</select></p>'
             . '<p><button class="button"><span class="dashicons dashicons-search"></span>Optimise meta</button></p></form>';
         SGAP_UI::card_close();
-        echo '</div></div><div id="sgap-studio-out"></div>';
         $cfg = ['ajax' => admin_url('admin-ajax.php'), 'nonce' => wp_create_nonce('sgap_studio')];
         echo '<script>(function(){var C=' . wp_json_encode($cfg) . ',out=document.getElementById("sgap-studio-out");'
             . 'function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\\"":"&quot;"}[c];});}'
@@ -545,7 +549,6 @@ class SGAP_Studio {
             . '+(d.suggestions&&d.suggestions.length?"<p><b>Ideas for the content:</b></p><ul style=\\"list-style:disc;margin-left:18px\\">"+d.suggestions.map(function(x){return "<li>"+esc(x)+"</li>";}).join("")+"</ul>":"");}'
             . '}).catch(function(err){clearInterval(timer);btn.disabled=false;c.innerHTML="<h2>Could not reach the site</h2><p>"+esc(err.message)+"</p>";});});});})();</script>';
         /* ---- whole-site SEO / AEO / GEO ---- */
-        echo '<div class="sgap-grid"><div>';
         SGAP_UI::card_open('Optimise the whole site', 'admin-site-alt3');
         echo '<p>One pass over every published page, post and product: SEO, answer engines (AEO) and generative engines (GEO). '
             . 'The scan reads titles, meta, headings, links and images — the button with the AI also writes the missing meta.'

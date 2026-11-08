@@ -2,7 +2,7 @@
 
 **Kort:** ni af de publicerede tees kan ikke sælges med størrelse. De er `simple` produkter uden
 variationer, mens deres produkttekster lover S–2XL. Hoodierne er `variable` og virker. Det er den
-største enkeltfejl i butikken lige nu, og den kan ikke rettes sikkert uden Printify-mapping.
+største enkeltfejl i butikken lige nu, og den kan ikke rettes sikkert uden Printful-mapping.
 
 ## Bevis
 
@@ -30,18 +30,18 @@ product`, og MCP kan ikke skifte produkttypen. Se `tee-varianter-spec-2026-11-02
 forsøg og for den færdige spec. Uanset det tekniske er den egentlige blokering:
 
 
-1. **Ingen POD-connector er aktiv.** `wp_get_plugins` viser 38 plugins; den eneste Printify-relaterede
-   er *Printify Shipping Method 3.2*. Der er ingen Printify-fulfilment-plugin, som kan mappe en
-   variation til en Printify-variant.
-2. **Uden mapping kan ordren ikke routes.** En variation med SKU `SG-V3-10-S` findes ikke i Printify.
+1. **Ingen POD-connector er aktiv.** `wp_get_plugins` viser 38 plugins; den eneste Printful-relaterede
+   er *Printify Shipping Method 3.2*. Der er ingen Printful-fulfilment-plugin, som kan mappe en
+   variation til en Printful-variant.
+2. **Uden mapping kan ordren ikke routes.** En variation med SKU `SG-V3-10-S` findes ikke i Printful.
    Kunden kan betale, og ordren strander som manuel behandling — værre end en tee uden størrelse,
    fordi pengene er trukket.
-3. **Det kræver ejerens Printify-konto** at hente de rigtige variant-ID'er og priser pr. størrelse.
+3. **Det kræver ejerens Printful-konto** at hente de rigtige variant-ID'er og priser pr. størrelse.
    Det er den samme blokering som Herbarium-linjen (12 kladder, alle `simple`).
 
 ## Anbefalet rækkefølge
 
-1. Beslut fulfilment: Printify-appen (mapping pr. variation) eller manuel ordrebehandling.
+1. Beslut fulfilment: Printful-appen (mapping pr. variation) eller manuel ordrebehandling.
 2. Med appen: opret S–2XL som variationer på de 9 tees **efter** mapping, ikke før.
 3. Uden appen: skriv i tee-teksten, at størrelse aftales efter køb — det er ærligt, men koster
    konvertering og giver flere returer.
@@ -56,7 +56,7 @@ Det er **forkert**. Kontrolleret 2/11:
 - 965–968 (art prints) → `gaslight`, `posters-prints`, `vintage-botanical-prints`
 - 969–972 (covers) → `gaslight`, `gothic-steampunk-phone-cases`
 
-Kategorierne er altså korrekte. Det, der reelt mangler på de 12, er varianter og Printify-mapping.
+Kategorierne er altså korrekte. Det, der reelt mangler på de 12, er varianter og Printful-mapping.
 `gaslight` er en tom kategori uden produkter; den kan ryddes op i admin, men gør ingen skade.
 
 ## Ryddet op i samme runde

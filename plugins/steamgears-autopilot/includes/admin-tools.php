@@ -96,6 +96,12 @@ class SGAP_AdminTools {
                 'Switches on AI Engine\'s "Dynamic REST" MCP module (and Abilities), which exposes the whole WordPress REST API (posts, pages, media, users, settings, plugins, WooCommerce, ...) as MCP tools. Takes effect when the MCP connection is reopened. enabled=false turns it off again.',
                 ['enabled' => ['type' => 'boolean', 'default' => true]],
                 [], [__CLASS__, 'enable_full_access'], false, true, false
+            ],
+            'set-ai-profile' => [
+                'Switch the AI profile',
+                'Switches the AI Chat between its profiles: assistant (autopilot only), site_admin (site administration — the chat may use every tool, and AI Engine\'s full REST access is switched on) and wp_seo_expert (WordPress SEO — content, SEO fields, products and media; no ops). Switching to site_admin is what activates access all; switching away does not turn it off again.',
+                ['profile' => ['type' => 'string', 'enum' => ['assistant', 'site_admin', 'wp_seo_expert']]],
+                ['profile'], [__CLASS__, 'set_ai_profile'], false, true, false
             ]
         ];
     }
@@ -110,7 +116,7 @@ class SGAP_AdminTools {
                 'description' => $description,
                 'category' => SGAP_Abilities::CATEGORY,
                 'output_schema' => ['type' => 'object'],
-                'execute_callback' => $execute,
+                'execute_callback' => static fn($input = null) => call_user_func($execute, $input),
                 'permission_callback' => [SGAP_Abilities::class, 'can_manage'],
                 'meta' => SGAP_Abilities::meta($readonly, $idempotent, $destructive)
             ];
@@ -174,8 +180,24 @@ class SGAP_AdminTools {
             if (is_bool($value)) {
                 $value = $value ? 'yes' : 'no';
             }
+            $value = is_scalar($value) ? (string) $value : '';
+            $secret = $kinds[$key] === 'secret';
+            if ($secret) {
+                // A key in wp-config.php wins over the database: say so instead of
+                // reporting a write that get() would never return.
+                if (SGAP_Settings::constant_name($key)) {
+                    $changed[$key] = 'ignored (set in wp-config.php)';
+                    continue;
+                }
+                // Same rule as Settings and the wizard: an empty field keeps the
+                // stored key, so a copied-back settings object cannot wipe it.
+                if (trim($value) === '') {
+                    $changed[$key] = 'kept (the new value was empty)';
+                    continue;
+                }
+            }
             $before = get_option('sgap_' . $key);
-            update_option('sgap_' . $key, is_scalar($value) ? (string) $value : '');
+            SGAP_Settings::set($key, $value);
             $after = get_option('sgap_' . $key);
             if ($after !== $before) {
                 $changed[$key] = $kinds[$key] === 'secret' ? 'updated' : $after;
@@ -486,7 +508,7 @@ class SGAP_AdminTools {
         ], fn($v) => $v !== null) : null;
         $sgap_events = [];
         foreach ([SGAP_Install::PUBLISH_CRON, SGAP_Install::GENERATE_CRON, SGAP_Install::CLEANUP_CRON] as $hook) {
-            $next = wp_next_scheduled($hook);
+            $next = SGAP_Scheduler::next($hook);
             $sgap_events[$hook] = $next ? wp_date('Y-m-d H:i:s', $next) : 'not scheduled';
         }
         $free = function_exists('disk_free_space') ? @disk_free_space(ABSPATH) : false;
@@ -504,6 +526,16 @@ class SGAP_AdminTools {
             'ai_engine_mcp' => $mcp,
             'autopilot_version' => SGAP_VERSION
         ];
+    }
+
+    /* ---- AI profile ---- */
+
+    /** @return array|WP_Error */
+    public static function set_ai_profile($input = null) {
+        if (!class_exists('SGAP_Profiles')) {
+            return new WP_Error('sgap_no_profiles', 'The profile layer is not loaded.');
+        }
+        return SGAP_Profiles::activate(sanitize_key((string) ($input['profile'] ?? '')));
     }
 
     /* ---- AI Engine full access ---- */

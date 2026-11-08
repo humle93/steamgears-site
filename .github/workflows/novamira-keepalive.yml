@@ -1,0 +1,200 @@
+name: Novamira keep-alive
+
+# Access-tokenet til Novamira-MCP'en lever 3600 s, og refresh-tokenet **roteres** ved
+# hver fornyelse — det gamle er dødt bagefter. Uden en planlagt fornyelse dør adgangen,
+# når refresh-tokenets levetid løber ud, og så skal ejeren godkende klienten igen.
+#
+# Kørslen her fornyer én gang i døgnet, verificerer at tokenet faktisk virker
+# (initialize + tools/list), og gemmer det nye refresh-token tilbage som
+# repository-secret. Den springer sig selv over med en ::notice, indtil
+# NOVAMIRA_REFRESH_TOKEN findes — så den støjer ikke, før ejeren vælger at slå den til.
+#
+# Samme fornyelse bruges til at MÅLE site-tilstanden (tools/live_state.py): står AI
+# Engines Dynamic REST og Abilities på true i mwai_options, hvilken profil står der,
+# og hvilken plugin-version kører sitet. Rapporten skrives til reports/live-tilstand-<dato>.md
+# og .json og committes, så svaret findes i repoet uden et token i en sandkasse.
+# Målingen kører EFTER at det roterede token er gemt, så en rød måling aldrig kan tabe
+# adgangen; krav der ikke er opfyldt giver en ::error i jobbet.
+#
+# Det kræver to secrets:
+#   NOVAMIRA_REFRESH_TOKEN   refresh-tokenet fra den lokale godkendelse
+#   NOVAMIRA_SECRETS_TOKEN   fine-grained PAT med Secrets: write (PINTEREST_SECRETS_TOKEN
+#                            bruges som fallback, hvis den allerede findes)
+# og valgfrit variablen NOVAMIRA_CLIENT_ID; ellers bruges den offentlige klient fra
+# godkendelsen 6/11 2026. Tokenet er en hemmelighed: det må aldrig i repoet, i en log
+# eller i en commit — derfor maskeres det, før det gemmes.
+on:
+  schedule:
+    # Begge UTC-timer der kan være kl. 03 dansk tid; kørslen springer selv den forkerte over.
+    - cron: '15 1,2 * * *'
+  workflow_dispatch:
+  push:
+    # Et push til filerne der styrer målingen starter kørslen med det samme — så svaret
+    # ikke skal vente til kl. 03, og en ændret måling bliver prøvet i samme tur.
+    # Rapport-committet rører ingen af filerne, så det trigger ikke en ny kørsel.
+    paths:
+      - .github/workflows/novamira-keepalive.yml
+      - tools/live_state.py
+      - tools/live_channels.py
+      - tools/mcp_keepalive.py
+
+permissions:
+  contents: write
+
+concurrency:
+  group: novamira-keepalive
+  cancel-in-progress: false
+
+jobs:
+  keepalive:
+    name: Forny og verificér MCP-adgangen
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Kun kl. 03 dansk tid (medmindre kørslen er startet i hånden)
+        id: gate
+        run: |
+          hour="$((10#$(TZ=Europe/Copenhagen date +%H)))"
+          if [ "${GITHUB_EVENT_NAME}" != "schedule" ] || [ "$hour" -eq 3 ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "Lokal tid er $(TZ=Europe/Copenhagen date +%H:%M) — denne kørsel springes over."
+          fi
+
+      - name: Er der et refresh-token?
+        id: token
+        env:
+          NOVAMIRA_REFRESH_TOKEN: ${{ secrets.NOVAMIRA_REFRESH_TOKEN }}
+        run: |
+          if [ -n "${NOVAMIRA_REFRESH_TOKEN}" ]; then
+            echo "have=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "have=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=Novamira keep-alive ikke slået til::Repository-secret NOVAMIRA_REFRESH_TOKEN mangler, så der er intet at fornye. Læg refresh-tokenet i secrets (og en PAT med Secrets: write som NOVAMIRA_SECRETS_TOKEN), så holder kørslen adgangen i live. Se docs/mcp-auth.md → Novamira."
+          fi
+
+      - name: Offline selftest af keep-alive og live-måling
+        if: steps.gate.outputs.run == 'true'
+        run: |
+          python3 tools/test_mcp_keepalive.py
+          python3 tools/test_live_state.py
+
+      - name: Kan det roterede token gemmes? (tjek FØR fornyelsen)
+        if: steps.gate.outputs.run == 'true' && steps.token.outputs.have == 'true'
+        env:
+          NOVAMIRA_SECRETS_TOKEN: ${{ secrets.NOVAMIRA_SECRETS_TOKEN || secrets.PINTEREST_SECRETS_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${NOVAMIRA_SECRETS_TOKEN}" ]; then
+            echo "::error title=For mange penge på bordet — fornyelsen er ikke kørt::Novamira roterer refresh-tokenet ved hver fornyelse, og uden en PAT med Secrets: write kan det nye token ikke gemmes — så ville det gamle være dødt og adgangen tabt. Tilføj NOVAMIRA_SECRETS_TOKEN (fine-grained PAT, Secrets: write) og kør jobbet igen. Der er intet fornyet i denne kørsel."
+            exit 1
+          fi
+          GH_TOKEN="$NOVAMIRA_SECRETS_TOKEN" gh secret list --repo "$GITHUB_REPOSITORY" >/dev/null \
+            || { echo "::error title=PAT kan ikke skrive secrets::PAT'en blev afvist af GitHub (mangler Secrets: write eller adgang til repoet). Intet er fornyet."; exit 1; }
+          echo "PAT kan skrive secrets — fornyelsen må køre."
+
+      - name: Forny, verificér og gem det roterede token
+        if: steps.gate.outputs.run == 'true' && steps.token.outputs.have == 'true'
+        env:
+          NOVAMIRA_REFRESH_TOKEN: ${{ secrets.NOVAMIRA_REFRESH_TOKEN }}
+          NOVAMIRA_CLIENT_ID: ${{ vars.NOVAMIRA_CLIENT_ID || 'e43dd563eb62a712b17b7c8f1f13826a' }}
+          NOVAMIRA_SECRETS_TOKEN: ${{ secrets.NOVAMIRA_SECRETS_TOKEN || secrets.PINTEREST_SECRETS_TOKEN }}
+        run: |
+          set -euo pipefail
+          emit="$(mktemp)"
+          # --live-report måler site-tilstanden med det samme, fornyede token og skriver
+          # reports/live-tilstand-<dato>.md/.json. Roteres der to gange, dør det første
+          # token — derfor præcis ét fornyelseskald pr. kørsel.
+          python3 tools/mcp_keepalive.py --ci --emit-refresh-file "$emit" --live-report reports
+          new="$(cat "$emit")"
+          rm -f "$emit"
+          echo "::add-mask::$new"
+          if [ -z "${NOVAMIRA_SECRETS_TOKEN}" ]; then
+            echo "::error title=Kunne ikke gemme det roterede token::Novamira roterede refresh-tokenet, men der er ingen PAT med Secrets: write (NOVAMIRA_SECRETS_TOKEN eller PINTEREST_SECRETS_TOKEN). Det nye token kan ikke gemmes, og det gamle er dødt — godkend klienten igen lokalt."
+            exit 1
+          fi
+          printf '%s' "$new" | gh secret set NOVAMIRA_REFRESH_TOKEN --repo "$GITHUB_REPOSITORY"
+          echo "Nyt refresh-token gemt som repository-secret."
+          # P1.5: hvilke platformtal er der faktisk landet i sgap_events, pr. kanal?
+          # Målingen kører med det netop fornyede access-token og skriver sin egen
+          # rapport. Exit 3 (blokeret) er en notice — en kanal uden token er ikke en
+          # fejl — mens exit 1 (et virkende token uden landede tal) er en annotation.
+          kanaler="reports/live-kanaler-$(TZ=Europe/Copenhagen date +%F).md"
+          kode=0
+          python3 tools/live_channels.py > "$kanaler" || kode=$?
+          if [ "$kode" -eq 2 ]; then
+            rm -f "$kanaler"
+            echo "::notice title=P1.5 blev ikke målt::Der var intet access-token efter fornyelsen."
+          elif [ "$kode" -eq 1 ]; then
+            echo "::error title=P1.5: et virkende token landede intet::Se $kanaler — kanalen kan hente, men sgap_events fik ingen platformstal."
+          elif [ "$kode" -eq 3 ]; then
+            echo "::notice title=P1.5 er blokeret endnu::Se $kanaler — mindst én kanal mangler token eller scope."
+          fi
+
+      # Rækkefølgen betyder noget: tokenet er gemt ovenfor, FØR målingen farver jobbet.
+      # En manglende Dynamic REST eller en tom ai_engine_mcp skal ses, men må ikke koste
+      # det roterede refresh-token.
+      - name: Live-tilstand til job-summary og annotation
+        id: live
+        if: steps.gate.outputs.run == 'true' && steps.token.outputs.have == 'true'
+        run: |
+          set -uo pipefail
+          report="reports/live-tilstand-$(TZ=Europe/Copenhagen date +%F).json"
+          if [ ! -s "$report" ]; then
+            echo "::warning title=Live-tilstanden blev ikke målt::Kørslen fornyede adgangen, men skrev ingen $report — se trinets log for fejlen. Intet token er tabt."
+            exit 0
+          fi
+          mkdir -p reports
+          python3 - "$report" <<'PY'
+          import json, os, sys
+
+          data = json.load(open(sys.argv[1], encoding="utf-8"))
+          checks = data["checks"]
+          mark = {"ok": "✓", "fejl": "✗", "advarsel": "!", "ukendt": "?"}
+          lines = [f"## Live-tilstand: {data['verdict']}", "",
+                   f"{len(checks) - data['failed']} af {len(checks)} krav opfyldt · "
+                   f"målt {data['measured_at']}", "",
+                   "| Krav | Forventet | Målt | |", "| --- | --- | --- | --- |"]
+          for check in checks:
+              lines.append(f"| {check['navn']} | `{check['krav']}` | `{check['maalt']}` | "
+                           f"{mark.get(check['status'], '?')} |")
+          lines.append("")
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as handle:
+              handle.write("\n".join(lines) + "\n")
+          bad = [c for c in checks if c["status"] in ("fejl", "ukendt")]
+          for check in bad:
+              print(f"::error title={check['navn']}::Forventet {check['krav']}, målt {check['maalt']}. Se {sys.argv[1]}.")
+          sys.exit(1 if bad else 0)
+          PY
+
+      - name: Commit og push målingen
+        if: always() && steps.gate.outputs.run == 'true' && steps.token.outputs.have == 'true'
+        run: |
+          git config user.name "Steamgears Keep-alive Bot"
+          git config user.email "bot@steamgears.eu"
+          git add reports/live-tilstand-*.md reports/live-tilstand-*.json reports/live-kanaler-*.md
+          if git diff --staged --quiet; then
+            echo "Ingen ny måling at gemme."
+            exit 0
+          fi
+          # chore(status): er et af commit-værnets undtagne emner — en bot-rapport kan
+          # ikke bære §1-procenter.
+          git commit -m "$(printf 'chore(status): live-tilstand %s\n\nMålt af novamira-keepalive.yml med det fornyede token; ingen procenter.\n\n🤖 Generated with Codebuff\nCo-Authored-By: Codebuff <noreply@codebuff.com>\n' "$(TZ=Europe/Copenhagen date +%F)")"
+          for attempt in 1 2 3; do
+            if git push; then
+              echo "Målingen er pushet til main."
+              exit 0
+            fi
+            echo "Push afvist (forsøg $attempt) — henter og prøver igen."
+            git pull --rebase --autostash
+          done
+          echo "::error title=Målingen kunne ikke pushes::Rapporten ligger i træet, men push fejlede efter 3 forsøg."
+          exit 1

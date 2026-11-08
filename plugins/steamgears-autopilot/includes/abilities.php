@@ -56,6 +56,13 @@ class SGAP_Abilities {
                 'Overview of the Steamgears social autopilot: on/off switches, channels, whether Publer and the AI are configured, why sending is paused (if it is), queue counts by status, pending drafts, the last generation run, recent errors and 30-day results per channel.',
                 [], [], [__CLASS__, 'status'], true, true
             ],
+            'channel-health' => [
+                'Channel analytics status',
+                'Per channel: is a token stored, what is the next step, and which platform numbers have actually landed in sgap_events inside the window (default 90 days). Telegram reports no_metric, because the Bot API has no per-post numbers; a channel that is ready but empty is the one where a working token returned nothing.',
+                [
+                    'days' => ['type' => 'integer', 'minimum' => 1, 'maximum' => 365, 'default' => 90]
+                ], [], [__CLASS__, 'channel_health'], true, true
+            ],
             'list-drafts' => [
                 'List AI drafts',
                 'Lists AI-written social posts. Default: those waiting for approval. Each has id, channel, title, text, hashtags and the page it promotes.',
@@ -143,6 +150,27 @@ class SGAP_Abilities {
                 'Tests the Publer API key: lists workspaces, connected social accounts, and configured channels that have no Publer account.',
                 [], [], [__CLASS__, 'check_publer'], true, true
             ],
+            'list-evergreen' => [
+                'List evergreen pages',
+                'Lists the pages and products marked for evergreen recycling with their share budget, expiry date, last share and whether they are ready now. Also returns the recycle settings and how many shares have been used.',
+                ['limit' => ['type' => 'integer', 'minimum' => 1, 'maximum' => 100, 'default' => 50]], [], [__CLASS__, 'list_evergreen'], true, true
+            ],
+            'mark-evergreen' => [
+                'Mark or unmark an evergreen page',
+                'Marks a blog post or product for evergreen recycling, or stops it. Optional max shares override (0 = the setting) and an expiry date (YYYY-MM-DD); an empty date never expires.',
+                [
+                    'post_id' => ['type' => 'integer', 'minimum' => 1],
+                    'evergreen' => ['type' => 'boolean', 'default' => true, 'description' => 'false stops recycling this page'],
+                    'max' => ['type' => 'integer', 'minimum' => 0, 'description' => 'Share budget for this page. 0 = the default in Settings → Evergreen.'],
+                    'until' => ['type' => 'string', 'description' => 'Last day it may be recycled, YYYY-MM-DD. Empty = never expires.'],
+                    'reset' => ['type' => 'boolean', 'description' => 'Also set the share count back to 0.']
+                ], ['post_id'], [__CLASS__, 'mark_evergreen'], false, true
+            ],
+            'recycle-evergreen' => [
+                'Recycle evergreen pages now',
+                'Runs the evergreen recycler now (normally daily): writes a fresh variation for the next due pages and queues it on the next channel in rotation. Each share still passes the quality gate, preflight, blackout and duplicate guard.',
+                ['limit' => ['type' => 'integer', 'minimum' => 1, 'maximum' => 10, 'description' => 'How many pages to recycle. Default: the daily setting.']], [], [__CLASS__, 'recycle_evergreen'], false, false
+            ],
             'meta-audit' => [
                 'Audit post meta',
                 'Audits titles and meta descriptions on published posts and pages: how many have no description, how many are outside the limits (title 60, description 70-155 characters), and which posts are worst. Read-only — it changes nothing.',
@@ -150,6 +178,38 @@ class SGAP_Abilities {
                     'scan' => ['type' => 'integer', 'minimum' => 1, 'maximum' => 500, 'default' => 100, 'description' => 'How many of the newest published posts to check'],
                     'limit' => ['type' => 'integer', 'minimum' => 1, 'maximum' => 100, 'default' => 20, 'description' => 'How many of the worst posts to return']
                 ], [], [__CLASS__, 'meta_audit'], true, true
+            ],
+            'niche-plan' => [
+                'Plan a shop from a niche',
+                'Turns one niche name into a complete shop plan: brand suggestions, five collections, priced products across the print-on-demand families, page drafts, a menu, the schema types the shop needs, and a readiness list of the steps only the owner can take. Read-only — nothing is created.',
+                [
+                    'niche' => ['type' => 'string', 'minLength' => 2, 'maxLength' => 60, 'description' => 'The niche, e.g. "steampunk airship" or "cottagecore mushroom"'],
+                    'count' => ['type' => 'integer', 'minimum' => 1, 'maximum' => 40, 'default' => 10, 'description' => 'How many products the plan should hold'],
+                    'margin' => ['type' => 'integer', 'minimum' => 0, 'maximum' => 500, 'description' => 'Margin floor in percent. Default: the shop setting (Settings → Shop & feeds).']
+                ], ['niche'], [__CLASS__, 'niche_plan'], true, true
+            ],
+            'niche-apply' => [
+                'Create the shop drafts from a niche',
+                'Runs the niche plan and creates WooCommerce product drafts, product categories and page drafts. Nothing is published, no existing product is touched, and every created id is stored under a run key so the whole run can be rolled back.',
+                [
+                    'niche' => ['type' => 'string', 'minLength' => 2, 'maxLength' => 60],
+                    'count' => ['type' => 'integer', 'minimum' => 1, 'maximum' => 40, 'default' => 10],
+                    'margin' => ['type' => 'integer', 'minimum' => 0, 'maximum' => 500],
+                    'force' => ['type' => 'boolean', 'default' => false, 'description' => 'Create again even if this plan key has already been applied.']
+                ], ['niche'], [__CLASS__, 'niche_apply'], false, false
+            ],
+            'niche-runs' => [
+                'List niche shop runs',
+                'Lists the niche runs that created drafts, with their key, the niche and how many collections, products and pages each created. Read-only.',
+                [], [], [__CLASS__, 'niche_runs'], true, true
+            ],
+            'niche-rollback' => [
+                'Roll back a niche shop run',
+                'Deletes the drafts and unused product categories one niche run created. Published items and items not created by that run are kept and reported. Destructive: it deletes draft content, so it needs the run key from niche-runs.',
+                [
+                    'plan_key' => ['type' => 'string', 'minLength' => 6, 'description' => 'The run key returned by niche-apply'],
+                    'dry' => ['type' => 'boolean', 'default' => false, 'description' => 'Only report what would be deleted']
+                ], ['plan_key'], [__CLASS__, 'niche_rollback'], false, false
             ]
         ];
     }
@@ -164,7 +224,7 @@ class SGAP_Abilities {
                 'description' => $description,
                 'category' => self::CATEGORY,
                 'output_schema' => ['type' => 'object'],
-                'execute_callback' => $execute,
+                'execute_callback' => static fn($input = null) => call_user_func($execute, $input),
                 'permission_callback' => [__CLASS__, 'can_manage'],
                 'meta' => self::meta($readonly, $idempotent)
             ];
@@ -200,7 +260,9 @@ class SGAP_Abilities {
             'key_test' => get_option(SGAP_KeyCheck::RESULT) ?: null,
             'sending_paused_because' => SGAP_Queue::blocked_reason() !== '' ? SGAP_Queue::blocked_message() : null,
             'blackout' => SGAP_Blackout::summary(),
+            'command_center' => class_exists('SGAP_CC') ? SGAP_CC::status() : null,
             'quality_gate' => ['mode' => SGAP_Quality::mode(), 'banned_words' => count(SGAP_Quality::words())],
+            'evergreen' => SGAP_Evergreen::summary(),
             'can_send_now' => SGAP_Queue::capacity(),
             'limits' => [
                 'daily_cap' => (int) SGAP_Settings::get('daily_cap', 8),
@@ -220,6 +282,27 @@ class SGAP_Abilities {
                  FROM {$wpdb->prefix}sgap_events WHERE created_at >= %s GROUP BY channel",
                 wp_date('Y-m-d H:i:s', time() - 30 * DAY_IN_SECONDS)
             ), ARRAY_A)
+        ];
+    }
+
+    /**
+     * The answer P1.5 is verified with: can the channel run, and did its numbers land?
+     *
+     * Read-only and idempotent: it queries sgap_events and the stored key state, and writes
+     * nothing. The two halves are returned separately instead of summed, because "ready" and
+     * "measured" answer different questions and a channel can be the first without the second.
+     */
+    public static function channel_health($input = null): array {
+        $input = (array) $input;
+        $days = max(SGAP_Channel_Health::MIN_DAYS,
+            min(SGAP_Channel_Health::MAX_DAYS, (int) ($input['days'] ?? SGAP_Channel_Health::WINDOW_DAYS)));
+        $analytics = SGAP_Channel_Health::analytics($days);
+        return [
+            'window_days' => $days,
+            'channels' => SGAP_Channel_Health::report(),
+            'summary' => SGAP_Channel_Health::summary(),
+            'analytics' => $analytics,
+            'analytics_summary' => SGAP_Channel_Health::analytics_summary($analytics),
         ];
     }
 
@@ -357,9 +440,75 @@ class SGAP_Abilities {
         return SGAP_KeyCheck::run();
     }
 
+    public static function list_evergreen($input = null): array {
+        $input = (array) $input;
+        $limit = min(100, max(1, (int) ($input['limit'] ?? 50)));
+        $items = [];
+        foreach (array_slice(SGAP_Evergreen::marked(), 0, $limit) as $id) {
+            $items[] = ['title' => get_the_title($id), 'type' => get_post_type($id)] + SGAP_Evergreen::status($id);
+        }
+        return ['settings' => SGAP_Evergreen::summary(), 'items' => $items];
+    }
+
+    public static function mark_evergreen($input = null) {
+        $input = (array) $input;
+        $id = absint($input['post_id'] ?? 0);
+        if (array_key_exists('evergreen', $input) && !$input['evergreen']) {
+            SGAP_Evergreen::unmark($id);
+            return ['post_id' => $id, 'marked' => false];
+        }
+        $result = SGAP_Evergreen::mark($id, [
+            'max' => absint($input['max'] ?? 0),
+            'until' => (string) ($input['until'] ?? ''),
+            'reset' => !empty($input['reset'])
+        ]);
+        return $result;
+    }
+
+    public static function recycle_evergreen($input = null): array {
+        $input = (array) $input;
+        return SGAP_Evergreen::run(isset($input['limit']) ? min(10, max(1, (int) $input['limit'])) : null);
+    }
+
     /** Read-only audit of titles and meta descriptions. Delegates to SGAP_Meta_Audit so the logic can be tested. */
     public static function meta_audit($input = null): array {
         return SGAP_Meta_Audit::audit($input);
+    }
+
+    /* ---- niche shop: one field, then drafts ---- */
+
+    public static function niche_plan($input = null) {
+        $input = (array) $input;
+        $plan = SGAP_Niche_Shop::plan((string) ($input['niche'] ?? ''), $input);
+        return is_wp_error($plan) ? $plan : SGAP_Niche_Shop::summary($plan);
+    }
+
+    public static function niche_apply($input = null) {
+        $input = (array) $input;
+        $input['apply'] = true;
+        return SGAP_Niche_Shop::run($input);
+    }
+
+    public static function niche_runs($input = null): array {
+        $runs = SGAP_Niche_Shop::runs();
+        $out = [];
+        foreach ($runs as $key => $run) {
+            $out[] = [
+                'plan_key' => $key,
+                'niche' => (string) ($run['niche'] ?? ''),
+                'created_at' => (string) ($run['created_at'] ?? ''),
+                'collections' => count($run['created']['collections'] ?? []),
+                'products' => count($run['created']['products'] ?? []),
+                'pages' => count($run['created']['pages'] ?? []),
+                'errors' => $run['errors'] ?? []
+            ];
+        }
+        return ['count' => count($out), 'runs' => $out];
+    }
+
+    public static function niche_rollback($input = null) {
+        $input = (array) $input;
+        return SGAP_Niche_Shop::rollback((string) ($input['plan_key'] ?? ''), empty($input['dry']));
     }
 
     public static function check_publer($input = null) {

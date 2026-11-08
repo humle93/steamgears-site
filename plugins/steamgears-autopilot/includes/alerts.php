@@ -49,6 +49,81 @@ class SGAP_Alerts {
         return round($queued / $per_day, 1);
     }
 
+    /**
+     * Per-channel caps from Settings → Alerts, written as "pinterest=2, facebook=3".
+     * A channel without an entry is measured against daily_cap; a typo, an unknown
+     * channel or a number outside 1–50 is ignored rather than warned about forever.
+     */
+    public static function caps(): array {
+        $known = class_exists('SGAP_Publer') ? SGAP_Publer::CHANNELS : [];
+        $caps = [];
+        foreach (preg_split('/[\r\n,;]+/', (string) SGAP_Settings::get('channel_caps', '')) as $line) {
+            if (!str_contains($line, '=')) {
+                continue;
+            }
+            [$channel, $value] = array_map('trim', explode('=', $line, 2));
+            $channel = sanitize_key($channel);
+            $value = (int) $value;
+            if ($channel === '' || $value < 1 || $value > 50) {
+                continue;
+            }
+            if ($known && !in_array($channel, $known, true)) {
+                continue; // a channel the publisher does not know cannot run dry
+            }
+            $caps[$channel] = $value;
+        }
+        return $caps;
+    }
+
+    /**
+     * Queue depth and runway per channel: the whole-queue measure hides one dead
+     * channel behind nine healthy ones. A channel with its own cap is measured
+     * against that cap, everything else against daily_cap.
+     */
+    public static function channel_runway(): array {
+        global $wpdb;
+        $caps = self::caps();
+        $daily = max(1, (int) SGAP_Settings::get('daily_cap', 8));
+        $counts = [];
+        $rows = (array) $wpdb->get_results("SELECT channel, COUNT(*) AS n FROM {$wpdb->prefix}sgap_queue WHERE status = 'queued' GROUP BY channel", ARRAY_A);
+        foreach ($rows as $row) {
+            $channel = sanitize_key((string) ($row['channel'] ?? ''));
+            if ($channel === '') {
+                continue;
+            }
+            $counts[$channel] = (int) ($row['n'] ?? 0);
+        }
+        $channels = array_keys($counts + $caps);
+        sort($channels);
+        $out = [];
+        foreach ($channels as $channel) {
+            $cap = (int) ($caps[$channel] ?? $daily);
+            $queued = (int) ($counts[$channel] ?? 0);
+            $out[$channel] = ['queued' => $queued, 'cap' => $cap, 'days' => round($queued / $cap, 1)];
+        }
+        return $out;
+    }
+
+    /**
+     * Channels below the warning level. A channel with its own cap always counts:
+     * setting a cap is a promise about that channel, so an empty one is a gap.
+     * A channel without a cap only counts while it still has something queued.
+     */
+    public static function dry_channels(): array {
+        $threshold = max(0, (int) SGAP_Settings::get('alert_dry_days', 2));
+        if ($threshold === 0) {
+            return [];
+        }
+        $caps = self::caps();
+        $out = [];
+        foreach (self::channel_runway() as $channel => $row) {
+            if ($row['days'] < $threshold && ($row['queued'] > 0 || isset($caps[$channel]))) {
+                $out[$channel] = $row;
+            }
+        }
+        return $out;
+    }
+
     /** Fired by SGAP_Queue::mark() when an item has spent its last attempt. */
     public static function on_failure(int $id, string $channel, string $error): void {
         if (self::mode() !== 'immediate') {
@@ -84,6 +159,7 @@ class SGAP_Alerts {
         $threshold = max(0, (int) SGAP_Settings::get('alert_dry_days', 2));
         $failed = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}sgap_queue WHERE status = 'failed'");
         $problems = (array) ($health['problems'] ?? []);
+        $dry = self::dry_channels();
 
         if ($mode === 'immediate') {
             if ($threshold > 0 && $runway < $threshold) {
@@ -99,16 +175,48 @@ class SGAP_Alerts {
                 ];
                 self::send('dry', 'Steamgears: the queue is running dry', implode("\n", $body));
             }
+            // A healthy total can still hide one channel that is about to stop.
+            if ($dry) {
+                $lines = [count($dry) === 1 ? 'A channel is about to run dry:' : count($dry) . ' channels are about to run dry:', ''];
+                foreach ($dry as $channel => $row) {
+                    $lines[] = "- {$channel}: {$row['queued']} queued, {$row['days']} day(s) at {$row['cap']}/day";
+                }
+                $lines[] = '';
+                $lines[] = 'Top up the quiet channel, or lower its cap if that rhythm was never intended.';
+                $lines[] = 'Per-channel caps are set under Settings → Alerts; a channel without one is measured against Max posts per day.';
+                $lines[] = '';
+                $lines[] = admin_url('admin.php?page=sgap-queue');
+                $names = array_keys($dry);
+                $subject = count($names) === 1
+                    ? 'Steamgears: ' . $names[0] . ' is running dry'
+                    : 'Steamgears: ' . count($names) . ' channels are running dry';
+                self::send('dry:' . implode(',', $names), $subject, implode("\n", $lines));
+            }
             return;
         }
 
         // daily: one mail, and only when there is something to say.
-        if (!$failed && !$problems && ($threshold === 0 || $runway >= $threshold)) {
+        if (!$failed && !$problems && !$dry && ($threshold === 0 || $runway >= $threshold)) {
             return;
         }
         $lines = ['Steamgears Autopilot — daily digest', ''];
         $lines[] = "Queue: {$runway} day(s) of runway at the daily cap" . ($threshold > 0 && $runway < $threshold ? ' (below the warning level of ' . $threshold . ')' : '');
+        if ($dry) {
+            $names = [];
+            foreach ($dry as $channel => $row) {
+                $names[] = $channel . ' (' . $row['queued'] . ' queued, ' . $row['days'] . ' day(s) at ' . $row['cap'] . '/day)';
+            }
+            $lines[] = 'Channels below the warning level: ' . implode(', ', $names);
+        }
         $lines[] = "Failed posts: {$failed}";
+        $per_channel = self::channel_runway();
+        if ($per_channel) {
+            $lines[] = '';
+            $lines[] = 'Per channel at its own cap:';
+            foreach ($per_channel as $channel => $row) {
+                $lines[] = "- {$channel}: {$row['queued']} queued, {$row['days']} day(s) at {$row['cap']}/day";
+            }
+        }
         if ($problems) {
             $lines[] = '';
             $lines[] = 'Self-check:';

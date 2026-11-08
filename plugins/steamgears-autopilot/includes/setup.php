@@ -21,21 +21,54 @@ class SGAP_Setup {
         'batch_size' => 'Posts per 15-minute run', 'quiet_start' => 'Quiet from', 'quiet_end' => 'Quiet until', 'labor_rate' => 'Your hourly rate',
         'monthly_budget' => 'Monthly budget', 'target_roi' => 'Target ROI %', 'winner_min_clicks' => 'Winner after clicks', 'loser_min_clicks' => 'Loser after clicks',
         'repost_cooldown_days' => 'Days before a page is promoted again', 'repost_max' => 'Max reposts', 'merchant_feed_secret' => 'Product feed secret',
-        'etsy_shop_id' => 'Etsy shop ID', 'etsy_oauth_token' => 'Etsy OAuth token', 'etsy_refresh_token' => 'Etsy refresh token',
-        'etsy_shipping_profile_id' => 'Etsy shipping profile', 'etsy_return_policy_id' => 'Etsy return policy',
+        'evergreen_enabled' => 'Recycle evergreen pages', 'evergreen_after_days' => 'Days between two shares', 'evergreen_max_shares' => 'Default shares per page', 'evergreen_batch' => 'Pages recycled per day',
         'auto_images' => 'AI photos for Instagram & Pinterest', 'auto_seo' => 'SEO meta for new posts & products', 'articles_per_week' => 'SEO articles per week',
-        'auto_publish_articles' => 'Publish weekly articles automatically', 'weekly_report' => 'Weekly e-mail report', 'rescue_hosts' => 'Copy images from these servers'
+        'auto_publish_articles' => 'Publish weekly articles automatically', 'weekly_report' => 'Weekly e-mail report', 'rescue_hosts' => 'Copy images from these servers',
+        'mcp_client_id' => 'MCP client ID', 'mcp_refresh_token' => 'MCP refresh token',
+        'telegram_bot_token' => 'Bot token', 'bluesky_app_password' => 'App password', 'mastodon_token' => 'Access token',
+        'printful_api_key' => 'Printful API token', 'printful_store_id' => 'Printful store ID', 'woo_min_margin' => 'Minimum margin %',
+        'pinterest_client_id' => 'Pinterest App ID', 'pinterest_client_secret' => 'Pinterest app secret',
+        'pinterest_access_token' => 'Pinterest access token', 'pinterest_refresh_token' => 'Pinterest refresh token',
+        'instagram_user_id' => 'Instagram account ID', 'instagram_graph_host' => 'Graph host',
+        'instagram_access_token' => 'Instagram access token',
+        'facebook_access_token' => 'Facebook page token',
+        'facebook_page_id' => 'Facebook page id'
     ];
 
-    /** Settings page tabs: id => [label, icon, keys]. */
+    /**
+     * Settings page tabs: id => [label, icon, keys].
+     *
+     * The keys tab is first and owns every secret (SGAP_Settings::SECRET_KEYS); the other tabs
+     * carry settings only. settings_page() strips a secret from any other panel as a guard, so a
+     * key added to the wrong tab later still shows up in exactly one place.
+     */
     const TABS = [
+        'keys' => ['Keys', 'lock', ['publer_api_key', 'ai_api_key', 'image_api_key', 'serpapi_key', 'telegram_bot_token', 'merchant_feed_secret', 'bluesky_app_password', 'mastodon_token', 'mcp_refresh_token', 'printful_api_key', 'pinterest_access_token', 'pinterest_refresh_token', 'pinterest_client_secret', 'instagram_access_token', 'facebook_access_token']],
         'basics' => ['Basics', 'admin-home', ['autopilot_enabled', 'full_auto_enabled', 'channels', 'posts_per_day']],
-        'ai' => ['AI & images', 'superhero-alt', ['ai_provider', 'ai_api_key', 'ai_model', 'ai_base_url', 'content_language', 'image_model', 'image_api_key', 'serpapi_key']],
-        'publishing' => ['Publishing', 'megaphone', ['publish_mode', 'publer_api_key', 'publer_workspace_id', 'publer_pinterest_board', 'quality_gate', 'banned_words']],
+        'ai' => ['AI & images', 'superhero-alt', ['ai_profile', 'ai_provider', 'ai_model', 'ai_base_url', 'content_language', 'image_model']],
+        'publishing' => ['Publishing', 'megaphone', ['publish_mode', 'publer_workspace_id', 'publer_pinterest_board', 'pinterest_client_id', 'instagram_user_id', 'instagram_graph_host', 'facebook_page_id', 'facebook_graph_version', 'facebook_direct', 'bluesky_handle', 'mastodon_instance', 'mastodon_limit', 'telegram_chat_id', 'quality_gate', 'banned_words', 'dupe_days']],
         'schedule' => ['Schedule & limits', 'clock', ['quiet_start', 'quiet_end', 'blackout_ranges', 'daily_cap', 'batch_size', 'repost_cooldown_days']],
-        'shop' => ['Shop & feeds', 'cart', ['merchant_feed_secret', 'etsy_shop_id', 'etsy_oauth_token', 'etsy_refresh_token', 'etsy_shipping_profile_id', 'etsy_return_policy_id']],
+        'evergreen' => ['Evergreen', 'update', ['evergreen_enabled', 'evergreen_after_days', 'evergreen_max_shares', 'evergreen_batch']],
+        'shop' => ['Shop & feeds', 'cart', ['woo_min_margin']],
+        'mcp' => ['MCP access', 'admin-links', ['mcp_client_id']],
         'automation' => ['Automation', 'update-alt', ['auto_images', 'auto_seo', 'articles_per_week', 'auto_publish_articles', 'weekly_report', 'rescue_hosts']],
         'advanced' => ['Economics', 'chart-line', ['labor_rate', 'monthly_budget', 'target_roi', 'winner_min_clicks', 'loser_min_clicks', 'repost_max']]
+    ];
+
+    /**
+     * One line per tab: what the tab decides. Every tab has a heading of its own, so a tab is
+     * never a stack of unnamed fields — the keys tab speaks for itself and is therefore absent.
+     */
+    const TAB_HINTS = [
+        'basics' => 'What the autopilot may do on its own, where it posts, and how many pages it promotes a day.',
+        'ai' => 'Which model writes the posts, the articles and the images, and in which language.',
+        'publishing' => 'How posts leave the site, which accounts they go to, and what the quality gate refuses.',
+        'schedule' => 'When posts are released, how many per day, and the days when nothing goes out at all.',
+        'evergreen' => 'Pages worth sharing more than once: how long between two shares, and how many each page gets.',
+        'shop' => 'Printful\'s store, the product feed and the margin floor the shop tools may not undercut.',
+        'mcp' => 'The client id the site uses when it renews its own MCP token.',
+        'automation' => 'What runs by itself: AI images, SEO meta on new posts, weekly articles and the image rescue.',
+        'advanced' => 'Your hourly rate and the numbers that decide whether a post is a winner, a loser or worth repeating.'
     ];
 
     const CHANNEL_LABELS = [
@@ -148,7 +181,7 @@ class SGAP_Setup {
     public static function ajax_test(): void {
         self::guard();
         $r = SGAP_KeyCheck::run();
-        wp_send_json_success(['ai' => $r['ai'], 'publer' => $r['publer']]);
+        wp_send_json_success(['ai' => $r['ai'], 'publer' => $r['publer'], 'printful' => $r['printful']]);
     }
 
     /* ---- fields ---- */
@@ -175,6 +208,52 @@ class SGAP_Setup {
             $html .= '<option value="' . $h . '"' . selected($value, $h, false) . '>' . sprintf('%02d:00', $h) . '</option>';
         }
         return $html . '</select>';
+    }
+
+    /**
+     * The model dropdown: only what the provider lists right now can be picked, so a retired or
+     * guessed model name can no longer be saved. Without a list the field stays free text, so an
+     * unreachable provider never blocks the rest of the form.
+     */
+    public static function model_field(string $name): string {
+        $id = 'sgap_ai_model';
+        $current = trim((string) SGAP_Settings::get('ai_model'));
+        $default = SGAP_AI::default_model();
+        $models = SGAP_AI::catalog();
+        if ($models === []) {
+            return '<input type="text" id="' . esc_attr($id) . '" name="' . esc_attr($name) . '" value="' . esc_attr($current)
+                . '" class="sgap-text" spellcheck="false" placeholder="' . esc_attr($default !== '' ? $default : 'model id') . '">'
+                . '<p class="sgap-hint">Could not read the model list from ' . esc_html(SGAP_AI::provider_name())
+                . ' right now, so the name is free text. Leave it empty for the default'
+                . ($default !== '' ? ' (' . esc_html($default) . ')' : '') . '.</p>';
+        }
+        $html = '<select id="' . esc_attr($id) . '" name="' . esc_attr($name) . '" class="sgap-model">'
+            . '<option value=""' . selected($current, '', false) . '>'
+            . esc_html($default !== '' ? 'Provider default: ' . $default : 'Provider default') . '</option>';
+        if ($current !== '' && !in_array($current, $models, true)) {
+            // Never hide what is saved: the owner has to see that it is gone.
+            $html .= '<option value="' . esc_attr($current) . '" selected>' . esc_html($current) . ' (not offered any more)</option>';
+        }
+        foreach (self::group_models($models) as $vendor => $ids) {
+            $html .= '<optgroup label="' . esc_attr($vendor) . '">';
+            foreach ($ids as $model) {
+                $html .= '<option value="' . esc_attr($model) . '"' . selected($current, $model, false) . '>' . esc_html($model) . '</option>';
+            }
+            $html .= '</optgroup>';
+        }
+        return $html . '</select><p class="sgap-hint">' . count($models) . ' model(s) that ' . esc_html(SGAP_AI::provider_name())
+            . ' offers right now. The list is refreshed every 12 hours, so a retired model cannot be picked, and saving checks it again.</p>';
+    }
+
+    /** Model ids by their vendor prefix, so hundreds of ids stay navigable in one dropdown. */
+    public static function group_models(array $models): array {
+        $groups = [];
+        foreach ($models as $model) {
+            $vendor = strpos($model, '/') !== false ? (string) strstr($model, '/', true) : 'other';
+            $groups[$vendor][] = $model;
+        }
+        ksort($groups);
+        return $groups;
     }
 
     /** One settings field, named for options.php (sgap_<key>) or for the wizard (settings[<key>]). */
@@ -209,6 +288,9 @@ class SGAP_Setup {
                 $html .= '<label class="sgap-clear"><input type="checkbox" name="sgap_clear[' . esc_attr($key) . ']" value="1"> Remove saved key</label>';
             }
             return $html;
+        }
+        if ($key === 'ai_model') {
+            return self::model_field($name);
         }
         if (in_array($key, SGAP_Settings::TEXTAREA_KEYS, true)) {
             return '<textarea id="' . esc_attr($id) . '" name="' . esc_attr($name) . '" rows="4" class="sgap-text" spellcheck="false">' . esc_textarea((string) SGAP_Settings::get($key)) . '</textarea>';
@@ -251,20 +333,30 @@ class SGAP_Setup {
         }
         echo '<a class="sgap-tab sgap-tab-link" href="' . esc_url(admin_url('admin.php?page=sgap-setup')) . '"><span class="dashicons dashicons-welcome-learn-more"></span>Setup guide</a></div>';
         $first = true;
-        $shown = [];
-        foreach (self::TABS as $id => [$label, $icon, $keys]) {
-            echo '<div class="sgap-card sgap-panel" data-panel="' . esc_attr($id) . '"' . ($first ? '' : ' hidden') . '>';
-            foreach ($keys as $key) {
-                echo self::row($key);
-                $shown[] = $key;
+        foreach (self::TABS as $id => $tab) {
+            $keys = (array) $tab[2];
+            echo '<div class="sgap-card sgap-panel' . ($id === 'keys' ? ' sgap-panel--keys' : '') . '" data-panel="' . esc_attr($id) . '"' . ($first ? '' : ' hidden') . '>';
+            if ($id === 'keys') {
+                SGAP_Keys::panel();
+            } else {
+                // Every tab opens with the question it answers, so the fields below have a place.
+                echo '<div class="sgap-panel-head"><h2><span class="dashicons dashicons-' . esc_attr($tab[1]) . '"></span>' . esc_html($tab[0]) . '</h2>'
+                    . (isset(self::TAB_HINTS[$id]) ? '<p class="sgap-section-hint">' . esc_html(self::TAB_HINTS[$id]) . '</p>' : '') . '</div>';
+                // A secret belongs on the keys tab and nowhere else, even if it is listed here by mistake.
+                foreach (array_diff($keys, SGAP_Settings::SECRET_KEYS) as $key) {
+                    echo self::row($key);
+                }
             }
             echo '</div>';
             $first = false;
         }
         // Registered settings not on a tab keep their values (options.php only saves fields it receives).
-        echo '<div class="sgap-savebar"><span class="description">Changes are saved for all tabs at once.</span>';
+        echo '<div class="sgap-savebar"><span class="sgap-dirty" hidden>Unsaved changes</span><span class="description">Every tab is saved at once.</span>';
         submit_button('Save settings', 'primary', 'submit', false);
         echo '</div></form>';
+        echo '<script>(function(){var f=document.querySelector("form.sgap-settings"),b=f&&f.querySelector(".sgap-dirty");if(!f||!b)return;'
+            . 'function edge(){var d=false;f.querySelectorAll("input,select,textarea").forEach(function(i){if(i.type==="hidden"||i.name==="nonce")return;if(i.type==="checkbox"||i.type==="radio"){if(i.checked!==i.defaultChecked)d=true;}else if(i.value!==i.defaultValue){d=true;}});b.hidden=!d;}'
+            . 'f.addEventListener("input",edge);f.addEventListener("change",edge);edge();})();</script>';
         echo self::field_js();
         echo '<script>(function(){var tabs=document.querySelectorAll(".sgap-tab[data-tab]"),panels=document.querySelectorAll(".sgap-panel");'
             . 'function show(id){tabs.forEach(function(t){t.classList.toggle("on",t.dataset.tab===id);});panels.forEach(function(p){p.hidden=p.dataset.panel!==id;});try{localStorage.setItem("sgapTab",id);}catch(e){}}'
@@ -301,7 +393,11 @@ class SGAP_Setup {
         foreach (['aimlapi' => ['AIMLAPI', 'Recommended. Claude and 300+ models plus images with one key. Pay as you go.'], 'anthropic' => ['Anthropic (Claude)', 'Directly from Anthropic. Text only – images need an AIMLAPI key.'], 'openai_compatible' => ['Other', 'OpenAI, OpenRouter or any OpenAI-compatible API.']] as $value => [$title, $text]) {
             echo '<label class="sgap-choice' . ($provider === $value ? ' on' : '') . '"><input type="radio" name="settings[ai_provider]" value="' . esc_attr($value) . '"' . checked($provider, $value, false) . '><span><strong>' . esc_html($title) . '</strong><small>' . esc_html($text) . '</small></span></label>';
         }
-        echo '</div>' . self::row('ai_api_key', true)
+        $ai_saved = trim((string) SGAP_Settings::get('ai_api_key', '')) !== '' || SGAP_Settings::constant_name('ai_api_key');
+        echo '</div>' . ($ai_saved
+                ? '<div class="sgap-connected">' . SGAP_UI::pill('Key saved', 'ok') . ' <span>Change it under <a href="'
+                    . esc_url(admin_url('admin.php?page=sgap-settings#keys')) . '">Settings → Keys</a> — that is the only place keys are pasted.</span></div>'
+                : self::row('ai_api_key', true))
             . '<details class="sgap-more"><summary>Model and address (optional)</summary>' . self::row('ai_model', true) . self::row('ai_base_url', true) . '</details>'
             . '<div class="sgap-test-result">' . (is_array($keys) && isset($keys['ai']) ? SGAP_UI::pill('AI ' . ($keys['ai']['ok'] ? '✓' : '✗'), $keys['ai']['ok'] ? 'ok' : 'bad') . ' <span>' . esc_html($keys['ai']['message']) . '</span>' : '') . '</div>'
             . '<div class="sgap-step-nav"><span></span><button class="button button-primary" data-next>Save, test &amp; continue</button></div></form>';

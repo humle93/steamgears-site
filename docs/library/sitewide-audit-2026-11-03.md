@@ -1,7 +1,7 @@
 # Sitewide-audit — steamgears.eu
 
 **Dato:** 2026-11-03  
-**Scope:** WordPress- og WooCommerce-webshop med print-on-demand via Printify.  
+**Scope:** WordPress- og WooCommerce-webshop med print-on-demand via Printful.  
 **Status:** Dokumentbaseret audit. Dette er en prioritering af eksisterende fund — ikke en ny live-crawl eller en bekræftelse af, at forholdene stadig er uændrede.
 
 ## Konklusion
@@ -20,7 +20,7 @@ Gennemgangen bygger på de nyeste tilgængelige repo-dokumenter pr. 2026-11-03:
 - [`../seo.md`](../seo.md): gældende SEO- og indholdspraksis.
 - [`agent-profil.md`](../agent-profil.md): platform, adgang og begrænsninger.
 
-**Ikke genverificeret i denne audit:** live WordPress-indstillinger, GSC/Crawl Stats, GA4-events, browserbaserede Core Web Vitals, rigtig checkout/fragtberegning, juridiske virksomhedsoplysninger, Printify-forbindelse og betalingsgatewayernes godkendelser. De historiske tal nedenfor er pejlemærker, ikke en påstand om dagens live-tilstand.
+**Ikke genverificeret i denne audit:** live WordPress-indstillinger, GSC/Crawl Stats, GA4-events, browserbaserede Core Web Vitals, rigtig checkout/fragtberegning, juridiske virksomhedsoplysninger, Printful-forbindelse og betalingsgatewayernes godkendelser. De historiske tal nedenfor er pejlemærker, ikke en påstand om dagens live-tilstand.
 
 ## Fund og anbefalinger
 
@@ -28,8 +28,8 @@ Gennemgangen bygger på de nyeste tilgængelige repo-dokumenter pr. 2026-11-03:
 | --- | --- | --- | --- |
 | P0 | Juridisk identitet og EU-tillid | Butiksauditten fandt manglende CVR/firmanavn, adresse og telefon; imprint stod til `none`. | Afklar virksomhedens registrerede oplysninger med ejeren. Udgiv korrekte kontakt-, handels-, retur- og privatlivsoplysninger; publicér aldrig gættede felter. Få juridisk gennemgang ved tvivl. |
 | P0 | Cookie-samtykke og måling | Butiksauditten fandt US/opt-out-konfiguration; SEO-dokumentationen beskrev dobbelt GA4 pageview fra to installationer. | Revider consent-regioner, kategorier og script-gating for relevante markeder. Behold én GA4-installation og test consent-tilstande før trafikmåling. |
-| P0 | Valuta, moms og samlet pris | Butiksauditten fandt USD i produktdata i produktdata, mens butikken henvender sig til danske/EU-kunder. | Vælg DKK eller EUR, genberegn produktpriser ud fra Printify-kostpris, fragt, moms og margin. Test den faktiske pris og valuta gennem checkout — skift ikke kun valutakoden. |
-| P0 | Checkout og levering | Printify live rates, zoner og cache-undtagelser var ikke bekræftet. | Test kurv til ordre i et sikkert testflow for mindst DK og et EU-land. Kontrollér fragt, skat, lager, e-mails, mobilvisning og at kurv/checkout ikke serveres fra cache. |
+| P0 | Valuta, moms og samlet pris | Butiksauditten fandt USD i produktdata i produktdata, mens butikken henvender sig til danske/EU-kunder. | Vælg DKK eller EUR, genberegn produktpriser ud fra Printful-kostpris, fragt, moms og margin. Test den faktiske pris og valuta gennem checkout — skift ikke kun valutakoden. |
+| P0 | Checkout og levering | Printful live rates, zoner og cache-undtagelser var ikke bekræftet. | Test kurv til ordre i et sikkert testflow for mindst DK og et EU-land. Kontrollér fragt, skat, lager, e-mails, mobilvisning og at kurv/checkout ikke serveres fra cache. |
 | P1 | Produktkøb og katalogkvalitet | Tidligere audit: 39 produkter med højst to billeder; størrelsestabeller manglede på produktsider; variantmapping var en kendt blokering. | Prioritér topsælgende/strategiske produkter. Sørg for korrekte varianter/SKU'er, størrelsesguide, materialer, fit, produktion/leveringstid, returbetingelser, GPSR-oplysninger og flere repræsentative billeder. |
 | P1 | Performance | Tidligere måling af `/shop/`: ca. 5,8 s / 470 KB i butiksaudit; SEO-audit målte 3,1 s / 448 KB. Målemetoder/tidspunkter varierer. | Etabler en ensartet mobil-baseline. Optimer produktbilleder og billedstørrelser, fjern unødvendige scripts, gennemgå cache/minificering og database/object-cache. Undgå ændringer i checkout-cache. |
 | P1 | SEO og katalogschema | SEO-audit: 7/30 indlæg uden FAQPage, 39 produkter uden returpolitik i Offer og 39 uden `shippingDetails`; 3 lange titler og arkivsider med manglende meta var også registreret. | Valider synligt indhold mod schema. Implementér retur-/fragtfelter først når politik og vilkår er bekræftet. Ret title/meta med Rank Math og mål schema på repræsentative produkt-, kategori- og guidesider. |
@@ -43,7 +43,7 @@ Gennemgangen bygger på de nyeste tilgængelige repo-dokumenter pr. 2026-11-03:
 ### Først: gør købstragten troværdig og friktionsfri
 
 1. **Klar leverings- og returinformation** på produkt, kurv, checkout og ordrebekræftelse, med enslydende og ejerbekræftede vilkår.
-2. **Korrekte produktvarianter og størrelser**, lagerstatus, SKU'er og Printify-mapping. Undgå at love størrelser, der ikke kan vælges.
+2. **Korrekte produktvarianter og størrelser**, lagerstatus, SKU'er og Printful-mapping. Undgå at love størrelser, der ikke kan vælges.
 3. **Samlet pris tidligt:** valuta, moms og forventet fragt skal være forståelige før betaling.
 4. **Mobil checkout uden overraskelser:** test gæstekøb, valideringsfejl, betalingsafvisning, genindlæsning og ordrebekræftelse.
 5. **Tillidslag:** verificerede anmeldelser, tydelig kontakt, sikker betaling og realistiske produktion-/leveringstider.
@@ -60,7 +60,7 @@ Gennemgangen bygger på de nyeste tilgængelige repo-dokumenter pr. 2026-11-03:
 
 11. **Samtykkestyret analytics** med én pageview-kilde, deduplikerede e-commerce events og testkøb.
 12. **Dashboards for købstragt:** produktvisning → kurv → checkout → køb, opdelt efter enhed, kanal og kampagne.
-13. **Lager- og katalogalarmer:** fejl i Printify-synk, udsolgte varianter, manglende billeder/meta og pris-/valutaafvigelser.
+13. **Lager- og katalogalarmer:** fejl i Printful-synk, udsolgte varianter, manglende billeder/meta og pris-/valutaafvigelser.
 14. **Regressionskontrol** efter ændringer: sitemap/status, checkout-smoke test, schema, links og performance-baseline.
 
 Undgå lige nu: tung headless-ombygning, flere AI/chat-widgets, avanceret loyalitetsprogram, bredt abonnementssystem eller mange overlappende plugins. De øger vedligeholdelse og risici uden dokumentation for, at kerneproblemerne er løst.
@@ -81,7 +81,7 @@ Etablér nye baselines før ændringer. Følgende er foreslåede styringsmål, i
 
 - Registreret virksomhedsnavn, CVR, postadresse, telefon og kontaktmail.
 - Valg af DKK/EUR og prissætning/momsstrategi.
-- Bekræftede Printify-varianter, leveringszoner/-priser og returbetingelser.
+- Bekræftede Printful-varianter, leveringszoner/-priser og returbetingelser.
 - Godkendelse af nye betalingsmetoder og eventuelle leverandøraftaler.
 - Adgang til staging/backup, WordPress-admin og analytics/GSC til live-måling.
 - Ejergodkendelse af ændringer, der påvirker betaling, juridiske oplysninger, samtykke eller publiceret indhold.

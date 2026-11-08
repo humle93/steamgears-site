@@ -1,8 +1,8 @@
 # Steamgears + Warpstorm — komplet mangel-liste og udførelsesplan
-«Dato: 25/10 2026. Kilder: wiki/fuld projektlog + live-verificering af steamgears.eu samme dag.»
+*Dato: 25/10 2026. Kilder: wiki/fuld projektlog + live-verificering af steamgears.eu samme dag.*
 
 ## 1. Kontekst (til ekstern læser)
-- steamgears.eu = steampunk cosplay/merch (WooCommerce, 86 produkter: Printify tees/hoodies + AliExpress gear + ny posters-linje), genopbygget fra bunden 23/10 2026 på Simply-hosting (Extendable theme, Rank Math, GA4 via GTM, Stripe live, Complianz).
+- steamgears.eu = steampunk cosplay/merch (WooCommerce, 86 produkter: Printful tees/hoodies + AliExpress gear + ny posters-linje), genopbygget fra bunden 23/10 2026 på Simply-hosting (Extendable theme, Rank Math, GA4 via GTM, Stripe live, Complianz).
 - Ejeren (Henning, Aabenraa) kører overordnet plan "LEARN → BUILD → SHOP". Andet projekt: warpstorm.online (Warhammer 40K begynder-hub + eget univers), deploy-pakke klar men ikke kørt.
 
 ## 2. Live-verificeret 25/10 (råtjek)
@@ -47,7 +47,7 @@
 11. Ny keywords i DB: "steampunk boots and spats" + "steampunk hats" (nye i dag)
 
 **Produkter/shop:**
-12. Posters: print-DPI-filer (300 DPI, 3543×4724 / 5943×8268) mangler — kun web-opløsning nu; Printify blueprint-setup mangler (posters-ordrer kræver manuel print indtil da)
+12. Posters: print-DPI-filer (300 DPI, 3543×4724 / 5943×8268) mangler — kun web-opløsning nu; Printful blueprint-setup mangler (posters-ordrer kræver manuel print indtil da)
 13. 5 Complete Looks-kollektioner som produktkategorier (Airship Captain, Victorian Inventor, Dark Clockwork, Mechanical Explorer, Beginner Steampunk) + shop-portalens 4 intent-valg
 14. Pirat Piger 04 (Compass Duchess): minimale tal i kortet skal renses
 15. Design-flow: min. 15 billeder/dag + alle designs tekstfrie (AI-tekst forbydes)
@@ -71,8 +71,8 @@
 1. **Deploy Grimdark-pakken** (klar i /workspace/warpstorm/deploy/: RUNBOOK, deploy.sh, payloads til 7 kategorier + 9 sider + 4 plugins + 17 posts, CSS v1.1) — WAF POST-quarantinen er udløbet
 2. 17/34 artikler skrevet → 17 resterende (liste + bekræftelse fra Henning)
 3. Billedvej: fal.ai tom balance; aimlapi mangler image-endpoint fra CLI — beslutning: top-up / all_images_ai / andet
-4. warpstorm.dk SSL afventer (warpstorm.online har SSL ✓)
-5. 35 Printify-designkoncepter indeholder tekst → text-free-regel: Printify-tekstlag i stedet for AI-tekst
+4. warpstorm.dk SSL afventer (warpstorm.online har SSL ✅)
+5. 35 Printful-designkoncepter indeholder tekst → text-free-regel: Printful-tekstlag i stedet for AI-tekst
 6. grimdark-site repo har deploy-filer; .wp-auth-filer må ALDRIG committes
 
 ## 6. UDFØRELSESPLAN (prioriteret)

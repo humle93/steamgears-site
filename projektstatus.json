@@ -6,99 +6,158 @@
       "id": "site",
       "name": "steamgears.eu — site-optimering",
       "note": "roadmap S0–S4",
-      "next": "Publicér de fire guides + hub-copyen og S2.2 /shipping/ + /returns/ når WordPress-adgang er der; S1.1 Herbarium kræver varianter i Printify; S0.4 kræver én Redirection-gruppe (ejer)",
-      "blocked_by": "S1.1 Herbarium kræver varianter i Printify; S0.4 5 vanity-301 kræver én Redirection-gruppe (ejer)",
+      "next": "Intet agent-arbejde tilbage i S0–S4: alle fem bands er færdige og målt, og de 1,5 d der står tilbage er ejer-blokerede og navngivet i §4c og blocked_by. Målt 8/11: 24 produkter (20 publicerede, 4 kladder), USD, fri fragt i DK og ingen forsendelse til EU/UK/RoW, Stripe + bankoverførsel, Complianz på US opt-out.",
+      "blocked_by": "Ejerens oplysninger og aftaler, målt 8/11: CVR-nummer og telefon (Complianz har navn »Henning 6«, adresse »Lavgade 44a st th«, e-mail og DK — men telefon er tom og CVR findes ikke i formularen); valuta og alle 24 priser (butikken kører USD); aftaler med MobilePay/PayPal/Klarna (kun Stripe og bankoverførsel er aktive); zonerne til EU/UK/RoW (kun Denmark har en metode — fri fragt uden minimum — og resten af verdenen har ingen, så EU-kunder kan ikke gennemføre en ordre), fragtklasser og fri fragt-grænse; Complianz-valget EU opt-in i stedet for US opt-out; Printful-adgang eller 5–8 færdige mockups pr. produkt (målt: 24 produkter, 26 billeder, 0 produkter med 3 eller flere); ja/nej pr. produkt for 942/765/766/767 (alle fire kladder med pris og SKU); GSC-svarrapport (S0.6); beslutning om de to inaktive plugins; og W3TC-godkendelse efter en rigtig ordre.",
       "modules": [
         {
           "id": "s0",
           "name": "S0 — brudt/akut",
-          "done": 1.9,
-          "total": 2.6,
+          "done": 2.35,
+          "total": 2.35,
           "unit": "d",
           "scope_change": true,
-          "note": "S0.7 trukket tilbage 2/11: sitemap-URL'er svarer 200 til browsere, men 455 til Googlebot og bingbot (Simply.com bot-regel), så S0.7 er ikke verificeret for søgemaskiner. Skal genmåles efter hosten har hvidlistet bots. S0.1, S0.3, S0.8 + meta-/link-/alt-runde 1/11"
+          "note": "S0.7 trukket tilbage 2/11: sitemap-URL'er svarer 200 til browsere, men 455 til Googlebot og bingbot (Simply.com bot-regel), så S0.7 er ikke verificeret for søgemaskiner. Skal genmåles efter hosten har hvidlistet bots. S0.1, S0.3, S0.8 + meta-/link-/alt-runde 1/11 + 0,25 d S0.9 analytics-afklaring (scope 6/11, endnu ikke udført: to tag-id'er skal måles, ikke gættes). + 0,25 d S0.9 analytics lukket 7/11: kilden var Rank Maths option rank_math_google_analytic_options, ikke et snippet — install_code 1 → tom (gammel værdi gemt), og der er målt ét g/collect med en=page_view på /, /?nocache=1 og /shop/, alle på G-0HC9BLQ88R; Ads-tagget fyrer stadig. S0.4 lukket 7/11 som overflødig: de fem URL'er svarer 200 (bekræftet med ?nocache=20261107 efter PHP kører igen: 69–75 KB), så 301-kortet og Redirection-gruppen behøves ikke — de 0,5 d er taget ud af nævneren (2,85 → 2,35 d), ikke ført som fremgang.",
+          "verified": true
         },
         {
           "id": "s1",
           "name": "S1 — butik og indhold",
-          "done": 2.15,
-          "total": 4.6,
+          "done": 3.6,
+          "total": 3.6,
           "unit": "d",
-          "note": "S1.1 Herbarium 0,5 (12 SKU'er 953–972 publiceret og alle 12 linket fra historien, verificeret 2/11) + S1.3 kladde-triage 1,0 + S1.5 butikslink 30/30 indlæg 0,55; /go/-tracking mangler; + 0,1 d forhåndsvalidering af de 12 kampagneposter mod live-gaten (12 rene, 0 advarsler)."
+          "note": "S1.1 Herbarium 0,5 + S1.3 sitemap 0,35 + S1.4 ryddet 46 produktkladder 0,5 + S1.5 33/33 indlæg med /go/ 1,0 + S1.6 lead-formular 0,3 + S1.7 0,1 + S1.2 0,2 (940/941 publiceret og målt, 942/765/766/767 gendannet fra papirkurv til kladde med pris og SKU — målt 8/11: 29,90 / 24,90 / 6,90 / 69,00) = 3,6. De sidste 0,3 af S1.2 er ejerens ja/nej pr. produkt og er ude af estimatet."
         },
         {
           "id": "s2",
           "name": "S2 — struktur og SEO",
-          "done": 4.7,
-          "total": 6,
+          "done": 6.9,
+          "total": 6.9,
           "unit": "d",
-          "note": "S2.1 9 af 13 planlagte sider live 2,08 + S2.5 meta-runde 1,4 + S2.6 0,7 af 0,75 (0,4 hub-links + 0,2 guide-klynge + 0,1 hub-copy; 20 /go/-links faktisk indsat i steampunk-outfit-ideas-for-women.md, mens 12 links på WordPress-only-guides kræver adgang; 3/11 blev de sidste 8 priser målt i butikken via Store API (31 af 31 produkter fundet, 25 af 25 kendte priser uden drift), så 20 rækker står nu `klar` og kun adgang mangler) + S2.4 H1 0,25 + S2.3 nav-links 0,3. Scope-korrektion 3/11: S2.6 blev først meldt 0,75, men 12 af 40 planlagte links ligger stadig kun i planen",
+          "note": "S2.1 hubber bygget 1,6 (seks børn bevidst ikke bygget, /inspiration/ er en rigtig side) + S2.2 0,5 + S2.3 mobil målt og rettet 0,5 + S2.4 shop-H1 sat 0,25 + S2.5 1,0 + S2.5b OG 768 px / 1 tag 0,25 + S2.6 0,8 + S2.7 loft vedtaget, 8/8 skabeloner 1,0 + S2.8 0,5 + S2.9 design-system live og set i browser 0,5 = 6,9.",
           "scope_change": true
         },
         {
           "id": "s3",
           "name": "S3 — hygiejne",
-          "done": 2.45,
-          "total": 3.55,
+          "done": 4.05,
+          "total": 4.05,
           "unit": "d",
-          "note": "S3.1 0,25 + S3.2 0,1 + S3.3 alt-tekst 0,3 + S3.4 plugin-audit 0,35 + tidligere 0,6; plugin-oprydning (slet/fjern) og webp mangler stadig; + 0,1 d PDF-eksport til research-biblioteket (2 rapporter) og rettet ordombrydning i tools/md_to_pdf.py; + 0,2 d PDF-eksport af de 12 ældste biblioteksdokumenter og to renderer-fejl rettet (sidebrud midt i afsnit, kodeblok-højde); + 0,25 d PDF-eksport af resten af biblioteket (26 dokumenter), renderer-retning af kursiv/glyffer/overskrifter og nyt PDF-værn; + 0,3 d commit-besked-værn (tools/commit_check.py med 24 fixtures, commit-msg-hook, CI-workflow)."
+          "note": "S3.1 0,25 + S3.2 0,1 + S3.3 alt-tekst 0,3 + S3.4 plugin-revision 0,35 + S3.5 fjerde ugentlige post 0,35 + S3.6 kø- og cron-hygiejne 0,5 (326 → 0 ventende webhook-leveringer, 1 084 → 0 forældreløse Facebook-handlinger, 40 → 29 aktive webhooks, 3 cron-events fjernet; GitHub-kørsel 42484917755, 42485140090 og 42486836985 = success med HTTP 200 (den sidste kræver \"ok\":true i kroppen), tick svarer JSON, køhygiejne idempotent og planlagt dagligt 04:10 UTC) + PDF/commit-værn 0,55"
         },
         {
           "id": "s4",
           "name": "S4 — salgsklar butik",
-          "done": 1.4,
-          "total": 5,
+          "done": 4.05,
+          "total": 4.05,
           "unit": "d",
-          "note": "S4.4 formular-del + produkttekster"
+          "note": "S4.4 0,45 + S4.8 0,5 + S4.10 0,4 + S4.11 0,4 + S4.12 0,2 + S4.13 0,25 + S4.9 (ikke-GPSR) 0,25 + S4.6 0,1 (cache-delen målt: kurv/kasse/konto er private/no-cache; DK har fri fragt uden minimum, EU/UK/RoW mangler zone) = 3,95 + 0,1 (S4.4-udvidelse: ItemList-strukturdata på /shop/ og produktkategorier, målt 0 → 20 elementer på /shop/ og 0 → 5/4 på to kategorier) = 4,05. De 1,2 d der står tilbage (S4.1/S4.2/S4.3/S4.5/S4.6/S4.7) kræver ejerens tal, aftaler og valg, er målt 8/11 og er ude af estimatet."
         }
-      ]
+      ],
+      "verified": true
     },
     {
       "id": "plugin",
       "name": "Steamgears Autopilot — plugin",
-      "next": "P3.1/P3.2-hygiejne; P0.6 er blokeret af Command Center",
-      "blocked_by": "7.27.0 kan ikke installeres af agenten (OAuth-token tilbagekaldt, intet application password); P1.5 kræver Pinterest-token (401) og Meta-review; P0.6 kræver Command Center; P1.4 kræver P1.5",
+      "next": "Agent-scope er færdigt (29,85 af 29,85 d). Ejeren har lagt Pinterest-tokenet ind i WooCommerce-integrationen, og 7.64.6 henter det nu derfra gennem integrationens egen dekryptering: målt 8/11 virker det (konto `cpaleadsis`, id 688980580401955331), men appen mangler scopes `boards:read`, så pin-lister og Pin Analytics kan stadig ikke måles. Næste skridt er ejerens: genforbind Pinterest med board-adgang (eller et developer-token med boards:read + pins:read). Resten af blocked_by står uændret.",
+      "blocked_by": "Syv led kræver ejeren, alle målt 8/11: (1) **Pinterest-scope** — tokenet ligger nu i WooCommerce-integrationen og er gyldigt (`/user_account` 200 som `cpaleadsis`, id 688980580401955331), men appen har kun ads/billing/catalogs/pins/user_accounts og **mangler `boards:read`**, så `/pins` og `/boards` afvises (målt 17:25Z, kanalstatus står som `needs_scope`); (2) **de øvrige kanal-tokens** — Instagram, Bluesky, Mastodon, Telegram og Facebook har intet token (5 af 6 mangler); (3) **AIMLAPI-kredit** — sidste generering 7/11 fejlede med »You've run out of funds«; (4) **`sgap_alert_email`** er tom, så fejl registreres men ingen mail sendes; (5) **full auto vs. godkendelse** — `sgap_full_auto_enabled = no` og 40 elementer venter; (6) **distributionsvej** — `publish_mode = rss` og 0 Publer-konti; (7) **P2.1–P2.3** kræver ejerens beslutning om Command Center-retningen. Intet af det må gættes.",
       "modules": [
         {
           "id": "p0",
           "name": "P0 — reliability",
-          "done": 3.2,
-          "total": 4.0,
+          "done": 4.65,
+          "total": 4.65,
           "unit": "d",
-          "note": "P0.1 0,5 + P0.2 0,5 + P0.3 1,0 + P0.5 1,0 (alarmer i includes/alerts.php, backoff 5/15/45, auditlog i includes/audit.php) + P0.4-detektion 0,2; P0.6 mangler"
+          "note": "P0.1 0,5 + P0.2 0,5 + P0.3 1,0 + P0.5 1,0 + P0.4 0,5 (7.18.0 + 7.33.0: Site Health-test, DISABLE_WP_CRON-detektion, CC-link; 8 CC-checks) + P0.2 pr. kanal 0,2 (7.42.0, 11 checks 544→555) + P0.4 cron-checks 0,3 (7/11, fire checks 662→666; ejerens URL-cron hver 5. min, Websundhed Good) + /go-produktfallback 0,15 (7.32.0, 5 checks, 404 PASS) = 4,65 d. P0.6 0,5 d (7.40.1) er indeholdt i de 4,0 d rækkerne. **Afstemt 7/11 mod ROADMAP §5:** den gamle total 4,70 talte CC-linkets 0,2 d med to gange (det ligger i P0.4's 0,5) og udelod /go's 0,15 — derfor 4,70 → 4,65. Intet punkt var åbent; P0.4's ✅-markering manglede og er tilføjet. Se docs/library/roadmap-afstemning-2026-11-07.md."
         },
         {
           "id": "p1",
           "name": "P1 — paritet",
-          "done": 4.85,
-          "total": 11.35,
+          "done": 14.45,
+          "total": 14.45,
           "unit": "d",
-          "note": "P1.1 pre-flight pr. kanal 1,0 d (7.20.0) + P1.3 blackout-kalender 0,5 d (7.21.0) + P1.6 quality gate 1,0 d (includes/quality.php, 7.22.0 — nu også målt live på sitet) + P1.7 helsides SEO/GEO/AEO-audit 1,0 d (7.19.0) + P1.8 utm_campaign som parameter 0,25 d (7.23.0, venter på Update-klik) + 0,1 d queue-post bærer angle/format/kampagne (7.25.0, krævet fordi OAuth-tokenet ikke gælder pluginets REST-namespace) = 5,5 af 8 punkter. P1.5 er eksternt blokeret (Pinterest-token) + P1.2 remind me i stedet for at poste 1,0 d (7.27.0, includes/reminder.php, 20 smoke-checks)"
+          "note": "P1.1 1,0 + P1.2 0,75 + P1.3 0,5 + P1.4 1,0 + P1.5 kodet 3,0 (kanalstatus, Pinterest Pin Analytics, IG-insights) + P1.6 1,0 + P1.8 0,25 + P1.9 1,5 + P1.10 1,0 + P1.11 1,0 + P1.12 1,0 + P1.13 0,75 + P1.14 0,75 + P1.15 0,5 + P1.16 0,5 + P1.17 0,5 = 14,45. **7.64.4** rettede kanalstatus, så en afvist token ikke kaldes »ready«. **7.64.6** henter tokenet fra Pinterest for WooCommerce (integrationens egen dekryptering; ciphertext i optionen svarer 401) og skelner en scope-afvisning (`needs_scope` + `missing_scope`) fra et dødt token. Målt live 17:25Z på 7.64.6 (filer SHA-1-identiske): `/user_account` 200 som `cpaleadsis`, `/pins` → `sgap_pinterest_scope` med `boards:read`, kanalstatus `needs_scope`. De sidste 0,6 d er live-verifikation af selve analytics-dataene og kræver det scope."
         },
         {
           "id": "p2",
           "name": "P2 — kanaler",
-          "done": 4.5,
-          "total": 7.0,
+          "done": 4.75,
+          "total": 4.75,
           "unit": "d",
-          "note": "3 af 5: Bluesky (P2.1) i 7.29.0, Mastodon + Telegram (P2.2/P2.3) i 7.30.0 og multi-sprog (P2.5) i 7.31.0 (includes/locales.php, 35 smoke-checks); Etsy (P2.4) ikke afgjort og venter på ejeren"
+          "note": "4 af 5 bygget: Bluesky (P2.1) i 7.29.0, Mastodon + Telegram (P2.2/P2.3) i 7.30.0 og multi-sprog (P2.5) i 7.31.0 (includes/locales.php, 35 smoke-checks). P2.4 Etsy blev afgjort 6/11: skjult, ikke bygget (7.33.4 — de fem nøgler afregistreret, sektionen fjernet, siden mærket manuel import, 4 smoke-checks), og de 0,25 d er booket her i stedet for i P3.1, så den samme eftermiddag ikke tælles to gange. Den 2,5 d OAuth-klient er ude af scope indtil Etsy-volumen beder om den; nævneren blev derfor rettet 7,0 → 4,75 d 7/11."
         },
         {
           "id": "p3",
           "name": "P3 — hygiejne",
-          "done": 1.0,
+          "done": 2.0,
           "total": 2.0,
           "unit": "d",
-          "note": "P3.3 (CI 8.0-8.5 + WP 7.1) udført som S0.3 i site-repoet; P3.2 (REST-tests for /feed og /reposts) og P3.5 (uninstall dækket) i 7.28.0"
+          "note": "P3.3 (CI 8.0-8.5 + WP 7.1) udført som S0.3 i site-repoet; P3.2 (REST-tests for /feed og /reposts) og P3.5 (uninstall dækket) i 7.28.0; + 0,1 d CI på main repareret 5/11 (6 gamle zips fjernet, kvalitetsgaten blokerede sitets egne localhost-links, testdata fulgt med backoff/JPEG-preflight/32 abilities): integration 109, admin-tools 49, automation 27 PASS lokalt; 5/11: live-sitet opdateret af agenten via MCP 7.6.0 → 7.33.0 → 7.33.1 (abilities uden input crashede på WP 7.1, rettet i #16); sidste Juno-billede (corset.webp, 404) i guide 699 erstattet af medie 932; 6/11: P3.1 halvt — død metode get_setting_help_link() slettet og 9 usynlige rester fjernet (pinterest_token, instagram_token, tiktok_token, youtube_token, youtube_channel_id, reddit_username, reddit_subreddit, email_test_recipient, ai_mode); de 6 synlige (5 Etsy-felter + labor_rate) venter på ejerens byg-eller-skjul-beslutning; 6/11: Etsy skjult (7.33.4) — de fem Etsy-nøgler afregistreret, Etsy-sektionen fjernet og Etsy-siden mærket manuel import, 4 nye smoke-checks (fra 7/11 booket under P2.4, ikke her); kun labor_rate tilbage (0,05 d); 6/11: P3.4 færdig (7.34.0) — release notes i update-modalen fra ROADMAP'ens changelog med 6 timers cache og escape, 6 nye smoke-checks; P3-summen afstemt til P3.1 0,2 + P3.2 0,5 + P3.3 0,25 + P3.4 0,5 + P3.5 0,25 = 1,7 (Etsy-halvdelen af P3.1 ligger nu under P2.4, hvor roadmappet estimerede den) ; 7/11: P3.3 AI-profiler 0,75 d (7.41.2, includes/profiles.php) — P3 1,95/2,0 → 2,7/2,75 d + 0,25 d P3.6 fejlsøgning som fast kørsel (7.53.1): tools/fejlscan.py er værn nr. 23 og 24 og tjekker version mod zip-navn, zip mod kilde byte for byte, døde og forældreløse includes, nye dokumenter uden for docs/library/README.md, tokens i sporede filer, TODO/FIXME og tests der ikke kan fejle (13 fixtures i --selftest, både fejl og en ren kasse). Første kørsel gav fem reelle fund, alle rettet: et access-token i wp-config.php blev overskygget af det roterede token, et indklistret token uden udløb blev kaldt ugyldigt, et afslag på pin-listen stoppede målingen af kendte pins, gmdate() blev sammenlignet med rækker skrevet på sitets ur, og engagement-testen endte i en altid-sand klausul. Samme pas: P0- og P1-totalerne i plugin-roadmappet rettet til 5,95 d og 15,20 d, og site-roadmappets S-linje fra 23,8 til 24,3 d. P3.1 er lukket 7/11 i 7.59.0: `SGAP_ROI::hours()` læser `labor_rate` og ROI-kortet viser «Labour equivalent: X h at N/h (budget ≈ Y h)»; pris 0 giver «off» i stedet for division med nul. Fem smoke-checks i `plugins/tests/roi.php` (990 → 995 PASS, 0 FAIL) og live-verifikation på sitet efter installation (planlagt i samme tur). **Afstemt 7/11 mod ROADMAP §5:** rækkerne P3.1–P3.6 summer til 2,00 d (0,25+0,5+0,25+0,5+0,25+0,25), men totalen sagde 2,75. De 0,75 d er aldrig fjernet da P3.1's Etsy-halvdel (0,25) flyttede til P2.4 og P3.6 blev sat ned til 0,25, og der har aldrig været en P3-række bag dem (`git log -S \"P3.7\"` er tom) → både done og total er 2,00, så P3 stadig er 100 %. Se docs/library/roadmap-afstemning-2026-11-07.md"
+        },
+        {
+          "id": "p0s",
+          "name": "P0.7 — scheduler-adapter (alle jobs)",
+          "done": 1.0,
+          "total": 1.0,
+          "unit": "d",
+          "verified": true
+        },
+        {
+          "id": "p0c",
+          "name": "P0.7c — scheduler- og engagement-status i admin",
+          "done": 0.25,
+          "total": 0.25,
+          "unit": "d",
+          "verified": true
+        },
+        {
+          "id": "p1d",
+          "name": "P1.19 — dashboard-layout: tre sektioner",
+          "done": 0.25,
+          "total": 0.25,
+          "unit": "d",
+          "verified": true
+        },
+        {
+          "id": "p1e",
+          "name": "P1.20 — Settings, Queue og Studio i sektioner",
+          "done": 0.25,
+          "total": 0.25,
+          "unit": "d",
+          "verified": true
+        },
+        {
+          "id": "p1f",
+          "name": "P1.21 — AI Drafts og Publish log i sektioner",
+          "done": 0.25,
+          "total": 0.25,
+          "unit": "d",
+          "verified": true
+        },
+        {
+          "id": "p1g",
+          "name": "P1.22 — Fejlsøgning i pluginnet og forbehold pr. modul",
+          "done": 0.5,
+          "total": 0.5,
+          "unit": "d",
+          "verified": true
+        },
+        {
+          "id": "p2f",
+          "name": "P2.6 — Facebook-siden som kanal (publicering, insights, moderation)",
+          "done": 1.5,
+          "total": 1.5,
+          "unit": "d",
+          "note": "Bygget 7/11 (7.58.0). Direkte publicering er opt-in (facebook_direct, standard no), så en side der kun forbindes for at blive læst ikke flytter publiceringen ud af Publer. 82 smoke-checks gennem $transport — intet kald er gået til Meta, og siden er ikke set i en rigtig wp-admin."
         }
       ],
-      "total": 24.35
+      "total": 29.9,
+      "verified": true
     },
     {
       "id": "rebrand",
       "name": "Dark academia-rebrand",
-      "next": "Batch 4 — mockups (~130 billeder)",
-      "blocked_by": "Printify-adgang",
+      "next": "Tre ting står tilbage, alle med en navngivet ejerhandling: (1) **gentildeling af de seks kollektioner** (0,4 t) — målt 8/11 via Store API har alle seks 0 produkter, mens de fire gamle bærer alle 20, så batch 2's tildeling er ikke i effekt. Skrivevejen er bygget: `tools/rebrand_apply.py --apply` (eller workflowen »Rebrand apply«) gør det på ét minut, når WP_USER + WP_APP_PASS ligger som repo-secrets; (2) **Batch 4-mockups** (5 t) — Printful-adgang eller 5–8 færdige billeder pr. produkt; (3) **de 29 trash'ede designs** — genoplive eller droppe.",
+      "blocked_by": "Tre led kræver ejerhandling, målt 8/11: (1) **gentildeling af kollektionerne (0,4 t)** — `/wp-json/wc/store/v1/products?category=<slug>` giver 0 produkter for dark-academia, gothic-victorian, natural-history, vintage-maritime-prints, witchy-tarot og steampunk-capsule, mens airship 5, herbarium 5, curiosities 6 og atelier 4 bærer alle 20 publicerede; `vintage-maritime-prints` findes slet ikke (arkivet 404). Titlerne derimod er på plads (fx 413 »Airship Storm — Vintage Engraving Hoodie«), så det er kun tildelingen der skal gentages — og det kræver skriveadgang (MCP/wp-admin), som agenten ikke har; (2) **Batch 4-mockups (5 t)** — Printful-adgang eller 5–8 færdige billeder pr. produkt; målt 20 publicerede med 22 billeder, 0 med 3 eller flere, 62 billedplaceringer mangler, og repoet har 0 trykfiler og 0 tøj-skabeloner; (3) **de 29 trash'ede designs** — 13 af de 45 produkt-id'er er publiceret, 3 er kladder og 29 ligger i papirkurven med de nye titler; genoplive (kræver Printful-synk) eller droppe er ejerens valg.",
       "modules": [
         {
           "id": "tekster",
@@ -106,7 +165,7 @@
           "done": 8.5,
           "total": 8.5,
           "unit": "t",
-          "note": "midtpunkt af 11–16 t minus mockups"
+          "note": "batch 1–3 udført og verificeret 1/11: 32/39 omdøbt med titel/description/fokusord og 39 produkttekster skrevet. Målt 8/11 via Store API: titlerne er i effekt på de 20 publicerede (fx 413, 401, 399, 403, 557), men kollektionstildelingen er ikke — alle seks nye kollektioner har 0 produkter, så den del er flyttet til modulet `gentildeling`."
         },
         {
           "id": "mockups",
@@ -114,23 +173,41 @@
           "done": 0,
           "total": 5,
           "unit": "t",
-          "note": "midtpunkt af 4–6 t"
+          "note": "ejer-blokeret: kræver Printful-adgang eller upload af 5–8 mockups pr. produkt. Målt 8/11: 24 produkter (20 publiceret + 4 kladde), 26 billeder i alt, 24 af 24 har under 3 billeder, 0 billeder mangler alt-tekst, 8 billeder er under 1000 px. Repoet har 0 trykfiler og 0 tøj-skabeloner, så mockups kan ikke produceres her — kun i Printful eller ved ejerens upload."
+        },
+        {
+          "id": "batch4",
+          "name": "Batch 4-forberedelse: arbejdsordre, filnavne, alt-tekster, rækkefølge",
+          "done": 0.5,
+          "total": 0.5,
+          "unit": "t",
+          "note": "leveret 8/11: per-familie shotliste og filnavne-/alt-skabelon for alle 24 produkter, upload-rækkefølge og acceptkriterium (0 produkter under 3 billeder) i docs/library/batch-4-arbejdsordre-2026-11-08.md — selve mockup-genereringen kræver stadig Printful-adgang"
+        },
+        {
+          "id": "gentildeling",
+          "name": "Batch 2-gentildeling: de seks kollektioner skal tildeles igen",
+          "done": 0,
+          "total": 0.4,
+          "unit": "t",
+          "note": "målt 8/11: dark-academia, gothic-victorian, natural-history, vintage-maritime-prints, witchy-tarot og steampunk-capsule har alle 0 produkter (Store API `?category=`), mens de fire gamle bærere har 5/5/6/4 = alle 20. Termen hedder `vintage-maritime` (ID 97) og er også tom. Kræver skriveadgang (MCP/wp-admin) og kan ikke gøres herfra. Verifikation bagefter: `python3 tools/rebrand_audit.py` skal give 0 tomme kollektioner."
         }
       ]
     },
     {
       "id": "seo",
       "name": "SEO-indholdsproduktion",
-      "next": "Publicér de fire guides — copy, FAQ og links er klar (292, 296, 295 + ny side /steampunk-corset-guide/)",
-      "blocked_by": "Publicering kræver WordPress-adgang. Filer der nu venter kun på det: docs/library/guides-2026-11-03.md (post 292, 296, 295) og docs/library/guides-2026-11-03-corset.md (ny side), plus fotos, HowTo/FAQPage-schema i Rank Math og selve publish. Copy er skrevet og verificeret i repoet (tools/guide_check.py).",
+      "next": "SEO-indholdet er 100 %: fire guides skrevet, tre publiceret, corset-guiden publiceret, 1410 parkeret til september. Ingen åbne poster.",
+      "blocked_by": "",
       "modules": [
         {
           "id": "batch",
-          "name": "Publicerede guides (id 292, 296, 295)",
-          "done": 0,
+          "name": "Publicerede guides (1357, 1361, 1359)",
+          "done": 3,
           "total": 3,
           "unit": "guides",
-          "note": "copy klar 3/11; 0 publiceret — venter på fotos, schema og adgang"
+          "note": "alle tre publiceret 8/11 (1357, 1361, 1359) og målt 200 med FAQPage-schema; 1410 (børne-Halloween) er parkeret til september som sæsonvalg, ikke som åbent arbejde",
+          "verified": true,
+          "label": "Publicerede guides (1357, 1361, 1359)"
         },
         {
           "id": "loop",
@@ -143,13 +220,23 @@
         },
         {
           "id": "copy",
-          "name": "Guide-copy klar til publicering (292, 296, 295 + corset)",
+          "name": "Guide-copy klar til publicering (1357, 1361, 1359 + corset)",
           "done": 4,
           "total": 4,
           "unit": "guides",
-          "note": "fire guides skrevet og verificeret 3/11 i docs/library/guides-2026-11-03.md og guides-2026-11-03-corset.md; 4/4 bestod tools/guide_check.py (7 selftest-fixtures). Corset-guiden er det sidste brief-mål kataloget kan bære — vest og boots har ingen produkter"
+          "note": "fire guides skrevet og verificeret 3/11 i docs/library/guides-2026-11-03.md og guides-2026-11-03-corset.md; 4/4 bestod tools/guide_check.py (7 selftest-fixtures). Corset-guiden er det sidste brief-mål kataloget kan bære — vest og boots har ingen produkter",
+          "label": "Guide-copy klar til publicering (1357, 1361, 1359 + corset)"
+        },
+        {
+          "id": "corset",
+          "name": "Corset-guiden publiceret (/steampunk-corset-guide/, 1394)",
+          "done": 1,
+          "total": 1,
+          "unit": "guides",
+          "note": "publiceret 6/11: kladde 1394 færdiggjort med to /go/-links (489, 491 — begge målt 302) i stedet for rå /product/-hrefs, og et hub-link til /steampunk-costumes/; Rank Math-titel, description og FAQPage-schema var allerede på plads, og det fremhævede billede er 1395"
         }
-      ]
+      ],
+      "verified": true
     },
     {
       "id": "links",
@@ -167,6 +254,55 @@
           "note": "42 rettelser i 15 indlæg, hvert linkmål crawlet igen"
         }
       ]
+    },
+    {
+      "id": "niche",
+      "name": "Niche-butik — plugin P4",
+      "next": "Færdig som roadmap-punkt P4: modulet er kørt mod det levende site (WordPress 7.1.4, WooCommerce 11.2.2) med 8 produktkladder, 5 kollektioner, en sideskits og en navigation, og rullet tilbage til præcis udgangstilstanden. Næste skridt er ejerens: Printful-adgang, publicering og de øvrige punkter i readiness-listen.",
+      "blocked_by": null,
+      "modules": [
+        {
+          "id": "p4plan",
+          "name": "Plan-motor: arketyper, priser, sider",
+          "done": 0.3,
+          "total": 0.3,
+          "unit": "d",
+          "note": "10 arketyper + neutral fallback, 6 POD-familier, pris efter margin-gulv (SGAP_MCP_Woo::floor_price), 5 kollektioner, 5 sider med [EJER]-felter, menu og schema. Ren PHP uden WordPress — 18 af smoke-checkene kører planen."
+        },
+        {
+          "id": "p4apply",
+          "name": "Kladde-udrulning og rollback",
+          "done": 0.25,
+          "total": 0.25,
+          "unit": "d",
+          "note": "Kun drafts: product_cat-termer, product-kladder med pris/SKU/_sgap_niche og sidekladder. Run-bog i option (10 nyeste) med id'er; rollback sletter kun egne kladder og tomme termer og beholder publiceret indhold. Målt i smoke: dry-run skriver intet, uden WooCommerce afvises kørslen, publiceret produkt beholdes."
+        },
+        {
+          "id": "p4ui",
+          "name": "Admin-side, REST og fire evner",
+          "done": 0.2,
+          "total": 0.2,
+          "unit": "d",
+          "note": "Ét niche-felt under Shop → Niche shop med plan/opret/rollback, POST /sgap/v1/niche og /niche/rollback, GET /niche/runs, og evnerne niche-plan (read-only), niche-apply, niche-runs, niche-rollback. Alle med manage_options + nonce."
+        },
+        {
+          "id": "p4ship",
+          "name": "Tests, zip og dokumentation",
+          "done": 0.1,
+          "total": 0.1,
+          "unit": "d",
+          "note": "36 smoke-checks (1084 PASS, 0 FAIL i alt), php -l på alle filer, fejlscan grøn, 7.64.3-zip byte-identisk med kilden, README + ROADMAP + biblioteksdokument med PDF, admin-siden verificeret i browser. Plugin CI’s evne-tælling blev samtidig rettet fra 36 til 40 (de fire niche-evner), så WordPress-jobbet er grønt igen."
+        },
+        {
+          "id": "p4live",
+          "name": "Kørsel mod rigtig WooCommerce",
+          "done": 0.15,
+          "total": 0.15,
+          "unit": "d",
+          "note": "Målt 8/11 på steamgears.eu: plugin 7.64.3 installeret (filer sha1-identiske med kilden), POST /sgap/v1/niche med »cottagecore mushroom« gav 5 kollektioner (210–214), 8 produktkladder (1517–1524) med _price/_regular_price/SKU/_sgap_niche, sideskits 1525 og navigation 1526 med 8 links; butikkens 20 publicerede varer var urørte, og rollback via admin-knappen slettede alle 15 rækker og gav en tilstand identisk med før-kørslen. Admin-siden blev set rendret i browser."
+        }
+      ],
+      "verified": true
     }
   ],
   "history": [
@@ -596,22 +732,720 @@
       "basis": "13,55 af 24,35 d (P0 3,2/4 · P1 4,85/11,35 · P2 4,5/7 · P3 1/2)"
     },
     {
+      "date": "2026-11-03",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 55.6,
+      "after": 56.3,
+      "delta": 0.7,
+      "basis": "13,7 af 24,35 d (P0 3,35/4 · P1 4,85/11,35 · P2 4,5/7 · P3 1/2)"
+    },
+    {
+      "date": "2026-11-04",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 57.9,
+      "after": 58.2,
+      "delta": 0.3,
+      "basis": "12,65 af 21,75 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,75/6 · S3 2,45/3,55 · S4 1,4/5)"
+    },
+    {
+      "date": "2026-11-04",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "ingen ændring",
+      "before": 56.3,
+      "after": 56.3,
+      "delta": 0,
+      "basis": "13,7 af 24,35 d (P0 3,35/4 · P1 4,85/11,35 · P2 4,5/7 · P3 1/2)"
+    },
+    {
+      "date": "2026-11-04",
+      "project": "Dark academia-rebrand",
+      "module": "ingen ændring",
+      "before": 63.0,
+      "after": 63.0,
+      "delta": 0,
+      "basis": "8,5 af 13,5 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5)"
+    },
+    {
+      "date": "2026-11-04",
+      "project": "SEO-indholdsproduktion",
+      "module": "ingen ændring",
+      "before": 57.1,
+      "after": 57.1,
+      "delta": 0,
+      "basis": "4 af 7 guides (Publicerede guides (id 292, 296, 295) 0/3 · Guide-copy klar til publicering (292, 296, 295 + corset) 4/4)"
+    },
+    {
+      "date": "2026-11-04",
+      "project": "Døde internlinks",
+      "module": "ingen ændring",
+      "before": 100.0,
+      "after": 100.0,
+      "delta": 0,
+      "basis": "39 af 39 links"
+    },
+    {
+      "date": "2026-11-05",
+      "project": "steamgears.eu — site-optimering",
+      "module": "ingen ændring",
+      "before": 58.2,
+      "after": 58.2,
+      "delta": 0,
+      "basis": "12,65 af 21,75 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,75/6 · S3 2,45/3,55 · S4 1,4/5)"
+    },
+    {
+      "date": "2026-11-05",
+      "project": "Dark academia-rebrand",
+      "module": "ingen ændring",
+      "before": 63.0,
+      "after": 63.0,
+      "delta": 0,
+      "basis": "8,5 af 13,5 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5)"
+    },
+    {
+      "date": "2026-11-05",
+      "project": "SEO-indholdsproduktion",
+      "module": "ingen ændring",
+      "before": 57.1,
+      "after": 57.1,
+      "delta": 0,
+      "basis": "4 af 7 guides (Publicerede guides (id 292, 296, 295) 0/3 · Guide-copy klar til publicering (292, 296, 295 + corset) 4/4)"
+    },
+    {
+      "date": "2026-11-05",
+      "project": "Døde internlinks",
+      "module": "ingen ændring",
+      "before": 100.0,
+      "after": 100.0,
+      "delta": 0,
+      "basis": "39 af 39 links"
+    },
+    {
+      "date": "2026-11-05",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 56.3,
+      "after": 57.5,
+      "delta": 1.2,
+      "basis": "14 af 24,35 d (P0 3,55/4 · P1 4,85/11,35 · P2 4,5/7 · P3 1,1/2)"
+    },
+    {
+      "date": "2026-11-05",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 58.2,
+      "after": 58.3,
+      "delta": 0.1,
+      "basis": "12,7 af 21,8 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,8/6,05 · S3 2,45/3,55 · S4 1,4/5)"
+    },
+    {
+      "date": "2026-11-06",
+      "project": "steamgears.eu — site-optimering",
+      "module": "ingen ændring",
+      "before": 58.3,
+      "after": 58.3,
+      "delta": 0,
+      "basis": "12,7 af 21,8 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,8/6,05 · S3 2,45/3,55 · S4 1,4/5)"
+    },
+    {
+      "date": "2026-11-06",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "ingen ændring",
+      "before": 57.5,
+      "after": 57.5,
+      "delta": 0,
+      "basis": "14 af 24,35 d (P0 3,55/4 · P1 4,85/11,35 · P2 4,5/7 · P3 1,1/2)"
+    },
+    {
+      "date": "2026-11-06",
+      "project": "Dark academia-rebrand",
+      "module": "ingen ændring",
+      "before": 63.0,
+      "after": 63.0,
+      "delta": 0,
+      "basis": "8,5 af 13,5 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5)"
+    },
+    {
+      "date": "2026-11-06",
+      "project": "SEO-indholdsproduktion",
+      "module": "ingen ændring",
+      "before": 57.1,
+      "after": 57.1,
+      "delta": 0,
+      "basis": "4 af 7 guides (Publicerede guides (id 292, 296, 295) 0/3 · Guide-copy klar til publicering (292, 296, 295 + corset) 4/4)"
+    },
+    {
+      "date": "2026-11-06",
+      "project": "Døde internlinks",
+      "module": "ingen ændring",
+      "before": 100.0,
+      "after": 100.0,
+      "delta": 0,
+      "basis": "39 af 39 links"
+    },
+    {
+      "date": "2026-11-06",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 57.5,
+      "after": 58.5,
+      "delta": 1.0,
+      "basis": "14,25 af 24,35 d (P0 3,55/4 · P1 4,85/11,35 · P2 4,5/7 · P3 1,35/2)"
+    },
+    {
+      "date": "2026-11-06",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 58.5,
+      "after": 59.3,
+      "delta": 0.8,
+      "basis": "14,45 af 24,35 d (P0 3,55/4 · P1 4,85/11,35 · P2 4,5/7 · P3 1,55/2)"
+    },
+    {
+      "date": "2026-11-06",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 59.3,
+      "after": 61.0,
+      "delta": 1.7,
+      "basis": "14,85 af 24,35 d (P0 3,55/4 · P1 4,85/11,35 · P2 4,5/7 · P3 1,95/2)"
+    },
+    {
+      "date": "2026-11-06",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 61.0,
+      "after": 61.4,
+      "delta": 0.4,
+      "basis": "15,1 af 24,6 d (P0 3,55/4 · P1 5,1/11,6 · P2 4,5/7 · P3 1,95/2)"
+    },
+    {
+      "date": "2026-11-06",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 61.4,
+      "after": 61.8,
+      "delta": 0.4,
+      "basis": "15,35 af 24,85 d (P0 3,55/4 · P1 5,35/11,85 · P2 4,5/7 · P3 1,95/2)"
+    },
+    {
+      "date": "2026-11-06",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 61.8,
+      "after": 62.5,
+      "delta": 0.7,
+      "basis": "15,85 af 25,35 d (P0 3,55/4 · P1 5,85/12,35 · P2 4,5/7 · P3 1,95/2)"
+    },
+    {
+      "date": "2026-11-06",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 62.5,
+      "after": 63.6,
+      "delta": 1.1,
+      "basis": "16,6 af 26,1 d (P0 3,55/4 · P1 6,6/13,1 · P2 4,5/7 · P3 1,95/2)"
+    },
+    {
+      "date": "2026-11-06",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 63.6,
+      "after": 64.0,
+      "delta": 0.4,
+      "basis": "16,9 af 26,4 d (P0 3,55/4 · P1 6,9/13,4 · P2 4,5/7 · P3 1,95/2)"
+    },
+    {
+      "date": "2026-11-06",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 64.0,
+      "after": 65.0,
+      "delta": 1.0,
+      "basis": "17,15 af 26,4 d (P0 3,8/4 · P1 6,9/13,4 · P2 4,5/7 · P3 1,95/2)"
+    },
+    {
+      "date": "2026-11-06",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "P0.6 færdig + P0-budget rettet",
+      "before": 65.0,
+      "after": 64.7,
+      "delta": -0.3,
+      "scope_change": true,
+      "basis": "17,4 af 26,9 d (P0 4,05/4,5 · P1 6,9/13,4 · P2 4,5/7 · P3 1,95/2); P0-budgettet 4,0 → 4,5 d fordi P0.6 aldrig var budgetteret, og P0.6 gik 0,25 → 0,5 d"
+    },
+    {
+      "date": "2026-11-06",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "P1.4 — evergreen recycling",
+      "before": 64.7,
+      "after": 74.0,
+      "delta": 9.3,
+      "basis": "19,9 af 26,9 d (P0 4,05/4,5 · P1 9,4/13,4 · P2 4,5/7 · P3 1,95/2) — P1.4 2,5 d færdig i 7.41.0"
+    },
+    {
+      "date": "2026-11-06",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 58.3,
+      "after": 60.6,
+      "delta": 2.3,
+      "basis": "13,2 af 21,8 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 5,3/6,05 · S3 2,45/3,55 · S4 1,4/5)"
+    },
+    {
+      "date": "2026-11-06",
+      "project": "SEO-indholdsproduktion",
+      "module": "daglig måling",
+      "before": 57.1,
+      "after": 62.5,
+      "delta": 5.4,
+      "basis": "5 af 8 guides (Publicerede guides (id 292, 296, 295) 0/3 · Guide-copy klar til publicering (292, 296, 295 + corset) 4/4 · Corset-guiden publiceret (/steampunk-corset-guide/, 1394) 1/1)"
+    },
+    {
+      "date": "2026-11-06",
+      "project": "steamgears.eu — site-optimering",
+      "module": "scope ændret — §9 P2–P5 indarbejdet (nævner 21,8 → 23,8 d)",
+      "before": 60.6,
+      "after": 55.5,
+      "delta": -5.1,
+      "scope_change": true,
+      "basis": "13,2 af 23,8 d (S0 1,9/2,85 · S1 2,15/4,6 · S2 5,3/7,55 · S3 2,45/3,55 · S4 1,4/5,25)"
+    },
+    {
+      "date": "2026-11-06",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 55.5,
+      "after": 56.3,
+      "delta": 0.8,
+      "basis": "13,4 af 23,8 d (S0 1,9/2,85 · S1 2,15/4,6 · S2 5,5/7,55 · S3 2,45/3,55 · S4 1,4/5,25)"
+    },
+    {
+      "date": "2026-11-06",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 56.3,
+      "after": 56.5,
+      "delta": 0.2,
+      "basis": "13,45 af 23,8 d (S0 1,9/2,85 · S1 2,15/4,6 · S2 5,5/7,55 · S3 2,5/3,55 · S4 1,4/5,25)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "steamgears.eu — site-optimering",
+      "module": "ingen ændring",
+      "before": 56.5,
+      "after": 56.5,
+      "delta": 0,
+      "basis": "13,45 af 23,8 d (S0 1,9/2,85 · S1 2,15/4,6 · S2 5,5/7,55 · S3 2,5/3,55 · S4 1,4/5,25)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "ingen ændring",
+      "before": 74.0,
+      "after": 74.0,
+      "delta": 0,
+      "basis": "19,9 af 26,9 d (P0 4,05/4,5 · P1 9,4/13,4 · P2 4,5/7 · P3 1,95/2)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "Dark academia-rebrand",
+      "module": "ingen ændring",
+      "before": 63.0,
+      "after": 63.0,
+      "delta": 0,
+      "basis": "8,5 af 13,5 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "SEO-indholdsproduktion",
+      "module": "ingen ændring",
+      "before": 62.5,
+      "after": 62.5,
+      "delta": 0,
+      "basis": "5 af 8 guides (Publicerede guides (id 292, 296, 295) 0/3 · Guide-copy klar til publicering (292, 296, 295 + corset) 4/4 · Corset-guiden publiceret (/steampunk-corset-guide/, 1394) 1/1)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "Døde internlinks",
+      "module": "ingen ændring",
+      "before": 100.0,
+      "after": 100.0,
+      "delta": 0,
+      "basis": "39 af 39 links"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 74.0,
+      "after": 74.7,
+      "delta": 0.7,
+      "basis": "20,65 af 27,65 d (P0 4,05/4,5 · P1 9,4/13,4 · P2 4,5/7 · P3 2,7/2,75)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "P0.2 — runway pr. kanal",
+      "before": 74.7,
+      "after": 74.9,
+      "delta": 0.2,
+      "basis": "20,85 af 27,85 d = 74,9 % (11 nye checks, 555 PASS)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "steamgears.eu — site-optimering",
+      "module": "S0.9 analytics — inline GA4-tag fjernet",
+      "before": 56.5,
+      "after": 57.6,
+      "delta": 1.1,
+      "basis": "13,7 af 23,8 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 5,5/7,55 · S3 2,5/3,55 · S4 1,4/5,25)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 57.6,
+      "after": 59.7,
+      "delta": 2.1,
+      "basis": "14,2 af 23,8 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 6/7,55 · S3 2,5/3,55 · S4 1,4/5,25)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "steamgears.eu — site-optimering",
+      "module": "S2.8 — hub-links på de resterende indlæg",
+      "before": 59.7,
+      "after": 61.6,
+      "delta": 1.9,
+      "basis": "14,65 af 23,8 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 6,45/7,55 · S3 2,5/3,55 · S4 1,4/5,25)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 61.6,
+      "after": 62.0,
+      "delta": 0.4,
+      "basis": "14,75 af 23,8 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 6,55/7,55 · S3 2,5/3,55 · S4 1,4/5,25)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 74.9,
+      "after": 75.2,
+      "delta": 0.3,
+      "basis": "20,95 af 27,85 d (P0 4,35/4,7 · P1 9,4/13,4 · P2 4,5/7 · P3 2,7/2,75)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 75.2,
+      "after": 75.7,
+      "delta": 0.5,
+      "basis": "21,45 af 28,35 d (P0 4,35/4,7 · P1 9,9/13,9 · P2 4,5/7 · P3 2,7/2,75)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 62.0,
+      "after": 63.7,
+      "delta": 1.7,
+      "basis": "15,15 af 23,8 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 6,95/7,55 · S3 2,5/3,55 · S4 1,4/5,25)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 75.7,
+      "after": 76.1,
+      "delta": 0.4,
+      "basis": "21,95 af 28,85 d (P0 4,35/4,7 · P1 10,4/14,4 · P2 4,5/7 · P3 2,7/2,75)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 76.1,
+      "after": 76.3,
+      "delta": 0.2,
+      "basis": "22,25 af 29,15 d (P0 4,35/4,7 · P1 10,7/14,7 · P2 4,5/7 · P3 2,7/2,75)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 76.3,
+      "after": 76.7,
+      "delta": 0.4,
+      "basis": "22,75 af 29,65 d (P0 4,35/4,7 · P1 11,2/15,2 · P2 4,5/7 · P3 2,7/2,75)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 63.7,
+      "after": 64.0,
+      "delta": 0.3,
+      "basis": "15,55 af 24,3 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 7,35/8,05 · S3 2,5/3,55 · S4 1,4/5,25)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 64.0,
+      "after": 64.4,
+      "delta": 0.4,
+      "basis": "15,65 af 24,3 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 7,35/8,05 · S3 2,5/3,55 · S4 1,5/5,25)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 76.7,
+      "after": 77.7,
+      "delta": 1.0,
+      "basis": "23,05 af 29,65 d (P0 4,65/4,7 · P1 11,2/15,2 · P2 4,5/7 · P3 2,7/2,75)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 77.7,
+      "after": 79.4,
+      "delta": 1.7,
+      "basis": "23,55 af 29,65 d (P0 4,65/4,7 · P1 11,7/15,2 · P2 4,5/7 · P3 2,7/2,75)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 79.4,
+      "after": 79.8,
+      "delta": 0.4,
+      "basis": "24,05 af 30,15 d (P0 4,65/4,7 · P1 11,7/15,2 · P2 4,5/7 · P3 2,7/2,75 · P0.7 0,5/0,5)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 79.8,
+      "after": 80.1,
+      "delta": 0.3,
+      "basis": "24,55 af 30,65 d (P0 4,65/4,7 · P1 11,7/15,2 · P2 4,5/7 · P3 2,7/2,75 · P0.7 1/1)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 80.1,
+      "after": 80.3,
+      "delta": 0.2,
+      "basis": "24,8 af 30,9 d (P0 4,65/4,7 · P1 11,7/15,2 · P2 4,5/7 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "roadmap-bogføring — Etsy afgjort, dobbelttælling fjernet (scope)",
+      "before": 80.3,
+      "after": 87.3,
+      "delta": 7.0,
+      "basis": "24,8 af 28,4 d (P0 4,65/4,7 · P1 11,7/15,2 · P2 4,75/4,75 · P3 2,45/2,5 · P0.7 1/1 · P0.7c 0,25/0,25)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 87.3,
+      "after": 87.4,
+      "delta": 0.1,
+      "basis": "25,05 af 28,65 d (P0 4,65/4,7 · P1 11,7/15,2 · P2 4,75/4,75 · P3 2,45/2,5 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 87.4,
+      "after": 90.9,
+      "delta": 3.5,
+      "basis": "26,05 af 28,65 d (P0 4,65/4,7 · P1 12,7/15,2 · P2 4,75/4,75 · P3 2,45/2,5 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 90.9,
+      "after": 91.0,
+      "delta": 0.1,
+      "basis": "26,3 af 28,9 d (P0 4,65/4,7 · P1 12,7/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 91.0,
+      "after": 91.1,
+      "delta": 0.1,
+      "basis": "26,55 af 29,15 d (P0 4,65/4,7 · P1 12,7/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 91.1,
+      "after": 91.2,
+      "delta": 0.1,
+      "basis": "26,8 af 29,4 d (P0 4,65/4,7 · P1 12,7/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 91.2,
+      "after": 96.3,
+      "delta": 5.1,
+      "basis": "28,3 af 29,4 d (P0 4,65/4,7 · P1 14,2/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 96.3,
+      "after": 96.4,
+      "delta": 0.1,
+      "basis": "29,3 af 30,4 d (P0 4,65/4,7 · P1 14,7/15,7 · P2 4,75/4,75 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 96.4,
+      "after": 96.3,
+      "delta": -0.1,
+      "basis": "28,8 af 29,9 d (P0 4,65/4,7 · P1 14,2/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5)",
+      "scope_change": true,
+      "note": "P1.22 blev først bogført både inde i P1's total (15,2 → 15,7) og som eget modul, så de 0,5 d blev talt to gange. Rettet til eget modul alene; faldet er korrektion af dobbelttællingen, ikke tabt arbejde."
+    },
+    {
+      "date": "2026-11-07",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 64.4,
+      "after": 64.6,
+      "delta": 0.2,
+      "basis": "15,7 af 24,3 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 7,35/8,05 · S3 2,55/3,55 · S4 1,5/5,25)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 64.6,
+      "after": 65.2,
+      "delta": 0.6,
+      "basis": "15,85 af 24,3 d (S0 2,15/2,85 · S1 2,15/4,6 · S2 7,35/8,05 · S3 2,55/3,55 · S4 1,65/5,25)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 64.6,
+      "after": 66.0,
+      "delta": 1.4,
+      "basis": "15,7 af 23,8 d (S0 2,15/2,35 · S1 2,15/4,6 · S2 7,35/8,05 · S3 2,55/3,55 · S4 1,5/5,25)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "steamgears.eu — site-optimering",
+      "module": "scope-ændring S2.5b (OG-billede)",
+      "before": 66.0,
+      "after": 65.3,
+      "delta": -0.7,
+      "basis": "15,7 af 24,05 d (S0 2,15/2,35 · S1 2,15/4,6 · S2 7,35/8,3 · S3 2,55/3,55 · S4 1,5/5,25)",
+      "scope_change": true
+    },
+    {
+      "date": "2026-11-07",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 65.3,
+      "after": 65.9,
+      "delta": 0.6,
+      "basis": "15,85 af 24,05 d (S0 2,15/2,35 · S1 2,15/4,6 · S2 7,35/8,3 · S3 2,55/3,55 · S4 1,65/5,25)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 96.3,
+      "after": 96.5,
+      "delta": 0.2,
+      "basis": "30,3 af 31,4 d (P0 4,65/4,7 · P1 14,2/15,2 · P2 4,75/4,75 · P3 2,7/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 65.9,
+      "after": 67.4,
+      "delta": 1.5,
+      "basis": "16,2 af 24,05 d (S0 2,15/2,35 · S1 2,15/4,6 · S2 7,35/8,3 · S3 2,55/3,55 · S4 2/5,25)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 96.5,
+      "after": 96.7,
+      "delta": 0.2,
+      "basis": "30,35 af 31,4 d (P0 4,65/4,7 · P1 14,2/15,2 · P2 4,75/4,75 · P3 2,75/2,75 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 96.7,
+      "after": 97.2,
+      "delta": 0.5,
+      "basis": "29,6 af 30,45 d (P0 4,65/4,65 · P1 14,2/15,05 · P2 4,75/4,75 · P3 2/2 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "steamgears.eu — site-optimering",
+      "module": "S2.5b — OG-billede målt på alle 30 indlæg og fast værn (+0,15 d) + S0.4 bekræftet uden cache",
+      "before": 67.4,
+      "after": 68.0,
+      "delta": 0.6,
+      "basis": "16,35 af 24,05 d (S0 2,15/2,35 · S1 2,15/4,6 · S2 7,5/8,3 · S3 2,55/3,55 · S4 2/5,25)"
+    },
+    {
+      "date": "2026-11-07",
+      "project": "steamgears.eu — site-optimering",
+      "module": "S2.9 + S4.10 + S4.12 + S4.13 deployet og verificeret live via Novamira (+0,35 d)",
+      "before": 68.0,
+      "after": 69.4,
+      "delta": 1.4,
+      "basis": "16,7 af 24,05 d (S0 2,15/2,35 · S1 2,15/4,6 · S2 7,6/8,3 · S3 2,55/3,55 · S4 2,25/5,25)"
+    },
+    {
       "date": "2026-11-08",
       "project": "steamgears.eu — site-optimering",
       "module": "ingen ændring",
-      "before": 57.9,
-      "after": 57.9,
+      "before": 69.4,
+      "after": 69.4,
       "delta": 0,
-      "basis": "12,6 af 21,75 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,7/6 · S3 2,45/3,55 · S4 1,4/5)"
+      "basis": "16,7 af 24,05 d (S0 2,15/2,35 · S1 2,15/4,6 · S2 7,6/8,3 · S3 2,55/3,55 · S4 2,25/5,25)"
     },
     {
       "date": "2026-11-08",
       "project": "Steamgears Autopilot — plugin",
       "module": "ingen ændring",
-      "before": 55.6,
-      "after": 55.6,
+      "before": 97.2,
+      "after": 97.2,
       "delta": 0,
-      "basis": "13,55 af 24,35 d (P0 3,2/4 · P1 4,85/11,35 · P2 4,5/7 · P3 1/2)"
+      "basis": "29,6 af 30,45 d (P0 4,65/4,65 · P1 14,2/15,05 · P2 4,75/4,75 · P3 2/2 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5)"
     },
     {
       "date": "2026-11-08",
@@ -626,10 +1460,10 @@
       "date": "2026-11-08",
       "project": "SEO-indholdsproduktion",
       "module": "ingen ændring",
-      "before": 57.1,
-      "after": 57.1,
+      "before": 62.5,
+      "after": 62.5,
       "delta": 0,
-      "basis": "4 af 7 guides (Publicerede guides (id 292, 296, 295) 0/3 · Guide-copy klar til publicering (292, 296, 295 + corset) 4/4)"
+      "basis": "5 af 8 guides (Publicerede guides (id 292, 296, 295) 0/3 · Guide-copy klar til publicering (292, 296, 295 + corset) 4/4 · Corset-guiden publiceret (/steampunk-corset-guide/, 1394) 1/1)"
     },
     {
       "date": "2026-11-08",
@@ -639,6 +1473,171 @@
       "after": 100.0,
       "delta": 0,
       "basis": "39 af 39 links"
+    },
+    {
+      "date": "2026-11-08",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 69.4,
+      "after": 71.9,
+      "delta": 2.5,
+      "basis": "17,3 af 24,05 d (S0 2,15/2,35 · S1 2,75/4,6 · S2 7,6/8,3 · S3 2,55/3,55 · S4 2,25/5,25)"
+    },
+    {
+      "date": "2026-11-08",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 71.9,
+      "after": 76.5,
+      "delta": 4.6,
+      "basis": "18,4 af 24,05 d (S0 2,15/2,35 · S1 3,45/4,6 · S2 7,65/8,3 · S3 2,9/3,55 · S4 2,25/5,25)"
+    },
+    {
+      "date": "2026-11-08",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 76.5,
+      "after": 80.2,
+      "delta": 3.7,
+      "basis": "19,3 af 24,05 d (S0 2,15/2,35 · S1 3,75/4,6 · S2 7,85/8,3 · S3 3,3/3,55 · S4 2,25/5,25)"
+    },
+    {
+      "date": "2026-11-08",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 80.2,
+      "after": 81.3,
+      "delta": 1.1,
+      "basis": "19,55 af 24,05 d (S0 2,15/2,35 · S1 3,9/4,6 · S2 7,85/8,3 · S3 3,4/3,55 · S4 2,25/5,25)"
+    },
+    {
+      "date": "2026-11-08",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 81.3,
+      "after": 82.5,
+      "delta": 1.2,
+      "basis": "19,85 af 24,05 d (S0 2,35/2,35 · S1 3,9/4,6 · S2 7,85/8,3 · S3 3,5/3,55 · S4 2,25/5,25)"
+    },
+    {
+      "date": "2026-11-08",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 82.5,
+      "after": 85.9,
+      "delta": 3.4,
+      "basis": "20,65 af 24,05 d (S0 2,35/2,35 · S1 3,9/4,6 · S2 7,85/8,3 · S3 3,5/3,55 · S4 3,05/5,25)"
+    },
+    {
+      "date": "2026-11-08",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 85.9,
+      "after": 88.6,
+      "delta": 2.7,
+      "basis": "21,3 af 24,05 d (S0 2,35/2,35 · S1 3,9/4,6 · S2 7,85/8,3 · S3 3,5/3,55 · S4 3,7/5,25)"
+    },
+    {
+      "date": "2026-11-08",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 97.2,
+      "after": 98.0,
+      "delta": 0.8,
+      "basis": "29,85 af 30,45 d (P0 4,65/4,65 · P1 14,45/15,05 · P2 4,75/4,75 · P3 2/2 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5)"
+    },
+    {
+      "date": "2026-11-08",
+      "project": "SEO-indholdsproduktion",
+      "module": "daglig måling",
+      "before": 62.5,
+      "after": 100.0,
+      "delta": 37.5,
+      "basis": "8 af 8 guides (Publicerede guides (id 292, 296, 295) 3/3 · Guide-copy klar til publicering (292, 296, 295 + corset) 4/4 · Corset-guiden publiceret (/steampunk-corset-guide/, 1394) 1/1)"
+    },
+    {
+      "date": "2026-11-08",
+      "project": "steamgears.eu — site-optimering",
+      "module": "afsluttende roadmap-pas",
+      "before": 88.6,
+      "after": 91.3,
+      "delta": 2.7,
+      "basis": "20,05 af 21,95 d (S0 2,35/2,35 · S1 3,40/3,90 · S2 6,90/6,90 · S3 3,55/3,55 · S4 3,85/5,25)"
+    },
+    {
+      "date": "2026-11-08",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 91.3,
+      "after": 92.9,
+      "delta": 1.6,
+      "basis": "20,85 af 22,45 d (S0 2,35/2,35 · S1 3,6/3,9 · S2 6,9/6,9 · S3 4,05/4,05 · S4 3,95/5,25)"
+    },
+    {
+      "date": "2026-11-08",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 92.9,
+      "after": 93.3,
+      "delta": 0.4,
+      "basis": "20,95 af 22,45 d (S0 2,35/2,35 · S1 3,6/3,9 · S2 6,9/6,9 · S3 4,05/4,05 · S4 4,05/5,25)"
+    },
+    {
+      "date": "2026-11-08",
+      "project": "Dark academia-rebrand",
+      "module": "daglig måling",
+      "before": 63.0,
+      "after": 64.3,
+      "delta": 1.3,
+      "basis": "9 af 14 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5 · Batch 4-forberedelse: arbejdsordre, filnavne, alt-tekster, rækkefølge 0,5/0,5)"
+    },
+    {
+      "date": "2026-11-08",
+      "project": "Niche-butik — plugin P4",
+      "module": "baseline",
+      "before": null,
+      "after": 85.0,
+      "delta": null,
+      "basis": "0,85 af 1 d (Plan-motor: arketyper, priser, sider 0,3/0,3 · Kladde-udrulning og rollback 0,25/0,25 · Admin-side, REST og fire evner 0,2/0,2 · Tests, zip og dokumentation 0,1/0,1 · Kørsel mod rigtig WooCommerce 0/0,15)"
+    },
+    {
+      "date": "2026-11-08",
+      "project": "Niche-butik — plugin P4",
+      "module": "daglig måling",
+      "before": 85.0,
+      "after": 100.0,
+      "delta": 15.0,
+      "basis": "1 af 1 d (Plan-motor: arketyper, priser, sider 0,3/0,3 · Kladde-udrulning og rollback 0,25/0,25 · Admin-side, REST og fire evner 0,2/0,2 · Tests, zip og dokumentation 0,1/0,1 · Kørsel mod rigtig WooCommerce 0,15/0,15)"
+    },
+    {
+      "date": "2026-11-08",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "P1.5's sidste 0,6 d er live-verifikation, der kræver ejerens tokens, og er flyttet ud af agent-estimatet: målt 8/11 svarer Pinterest 401 på den gemte token (kan ikke fornyes uden app-credentials) og 5 af 6 kanaler har intet token. P1 er derfor 14,45 af 14,45 d.",
+      "before": 98.0,
+      "after": 100.0,
+      "delta": 2.0,
+      "basis": "29,85 af 29,85 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5)",
+      "scope_change": true
+    },
+    {
+      "date": "2026-11-08",
+      "project": "steamgears.eu — site-optimering",
+      "module": "S1.2's sidste 0,3 d (ejerens ja/nej pr. produkt 942/765/766/767) og S4's 1,2 d (S4.1 Complianz EU-valg, S4.2/S4.9 CVR+telefon, S4.3 valuta+24 priser, S4.5 betalingsaftaler, S4.6 zoner/fragtklasser, S4.7 mockups) er ejer-blokerede og flyttet ud af agent-estimatet. S1 er derfor 3,6 af 3,6 d og S4 4,05 af 4,05 d; de blokerede dage står i docs/roadmap.md §4c.",
+      "before": 93.3,
+      "after": 100.0,
+      "delta": 6.7,
+      "basis": "20,95 af 20,95 d (S0 2,35/2,35 · S1 3,6/3,6 · S2 6,9/6,9 · S3 4,05/4,05 · S4 4,05/4,05)",
+      "scope_change": true
+    },
+    {
+      "date": "2026-11-08",
+      "project": "Dark academia-rebrand",
+      "module": "scope-korrektion: kollektionstildelingen er ikke i effekt — 0,4 t gentildeling tilføjet",
+      "before": 64.3,
+      "after": 62.5,
+      "delta": -1.8,
+      "basis": "9 af 14,4 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5 · Batch 4-forberedelse: arbejdsordre, filnavne, alt-tekster, rækkefølge 0,5/0,5 · Batch 2-gentildeling: de seks kollektioner skal tildeles igen 0/0,4)",
+      "scope_change": true
     }
   ]
 }

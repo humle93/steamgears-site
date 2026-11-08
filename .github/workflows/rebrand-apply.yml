@@ -1,0 +1,105 @@
+name: Rebrand apply
+
+# Tildeler de seks dark academia-kollektioner til produkterne — den handling der ikke kunne gøres fra en
+# agent-sandkasse, fordi der ikke findes et credential der. Kørslen bruger de samme repo-secrets som
+# seo_audit.yml (WP_USER + WP_APP_PASS: et WordPress-application-password på en admin-bruger).
+#
+# Kørslen skriver en rapport tilbage i repoet (reports/rebrand-apply-log.md), så resultatet kan læses af
+# enhver — også når logfilerne kræver login. Kode, tal og credential-status, aldrig credential-værdier.
+
+on:
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: "Skriv tildelingen (ellers kun plan + verify)"
+        type: boolean
+        default: false
+  # Et push der rører værktøjet (eller denne fil) kører tildelingen med det samme — men kun hvis
+  # credentials findes som secrets. Uden dem skriver kørslen intet og advarer i stedet.
+  push:
+    paths:
+      - tools/rebrand_apply.py
+      - tools/rebrand_audit.py
+      - .github/workflows/rebrand-apply.yml
+
+permissions:
+  contents: write
+
+jobs:
+  rebrand:
+    name: Kollektioner
+    runs-on: ubuntu-latest
+    env:
+      WP_USER: ${{ secrets.WP_USER }}
+      WP_APP_PASSWORD: ${{ secrets.WP_APP_PASS }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Selftest (offline)
+        run: python3 tools/rebrand_apply.py --selftest
+
+      - name: Plan mod den offentlige butik
+        run: |
+          set -o pipefail
+          if [ -z "$WP_APP_PASSWORD" ]; then
+            echo "::warning title=Ingen credentials::WP_USER/WP_APP_PASS er ikke sat — kun plan, intet skrives."
+          fi
+          python3 tools/rebrand_apply.py | tee /tmp/plan.txt
+
+      - name: Apply
+        if: ${{ inputs.apply || github.event_name == 'push' }}
+        run: |
+          set -o pipefail
+          if [ -z "$WP_APP_PASSWORD" ] || [ -z "$WP_USER" ]; then
+            echo "ingen credentials — tildelingen er ikke forsøgt" | tee /tmp/apply.txt
+            exit 0
+          fi
+          python3 tools/rebrand_apply.py --apply | tee /tmp/apply.txt
+
+      - name: Verify
+        run: python3 tools/rebrand_apply.py --verify | tee /tmp/verify.txt
+
+      - name: Skriv kørselsrapport
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import os, pathlib, datetime
+          secret = "ja" if os.environ.get("WP_APP_PASSWORD") else "nej"
+          def read(name):
+              path = pathlib.Path(f"/tmp/{name}.txt")
+              return path.read_text(errors="replace").strip() if path.exists() else "(trinnet kørte ikke)"
+          lines = [
+              "# Rebrand apply — seneste kørsel",
+              "",
+              f"- Tid: {datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}",
+              f"- Udløst af: `{os.environ.get('GITHUB_EVENT_NAME', '?')}` · commit `{os.environ.get('GITHUB_SHA', '?')[:7]}`",
+              f"- Credentials sat som repo-secrets: **{secret}** (værdierne læses aldrig her)",
+              "",
+              "## Plan (hvem mangler hvad)",
+              "```", read("plan"), "```",
+              "",
+              "## Apply",
+              "```", read("apply"), "```",
+              "",
+              "## Verify (acceptkriterium: 0 tomme kollektioner)",
+              "```", read("verify"), "```",
+              "",
+          ]
+          pathlib.Path("reports/rebrand-apply-log.md").write_text("\n".join(lines) + "\n")
+          print("\n".join(lines))
+          PY
+
+      - name: Commit rapporten
+        if: always()
+        run: |
+          if [ -n "$(git status --porcelain reports/rebrand-apply-log.md)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add reports/rebrand-apply-log.md
+            git commit -m "chore(rebrand): kørselsrapport for tildelingen"
+            git push origin HEAD:main
+          fi

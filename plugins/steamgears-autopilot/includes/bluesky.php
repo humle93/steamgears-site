@@ -216,7 +216,7 @@ class SGAP_Bluesky {
 
         // An access token lives about two hours, so a cached session can be refused
         // before the transient runs out. One fresh login, then the same verdict stands.
-        if (is_wp_error($created) && (int) ($created->data['status'] ?? 0) === 401) {
+        if (is_wp_error($created) && (int) (($created->get_error_data() ?: [])['status'] ?? 0) === 401) {
             self::forget();
             $session = self::session(true);
             if (is_wp_error($session)) {

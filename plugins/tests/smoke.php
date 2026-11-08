@@ -4,38 +4,45 @@
  * No WordPress or database needed. Usage: php plugins/tests/smoke.php
  * (Real WordPress + MySQL is covered by plugins/tests/integration.php in CI.)
  */
-define('ABSPATH', __DIR__.'/fixtures/'); define('DAY_IN_SECONDS',86400); define('HOUR_IN_SECONDS',3600); define('MINUTE_IN_SECONDS',60); define('ARRAY_A','ARRAY_A');
+define('ABSPATH', __DIR__.'/fixtures/'); define('DAY_IN_SECONDS',86400); define('HOUR_IN_SECONDS',3600); define('MINUTE_IN_SECONDS',60); define('WEEK_IN_SECONDS',604800); define('ARRAY_A','ARRAY_A');
 $GLOBALS['actions']=[]; $opts=[]; $settings=[];
 function add_action($h,$cb){ $GLOBALS['actions'][$h][]=$cb; } function add_filter($h,$cb){ $GLOBALS['actions'][$h][]=$cb; }
+$GLOBALS['routes']=[]; function register_rest_route($ns,$route,$args=[]){ $GLOBALS['routes'][$ns][]=$route; return true; }
 function apply_filters($h,$v,...$a){return isset($GLOBALS['filters'][$h])?($GLOBALS['filters'][$h])($v,...$a):$v;}
 function do_action($h,...$a){ foreach($GLOBALS['actions'][$h]??[] as $cb) call_user_func_array($cb,$a); }
 function register_activation_hook(...$a){} function register_deactivation_hook(...$a){}
 function is_admin(){return true;} function get_option($k,$d=false){return $GLOBALS['opts'][$k]??$d;}
-function update_option($k,$v){$GLOBALS['opts'][$k]=$v;} function add_option($k,$v){$GLOBALS['opts'][$k]??=$v;} function wp_mail($to,$s,$b){$GLOBALS['mails'][]=[$to,$s,$b]; return true;}
-function register_setting($g,$k,$a){ $GLOBALS['settings'][$k]=$a; } function wp_clear_scheduled_hook($h){}
+function update_option($k,$v,$autoload=null){$GLOBALS['opts'][$k]=$v; $GLOBALS['autoload'][$k]=$autoload;} function add_option($k,$v){$GLOBALS['opts'][$k]??=$v;} function wp_mail($to,$s,$b){$GLOBALS['mails'][]=[$to,$s,$b]; return true;}
+function register_setting($g,$k,$a){ $GLOBALS['settings'][$k]=$a; } function wp_clear_scheduled_hook($h,$a=[]){ $GLOBALS['cleared'][]=$h; }
 function add_menu_page($t,$m,$c,$slug,$cb){ add_action('page_'.$slug,$cb);} function add_submenu_page($p,$t,$m,$c,$slug,$cb){ add_action('page_'.$slug,$cb);}
 function esc_html($s){return htmlspecialchars((string)$s);} function esc_attr($s){return htmlspecialchars((string)$s);} function esc_url($s){return $s;} function esc_textarea($s){return htmlspecialchars((string)$s);}
 function get_transient($k){return false;} function set_transient(...$a){} function delete_transient($k){} function settings_fields($g){} function submit_button(){}
-function admin_url($p=''){return '/wp-admin/'.$p;} function rest_url($p=''){return '/wp-json/'.$p;} function home_url($p=''){return 'https://steamgears.eu'.$p;}
-function get_bloginfo($k=''){return 'Steamgears';} function wp_timezone_string(){return 'UTC';} function get_the_title($id){return 'Post '.$id;} function get_permalink($id){return 'https://steamgears.eu/?p='.$id;} function has_post_thumbnail($id){return false;} function get_post_type($id){return 'post';} function pll_get_post($id,$locale=''){return (int)($GLOBALS['pll_map'][$locale]??0);}
-function get_posts($a=[]){ $r=$GLOBALS['posts_result']??[]; return array_slice($r,0,(int)($a['numberposts']??(count($r)?:1))); } function post_type_exists($t){return in_array($t,['post','page'],true);} function get_post($id){return null;} function get_user_meta($u,$k,$s=false){return '';} function update_user_meta($u,$k,$v){return true;} function get_edit_post_link($id,$c=''){return '/edit/'.$id;} function get_preview_post_link($id){return '/preview/'.$id;}
+function site_url($p=''){return 'https://steamgears.eu/'.$p;} function admin_url($p=''){return '/wp-admin/'.$p;} function rest_url($p=''){return '/wp-json/'.$p;} function home_url($p=''){return 'https://steamgears.eu'.$p;}
+function get_bloginfo($k=''){return 'Steamgears';} function wp_timezone_string(){return 'UTC';} function get_the_title($id){ if(is_object($id)){return (string)($id->post_title!==''?$id->post_title:'Post '.($id->ID??0));} $p=$GLOBALS['post_by_id'][(int)$id]??null; return $p? (string)$p->post_title : 'Post '.$id; } function get_permalink($id){return 'https://steamgears.eu/?p='.$id;} function has_post_thumbnail($id){return false;} function get_post_type($id){return 'post';} function pll_get_post($id,$locale=''){return (int)($GLOBALS['pll_map'][$locale]??0);}
+function get_posts($a=[]){ $r=$GLOBALS['posts_result']??[]; return array_slice($r,0,(int)($a['numberposts']??(count($r)?:1))); } function post_type_exists($t){return in_array($t,['post','page'],true);} function get_post($id){return $GLOBALS['post_by_id'][(int)$id]??null;}
+function update_post_meta($id,$k,$v){ $GLOBALS['postmeta'][(int)$id][$k]=$v; return true; } function delete_post_meta($id,$k){ unset($GLOBALS['postmeta'][(int)$id][$k]); return true; } function get_the_post_thumbnail_url($id,$s=''){ return $GLOBALS['thumb'][(int)$id]??''; } function add_meta_box(...$a){ $GLOBALS['metaboxes'][]=$a; } function wp_is_post_revision($id){ return false; } function wp_verify_nonce($n,$a=''){ return true; } function has_excerpt($p){ return is_object($p) && !empty($p->post_excerpt); } function strip_shortcodes($t){ return (string)$t; } function wp_trim_words($t,$n=55,$more='…'){ $w=preg_split('/\s+/',trim((string)$t)); return implode(' ',array_slice($w,0,$n)).(count($w)>$n?$more:''); } function get_user_meta($u,$k,$s=false){return '';} function update_user_meta($u,$k,$v){return true;} function get_edit_post_link($id,$c=''){return '/edit/'.$id;} function get_preview_post_link($id){return '/preview/'.$id;}
 function wp_nonce_field(...$a){return '';} function wp_create_nonce($a=''){return 'n';} function selected($a,$b,$e){return $a===$b?' selected':'';} function checked($a,$b=true,$e=true){return $a===$b?' checked':'';}
 function sanitize_text_field($s){return trim(strip_tags((string)$s));} function sanitize_textarea_field($s){return trim(strip_tags((string)$s));}
 function sanitize_key($s){return preg_replace('/[^a-z0-9_\-]/','',strtolower((string)$s));} function absint($v){return abs((int)$v);}
 function esc_url_raw($u,$p=null){return preg_match('#^https?://#',$u)?$u:'';} function wp_parse_url($u,$c=-1){return parse_url($u,$c);}
 function wp_parse_args($a,$d){return array_merge($d,$a);} function add_query_arg($a,$u){return $u.(str_contains($u,'?')?'&':'?').http_build_query($a,'','&',PHP_QUERY_RFC3986);}
-function current_time($t){return '2026-10-30 12:00:00';} function wp_date($f,$t=null){return date($f,$t??time());} function mysql2date($f,$d,$t=true){return date($f, strtotime((string)$d));}
+function current_time($t){return '2026-10-30 12:00:00';} function wp_date($f,$t=null){return date($f,$t??time());} function mysql2date($f,$d,$t=null){return $d?date($f,strtotime((string)$d)):'';}
 function current_user_can($c){return true;} function get_current_user_id(){return 1;} function get_site_transient($k){return false;} function set_site_transient(...$a){} function wp_remote_get(...$a){return new WP_Error('offline','offline');} function wp_nonce_field_stub(){} function delete_option($k){unset($GLOBALS["opts"][$k]);} function wp_json_encode($v){return json_encode($v);} function is_wp_error($v){return $v instanceof WP_Error;}
 function wp_strip_all_tags($s){return strip_tags((string)$s);} function attachment_url_to_postid($u){return (int)($GLOBALS['attachment_for'][$u]??0);} function get_post_meta($id,$k='',$s=false){return $GLOBALS['postmeta'][$id][$k]??'';} function url_to_postid($u){return (int)($GLOBALS['postid_for'][$u]??0);} function get_post_status($id){return (string)($GLOBALS['poststatus'][$id]??'publish');} function wp_get_attachment_metadata($id){return $GLOBALS['attachment_meta'][$id]??[];} function get_post_mime_type($id){return (string)($GLOBALS['attachment_mime'][$id]??'');} function wp_die($m=''){throw new RuntimeException((string)$m);} function check_admin_referer($a=''){return true;}
 $GLOBALS['abilities']=[]; $GLOBALS['ability_categories']=[];
 function wp_register_ability($n,$a=[]){ $GLOBALS['abilities'][$n]=$a; return true; } function wp_register_ability_category($s,$a=[]){ $GLOBALS['ability_categories'][$s]=$a; return true; }
-class WP_Error{ function __construct(public $code,public $msg,public $data=[]){} function get_error_message(){return $this->msg;} }
+if (!class_exists('WP_Post')) { class WP_Post {
+    public $ID=0; public $post_type='post'; public $post_status='publish';
+    public $post_title=''; public $post_content=''; public $post_excerpt='';
+    function __construct($a=[]){ foreach($a as $k=>$v){ $this->$k=$v; } }
+} }
+class WP_Error{ function __construct(public $code,public $msg,public $data=[]){} function get_error_message(){return $this->msg;} function get_error_code(){return $this->code;} function get_error_data(){return $this->data;} }
 class WP_REST_Response{ function __construct(public $data,public $status=200){} }
 class WP_REST_Request implements ArrayAccess{ function __construct(public array $p){} function get_param($k){return $this->p[$k]??null;}
  function offsetGet($k):mixed{return $this->p[$k]??null;} function offsetExists($k):bool{return isset($this->p[$k]);} function offsetSet($k,$v):void{} function offsetUnset($k):void{} }
-function wp_next_scheduled($h){return false;} function wp_schedule_event(...$a){$GLOBALS['cron'][]=$a[2];} function flush_rewrite_rules($h=true){$GLOBALS['flushed']=1;} function add_rewrite_rule(...$a){$GLOBALS['rules'][]=$a[0];} function wp_set_option_autoload_values($a){$GLOBALS['noauto']=$a;}
+function wp_next_scheduled($h){return (int)($GLOBALS['next_scheduled'][$h]??0);} function wp_schedule_event(...$a){$GLOBALS['cron'][]=$a[2];} function flush_rewrite_rules($h=true){$GLOBALS['flushed']=1;} function add_rewrite_rule(...$a){$GLOBALS['rules'][]=$a[0];} function wp_set_option_autoload_values($a){$GLOBALS['noauto']=$a;}
 class W{ public $prefix='wp_'; public $posts='wp_posts'; public $postmeta='wp_postmeta'; public $options='wp_options'; function get_charset_collate(){return '';} public $insert_id=0; public $log=[]; public $next=null; public $row=null;
- function get_var($q){$this->log[]=$q; return $this->next;} function prepare($q,...$a){ if(count($a)==1&&is_array($a[0]))$a=$a[0]; return vsprintf(str_replace(['%s','%d','%f'],["'%s'",'%d','%F'],$q),$a);} function esc_like($s){return $s;}
+ function get_var($q){$this->log[]=$q; return is_array($this->next)?array_shift($this->next):$this->next;} function prepare($q,...$a){ if(count($a)==1&&is_array($a[0]))$a=$a[0]; return vsprintf(str_replace(['%s','%d','%f'],["'%s'",'%d','%F'],$q),$a);} function esc_like($s){return $s;}
  function get_results($q,$o=null){$this->log[]=$q;return $GLOBALS['rows']??[];} function get_row($q){$this->log[]=$q;return $this->row ?? null;} function query($q){$this->log[]=$q;return 0;}
  function insert($t,$d){$this->log[]="INSERT $t ".json_encode($d); $this->insert_id=42; return 1;} function update($t,$d,$w){$this->log[]="UPDATE $t ".json_encode($d);return 1;} }
 $wpdb=new W; $wpdb->row=null;
@@ -43,13 +50,51 @@ require __DIR__.'/../steamgears-autopilot/steamgears-autopilot.php';
 function check($name,$ok){ echo ($ok?'PASS ':'FAIL ')."$name\n"; if(!$ok) $GLOBALS['fail']=1; }
 do_action('init'); do_action('admin_init'); do_action('admin_menu');
 check('install: 9 tables', count($GLOBALS['ddl']??[])===9); check('install: publish log table', str_contains(implode("\n",$GLOBALS['ddl']??[]),'sgap_publish_log')); check('install: cleanup cron', in_array('sgap_daily_cleanup',$GLOBALS['cron']??[])); check('install: /go/ rule + flush', ($GLOBALS['rules'][0]??'')==='^go/([0-9]+)/?$' && !empty($GLOBALS['flushed'])); check('install: secrets not autoloaded', isset($GLOBALS['noauto']['sgap_ai_api_key'])); check('version stored', $opts['sgap_version']===SGAP_VERSION);
-foreach(['steamgears-autopilot','sgap-settings','sgap-queue','sgap-ai','sgap-campaigns','sgap-etsy','sgap-reports','sgap-fullauto','sgap-merchant','sgap-setup','sgap-studio','sgap-chat','sgap-log'] as $p){ ob_start(); do_action('page_'.$p); $html=ob_get_clean(); check("page $p renders", strlen($html)>20); }
+// P3.3 — AI-profiler: persona, værktøjsadgang og access all
+check('profiles: three profiles', count(SGAP_Profiles::all())===3 && isset(SGAP_Profiles::all()['site_admin'], SGAP_Profiles::all()['wp_seo_expert']));
+check('profiles: default is the limited assistant', SGAP_Profiles::id()==='assistant' && !SGAP_Profiles::is_full());
+check('profiles: assistant keeps the chat exclusions', in_array('manage-plugin', SGAP_Profiles::excluded(), true));
+check('profiles: an unknown id never becomes full access', SGAP_Profiles::valid('root')==='assistant');
+SGAP_Settings::set('ai_profile','wp_seo_expert');
+check('profiles: seo profile still refuses update-settings', in_array('update-settings', SGAP_Profiles::excluded(), true) && SGAP_Profiles::access()==='limited');
+check('profiles: seo persona is a WordPress SEO expert', str_contains(SGAP_Profiles::prompt(),'SEO expert'));
+check('profiles: seo boosts the seo category first', in_array('seo', SGAP_Profiles::boost(), true));
+check('profiles: chat system prompt carries the persona', str_contains(SGAP_Chat::system_prompt(),'SEO expert'));
+$GLOBALS['opts']['mwai_options']=['mcp_dynamic_rest'=>false,'mcp_abilities'=>false];
+$r=SGAP_Profiles::activate('site_admin');
+check('profiles: site_admin activates access all', ($r['access']??'')==='all' && get_option('mwai_options')['mcp_dynamic_rest']===true && get_option('mwai_options')['mcp_abilities']===true);
+check('profiles: access all drops the exclusions but keeps the full-access switch shut', SGAP_Profiles::excluded()===['enable-full-access']);
+check('profiles: site_admin persona is a site administrator', str_contains(SGAP_Profiles::prompt(),'site administrator') && str_contains(SGAP_Chat::system_prompt(),'full access'));
+check('profiles: unknown profile is refused', SGAP_Profiles::activate('nope') instanceof WP_Error);
+check('profiles: set-ai-profile switches back to the assistant', (SGAP_AdminTools::set_ai_profile(['profile'=>'assistant'])['profile']??'')==='assistant' && SGAP_Profiles::id()==='assistant');
+check('profiles: the switch is offered in Settings', isset(SGAP_Settings::CHOICE_KEYS['ai_profile']) && in_array('ai_profile', SGAP_Settings::SECTIONS['AI content'], true));
+unset($GLOBALS['opts']['mwai_options']);
+foreach(['steamgears-autopilot','sgap-settings','sgap-queue','sgap-ai','sgap-campaigns','sgap-etsy','sgap-reports','sgap-fullauto','sgap-merchant','sgap-setup','sgap-studio','sgap-chat','sgap-tools','sgap-log'] as $p){ ob_start(); do_action('page_'.$p); $html=ob_get_clean(); check("page $p renders", strlen($html)>20); }
+// Etsy er manuel import: felterne er væk fra indstillingerne, og siden lover ikke en API der ikke findes.
+ob_start(); do_action('page_sgap-settings'); $set_html=ob_get_clean();
+check('etsy: no credential fields in Settings', !str_contains($set_html,'etsy_shop_id') && !str_contains($set_html,'etsy_oauth_token') && !str_contains($set_html,'Etsy shop ID'));
+check('etsy: shop tab still renders the feed secret', str_contains($set_html,'merchant_feed_secret'));
+ob_start(); do_action('page_sgap-etsy'); $etsy_html=ob_get_clean();
+check('etsy: page says manual import', str_contains($etsy_html,'Manual import') && str_contains($etsy_html,'/etsy/orders'));
+check('etsy: dead credential keys rejected', SGAP_AdminTools::update_settings(['settings'=>['etsy_shop_id'=>'x']]) instanceof WP_Error);
 // secrets never echoed
 $opts['sgap_ai_api_key']='SECRET123'; ob_start(); do_action('page_sgap-settings'); $html=ob_get_clean();
 check('secret not in settings html', !str_contains($html,'SECRET123') && str_contains($html,'Saved'));
 $san=$settings['sgap_ai_api_key']['sanitize_callback'];
 check('empty secret keeps old', $san('')==='SECRET123'); check('new secret saved',$san('NEW')==='NEW');
 $_POST['sgap_clear']['ai_api_key']=1; check('clear secret', $san('')===''); unset($_POST['sgap_clear']);
+// Skrivevejene uden om formularen: nøgler må ikke autoloades, og et tomt felt må ikke slette dem.
+$img_before=get_option('sgap_image_api_key','');
+SGAP_Settings::set('image_api_key','IMGSECRET');
+check('secret writes are never autoloaded', ($GLOBALS['autoload']['sgap_image_api_key']??null)===false && get_option('sgap_image_api_key')==='IMGSECRET');
+$cap_before=get_option('sgap_daily_cap'); SGAP_Settings::set('daily_cap',5);
+check('plain settings keep the default autoload', array_key_exists('sgap_daily_cap',$GLOBALS['autoload']) && $GLOBALS['autoload']['sgap_daily_cap']===null);
+SGAP_Settings::set('daily_cap',$cap_before);
+$r=SGAP_AdminTools::update_settings(['settings'=>['image_api_key'=>'']]);
+check('empty secret through update-settings keeps the key', get_option('sgap_image_api_key')==='IMGSECRET' && ($r['changed']['image_api_key']??'')==='kept (the new value was empty)');
+$r=SGAP_AdminTools::update_settings(['settings'=>['image_api_key'=>'IMGSECRET2']]);
+check('new secret through update-settings is saved without autoload', get_option('sgap_image_api_key')==='IMGSECRET2' && ($GLOBALS['autoload']['sgap_image_api_key']??null)===false && ($r['changed']['image_api_key']??'')==='updated');
+SGAP_Settings::set('image_api_key',$img_before);
 define('SGAP_TELEGRAM_BOT_TOKEN','fromconfig'); check('wp-config constant wins', SGAP_Settings::get('telegram_bot_token')==='fromconfig');
 check('hour clamp', $settings['sgap_quiet_start']['sanitize_callback']('99')===23);
 check('bool sanitize', $settings['sgap_autopilot_enabled']['sanitize_callback']('hack')==='no');
@@ -86,8 +131,37 @@ $wpdb->next=null; $before=count($wpdb->log);
 $r=SGAP_REST::create_queue(new WP_REST_Request(['channel'=>'pinterest','title'=>'Campaign pin','destination_url'=>'https://steamgears.eu/g/','campaign'=>'Clockwork Punk 2026_11']));
 check('queue: per-post campaign in utm url', $r instanceof WP_REST_Response && str_contains((string)($r->data['utm_url']??''),'utm_campaign=clockworkpunk2026_11'));
 check('queue: per-post campaign saved on the row', str_contains(implode("\n",array_slice($wpdb->log,$before)),'utm_campaign=clockworkpunk2026_11'));
-$wpdb->next=7; $r=SGAP_REST::create_queue(new WP_REST_Request(['channel'=>'pinterest','title'=>'Goggles','destination_url'=>'https://steamgears.eu/g/']));
+$wpdb->next=null; $wpdb->row=['id'=>7,'status'=>'queued','scheduled_at'=>'2026-10-30 12:00:00','published_at'=>null]; $r=SGAP_REST::create_queue(new WP_REST_Request(['channel'=>'pinterest','title'=>'Goggles','destination_url'=>'https://steamgears.eu/g/']));
 check('duplicate 409', $r instanceof WP_Error && $r->data['status']===409);
+// ---- P0.6: the same post cannot enter the queue twice, from any writer ----
+check('dupe: the fingerprint is channel + destination + title', SGAP_Duplicate::fingerprint('pinterest','https://steamgears.eu/g/','Goggles')===hash('sha256','pinterest|https://steamgears.eu/g/|Goggles'));
+check('dupe: another title is another post', SGAP_Duplicate::fingerprint('pinterest','https://steamgears.eu/g/','Goggles')!==SGAP_Duplicate::fingerprint('pinterest','https://steamgears.eu/g/','Goggles 2'));
+unset($opts['sgap_dupe_days']);
+check('dupe: the window defaults to 30 days', SGAP_Duplicate::days()===30);
+$opts['sgap_dupe_days']=0; $wpdb->log=[];
+$wpdb->row=['id'=>12,'status'=>'published','scheduled_at'=>'2026-01-01 10:00:00','published_at'=>'2026-01-01 10:05:00'];
+$found=SGAP_Duplicate::find(SGAP_Duplicate::fingerprint('pinterest','https://steamgears.eu/g/','Goggles'));
+check('dupe: 0 days means the whole history', is_array($found) && $found['id']===12);
+check('dupe: no window in the SQL when it is off', !str_contains(implode("\n",$wpdb->log),'COALESCE'));
+$opts['sgap_dupe_days']=30; $wpdb->log=[];
+SGAP_Duplicate::find(SGAP_Duplicate::fingerprint('pinterest','https://steamgears.eu/g/','Goggles'));
+$dup_sql=implode("\n",$wpdb->log);
+check('dupe: a queued post blocks whatever its age', str_contains($dup_sql,"'queued', 'sending', 'draft'"));
+check('dupe: a published post only blocks inside the window', str_contains($dup_sql,'COALESCE(published_at, sent_at, scheduled_at)'));
+check('dupe: failed rows never block', str_contains($dup_sql,"status <> 'failed'"));
+check('dupe: the lookup is by fingerprint', str_contains($dup_sql,'fingerprint = '));
+$msg=SGAP_Duplicate::message(['id'=>12,'status'=>'queued','scheduled_at'=>'2026-11-08 10:00:00','published_at'=>null]);
+check('dupe: the refusal names the row it collided with', str_contains($msg,'#12') && str_contains($msg,'queued') && str_contains($msg,'30 days'));
+$wpdb->row=['id'=>12,'status'=>'queued','scheduled_at'=>'2026-11-08 10:00:00','published_at'=>null];
+$again=SGAP_Queue::add(['channel'=>'pinterest','title'=>'Goggles','destination_url'=>'https://steamgears.eu/g/']);
+check('dupe: the queue refuses a cross-system repeat with 409', is_wp_error($again) && $again->code==='sgap_duplicate' && ($again->data['status']??0)===409 && ($again->data['id']??0)===12);
+check('dupe: the refusal carries the fingerprint', ($again->data['fingerprint']??'')===SGAP_Duplicate::fingerprint('pinterest','https://steamgears.eu/g/','Goggles'));
+$wpdb->row=null; $wpdb->log=[];
+$fresh=SGAP_Queue::add(['channel'=>'pinterest','title'=>'Goggles','destination_url'=>'https://steamgears.eu/g/','body'=>'Fresh titanium gears in the shop']);
+check('dupe: an unseen post still queues', is_array($fresh));
+check('dupe: the window is a number on the settings page', isset(SGAP_Settings::INT_KEYS[array_search('dupe_days',SGAP_Settings::INT_KEYS,true)]) && in_array('dupe_days',SGAP_Settings::SECTIONS['General'],true) && isset(SGAP_Settings::HELP['dupe_days']));
+ob_start(); do_action('page_sgap-settings'); $dh=ob_get_clean();
+check('dupe: the setting is rendered', str_contains($dh,'name="sgap_dupe_days"'));
 $opts['sgap_autopilot_enabled']='no'; $r=SGAP_REST::due(new WP_REST_Request([])); check('due off', $r['reason']==='autopilot_disabled');
 $opts['sgap_autopilot_enabled']='yes'; $opts['sgap_quiet_start']=0; $opts['sgap_quiet_end']=0; $wpdb->next=8; $opts['sgap_daily_cap']=8;
 $r=SGAP_REST::due(new WP_REST_Request([])); check('due cap reached', $r['reason']==='daily_cap_reached');
@@ -101,6 +175,7 @@ check('snapshot: every section present', is_array($snap) && isset($snap['generat
 check('snapshot: reports the installed version', ($snap['version']??'')===SGAP_VERSION);
 check('snapshot: secrets only as set/not set', !str_contains(wp_json_encode($snap),'TOPSECRET') && ($snap['settings']['AI content']['ai_api_key']['value']??'')==='set');
 check('snapshot: window echoes the requested days', ($snap['window']['days']??0)===30);
+check('snapshot: queue rows expose the duplicate fingerprint', array_key_exists('fingerprint', (array)($snap['queue'][0] ?? ['fingerprint'=>null])) || empty($snap['queue']));
 
 // --- Publer payloads ---
 $row=['title'=>'Brass goggles','body'=>'Look sharp.','tracking_url'=>'https://steamgears.eu/go/5/','image_url'=>'https://steamgears.eu/img.jpg'];
@@ -145,6 +220,16 @@ check('bot: Publer link scraper is not a click', SGAP_Tracking::is_bot('facebook
 check('updater: reads Version from a plugin header', SGAP_Updater::parse_version("<?php\n/**\n* Plugin Name: X\n* Version: 7.6.2\n*/")==='7.6.2');
 check('updater: no version in junk', SGAP_Updater::parse_version('404: Not Found')==='');
 check('updater: package url points at the versioned zip on main', SGAP_Updater::package_url('7.6.2')==='https://raw.githubusercontent.com/humle93/steamgears-site/main/plugins/steamgears-autopilot-v7.6.2.zip');
+// Release notes i update-modalen (P3.4): parses fra roadmapens changelog, nyeste først.
+$notes_md="| Date | Plugin | Change |\n| --- | --- | --- |\n| 2026-11-06 | 7.34.0 | **Ny** note med `code` og <script>alert(1)</script> |\n| 2026-11-05 | 7.33.4 | Ældre note |\n";
+$notes=SGAP_Updater::changelog_notes($notes_md, 2);
+check('updater: changelog renders the newest rows', str_contains($notes,'7.34.0') && str_contains($notes,'<strong>Ny</strong>') && str_contains($notes,'<code>code</code>') && str_contains($notes,'7.33.4'));
+check('updater: changelog escapes html from the repo', !str_contains($notes,'<script>') && str_contains($notes,'&lt;script&gt;'));
+check('updater: changelog respects the limit', substr_count(SGAP_Updater::changelog_notes($notes_md,1),'<li>')===1);
+check('updater: changelog is empty without rows', SGAP_Updater::changelog_notes('# no table here')==='');
+$info=SGAP_Updater::plugin_info(null,'plugin_information',(object)['slug'=>'steamgears-autopilot']);
+check('updater: modal always has a changelog section', isset($info->sections['changelog']) && strlen($info->sections['changelog'])>10);
+check('updater: modal ignores other slugs', SGAP_Updater::plugin_info('keep','plugin_information',(object)['slug'=>'other'])==='keep');
 // --- Alerts: P0.1 failed post, P0.2 queue running dry ---
 $GLOBALS['mails']=[];
 update_option('admin_email','admin@example.com'); update_option('sgap_alert_mode','immediate');
@@ -173,6 +258,47 @@ check('alerts: one day of queue sends the dry warning', count($GLOBALS['mails'])
 update_option('sgap_alert_mode','daily'); delete_option('sgap_alerts_last');
 $wpdb->next=0; SGAP_Alerts::after_health(['problems'=>['The autopilot is off.']]);
 check('alerts: daily mode sends one digest listing the problems', count($GLOBALS['mails'])===4 && str_contains($GLOBALS['mails'][3][2],'The autopilot is off.'));
+// --- P0.2 per channel: a healthy total must not hide one channel running dry ---
+$GLOBALS['rows']=[]; $GLOBALS['mails']=[]; update_option('sgap_alert_mode','immediate'); delete_option('sgap_alerts_last');
+update_option('sgap_channel_caps','pinterest=2, facebook=3, pinterest99=2, instagram=0');
+check('alerts: caps parse, unknown channels and bad numbers ignored', SGAP_Alerts::caps()===['pinterest'=>2,'facebook'=>3]);
+$GLOBALS['rows']=[['channel'=>'pinterest','n'=>4],['channel'=>'facebook','n'=>8],['channel'=>'twitter','n'=>16]];
+$chan=SGAP_Alerts::channel_runway();
+check('alerts: a capped channel uses its own cap, the rest the daily cap', $chan['pinterest']['days']===2.0 && $chan['facebook']['cap']===3 && $chan['twitter']['cap']===8);
+check('alerts: per-channel runway is queued divided by that cap', $chan['facebook']['days']===2.7 && $chan['twitter']['days']===2.0);
+$GLOBALS['rows']=[['channel'=>'pinterest','n'=>1],['channel'=>'facebook','n'=>40]];
+$dry=SGAP_Alerts::dry_channels();
+check('alerts: a capped channel with a thin queue is dry', isset($dry['pinterest']) && $dry['pinterest']['queued']===1 && $dry['pinterest']['days']===0.5);
+check('alerts: a channel above the warning level is not dry', !isset($dry['facebook']));
+update_option('sgap_channel_caps',''); $GLOBALS['rows']=[['channel'=>'facebook','n'=>40]];
+check('alerts: without a cap a healthy channel is never a gap', SGAP_Alerts::dry_channels()===[]);
+update_option('sgap_channel_caps','pinterest=2'); $GLOBALS['rows']=[['channel'=>'pinterest','n'=>0],['channel'=>'facebook','n'=>40]];
+$wpdb->next=[8,0]; SGAP_Alerts::after_health([]);
+$pins=array_values(array_filter($GLOBALS['mails'],fn($m)=>str_contains($m[1],'pinterest is running dry')));
+check('alerts: a dry channel gets its own mail', count($pins)===1);
+check('alerts: the channel mail names the queue and the cap', str_contains($pins[0][2],'0 queued') && str_contains($pins[0][2],'2/day'));
+$before=count($GLOBALS['mails']); SGAP_Alerts::after_health([]);
+check('alerts: the same dry channel is not mailed twice', count($GLOBALS['mails'])===$before);
+update_option('sgap_alert_mode','daily'); delete_option('sgap_alerts_last'); $GLOBALS['mails']=[];
+$wpdb->next=[40,0]; $GLOBALS['rows']=[['channel'=>'pinterest','n'=>0],['channel'=>'facebook','n'=>40]];
+SGAP_Alerts::after_health([]);
+check('alerts: the digest lists each channel runway', count($GLOBALS['mails'])===1 && str_contains($GLOBALS['mails'][0][2],'pinterest: 0 queued') && str_contains($GLOBALS['mails'][0][2],'Channels below the warning level: pinterest'));
+update_option('sgap_alert_dry_days',0); update_option('sgap_alert_mode','immediate'); delete_option('sgap_alerts_last'); $GLOBALS['mails']=[];
+$wpdb->next=[8,0]; SGAP_Alerts::after_health([]);
+check('alerts: warning level 0 turns the channel alarm off too', SGAP_Alerts::dry_channels()===[] && $GLOBALS['mails']===[]);
+update_option('sgap_alert_dry_days',2); update_option('sgap_channel_caps',''); $GLOBALS['rows']=[]; $wpdb->next=0;
+// --- channel_caps as a real ceiling (P0.2 follow-up) ---
+update_option('sgap_channel_caps','pinterest=2'); $GLOBALS['rows']=[['channel'=>'pinterest','n'=>2]];
+$wpdb->next=0;
+check('ceiling: a channel at its cap is reported full', SGAP_Queue::full_channels()===['pinterest']);
+update_option('sgap_channel_caps','pinterest=2'); $GLOBALS['rows']=[['channel'=>'pinterest','n'=>1]];
+check('ceiling: a channel under its cap is not full', SGAP_Queue::full_channels()===[]);
+update_option('sgap_channel_caps',''); $GLOBALS['rows']=[['channel'=>'pinterest','n'=>9]];
+check('ceiling: without channel_caps nothing is ever full', SGAP_Queue::full_channels()===[]);
+update_option('sgap_channel_caps','pinterest=2'); $GLOBALS['rows']=[['channel'=>'pinterest','n'=>2]];
+$wpdb->log=[]; SGAP_Queue::claim(5);
+check('ceiling: claim skips a full channel in the query', implode(' ',$wpdb->log) !== '' && str_contains(implode(' ',$wpdb->log),'NOT IN'));
+update_option('sgap_channel_caps',''); $GLOBALS['rows']=[]; $wpdb->log=[];
 // --- Retry with backoff (P0.3) ---
 check('backoff: 5, 15, 45 minutes by attempt', SGAP_Queue::retry_delay_minutes(1)===5 && SGAP_Queue::retry_delay_minutes(2)===15 && SGAP_Queue::retry_delay_minutes(3)===45);
 check('backoff: clamped at both ends', SGAP_Queue::retry_delay_minutes(0)===5 && SGAP_Queue::retry_delay_minutes(99)===45);
@@ -210,8 +336,35 @@ $q=implode("\n",$wpdb->log);
 check('audit: rows filters by outcome and channel with paging', str_contains($q,"outcome = 'failed'") && str_contains($q,"channel = 'pinterest'") && str_contains($q,'LIMIT 25 OFFSET 50'));
 check('audit: page size is clamped', str_contains((function(){global $wpdb; $wpdb->log=[]; SGAP_Audit::rows('','',9999,0); return implode("\n",$wpdb->log);})(),'LIMIT 200 OFFSET 0'));
 $wpdb->next=7; check('audit: total counts with the same filter', SGAP_Audit::total('failed')===7);
+// Siden tjekker først at tabellen findes (SHOW TABLES), derefter antallet: to svar i kø.
+$wpdb->next=['wp_sgap_publish_log',7];
+$GLOBALS['rows']=[
+    (object)['id'=>3,'queue_id'=>901,'channel'=>'pinterest','outcome'=>'sent','http_status'=>200,'actor'=>'cron','message'=>'Publer job job_1','created_at'=>'2026-11-07 10:00:00'],
+    (object)['id'=>2,'queue_id'=>902,'channel'=>'instagram','outcome'=>'failed','http_status'=>429,'actor'=>'cron','message'=>'Publer: HTTP 429','created_at'=>'2026-11-07 09:00:00'],
+    (object)['id'=>1,'queue_id'=>903,'channel'=>'bluesky','outcome'=>'requeued','http_status'=>0,'actor'=>'admin','message'=>'Try again later','created_at'=>'2026-11-07 08:00:00'],
+];
 ob_start(); do_action('page_sgap-log'); $html=ob_get_clean();
 check('audit: the log page explains the retention window', str_contains($html,'Kept for 90 days'));
+$lf = strpos($html,'<h2>Filter</h2>'); $la = strpos($html,'<h2>Attempts</h2>');
+check('log 7.55: filter first, then the attempts it produced', $lf !== false && $la !== false && $lf < $la);
+check('log 7.55: the counts describe the rows on screen', str_contains($html,'<b>1</b><span>Sent</span>') && str_contains($html,'<b>1</b><span>Failed</span>') && str_contains($html,'<b>1</b><span>Requeued or held</span>'));
+check('log 7.55: the rows are still there with their own message and queue link', str_contains($html,'Publer: HTTP 429') && str_contains($html,'#901'));
+$GLOBALS['rows']=[]; $wpdb->next=null;
+
+// AI Drafts: grupperet efter den side de er skrevet til, med tre tal over grupperne.
+$wpdb->next='wp_sgap_ai_drafts';
+$GLOBALS['rows']=[
+    (object)['id'=>11,'post_id'=>5,'channel'=>'pinterest','title'=>'Brass goggles','body'=>'Body one','hashtags'=>'#steampunk','created_at'=>'2026-11-07 09:00:00','source'=>'How to pick goggles'],
+    (object)['id'=>12,'post_id'=>5,'channel'=>'facebook','title'=>'Brass goggles again','body'=>'Body two','hashtags'=>'','created_at'=>'2026-11-07 09:05:00','source'=>'How to pick goggles'],
+    (object)['id'=>13,'post_id'=>8,'channel'=>'bluesky','title'=>'Leather care','body'=>'Body three','hashtags'=>'','created_at'=>'2026-11-07 09:10:00','source'=>'Leather care 101'],
+    (object)['id'=>14,'post_id'=>0,'channel'=>'mastodon','title'=>'Orphan','body'=>'Body four','hashtags'=>'','created_at'=>'2026-11-07 09:15:00','source'=>null],
+];
+ob_start(); do_action('page_sgap-ai'); $drafts55 = ob_get_clean();
+check('drafts 7.55: one section and three numbers before the cards', str_contains($drafts55,'<h2>Waiting for your decision</h2>') && str_contains($drafts55,'<b>4</b><span>Drafts</span>') && str_contains($drafts55,'<b>3</b><span>Pages</span>') && str_contains($drafts55,'<b>4</b><span>Channels</span>'));
+check('drafts 7.55: drafts for the same page are grouped under that page', str_contains($drafts55,'<h3>How to pick goggles</h3>') && str_contains($drafts55,'2 posts') && str_contains($drafts55,'<h3>Leather care 101</h3>'));
+check('drafts 7.55: a draft without a source page is still shown, under its own heading', str_contains($drafts55,'<h3>No source page</h3>') && str_contains($drafts55,'>16</option>') === false && str_contains($drafts55,'#14'));
+check('drafts 7.55: every draft keeps its three decisions', substr_count($drafts55,'value="queue"')===4 && substr_count($drafts55,'value="rejected"')===4);
+$GLOBALS['rows']=[]; $wpdb->next=null;
 // ---- whole-site SEO / AEO / GEO (7.19.0) ----
 $sgap_check = function (array $checks, string $id) { foreach ($checks as $c) { if ($c['id'] === $id) return $c; } return ['status' => 'missing', 'detail' => '']; };
 $base = ['type' => 'post', 'slug' => 'steampunk-goggles', 'title' => 'Steampunk Goggles: How to Choose a Pair That Fits',
@@ -237,6 +390,8 @@ check('site seo: numbers are quotable facts', $sgap_check(SGAP_Site_SEO::evaluat
 $sum = SGAP_Site_SEO::summarize([['fails' => ['a'], 'warns' => ['b'], 'checks' => [1, 2, 3], 'fixed_at' => ''], ['fails' => [], 'warns' => [], 'checks' => [], 'fixed_at' => '']]);
 check('site seo: the summary counts fails, warns and pages needing work', $sum['fail'] === 1 && $sum['warn'] === 1 && $sum['needs_work'] === 1 && $sum['pass'] === 1);
 check('site seo: ids() picks one status only', SGAP_Site_SEO::ids([['id' => 'a', 'status' => 'fail'], ['id' => 'b', 'status' => 'pass']], 'fail') === ['a']);
+// 6/11: site_checks() skrev «home» uden $ og gav en fatal error midt i en admin-request.
+check('site seo: the domain checks run without a fatal error', count(SGAP_Site_SEO::site_checks()) === 4);
 ob_start(); do_action('page_sgap-studio'); $studio = ob_get_clean();
 check('site seo: the studio page carries the whole-site card and its script', str_contains($studio, 'sgap-seo-site-out') && str_contains($studio, 'Scan the whole site') && str_contains($studio, 'sgap_seo_site'));
 /* --- pre-flight per channel (P1.1) --- */
@@ -431,15 +586,16 @@ if (!function_exists('get_query_var')) { function get_query_var($k){ return ''; 
 if (!function_exists('has_action')) { function has_action($h){ return false; } }
 if (!function_exists('do_action_ref_array')) { function do_action_ref_array($h,$a=[]){ $GLOBALS['ran'][]=$h; } }
 if (!function_exists('sanitize_title')) { function sanitize_title($s){ return trim(strtolower(preg_replace('/[^a-z0-9]+/i','-',(string)$s)),'-'); } }
+if (!function_exists('wp_kses_post')) { function wp_kses_post($s){ return (string) $s; } }
 if (!function_exists('wp_remote_retrieve_response_code')) { function wp_remote_retrieve_response_code($r){ return 200; } }
 if (!function_exists('wp_remote_retrieve_body')) { function wp_remote_retrieve_body($r){ return ''; } }
 if (!function_exists('wp_get_abilities')) { function wp_get_abilities(){ return $GLOBALS['ability_objects']??[]; } }
 if (!function_exists('wp_get_ability')) { function wp_get_ability($n){ return $GLOBALS['ability_objects'][$n]??null; } }
-class SGAP_Fake_Ability { function __construct(public string $n, public array $a=[]){} function get_name(){return $this->n;} function get_label(){return 'Label '.$this->n;} function get_description(){return 'Does '.$this->n;} function get_category(){return $this->a['category']??'cat';} function get_input_schema(){return $this->a['input_schema']??null;} function get_meta(){return ['mcp'=>['public'=>true,'type'=>'tool']];} function check_permissions($x=[]){return true;} function execute($x=[]){return ['ran'=>$this->n,'input'=>$x];} }
+class SGAP_Fake_Ability { function __construct(public string $n, public array $a=[]){} function get_name(){return $this->n;} function get_label(){return 'Label '.$this->n;} function get_description(){return 'Does '.$this->n;} function get_category(){return $this->a['category']??'cat';} function get_input_schema(){return $this->a['input_schema']??null;} function get_meta(){return $this->a['meta']??['mcp'=>['public'=>true,'type'=>'tool']];} function check_permissions($x=[]){return true;} function execute($x=[]){return ['ran'=>$this->n,'input'=>$x];} }
 do_action('wp_abilities_api_categories_init'); do_action('wp_abilities_api_init');
 $tools=array_filter($GLOBALS['abilities'],fn($k)=>str_starts_with($k,'steamgears-tools/'),ARRAY_FILTER_USE_KEY);
 check('tools: category registered', isset($GLOBALS['ability_categories']['steamgears-tools']));
-check('tools: full catalogue registered', count($tools)===26);
+check('tools: full catalogue registered', count($tools)===36);
 check('tools: the actions we kept needing are there', !array_diff([
     'steamgears-tools/get-option','steamgears-tools/update-option','steamgears-tools/undo','steamgears-tools/set-plugin-state',
     'steamgears-tools/flush-rewrites','steamgears-tools/flush-caches','steamgears-tools/list-posts','steamgears-tools/update-post',
@@ -490,7 +646,122 @@ check('tools: bridge lists every registered ability', $la['count']===2 && $la['a
 check('tools: bridge filters by category', SGAP_MCP_Tools::list_abilities(['category'=>'other'])['count']===1);
 $called=SGAP_MCP_Tools::call_ability(['name'=>'x/y','input'=>['a'=>1]]);
 check('tools: bridge runs an ability and echoes its name', $called['ran']==='x/y' && $called['_ability']==='x/y' && $called['input']===['a'=>1]);
+// Indeks og kategorisøgning over abilities (7.38.0).
+$described=[
+ ['name'=>'steamgears-tools/list-posts','category'=>'steamgears-tools','description'=>'Lists posts','readonly'=>true],
+ ['name'=>'steamgears-tools/create-post','category'=>'steamgears-tools','description'=>'Creates a post','readonly'=>false],
+ ['name'=>'woo/report','category'=>'woo','description'=>'Sales report','readonly'=>true],
+];
+$idx=SGAP_MCP_Tools::index_abilities($described);
+check('tools: the index groups by category with counts and read flags', ($idx['steamgears-tools']['count']??0)===2 && ($idx['steamgears-tools']['readonly']??0)===1 && ($idx['woo']['tools'][0]??'')==='woo/report');
+$sr=SGAP_MCP_Tools::search_abilities($described,'report');
+check('tools: search matches the description and counts hits', ($sr['matched']??0)===1 && ($sr['abilities'][0]['name']??'')==='woo/report');
+check('tools: search can be limited to a category', (SGAP_MCP_Tools::search_abilities($described,'','steamgears-tools')['matched']??0)===2);
+$lim=SGAP_MCP_Tools::search_abilities($described,'','',1);
+check('tools: the limit slices the list without losing the count', ($lim['matched']??0)===3 && count($lim['abilities'])===1);
+$aidx=SGAP_MCP_Tools::ability_index([]);
+check('tools: ability-index reports the registered categories', ($aidx['total']??0)===2 && isset($aidx['categories']['other']));
+$asearch=SGAP_MCP_Tools::search_abilities_tool(['query'=>'x/y']);
+check('tools: search-abilities tool answers with the match', ($asearch['matched']??0)===1 && ($asearch['abilities'][0]['name']??'')==='x/y');
+ob_start(); do_action('page_sgap-tools'); $tools_html=ob_get_clean();
+check('tools page: renders a searchable, categorised browser', str_contains($tools_html,'sgap-tool-search') && str_contains($tools_html,'data-cat="other"') && str_contains($tools_html,'2 registered'));
 unset($GLOBALS['ability_objects']);
+// ---- Botten og MCP-fladen: chatten mÃ¥ lÃ¦se, men ikke skrive ----
+$ro=SGAP_MCP_Tools::readonly_names();
+check('chat: the read-only set covers the lookups', !array_diff(['site-info','get-option','list-posts','get-post','list-products','get-product','list-abilities'],$ro));
+check('chat: the read-only set excludes every writer', !array_intersect(['create-post','update-post','trash-post','update-option','set-plugin-state','run-cron','upload-media','update-product','indexnow-submit','undo','call-ability'],$ro));
+$GLOBALS['ability_objects']=[];
+foreach($GLOBALS['abilities'] as $an=>$aa){ $GLOBALS['ability_objects'][$an]=new SGAP_Fake_Ability($an,['category'=>$aa['category']??'','input_schema'=>$aa['input_schema']??null]); }
+$ct=SGAP_Chat::tools();
+check('chat: the assistant reaches the site lookups', isset($ct['list-posts']) && isset($ct['site-info']) && isset($ct['get-product']));
+check('chat: the assistant cannot write through a site tool', !isset($ct['create-post']) && !isset($ct['update-option']) && !isset($ct['set-plugin-state']) && !isset($ct['run-cron']));
+check('chat: its own tools are still there', count($ct)>2 && !isset($ct['manage-plugin']));
+// Chatten må ikke kunne skrive indstillinger: en gættet ai_model gjorde AIMLAPI-svaret til en fejl (7.38.3).
+check('chat: the assistant can read settings but not change them', isset($ct['get-settings']) && !isset($ct['update-settings']));
+check('chat: run-tool refuses to change settings', str_contains(SGAP_Chat::run_tool('run-tool',['name'=>'update-settings','input'=>['settings'=>['ai_model'=>'claude-3-5-sonnet']]],$ct),'may not use'));
+check('chat: the prompt forbids guessing a model name', str_contains(SGAP_Chat::system_prompt(),'never guess at a model name'));
+check('chat: every tool has a schema object', (function($t){ foreach($t as $v){ if(!is_array($v[1]) || ($v[1]['type']??'')!=='object') return false; } return true; })($ct));
+// Nye værktøjer: et filter kan lægge dem til, og siden kan hente kataloget igen.
+$GLOBALS['filters']['sgap_chat_tools']=fn($t)=>$t+['my-tool'=>['Does my thing',['type'=>'object','properties'=>[]],null],'bad-tool'=>'not a tool'];
+$ct2=SGAP_Chat::tools();
+check('chat: another plugin can add a tool through the filter', isset($ct2['my-tool']) && !isset($ct2['bad-tool']));
+check('chat: the signature follows the catalogue', SGAP_Chat::tools_signature($ct2)!==SGAP_Chat::tools_signature($ct));
+$cat=SGAP_Chat::tool_catalog();
+check('chat: the catalogue reports count, names and signature', $cat['count']===count($ct2) && in_array('my-tool',$cat['names'],true) && strlen($cat['signature'])===32);
+check('chat: a tool without a runner fails cleanly', str_contains(SGAP_Chat::run_tool('my-tool',[],$ct2),'no runner'));
+unset($GLOBALS['filters']['sgap_chat_tools'], $GLOBALS['ability_objects']);
+// Alt registreret på sitet skal kunne ses, ikke kun vores egne kataloger (7.37.0).
+$GLOBALS['ability_objects']=[
+ 'core/analyse'=>new SGAP_Fake_Ability('core/analyse',['category'=>'core','meta'=>['annotations'=>['readonly'=>true]]]),
+ 'core/delete-all'=>new SGAP_Fake_Ability('core/delete-all',['category'=>'core']),
+ 'woo/product-report'=>new SGAP_Fake_Ability('woo/product-report',['category'=>'woo','meta'=>['annotations'=>['readonly'=>true]]]),
+ 'steamgears-autopilot/manage-plugin'=>new SGAP_Fake_Ability('steamgears-autopilot/manage-plugin',['category'=>'steamgears-autopilot']),
+ '9 lives/x y'=>new SGAP_Fake_Ability('9 lives/x y',['category'=>'odd','meta'=>['annotations'=>['readonly'=>true]]]),
+];
+$ct3=SGAP_Chat::tools();
+check('chat: read-only abilities from other plugins are bound', isset($ct3['analyse']) && isset($ct3['product-report']));
+check('chat: writers from other plugins are not bound', !isset($ct3['delete-all']));
+check('chat: the three meta tools are always bound', isset($ct3['find-tools'],$ct3['describe-tool'],$ct3['run-tool']));
+$found=SGAP_Chat::find_tools(['query'=>'product']);
+check('chat: find-tools reaches the whole site catalogue', ($found['total_available']??0)===5 && ($found['matched']??0)===1 && ($found['tools'][0]['name']??'')==='woo/product-report');
+check('chat: find-tools hides the excluded tools', SGAP_Chat::find_tools(['query'=>'manage']??[])['matched']===0);
+$desc=SGAP_Chat::describe_tool(['name'=>'product-report']);
+check('chat: describe-tool answers by short name', ($desc['name']??'')==='woo/product-report' && array_key_exists('input_schema',$desc));
+check('chat: run-tool runs an unbound ability', (SGAP_Chat::run_named(['name'=>'delete-all','input'=>['x'=>1]])['ran']??'')==='core/delete-all');
+check('chat: run-tool refuses an excluded name', str_contains(SGAP_Chat::run_tool('run-tool',['name'=>'manage-plugin'],$ct3),'may not use'));
+$cat3=SGAP_Chat::tool_catalog();
+check('chat: the catalogue counts what the site registers', ($cat3['available']??0)===5 && ($cat3['categories']['core']??0)===2);
+// AIMLAPI/Gemini afviser ugyldige funktionsnavne — hvert bundet navn skal være provider-sikkert.
+check('chat: tool names are provider-safe', (function($t){ foreach(array_keys($t) as $n){ if(!preg_match('/^[A-Za-z_][A-Za-z0-9_.:-]{0,63}$/',$n)) return false; } return true; })($ct3));
+check('chat: a name with a space and a digit still becomes callable', isset($ct3['x_y']) && !isset($ct3['9 lives/x y']));
+check('chat: safe_name repairs what providers reject', SGAP_Chat::safe_name('9lives')==='t_9lives' && SGAP_Chat::safe_name('core/list posts')==='core_list_posts' && SGAP_Chat::safe_name('/ /')==='tool' && strlen(SGAP_Chat::safe_name(str_repeat('a',200)))===64);
+check('chat: unique_name never collides', SGAP_Chat::unique_name('list-posts',['list-posts'=>[]])==='list-posts__2');
+// Diagnostik: providerens indeks skal kunne oversættes til det konkrete værktøj.
+$aimlapi='* GenerateContentRequest.tools[0].function_declarations[30].name: Invalid function name. Must start with a letter or an underscore.';
+$names=array_map(fn($i)=>'tool-'.$i, range(0,40));
+check('chat: a rejected index resolves to the tool name', (SGAP_Chat::culprit($aimlapi,$names)['name']??'')==='tool-30');
+check('chat: an error without an index has no culprit', SGAP_Chat::culprit('quota exceeded',$names)===null);
+$call=SGAP_Chat::remember_call('AIMLAPI','m',0,$names,$aimlapi);
+check('chat: a failed call is remembered with its culprit', ($call['culprit']['index']??-1)===30 && $call['count']===41 && ($call['error']??'')!=='');
+check('chat: the log never holds a key', !str_contains((string) wp_json_encode($call['names']),'key'));
+unset($GLOBALS['ability_objects']);
+
+// Chat-loopet: modellen skal kunne kalde et værktøj, få resultatet tilbage og bruge det
+// i næste runde. Begge provider-formater testes, fordi de har hver sin wire-format.
+$chat_keep=[]; foreach(['sgap_ai_provider','sgap_ai_model','sgap_ai_api_key'] as $k){ $chat_keep[$k]=$GLOBALS['opts'][$k]??null; }
+$abilities_keep=$GLOBALS['ability_objects']??null;
+$GLOBALS['ability_objects']=['core/analyse'=>new SGAP_Fake_Ability('core/analyse',['category'=>'core','meta'=>['annotations'=>['readonly'=>true]]])];
+$GLOBALS['opts']['sgap_ai_provider']='aimlapi'; $GLOBALS['opts']['sgap_ai_model']='anthropic/claude-opus-5.5'; $GLOBALS['opts']['sgap_ai_api_key']='KEY';
+$GLOBALS['http_calls']=[];
+$GLOBALS['http_queue']=[
+ sgap_http(200,['choices'=>[['message'=>['content'=>'','tool_calls'=>[['id'=>'call_1','type'=>'function','function'=>['name'=>'analyse','arguments'=>'{"topic":"corsets"}']]]],'finish_reason'=>'tool_calls']]]),
+ sgap_http(200,['choices'=>[['message'=>['content'=>'Endeligt svar fra værktøjet'],'finish_reason'=>'stop']]])
+];
+$loop=SGAP_Chat::reply([], 'Analysér corsets');
+$first=json_decode((string)($GLOBALS['http_calls'][0][1]['body']??''),true); $second=json_decode((string)($GLOBALS['http_calls'][1][1]['body']??''),true);
+$tool_msg=null; foreach(($second['messages']??[]) as $m){ if(($m['role']??'')==='tool'){ $tool_msg=$m; break; } }
+$tool_result=json_decode((string)($tool_msg['content']??''),true);
+check('chat loop: OpenAI-compatible runs the tool and answers', is_array($loop) && ($loop['text']??'')==='Endeligt svar fra værktøjet' && ($loop['tools']??[])===['analyse'] && count($GLOBALS['http_calls'])===2);
+check('chat loop: OpenAI-compatible sends the tool schema', in_array('analyse',array_column(array_column($first['tools']??[],'function'),'name'),true));
+check('chat loop: OpenAI-compatible returns the tool result under its call id', ($tool_msg['tool_call_id']??'')==='call_1' && ($tool_result['ran']??'')==='core/analyse' && ($tool_result['input']['topic']??'')==='corsets');
+
+$GLOBALS['opts']['sgap_ai_provider']='anthropic'; $GLOBALS['opts']['sgap_ai_model']='claude-opus-5-5'; $GLOBALS['http_calls']=[];
+$GLOBALS['http_queue']=[
+ sgap_http(200,['content'=>[['type'=>'text','text'=>'Jeg slår det op.'],['type'=>'tool_use','id'=>'toolu_1','name'=>'analyse','input'=>['topic'=>'corsets']]],'stop_reason'=>'tool_use']),
+ sgap_http(200,['content'=>[['type'=>'text','text'=>'Endeligt Anthropic-svar']],'stop_reason'=>'end_turn'])
+];
+$loop=SGAP_Chat::reply([], 'Analysér corsets');
+$first_body=json_decode((string)($GLOBALS['http_calls'][0][1]['body']??''),true);
+$second_body=json_decode((string)($GLOBALS['http_calls'][1][1]['body']??''),true);
+$tool_result=null; foreach(($second_body['messages']??[]) as $m){ foreach((array)($m['content']??[]) as $b){ if(is_array($b) && ($b['type']??'')==='tool_result'){ $tool_result=$b; break 2; } } }
+$tool_json=json_decode((string)($tool_result['content']??''),true);
+check('chat loop: Anthropic runs the tool and answers', is_array($loop) && ($loop['text']??'')==='Endeligt Anthropic-svar' && ($loop['tools']??[])===['analyse'] && count($GLOBALS['http_calls'])===2);
+check('chat loop: Anthropic uses native headers and sends the tool schema', ($GLOBALS['http_calls'][0][1]['headers']['x-api-key']??'')==='KEY' && ($GLOBALS['http_calls'][0][1]['headers']['anthropic-version']??'')===SGAP_AI::ANTHROPIC_VERSION && in_array('analyse',array_column($first_body['tools']??[],'name'),true));
+check('chat loop: Anthropic returns the tool result under its tool_use id', ($tool_result['tool_use_id']??'')==='toolu_1' && ($tool_json['ran']??'')==='core/analyse' && ($tool_json['input']['topic']??'')==='corsets');
+
+foreach($chat_keep as $k=>$v){ if($v===null){ unset($GLOBALS['opts'][$k]); } else { $GLOBALS['opts'][$k]=$v; } }
+if($abilities_keep===null){ unset($GLOBALS['ability_objects']); } else { $GLOBALS['ability_objects']=$abilities_keep; }
+$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[];
 
 // ---- P1.2: remind me instead of posting ----
 if (!function_exists('is_email')) { function is_email($e){ return (bool) filter_var((string)$e, FILTER_VALIDATE_EMAIL); } }
@@ -623,7 +894,101 @@ function wp_remote_post($url,$args=[]){ $GLOBALS['http_calls'][]=[$url,$args]; $
 function wp_remote_request($url,$args=[]){ return wp_remote_post($url,$args); }
 function wp_remote_retrieve_response_code($r){ return is_array($r)?(int)($r['response']['code']??0):0; }
 function wp_remote_retrieve_body($r){ return is_array($r)?(string)($r['body']??''):''; }
+function wp_remote_retrieve_header($r,$h){ $h=strtolower((string)$h); return is_array($r)&&isset($r['headers'])?(string)($r['headers'][$h]??''):''; }
 function sgap_http($code,$body){ return ['response'=>['code'=>$code],'body'=>is_array($body)?json_encode($body):(string)$body]; }
+
+// 7.38.4 — et gemt modelnavn AIMLAPI ikke kender må ikke lamme chatten: kaldet prøver én gang
+// på standardmodellen, retter indstillingen og fortæller ejeren det. Auth, netværk og rate limit
+// må ikke udløse fallback.
+$ai_keep=[]; foreach(['sgap_ai_provider','sgap_ai_model','sgap_ai_api_key'] as $k){ $ai_keep[$k]=$GLOBALS['opts'][$k]??null; }
+$GLOBALS['opts']['sgap_ai_provider']='aimlapi'; $GLOBALS['opts']['sgap_ai_api_key']='KEY'; $GLOBALS['opts']['sgap_ai_model']='claude-3-5-sonnet';
+check('ai: only a model-name error counts as a model error', SGAP_AI::model_rejected('Model claude-3-5-sonnet not found') && SGAP_AI::model_rejected('The model `x` does not exist or you do not have access to it') && !SGAP_AI::model_rejected('Incorrect API key provided') && !SGAP_AI::model_rejected('Rate limit exceeded for model claude-3-5-sonnet') && !SGAP_AI::model_rejected('offline'));
+$GLOBALS['http_calls']=[];
+$GLOBALS['http_queue']=[
+ sgap_http(404,['error'=>['message'=>'Model claude-3-5-sonnet not found']]),
+ sgap_http(200,['model'=>'anthropic/claude-opus-5.5','choices'=>[['message'=>['content'=>'Hej fra standardmodellen'],'finish_reason'=>'stop']]])
+];
+$answer=SGAP_Chat::reply([], 'Hej');
+check('chat: a stored model AIMLAPI rejects still answers', is_array($answer) && str_contains((string)($answer['text']??''),'Hej fra standardmodellen'));
+check('chat: the retry runs on the default model, exactly once', count($GLOBALS['http_calls'])===2 && (json_decode((string)($GLOBALS['http_calls'][1][1]['body']??''),true)['model']??'')==='anthropic/claude-opus-5.5');
+check('chat: the rejected model is repaired to the model that answers', get_option('sgap_ai_model','')==='anthropic/claude-opus-5.5' && SGAP_AI::model()==='anthropic/claude-opus-5.5');
+check('chat: the owner is told which model was replaced', str_contains((string)($answer['text']??''),'claude-3-5-sonnet'));
+check('chat: the answer also names the model it now uses', str_contains((string)($answer['text']??''),'anthropic/claude-opus-5.5'));
+$GLOBALS['opts']['sgap_ai_model']='claude-3-5-sonnet'; $GLOBALS['http_calls']=[];
+$GLOBALS['http_queue']=[sgap_http(401,['error'=>['message'=>'Incorrect API key provided']])];
+$answer=SGAP_Chat::reply([], 'Hej');
+check('chat: an auth error fails without a fallback call', $answer instanceof WP_Error && count($GLOBALS['http_calls'])===1 && get_option('sgap_ai_model')==='claude-3-5-sonnet');
+$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[];
+$answer=SGAP_Chat::reply([], 'Hej');
+check('chat: a network error fails without a fallback call', $answer instanceof WP_Error && count($GLOBALS['http_calls'])===1 && get_option('sgap_ai_model')==='claude-3-5-sonnet');
+$GLOBALS['http_calls']=[];
+$GLOBALS['http_queue']=[sgap_http(429,['error'=>['message'=>'Rate limit exceeded for model claude-3-5-sonnet']])];
+$answer=SGAP_Chat::reply([], 'Hej');
+check('chat: a rate limit error is reported, not retried on another model', $answer instanceof WP_Error && count($GLOBALS['http_calls'])===1 && get_option('sgap_ai_model')==='claude-3-5-sonnet');
+foreach($ai_keep as $k=>$v){ if($v===null){ unset($GLOBALS['opts'][$k]); } else { $GLOBALS['opts'][$k]=$v; } }
+
+// 7.39.0 — model-dropdown: kun det provideren faktisk udbyder kan vælges, og et gemt navn
+// der er udgået vises som udgået i stedet for at forsvinde.
+if (!function_exists('add_settings_error')) { function add_settings_error($setting,$code,$message,$type='error'){ $GLOBALS['settings_errors'][]=[$setting,$code,$message,$type]; } }
+$GLOBALS['settings_errors']=[];
+$GLOBALS['filters']['sgap_ai_model_catalog']=fn($list,$provider)=>['openai/gpt-x','anthropic/claude-opus-5.5','openai/gpt-x','anthropic/claude-sonnet-5.5'];
+$GLOBALS['opts']['sgap_ai_provider']='aimlapi'; $GLOBALS['opts']['sgap_ai_model']='';
+check('models: the catalogue dedupes, sorts and groups by vendor', SGAP_AI::catalog()===['anthropic/claude-opus-5.5','anthropic/claude-sonnet-5.5','openai/gpt-x'] && array_keys(SGAP_Setup::group_models(SGAP_AI::catalog()))===['anthropic','openai']);
+$mf=SGAP_Setup::field('ai_model');
+check('models: the field is a grouped dropdown with the default first', str_contains($mf,'<select id="sgap_ai_model"') && str_contains($mf,'<optgroup label="anthropic">') && substr_count($mf,'<option')===4);
+update_option('sgap_ai_model','anthropic/claude-3-5-sonnet');
+check('models: a stored model that is gone is shown as retired, not hidden', str_contains(SGAP_Setup::field('ai_model'),'(not offered any more)'));
+check('models: a listed model may be saved', SGAP_Settings::sanitize_model('anthropic/claude-sonnet-5.5')==='anthropic/claude-sonnet-5.5');
+check('models: an unlisted model is refused and the stored one kept', SGAP_Settings::sanitize_model('claude-3-5-sonnet')==='anthropic/claude-3-5-sonnet' && ($GLOBALS['settings_errors'][0][1]??'')==='sgap_model_unknown');
+// Punktet der blev fanget her: "Provider default" må ikke gemmes som et tomt felt.
+$model_san=$GLOBALS['settings']['sgap_ai_model']['sanitize_callback'] ?? null;
+check('models: the save path is the registered sanitizer', is_callable($model_san));
+$picked_default=$model_san('');
+check('models: Provider default is stored as the model it resolves to', $picked_default==='anthropic/claude-opus-5.5');
+update_option('sgap_ai_model',$picked_default);
+check('models: after saving, the field holds the model and is not empty', get_option('sgap_ai_model')==='anthropic/claude-opus-5.5' && SGAP_AI::model()==='anthropic/claude-opus-5.5');
+check('models: the stored default is the option the dropdown marks as selected', str_contains(SGAP_Setup::field('ai_model'),'<option value="anthropic/claude-opus-5.5" selected'));
+check('models: the retired name cannot be saved back after that', $model_san('claude-3-5-sonnet')==='anthropic/claude-opus-5.5');
+update_option('sgap_ai_model','');
+ob_start(); do_action('page_sgap-settings'); $settings_html=ob_get_clean();
+check('models: the settings page renders the dropdown', str_contains($settings_html,'id="sgap_ai_model"') && str_contains($settings_html,'<optgroup label="anthropic">'));
+unset($GLOBALS['filters']['sgap_ai_model_catalog']);
+$GLOBALS['opts']['sgap_ai_model']='';
+check('models: without a catalogue the field is free text again', str_contains(SGAP_Setup::field('ai_model'),'type="text"') && !str_contains(SGAP_Setup::field('ai_model'),'<select'));
+check('models: without a catalogue the typed name is kept', SGAP_Settings::sanitize_model('some/custom')==='some/custom');
+
+// Punkt 4 mod den rigtige verden: kør med SGAP_LIVE_CATALOG=1, så hentes AIMLAPI's eget
+// katalog og hver eneste <option> sammenlignes med de id'er provideren faktisk udbyder.
+if (($live_src = (string) getenv('SGAP_LIVE_CATALOG')) !== '') {
+    if ($live_src !== '1' && is_file($live_src)) {
+        // En PHP uden allow_url_fopen kan få kataloget serveret som en fil hentet med curl.
+        $raw = (string) file_get_contents($live_src);
+    } else {
+        $ctx = stream_context_create(['http' => ['timeout' => 25, 'header' => "User-Agent: steamgears-smoke\r\n"]]);
+        $raw = @file_get_contents('https://api.aimlapi.com/v1/models', false, $ctx);
+    }
+    $live_body = is_string($raw) ? json_decode($raw, true) : null;
+    if (is_array($live_body)) {
+        $live_ids = SGAP_AI::catalog_ids($live_body);
+        $GLOBALS['filters']['sgap_ai_model_catalog'] = fn() => $live_ids;
+        $GLOBALS['opts']['sgap_ai_provider'] = 'aimlapi';
+        $GLOBALS['opts']['sgap_ai_model'] = 'anthropic/claude-opus-5.5';
+        $live_html = SGAP_Setup::field('ai_model');
+        preg_match_all('/<option value="([^"]*)"/', $live_html, $om);
+        $picked = array_values(array_diff($om[1], ['']));
+        $expect = $live_ids;
+        sort($picked); sort($expect);
+        check('live: AIMLAPI lists a usable catalogue', count($live_ids) > 100);
+        check('live: every dropdown option is a model AIMLAPI offers (and no other)', $picked === $expect && count($om[1]) === count($live_ids) + 1);
+        check('live: Provider default is the first option and names the default model', str_starts_with($live_html, '<select') && str_contains(substr($live_html, 0, strpos($live_html, '</option>') + 9), 'Provider default: anthropic/claude-opus-5.5'));
+        check('live: the default model is one AIMLAPI offers', in_array('anthropic/claude-opus-5.5', $live_ids, true));
+        echo 'LIVE: ' . count($live_ids) . " modeller fra AIMLAPI, alle valgbare i dropdownen\n";
+        $GLOBALS['opts']['sgap_ai_model'] = '';
+        unset($GLOBALS['filters']['sgap_ai_model_catalog']);
+    } else {
+        echo "SKIP live: AIMLAPI /models kunne ikke læses\n";
+    }
+}
 
 $GLOBALS['opts']['sgap_bluesky_handle']='@steamgears.bsky.social';
 $GLOBALS['opts']['sgap_bluesky_app_password']='abcd-efgh-ijkl-mnop';
@@ -879,37 +1244,287 @@ $core_src = file_get_contents(__DIR__.'/../steamgears-autopilot/includes/core.ph
 check('locales: the queue table stores language and source id', str_contains($core_src,'locale VARCHAR(10)') && str_contains($core_src,'source_id BIGINT UNSIGNED'));
 check('locales: every caption is translated through the AI module', str_contains(file_get_contents(__DIR__.'/../steamgears-autopilot/includes/locales.php'),'SGAP_AI::json_call('));
 
-// Kø-siden: sproget og kildeposten skal kunne ses på rækken, ikke gættes ud fra teksten.
-$GLOBALS['rows'] = [
-    (object)['id'=>102,'channel'=>'pinterest','title'=>'Messingbrille','status'=>'queued','remind'=>0,'attempts'=>0,
-        'scheduled_at'=>'2026-11-09 10:00:00','published_at'=>null,'error'=>null,
-        'locale'=>'da','source_id'=>100,'source_title'=>'Brass goggles','source_locale'=>''],
-    (object)['id'=>100,'channel'=>'pinterest','title'=>'Brass goggles','status'=>'queued','remind'=>0,'attempts'=>0,
-        'scheduled_at'=>'2026-11-09 10:00:00','published_at'=>null,'error'=>null,
-        'locale'=>'','source_id'=>0,'source_title'=>null,'source_locale'=>null],
+// 7.32.0 — /go/<id>/ som produktkortlink: ruten sendte læseren til forsiden når id'et ikke var en kø-post.
+if (!function_exists('wc_get_product')) { function wc_get_product($id){ return $GLOBALS['wc_product_by_id'][(int)$id] ?? false; } }
+$GLOBALS['wc_product_by_id']=[
+    477=>new Fake_Product(['id'=>477,'name'=>'Copper Pilot Goggles']),
+    766=>new Fake_Product(['id'=>766,'name'=>'Steampunk Leather Utility Belt & Holster']),
 ];
-$wpdb->next='wp_sgap_queue'; $wpdb->log=[];
-ob_start(); SGAP_Admin::queue(); $html=ob_get_clean();
-$sql = implode("\n", $wpdb->log);
-check('queue page: the query reads language and source, not just the id', str_contains($sql,'q.locale') && str_contains($sql,'q.source_id') && str_contains($sql,'LEFT JOIN wp_sgap_queue'));
-check('queue page: a language column names the language of each row', str_contains($html,'data-label="Language"') && str_contains($html,'<code>da</code>'));
-check('queue page: a variant says it is a translation, the source says it is the original', str_contains($html,'<small>translation</small>') && str_contains($html,'<small>original</small>'));
-check('queue page: a variant names and links the post it was translated from', str_contains($html,'href="#sgap-q-100"') && str_contains($html,'>#100</a>') && str_contains($html,'Brass goggles'));
-check('queue page: a source row has no source of its own', substr_count($html,'data-label="Source">—')===1);
-check('queue page: every row can be jumped to by id', str_contains($html,'id="sgap-q-102"') && str_contains($html,'id="sgap-q-100"'));
+check('product link: a product id resolves to its permalink', SGAP_Tracking::product_target(477)==='https://steamgears.eu/p/477/');
+check('product link: an unknown id still lands on the front page', SGAP_Tracking::product_target(987654)===home_url('/'));
+check('product link: a queue id is not treated as a product', SGAP_Tracking::product_target(0)===home_url('/'));
+$coresrc=file_get_contents(__DIR__.'/../steamgears-autopilot/includes/core.php');
+check('product link: the missing-row branch uses the product fallback', str_contains($coresrc,'wp_redirect(self::product_target($id), 302, \'Steamgears\')'));
+check('product link: the product lookup is guarded, so the route cannot fatal without WooCommerce', str_contains($coresrc,"function_exists('wc_get_product')"));
 
-$GLOBALS['rows'][0]->source_title='<script>alert(1)</script>';
-ob_start(); SGAP_Admin::queue(); $html=ob_get_clean();
-check('queue page: a source title is escaped', str_contains($html,'&lt;script&gt;') && !str_contains($html,'<script>alert(1)</script>'));
+// P1.4 — evergreen recycling: mark, variation, share budget, expiry, queue integration.
+$GLOBALS['opts']['sgap_evergreen_enabled']='yes'; $GLOBALS['opts']['sgap_evergreen_after_days']=60;
+$GLOBALS['opts']['sgap_evergreen_max_shares']=3; $GLOBALS['opts']['sgap_evergreen_batch']=1;
+$GLOBALS['opts']['sgap_channels']='facebook,instagram,pinterest'; $GLOBALS['opts']['sgap_quality_gate']='off';
+$GLOBALS['opts']['sgap_ai_api_key']=''; $GLOBALS['opts']['sgap_ai_provider']='anthropic'; $GLOBALS['opts']['sgap_ai_model']='';
+$GLOBALS['postmeta']=[]; $GLOBALS['post_by_id']=[]; $GLOBALS['posts_result']=[]; $wpdb->row=null; $wpdb->next=null; $wpdb->log=[];
+$ev1=new WP_Post(['ID'=>501,'post_type'=>'post','post_status'=>'publish','post_title'=>'Brass Goggles Guide','post_content'=>'A long guide about brass goggles and how to wear them well.','post_excerpt'=>'']);
+$ev2=new WP_Post(['ID'=>502,'post_type'=>'post','post_status'=>'publish','post_title'=>'Corset Fitting Guide','post_content'=>'How a corset should fit, and what to do when it does not.','post_excerpt'=>'']);
+$GLOBALS['post_by_id']=[501=>$ev1,502=>$ev2]; $GLOBALS['posts_result']=[$ev1,$ev2];
+check('evergreen: the daily cron is scheduled', in_array('sgap_evergreen',$GLOBALS['cron']??[],true));
+$marked=SGAP_Evergreen::mark(501,['max'=>2,'until'=>'2027-01-31']);
+check('evergreen: mark stores the budget and expiry date', is_array($marked) && $marked['marked'] && $marked['max']===2 && $marked['until']==='2027-01-31');
+check('evergreen: a marked page with no shares is ready', SGAP_Evergreen::status(501)['eligible'] && SGAP_Evergreen::shares(501)===0);
+check('evergreen: a past expiry date is refused', SGAP_Evergreen::mark(502,['until'=>'2020-01-01']) instanceof WP_Error);
+check('evergreen: an unsupported post type is refused', SGAP_Evergreen::mark(999) instanceof WP_Error);
+check('evergreen: the marked page is a candidate', in_array(501,SGAP_Evergreen::candidates(10),true));
+check('evergreen: the summary counts the mark', SGAP_Evergreen::summary()['marked']===1);
 
+$GLOBALS['ev_counter']=0;
+$GLOBALS['filters']['sgap_evergreen_variation']=function($v,$post,$channel,$angle,$history){ $GLOBALS['ev_counter']++; return ['title'=>'Fresh angle '.$GLOBALS['ev_counter'],'text'=>'A new way into the guide, written for '.$channel.'.','hashtags'=>['steampunk','brass'],'alt_text'=>'Brass goggles']; };
+$first=SGAP_Evergreen::queue_one(501);
+check('evergreen: the first share is queued through the normal queue', is_array($first) && $first['channel']==='facebook' && $first['share']===1 && $first['max']===2);
+$evlog=implode("\n",$wpdb->log);
+check('evergreen: the queue row carries the page, the angle and the variation', str_contains($evlog,'INSERT wp_sgap_queue') && str_contains($evlog,'"post_id":501') && str_contains($evlog,'"angle":"angle_a"') && str_contains($evlog,'"content_type":"guide"'));
+check('evergreen: hashtags become part of the caption', str_contains($evlog,'#steampunk #brass'));
+check('evergreen: the share is counted and the page is put on cooldown', SGAP_Evergreen::shares(501)===1 && SGAP_Evergreen::last_share(501)>0 && !SGAP_Evergreen::status(501)['eligible']);
+check('evergreen: the waiting period is named', str_contains(SGAP_Evergreen::status(501)['reason'],'next share from'));
+$tooSoon=SGAP_Evergreen::queue_one(501);
+check('evergreen: a page cannot be recycled twice in the same week', is_wp_error($tooSoon) && ($tooSoon->data['status']??0)===409 && str_contains($tooSoon->get_error_message(),'next share'));
+update_post_meta(501,SGAP_Evergreen::LAST,time()-100*DAY_IN_SECONDS); $wpdb->log=[];
+$second=SGAP_Evergreen::queue_one(501);
+check('evergreen: the next share rotates channel and angle', is_array($second) && $second['channel']==='instagram' && $second['share']===2);
+check('evergreen: the rotated angle is in the queue row', str_contains(implode("\n",$wpdb->log),'"angle":"angle_b"'));
+$full=SGAP_Evergreen::status(501);
+check('evergreen: the budget closes the page', $full['shares']===2 && !$full['eligible'] && str_contains($full['reason'],'all 2 shares used'));
+$over=SGAP_Evergreen::queue_one(501);
+check('evergreen: a page over its budget is refused', is_wp_error($over) && str_contains($over->get_error_message(),'all 2 shares used'));
+
+$GLOBALS['filters']['sgap_evergreen_variation']=fn()=>['title'=>'T','text'=>'Body for the second evergreen page.','hashtags'=>[],'alt_text'=>''];
+update_post_meta(502,SGAP_Evergreen::MARK,'1'); update_post_meta(502,SGAP_Evergreen::UNTIL,'2026-01-01');
+$expired=SGAP_Evergreen::status(502);
+check('evergreen: an expired page is not ready and says why', !$expired['eligible'] && str_contains($expired['reason'],'expired on'));
+update_post_meta(502,SGAP_Evergreen::UNTIL,wp_date('Y-m-d',time()+DAY_IN_SECONDS)); $wpdb->next=null;
+check('evergreen: a page inside its expiry window is ready again', SGAP_Evergreen::status(502)['eligible']);
+SGAP_Evergreen::unmark(502);
+check('evergreen: unmark removes the mark and the budget', !SGAP_Evergreen::status(502)['marked'] && get_post_meta(502,SGAP_Evergreen::MAX,true)==='' && get_post_meta(502,SGAP_Evergreen::SHARES,true)==='');
+
+// AI-stien: variationsprompten går gennem det konfigurerede AI-kald og kan stubbes.
+unset($GLOBALS['filters']['sgap_evergreen_variation']);
+SGAP_Evergreen::mark(502,['max'=>1]); $GLOBALS['opts']['sgap_ai_api_key']='k'; $wpdb->log=[]; $GLOBALS['http_calls']=[];
+$GLOBALS['http_queue']=[sgap_http(200,['content'=>[['type'=>'text','text'=>json_encode(['title'=>'A second look at the corset','text'=>'The fit guide, revisited.','hashtags'=>['#corset'],'alt_text'=>'Corset on a mannequin'])]]])];
+$ai=SGAP_Evergreen::queue_one(502);
+check('evergreen: the AI variation is one structured call', is_array($ai) && count($GLOBALS['http_calls'])===1);
+check('evergreen: the prompt asks for a new angle and forbids invented offers', str_contains((string)$GLOBALS['http_calls'][0][1]['body'],'genuinely different angle') && str_contains((string)$GLOBALS['http_calls'][0][1]['body'],'do not invent a discount'));
+check('evergreen: the AI answer is what reaches the queue', str_contains(implode("\n",$wpdb->log),'A second look at the corset') && str_contains(implode("\n",$wpdb->log),'#corset'));
+$GLOBALS['opts']['sgap_ai_api_key']='';
+
+// P0.4: cron-honesty — Site Health-testen, rådgivningen og den præcise fix-linje.
+$GLOBALS['next_scheduled']=[];
+$registered=SGAP_Auto::site_status_tests(['direct'=>[]]);
+check('cron: the Site Health test is registered under its own id', isset($registered['direct']['sgap_wp_cron']) && ($registered['direct']['sgap_wp_cron']['test'][1]??'')==='site_health_cron');
+$GLOBALS['next_scheduled']=[SGAP_Install::PUBLISH_CRON=>time()-5*MINUTE_IN_SECONDS];
+$onTime=SGAP_Auto::site_health_cron();
+check('cron: a publisher under 30 minutes late is reported as good', $onTime['status']==='good' && $onTime['test']==='sgap_wp_cron');
+$GLOBALS['next_scheduled']=[SGAP_Install::PUBLISH_CRON=>time()-45*MINUTE_IN_SECONDS];
+$late=SGAP_Auto::site_health_cron();
+check('cron: a publisher 45 minutes late turns the test critical', $late['status']==='critical' && str_contains($late['description'],'45 minutes behind'));
+check('cron: the advice carries the exact wp-cron.php call and the 5-minute interval', str_contains($late['description'],'wp-cron.php') && str_contains($late['description'],'every 5 minutes'));
+unset($GLOBALS['next_scheduled']);
+// P0.5 — scheduler-adapteren. Uden Action Scheduler (som i denne suite, indtil stubbene
+// nedenfor defineres) skal alt lande på WP-Cron med samme hook; med AS skal intet gøre det.
+if (!function_exists('wp_schedule_single_event')) { function wp_schedule_single_event($ts,$h,$a=[]){ $GLOBALS['single_events'][]=[$h,$ts]; return true; } }
+check('scheduler: without Action Scheduler the backend is wp-cron', SGAP_Scheduler::backend()==='wp-cron' && !SGAP_Scheduler::available());
+$GLOBALS['cron']=[]; $GLOBALS['next_scheduled']=[];
+SGAP_Scheduler::recurring('sgap_test_hook',5*MINUTE_IN_SECONDS);
+check('scheduler: a recurring job lands on WP-Cron with its hook intact', in_array('sgap_test_hook',$GLOBALS['cron'],true));
+$cron_before=count($GLOBALS['cron']); $GLOBALS['next_scheduled']['sgap_test_hook']=time()+120;
+check('scheduler: an existing occurrence is not scheduled twice', SGAP_Scheduler::recurring('sgap_test_hook',5*MINUTE_IN_SECONDS) && count($GLOBALS['cron'])===$cron_before);
+unset($GLOBALS['next_scheduled']['sgap_test_hook']);
+$GLOBALS['single_events']=[];
+check('scheduler: a one-off job lands on WP-Cron', SGAP_Scheduler::single('sgap_test_once',time()+600) && ($GLOBALS['single_events'][0][0]??'')==='sgap_test_once');
+if (!function_exists('as_schedule_recurring_action')) {
+    function as_schedule_recurring_action($ts,$interval,$hook,$args=[],$group=''){ $GLOBALS['as']['recurring'][]=[$ts,$interval,$hook,$group]; return 77; }
+    function as_schedule_single_action($ts,$hook,$args=[],$group=''){ $GLOBALS['as']['single'][]=[$ts,$hook,$group]; return 78; }
+    function as_next_scheduled_action($hook,$args=[],$group=''){ return $GLOBALS['as']['next']; }
+    function as_unschedule_all_actions($hook,$args=[],$group=''){ $GLOBALS['as']['unschedule'][]=[$hook,$group]; return 1; }
+}
+$GLOBALS['as']=['recurring'=>[],'single'=>[],'unschedule'=>[],'next'=>false];
+check('scheduler: Action Scheduler is detected from its functions', SGAP_Scheduler::available() && SGAP_Scheduler::backend()==='action-scheduler');
+check('scheduler: recurring jobs go to AS in the sgap group', SGAP_Scheduler::recurring('sgap_as_hook',DAY_IN_SECONDS) && ($GLOBALS['as']['recurring'][0][2]??'')==='sgap_as_hook' && ($GLOBALS['as']['recurring'][0][3]??'')==='sgap');
+$GLOBALS['as']['next']=time()+300; $as_before=count($GLOBALS['as']['recurring']);
+check('scheduler: an AS job that already exists is left alone', SGAP_Scheduler::recurring('sgap_as_hook',DAY_IN_SECONDS) && count($GLOBALS['as']['recurring'])===$as_before);
+$GLOBALS['as']['next']=false;
+check('scheduler: single jobs carry the group too', SGAP_Scheduler::single('sgap_as_once',time()+600) && ($GLOBALS['as']['single'][0][2]??'')==='sgap');
+SGAP_Scheduler::unschedule('sgap_as_hook');
+check('scheduler: unschedule clears the AS hook in our group', ($GLOBALS['as']['unschedule'][0]??null)===['sgap_as_hook','sgap']);
+check('scheduler: AS present means WP-Cron is never asked', !in_array('sgap_as_hook',$GLOBALS['cron'],true));
+check('scheduler: health names the backend and explains the difference', SGAP_Scheduler::health()['backend']==='action-scheduler' && str_contains(SGAP_Scheduler::health()['note'],'Action Scheduler'));
+
+// P0.7b — alle jobs gennem adapteren.
+$GLOBALS['as']['recurring']=[]; $GLOBALS['as']['single']=[]; $GLOBALS['as']['unschedule']=[]; $GLOBALS['as']['next']=0; $GLOBALS['cron']=[]; $GLOBALS['ddl']=[];
+SGAP_Install::install();
+$as_hooks = array_map(fn($r)=>$r[2], $GLOBALS['as']['recurring']);
+check('scheduler: activation puts all five jobs on Action Scheduler', count(array_intersect(
+    [SGAP_Install::CLEANUP_CRON, SGAP_Install::GENERATE_CRON, SGAP_Install::EVERGREEN_CRON, SGAP_Install::PUBLISH_CRON, SGAP_Install::MCP_CRON], $as_hooks))===5);
+$publish = array_values(array_filter($GLOBALS['as']['recurring'], fn($r)=>$r[2]===SGAP_Install::PUBLISH_CRON));
+check('scheduler: the publisher keeps its 15-minute interval on AS', ($publish[0][1]??0)===15*MINUTE_IN_SECONDS && ($publish[0][3]??'')==='sgap');
+check('scheduler: the first run keeps its delay instead of waiting a whole interval', abs(($publish[0][0]??0) - (time()+5*MINUTE_IN_SECONDS)) < 5);
+check('scheduler: one pass leaves WP-Cron empty when AS is there', $GLOBALS['cron']===[]);
+
+$GLOBALS['as']['recurring']=[];
+SGAP_Auto::schedule();
+$health = array_values(array_filter($GLOBALS['as']['recurring'], fn($r)=>$r[2]===SGAP_Auto::HEALTH_CRON));
+check('scheduler: the daily self-check goes through the adapter too', ($health[0][1]??0)===DAY_IN_SECONDS && abs(($health[0][0]??0)-(time()+2*HOUR_IN_SECONDS)) < 5);
+
+$GLOBALS['cleared']=[]; $GLOBALS['as']['unschedule']=[];
+SGAP_Scheduler::unschedule('sgap_both_hook');
+check('scheduler: unschedule clears AS and WP-Cron, so a switch cannot leave a twin', ($GLOBALS['as']['unschedule'][0]??null)===['sgap_both_hook','sgap'] && in_array('sgap_both_hook',$GLOBALS['cleared'],true));
+
+$GLOBALS['as']['next']=time()-45*MINUTE_IN_SECONDS;
+$lag=SGAP_Auto::cron_lag();
+check('scheduler: cron lag is measured on whichever backend runs', $lag>=44 && $lag<=46);
+$GLOBALS['as']['next']=time()+5*MINUTE_IN_SECONDS;
+check('scheduler: Site Health names the backend that is running', str_contains(SGAP_Auto::site_health_cron()['description'],'action-scheduler'));
+
+$GLOBALS['filters']['sgap_scheduler_action_scheduler']=fn($v)=>false;
+check('scheduler: the filter forces WP-Cron while AS is installed', SGAP_Scheduler::backend()==='wp-cron');
+unset($GLOBALS['filters']['sgap_scheduler_action_scheduler']);
+
+$GLOBALS['as']['next']=0; $GLOBALS['as']['recurring']=[];
+check('scheduler: a zero next run in AS still means not scheduled', SGAP_Scheduler::recurring('sgap_as_zero',HOUR_IN_SECONDS) && count($GLOBALS['as']['recurring'])===1);
+$GLOBALS['as']['next']=0; $GLOBALS['as']['recurring']=[]; $GLOBALS['as']['unschedule']=[];
+
+
+// P0.7c — adminkort viser backend, næste publicering, forsinkelse og engagement-snapshots.
+$GLOBALS['as']['next']=time()+15*MINUTE_IN_SECONDS;
+ob_start(); SGAP_Auto::scheduler_card(); $scheduler_card=ob_get_clean();
+check('scheduler admin: dashboard names Action Scheduler and the next publish tick', str_contains($scheduler_card,'Action Scheduler') && str_contains($scheduler_card,'Next publish tick:') && str_contains($scheduler_card,'Publish tick scheduled'));
+$GLOBALS['as']['next']=time()-35*MINUTE_IN_SECONDS;
+ob_start(); SGAP_Auto::scheduler_card(); $scheduler_card=ob_get_clean();
+check('scheduler admin: overdue publish tick is shown with its measured lag', str_contains($scheduler_card,'Late by 35 min'));
+$GLOBALS['as']['next']=0;
+ob_start(); SGAP_Auto::scheduler_card(); $scheduler_card=ob_get_clean();
+check('scheduler admin: missing publish event is not shown as healthy', str_contains($scheduler_card,'Publish tick not scheduled') && !str_contains($scheduler_card,'Publish tick scheduled'));
+$GLOBALS['filters']['sgap_scheduler_action_scheduler']=fn($v)=>false;
+$GLOBALS['next_scheduled']=[SGAP_Install::PUBLISH_CRON=>time()+15*MINUTE_IN_SECONDS];
+ob_start(); SGAP_Auto::scheduler_card(); $scheduler_card=ob_get_clean();
+check('scheduler admin: dashboard reports WP-Cron when the fallback is selected', str_contains($scheduler_card,'WP-Cron') && str_contains($scheduler_card,'Next publish tick:'));
+unset($GLOBALS['filters']['sgap_scheduler_action_scheduler']); unset($GLOBALS['next_scheduled']); $GLOBALS['as']['next']=0;
+$GLOBALS['rows']=[];
+ob_start(); SGAP_Engagement::dashboard_card(); $engagement_card=ob_get_clean();
+check('engagement admin: empty state explains that snapshots arrive after refresh', str_contains($engagement_card,'No engagement snapshots yet') && str_contains($engagement_card,'Bluesky and Mastodon'));
 $GLOBALS['rows']=[
-    (object)['id'=>103,'channel'=>'pinterest','title'=>'Messingbrille','status'=>'queued','remind'=>0,'attempts'=>0,
-        'scheduled_at'=>'2026-11-09 10:00:00','published_at'=>null,'error'=>null,
-        'locale'=>'da','source_id'=>7,'source_title'=>null,'source_locale'=>null],
+    ['channel'=>'bluesky','event_type'=>'likes','total'=>'12','rows_count'=>'3'],
+    ['channel'=>'bluesky','event_type'=>'reposts','total'=>'3','rows_count'=>'3'],
+    ['channel'=>'mastodon','event_type'=>'replies','total'=>'2','rows_count'=>'1'],
 ];
-ob_start(); SGAP_Admin::queue(); $html=ob_get_clean();
-check('queue page: a deleted source is still named by its id', str_contains($html,'href="#sgap-q-7">#7</a>') && !str_contains($html,'data-label="Source">—'));
+ob_start(); SGAP_Engagement::dashboard_card(); $engagement_card=ob_get_clean();
+check('engagement admin: dashboard renders per-channel likes, reposts and replies', str_contains($engagement_card,'bluesky') && str_contains($engagement_card,'mastodon') && str_contains($engagement_card,'>12</td>') && str_contains($engagement_card,'>3</td>') && str_contains($engagement_card,'>2</td>'));
+check('engagement admin: the totals sit above the table as metrics', str_contains($engagement_card,'sgap-metrics') && strpos($engagement_card,'sgap-metrics') < strpos($engagement_card,'<table'));
 $GLOBALS['rows']=[];
 
+// 7.52.0 — dashboardet læses oppefra: hvad kræver et menneske, hvad kører, hvor poster det,
+// og hvad holder det i live. Hvert kort skal stå under det spørgsmål det svarer på.
+ob_start(); do_action('page_steamgears-autopilot'); $dash = ob_get_clean();
+$now = strpos($dash,'<h2>Now</h2>'); $chan = strpos($dash,'<h2>Channels</h2>'); $sys = strpos($dash,'<h2>System</h2>');
+check('dashboard 7.52: three sections in reading order', $now !== false && $chan !== false && $sys !== false && $now < $chan && $chan < $sys);
+check('dashboard 7.52: the attention strip is the first thing after the status pills', str_contains($dash,'sgap-attn') && strpos($dash,'sgap-attn') < strpos($dash,'sgap-stats'));
+check('dashboard 7.52: run now, chat and scheduler answer "is it running"', $now < strpos($dash,'Run now') && strpos($dash,'Run now') < $chan
+    && $now < strpos($dash,'Open AI Chat') && strpos($dash,'Open AI Chat') < $chan
+    && $now < strpos($dash,'Scheduler</h2>') && strpos($dash,'Scheduler</h2>') < $chan);
+check('dashboard 7.52: channel numbers and engagement share one section', $chan < strpos($dash,'Last 30 days per channel') && strpos($dash,'Last 30 days per channel') < $sys
+    && $chan < strpos($dash,'Engagement · last 30 days') && strpos($dash,'Engagement · last 30 days') < $sys);
+check('dashboard 7.52: the updater moved under System', $sys < strpos($dash,'Plugin update'));
+check('dashboard 7.52: a healthy dashboard says so in one line instead of scattered pills', str_contains($dash,'sgap-attn is-ok') && str_contains($dash,'All clear'));
+ob_start(); do_action('page_sgap-settings'); $set53 = ob_get_clean();
+check('settings 7.54: every tab but Keys opens with a heading and a hint', substr_count($set53,'class="sgap-panel-head"') === count(SGAP_Setup::TABS) - 1);
+check('settings 7.54: the hints cover exactly those tabs, in tab order', array_keys(SGAP_Setup::TAB_HINTS) === array_values(array_diff(array_keys(SGAP_Setup::TABS), ['keys'])));
+check('settings 7.54: the hint is rendered next to the heading, not only stored', str_contains($set53,'<h2><span class="dashicons dashicons-admin-home"></span>Basics</h2>') && str_contains($set53,'What the autopilot may do on its own'));
+
+// Køen er to spørgsmål, ikke én tabel: hvad er på vej ud, og hvad kom der ud af det.
+$wpdb->next='wp_sgap_queue';
+$GLOBALS['rows']=[
+    (object)['id'=>901,'channel'=>'pinterest','title'=>'Waiting one','status'=>'queued','remind'=>0,'attempts'=>1,'scheduled_at'=>'2026-11-08 10:00:00','published_at'=>null,'error'=>null],
+    (object)['id'=>902,'channel'=>'bluesky','title'=>'Done one','status'=>'published','remind'=>0,'attempts'=>1,'scheduled_at'=>'2026-11-07 09:00:00','published_at'=>'2026-11-07 09:01:00','error'=>null],
+];
+ob_start(); do_action('page_sgap-queue'); $queue53 = ob_get_clean();
+$qw = strpos($queue53,'<h2>Waiting</h2>'); $qd = strpos($queue53,'<h2>Done</h2>');
+check('queue 7.54: waiting and done are two sections, waiting first', $qw !== false && $qd !== false && $qw < $qd);
+check('queue 7.54: a queued row sits under Waiting, a published row under Done', $qw !== false && $qd !== false
+    && str_contains(substr($queue53,$qw,$qd-$qw),'>901</td>') && !str_contains(substr($queue53,$qw,$qd-$qw),'>902</td>')
+    && str_contains(substr($queue53,$qd),'>902</td>'));
+check('queue 7.54: the waiting hint counts what is left', str_contains(substr($queue53,$qw,$qd-$qw),'One post still has to go out.'));
+$GLOBALS['rows']=[(object)['id'=>903,'channel'=>'bluesky','title'=>'Sending now','status'=>'sending','remind'=>0,'attempts'=>1,'scheduled_at'=>null,'published_at'=>null,'error'=>null]];
+ob_start(); do_action('page_sgap-queue'); $q53b = ob_get_clean();
+$qw2 = strpos($q53b,'<h2>Waiting</h2>');
+check('queue 7.54: a sending row counts as waiting, and an empty Done group says so', $qw2 !== false
+    && str_contains(substr($q53b,$qw2),'>903</td>') && str_contains($q53b,'Nothing has gone out yet.'));
+$GLOBALS['rows']=[]; $wpdb->next=null;
+
+ob_start(); do_action('page_sgap-studio'); $studio53 = ob_get_clean();
+$sw = strpos($studio53,'<h2>Write</h2>'); $sf = strpos($studio53,'<h2>Fix</h2>');
+check('studio 7.54: write and fix are two sections, write first', $sw !== false && $sf !== false && $sw < $sf);
+check('studio 7.54: drafting and images under Write, SEO work under Fix', $sw !== false && $sf !== false
+    && str_contains(substr($studio53,$sw,$sf-$sw),'Write an article or guide') && str_contains(substr($studio53,$sw,$sf-$sw),'AI image')
+    && str_contains(substr($studio53,$sf),'Optimise SEO of a page') && str_contains(substr($studio53,$sf),'Optimise the whole site'));
+check('studio 7.54: the score card still explains what it measures', str_contains(substr($studio53,$sf),'What the score measures') && str_contains(substr($studio53,$sf),'AEO'));
+check('admin pages 7.54: css carries the panel head and its high-contrast rule', str_contains(SGAP_UI::stylesheet(), '.sgap-panel-head{') && str_contains(SGAP_UI::stylesheet(), '.sgap-panel-head,.sgap .sgap-section-head:after{border-color:CanvasText}'));
+$css52 = SGAP_UI::stylesheet();
+check('dashboard 7.52: css carries the section heading and the metric row', str_contains($css52,'.sgap-section-head{') && str_contains($css52,'.sgap-metrics{') && str_contains($css52,'forced-colors:active'));
+
+// P1.5a — Bluesky- og Mastodon-engagement ind i sgap_events. Netværket går gennem
+// SGAP_Engagement::$transport, fordi smoke-suiten allerede har defineret wp_remote_get.
+$GLOBALS['opts']['sgap_mastodon_instance']='https://mastodon.social';
+check('engagement: mastodon id from mastodon:<id>', SGAP_Engagement::mastodon_id('mastodon:12345')==='12345');
+check('engagement: mastodon id from a post URL', SGAP_Engagement::mastodon_id('https://mastodon.social/@steamgears/999/')==='999');
+check('engagement: a job id or AT URI is not a mastodon id', SGAP_Engagement::mastodon_id('job_abc')==='' && SGAP_Engagement::mastodon_id('at://did:plc:x/app.bsky.feed.post/1')==='');
+$GLOBALS['engage_urls']=[];
+SGAP_Engagement::$transport=function($url){
+    $GLOBALS['engage_urls'][]=$url;
+    if (str_contains($url,'getPosts')) {
+        return sgap_http(200,['posts'=>[['uri'=>'at://did:plc:a/app.bsky.feed.post/1','likeCount'=>12,'repostCount'=>3,'replyCount'=>2]]]);
+    }
+    return sgap_http(200,['id'=>'555','favourites_count'=>7,'reblogs_count'=>4,'replies_count'=>1]);
+};
+$counts=SGAP_Engagement::bluesky(['at://did:plc:a/app.bsky.feed.post/1','at://did:plc:a/app.bsky.feed.post/1']);
+check('engagement: bluesky reads likeCount/repostCount/replyCount', ($counts['at://did:plc:a/app.bsky.feed.post/1']??null)===['likes'=>12,'reposts'=>3,'replies'=>2]);
+check('engagement: bluesky dedupes URIs into one call with repeated uris params', count($GLOBALS['engage_urls'])===1 && substr_count($GLOBALS['engage_urls'][0],'uris=')===1 && str_contains($GLOBALS['engage_urls'][0],'at%3A%2F%2F'));
+$GLOBALS['engage_urls']=[];
+$mast=SGAP_Engagement::mastodon(['mastodon:555','555','https://mastodon.social/@steamgears/555']);
+check('engagement: mastodon reads favourites/reblogs/replies', ($mast['555']??null)===['likes'=>7,'reposts'=>4,'replies'=>1]);
+check('engagement: three spellings of one status cost one call', count($GLOBALS['engage_urls'])===1 && str_ends_with($GLOBALS['engage_urls'][0],'/api/v1/statuses/555'));
+$GLOBALS['rows']=[
+    ['id'=>'7','channel'=>'bluesky','angle'=>'angle_a','external_id'=>'at://did:plc:a/app.bsky.feed.post/1'],
+    ['id'=>'8','channel'=>'mastodon','angle'=>'angle_b','external_id'=>'mastodon:555'],
+    ['id'=>'9','channel'=>'pinterest','angle'=>'angle_a','external_id'=>'pin_1'],
+];
+$GLOBALS['engage_urls']=[]; $wpdb->log=[];
+$run=SGAP_Engagement::refresh();
+check('engagement: refresh follows the two supported channels and leaves the rest alone', $run['targets']===3 && $run['updated']===2 && $run['errors']===[]);
+check('engagement: every queue row is stored once per type', substr_count(implode("\n",$wpdb->log),'INSERT wp_sgap_events')===6 && substr_count(implode("\n",$wpdb->log),'likes')>=2);
+check('engagement: the old snapshot is deleted before the new one is written', substr_count(implode("\n",$wpdb->log),'DELETE FROM wp_sgap_events WHERE queue_id')===2);
+// The previous block left queue rows in $GLOBALS['rows'], which the fake wpdb hands to any
+// query; clear them, or this check reads queue columns as snapshot columns — and it used to
+// end in an always-true clause, so it could not fail at all. tools/fejlscan.py rejects that.
+$GLOBALS['rows']=[];
+check('engagement: no snapshots means an empty summary, not invented zeros', SGAP_Engagement::summary()===[]);
+$GLOBALS['rows']=[['channel'=>'bluesky','event_type'=>'likes','total'=>'12','rows_count'=>'3'],['channel'=>'bluesky','event_type'=>'reposts','total'=>'3','rows_count'=>'3']];
+$sum=SGAP_Engagement::summary();
+check('engagement: summary sums per channel and reports reach as null', ($sum['bluesky']['likes']??null)===12.0 && ($sum['bluesky']['reposts']??null)===3.0 && array_key_exists('reach',$sum['bluesky']) && $sum['bluesky']['reach']===null);
+SGAP_Engagement::$transport=function($url){ return sgap_http(500,['error'=>'boom']); };
+$GLOBALS['rows']=[['id'=>'7','channel'=>'bluesky','angle'=>'angle_a','external_id'=>'at://did:plc:a/app.bsky.feed.post/1']];
+$failed=SGAP_Engagement::refresh();
+check('engagement: a 500 is reported and stores nothing', $failed['updated']===0 && count($failed['errors'])===1 && str_contains($failed['errors'][0],'500'));
+SGAP_Engagement::$transport=null; $GLOBALS['rows']=[];
+
+require __DIR__.'/roi.php';
+require __DIR__.'/pinterest.php';
+require __DIR__.'/instagram.php';
+require __DIR__.'/diagnostics.php';
+require __DIR__.'/facebook.php';
+require __DIR__.'/mcp-woo.php';
+require __DIR__.'/mcp.php';
+require __DIR__.'/evergreen.php';
+require __DIR__.'/keys.php';
+require __DIR__.'/channel-health.php';
+require __DIR__.'/menu.php';
+require __DIR__.'/niche-shop.php';
+require __DIR__.'/queue-page.php';
 // P3.2/P3.5-slut
 exit(empty($GLOBALS['fail'])?0:1);

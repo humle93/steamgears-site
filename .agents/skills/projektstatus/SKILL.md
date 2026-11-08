@@ -59,7 +59,7 @@ Grundlag: 12,05 af 21,75 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,45/6 · S3 2,15/3,
 - **Grundlaget skal kunne genberegnes** — `3 af 5 faser`, `0,25 af 5 t`, `39 af 39 links`. Ingen tal uden
   regnestykke.
 - **Blokeret arbejde tæller ikke som fremgang.** Står et punkt fast på en ekstern blokering (manglende nøgle,
-  ejerens klik, Printify-adgang), bliver procenten stående, og blokeringen skrives i svaret.
+  ejerens klik, Printful-adgang), bliver procenten stående, og blokeringen skrives i svaret.
 - **100 % = færdigt og verificeret**, ikke "kode skrevet".
 - **Daglig status for alle fem projekter** skal også stå i svaret til ejeren, ikke kun i filen:
 
@@ -70,8 +70,10 @@ Grundlag: 12,05 af 21,75 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,45/6 · S3 2,15/3,
 - **Commit-beskeden bærer samme tal.** Dansk, med `🤖 Generated with Codebuff` + `Co-Authored-By`-fod.
   Værnet [`tools/commit_check.py`](../../../tools/commit_check.py) afviser beskeden hvis blokken mangler, hvis et
   procentfelt ikke er et tal eller en streg, hvis `Grundlag` ikke kan genberegnes, eller hvis `Δ` ikke passer med
-  `Efter − Før`. Er hooken ikke installeret i sandkassen: `python3 tools/commit_check.py --install`.
-  Merge-, revert- og bot-commits er undtaget.
+  `Efter − Før`. Tallene krydstjekkes desuden mod historik-rækkerne i `projektstatus.json`: `Før`/`Efter`/`Δ`
+  skal matche en række, og `Grundlag` skal stemme med rækkens `basis`, så et opdigtet regnestykke afvises.
+  Er hooken ikke installeret i sandkassen: `python3 tools/commit_check.py --install`. Merge-, revert- og
+  bot-commits er undtaget.
 
 ## 5. Efter passet
 
