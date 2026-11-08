@@ -1757,9 +1757,6 @@ class SGAP_Admin {
             echo '<div class="notice notice-' . $type . ' is-dismissible"><pre style="white-space:pre-wrap;font-size:13px">' . esc_html($result) . '</pre></div>';
         }
         // Buttons that call an AI or the network take a while: show that the click registered.
-        echo '<script>document.addEventListener("submit",function(e){var f=e.target;if((f.getAttribute("action")||"").indexOf("admin-post.php")<0)return;'
-            . 'var b=e.submitter||f.querySelector("button,input[type=submit]");if(!b)return;setTimeout(function(){b.disabled=true;'
-            . 'var t="Working… this can take a minute";if(b.tagName==="INPUT"){b.value=t;}else{b.textContent=t;}},0);});</script>';
     }
 
     /** Stores a message for open() on the next page and goes there. */

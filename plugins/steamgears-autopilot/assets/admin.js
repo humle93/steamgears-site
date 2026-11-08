@@ -1,0 +1,1 @@
+document.addEventListener("submit",function(e){var f=e.target;if((f.getAttribute("action")||"").indexOf("admin-post.php")<0)return;var b=e.submitter||f.querySelector("button,input[type=submit]");if(!b)return;setTimeout(function(){b.disabled=true;var t="Working… this can take a minute";if(b.tagName==="INPUT"){b.value=t;}else{b.textContent=t;}},0);});

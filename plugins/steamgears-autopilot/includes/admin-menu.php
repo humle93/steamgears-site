@@ -26,7 +26,6 @@ class SGAP_Menu {
 
     public static function init(): void {
         add_action('admin_menu', [__CLASS__, 'tidy'], 999);
-        add_action('admin_head', [__CLASS__, 'assets']);
     }
 
     /** The new order, as a list of submenu rows. Pure, so the tests can run it without WordPress. */
@@ -93,21 +92,15 @@ class SGAP_Menu {
         $submenu[self::PARENT] = self::arrange(array_values($submenu[self::PARENT]), $current);
     }
 
+    /**
+     * Menu styling lives in assets/menu.css and assets/menu.js now.
+     *
+     * It used to be echoed on every admin page; keeping the method means the tests
+     * and any third-party call still work, but nothing is printed into <head>.
+     */
     public static function assets(): void {
-        if (!current_user_can('manage_options')) {
-            return;
+        if (class_exists('SGAP_Assets')) {
+            SGAP_Assets::enqueue_menu();
         }
-        echo '<style id="sgap-menu-css">'
-            . '#adminmenu .wp-submenu li.sgap-menu-label{pointer-events:none;margin-top:6px}'
-            . '#adminmenu .wp-submenu li.sgap-menu-label a{font-size:10px;letter-spacing:.14em;text-transform:uppercase;opacity:.6;padding-block:6px 2px;font-weight:600}'
-            . '#adminmenu .wp-submenu li.sgap-menu-more a::after{content:"\25BE";float:right;opacity:.7}'
-            . '#adminmenu .wp-submenu li.sgap-menu-more.is-open a::after{content:"\25B4"}'
-            . '#adminmenu .wp-submenu.sgap-menu-js li.sgap-menu-adv{display:none}'
-            . '#adminmenu .wp-submenu.sgap-menu-js.sgap-more-open li.sgap-menu-adv,#adminmenu .wp-submenu.sgap-menu-js li.sgap-menu-adv.current{display:list-item}'
-            . '</style>'
-            . '<script id="sgap-menu-js">document.addEventListener("DOMContentLoaded",function(){'
-            . 'var m=document.querySelector("#adminmenu .wp-submenu li.sgap-menu-more");if(!m)return;var ul=m.parentNode;'
-            . 'ul.classList.add("sgap-menu-js");if(m.classList.contains("is-open"))ul.classList.add("sgap-more-open");'
-            . 'm.querySelector("a").addEventListener("click",function(e){e.preventDefault();m.classList.toggle("is-open",ul.classList.toggle("sgap-more-open"));});});</script>';
     }
 }

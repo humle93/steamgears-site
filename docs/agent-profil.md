@@ -28,7 +28,7 @@ Der er **seks aktive projekter**, alle målt i [`projektstatus.json`](../projekt
 | id | Projekt | Status | Enhed |
 | --- | --- | --- | --- |
 | `site` | steamgears.eu — site-optimering | **100 %** (20,95 af 20,95 d) | developer-dage |
-| `plugin` | Steamgears Autopilot — plugin | **100 %** (29,85 af 29,85 d) | developer-dage |
+| `plugin` | Steamgears Autopilot — plugin | **100 %** (30,45 af 30,45 d) | developer-dage |
 | `rebrand` | Dark academia-rebrand | **65,3 %** (9,4 af 14,4 t) | timer |
 | `seo` | SEO-indholdsproduktion | **100 %** (8 af 8 guides) | guides |
 | `links` | Døde internlinks | **100 %** (39 af 39 links) | links |
@@ -94,7 +94,7 @@ Dette kort er afstemt mod målinger og status pr. **8/11 2026**. Nyere live-tal 
 
 **Pluginnet** (`plugins/steamgears-autopilot/`)
 
-- **Version i repo mod live:** repo **7.65.1** (en dokumentations-patch af `ROADMAP.md`), live **7.65.0,
+- **Version i repo mod live:** repo **7.65.2** (kode- og UI-optimering), live **7.65.0,
   aktiv** (målt 8/11 om aftenen; opdateringen blev lagt på gennem `Plugin_Upgrader`, og
   `steamgears-autopilot/update` svarer »Already up to date (7.65.0)« på sitet).
   7.64.7 er tokenrettelsen, 7.64.8 gør kanalstatus entydig, og 7.64.9 gør P1.5 målbar

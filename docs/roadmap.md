@@ -334,7 +334,7 @@ aftenen** (hele listen med metode står i [library/roadmap-status-2026-11-08.md]
 har en forsendelsesmetode (fri fragt uden minimum) mens resten af verdenen har **ingen**, **5**
 betalingsmetoder er slået til men kun **2 er tilgængelige i kassen** (`stripe` og `bacs`), Complianz står på
 **EU opt-in** (`regions: eu`, `eu_consent_regions: yes`), og billedlaget er **22 billeder på 20 publicerede
-produkter — 0 har 3 eller flere** (0 uden alt-tekst). Pluginnet kører **7.65.0** på sitet (**7.65.1** i repoet — en ren dokumentations-patch), køen har **0** ventende,
+produkter — 0 har 3 eller flere** (0 uden alt-tekst). Pluginnet kører **7.65.0** på sitet (**7.65.2** i repoet — CSS/JS flyttet ud i `assets/` og enqueue'et pr. skærm), køen har **0** ventende,
 og AI-nøglen svarer »run out of funds« med **45** kladder i kø.
 
 Efter gennemgangen 8/11 er der **ingen åbne punkter tilbage i S0–S4 som agenten kan udføre** — heller

@@ -166,9 +166,17 @@
           "total": 1.5,
           "unit": "d",
           "note": "Bygget 7/11 (7.58.0). Direkte publicering er opt-in (facebook_direct, standard no), så en side der kun forbindes for at blive læst ikke flytter publiceringen ud af Publer. 82 smoke-checks gennem $transport — intet kald er gået til Meta, og siden er ikke set i en rigtig wp-admin."
+        },
+        {
+          "id": "p3opt",
+          "name": "P3.7 — kode- og UI-optimering",
+          "done": 0.6,
+          "total": 0.6,
+          "unit": "d",
+          "note": "7.65.2: stylesheet + menu-CSS/JS + submit-script flyttet fra inline <head> til assets/admin.css, admin.js, menu.css, menu.js og enqueuet af SGAP_Assets (menu overalt, side-assets kun på pluginets skærme, kun manage_options, mtime som version). 41,8 KB mindre HTML pr. admin-side og cachebare filer. UI: :focus-visible, mobil-tabeller, mobil-grid, reduced motion, tabular-nums. 36 nye smoke-checks i plugins/tests/assets.php; suiten 1172 PASS / 0 FAIL."
         }
       ],
-      "total": 29.9,
+      "total": 30.45,
       "verified": true
     },
     {
