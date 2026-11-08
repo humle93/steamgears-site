@@ -1,6 +1,6 @@
 # Nye WordPress-sites — guide, metode og sammenligning
 
-**Skrevet:** 8/11 2026 · **Gælder:** de næste sites vi starter, ikke steamgears.eu · **Kilder:** §14
+**Skrevet:** 8/11 2026 · **Gælder:** de næste sites vi starter, ikke steamgears.eu · **Kilder:** §15
 
 Denne guide svarer på to ting: **hvad er den bedste og mest moderne måde at bygge et WordPress-site på i
 dag**, og **hvordan står den metode mod den vi selv bruger**. Den er skrevet, så et nyt site kan startes på
@@ -300,7 +300,7 @@ opgave på mobil først, derefter desktop:
 - **Indholdssite:** søgeindgang → svar → relateret indhold → relevant CTA.
 
 Kør en kort, modereret **kvalitativ** opgavetest med 3–5 personer fra målgruppen. Det er en formativ
-fejlfindingsrunde — ikke statistisk markedsbevis eller en konverteringsprognose; se NN/g-kilden i §14. Notér
+fejlfindingsrunde — ikke statistisk markedsbevis eller en konverteringsprognose; se NN/g-kilden i §15. Notér
 hvor de stopper, hvad de misforstår, og om de fuldfører opgaven uden hjælp. Ret de kritiske og gentagne
 stopklodser, før hele sitet bygges. Book deltagerne tidligt: testens kalender-tid kommer oven i teamets
 aktive byggetid.
@@ -489,11 +489,191 @@ beslutningen tages — ikke citeres fra denne guide.
 | Simply (nuværende) | Nej | Ikke brugt i driften | Nej | billig, kendt, ingen kode-deploy |
 
 **Sådan vælges:** skriv de seks krav fra §6 ned, og stryg enhver host der ikke opfylder dem. Vælg derefter
-på support, region og pris — ikke på logo.
+på support, region og pris — ikke på logo. Når værten er valgt, er næste skridt miljøopsætningen i §9 — den
+afgør, om Git- og staging-metoden bliver sikker i praksis eller bare en dyr kopi af den gamle arbejdsmåde.
 
 ---
 
-## 9. Hvis et eksisterende site skal flyttes
+## 9. Server- og sandbox-forhold — den del der afgør, om metoden er sikker
+
+Et site har tre miljøer, og hver har sit formål. Den dyre fejl er at gøre dem for ens: en sandkasse der ligner
+produktion så meget, at den kan trække penge, sende mail og ramme kundedata — eller en produktion der ligner
+en sandkasse, så der debugges live.
+
+| Miljø | Formål | Data | Må aldrig kunne |
+| --- | --- | --- | --- |
+| **Lokal** (`wp-env`, DDEV) | bygge, syntax, unit-tests | seed/fixtures | nå produktions-DB, sende rigtig mail |
+| **Sandbox/staging** | accept, betalingstest, kvalitetsporte | kopi uden persondata eller syntetisk data | indekseres, trække penge, maile kunder, ramme live-webhooks |
+| **Produktion** | kunder, ordrer, SEO | rigtig data | debug-output, testnøgler, eksperimenter |
+
+### 9.1 Produktionsserveren — baseline
+
+| Indstilling | Krav | Hvorfor |
+| --- | --- | --- |
+| PHP | 8.3–8.5, samme minor som er testet, opcache slået til | ellers tester man en anden runtime end kunden møder |
+| `WP_ENVIRONMENT_TYPE` | `production` | plugins og tema må ikke tro, de er i staging |
+| `WP_DEBUG` / `WP_DEBUG_DISPLAY` | `false` / `false` | ellers lækkes stier, SQL og data til besøgende |
+| `WP_DEBUG_LOG` | kun hvis filen ligger uden for webroot eller er beskyttet | `wp-content/debug.log` kan ellers hentes offentligt |
+| `DISALLOW_FILE_EDIT` | `true` | fjerner editor-vejen til en fatal fejl |
+| HTTPS og secure cookies | hele sitet, HSTS når det er stabilt | login, kurv og kasse |
+| Object cache | Redis/Memcached hvis hosten tilbyder det | DB-last og TTFB |
+| Page cache-undtagelser | kurv, kasse, konto, login, REST | ellers lækkes personligt indhold |
+| Cron | system-cron → `wp cron event run --due-now` | WP-Cron på et cachet site sover |
+| Mails | SMTP/transaktionsudbyder + SPF, DKIM, DMARC | PHP-mail ender i spam eller blokeres |
+| Backup | daglig DB + filer, offsite, 14–30 dages retention, restore testet | RPO/RTO skal være kendt, ikke håbet |
+| Logs | PHP-fejl, slow-log, adgangslog bag auth, rotation | fejlfinding uden kundens browser |
+| Rettigheder | deploy-bruger ≠ web-bruger, mindst privilegium, 2FA, SSH-nøgle med adskilt adgang | et kompromitteret plugin skal ikke eje filerne |
+| Disk og inodes | kendt loft, logrotation og oprydning | et fuldt disk dækker over alle andre fejl |
+
+**Mål det, antag det ikke.** Et nyt site er først klart, når disse svar er hentet med kommando og gemt: hvilken
+PHP-version svarer, er debug slået fra, kører cron, kan en backup gendannes, og svarer `/wp-json/` uden at en
+cache eller WAF står i vejen. Kommandoerne står i §9.7.
+
+### 9.2 Sandkassen — isoleret med vilje
+
+Sandkassen er den farligste af de tre, fordi den har produktionens kode og ofte produktionens database. Den
+skal derfor lukkes på hvert et punkt hvor den kan gøre skade:
+
+- **Eget domæne eller subdomæne**, `noindex` i metadata **og** `X-Robots-Tag`, plus HTTP-auth. En indekseret
+  staging er to sider der konkurrerer om de samme søgeord.
+- **`WP_ENVIRONMENT_TYPE=staging`.** WordPress 7.1 slår pings fra uden for produktion, og plugins som
+  betalingsudbydere skifter selv til test-adfærd ud fra miljøtypen.
+- **Kun testnøgler og testkort.** WooCommerce anbefaler udtrykkeligt at teste på staging og aldrig på live,
+  fordi en testordre kan udløse mails og forstyrre rigtige ordrer. Testordrer har **ingen visuel markering** i
+  WooCommerce — slet dem efter testen.
+- **Webhooks peg**es på en sandbox-endpoint eller slås fra. Ellers kan staging oprette rigtige ordrer,
+  abonnementer eller billetter i tredjeparten.
+- **Mails fanges** i en mail-sink eller sendes kun til en intern testkonto. Et "disable emails"-plugin kan
+  omgås af et SMTP-plugin, så verificér i loggen at intet gik ud.
+- **Tracking og consent** bruger et separat property eller debug-tilstand. Staging skal ikke forurene kundens
+  GA4, Ads eller Search Console.
+- **Kanal-tokens fjernes**: nyhedsbrev, sociale medier, fragt og lager. En staging-kopi der publicerer eller
+  bestiller varer er en hændelse, ikke en test.
+- **Cron begrænses**: ellers publicerer staging kladder og tømmer kø-poster, der hører til live.
+- **Cache og CDN er adskilt**: staging må ikke kunne purgre produktionens CDN.
+- **Egen database og egne credentials.** Produktionens DB-bruger eller nøgler må ikke stå i staging-config.
+
+### 9.3 Når staging-kopien skal tilbage
+
+| Retning | Regel | Grund |
+| --- | --- | --- |
+| staging → live, **kode** | ja, via Git/release og samme gate som alt andet | det er den vej metoden findes for |
+| staging → live, **database** | nej som standard; kun bevidst indholdsmigrering med backup, log og ejer-godkendelse | ordrer, kunder og abonnementer må aldrig overskrives |
+| live → staging, **database** | kun anonymiseret eller syntetisk | persondata skal ikke ligge i et testmiljø |
+| **uploads** | data, ikke kode — kopieres bevidst, ikke deployes | ellers overskrives nye billeder |
+
+**WooPayments-fælden:** en klon kan efterlade live-sitet "stuck in test mode", fordi indstillingerne
+`wcpay_account_data` og `wcpay_onboarding_test_mode` følger med databasen, og en klon kan aktivere Safe Mode,
+når to URL'er peger på samme konto. Læs deres migreringsdokumentation, før en butik klones — og kontroller
+indstillingerne efter promote.
+
+### 9.4 Deploy-rækkefølgen — den optimale kæde
+
+1. **PR** med lint, statisk analyse og tests. Ingen grøn pipeline, ingen merge.
+2. **Automatisk deploy til staging** ved merge til staging-grenen — ikke til produktion.
+3. **Smoke-test på staging**: health, login, kritisk rejse, testbetaling, mail-sink, `noindex`, cache-undtagelser.
+4. **Manuel godkendelse** af et menneske, der ejer resultatet.
+5. **Deploy kun kode** til produktion. Databaseændringer køres som et separat, logget skridt med backup først.
+6. **Atomisk release** med forrige release bevaret, så rollback er et klik eller en symlink — ikke en gendannelse.
+7. **Purge cache/CDN** og versionér assets, så kunderne ikke får gammel CSS med ny HTML.
+8. **Smoke-test i produktion** og overvåg fejl de første 30 minutter.
+9. **Log** commit, tag, ansvarlig og tidspunkt i repoet.
+
+**Lås og vindue:** én deploy ad gangen (concurrency-gruppe), ingen deploy midt i en kampagne, og en skrevet regel
+for hvem der må trykke go. En deploy der fejler, standser linjen — den rulles tilbage eller rettes fremad med
+en ny release, aldrig med et manuelt indgreb i filerne.
+
+**GitHub-fælden (målt i dette repo):** environments med required reviewers og wait timer er kun tilgængelige
+for **offentlige** repos på Free-planen. Bliver et repo gjort privat, ignoreres de konfigurerede
+beskyttelsesregler og environment-secrets. En "beskyttet" produktion kan altså se beskyttet ud uden at være
+det — brug branch protection og et manuelt `workflow_dispatch`-trin, eller en plan der understøtter det.
+
+### 9.5 Paritet mellem miljøerne
+
+| Komponent | Skal matche produktion | Må afvige, hvis det er dokumenteret |
+| --- | --- | --- |
+| PHP, WordPress, WooCommerce | ja | nej |
+| Tema og plugins (kode) | ja | indhold må afvige |
+| Webserver og rewrite-regler | så tæt som muligt | ja |
+| Object cache og CDN | nej | ja — skriv hvad der ikke er testet |
+| Mail, betaling, fragt | nej, med vilje | ja — det er hele pointen |
+| Data | nej | ja — syntetisk eller anonymiseret |
+
+Paritet er ikke "alt er ens"; paritet er at **forskellene er kendte**. Skriv dem i repoets README, så næste
+person ikke tester noget andet end det, der bliver udgivet.
+
+### 9.6 Sandbox for agenter og automatisering
+
+- **Egne credentials pr. miljø**, scopede og roterbare. En produktionsnøgle i en sandkasse er en lækage med
+  forsinkelse.
+- **Ingen kundedata i en flygtig sandkasse.** Playground og lokale miljøer bruger seed-data.
+- **Udgående trafik begrænses** hvor det er muligt, og logges. En agent skal ikke kunne sende mail eller kalde
+  en betalings-API "fordi det virkede lokalt".
+- **Mennesket ejer promote.** Automatik må deploye til staging; produktion kræver en godkendelse.
+- **Grøn CI er ikke det samme som deployet.** Det er målt i dette repo: et grønt workflow-run kan se ud som en
+  udrulning uden at være det.
+- **Flygtige tokens dør** med sandkassen. Genskab dem med et script, og skriv hvordan i README.
+- **Auditlog** over hvad automatikken ændrede, med commit eller release-tag som reference.
+
+### 9.7 Kontrolkommandoer
+
+```bash
+# hvilket miljø tror WordPress, det er i?
+wp eval 'echo wp_get_environment_type(), PHP_EOL;'
+
+# er debug slået fra i produktion?
+wp config get WP_DEBUG; wp config get WP_DEBUG_DISPLAY
+
+# kører cron, og hvornår?
+wp cron event list --fields=hook,next_run_relative
+
+# hvilken release kører, og kan den rulles tilbage?
+wp core version; git describe --tags --always
+
+# svarer sitet uden at cache eller WAF forvirrer?
+curl -sS -o /dev/null -w '%{http_code} %{time_total}\n' https://<domæne>/wp-json/
+
+# er staging beskyttet mod indeksering og adgang?
+curl -sSI https://<staging-domæne>/ | grep -iE 'x-robots-tag|www-authenticate'
+```
+
+### 9.8 Fælder i miljøopsætningen
+
+| Fælde | Hvad der sker | Regel |
+| --- | --- | --- |
+| Staging med produktions-DB | kundedata lækker, og mails kan gå til rigtige kunder | anonymisér ved kopi, eller brug syntetisk data |
+| Test-mode hænger i live | butikken tager ikke imod rigtige betalinger | kontroller betalingsindstillingerne efter promote |
+| Testordrer uden markering | de bliver behandlet, sendt eller talt med i statistik | slet dem efter testen |
+| Webhooks peger på produktion | dobbelte ordrer eller abonnementer i tredjepart | egen sandbox-endpoint eller slået fra |
+| Staging indekseret | to sider konkurrerer i søgeresultaterne | `noindex` + `X-Robots-Tag` + auth |
+| Cron og pings kører | kladder publiceres, og søgemaskiner pinges fra et testmiljø | `WP_ENVIRONMENT_TYPE=staging` og begrænset cron |
+| Debug slået til i produktion | stier, SQL og data vises til besøgende | `WP_DEBUG=false`, `WP_DEBUG_DISPLAY=false` |
+| `debug.log` i webroot | logfilen kan hentes af alle | læg den uden for webroot eller beskyt den |
+| Staging purger CDN | produktionens cache tømmes midt i trafik | adskilte nøgler pr. miljø |
+| Miljø-gate der ikke findes | "beskyttet" deploy uden godkendelse | branch protection og manuelt promote-trin |
+| PHP-version forskel | testet på 8.4, kørt på 8.2 | lås versionen begge steder |
+| Deploy uden smoke-test | grøn pipeline, hvid side | smoke-test efter hver promote |
+
+### 9.9 Måltal for miljøet
+
+| Måltal | Krav | Hvordan det bevises |
+| --- | --- | --- |
+| Deploy-tid | under 5 min for kode | logget tid pr. release |
+| Fejlede deploys | under 1 ud af 10 | release-log |
+| Rollback-tid | under 5 min | øvelse med stopur |
+| Restore-tid (RTO) | kendt og målt | kvartalsvis restore til staging |
+| Data-tab (RPO) | højst 24 timer | backupfrekvens og tidsstempel |
+| Uautoriserede mails fra staging | 0 | mail-sink-log |
+| Indekserede staging-URL'er | 0 | `site:`-søgning efter launch |
+| Secrets ældre end 12 måneder | 0 | gennemgang af nøgler pr. miljø |
+
+**Et miljø er først klart**, når disse er sande: staging er utilgængeligt uden auth og `noindex`, kun
+testbetalinger kan gennemføres, ingen mail kan nå en kunde, cron og webhooks er begrænsede, produktion har
+debug slået fra, backup er gendannet én gang, og et menneske har godkendt den release der kører.
+
+---
+
+## 10. Hvis et eksisterende site skal flyttes
 
 Flyt ikke for flytningens skyld. Flyt når der er en konkret gevinst: staging, kode-deploy, ydelse eller
 sikkerhed. Rækkefølgen er:
@@ -510,7 +690,7 @@ mail-flow der peger på den gamle host, WAF-regler der blokerer den nye, og beta
 
 ---
 
-## 10. Fælder i den moderne metode
+## 11. Fælder i den moderne metode
 
 Den nye metode har sine egne fælder. De står her, så de ikke skal opdages på et nyt site.
 
@@ -528,7 +708,7 @@ Den nye metode har sine egne fælder. De står her, så de ikke skal opdages på
 
 ---
 
-## 11. Tjekliste før launch
+## 12. Tjekliste før launch
 
 | Gruppe | Punkt |
 | --- | --- |
@@ -536,6 +716,7 @@ Den nye metode har sine egne fælder. De står her, så de ikke skal opdages på
 | Adgang | SSH nøgle, WP-CLI, staging-adgang, mindst to administratorer |
 | Backup | daglig backup, off-site, restore testet |
 | Sikkerhed | WAF, 2FA, ingen eksponerede nøgler, mindst mulige plugins |
+| Miljøer | staging: auth, `noindex`, kun testbetaling, mail-sink · produktion: debug fra, cron kører, backup gendannet |
 | Ydelse | HTML/script-budget målt, object cache, kurv/kasse ikke cachet |
 | SEO | 1 H1 pr. side, meta, canonical, sitemap, 301'er, OG-billeder |
 | Butik (hvis relevant) | testordre, betaling, fragt, moms, mails, returformular |
@@ -545,7 +726,7 @@ Den nye metode har sine egne fælder. De står her, så de ikke skal opdages på
 
 ---
 
-## 12. Forbedringer til vores fremgangsmåde — anbefaling til næste site
+## 13. Forbedringer til vores fremgangsmåde — anbefaling til næste site
 
 Disse ændringer anbefales som standard for nye sites oven på det vi allerede gør godt. De er tænkt til brug
 fra første brief; de kræver ikke at steamgears flyttes eller genbygges.
@@ -586,7 +767,7 @@ fra første brief; de kræver ikke at steamgears flyttes eller genbygges.
 
 ---
 
-## 13. Hvad vi tager med fra steamgears
+## 14. Hvad vi tager med fra steamgears
 
 Uanset host og metode skal det her følge med, fordi det er det der gjorde steamgears styrbart:
 
@@ -599,7 +780,7 @@ Uanset host og metode skal det her følge med, fordi det er det der gjorde steam
 
 ---
 
-## 14. Kilder
+## 15. Kilder
 
 | Kilde | Hvad den bruges til | Dato |
 | --- | --- | --- |
@@ -621,6 +802,16 @@ Uanset host og metode skal det her følge med, fordi det er det der gjorde steam
 | [WordPress Accessibility Coding Standards](https://developer.wordpress.org/coding-standards/wordpress-coding-standards/accessibility/) | WordPress anbefaler WCAG 2.2 AA for nyt/opdateret kode | 14/10 2026 |
 | [WordPress brute-force guidance](https://developer.wordpress.org/advanced-administration/security/brute-force/) | 2FA, mindst privilegium, HTTPS, testede backups | 14/10 2026 |
 | [NN/g: 5 participants, qualitative vs. quantitative](https://www.nngroup.com/articles/5-test-users-qual-quant/) | lille brugertest er formativ fejlfinding, ikke kvantitativ dokumentation | 11/7 2021 |
+| [wp_get_environment_type()](https://developer.wordpress.org/reference/functions/wp_get_environment_type/) | miljøtyper: `local`, `development`, `staging`, `production`; standard er produktion | — |
+| [Pings slås fra uden for produktion](https://developer.wordpress.org/reference/functions/wp_should_disable_pings_for_environment/) | WordPress 7.1 slår pingbacks fra i ikke-produktionsmiljøer | 7.1 |
+| [Debugging in WordPress](https://developer.wordpress.org/advanced-administration/debug/debug-wordpress) | `WP_DEBUG`, `WP_DEBUG_DISPLAY`, `WP_DEBUG_LOG`; debug frarådes på live | 14/10 2026 |
+| [WooCommerce: testing orders](https://woocommerce.com/document/managing-orders/testing-orders/) | test kun på staging; testordrer har ingen markering og kan udløse mails | 8/5 2024 |
+| [WooPayments: site migrations](https://woocommerce.com/document/woopayments/account-management/site-migrations/) | Safe Mode ved klon; "stuck in test mode" via `wcpay_account_data` og `wcpay_onboarding_test_mode` | 9/11 2023 |
+| [WooCommerce: skift af tema](https://woocommerce.com/document/choose-change-theme/) | bevar live-ordrer; overskriv ikke live-DB med en ældre staging-kopi | — |
+| [Stripe: testing og sandboxes](https://docs.stripe.com/testing-use-cases) | sandbox er isoleret; test- og live-nøgler og webhook-secrets er adskilte | — |
+| [GitHub: deployments og environments](https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments) | required reviewers, wait timer og environment-secrets; på Free kun for offentlige repos | — |
 
-**Ikke undersøgt her:** konkrete priser/planer, dansk databehandleraftale pr. host og Lighthouse-tal for et nyt
-site. Det skal afklares og måles, når værten er shortlistet.
+**Ikke undersøgt her:** konkrete priser/planer, dansk databehandleraftale pr. host, Lighthouse-tal for et nyt
+site, og hvilke af §9's miljøkrav den enkelte host faktisk leverer (object cache, system-cron, SMTP, separat
+staging-DB, miljøvariabler). Det skal afklares og måles pr. host, når værten er shortlistet — ikke antages ud
+fra denne guide.

@@ -11,7 +11,7 @@ design/CSS, backup-data, dokumentation og status.
 | [`docs/library/sitewide-audit-2026-11-03.md`](docs/library/sitewide-audit-2026-11-03.md) | Sitewide audit: prioriterede P0–P2-risici og anbefalede funktioner til WooCommerce-butikken |
 | [`docs/library/deploy-roadmap-2026-11-03.md`](docs/library/deploy-roadmap-2026-11-03.md) | Deployment-roadmap: faser, estimater, porte for backup/rollback og testliste før og efter live |
 | [`docs/library/deploy-playbook-2026-11-08.md`](docs/library/deploy-playbook-2026-11-08.md) | **Deploy-playbook for den næste side** — syv faser, kontrolscript, 15-punkts Definition of Done, fældekatalog og rollback pr. flade (PDF i `reports/`) |
-| [`docs/library/website-guide-2026-11-08.md`](docs/library/website-guide-2026-11-08.md) | **Guide til nye WordPress-sites** — Git/staging sammenlignet med vores metode, produktbrief, kritisk brugerrejse, målbare release-gates og 30-dages opfølgning (PDF i `reports/`) |
+| [`docs/library/website-guide-2026-11-08.md`](docs/library/website-guide-2026-11-08.md) | **Guide til nye WordPress-sites** — Git/staging sammenlignet med vores metode, produktbrief, kritisk brugerrejse, server- og sandbox-forhold, målbare release-gates og 30-dages opfølgning (PDF i `reports/`) |
 | [`docs/roadmap.md`](docs/roadmap.md) | Optimeringsplanen for sitet, S0–S4 med tidestimater og blokeringer |
 | [`design.md`](design.md) | **Den visuelle identitet** — typografi, farver, komponenter og det lag `css/sg-design-system.css` lægger på siden (§14) |
 | [`docs/seo.md`](docs/seo.md) | SEO-regler, GEO-skabelon og måling |
