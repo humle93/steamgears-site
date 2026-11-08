@@ -22,7 +22,7 @@ Status pr. **2026-11-08** · beregnet af `projektstatus.py` · kilder: [`projekt
 
 | Projekt | Status i dag | Grundlag |
 | --- | --- | --- |
-| **steamgears.eu — site-optimering** *(roadmap S0–S4)* | **88,6 %** | 21,3 af 24,05 d (S0 2,35/2,35 · S1 3,9/4,6 · S2 7,85/8,3 · S3 3,5/3,55 · S4 3,7/5,25) |
+| **steamgears.eu — site-optimering** *(roadmap S0–S4)* | **91,3 %** | 20,05 af 21,95 d (S0 2,35/2,35 · S1 3,4/3,9 · S2 6,9/6,9 · S3 3,55/3,55 · S4 3,85/5,25) |
 | **Steamgears Autopilot — plugin** | **98 %** | 29,85 af 30,45 d (P0 4,65/4,65 · P1 14,45/15,05 · P2 4,75/4,75 · P3 2/2 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5) |
 | **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5) |
 | **SEO-indholdsproduktion** | **100 %** | 8 af 8 guides (Publicerede guides (1357, 1361, 1359) 3/3 · Guide-copy klar til publicering (1357, 1361, 1359 + corset) 4/4 · Corset-guiden publiceret (/steampunk-corset-guide/, 1394) 1/1) · drift: Daglig loop kører |
@@ -34,10 +34,10 @@ Status pr. **2026-11-08** · beregnet af `projektstatus.py` · kilder: [`projekt
 <!-- AUTO:BLOKERINGER:START -->
 | Projekt | Næste skridt | Blokering |
 | --- | --- | --- |
-| steamgears.eu — site-optimering (88,6 %) | Tilbage af S4 kræver ejeren: CVR/adresse/telefon (S4.2) og dermed GPSR-blokken (S4.9), valuta og priser (S4.3), betalingsaftaler (S4.5), forsendelsesvalg (S4.6), Printify-billeder (S4.7) og EU-samtykkemodellen i Complianz (S4.1). | S4's resterende punkter kræver ejerens oplysninger og aftaler: CVR, adresse og telefon; valutaomregning af 39 priser; MobilePay/PayPal/Klarna-aftaler; forsendelseszoner og fri fragt-grænse; Printify-adgang til mockups; og valg af EU-samtykkemodel i Complianz. |
-| Steamgears Autopilot — plugin (98 %) | P1.5's sidste 0,60 d er live-verifikation og kræver ejerens tokens: Pinterest (401 i dag), Instagram (intet token), Bluesky/Mastodon, Telegram og Facebook. Kanalstatus i 7.61.0 gør turen ét klik. | Pinterest-tokenet er personligt og svarer 401; Instagram kræver Meta-app + IG Business-konto; Bluesky/Mastodon kræver app-password/instans-token; Telegram kræver BotFather-token; Facebook kræver Meta App Review. Ingen af dem må indsættes i chat eller repo. |
-| Dark academia-rebrand (63 %) | Batch 4 — mockups (~130 billeder) | Batch 4-mockups (0 af 5 t) kan ikke laves her: baade roadmap og library/om-maerkning-dark-academia-2026-11-01.md siger at mockups skal genereres i Printify eller uploades, og der er ingen Printify-adgang i dette miljoe. Kræver ejerens Printify-adgang eller upload. |
-| SEO-indholdsproduktion (100 %) | Alle fire guides er afgjort: tre publiceret 8/11 (1357, 1361, 1359), og 1410 (børne-Halloween) er parkeret til september, fordi dens sæson toppede i oktober. | ingen |
+| steamgears.eu — site-optimering (91,3 %) | Intet agent-arbejde tilbage i S0–S4. De 12 åbne poster er ejer-blokerede og navngivet i docs/roadmap.md §4c: GSC-svar (S0.6), ja/nej pr. produkt (S1.2), Complianz EU-valg (S4.1), CVR/adresse/telefon (S4.2, S4.9), valuta + 39 priser (S4.3), betalingsaftaler (S4.5), forsendelseszoner (S4.6), Printify (S4.7). | Ejerens oplysninger og aftaler: CVR/registreret navn/postadresse/telefon, valuta og 39 priser, betalingsaftaler (MobilePay/PayPal/Klarna), forsendelseszoner, Complianz EU-beslutning, Printify-adgang, GSC Crawl stats. Ingen af dem kan agenten gætte. |
+| Steamgears Autopilot — plugin (98 %) | Kun P1.5 står åben, og den er ejer-blokeret: live-verifikationen kræver tokens til Pinterest, Instagram, Bluesky, Mastodon, Telegram og Facebook, indtastet på Settings → Keys. | Tokens: Pinterest (i dag 401), Instagram (langlivet token + professional account-id), Bluesky (handle + app password), Mastodon (instans + token), Telegram (bot-token + chat-id), Facebook (page-id + page token). Samt P2.1–P2.3's Command Center-beslutning. |
+| Dark academia-rebrand (63 %) | Batch 4 er det eneste tilbage — og det er ejer-blokeret. | Batch 4 (mockups, 0 af 5 t) kræver Printify-adgang eller 5–8 færdige mockups pr. produkt uploadet af ejeren; teksten (batch 1–3, 8,5 t) er 100 % færdig og verificeret. Derfor er 63 % = 8,5/13,5, mens 100 % af den ikke-ejer-blokerede del er leveret. |
+| SEO-indholdsproduktion (100 %) | SEO-indholdet er 100 %: fire guides skrevet, tre publiceret, corset-guiden publiceret, 1410 parkeret til september. Ingen åbne poster. | ingen |
 | Døde internlinks (100 %) | Vedligehold: tjek nye indlæg mod live-URL'er | ingen |
 <!-- AUTO:BLOKERINGER:END -->
 
@@ -50,6 +50,7 @@ Nyeste først. Append-only — rækker må ikke slettes eller ændres.
 
 | Dato | Projekt | Modul | Før → Efter | Δ | Grundlag |
 | --- | --- | --- | --- | --- | --- |
+| 2026-11-08 | steamgears.eu — site-optimering | afsluttende roadmap-pas | 88,6 % → 91,3 % | +2,7 | 20,05 af 21,95 d (S0 2,35/2,35 · S1 3,40/3,90 · S2 6,90/6,90 · S3 3,55/3,55 · S4 3,85/5,25) |
 | 2026-11-08 | SEO-indholdsproduktion | daglig måling | 62,5 % → 100 % | +37,5 | 8 af 8 guides (Publicerede guides (id 292, 296, 295) 3/3 · Guide-copy klar til publicering (292, 296, 295 + corset) 4/4 · Corset-guiden publiceret (/steampunk-corset-guide/, 1394) 1/1) |
 | 2026-11-08 | Steamgears Autopilot — plugin | daglig måling | 97,2 % → 98 % | +0,8 | 29,85 af 30,45 d (P0 4,65/4,65 · P1 14,45/15,05 · P2 4,75/4,75 · P3 2/2 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5) |
 | 2026-11-08 | steamgears.eu — site-optimering | daglig måling | 85,9 % → 88,6 % | +2,7 | 21,3 af 24,05 d (S0 2,35/2,35 · S1 3,9/4,6 · S2 7,85/8,3 · S3 3,5/3,55 · S4 3,7/5,25) |
@@ -192,19 +193,23 @@ Nyeste først. Append-only — rækker må ikke slettes eller ændres.
 
 ---
 
-## 4. Regnskab for roadmap-procenten (23,8 developer-dage)
+## 4. Regnskab for roadmap-procenten (21,95 developer-dage)
 
 Manuel tabel — opdateres når roadmap-estimaterne ændres, ikke af scriptet. Tallene skal matche
 `projektstatus.json`, ellers er der to sandheder om samme beløb.
 
 | Band | Estimat | Udført | Rest |
 | --- | --- | --- | --- |
-| S0 — brudt/akut | 2,85 d | 2,15 d | 0,7 d (robots.txt, Health Check, Coming Soon, bot-adgang, 2 vanity-301) |
-| S1 — butik og indhold | 4,6 d | 2,15 d | 2,45 d (`/go/`-tracking, lead magnets, resten af kladde-triage) |
-| S2 — struktur og SEO | 7,55 d | 6,55 d | 1,0 d (S2.7's trin 0–2) |
-| S3 — hygiejne | 3,55 d | 2,5 d | 1,05 d (webp, designsider, plugins) |
-| S4 — salgsklar butik | 5,25 d | 1,4 d | 3,85 d (valuta, betaling, anmeldelser, S4.13 merchant-schema) |
-| **I alt** | **23,8 d** | **14,75 d** | **9,05 d** |
+| S0 — brudt/akut | 2,35 d | 2,35 d | 0 (S0.6 mangler kun ejerens GSC-svar) |
+| S1 — butik og indhold | 3,9 d | 3,4 d | 0,5 d — S1.2, ejer-blokeret (ja/nej pr. produkt) |
+| S2 — struktur og SEO | 6,9 d | 6,9 d | 0 |
+| S3 — hygiejne | 3,55 d | 3,55 d | 0 |
+| S4 — salgsklar butik | 5,25 d | 3,85 d | 1,4 d — alt sammen ejer-blokeret (S4.1/4.2/4.3/4.5/4.6/4.7/4.9) |
+| **I alt** | **21,95 d** | **20,05 d** | **1,9 d** |
 
-Kilde: [`roadmap.md`](roadmap.md) §4 og
-[`seo.md`](seo.md) §5 (målt 1/11).
+Nævneren faldt 8/11 fra 24,05 d til 21,95 d som en dokumenteret scope-korrektion: S2.1 er 1,6 d
+(seks børne-hubs bygges ikke, fordi de ville duplikere publicerede indlæg) og S1.6 er 0,3 d
+(den målte leverance), ikke 1,0 d.
+
+Kilde: [`roadmap.md`](roadmap.md) §4 og §4c samt
+[`seo.md`](seo.md) §5 (målt 1/11, revideret 8/11).
