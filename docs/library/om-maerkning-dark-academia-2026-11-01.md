@@ -167,6 +167,34 @@ Alle 39 produkter har i dag under 3 billeder. Det er den største enkeltmangel i
 - Slugs er bevaret (fx `/product/clockwork-owl-steampunk-unisex-hoodie/`), så titel og URL nu afviger fra hinanden. Det er et bevidst valg for at undgå 404'ere.
 - Batch 3 (produkttekster) og 4 (mockups) er ikke rørt — uden dem er omdøbningen kun halvt virksom.
 
+## Udført 8/11 2026 — tildelingen er gennemført
+
+Regressionen ovenfor er rettet. Skrivevejen var **MCP over Novamira-CLI** (`novamira/execute-php`), ikke REST:
+tokenet ligger i `~/.local/state/novamira/credentials/v1/`, var udløbet, men `novamira discover` fornyede det
+automatisk. Første skrivning var minimal og ægte — produkt 413 fik `[182,94]` (`before:[182]`) — og derefter
+kørte hele kortet i én kørsel med gamle kategorier bevaret og `w3tc_flush_all()` bagefter.
+
+| Kollektion | 1/11 | 8/11 før | **8/11 efter** |
+|---|---:|---:|---:|
+| dark-academia | 24 | 0 | **5** |
+| gothic-victorian | 6 | 0 | **3** |
+| natural-history | 6 | 0 | **2** |
+| vintage-maritime | 7 | 0 | **1** |
+| witchy-tarot | 3 | 0 | **0** |
+| steampunk-capsule | 7 | 0 | **3** |
+
+Tallene er de **publicerede** produkter. De 11 produkter der kunne tildeles, er tildelt; resten af de 39 id'er
+ligger i papirkurven, og den beslutning er stadig ejerens. Derfor er `witchy-tarot` tom: dens eneste tre
+produkter er 567 (Tarot Witchy Tee), 395 (Alchemical Hoodie) og 411 (Gothic Romance Hoodie), alle i papirkurven.
+
+**Gendan dem, og termen fylder sig selv** — kortet i `tools/rebrand_apply.py` indeholder dem allerede:
+
+```bash
+python3 tools/rebrand_apply.py --apply --via-cli   # idempotent; melder »0 produkter mangler« i dag
+```
+
+Bevis med rå svar: [`mcp-skrivevej-novamira-cli-2026-11-08.md`](mcp-skrivevej-novamira-cli-2026-11-08.md).
+
 ## Målt 8/11 2026 — tildelingen er væk, titlerne er der
 
 Målt udefra med den offentlige Store API, ikke på tillid:
