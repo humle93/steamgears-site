@@ -47,11 +47,13 @@ forskelligt.
 | --- | --- | --- |
 | `bestået` | 0 | hver kanal med en metric har landet mindst én række |
 | `blokeret` | 3 | mindst én kanal kan ikke måles endnu (token eller scope mangler) — ikke en fejl |
-| `fejlet` | 1 | **et virkende token landede intet**, eller målingen kunne ikke læses |
+| `fejlet` | 1 | **et virkende token landede intet**, eller forbindelsen selv fejlede |
 | — | 2 | intet credential: intet er målt, og intet er skrevet |
 
 `fejlet` er den række der er pointen. `blokeret` er den række der forhindrer at en tom kanal bliver meldt som
-en måling. Forskellen står i koden, ikke i en læser.
+en måling — og den dækker også et plugin der **ikke har abilityen endnu**: live kørte 7.64.6 da målingen blev
+bygget, så den natlige kørsel ville ellers have meldt rødt på noget ejerens *Plugins → Update* løser.
+Forskellen står i koden, ikke i en læser.
 
 Målingen kører nu i [`novamira-keepalive.yml`](../../.github/workflows/novamira-keepalive.yml) med det netop
 fornyede access-token og skriver `reports/live-kanaler-<dato>.md`. Exit 3 giver en `::notice`, exit 1 en

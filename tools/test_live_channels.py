@@ -176,18 +176,25 @@ class LiveChannelsTest(unittest.TestCase):
         self.assertEqual((telegram["kanal"], telegram["landet"], telegram["status"]),
                          ("Telegram", "no_metric", "ok"))
 
-    def test_05_aeldre_plugin_uden_analytics_er_ikke_bestaet(self):
+    def test_05_aeldre_plugin_uden_analytics_er_blokeret(self):
+        # Live kørte 7.64.6 da abilityen blev bygget: den findes ikke før Update-klikket,
+        # og det må ikke melde rødt — der er intet at rette i koden, kun et plugin at opdatere.
         STATE["payload"] = {"channels": {}, "summary": {}}
         rows = live_channels.evaluate(live_channels.measure(TOKEN))
-        self.assertEqual(live_channels.verdict(rows), "fejlet")
+        self.assertEqual(live_channels.verdict(rows), "blokeret")
         self.assertIn("ældre end abilityen", rows[0]["detalje"])
 
-    def test_06_ability_fejl_bliver_ikke_til_bestaet(self):
+    def test_06_ukendt_ability_er_blokeret_ikke_fejl(self):
         STATE["payload"] = None  # værktøjet svarer isError
         measured = live_channels.measure(TOKEN)
         rows = live_channels.evaluate(measured)
-        self.assertEqual(live_channels.verdict(rows), "fejlet")
+        self.assertEqual(live_channels.verdict(rows), "blokeret")
         self.assertIn("unknown ability", rows[0]["detalje"])
+
+    def test_06b_manglende_forbindelse_er_fejl(self):
+        rows = live_channels.evaluate({"errors": {"initialize": "HTTP 401: rest_forbidden"}})
+        self.assertEqual(live_channels.verdict(rows), "fejlet")
+        self.assertEqual(rows[0]["kanal"], "MCP-forbindelse")
 
     def test_07_scope_afslag_er_blokeret_med_scopet_navnt(self):
         payload = good_payload()

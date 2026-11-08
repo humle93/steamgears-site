@@ -35,6 +35,7 @@ on:
     paths:
       - .github/workflows/novamira-keepalive.yml
       - tools/live_state.py
+      - tools/live_channels.py
       - tools/mcp_keepalive.py
 
 permissions:

@@ -17,8 +17,9 @@ Målingen kræver et token til Novamira-fladen, så den kan ikke køre i en tom 
     python3 tools/live_channels.py --days 30
 
 Exit: 0 = alle kanaler med en metric har landet tal · 1 = en kanal med et virkende token
-landede intet, eller målingen fejlede · 2 = ingen credential (intet er målt) · 3 = intet er
-fejlet, men mindst én kanal kan ikke måles endnu (mangler token eller scope).
+landede intet (eller forbindelsen fejlede) · 2 = ingen credential (intet er målt) · 3 = intet
+er fejlet, men målingen kan ikke laves endnu: en kanal mangler token eller scope, eller
+plugin'et på sitet er ældre end abilityen.
 
 Tokenet printes aldrig — kun sitets egne svar.
 """
@@ -105,12 +106,20 @@ def evaluate(measured: dict) -> list[dict]:
     """Én række pr. kanal: kan den hente, landede der noget, og hvad betyder det."""
     if measured.get("errors"):
         first = next(iter(measured["errors"].items()))
-        return [{"kanal": "MCP-forbindelse", "kan_hente": "—", "landet": "—",
-                 "status": "fejl", "detalje": f"{first[0]}: {first[1]}"}]
+        # Kun forbindelsen selv er en fejl. Et plugin der ikke har abilityen endnu
+        # (live kørte 7.64.6 da denne måling blev bygget) kan ikke måles — og det er
+        # blokeret, ikke rødt: ejerens *Plugins → Update* er svaret, ikke en fejlretning.
+        transport = first[0] in ("initialize", "tools/list")
+        return [{"kanal": "MCP-forbindelse" if transport else "channel-health",
+                 "kan_hente": "—", "landet": "—",
+                 "status": "fejl" if transport else "blokeret",
+                 "detalje": f"{first[0]}: {first[1]}"}]
     analytics = measured.get("analytics") or {}
     if not analytics:
         return [{"kanal": "channel-health", "kan_hente": "—", "landet": "—",
-                 "status": "fejl", "detalje": "svaret har ingen analytics — plugin'et er ældre end abilityen"}]
+                 "status": "blokeret",
+                 "detalje": "svaret har ingen analytics — plugin'et er ældre end abilityen "
+                            "(opdater til 7.64.9)"}]
 
     rows: list[dict] = []
     for channel, row in analytics.items():
