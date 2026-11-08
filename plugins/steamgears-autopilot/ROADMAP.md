@@ -6,6 +6,13 @@ release is **7.64.9**, and **7.64.6 is what steamgears.eu runs** (measured 8/11 
 `plugins/` is **7.64.9**, and nothing reaches the site until an update runs from wp-admin · update this file in
 the same commit as any release._
 
+**The 7.64.9 upgrade has no agent path, measured 8/11 2026:** there is no MCP credential anywhere — 0
+repository secrets, no token file in the sandbox, and the public routes that exist answer `401` — so the
+install is the owner's ***Plugins → Update*** click, not something a push can do. With
+`NOVAMIRA_REFRESH_TOKEN` + `NOVAMIRA_SECRETS_TOKEN` in place, the nightly keepalive proves the installed
+`autopilot_version` and writes the channel measurement by itself. Evidence, rejected paths and the
+rollback gap: [`docs/library/live-7-64-9-2026-11-08.md`](../../docs/library/live-7-64-9-2026-11-08.md).
+
 **History, kept because it explains the rituals:** 7.58.0 took the whole REST API down —
 `includes/diagnostics.php` registered its route with `SGAP_Admin::NS`, a constant that has never existed, so
 `rest_api_init` died with a fatal on every `/wp-json/` request (measured 7/11 2026, see

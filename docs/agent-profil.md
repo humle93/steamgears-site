@@ -172,8 +172,8 @@ PYTHONPATH=tools/_deps python3 tools/project_reports.py
 tools/_deps/bin/php -l plugins/steamgears-autopilot/steamgears-autopilot.php
 ```
 
-**Blokeringer der kræver ejeren:** OAuth-browsergodkendelse i en ny sandkasse; *Plugins → Update* til 7.64.8
-(tokenrettelsen) og en genforbindelse af Pinterest med `boards:read`; P1.5-kanalnøgler; Printful-kostpriser/mockups; ja/nej for produkterne
+**Blokeringer der kræver ejeren:** OAuth-browsergodkendelse i en ny sandkasse; *Plugins → Update* til 7.64.9
+(tokenrettelsen, kanalstatus-entydigheden og P1.5-målingen) og en genforbindelse af Pinterest med `boards:read`; P1.5-kanalnøgler; Printful-kostpriser/mockups; ja/nej for produkterne
 942/765/766/767; samt CVR, navn, adresse, telefon, valuta/priser, betalingsaftaler, Complianz-valg og
 forsendelseszoner. GSC Crawl stats → By response kræver ejerens adgang. Se den aktuelle og komplette liste i
 [`docs/roadmap.md`](roadmap.md) §4c. S0.4's vanity-301'er er lukket som overflødige — opret ikke en Redirection-gruppe.

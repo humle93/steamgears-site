@@ -48,15 +48,36 @@ _Opdateret 2026-11-08 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
-- `3558d13 Pinterest-tokenet hentes nu fra WooCommerce (7.64.6)`
-- `2d41c94 chore(status): daglig projektstatus 2026-11-08`
-- `145f6f9 Begge roadmaps lukket: 1,5 d + 0,6 d er målt ejer-blokerede`
-- `243f629 Kanalstatus: en afvist token er ikke »ready« (7.64.4)`
-- `1ac26ba Test: evne-tællingen i admin-tools følger de fire niche-evner`
-- `cad5782 chore(status): daglig projektstatus 2026-11-08`
+- `e4eb037 Roadmap-headeren stod stadig på 7.64.8 efter bumpet til 7.64.9`
+- `45a3afc Zip'en til 7.64.9 var pakket uden filrettigheder — nu med mode og fast dato`
+- `6b3a155 P1.5-målingen: et plugin uden abilityen er blokeret, ikke fejlet`
+- `f136581 P1.5: kanalstatus kan nu måles pr. kanal — platformstallene i sgap_events (7.64.9)`
+- `baf9941 Roadmap: §1–§4 er historik, og hvert åbent punkt har sin ejerblokering (7.64.8)`
+- `e9c13fd Pinterest: tokenkilden bestemmer hvem der må forny (7.64.7)`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 8/11 — live-opdateringen til 7.64.9 kunne ikke køres, og nu er det målt hvorfor
+
+- **Fire veje blev prøvet, alle med svar i hånden.** Repository-secrets er `total_count: 0` (så hverken
+  `NOVAMIRA_REFRESH_TOKEN` eller `NOVAMIRA_SECRETS_TOKEN` findes); en `workflow_dispatch` af
+  `novamira-keepalive.yml` (run `42507407353`) sprang fornyelsen over med `have=false`; sandkassen har ingen
+  tokenfil (`~/.config/novamira/config.json` har kun `clientId`/`clientGrant` — klienten fra 6/11 er
+  registreret, men godkendelsen er ikke gennemført her); og den offentlige `/sgap/v1/tick` puster kun til
+  publisher-køen. Der findes **ingen** auto-update-cron: `Plugin_Upgrader` kaldes kun fra
+  `SGAP_Updater::install()` bag admin-siden og abilityen `update`.
+- **Fælden der kostede runden:** det er ikke nok at zip'en ligger på `main`. Et plugin-folder skiftes kun af
+  WordPress selv, og alle læseflader (`channel-health`, `niche/runs`, `diagnostics`) svarer `401` uden token.
+  Device-grant afviser en DCR-klient (`401 invalid_client`), og CLI-klientens grant kræver stadig ejerens
+  browser.
+- **To dokumentfejl rettet i samme pas:** `docs/roadmap.md` §2b sagde «Repo 7.64.8, live 7.64.6», og
+  agent-profilen bad ejeren opdatere «til 7.64.8». Begge hedder nu 7.64.9, og blokeringen er navngivet som en
+  credential-mangel i stedet for et manglende klik alene.
+- **Rollback-hullet blev synligt:** repoet holder præcis én zip (CI fejler på flere), så 7.64.6 kan ikke
+  geninstalleres uden at den gamle zip hentes **før** opdateringen. Det er ikke ændret — det er en beslutning om
+  repoets regler.
+- Dokument med beviser og den præcise ejerhandling: [library/live-7-64-9-2026-11-08.md](library/live-7-64-9-2026-11-08.md).
 
 ### 8/11 — kodegennemgang: tokenkilden bestemmer, hvem der må forny (7.64.7)
 
