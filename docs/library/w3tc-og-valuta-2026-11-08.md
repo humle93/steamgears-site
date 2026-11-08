@@ -85,87 +85,108 @@ Gendan `wp-content/uploads/w3tc-master-foer-minify-2026-11-08.php` til
 `wp-content/w3tc-config/master.php`, slet `wp-content/db.php`, kør `w3tc_flush_all()`. Så er W3TC
 tilbage på formiddagens tilstand (pgcache + browsercache, ingen minify/dbcache/lazyload).
 
-## 2. Valutaen: butikken kører nu DKK
+## 2. Valutaen: DKK, og priserne er nu tabellens tal
 
-`woocommerce_currency` blev ændret **USD → DKK**, og alle priser blev sat i samme kørsel: **72
-prisrækker** (12 simple produkter + 60 variationer) fordelt på 24 produkter. Der fandtes ingen
-udsalgspriser, så ingen blev rørt.
+`woocommerce_currency` er **DKK**. Priserne er i dette pas sat til **præcis de tal DKK-tabellen i
+[`valuta-og-priser-2026-11-02.md`](valuta-og-priser-2026-11-02.md) angiver**, ordret fra tabellen — ingen
+egen kurs, ingen egen afrunding, ingen »bevar nuværende beløb«-variant.
 
-**Metoden er dokumentets egen.** [`valuta-og-priser-2026-11-02.md`](valuta-og-priser-2026-11-02.md)
-siger: primær valuta **DKK**, kursen skal **genhentes på skiftedagen**, og DKK afrundes til **nærmeste
-5 kr**. Kursen blev hentet 8/11 fra `api.frankfurter.dev` (ECB-referencer, dateret 6/11 2026):
-**1 USD = 6,6952 DKK**. Hvert produkt fik `round(pris × 6,6952 / 5) × 5`.
+Kilden er tabellen i dokumentet: den har **38 rækker** (linje 32–69, overskrift på linje 30:
+`| Produkt | USD nu | EUR-forslag | DKK-forslag |`) og dækker ifølge linje 28 »38 produkter med pris«.
+**11 af dem findes i det nuværende katalog**, og de 11 står nu med tabellens DKK-tal i alle deres
+variationer.
 
-### De 24 priser, før og efter
+### De 11 dokumenterede rækker — tallet ordret fra dokumentet
 
-| ID | Produkt | Status | Før (USD) | Efter (DKK) | 2/11-tabellens DKK |
-| --- | --- | --- | ---: | ---: | ---: |
-| 399 | Clockwork Octopus — Curiosity Hoodie | publish | $109 | **730 kr** | 335 |
-| 401 | Whale Airship — Vintage Voyage Hoodie | publish | $109 | **730 kr** | 335 |
-| 403 | Mechanical Elephant — Curiosity Hoodie | publish | $109 | **730 kr** | 335 |
-| 413 | Airship Storm — Vintage Engraving Hoodie | publish | $109 | **730 kr** | 335 |
-| 477 | Copper Pilot Goggles — Vintage Windproof | publish | $69 | **460 kr** | 165 |
-| 483 | Time Traveler Top Hat with Goggles | publish | $89 | **595 kr** | 335 |
-| 489 | Steampunk Overbust Corset — Leather Lace-Up | publish | $219 | **1465 kr** | 400 |
-| 491 | Gothic Overbust Corset — Faux Leather, Silver | publish | $199 | **1330 kr** | 435 |
-| 493 | Wine Red Velvet Tailcoat — Victorian Frock Coat | publish | $279 | **1870 kr** | 435 |
-| 495 | Victorian Vampire Tailcoat — Brocade | publish | $249 | **1665 kr** | 265 |
-| 557 | Airship Armada — Vintage Engraving Tee | publish | $79 | **530 kr** | 180 |
-| 765 | Steampunk Goggle DIY Starter Kit | draft | $29.90 | **200 kr** | — |
-| 766 | Steampunk Leather Utility Belt & Holster | draft | $24.90 | **165 kr** | — |
-| 767 | Digital Blueprint: Victorian Corset & Vest PDF | draft | $6.90 | **45 kr** | — |
-| 940 | Clockwork Seer — Brass Pocket Watch Pendant | publish | $129 | **865 kr** | — |
-| 941 | The Aeronaut — Brass Skeleton Pocket Watch | publish | $149 | **1000 kr** | — |
-| 942 | Ink and Steam — Clockwork Charm Bracelet | draft | $69 | **460 kr** | — |
-| 954 | Brass Luna Moth — Clockwork Herbarium Tee | publish | $79 | **530 kr** | — |
-| 965 | Clockwork Rose — Herbarium Art Print | publish | $59 | **395 kr** | — |
-| 966 | Brass Luna Moth — Herbarium Art Print | publish | $59 | **395 kr** | — |
-| 967 | The Raven Chronometer — Herbarium Art Print | publish | $59 | **395 kr** | — |
-| 970 | Brass Luna Moth — Herbarium Phone Case | publish | $49 | **330 kr** | — |
-| 1255 | Brass Fox Automaton — Steampunk Tee | publish | $79 | **530 kr** | — |
-| 1282 | Astrolabe Planisphere — Steampunk Tee | publish | $79 | **530 kr** | — |
+| ID | Produkt (nuværende navn) | Dok.linje | Dokumentets række | Før dette pas | Nu (DB + side) | Ændring |
+| --- | --- | ---: | --- | ---: | ---: | ---: |
+| 399 | Clockwork Octopus — Curiosity Hoodie | **56** | `$49.95 → 335 kr` | 730 kr | **335 kr** | −54 % |
+| 401 | Whale Airship — Vintage Voyage Hoodie | **66** | `$49.95 → 335 kr` | 730 kr | **335 kr** | −54 % |
+| 403 | Mechanical Elephant — Curiosity Hoodie | **63** | `$49.95 → 335 kr` | 730 kr | **335 kr** | −54 % |
+| 413 | Airship Storm — Vintage Engraving Hoodie | **54** | `$49.95 → 335 kr` | 730 kr | **335 kr** | −54 % |
+| 477 | Copper Pilot Goggles - Vintage Windproof Riding | **37** | `$24.95 → 165 kr` | 460 kr | **165 kr** | −64 % |
+| 483 | Time Traveler Top Hat with Goggles | **65** | `$49.95 → 335 kr` | 595 kr | **335 kr** | −44 % |
+| 489 | Steampunk Overbust Corset - Leather Lace-Up Burlesque | **67** | `$59.95 → 400 kr` | 1465 kr | **400 kr** | −73 % |
+| 491 | Gothic PU Leather Overbust Corset — Silver | **68** | `$64.95 → 435 kr` | 1330 kr | **435 kr** | −67 % |
+| 493 | Wine Red Velvet Tailcoat — Victorian Frock Coat | **69** | `$64.95 → 435 kr` | 1870 kr | **435 kr** | −77 % |
+| 495 | Victorian Vampire Tailcoat — Brocade Gothic Jacket | **52** | `$39.95 → 265 kr` | 1665 kr | **265 kr** | −84 % |
+| 557 | Airship Armada — Vintage Engraving Tee | **39** | `$26.95 → 180 kr` | 530 kr | **180 kr** | −66 % |
 
-### Verificeret på begge flader
+Fire af rækkerne har et andet produktnavn i dag end i tabellen; det er samme vare, og kolonnen viser
+dokumentets eget navn:
 
-- **DB:** alle 24 produkter står med DKK-pris; de fire kladder (765/766/767/942) er ikke offentlige og
-  er derfor kun kontrolleret i databasen: 200, 165, 45 og 460 kr.
-- **Offentlig prisflade:** WooCommerce Store API (`/wp-json/wc/store/v1/products?per_page=100`) svarer
-  **200** med **20 produkter, alle med `currency_code: DKK`** og `currency_symbol: kr.`.
-- **Produktsiderne:** alle **20 af 20** offentlige produktsider svarer 200, viser prisen med `kr.` og
-  **hvert vist beløb matcher databasen** (fx `kr. 530.00` for id 1282 og `kr. 1,465.00` for id 489).
-  **0 afvigelser.**
+| ID | Navn i dokumentet (linje) | Navn i butikken nu |
+| --- | --- | --- |
+| 477 | `Copper Pilot Goggles - Vintage Windproof Riding` (37) | Copper Pilot Goggles — Vintage Windproof |
+| 489 | `Steampunk Overbust Corset - Leather Lace-Up Burlesque` (67) | Steampunk Overbust Corset — Leather Lace-Up |
+| 491 | `Gothic PU Leather Overbust Corset — Silver` (68) | Gothic Overbust Corset — Faux Leather, Silver (PU = faux læder) |
+| 495 | `Victorian Vampire Tailcoat — Brocade Gothic Jacket` (52) | Victorian Vampire Tailcoat — Brocade |
 
-### Afvigelsen der skal stå her: tabellen passer ikke længere på kataloget
+### De 13 produkter uden nogen dokumenteret DKK-pris
 
-Dette er dokumentets vigtigste måling. **Kun 11 af de 24 produkter har en række i 2/11-tabellen**, og
-for alle 11 bygger tabellens DKK-tal på den USD-pris produktet havde **2/11**. Kataloget er blevet
-genprissat i USD siden:
+Disse produkter står i butikken, men har **ingen række** i tabellen. Der er derfor ikke gættet nogen pris:
+deres pris er den samme som før dette pas (omregningen fra forrige pas), og det er et faktum, ikke et valg.
 
-| Produkt | USD 2/11 (tabellens grundlag) | USD 8/11 (før skiftet) | Tabel | Anvendt |
-| --- | ---: | ---: | ---: | ---: |
-| Clockwork Octopus Hoodie (399) | $49.95 | $109 | 335 kr | 730 kr |
-| Steampunk Overbust Corset (489) | $59.95 | $219 | 400 kr | 1 465 kr |
-| Wine Red Velvet Tailcoat (493) | $64.95 | $279 | 435 kr | 1 870 kr |
-| Airship Armada Tee (557) | $26.95 | $79 | 180 kr | 530 kr |
+| ID | Produkt | Status | Pris nu |
+| --- | --- | --- | ---: |
+| 765 | Steampunk Goggle DIY Starter Kit | draft | 200 kr |
+| 766 | Steampunk Leather Utility Belt & Holster | draft | 165 kr |
+| 767 | Digital Blueprint: Victorian Corset & Vest PDF | draft | 45 kr |
+| 940 | Clockwork Seer — Brass Pocket Watch Pendant | publish | 865 kr |
+| 941 | The Aeronaut — Brass Skeleton Pocket Watch | publish | 1000 kr |
+| 942 | Ink and Steam — Clockwork Charm Bracelet | draft | 460 kr |
+| 954 | Brass Luna Moth — Clockwork Herbarium Tee | publish | 530 kr |
+| 965 | Clockwork Rose — Herbarium Art Print | publish | 395 kr |
+| 966 | Brass Luna Moth — Herbarium Art Print | publish | 395 kr |
+| 967 | The Raven Chronometer — Herbarium Art Print | publish | 395 kr |
+| 970 | Brass Luna Moth — Herbarium Phone Case | publish | 330 kr |
+| 1255 | Brass Fox Automaton — Steampunk Tee | publish | 530 kr |
+| 1282 | Astrolabe Planisphere — Steampunk Tee | publish | 530 kr |
 
-At føre tabellens absolutte tal ind ville derfor **sænke priserne med 45–78 %** — og det strider mod
-tabellens egen regel: »Skiftet må ikke ændre, hvad kunden reelt betaler, med mere end afrundingen.« De
-13 øvrige produkter (Atelier-smykkerne, Herbarium-serien, V5-tees og de fire kladder) har **ingen
-række** i tabellen, så der findes intet dokumenteret tal at sætte for dem.
+Beviset for at rækken mangler, er en rå læsning af dokumentet: tabellen har 38 rækker på linje 32–69, og
+et opslag på hvert af de 13 navne giver **0 træffere** i hele dokumentet (`grep -c` → `0` for
+»Steampunk Goggle DIY«, »Utility Belt«, »Digital Blueprint«, »Pocket Watch Pendant«, »Skeleton Pocket
+Watch«, »Charm Bracelet«, »Herbarium«, »Phone Case«, »Brass Fox« og »Astrolabe«). Dokumentets eneste
+omtale af smykkerne og Herbarium-serien er i [`priser-fra-store-api-2026-11-03.md`](priser-fra-store-api-2026-11-03.md),
+og den tabel er i **USD**, ikke DKK — den kan derfor ikke bruges som DKK-kilde.
 
-Valutaskiftet blev derfor udført som et **valutaskift**: samme pris, ny valuta, omregnet med den
-dokumenterede kurs og afrundet efter den dokumenterede regel. Valutaen og regnestykket er udført som
-foreskrevet; de absolutte tal fra 2/11 er **ikke** anvendt, fordi de ville ændre kundeprisen markant.
-Kolonnen længst til højre viser præcis, hvad ejeren får, hvis de 11 tal foretrækkes alligevel.
+### Verificeret på begge flader, 0 afvigelser
 
-**EUR som sekundærvaluta vises ikke.** Dokumentet foreskriver EUR »via currency switcher, ikke som
-base«, men der er **ingen aktiv currency-switcher** på sitet (målt: 0 aktive plugins med »currenc« i
-stien). Det er en ejerhandling: installer og aktivér en switcher, så konfigurerer agenten EUR.
+- **DB:** hvert af de 11 produkter står med tabeltallet, og **alle variationer** har samme tal (fx 489 med
+  6 variationer: alle `400`; 491 med 6: alle `435`; 493 med 4: alle `435`).
+- **Den offentlige prisflade (produktsiden, læst som anonym):** **11 af 11** viser præcis tabeltallet med
+  `kr.`-symbol — fx `kr. 335.00` (399, 401, 403, 413, 483), `kr. 165.00` (477), `kr. 400.00` (489),
+  `kr. 435.00` (491 og 493), `kr. 265.00` (495), `kr. 180.00` (557). **0 afvigelser.**
+- **Alle produktsider:** **20 af 20** svarer 200 og viser et `kr.`-beløb der matcher både DB og Store API.
+- **Store API:** 20 produkter, alle `currency_code: DKK`, `currency_symbol: kr.`.
+- **Kurv og kasse:** `/cart/` 200, `/checkout/` 200 med en vare i kurven (395,00 kr), og hele checkouten
+  blev desuden gennemført tre gange tidligere i dag (ordre 1528, 1529, 1530 — alle annulleret med note).
 
-### Rollback af priserne
+### Dokumentets egen modsætning — rå citater, ikke et valg
 
-De gamle USD-tal står i tabellen ovenfor. Ét kald genopretter dem: `woocommerce_currency` til `USD` og
-hvert produkt tilbage til kolonnen »Før (USD)«.
+Tabellen modsiger sin egen regel, og det skal stå som et faktum:
+
+- Linje 73 i samme dokument: »**Skiftet må ikke ændre, hvad kunden reelt betaler, med mere end
+  afrundingen.**«
+- Linje 16: »Kursen skal genhentes på skiftedagen — **tabellen er et forslag, ikke en facitliste**.«
+- Linje 23: »Afrunding: EUR til nærmeste `x,95`, **DKK til nærmeste 5 kr**.«
+- Men tabellens DKK-kolonne er udregnet af de USD-priser produkterne havde **2/11**, og de er siden
+  ændret i butikken. Målt 8/11, før dette pas: hoodie 399 stod i **$109** (tabellens række, linje 56,
+  siger `$49.95 → 335 kr`), corset 489 i **$219** (linje 67: `$59.95 → 400 kr`).
+
+Konsekvensen er målt og står i tabellen ovenfor: de 11 priser falder mellem **44 % og 84 %** i forhold til
+hvad butikken viste før passet. Tabellens tal er alligevel sat, fordi det er dem dokumentet angiver, og
+modsætningen er ikke løst ved at vælge side.
+
+**Én konkret ejerhandling:** åbn **WooCommerce → Produkter** og gennemse prisen på de 11 produkter i
+tabellen (335 / 165 / 335 / 400 / 435 / 435 / 265 / 180 kr). Er de tal de rigtige, er posten færdig som
+den står; er de for lave, ret dem i samme felt, eller sig at tabellen skal genberegnes mod de nuværende
+USD-priser — så kører agenten det i én kørsel.
+
+### Rollback
+
+De tidligere priser står i kolonnen »Før dette pas« ovenfor. Ét kald genopretter dem; valutakoden bliver
+`DKK` i begge tilfælde.
 
 ## 3. Hvad der stadig ikke kan gøres af agenten
 

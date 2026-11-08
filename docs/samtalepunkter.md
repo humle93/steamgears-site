@@ -39,7 +39,7 @@ _Opdateret 2026-11-08 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Næste skridt
 
-- **steamgears.eu — site-optimering** — Intet agent-arbejde tilbage i S0–S4: alle fem bands er færdige og målt, og de resterende poster er ejerens og navngivet i §4c og blocked_by. Målt 8/11: 24 produkter (20 publicerede, 4 kladder) i **DKK** med alle 72 prisrækker sat efter dagens ECB-kurs (6,6952) og afrunding til nærmeste 5 kr; W3TC kører med **minify, lazy load og database-cache slået til** efter tre gennemførte testordrer (1528/1529/1530, alle annulleret med note); fri fragt i DK og ingen forsendelse til EU/UK/RoW; Stripe + bankoverførsel; Complianz på EU opt-in.
+- **steamgears.eu — site-optimering** — Intet agent-arbejde tilbage i S0–S4: alle fem bands er færdige og målt, og de resterende poster er ejerens og navngivet i §4c og blocked_by. Målt 8/11: 24 produkter (20 publicerede, 4 kladder) i **DKK**, hvor de **11 produkter med en række i DKK-tabellen** står med **tabellens tal ordret** (335/165/400/435/265/180 kr) og de 13 uden række har uændret pris med id og målt beløb dokumenteret; W3TC kører med **minify, lazy load og database-cache slået til** efter tre gennemførte testordrer (1528/1529/1530, alle annulleret med note); fri fragt i DK og ingen forsendelse til EU/UK/RoW; Stripe + bankoverførsel; Complianz på EU opt-in.
 - **Steamgears Autopilot — plugin** — Agent-scope er færdigt (29,85 af 29,85 d). Ejeren har lagt Pinterest-tokenet ind i WooCommerce-integrationen, og 7.65.0 — som blev lagt på sitet 8/11 gennem MCP (`Plugin_Upgrader` i `execute-php`; `update` svarer nu »Already up to date«) — henter det nu derfra gennem integrationens egen dekryptering: målt 8/11 virker det (konto `cpaleadsis`, id 688980580401955331), men appen mangler scopes `boards:read`, så pin-lister og Pin Analytics kan stadig ikke måles. Næste skridt er ejerens: genforbind Pinterest med board-adgang (eller et developer-token med boards:read + pins:read). Resten af blocked_by står uændret.
 - **Dark academia-rebrand** — Kun to ting står tilbage: (1) **witchy-tarot** kan først få indhold når ejeren siger ja til at gendanne 567 (Tarot Witchy Tee) — og eventuelt 395/411 — fra papirkurven; derefter fylder `python3 tools/rebrand_apply.py --apply --via-cli` termen automatisk, fordi kortet allerede indeholder dem; (2) **Batch 4-mockups** (5 t) kræver Printful-adgang eller 5–8 færdige billeder pr. produkt.
 - **SEO-indholdsproduktion** — SEO-indholdet er 100 %: fire guides skrevet, tre publiceret, corset-guiden publiceret, 1410 parkeret til september. Ingen åbne poster.
@@ -48,15 +48,36 @@ _Opdateret 2026-11-08 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `99ce5b8 W3TC slået til og butikken skiftet til DKK — begge poster udført på live og målt udefra Modul: S4.3 valuta + priser, og seo.md #4 W3TC Før: — Efter: — Δ: — Grundlag: ingen ændring`
 - `a3b80a9 Sidste to restpunkter gjort konkrete: P1.5s versionskrav er indfriet, og ingen post står som »blokeret« Modul: restpunkter — roadmap Før: — Efter: — Δ: — Grundlag: ingen ændring`
 - `600c7af Undtag rebrand-workflowens egen rapport-commit, så CI ikke lyser rødt for maskinens eget arbejde Modul: værnet — commit-tjek Før: — Efter: — Δ: — Grundlag: ingen ændring`
 - `2b915aa Restpunkterne er gennemgået med skriveadgang: Complianz og plugin-opdateringen er udført, resten er konkrete ejerhandlinger Modul: restpunkter — site og plugin Før: — Efter: — Δ: — Grundlag: ingen ændring`
 - `477c3bb Merge branch 'main' of https://github.com/humle93/steamgears-site into freebuff/cca5dfcf9656b5d36ff3151f`
 - `05101ef Modul: Steamgears Autopilot — sproget og kilden synlige i køen (7.65.0) Før: 100 %  →  Efter: 100 %  (Δ 0) Grundlag: ingen ændring`
-- `f49f155 chore(rebrand): kørselsrapport for tildelingen`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 8/11 — priserne er nu tabellens egne tal, ikke en omregning
+
+- **Forrige pas valgte en omregning; det var en egen beslutning.** Nu er DKK-tabellen læst på ny (38 rækker,
+  linje 32–69) og de **11 produkter der findes i kataloget** har fået **tabellens tal ordret**: 335 kr
+  (399/401/403/413/483), 165 kr (477), 400 kr (489), 435 kr (491/493), 265 kr (495) og 180 kr (557) — også
+  i alle variationer. Ingen kurs, ingen egen afrunding.
+- **13 produkter har ingen række** i dokumentet: 765, 766, 767, 940, 941, 942, 954, 965, 966, 967, 970,
+  1255, 1282. Deres pris er uændret, og de står med id, målt beløb og beviset for at rækken mangler
+  (0 grep-træf i et dokument med 38 tabelrækker). Der er ikke gættet et tal.
+- **Fælden: dokumentets tabel modsiger sin egen regel.** Linje 73 siger at skiftet ikke må ændre hvad kunden
+  betaler ud over afrundingen, men tabellens DKK-tal er udregnet af 2/11-USD-priserne, og butikken er
+  genprissat siden (hoodie $49.95 → $109; corset $59.95 → $219). Tabellens tal er sat alligevel, fordi det er
+  dem dokumentet angiver, og de 11 priser falder derfor 44–84 %. Modsætningen står med citater og
+  linjenumre — ikke løst ved at vælge side — og ejerhandlingen er at gennemse de 11 priser i
+  **WooCommerce → Produkter**.
+- **Målt:** 11 af 11 produktsider viser præcis det dokumenterede beløb med `kr.` (0 afvigelser mod DB og
+  Store API), 20 af 20 produktsider svarer 200, kurv og kasse 200 med vare i kurven, og W3TC står stadig på
+  `minify/dbcache/lazyload: true` med kombinerede assets (29–35 minify-referencer pr. side).
+- **Fire navne er ændret siden tabellen**, men varen er den samme: 477 (Windproof Riding), 489
+  (Burlesque), 491 (PU → faux læder) og 495 (Brocade Gothic Jacket). Koblingen står i dokumentet.
 
 ### 8/11 — W3TC slået til og butikken skiftet til DKK, begge målt udefra
 

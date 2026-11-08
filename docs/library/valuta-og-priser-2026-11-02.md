@@ -1,6 +1,6 @@
 # Valuta og priser — forslag til S4.3
 
-> **Status 8/11 2026: udført.** Butikken kører nu **DKK**, og alle 24 produkter har fået DKK-pris efter denne omskrivnings metode: dagens ECB-kurs (6,6952) og afrunding til nærmeste 5 kr. Tabellen herunder blev **ikke** ført ind som absolutte tal, fordi kataloget er blevet genprissat i USD efter 2/11 og tabellen kun dækker 11 af de 24 produkter; se [`w3tc-og-valuta-2026-11-08.md`](w3tc-og-valuta-2026-11-08.md) for hele før/efter-listen og begrundelsen.
+> **Status 8/11 2026: udført som dokumenteret.** Butikken kører **DKK**, og de **11 produkter i det nuværende katalog der har en række i tabellen herunder** er sat til **tabellens DKK-tal ordret** (linje 32–69) — ingen kurs, ingen egen afrunding. De **13 produkter uden række** har beholdt deres pris og står med id og målt beløb. Tabellen bygger på USD-priserne fra 2/11, som butikken siden har ændret, så tabellens tal ligger 44–84 % under det butikken viste før — det er dokumenteret med citater og linjenumre i [`w3tc-og-valuta-2026-11-08.md`](w3tc-og-valuta-2026-11-08.md), sammen med den ene ejerhandling der afgør sagen.
 
 Butikken kører i **USD**. For en dansk butik med EU-levering betyder det, at kunden skal regne om i
 hovedet, og at momsvisning bliver meningsløs. S4.3 kræver både et valutaskift **og** nye priser —
@@ -82,13 +82,15 @@ produkter og undgår, at en tee koster 179,32 kr.
 
 ## Hvad der blev gjort 8/11
 
-Valutaen blev skiftet til **DKK**, og alle 72 prisrækker (24 produkter) blev sat efter metoden ovenfor:
-ECB-kursen blev genhentet på skiftedagen (**1 USD = 6,6952 DKK**, dateret 6/11) og hvert produkt rundet
-til nærmeste 5 kr. To ting fra »Før du skifter« blev kontrolleret undervejs: priserne er sat **inkl.
-moms** (`woocommerce_prices_include_tax: yes`, 25 %), og kunden betaler det samme som før, kun i DKK —
-det var netop grunden til at tabellens absolutte tal ikke blev brugt (de bygger på USD-priser fra 2/11;
-kataloget er genprissat siden). Fragt og betalingsgebyrer er stadig ejerens poster (S4.6/S4.5), og EUR
-kan ikke vises som sekundærvaluta, fordi der ikke er nogen currency-switcher på sitet.
+Valutaen blev skiftet til **DKK**, og de 11 produkter i det nuværende katalog der har en række i tabellen
+fik **tabellens tal ordret** — 335 / 165 / 335 / 400 / 435 / 435 / 265 / 180 kr — i alle deres variationer.
+Der blev ikke brugt nogen kurs og ingen egen afrunding: tallet er kopieret fra rækken.
 
-Før/efter for alle 24 produkter, rå målinger og rollback:
-[`w3tc-og-valuta-2026-11-08.md`](w3tc-og-valuta-2026-11-08.md).
+De 13 produkter uden række (765, 766, 767, 940, 941, 942, 954, 965, 966, 967, 970, 1255, 1282) har
+beholdt deres pris. Deres id, målte beløb og beviset for at rækken mangler (0 grep-træf i et dokument med
+38 tabelrækker) står i [`w3tc-og-valuta-2026-11-08.md`](w3tc-og-valuta-2026-11-08.md).
+
+**Tabellen modsiger sin egen regel:** linje 73 siger, at skiftet ikke må ændre hvad kunden betaler ud over
+afrundingen, men tabellens DKK-tal er udregnet af USD-priserne fra 2/11, og butikken har fået nye siden
+(hoodie $49.95 → $109; corset $59.95 → $219). Modsætningen er ikke løst ved at vælge side — den står med rå
+citater, og ejerhandlingen er at gennemse de 11 priser i **WooCommerce → Produkter**.
