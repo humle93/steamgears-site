@@ -248,8 +248,8 @@
     {
       "id": "niche",
       "name": "Niche-butik — plugin P4",
-      "next": "Modulet er bygget og grønt lokalt (32 smoke-checks, php -l, fejlscan, zip byte-identisk). Det der mangler er én kørsel mod rigtig WooCommerce: activation af 7.64.0 på sitet og et niche-run med efterfølgende rollback, så kladde-flowet er målt og ikke kun testet.",
-      "blocked_by": "Kørslen på det levende site kræver ejerens klik: et nyt MCP-token i denne sandkasse (OAuth-linket fra tools/mcp_oauth.py --start) eller Plugins → Update til 7.64.0. Indtil da er WooCommerce-delen af udrulningen kun dækket af stub-tests, og det står som de sidste 0,15 d.",
+      "next": "Færdig som roadmap-punkt P4: modulet er kørt mod det levende site (WordPress 7.1.4, WooCommerce 11.2.2) med 8 produktkladder, 5 kollektioner, en sideskits og en navigation, og rullet tilbage til præcis udgangstilstanden. Næste skridt er ejerens: Printful-adgang, publicering og de øvrige punkter i readiness-listen.",
+      "blocked_by": null,
       "modules": [
         {
           "id": "p4plan",
@@ -281,17 +281,18 @@
           "done": 0.1,
           "total": 0.1,
           "unit": "d",
-          "note": "32 smoke-checks (1081 PASS, 0 FAIL i alt), php -l på alle filer, fejlscan grøn, 7.64.0-zip byte-identisk med kilden, README + ROADMAP + biblioteksdokument med PDF."
+          "note": "36 smoke-checks (1084 PASS, 0 FAIL i alt), php -l på alle filer, fejlscan grøn, 7.64.3-zip byte-identisk med kilden, README + ROADMAP + biblioteksdokument med PDF, admin-siden verificeret i browser."
         },
         {
           "id": "p4live",
           "name": "Kørsel mod rigtig WooCommerce",
-          "done": 0.0,
+          "done": 0.15,
           "total": 0.15,
           "unit": "d",
-          "note": "Mangler: activate 7.64.0 på sitet og kør ét niche-run med rollback, så product_cat, pris-meta og slettevejen er målt i WooCommerce og ikke kun i stubber."
+          "note": "Målt 8/11 på steamgears.eu: plugin 7.64.3 installeret (filer sha1-identiske med kilden), POST /sgap/v1/niche med »cottagecore mushroom« gav 5 kollektioner (210–214), 8 produktkladder (1517–1524) med _price/_regular_price/SKU/_sgap_niche, sideskits 1525 og navigation 1526 med 8 links; butikkens 20 publicerede varer var urørte, og rollback via admin-knappen slettede alle 15 rækker og gav en tilstand identisk med før-kørslen. Admin-siden blev set rendret i browser."
         }
-      ]
+      ],
+      "verified": true
     }
   ],
   "history": [
@@ -1588,6 +1589,15 @@
       "after": 85.0,
       "delta": null,
       "basis": "0,85 af 1 d (Plan-motor: arketyper, priser, sider 0,3/0,3 · Kladde-udrulning og rollback 0,25/0,25 · Admin-side, REST og fire evner 0,2/0,2 · Tests, zip og dokumentation 0,1/0,1 · Kørsel mod rigtig WooCommerce 0/0,15)"
+    },
+    {
+      "date": "2026-11-08",
+      "project": "Niche-butik — plugin P4",
+      "module": "daglig måling",
+      "before": 85.0,
+      "after": 100.0,
+      "delta": 15.0,
+      "basis": "1 af 1 d (Plan-motor: arketyper, priser, sider 0,3/0,3 · Kladde-udrulning og rollback 0,25/0,25 · Admin-side, REST og fire evner 0,2/0,2 · Tests, zip og dokumentation 0,1/0,1 · Kørsel mod rigtig WooCommerce 0,15/0,15)"
     }
   ]
 }

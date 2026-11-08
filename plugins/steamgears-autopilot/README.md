@@ -23,7 +23,7 @@ The whole social autopilot runs inside WordPress (Command Center is retired):
 4. **Measure** – every post links via `/go/<id>/`, so clicks (and WooCommerce
    orders) are counted per channel.
 
-Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.64.0.zip` → Activate. On an existing
+Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.64.3.zip` → Activate. On an existing
 install the same zip arrives through the self-updater (see *Updates*), so an upload is only needed for the
 first install or a recovery.
 
@@ -497,11 +497,15 @@ shop skeleton you can publish from:
    drafts, a menu and the schema types the shop needs. Same niche and settings give the same plan
    key, so a plan can be reviewed and shared before it is created.
 2. **Drafts, never live products.** *Create drafts* writes `product_cat` terms, WooCommerce product
-   drafts (price, SKU, `_sgap_niche` marker) and page drafts. Nothing is published, no existing
-   product is touched, and every id is stored under the run key.
+   drafts (price, SKU, `_sgap_niche` marker), page drafts and the menu — as a `wp_navigation` post on
+   a block theme, as a nav menu elsewhere, with real links to the shop, the collection archives and
+   the pages that exist. Nothing is published, no existing product is touched, and every id is
+   stored under the run key. The menu is not pointed at the header automatically: swapping the live
+   navigation is the owner's decision, but the navigation sits ready to be picked.
 3. **Roll back in one click.** The Runs table keeps the ten newest runs. A rollback deletes the
-   drafts and empty terms *that run* created and keeps anything already published — the report says
-   which is which.
+   drafts, empty terms and menu *that run* created and keeps anything already published — the report
+   says which is which. Running the same plan twice writes nothing new; the page says so with the
+   date of the first run.
 4. **Honest about the rest.** Every plan ends with the steps only the owner can take: Printful access
    (real costs and 5–8 mockups), publishing approval, currency and prices, payment methods,
    CVR/name/address/phone, the EU consent model, shipping zones, and confirming the shop name. The

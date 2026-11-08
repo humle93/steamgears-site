@@ -19,6 +19,12 @@ if (!function_exists('wp_delete_term')) {
 if (!function_exists('term_exists')) {
     function term_exists($slug, $taxonomy = '') { return $GLOBALS['existing_terms'][$slug] ?? null; }
 }
+if (!function_exists('get_term_meta')) {
+    function get_term_meta($id, $key = '', $single = false) { return $GLOBALS['termmeta'][(int) $id][$key] ?? ''; }
+}
+if (!function_exists('wp_delete_nav_menu')) {
+    function wp_delete_nav_menu($id) { $GLOBALS['deleted_menus'][] = (int) $id; return true; }
+}
 
 // 1. Planen: deterministisk, uden WordPress-data.
 $plan = SGAP_Niche_Shop::plan('steampunk airship', ['count' => 10, 'margin' => 60]);
@@ -42,6 +48,11 @@ check('niche: every SKU is unique and prefixed', count(array_unique(array_column
 check('niche: five pages, start-here first', count($plan['pages']) === 5 && $plan['pages'][0]['slug'] === 'start-here');
 check('niche: the owner-only facts are marked, not guessed', $plan['counts']['owner_fields'] > 0 && str_contains($plan['pages'][1]['body'], '[EJER'));
 check('niche: the menu is the shop skeleton', $plan['menu'] === ['Start here', 'Shop', 'Airship', 'Clockwork', 'Herbarium', 'Guides', 'About', 'Contact']);
+$links = SGAP_Niche_Shop::menu_links($plan);
+check('niche: the menu labels become real links, and a label with nowhere to go is left out', count($links) === 4
+    && array_column($links, 'label') === ['Shop', 'Airship', 'Clockwork', 'Herbarium']
+    && count(array_filter($links, fn($l) => str_starts_with($l['url'], 'https://'))) === 4);
+check('niche: a collection without a term yet still links to its archive', $links[1]['url'] === 'https://steamgears.eu/product-category/airship/');
 check('niche: the readiness list is owner-only and names Printful first', ($plan['readiness'][0]['id'] ?? '') === 'printful' && count(array_filter($plan['readiness'], fn($r) => empty($r['owner']))) === 0);
 check('niche: schema covers the types the shop page needs', in_array('ItemList', $plan['schema'], true) && in_array('Product', $plan['schema'], true));
 
@@ -78,13 +89,16 @@ $GLOBALS['opts'][SGAP_Niche_Shop::RUNS] = ['abc123abc123' => [
 ]];
 $GLOBALS['poststatus'] = [601 => 'draft', 701 => 'draft'];
 $GLOBALS['postmeta'] = [601 => ['_sgap_niche' => 'abc123abc123'], 701 => ['_sgap_niche' => 'abc123abc123']];
+$GLOBALS['termmeta'] = [901 => ['_sgap_niche' => 'abc123abc123']];
+$GLOBALS['opts'][SGAP_Niche_Shop::RUNS]['abc123abc123']['created']['menus'] = [['id' => 901, 'kind' => 'nav_menu', 'title' => 'Airship menu', 'items' => 8]];
 $preview = SGAP_Niche_Shop::rollback('abc123abc123', false);
-check('niche: a rollback preview lists what it would delete and keeps the run', $preview['dry_run'] === true && in_array('product:airship-armada-tee', $preview['deleted'], true) && in_array('page:start-here', $preview['deleted'], true) && isset(SGAP_Niche_Shop::runs()['abc123abc123']));
+check('niche: a rollback preview lists what it would delete and keeps the run', $preview['dry_run'] === true && in_array('product:airship-armada-tee', $preview['deleted'], true) && in_array('page:start-here', $preview['deleted'], true) && in_array('menu:Airship menu', $preview['deleted'], true) && isset(SGAP_Niche_Shop::runs()['abc123abc123']));
 $GLOBALS['poststatus'][601] = 'publish';
 $report = SGAP_Niche_Shop::rollback('abc123abc123', true);
 check('niche: a published product is kept, the draft page is deleted', in_array('product:airship-armada-tee (publish)', $report['kept'], true) && in_array('page:start-here', $report['deleted'], true));
+check('niche: the menu from the run is deleted with it', in_array('menu:Airship menu', $report['deleted'], true) && ($GLOBALS['deleted_menus'] ?? []) === [901]);
 check('niche: the run is forgotten once it has been rolled back', !isset(SGAP_Niche_Shop::runs()['abc123abc123']));
-unset($GLOBALS['opts'][SGAP_Niche_Shop::RUNS], $GLOBALS['poststatus'], $GLOBALS['postmeta']);
+unset($GLOBALS['opts'][SGAP_Niche_Shop::RUNS], $GLOBALS['poststatus'], $GLOBALS['postmeta'], $GLOBALS['termmeta'], $GLOBALS['deleted_menus']);
 
 // 6. Evnerne: feltet kan nås af en MCP-klient, og planen er læsende.
 // Registret kan være name-keyed (rigtigt) eller en liste af navne, hvis en tidligere test har

@@ -348,6 +348,12 @@ add_filter('pre_http_request', function ($pre, $args, $url) {
             return $reply(200, [['id' => 'a1', 'provider' => 'facebook', 'name' => 'FB'], ['id' => 'a2', 'provider' => 'instagram', 'name' => 'IG']]);
         }
     }
+    // The catalogue the settings dropdown and the save-time check read: /v1/models?limit=100.
+    // It is a different URL from the single-model probe below, and the check that a retired
+    // name cannot be saved is meaningless unless this list answers.
+    if ($url === 'https://api.anthropic.com/v1/models?limit=100') {
+        return $reply(200, ['data' => [['id' => 'claude-opus-5-5', 'type' => 'model']], 'has_more' => false]);
+    }
     if (str_starts_with($url, 'https://api.anthropic.com/v1/models/')) {
         $GLOBALS['sgci_anthropic_models'][] = ['url' => $url, 'args' => $args];
         if (($args['headers']['x-api-key'] ?? '') !== 'good-ai-key') {
@@ -412,6 +418,9 @@ update_option('sgap_publer_api_key', 'bad-key');
 $r = SGAP_KeyCheck::run();
 sgci_check('keycheck: invalid Publer key is reported', $r['publer']['ok'] === false && str_contains($r['publer']['message'], 'invalid'), $r['publer']);
 // A retired name cannot be saved again: the save-time check keeps the model that works.
+// The catalogue is cached for 12 hours, so clear it: a cached list from another phase would
+// decide this check instead of the stub above.
+delete_site_transient('sgap_ai_catalog_' . SGAP_AI::provider());
 update_option('sgap_ai_model', 'claude-made-up');
 sgci_check('model: a name the provider does not offer is refused at save', get_option('sgap_ai_model') === 'claude-opus-5-5', get_option('sgap_ai_model'));
 // A site can still have one stored from before the check existed: written straight into the

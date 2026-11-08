@@ -518,7 +518,8 @@ class SGAP_Niche_Shop {
         $wanted = [
             'collections' => count($plan['collections']),
             'products' => count($plan['products']),
-            'pages' => count($plan['pages'])
+            'pages' => count($plan['pages']),
+            'menus' => $plan['menu'] === [] ? 0 : 1
         ];
         if (!$write) {
             return ['dry_run' => true, 'plan_key' => $key, 'would_create' => $wanted];
@@ -526,7 +527,7 @@ class SGAP_Niche_Shop {
         if (!post_type_exists('product')) {
             return new WP_Error('sgap_niche_no_woo', 'WooCommerce is not active, so there is no product post type to create drafts in. Activate WooCommerce first, or use the plan without applying it.');
         }
-        $created = ['collections' => [], 'products' => [], 'pages' => []];
+        $created = ['collections' => [], 'products' => [], 'pages' => [], 'menus' => []];
         $skipped = [];
         $errors = [];
 
@@ -599,6 +600,13 @@ class SGAP_Niche_Shop {
             $created['pages'][] = ['id' => (int) $id, 'slug' => $page['slug'], 'title' => $page['title']];
         }
 
+        $menu = self::create_menu($plan, $key);
+        if (is_wp_error($menu)) {
+            $errors[] = 'menu: ' . $menu->get_error_message();
+        } elseif ($menu) {
+            $created['menus'][] = $menu;
+        }
+
         $runs[$key] = [
             'plan_key' => $key,
             'niche' => $plan['niche'],
@@ -614,11 +622,120 @@ class SGAP_Niche_Shop {
             'dry_run' => false,
             'plan_key' => $key,
             'created' => $created,
-            'counts' => ['collections' => count($created['collections']), 'products' => count($created['products']), 'pages' => count($created['pages'])],
+            'counts' => ['collections' => count($created['collections']), 'products' => count($created['products']), 'pages' => count($created['pages']), 'menus' => count($created['menus'])],
             'skipped' => $skipped,
             'errors' => $errors,
             'rollback' => 'POST /wp-json/sgap/v1/niche/rollback with {"plan_key":"' . $key . '"}'
         ];
+    }
+
+    /**
+     * The planned labels turned into real links: the shop, the collection archives and the
+     * pages that actually exist. A label with nowhere to go is left out instead of pointing at `#`.
+     *
+     * @return array<int,array{label:string,url:string}>
+     */
+    public static function menu_links(array $plan): array {
+        // Two plan labels are pages under another name: "Guides" is the journal on this shop.
+        $page_for = ['Start here' => 'start-here', 'Guides' => 'journal', 'About' => 'about', 'Contact' => 'contact'];
+        $collections = [];
+        foreach ((array) ($plan['collections'] ?? []) as $collection) {
+            $collections[mb_strtolower((string) $collection['name'])] = (string) $collection['slug'];
+        }
+        $links = [];
+        foreach ((array) ($plan['menu'] ?? []) as $label) {
+            $label = (string) $label;
+            $url = '';
+            if (mb_strtolower($label) === 'shop') {
+                $url = function_exists('wc_get_page_permalink') ? (string) wc_get_page_permalink('shop') : home_url('/shop/');
+            } elseif (isset($collections[mb_strtolower($label)])) {
+                $url = self::term_url($collections[mb_strtolower($label)]);
+            } elseif (isset($page_for[$label])) {
+                $id = self::find('page', $page_for[$label]);
+                $url = $id > 0 && function_exists('get_permalink') ? (string) get_permalink($id) : '';
+            }
+            if ($url !== '') {
+                $links[] = ['label' => $label, 'url' => $url];
+            }
+        }
+        return $links;
+    }
+
+    /** The archive URL of a collection, before or after the term exists. */
+    private static function term_url(string $slug): string {
+        if (function_exists('get_term_by') && function_exists('get_term_link')) {
+            $term = get_term_by('slug', $slug, 'product_cat');
+            if ($term && !is_wp_error($term)) {
+                $link = get_term_link($term);
+                if (!is_wp_error($link)) {
+                    return (string) $link;
+                }
+            }
+        }
+        return home_url('/product-category/' . $slug . '/');
+    }
+
+    /**
+     * Write the planned menu so it exists as data, not only as a suggestion: a `wp_navigation`
+     * post on a block theme, a classic nav menu on any other. It is never pointed at the header —
+     * swapping the live navigation is the owner's call — but it is ready to be picked there.
+     *
+     * @return array|WP_Error|null Null when there is nothing to link to.
+     */
+    private static function create_menu(array $plan, string $key) {
+        if (!function_exists('wp_insert_post')) {
+            return null;
+        }
+        $links = self::menu_links($plan);
+        if ($links === []) {
+            return null;
+        }
+        $title = self::title((string) $plan['niche']) . ' menu';
+        if (post_type_exists('wp_navigation')) {
+            $blocks = '';
+            foreach ($links as $link) {
+                $blocks .= '<!-- wp:navigation-link ' . wp_json_encode([
+                    'label' => $link['label'],
+                    'type' => 'custom',
+                    'url' => $link['url'],
+                    'kind' => 'custom',
+                    'isTopLevelLink' => true
+                ]) . ' /-->' . "\n";
+            }
+            $id = wp_insert_post([
+                'post_type' => 'wp_navigation',
+                'post_status' => 'publish',
+                'post_title' => $title,
+                'post_content' => $blocks,
+                'post_author' => get_current_user_id()
+            ], true);
+            if (is_wp_error($id)) {
+                return $id;
+            }
+            if (!$id) {
+                return new WP_Error('sgap_niche_menu', 'WordPress returned no id for the navigation.');
+            }
+            update_post_meta((int) $id, '_sgap_niche', $key);
+            return ['id' => (int) $id, 'kind' => 'wp_navigation', 'title' => $title, 'items' => count($links)];
+        }
+        if (function_exists('wp_create_nav_menu') && function_exists('wp_update_nav_menu_item')) {
+            $term = wp_create_nav_menu($title);
+            if (is_wp_error($term)) {
+                return $term;
+            }
+            foreach ($links as $position => $link) {
+                wp_update_nav_menu_item((int) $term, 0, [
+                    'menu-item-title' => $link['label'],
+                    'menu-item-url' => $link['url'],
+                    'menu-item-type' => 'custom',
+                    'menu-item-status' => 'publish',
+                    'menu-item-position' => $position + 1
+                ]);
+            }
+            update_term_meta((int) $term, '_sgap_niche', $key);
+            return ['id' => (int) $term, 'kind' => 'nav_menu', 'title' => $title, 'items' => count($links)];
+        }
+        return null;
     }
 
     /** Product meta WooCommerce reads, plus the run marker rollback depends on. */
@@ -662,7 +779,7 @@ class SGAP_Niche_Shop {
         $run = $runs[$key];
         $report = ['plan_key' => $key, 'deleted' => [], 'kept' => []];
         // Singular labels: a report line names the thing, not the array it came from.
-        $label = ['collections' => 'collection', 'products' => 'product', 'pages' => 'page'];
+        $label = ['collections' => 'collection', 'products' => 'product', 'pages' => 'page', 'menus' => 'menu'];
         foreach ($run['created'] as $type => $items) {
             foreach ((array) $items as $item) {
                 $id = (int) ($item['id'] ?? 0);
@@ -670,6 +787,30 @@ class SGAP_Niche_Shop {
                     continue;
                 }
                 $kind = $label[$type] ?? $type;
+                if ($type === 'menus') {
+                    // A navigation is published by nature, so it needs its own branch: the marker
+                    // is what says it came from this run, not the status.
+                    $name = (string) ($item['title'] ?? $id);
+                    if (!$write) {
+                        $report['deleted'][] = $kind . ':' . $name;
+                        continue;
+                    }
+                    $is_navigation = function_exists('get_post_type') && get_post_type($id) === 'wp_navigation';
+                    $marker = $is_navigation
+                        ? (string) get_post_meta($id, '_sgap_niche', true)
+                        : (function_exists('get_term_meta') ? (string) get_term_meta($id, '_sgap_niche', true) : '');
+                    if ($marker !== $key) {
+                        $report['kept'][] = $kind . ':' . $name . ' (not from this run)';
+                        continue;
+                    }
+                    if ($is_navigation) {
+                        wp_delete_post($id, true);
+                    } elseif (function_exists('wp_delete_nav_menu')) {
+                        wp_delete_nav_menu($id);
+                    }
+                    $report['deleted'][] = $kind . ':' . $name;
+                    continue;
+                }
                 if ($type === 'collections') {
                     if (!$write) {
                         $report['deleted'][] = $kind . ':' . ($item['slug'] ?? $id);
@@ -784,7 +925,8 @@ class SGAP_Niche_Shop {
                 'counts' => [
                     'collections' => count($run['created']['collections'] ?? []),
                     'products' => count($run['created']['products'] ?? []),
-                    'pages' => count($run['created']['pages'] ?? [])
+                    'pages' => count($run['created']['pages'] ?? []),
+                    'menus' => count($run['created']['menus'] ?? [])
                 ]
             ];
         }
@@ -828,7 +970,7 @@ class SGAP_Niche_Shop {
         SGAP_Admin::open('Niche shop', 'Type a niche. The plan is built first — nothing is written until you press Create drafts, and drafts are always reversible.');
         $runs = self::runs();
         echo '<div class="sgap-card"><h2><span class="dashicons dashicons-store"></span>What is the shop about?</h2>'
-            . '<p class="sgap-sub">One field. The plan turns a niche into collections, priced products, page drafts and a readiness list. Products are created as <strong>drafts</strong>; the owner publishes.</p>'
+            . '<p class="sgap-sub">One field. The plan turns a niche into collections, priced products, page drafts, a menu and a readiness list. Products are created as <strong>drafts</strong>; the owner publishes.</p>'
             . '<div class="sgap-field"><div class="sgap-field-label"><label for="sgap_niche">Niche</label><p>For example “steampunk airship”, “cottagecore mushroom” or “celestial zodiac”.</p></div>'
             . '<div class="sgap-field-input"><input type="text" id="sgap_niche" class="sgap-text" placeholder="steampunk airship" maxlength="' . (int) self::MAX_NICHE . '"></div></div>'
             . '<div class="sgap-inline"><label class="sgap-mini">Products <input type="number" id="sgap_niche_count" value="10" min="1" max="' . (int) self::MAX_PRODUCTS . '" class="sgap-num"></label>'
@@ -844,9 +986,10 @@ class SGAP_Niche_Shop {
         } else {
             echo '<table class="widefat striped"><thead><tr><th>When</th><th>Niche</th><th>Drafts</th><th>Key</th><th></th></tr></thead><tbody>';
             foreach ($runs as $key => $run) {
-                $counts = [count($run['created']['collections'] ?? []), count($run['created']['products'] ?? []), count($run['created']['pages'] ?? [])];
+                $counts = [count($run['created']['collections'] ?? []), count($run['created']['products'] ?? []), count($run['created']['pages'] ?? []), count($run['created']['menus'] ?? [])];
+                $plural = fn(int $n, string $one, string $many) => $n . ' ' . ($n === 1 ? $one : $many);
                 echo '<tr><td>' . esc_html((string) ($run['created_at'] ?? '')) . '</td><td>' . esc_html((string) ($run['niche'] ?? '')) . '</td>'
-                    . '<td>' . esc_html($counts[0] . ' collections · ' . $counts[1] . ' products · ' . $counts[2] . ' pages') . '</td>'
+                    . '<td>' . esc_html($plural($counts[0], 'collection', 'collections') . ' · ' . $plural($counts[1], 'product', 'products') . ' · ' . $plural($counts[2], 'page', 'pages') . ' · ' . $plural($counts[3], 'menu', 'menus')) . '</td>'
                     . '<td><code>' . esc_html((string) $key) . '</code></td>'
                     . '<td><button class="button button-small sgap-niche-undo" data-key="' . esc_attr((string) $key) . '">Roll back</button></td></tr>';
             }
@@ -887,6 +1030,8 @@ class SGAP_Niche_Shop {
     return h + "</tbody></table>";
   }
 
+  function pl(n, one, many) { return n + " " + (Number(n) === 1 ? one : many); }
+
   function niche() { return document.getElementById("sgap_niche").value.trim(); }
   function count() { return document.getElementById("sgap_niche_count").value; }
   function margin() { return document.getElementById("sgap_niche_margin").value; }
@@ -895,9 +1040,13 @@ class SGAP_Niche_Shop {
     var p = payload.plan || payload, r = payload.result || {}, c = p.counts || {};
     var html = "<h3>" + esc(p.brand.suggested) + "</h3>";
     html += '<p class="sgap-sub">' + esc(p.brand.tagline) + " · " + esc(p.archetype.label) + " (" + esc(p.archetype.confidence) + " % match) · key <code>" + esc(p.plan_key) + "</code></p>";
-    html += "<p>" + esc(c.products) + " products · " + esc(c.collections) + " collections · " + esc(c.pages) + " pages · " + esc(c.owner_steps) + " owner steps · " + esc(c.owner_fields) + " fields marked [EJER] · ~" + esc(c.estimated_hours) + " h of setup left</p>";
-    if (r.created) {
-      html += '<div class="notice notice-success"><p>Created ' + esc(r.counts.products) + " product drafts, " + esc(r.counts.collections) + " collections and " + esc(r.counts.pages) + " page drafts. Roll back below if it is not right.</p></div>";
+    html += "<p>" + esc(pl(c.products, "product", "products")) + " · " + esc(pl(c.collections, "collection", "collections")) + " · " + esc(pl(c.pages, "page", "pages")) + " · " + esc(pl(c.owner_steps, "owner step", "owner steps")) + " · " + esc(c.owner_fields) + " fields marked [EJER] · ~" + esc(c.estimated_hours) + " h of setup left</p>";
+    if (r.already_applied) {
+      // The same plan key does not run twice: say so instead of claiming work that did not happen.
+      html += '<div class="notice notice-info"><p>This plan was already applied on ' + esc(r.created_at) + " — nothing new was written. Roll back below to undo it, or change the count or the margin for a different plan.</p></div>";
+    } else if (r.created) {
+      var made = r.counts || {};
+      html += '<div class="notice notice-success"><p>Created ' + esc(pl(made.products, "product", "product drafts")) + ", " + esc(pl(made.collections, "collection", "collections")) + ", " + esc(pl(made.pages, "page draft", "page drafts")) + (made.menus ? " and " + esc(pl(made.menus, "menu", "menus")) : "") + ". Roll back below if it is not right.</p></div>";
     }
     html += "<h4>Products</h4>" + table((p.products || []).map(function (x) {
       return [x.title, x.collection, x.price, x.cost, x.margin_percent + " %"];
@@ -920,6 +1069,9 @@ class SGAP_Niche_Shop {
       if (!j.success) { alert(j.data || "Could not build the plan"); hint.textContent = ""; return; }
       render(j.data);
       hint.textContent = "Plan only — nothing written. Press Create drafts to save it as drafts.";
+    }).catch(function () {
+      planBtn.disabled = false;
+      hint.textContent = "Could not reach the site. Nothing was written — try again.";
     });
   });
 
@@ -929,7 +1081,12 @@ class SGAP_Niche_Shop {
     post("sgap_niche_run", { niche: niche(), count: count(), margin: margin(), apply: 1 }).then(function (j) {
       if (!j.success) { alert(j.data || "Could not create the drafts"); applyBtn.disabled = false; hint.textContent = ""; return; }
       render(j.data);
-      hint.textContent = "Drafts created. Review them under Products, then publish — or roll back.";
+      hint.textContent = (j.data.result && j.data.result.already_applied)
+        ? "This plan is already in the shop — nothing was written again."
+        : "Drafts created. Review them under Products, then publish — or roll back.";
+    }).catch(function () {
+      applyBtn.disabled = false;
+      hint.textContent = "Could not reach the site. Nothing new is known to exist — check Runs before trying again.";
     });
   });
 

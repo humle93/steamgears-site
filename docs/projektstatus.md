@@ -27,7 +27,7 @@ Status pr. **2026-11-08** · beregnet af `projektstatus.py` · kilder: [`projekt
 | **Dark academia-rebrand** | **64,3 %** | 9 af 14 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5 · Batch 4-forberedelse: arbejdsordre, filnavne, alt-tekster, rækkefølge 0,5/0,5) |
 | **SEO-indholdsproduktion** | **100 %** | 8 af 8 guides (Publicerede guides (1357, 1361, 1359) 3/3 · Guide-copy klar til publicering (1357, 1361, 1359 + corset) 4/4 · Corset-guiden publiceret (/steampunk-corset-guide/, 1394) 1/1) · drift: Daglig loop kører |
 | **Døde internlinks** | **100 %** | 39 af 39 links |
-| **Niche-butik — plugin P4** | **85 %** | 0,85 af 1 d (Plan-motor: arketyper, priser, sider 0,3/0,3 · Kladde-udrulning og rollback 0,25/0,25 · Admin-side, REST og fire evner 0,2/0,2 · Tests, zip og dokumentation 0,1/0,1 · Kørsel mod rigtig WooCommerce 0/0,15) |
+| **Niche-butik — plugin P4** | **100 %** | 1 af 1 d (Plan-motor: arketyper, priser, sider 0,3/0,3 · Kladde-udrulning og rollback 0,25/0,25 · Admin-side, REST og fire evner 0,2/0,2 · Tests, zip og dokumentation 0,1/0,1 · Kørsel mod rigtig WooCommerce 0,15/0,15) |
 <!-- AUTO:DAGLIG:END -->
 
 ## 2. Aktive projekter og hvad der blokerer
@@ -40,7 +40,7 @@ Status pr. **2026-11-08** · beregnet af `projektstatus.py` · kilder: [`projekt
 | Dark academia-rebrand (64,3 %) | Batch 4 er det eneste tilbage. Forberedelsen (0,5 t) er færdig og målt; selve mockup-genereringen er ejer-blokeret. Næste skridt er ejerens: Printful-adgang eller 5–8 færdige billeder pr. produkt. | Batch 4 (mockups, 0 af 5 t) kræver Printful-adgang eller 5–8 færdige mockups pr. produkt uploadet af ejeren; teksten (batch 1–3, 8,5 t) og forberedelsen (0,5 t) er færdig og verificeret. Derfor er 64,3 % = 9/14, mens 100 % af den ikke-ejer-blokerede del er leveret. |
 | SEO-indholdsproduktion (100 %) | SEO-indholdet er 100 %: fire guides skrevet, tre publiceret, corset-guiden publiceret, 1410 parkeret til september. Ingen åbne poster. | ingen |
 | Døde internlinks (100 %) | Vedligehold: tjek nye indlæg mod live-URL'er | ingen |
-| Niche-butik — plugin P4 (85 %) | Modulet er bygget og grønt lokalt (32 smoke-checks, php -l, fejlscan, zip byte-identisk). Det der mangler er én kørsel mod rigtig WooCommerce: activation af 7.64.0 på sitet og et niche-run med efterfølgende rollback, så kladde-flowet er målt og ikke kun testet. | Kørslen på det levende site kræver ejerens klik: et nyt MCP-token i denne sandkasse (OAuth-linket fra tools/mcp_oauth.py --start) eller Plugins → Update til 7.64.0. Indtil da er WooCommerce-delen af udrulningen kun dækket af stub-tests, og det står som de sidste 0,15 d. |
+| Niche-butik — plugin P4 (100 %) | Færdig som roadmap-punkt P4: modulet er kørt mod det levende site (WordPress 7.1.4, WooCommerce 11.2.2) med 8 produktkladder, 5 kollektioner, en sideskits og en navigation, og rullet tilbage til præcis udgangstilstanden. Næste skridt er ejerens: Printful-adgang, publicering og de øvrige punkter i readiness-listen. | ingen |
 <!-- AUTO:BLOKERINGER:END -->
 
 ---
@@ -52,6 +52,7 @@ Nyeste først. Append-only — rækker må ikke slettes eller ændres.
 
 | Dato | Projekt | Modul | Før → Efter | Δ | Grundlag |
 | --- | --- | --- | --- | --- | --- |
+| 2026-11-08 | Niche-butik — plugin P4 | daglig måling | 85 % → 100 % | +15 | 1 af 1 d (Plan-motor: arketyper, priser, sider 0,3/0,3 · Kladde-udrulning og rollback 0,25/0,25 · Admin-side, REST og fire evner 0,2/0,2 · Tests, zip og dokumentation 0,1/0,1 · Kørsel mod rigtig WooCommerce 0,15/0,15) |
 | 2026-11-08 | Niche-butik — plugin P4 | baseline | — → 85 % | — | 0,85 af 1 d (Plan-motor: arketyper, priser, sider 0,3/0,3 · Kladde-udrulning og rollback 0,25/0,25 · Admin-side, REST og fire evner 0,2/0,2 · Tests, zip og dokumentation 0,1/0,1 · Kørsel mod rigtig WooCommerce 0/0,15) |
 | 2026-11-08 | Dark academia-rebrand | daglig måling | 63 % → 64,3 % | +1,3 | 9 af 14 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5 · Batch 4-forberedelse: arbejdsordre, filnavne, alt-tekster, rækkefølge 0,5/0,5) |
 | 2026-11-08 | steamgears.eu — site-optimering | daglig måling | 92,9 % → 93,3 % | +0,4 | 20,95 af 22,45 d (S0 2,35/2,35 · S1 3,6/3,9 · S2 6,9/6,9 · S3 4,05/4,05 · S4 4,05/5,25) |

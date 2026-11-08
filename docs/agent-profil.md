@@ -87,17 +87,54 @@ Dette kort er afstemt mod målinger og status pr. **8/11 2026**. Nyere live-tal 
 
 **Pluginnet** (`plugins/steamgears-autopilot/`)
 
-- **Repo 7.64.0, live 7.60.1** ifølge seneste måling i [`docs/roadmap.md`](roadmap.md) §2b: 7.61.0 kanalstatus,
-  7.62.0 nøglesiden og 7.64.0 niche-butikken er ikke bekræftet installeret live. Plugin-opdateringen kræver
-  ejerens *Plugins → Update*-klik; et push alene deployer ikke WordPress-plugin'et.
-- 7.64.0 har niche-butik P4: planlægger produkter/kollektioner/sider, opretter **kladder** og kan rulle
-  den enkelte kørsel tilbage. 32 nye smoke-checks; 1081 PASS i alt, `php -l` ren og zip byte-identisk.
-  **85 % (0,85/1 d):** sidste 0,15 d er en kørsel mod rigtig WooCommerce med rollback; endnu ikke målt live.
-  Kilde: [`library/niche-butik-2026-11-08.md`](library/niche-butik-2026-11-08.md).
-- **P1.5 er ejer-blokeret:** Pinterest-tokenet svarer HTTP 401, Instagram mangler token; de øvrige kanalnøgler
-  mangler også. Ingen platformsmålinger påstås uden gyldige credentials. Se `projektstatus.json` og §2b.
-- Historiske arkitektur- og sikkerhedsnoter findes i plugin-README og ROADMAP; brug dem som kilde til
-  implementeringsdetaljer, ikke som aktuel status hvis de modsiger status-JSON eller den seneste roadmap.
+- **Version i repo mod live:** repo **7.64.3**, live **7.64.3, aktív** (8/11 2026: `Plugin_Upgrader` fra
+  release-zippen, og `steamgears-autopilot.php`, `includes/niche-shop.php`, `includes/abilities.php` og
+  `uninstall.php` er SHA-1-identiske med kilden; `SGAP_VERSION` svarer 7.64.3 i et frisk request). Ældre
+  historik: 7.58.2 blev lagt på 7/11 med `wp plugin install` fra
+  repoets zip og `wp plugin activate` gennem Novamira; `/wp-json/sgap/v1` svarer 200 med 19 ruter, inkl. de tre
+  `/facebook/*`). Vejen dertil kostede en runde: 7.58.0 lå på disken men var **inaktiv**, WooCommerce var også
+  inaktiv, og `mu-plugins/sga-payload-trim.php:134` kaldte `is_woocommerce()` → **500 på hver side**. Efter
+  aktiveringen blev 500 ved med at komme fra **W3 Total Caches cachede fatale side**, indtil `w3tc_flush_all()`.
+  Plugin-listen er ryddet (18 slettet, 5 beholdt inaktive fordi de har data): se
+  [library/genaktivering-og-oprydning-2026-11-07.md](library/genaktivering-og-oprydning-2026-11-07.md). 7.58.1 retter de fire referencer til
+  `SGAP_REST::NS`; se `docs/library/rest-nedbrud-7-58-0-2026-11-07.md`. Et plugin-folder kan kun skiftes af
+  WordPress selv, så en release slutter med ejerens *Plugins → Update*-klik, ikke med et push.
+  Status: `docs/roadmap.md` §2b; procedure og efterkontrol: plugin-README §Updates.
+- 54 klasser, 42 PHP-filer, 18.153 linjer (målt 7/11 på 7.58.0); hvert subsystem kan nås fra en rigtig
+  indgang (cron, REST, admin-side, ability eller AJAX). Version **7.19.0** tilføjede
+  helsides SEO/GEO/AEO-auditten (`includes/site-seo.php`), som erstatter den per-side-optimering der krævede
+  ét klik pr. URL. **7.20.0** tilføjede pre-flight-valideringen (`includes/preflight.php`): hver kø-post tjekkes
+  mod nettets egne grænser før det første Publer-kald, og det der kan rettes mekanisk (caption-længde, hashtags)
+  rettes i stedet for at blive afvist. **7.21.0** tilføjede blackout-kalenderen (`includes/blackout.php`):
+  datointervaller hvor intet frigives, og kø-poster flyttes til næste frie dag samme klokkeslæt. **7.22.0**
+  tilføjede quality-gaten (`includes/quality.php`) i `SGAP_Queue::add()`: bandeord, døde links, manglende
+  alt-tekst og næsten-dubletter stoppes før posten når køen. **7.23.0** tilføjede `meta-audit`
+  (`includes/meta-audit.php`): en læsende gennemgang af titler og metabeskrivelser med de værste poster først.
+  **7.24.0** gjorde `utm_campaign` til en parameter:
+  indstillingen *Campaign name* plus et `campaign`-felt pr. post i `/queue` og `queue-post`, så en navngivet
+  kampagne kan måles i GA4 ved siden af evergreen-strømmen. **7.53.1** tilføjede fejlsøgning som fast kørsel
+  (`tools/fejlscan.py`, værn nr. 23–24) og rettede fem fejl i Pinterest-modulet og dets tests — se
+  `docs/library/fejlsogning-fast-vaern-2026-11-07.md`. **7.54.0** tilføjede Instagram-insights (P1.5c):
+  `includes/instagram.php` læser `views`, `likes`, `comments`, `shares` og `saved` pr. medie — `views` afløser
+  det deprecerede `impressions`, en metric Instagram endnu ikke har rapporteret udelades i stedet for at blive
+  gemt som 0, og matchningen sker på captionen mod `/go/<id>/`. **7.57.0** gjorde fejlsøgningen til et fast
+værn, og **7.58.0** tilføjede Facebook-siden som kanal (P2.6): publicering, insights og moderation med
+direkte publicering som opt-in. **1084 smoke-checks, alle grønne** (målt 8/11 2026, efter 7.64.3).
+- **Niche-butikken (P4) er færdig og målt live:** ét niche-navn blev til 5 kollektioner (210–214), 8
+  produktkladder (1517–1524) med `_price`/`_regular_price`/SKU/`_sgap_niche`, en sideskits (1525) og en
+  `wp_navigation` (1526) med 8 links — og rollback via admin-knappen slettede alle 15 rækker og gav en
+  tilstand identisk med før-kørslen. 1,0 af 1,0 d, 100 %. Kilde:
+  [`library/niche-butik-2026-11-08.md`](library/niche-butik-2026-11-08.md).
+- Kæden virker: generér → godkend → publicér (RSS eller Publer API) → mål.
+- Self-updateren virker: zip i repoet er **byte-identisk** med kilden; 20 versioner på fire dage.
+- 9 AJAX- og 5 admin_post-handlere har capability + nonce; **kun ét `wp_mail`** i hele pluginnet (ugerapport).
+- **Mangler (målt 7/11):** P1.5a (Bluesky/Mastodon), P1.5b (Pinterest) og P1.5c (Instagram) er bygget — både
+  Pinterest og Instagram er **kode-færdige, men ikke kørt live**, fordi der ikke findes et token. P3.1 mangler
+  kun `labor_rate` (ejerbeslutning). Alt det andet er bygget:
+  fejl-alarmering, kø-udtørrings-alarm, backoff og auditlog (P0.1–P0.5), P1.4 evergreen-recycling (7.41.0),
+  Etsy skjult med manuel import (7.33.4), og den døde metode plus de ni usynlige indstillinger er væk.
+- `uninstall.php` rydder 9 tabeller, alle `sgap_%` options/transients og 12 cron-hooks plus `sgap`-gruppen i Action Scheduler.
+- Cron er WP-Cron på et cachet site → publicering kan blive forsinket (`DISABLE_WP_CRON` detekteres).
 
 **Rebrand**
 

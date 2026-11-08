@@ -29,50 +29,57 @@ _Opdateret 2026-11-08 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 | **Dark academia-rebrand** | **64,3 %** | 9 af 14 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5 · BATCH4 0,5/0,5) |
 | **SEO-indholdsproduktion** | **100 %** | 8 af 8 guides (BATCH 3/3 · COPY 4/4 · CORSET 1/1) |
 | **Døde internlinks** | **100 %** | 39 af 39 links (FIX 39/39) |
-| **Niche-butik — plugin P4** | **85 %** | 0,85 af 1 d (P4PLAN 0,3/0,3 · P4APPLY 0,25/0,25 · P4UI 0,2/0,2 · P4SHIP 0,1/0,1 · P4LIVE 0/0,15) |
+| **Niche-butik — plugin P4** | **100 %** | 1 af 1 d (P4PLAN 0,3/0,3 · P4APPLY 0,25/0,25 · P4UI 0,2/0,2 · P4SHIP 0,1/0,1 · P4LIVE 0,15/0,15) |
 
 ### Åbne blokeringer
 
 - **steamgears.eu — site-optimering** — Ejerens oplysninger og aftaler: CVR/registreret navn/postadresse/telefon, valuta og alle priser, betalingsaftaler (MobilePay/PayPal/Klarna), forsendelseszoner og fragtklasser, Complianz EU-model, Printful-adgang, GSC Crawl stats, og ja/nej til publicering af 942/765/766/767.
 - **Steamgears Autopilot — plugin** — Fire driftspunkter kræver ejeren, og de er målt 8/11: (1) **AIMLAPI-kredit** — sidste generering 7/11 fejlede med »You've run out of funds«, så der laves ingen nye kladder; (2) **`sgap_alert_email`** er tom, så fejl registreres men ingen mail sendes; (3) **Full auto vs. godkendelse** — `sgap_full_auto_enabled = no`, og 40 elementer venter på godkendelse; (4) **distributionsvej** — `publish_mode = rss` og 0 Publer-konti, mens Pinterest svarer 401 og fem kanaler mangler token. Dertil P1.5's tokens (Pinterest, Instagram, Bluesky, Mastodon, Telegram, Facebook) og P2.1–P2.3's Command Center-beslutning. Intet af det må gættes.
 - **Dark academia-rebrand** — Batch 4 (mockups, 0 af 5 t) kræver Printful-adgang eller 5–8 færdige mockups pr. produkt uploadet af ejeren; teksten (batch 1–3, 8,5 t) og forberedelsen (0,5 t) er færdig og verificeret. Derfor er 64,3 % = 9/14, mens 100 % af den ikke-ejer-blokerede del er leveret.
-- **Niche-butik — plugin P4** — Kørslen på det levende site kræver ejerens klik: et nyt MCP-token i denne sandkasse (OAuth-linket fra tools/mcp_oauth.py --start) eller Plugins → Update til 7.64.0. Indtil da er WooCommerce-delen af udrulningen kun dækket af stub-tests, og det står som de sidste 0,15 d.
 
 ### Næste skridt
 
-- **steamgears.eu — site-optimering** — Intet agent-arbejde tilbage i S0–S4. De åbne poster er ejer-blokerede og navngivet i docs/roadmap.md §4c: GSC-svar (S0.6), ja/nej pr. produkt 942/765/766/767 (S1.2), Complianz EU-valg (S4.1), CVR/adresse/telefon (S4.2, S4.9), valuta + 39 priser (S4.3), betalingsaftaler (S4.5), forsendelseszoner (S4.6), Printful (S4.7). Køen og cron er derimod ryddet og kører nu af sig selv (S3.6).
+- **steamgears.eu — site-optimering** — Intet agent-arbejde tilbage i S0–S4. De åbne poster er ejer-blokerede og navngivet i docs/roadmap.md §4c: GSC-svar (S0.6), ja/nej pr. produkt 942/765/766/767 (S1.2), Complianz EU-valg (S4.1), CVR/adresse/telefon (S4.2, S4.9), valuta + 24 priser (S4.3), betalingsaftaler (S4.5), forsendelseszoner (S4.6), Printful (S4.7). Køen og cron er derimod ryddet og kører nu af sig selv (S3.6).
 - **Steamgears Autopilot — plugin** — Kun P1.5 står åben i plugin-roadmappet, og den er ejer-blokeret (tokens). Driften er derimod målt: cron kører nu gennem tick-endpointet, køen er tom, og de fire led der kræver ejeren står i blocked_by.
 - **Dark academia-rebrand** — Batch 4 er det eneste tilbage. Forberedelsen (0,5 t) er færdig og målt; selve mockup-genereringen er ejer-blokeret. Næste skridt er ejerens: Printful-adgang eller 5–8 færdige billeder pr. produkt.
 - **SEO-indholdsproduktion** — SEO-indholdet er 100 %: fire guides skrevet, tre publiceret, corset-guiden publiceret, 1410 parkeret til september. Ingen åbne poster.
 - **Døde internlinks** — Vedligehold: tjek nye indlæg mod live-URL'er
-- **Niche-butik — plugin P4** — Modulet er bygget og grønt lokalt (32 smoke-checks, php -l, fejlscan, zip byte-identisk). Det der mangler er én kørsel mod rigtig WooCommerce: activation af 7.64.0 på sitet og et niche-run med efterfølgende rollback, så kladde-flowet er målt og ikke kun testet.
+- **Niche-butik — plugin P4** — Færdig som roadmap-punkt P4: modulet er kørt mod det levende site (WordPress 7.1.4, WooCommerce 11.2.2) med 8 produktkladder, 5 kollektioner, en sideskits og en navigation, og rullet tilbage til præcis udgangstilstanden. Næste skridt er ejerens: Printful-adgang, publicering og de øvrige punkter i readiness-listen.
 
 ### Seneste commits
 
+- `56844d3 Niche-butik: målt på sitet og rullet tilbage — P4 færdig`
+- `772a1de Modul: agent-profil — faktakort Før: 93,3 % → Efter: 93,3 % (Δ 0) Grundlag: ingen ændring`
+- `a8c26c7 Modul: steamgears.eu — site-optimering (roadmap afstemt mod målte tal) Før: 93,3 % Efter: 93,3 % Δ: 0 Grundlag: ingen ændring`
+- `4701f3b Skriv niche-beslutningen ind i samtalepunkterne`
 - `db62144 Niche-butik: ét felt rejser butikken — som kladder, med rollback`
 - `d311b12 Ret katalogtallene til det målte: 24 produkter, ikke 39`
-- `aa1355f chore(status): daglig projektstatus 2026-11-08`
-- `eee6ceb Luk batch 4-forberedelsen og giv shoparkivet strukturdata`
-- `1d39063 Dokumentér at den site-planlagte tick kørte af sig selv kl. 14:15`
-- `e98ab1e Læg tick på site-planlægning som uafhængig vej ved siden af GitHub`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
 
-### 8/11 — niche-butikken: ét felt bliver en butik, men kun som kladder
+### 8/11 — niche-butikken: ét felt bliver en butik — målt på sitet og rullet tilbage
 
 - **Beslutning:** ønsket »skriv niche-navn → fuld udrulning af webshop« er bygget som en *plan* plus en
-  reversibel kladde-udrulning (7.64.0), ikke som en auto-publicering. Alt hvad der ikke må gættes —
+  reversibel kladde-udrulning (7.64.3), ikke som en auto-publicering. Alt hvad der ikke må gættes —
   kostpris, mockups, valuta, betaling, CVR, zoner, samtykke — står i en ejer-liste, og hver ejer-fakta i
   side-copy står som `[EJER: …]`.
-- **Målt:** 32 nye smoke-checks (plan-determinisme, arketypematch, pris over margin-gulv, dry-run uden
-  skrivning, afvisning uden WooCommerce, rollback der beholder publiceret indhold), **1081 PASS i alt**,
-  `php -l` ren, zip byte-identisk, alle 29 værn grønne lokalt.
-- **Fælde:** rollback-rapporten mærkede linjerne med array-nøglen (`products:`), ikke entiteten
-  (`product:`) — fanget af testen, ikke af øjet. Og smoke-harnesset manglede slette-API'et, så
-  WordPress-stubberne til rollback ligger nu i testfilen med en kommentar om hvorfor.
-- **Ikke gjort:** WooCommerce-kørslen. Den kræver at 7.64.0 aktiveres på sitet (ejerens Plugins → Update
-  eller et nyt MCP-token i sandkassen), og står som modulets sidste 0,15 d.
+- **Målt på steamgears.eu** (WordPress 7.1.4, WooCommerce 11.2.2): niche »cottagecore mushroom« gav med
+  ét REST-kald 5 kollektioner (210–214), 8 produktkladder (1517–1524) med `_price`, `_regular_price`, SKU
+  og `_sgap_niche`, en sideskits (1525) og en navigation (1526) med 8 rigtige links. Butikkens 20
+  publicerede varer, 32 kategorier og 32 sider var urørte; kladderne svarede 404. Rollback via
+  admin-knappen slettede alle 15 rækker (`kept: []`) og gav en tilstand identisk med før-kørslen.
+- **Fælde:** tre fejl blev først synlige i browseren: planen lovede en menu som `apply()` aldrig skrev
+  (rettet 7.64.1), Runs-tabellen skrev »1 pages« (7.64.2), og »Create drafts« på en allerede kørt plan
+  kastede et JS-`TypeError` og efterlod knappen død (7.64.3). Ingen af dem kunne smoke-testen se.
+  Dertil: rollback-rapporten mærkede linjerne med array-nøglen (`products:`) — fanget af testen.
+- **Plugin CI-checken** »model: a name the provider does not offer is refused at save« var rød, fordi
+  integrationstestens stub svarede på `/v1/models/<model>` men ikke på den katalog-URL koden kalder
+  (`/v1/models?limit=100`); uden katalog accepterer pluginnet med vilje det indtastede navn. Målt på
+  det levende site, rettet i testfilen — produktadfærden er uændret.
+- **Ikke gjort, og kun ejerens:** Printful-adgang (rigtige kostpriser og mockups), publicering,
+  valuta/betaling/CVR/samtykke/zoner, og valg af den nye navigation i headerens Navigation-blok.
+  AI-nøglen til AIMLAPI er løbet tør for midler ifølge admin-notitsen.
 
 ### 8/11 — nøglerne på én side siger nu hvem de tilhører, og hver ændring huskes uden værdien
 
