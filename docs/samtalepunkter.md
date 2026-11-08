@@ -46,12 +46,12 @@ _Opdateret 2026-11-08 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `e98ab1e Læg tick på site-planlægning som uafhængig vej ved siden af GitHub`
+- `c12df1a Ret leverandøren til Printful i hele repoet`
 - `0295873 Dokumentér tredje grønne kørsel og krops-kravet i tick-jobbet`
 - `2175c0d Bevis cron-tick i drift: to grønne GitHub-kørsler og idempotent køhygiejne`
 - `3bdb459 Merge origin/main (daglig status-brief)`
 - `fa0d058 chore(status): daglig projektstatus 2026-11-08`
-- `f3aaeb0 Merge remote-tracking branch 'origin/main' (daglig status-brief 8/11)`
-- `8d5b140 Ryd køen og sæt cron i gang: 326 ventende leveringer → 0`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)

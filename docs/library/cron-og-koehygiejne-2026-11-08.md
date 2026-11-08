@@ -94,6 +94,17 @@ wp_get_schedule('sgap_cron_tick')   = sgap_five_minutes (300 s)
 Det gør køen uafhængig af én ekstern scheduler: GitHub-jobbet og site-planen dækker hver sin vej,
 og begge skriver til `sgap_cron_kicker_history`.
 
+**Målt i drift 14:15:33 UTC** — uden at nogen agent eller noget GitHub-job kaldte noget:
+
+```
+{"at":"2026-11-08T14:15:33+00:00","source":"wp-schedule","due_before":14,"ran":8,"seconds":1.03}
+wp_next_scheduled('sgap_cron_tick') = 2026-11-08T14:20:32+00:00
+```
+
+Altså: den site-planlagte ur slog af sig selv, kørte otte forfaldne opgaver og satte næste
+kørsel. Historikken havde på det tidspunkt 12 poster fordelt på `shutdown` (10), `tick` (1) og
+`wp-schedule` (1).
+
 ### 2.3.1 Den faktiske GitHub-kørsel
 
 Workflowen blev startet med `workflow_dispatch` (den havde ikke haft en planlagt slot endnu). Tre kørsler,
