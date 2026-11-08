@@ -21,8 +21,10 @@ Tallene krydstjekkes desuden mod historik-rækkerne i `projektstatus.json`: Før
 en række, og Grundlag skal kunne læses ud af den rækkes `basis`. Et opdigtet regnestykke afvises.
 
 Undtaget, fordi de ikke kan bære procenter: merge- og revert-commits samt bot-committene fra
-`.github/workflows/projektstatus.yml` (`chore(status): …`) og `.github/workflows/natlig-push.yml`
-(`chore: natlig auto-push …`).
+`.github/workflows/projektstatus.yml` (`chore(status): …`), `.github/workflows/natlig-push.yml`
+(`chore: natlig auto-push …`) og `.github/workflows/rebrand-apply.yml` (`chore(rebrand): …`).
+De tre er maskinens egne rapport-commits: de flytter ingen procenter, så der findes ingen række at
+krydstjekke imod.
 
 Exitkoder: 0 = ok, 1 = regelbrud, 2 = intern fejl eller forkert brug.
 """
@@ -51,6 +53,7 @@ SKIP_SUBJECTS = (
     "revert ",
     "chore(status):",
     "chore: natlig auto-push",
+    "chore(rebrand):",
 )
 
 # ------------------------------------------------------------------- verificeret register
@@ -528,6 +531,11 @@ FIXTURES: list[tuple[str, str, bool]] = [
     (
         "status-bottens commit undtages",
         "chore(status): daglig projektstatus 2026-11-03\n",
+        True,
+    ),
+    (
+        "rebrand-bottens commit undtages",
+        "chore(rebrand): kørselsrapport for tildelingen\n",
         True,
     ),
     (
