@@ -281,7 +281,7 @@
           "done": 0.1,
           "total": 0.1,
           "unit": "d",
-          "note": "36 smoke-checks (1084 PASS, 0 FAIL i alt), php -l på alle filer, fejlscan grøn, 7.64.3-zip byte-identisk med kilden, README + ROADMAP + biblioteksdokument med PDF, admin-siden verificeret i browser."
+          "note": "36 smoke-checks (1084 PASS, 0 FAIL i alt), php -l på alle filer, fejlscan grøn, 7.64.3-zip byte-identisk med kilden, README + ROADMAP + biblioteksdokument med PDF, admin-siden verificeret i browser. Plugin CI’s evne-tælling blev samtidig rettet fra 36 til 40 (de fire niche-evner), så WordPress-jobbet er grønt igen."
         },
         {
           "id": "p4live",
