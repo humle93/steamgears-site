@@ -1,6 +1,6 @@
 # Nye WordPress-sites — guide, metode og sammenligning
 
-**Skrevet:** 8/11 2026 · **Gælder:** de næste sites vi starter, ikke steamgears.eu · **Kilder:** §13
+**Skrevet:** 8/11 2026 · **Gælder:** de næste sites vi starter, ikke steamgears.eu · **Kilder:** §14
 
 Denne guide svarer på to ting: **hvad er den bedste og mest moderne måde at bygge et WordPress-site på i
 dag**, og **hvordan står den metode mod den vi selv bruger**. Den er skrevet, så et nyt site kan startes på
@@ -33,7 +33,10 @@ end de fleste: hver side måles, hver commit bærer procenter, og hver fælde bl
 mere pr. måned og kræver SSH/Git-kompetence, men den fjerner præcis de tre svagheder der har kostet os dyrest
 (ingen staging, ingen rollback af kode, fejlfinding gennem en cache). Til **steamgears** skal vi ikke migrere
 for migrationens skyld; siden kører, er målt, og en flytning ville koste mere end den giver lige nu.
-Uanset hvad vi vælger, tager vi **værnene og dokumentationen** med — de er metoden, ikke hosten.
+Uanset hvad vi vælger, tager vi **værnene og dokumentationen** med — de er metoden, ikke hosten. Den nye
+arbejdsrækkefølge er: **mål → afgræns → prototype én kritisk brugerrejse → test med målgruppen → byg →
+kontrollér kvalitet → staging-accept → live → mål igen**. Vi skalerer ikke indhold eller features op, før den
+kritiske rejse virker.
 
 | Spørgsmål | Vores metode | Git- og staging-metoden |
 | --- | --- | --- |
@@ -233,11 +236,18 @@ Et nyt site skal måles på det samme, uanset metode, så "bedre" ikke bliver en
 | Change failure rate | hvor ofte brækker en ændring? | historik: 3 hændelser på 14 dage |
 | MTTR | hvor hurtigt er vi tilbage? | 1 t 38 min ved butiksnedbruddet 6/11 |
 | HTML og scripts | payload | 75 KB / 27 scripts (forside) |
-| TTFB og CWV | oplevet hastighed | ikke målt med Lighthouse i dag |
-| Restore-tid | kan vi gendanne? | ikke målt |
-| Fejl i loggen | 500'er pr. uge | ikke målt |
+| Core Web Vitals | hastighed, respons, stabilitet | mål: LCP ≤2,5 s · INP ≤200 ms · CLS ≤0,1 ved p75 (feltdata) |
+| Accessibility | kan flere bruge sitet? | mål: WCAG 2.2 AA; automatiseret + manuel kontrol |
+| Kritisk brugerrejse | kan kunden nå sit mål? | mål: gennemført på mobil og desktop uden hjælp |
+| Restore-tid | kan vi gendanne? | restore til staging gennemført og tidsmålt før launch |
+| Fejl i loggen | 500'er pr. uge | ingen uforklarede 5xx i kritisk rejse |
+| Målehændelser | kan vi træffe beslutninger? | hver kritisk hændelse registreres én gang |
+| Tilgængelighed | kan flere bruge sitet? | WCAG 2.2 AA er release-mål, ikke plugin-badge |
 
-De to sidste er huller i vores nuværende metode, og de er billige at lukke på et nyt site fra dag et.
+De manglende performance-, accessibility-, restore- og event-baselines er huller i vores nuværende metode.
+De lukkes på et nyt site fra dag ét. Core Web Vitals er feltmål: brug p75 opdelt på mobil/desktop, når data
+findes. Før der er trafik nok, brug samme lab-opsætning før/efter som en foreløbig guardrail — og skriv
+udtrykkeligt, at lab-tallet ikke er felt-CWV.
 
 ---
 
@@ -257,22 +267,74 @@ kanal WordPress ikke selv kan vise — ellers betaler man for en ekstra frontend
 
 ---
 
-## 6. Playbook: nyt site i otte faser
+## 6. Playbook: nyt site i otte arbejdsfaser
+
+Fase 0 er beslutningsporten; faserne 1–8 er de otte arbejdsfaser. Den vigtigste ændring fra den gamle
+arbejdsmåde er, at vi **beviser én komplet brugerrejse før vi masseproducerer sider eller funktioner**.
+
+### Første port: produktbrief og målinger
+
+Før Blueprint eller tema skrives, udfyldes en kort brief. Den forebygger, at en færdig hjemmeside stadig er
+forkert for kunden.
+
+| Spørgsmål | Svar der skal være skrevet ned |
+| --- | --- |
+| Hvem er den primære bruger, og hvilket problem løser sitet? | Én målgruppe og ét konkret jobs-to-be-done |
+| Hvad er den vigtigste handling? | køb, booking, kontakt, tilmelding eller læsning — én primær CTA |
+| Hvordan ved vi, at løsningen er bedre? | 1–3 måltal med baseline, ejer og målemetode |
+| Hvad er MVP, og hvad venter? | must / should / later; ingen features uden brugerbehov |
+| Hvem ejer fakta og godkendelser? | navngiv ejer af priser, jura, billeder, betaling og copy |
+| Hvilke forudsætninger er usikre? | antagelse, hvordan den testes, og hvornår den afgør go/no-go |
+| Hvad gør sitet med persondata? | felter, formål, opbevaring, adgang og sletning |
+
+**Gate:** ejer godkender mål, primary CTA, MVP og ejerafhængige fakta. Ukendte priser/jura/leveringsløfter
+bliver navngivne blokeringer — ikke gættet copy.
+
+### Prototypen skal bevise en hel rejse
+
+Byg ikke først hele forsiden og håb, at resten passer. Prototypér én vigtig vej fra indgang til afsluttet
+opgave på mobil først, derefter desktop:
+
+- **Webshop:** landingsside → produktside → variant → kurv → checkout → bekræftelse.
+- **Lead/site:** landingsside → forstå tilbuddet → kontaktformular → succesbesked → bekræftelsesmail.
+- **Indholdssite:** søgeindgang → svar → relateret indhold → relevant CTA.
+
+Kør en kort, modereret **kvalitativ** opgavetest med 3–5 personer fra målgruppen. Det er en formativ
+fejlfindingsrunde — ikke statistisk markedsbevis eller en konverteringsprognose; se NN/g-kilden i §14. Notér
+hvor de stopper, hvad de misforstår, og om de fuldfører opgaven uden hjælp. Ret de kritiske og gentagne
+stopklodser, før hele sitet bygges. Book deltagerne tidligt: testens kalender-tid kommer oven i teamets
+aktive byggetid.
+
+### Beslutningsporte undervejs
+
+- **Arkitekturport:** sitemap, indholdstyper, slugs, navigation og redirect-plan godkendes før copy-mængden
+  vokser. URL'er er data: skift efter publicering kræver 301 og opdatering af interne links.
+- **Designport:** `theme.json`, typografi, farver, spacing og 3–5 genbrugelige patterns fastlægges før alle
+  skabeloner bygges. Én repræsentativ side godkendes på mobil + desktop.
+- **Kvalitetsport:** accessibility, performance, sikkerhed, SEO, consent og måling køres på samme kritiske
+  rejse — ikke kun på forsiden.
+- **Go-live-port:** ingen åbne kritiske fejl i køb/kontakt/login, indholdsfakta godkendt af ejeren, backup
+  gendannet til staging, rollback ejer og trigger kendt.
 
 | Fase | Arbejde | Tid | Gate |
 | --- | --- | --- | --- |
-| 0 | Formål, målgruppe, indholdsmodel, KPI | 2–4 t | én sætning om hvem siden er for |
-| 1 | Prototype i Playground (Blueprint i repo) | 2–6 t | kunden har set den i browseren |
-| 2 | Host, staging, backup, PHP/WP-version | 2–4 t | staging findes og er `noindex` |
-| 3 | Repo, lokal opsætning, CI-lint | 3–6 t | `git push` giver grøn lint |
-| 4 | Block theme, `theme.json`, patterns, Woo-skabeloner | 2–5 d | designet er i Git, ikke i editoren |
-| 5 | Indhold, metadata, schema, sitemap, redirects | 1–3 d | 0 døde links, 1 H1 pr. side |
-| 6 | Staging-test: kasse, mails, formularer, ydelse | 0,5–1 d | testordre gennemført |
-| 7 | Go-live: DNS, 301, sitemap, GSC, uptime | 2–4 t | smoke-test efter DNS-skift |
-| 8 | Drift: uge/måned/kvartal + dokumentation | løbende | restore-øvelse gennemført |
+| 0 · port | Produktbrief, målgruppe, brugerproblem, CTA, KPI, MVP og ejerfakta | 2–4 t | brief godkendt; usikre forhold har test/owner |
+| 1 | Prototype i Playground (Blueprint i repo) + kritisk rejse | 2–6 t | kvalitativ brugertest; gentagne stopklodser rettet |
+| 2 | Host, staging, backup, PHP/WP-version | 2–4 t | staging er `noindex`; restore prøvet |
+| 3 | Repo, lokal opsætning, CI-lint | 3–6 t | `git push` giver grøn kodekontrol |
+| 4 | Block theme, `theme.json`, patterns, Woo-skabeloner | 2–5 d | design godkendt på repræsentativ mobil/desktop |
+| 5 | Indhold, metadata, schema, sitemap, redirects | 1–3 d | URL-model låst; ingen udokumenterede facts |
+| 6 | Staging-test: rejse, mails, formularer, a11y, performance | 0,5–1 d | release-gates nedenfor bestået |
+| 7 | Go-live: DNS, 301, sitemap, GSC, uptime | 2–4 t | smoke-test efter DNS-skift + rollback-ejer |
+| 8 | Drift: uge/måned/kvartal + dokumentation | løbende | 7/30/90-dages-review og restore-øvelse |
 
-**Total: 5–9 arbejdsdage** for et lille site med eksisterende copy, **2–4 uger** hvis indholdet skal skrives.
-Det er den samme størrelsesorden som steamgears' deploy-roadmap, men fordelt på et site der ikke findes endnu.
+Port 0 er en beslutningsport uden for byggefaserne; **fase 1–8 er otte arbejdsfaser**.
+
+**Planlægningsestimat: 5–9 arbejdsdage** for et lille site med eksisterende copy, **2–4 uger** hvis indholdet
+skal skrives. Det er et groft aktivt-teams-estimat, ikke en deadline-garanti; ejerafklaringer, rekruttering af
+testpersoner, host-setup og tredjepartsbetalinger kan forlænge kalenderen. Første sites gennemføres som pilot,
+og estimatet justeres ud fra faktisk tidsforbrug. Samme størrelsesorden som steamgears' deploy-roadmap, men
+fordelt på et site der ikke findes endnu.
 
 ### Fase 1 — prototypen er kontrakten
 
@@ -280,16 +342,30 @@ Blueprint-filen er det første commit i repoet. Den giver tre ting: kunden ser s
 udvikleren får samme udgangspunkt hver gang, og demoen kan genskabes om et år. Læg den i
 `playground/blueprint.json` og skriv kommandoen i README.
 
-### Fase 2 — hosten vælges på seks krav, ikke på pris
+Prototypen viser ikke bare hero og farver: den indeholder hele den kritiske rejse, den rigtige CTA, én
+fejltilstand, én tom tilstand og en succesbekræftelse. Test først den prototype med de målbrugere, der kan
+rekrutteres. Hvis de ikke forstår hvad siden tilbyder eller hvordan de fuldfører hovedopgaven, skal løsningen
+ændres før komponenter og copy skaleres op.
+
+### Fase 2 — hosten vælges på krav, ikke på pris
 
 1. **SSH + WP-CLI** (ellers kan I ikke fejlfinde).
-2. **Git-deploy** — indbygget eller via CI.
-3. **Staging** der kan klones og skubbes til live.
-4. **Backup** med restore til staging.
-5. **PHP 8.5** og en opdateringspolitik I kan leve med.
-6. **EU-region** hvis kunderne er i EU (og en databehandleraftale).
+2. **Git-deploy** — indbygget eller via CI; staging deployes først, production-promote kræver accept.
+3. **Staging** der kan klones, adgangsbeskyttes og sættes `noindex`; skriv hvad miljøet ikke matcher (PHP/cache).
+4. **Backup** med restore til staging; kræv dokumenteret RPO/RTO fra hosten og mål restore selv.
+5. **PHP/WP/Woo-version** er understøttet af tema og alle betalings-, fragt- og consent-plugins; lås versioner.
+6. **EU-region, DPA og underleverandører** hvis målgruppen/kravene kræver det.
+7. **Logs, cache purge og incident support** kan tilgås uden at kundens browser er eneste diagnosevej.
+
+Sammenlign mindst to kandidater på de samme krav og samlet pris, herunder staging, backup og eventuelle
+migreringsgebyrer. Host-valg markeres som en beslutning med dato, ansvarlig og årsag — ikke et skjult gæt.
 
 ### Fase 3 — repo og CI
+
+Opret CI sammen med repoet, ikke som oprydning før launch. Hver ændring til production skal være en
+reviewbar PR/commit, grøn lint og deployet til staging. Production-promote er et separat, logget skridt. CI
+kører det der passer til koden (PHP syntax/style, theme/plugin checks, JavaScript/CSS build og automatiske
+smoke-tests); den må **ikke** deploye databasen eller `uploads/`.
 
 Mindste repo der stadig er professionelt:
 
@@ -317,7 +393,9 @@ option der kan læses udefra. En nøgle der har været eksponeret, tilbagekaldes
 - **Patterns** til sektioner der gentages (hero, trust, produktgrid), så indhold ikke bliver copy-paste.
 - **Skabeloner** til forside, arkiv, produkt, kurv, kasse og 404.
 - Ingen hardkodet tekst i temaet; al redigerbar tekst er blokke eller patterns.
-- Kontrast og fokusring testes, før designet godkendes — ikke efter.
+- Kontrast, fokusring, mobilnavigation og formularfelter testes, før designet godkendes — ikke efter.
+- Designporten er en mobilbredde og desktopbredde på samme repræsentative side, ikke alle skærmstørrelser
+  efter mavefornemmelse.
 
 ### Fase 5 — indhold og SEO
 
@@ -325,23 +403,49 @@ Samme regler som [`deploy-playbook-2026-11-08.md`](deploy-playbook-2026-11-08.md
 tegn, canonical, ét OG-billede, schema der matcher den synlige tekst, og et sitemap der faktisk indeholder
 siden. Forskellen er, at det nu kan kontrolleres på **staging** i stedet for efter publicering.
 
-### Fase 6 — staging-testen
+### Fase 6 — staging-testen og release-gates
 
-| Test | Krav |
-| --- | --- |
-| Testordre | gennemført, annulleret, noteret |
-| Betaling | mindst én godkendt og én afvist transaktion |
-| Mails | ordrebekræftelse, fortrydelse, retur |
-| Formularer | indsendelse målt, ikke antaget |
-| Consent | afvisning starter ingen ikke-nødvendige scripts |
-| Cache | kurv og kasse er ikke cachede |
-| Performance | budget målt på staging, ikke gættet |
-| `noindex` | staging blokerer søgemaskiner |
+Test den samme primære rejse, som blev godkendt i prototypen. Der publiceres ikke med kendte fejl, der
+forhindrer køb, kontakt, tilmelding eller den valgte hovedopgave.
 
-### Fase 7 — go-live
+| Kvalitetsport | Krav før launch | Sådan bevises det |
+| --- | --- | --- |
+| Brugerrejse | hovedopgaven fuldføres uden hjælp på mobil og desktop | modereret opgavetest; ingen blocker |
+| Webfunktion | sidets kritiske formular/handling har success + fejltilstand | staging-kørsel med resultat/kvittering |
+| Betaling (hvis webshop) | én godkendt og én afvist sandbox-betaling, ingen rigtig charge | payment sandbox + ordrenummer |
+| Mails | ordrebekræftelse, fortrydelse/retur eller formkvittering | modtaget mail i testkonto |
+| Accessibility | WCAG 2.2 AA som mål; tastatur, fokus, labels, kontrast og zoom kontrolleret | automatisk scan + manuel keyboardrunde; scanner alene er ikke bevis for AA |
+| Performance | feltmål: LCP ≤2,5 s, INP ≤200 ms, CLS ≤0,1 ved p75 for mobil/desktop når data findes | CrUX/PageSpeed Insights; før data findes gemmes samme lab-test som baseline, markeret lab |
+| SEO/links | 1 H1, canonical, metadata, sitemap, alle kritiske links når rigtigt mål | crawl + følg redirect helt til målside, ikke kun 302 |
+| Analytics | hovedhændelse fyrer én gang og har korrekt værdi/valuta | network/event-debug; sammenlign med handlingen |
+| Consent | afvisning starter ikke ikke-nødvendige scripts | test både reject og accept i frisk session |
+| Sikkerhed | admin 2FA, mindst privilegier, secrets uden for Git, HTTPS | access review + secret scan |
+| Backup/rollback | restore gennemført til staging; kode kan rulles til sidste release | kør øvelsen og mål tiden |
+| Cache | kurv, checkout, login og personligt indhold ikke cachet | headers + brugerflow |
+| Staging | password-beskyttet og `noindex` | HTTP/meta + Search Console-tilsyn efter launch |
 
-DNS med lav TTL i god tid, 301 fra gamle URL'er, sitemap indsendt, GSC og analytics verificeret, uptime-overvågning
-tændt, og en smoke-test **efter** DNS-skiftet — ikke før.
+**Performanceforbehold:** Lighthouse/lab-tal er nyttige til regressioner, men erstatter ikke feltdata. Google
+anbefaler at vurdere Core Web Vitals på 75-percentilen, opdelt på mobil og desktop. Med for lidt trafik
+skrives status »feltdata utilstrækkelige« i stedet for at erklære målet bestået.
+
+**Go/no-go:** stop ved fejl i betaling, persondata, adgang, hovedformular eller hovedrejse. Pynt, ekstra sider
+og ikke-kritiske animationer kan komme efter launch; de må ikke forsinke eller skjule en kritisk fejl.
+
+### Fase 7 — go-live og de første 30 dage
+
+Før launch: lav TTL i god tid, 301 fra gamle URL'er, sitemap indsendt, GSC og analytics verificeret,
+uptime-overvågning tændt, og en smoke-test **efter** DNS-skiftet — ikke før. Skriv den sidste kendt-gode
+release, den der kan trykke rollback, og hvilke hændelser der udløser rollback (fx checkout-fejl, fatal fejl
+eller tab af ordre/formdata).
+
+Efter launch:
+
+- **Første døgn:** kontroller 5xx, checkout/formular, mail, betalinger, consent og deploy-status flere gange.
+- **Dag 7:** gennemgå konverterings-/kontaktflow og fejl mod briefens baseline; ret den største dokumenterede
+  friktion, ikke den nyeste idé.
+- **Dag 30:** sammenlign KPI, Core Web Vitals feltdata hvis tilstrækkelige, uptime og supporthenvendelser mod
+  baseline. Registrér beslutninger og nye værn i repoet.
+- **Kvartalsvis:** restore-øvelse til staging og plugin-/adgangsgennemgang.
 
 ---
 
@@ -434,14 +538,55 @@ Den nye metode har sine egne fælder. De står her, så de ikke skal opdages på
 | Sikkerhed | WAF, 2FA, ingen eksponerede nøgler, mindst mulige plugins |
 | Ydelse | HTML/script-budget målt, object cache, kurv/kasse ikke cachet |
 | SEO | 1 H1 pr. side, meta, canonical, sitemap, 301'er, OG-billeder |
-| Butik | testordre, betaling, fragt, moms, mails, returformular |
-| Jura | CVR, adresse, telefon, fortrydelse, consent, GPSR |
+| Butik (hvis relevant) | testordre, betaling, fragt, moms, mails, returformular |
+| Jura (efter land/model) | CVR, adresse, telefon, fortrydelse, consent, GPSR |
 | Måling | GA4 uden dubletter, GSC, uptime, fejl-log |
 | Drift | deploy-rutine, rollback-rutine, kontaktvej, dokumentation |
 
 ---
 
-## 12. Hvad vi tager med fra steamgears
+## 12. Forbedringer til vores fremgangsmåde — anbefaling til næste site
+
+Disse ændringer anbefales som standard for nye sites oven på det vi allerede gør godt. De er tænkt til brug
+fra første brief; de kræver ikke at steamgears flyttes eller genbygges.
+
+| Prioritet | Forbedring | Ændring i arbejdsgangen | Hvilket svigt den forhindrer |
+| --- | --- | --- | --- |
+| **P0** | Produktbrief før design | målgruppe, primary job, CTA, MVP, 1–3 KPI'er, fakta-ejer og antagelser skrives og godkendes i port 0 | flotte sider uden mål eller ejerafklarede facts |
+| **P0** | Én komplet brugerrejse først | prototype/test én kritisk rejse med 3–5 målbrugere, før massebygning | at opfinde hele sitet før man ser hvor folk stopper |
+| **P0** | Staging + Git + rollback | alle kodeændringer via reviewbar commit → staging → accept → promote; DB/ordrer/`uploads` håndteres separat | direkte live-fejl, manglende diff og utryg rollback |
+| **P0** | Release-porte | WCAG, kritisk rejse, betaling/formular, consent, analytics og backup indgår i go/no-go | »siden virker« betyder kun at forsiden åbner |
+| **P1** | Målbar kvalitet | performance- og fejlbaselines måles før/efter; feltdata og lab-data mærkes hver for sig | falske hastighedsforbedringer og uklare claims |
+| **P1** | Content model + URL'er før copy | indholdstyper, navigation, slug og redirectkort godkendes før produktion | masseindhold og dyre slug-/strukturændringer |
+| **P1** | Mindre plugin-/feature-scope | hver plugin/feature skal have formål, ejer, dataadgang, vedligeholder og removal-plan | unødige afhængigheder, ekstra scripts og døde funktioner |
+| **P1** | Launch er start på måling | 24 timer / 7 dage / 30 dage + kvartalsvis restore review | ingen læring efter at sitet er live |
+
+### Nyt standardforløb
+
+1. **Brief og beslutningslog** — sæt succesmål, risici, MVP og ejerafhængige facts.
+2. **Research og content model** — verificér konkurrenter/kilder, navngiv sidetyper, data og slugs.
+3. **Prototype brugerrejsen** — Playground Blueprint + mobil/desktop, med fejl-, tom- og success-tilstand.
+4. **Test og beslut** — kvalitativ test med målbrugere; log observationer, ret blocker, godkend scope.
+5. **Byg repræsentativt** — temaets tokens/patterns + én komplet sidetype; review før bred genbrug.
+6. **Byg resten i batches** — hver batch har staging-URL, owner, tests, acceptkriterium og rollback.
+7. **Release-gates** — accessibility, performance, funktion, sikkerhed, SEO, consent og restore.
+8. **Promote, smoke-test, mål igen** — kun ændret kode; indhold og kundeordrer migreres særskilt.
+9. **Post-launch review** — 24 timer, 7 dage, 30 dage; opdatér KPI og dokumentér én læring pr. release.
+
+### Krav før vi kalder produktet færdigt
+
+- Den primære bruger kan fuldføre den aftalte opgave på telefon og desktop.
+- Ingen åbne kritiske fejl i checkout, betaling, formular, login, dataindsamling eller hovednavigation.
+- Tilgængelighed er gennemgået med automated checks **og** manuel tastatur-/fokus-/formularrunde mod WCAG 2.2 AA.
+- Performance er målt med dato, side, device, lab/felt og metode; ingen forbedring påstås uden før/efter-tal.
+- Analytics registrerer den vigtigste konvertering én gang og med korrekt beløb/valuta, hvor det gælder.
+- Backup er gendannet til staging, og rollback-trin + ansvarlig er kendt.
+- Alle nødvendige fakta (pris, fragt, retur, identitet, samtykke) er ejet og godkendt — resten står som
+  blokering, ikke som generisk placeholder.
+
+---
+
+## 13. Hvad vi tager med fra steamgears
 
 Uanset host og metode skal det her følge med, fordi det er det der gjorde steamgears styrbart:
 
@@ -454,7 +599,7 @@ Uanset host og metode skal det her følge med, fordi det er det der gjorde steam
 
 ---
 
-## 13. Kilder
+## 14. Kilder
 
 | Kilde | Hvad den bruges til | Dato |
 | --- | --- | --- |
@@ -471,6 +616,11 @@ Uanset host og metode skal det her følge med, fordi det er det der gjorde steam
 | [15 hosts checked for Git deploy](https://wppusher.com/git-deploy-hosting) | hostmatrix: Git, SSH, staging | 20/10 2026 |
 | [Kinsta staging](https://kinsta.com/docs/wordpress-hosting/staging-environment/) | staging, SSH, Git uden push-to-deploy | 15/6 2026 |
 | [Raidboxes staging](https://helpcenter.raidboxes.de/en/articles/9104178-wordpress-staging-environment-at-raidboxes) | EU-host, staging og begrænsninger | 28/7 2026 |
+| [Core Web Vitals](https://web.dev/articles/vitals) | p75-feltmål og tærskler: LCP 2,5 s · INP 200 ms · CLS 0,1 | løbende |
+| [WCAG 2.2](https://www.w3.org/TR/WCAG22/) | anbefalet tilgængelighedsmål for nye sites | 12/12 2024 |
+| [WordPress Accessibility Coding Standards](https://developer.wordpress.org/coding-standards/wordpress-coding-standards/accessibility/) | WordPress anbefaler WCAG 2.2 AA for nyt/opdateret kode | 14/10 2026 |
+| [WordPress brute-force guidance](https://developer.wordpress.org/advanced-administration/security/brute-force/) | 2FA, mindst privilegium, HTTPS, testede backups | 14/10 2026 |
+| [NN/g: 5 participants, qualitative vs. quantitative](https://www.nngroup.com/articles/5-test-users-qual-quant/) | lille brugertest er formativ fejlfinding, ikke kvantitativ dokumentation | 11/7 2021 |
 
-**Ikke undersøgt her:** Lighthouse/Core Web Vitals for et nyt site, priser og planer, danske
-databehandleraftaler, og hvordan WooCommerce 11.3 opfører sig i praksis. Det skal måles, når hosten er valgt.
+**Ikke undersøgt her:** konkrete priser/planer, dansk databehandleraftale pr. host og Lighthouse-tal for et nyt
+site. Det skal afklares og måles, når værten er shortlistet.
