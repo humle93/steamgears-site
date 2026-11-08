@@ -29,7 +29,7 @@ Samme API, filtreret på kategori — to uafhængige mål (API-filter og arkivsi
 | dark-academia | **0** | 200, tom |
 | gothic-victorian | **0** | 200, tom |
 | natural-history | **0** | 200, tom |
-| vintage-maritime-prints | **0** | **404 — findes ikke** |
+| vintage-maritime (ID 97) | **0** | 200, tom |
 | witchy-tarot | **0** | 200, tom |
 | steampunk-capsule | **0** | 200, tom |
 | airship (gammel) | 5 | 200 |
@@ -38,9 +38,9 @@ Samme API, filtreret på kategori — to uafhængige mål (API-filter og arkivsi
 | atelier (gammel) | 4 | 200 |
 
 Alle 20 publicerede produkter ligger altså stadig kun i de fire oprindelige kollektioner. Tildelingen fra
-1/11 er væk — formentlig overskrevet ved en katalog-synk eller genskabelse af termene (fem af de seks
-termer findes stadig med tomme arkiver; `vintage-maritime-prints` er helt væk). Det er præcis den risiko
-planen selv advarede om.
+1/11 er væk — formentlig overskrevet ved en katalog-synk. Alle seks termer findes (ID 94–99) og står på
+`count: 0`; den maritime term hedder `vintage-maritime`, ikke `vintage-maritime-prints`, og det var den
+forskel der først blev læst som »termen findes ikke«. Det er præcis den synk-risiko planen selv advarede om.
 
 Det er en **regression, ikke udført arbejde der mangler**: omdøbningen og de 39 tekster er der, men
 effekten af batch 2 er der ikke. Derfor er gentildelingen skilt ud som eget modul (0,4 t) i
@@ -62,10 +62,23 @@ i `docs/library/batch-4-arbejdsordre-2026-11-08.md`; selve billederne kan ikke p
 
 ## 4. De to ejerhandlinger
 
-1. **Gentildel kollektionerne (0,4 t).** Kræver skriveadgang (MCP eller wp-admin). Rækkefølge: opret
-   `vintage-maritime-prints` igen, tildel de 20 publicerede (og de 4 kladder) efter planens grupper, kør
-   `python3 tools/rebrand_audit.py` og bekræft at ingen kollektion er tom.
+1. **Gentildel kollektionerne (0,4 t) — ét klik, når et application password findes.** Værktøjet
+   `tools/rebrand_apply.py` gør tildelingen (plan uden credentials, `--apply` med, `--verify` bagefter), og
+   workflowen *Rebrand apply* kører det i CI. Den eneste ejerhandling er at oprette et application password
+   og lægge det ind som repo-secrets — se trinnene nedenfor.
 2. **Mockups (5 t).** Kræver Printful-adgang eller færdige billeder. Acceptkriterium: 0 produkter under
    3 billeder — i dag 20 af 20.
+
+### Den konkrete ejerhandling (90 sekunder)
+
+1. Log ind på `steamgears.eu/wp-admin` som admin.
+2. **Brugere → Profil → Application Passwords**: navn fx `rebrand-ci`, klik *Add New Application Password*,
+   og kopiér den viste kode (den vises kun én gang).
+3. GitHub → repoet → **Settings → Secrets and variables → Actions**: opret `WP_USER` (dit brugernavn) og
+   `WP_APP_PASS` (koden fra trin 2). Koden skal ikke i chat, i repoet eller i en fil.
+4. **Actions → Rebrand apply → Run workflow** med `apply` slået til. Kørslen tildeler, verificerer og fejler
+   hvis en kollektion stadig er tom.
+5. Kør `python3 tools/rebrand_audit.py` (eller se kørslens verify-trin): **0 tomme kollektioner** er
+   acceptkriteriet.
 
 Indtil begge er gjort, er om-mærkningen **ikke** færdig, uanset hvor mange teksttimer der er brugt.

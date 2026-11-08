@@ -156,7 +156,7 @@
     {
       "id": "rebrand",
       "name": "Dark academia-rebrand",
-      "next": "Tre ting står tilbage, alle med en navngivet ejerhandling: (1) **gentildeling af de seks kollektioner** (0,4 t) — målt 8/11 via Store API har alle seks 0 produkter, mens de fire gamle bærer alle 20, så batch 2's tildeling er ikke i effekt og skal laves igen med skriveadgang; (2) **Batch 4-mockups** (5 t) — Printful-adgang eller 5–8 færdige billeder pr. produkt; (3) **de 29 trash'ede designs** — genoplive eller droppe.",
+      "next": "Tre ting står tilbage, alle med en navngivet ejerhandling: (1) **gentildeling af de seks kollektioner** (0,4 t) — målt 8/11 via Store API har alle seks 0 produkter, mens de fire gamle bærer alle 20, så batch 2's tildeling er ikke i effekt. Skrivevejen er bygget: `tools/rebrand_apply.py --apply` (eller workflowen »Rebrand apply«) gør det på ét minut, når WP_USER + WP_APP_PASS ligger som repo-secrets; (2) **Batch 4-mockups** (5 t) — Printful-adgang eller 5–8 færdige billeder pr. produkt; (3) **de 29 trash'ede designs** — genoplive eller droppe.",
       "blocked_by": "Tre led kræver ejerhandling, målt 8/11: (1) **gentildeling af kollektionerne (0,4 t)** — `/wp-json/wc/store/v1/products?category=<slug>` giver 0 produkter for dark-academia, gothic-victorian, natural-history, vintage-maritime-prints, witchy-tarot og steampunk-capsule, mens airship 5, herbarium 5, curiosities 6 og atelier 4 bærer alle 20 publicerede; `vintage-maritime-prints` findes slet ikke (arkivet 404). Titlerne derimod er på plads (fx 413 »Airship Storm — Vintage Engraving Hoodie«), så det er kun tildelingen der skal gentages — og det kræver skriveadgang (MCP/wp-admin), som agenten ikke har; (2) **Batch 4-mockups (5 t)** — Printful-adgang eller 5–8 færdige billeder pr. produkt; målt 20 publicerede med 22 billeder, 0 med 3 eller flere, 62 billedplaceringer mangler, og repoet har 0 trykfiler og 0 tøj-skabeloner; (3) **de 29 trash'ede designs** — 13 af de 45 produkt-id'er er publiceret, 3 er kladder og 29 ligger i papirkurven med de nye titler; genoplive (kræver Printful-synk) eller droppe er ejerens valg.",
       "modules": [
         {
@@ -189,7 +189,7 @@
           "done": 0,
           "total": 0.4,
           "unit": "t",
-          "note": "målt 8/11: dark-academia, gothic-victorian, natural-history, vintage-maritime-prints, witchy-tarot og steampunk-capsule har alle 0 produkter (Store API `?category=`), mens de fire gamle bærere har 5/5/6/4 = alle 20. `vintage-maritime-prints` svarer 404 — termen findes ikke. Kræver skriveadgang (MCP/wp-admin) og kan ikke gøres herfra. Verifikation bagefter: `python3 tools/rebrand_audit.py` skal give 0 tomme kollektioner."
+          "note": "målt 8/11: dark-academia, gothic-victorian, natural-history, vintage-maritime-prints, witchy-tarot og steampunk-capsule har alle 0 produkter (Store API `?category=`), mens de fire gamle bærere har 5/5/6/4 = alle 20. Termen hedder `vintage-maritime` (ID 97) og er også tom. Kræver skriveadgang (MCP/wp-admin) og kan ikke gøres herfra. Verifikation bagefter: `python3 tools/rebrand_audit.py` skal give 0 tomme kollektioner."
         }
       ]
     },

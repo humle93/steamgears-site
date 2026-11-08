@@ -98,6 +98,8 @@ check "anmeldelsesmail"                      "$PHP_BIN" wordpress/tests/test-rev
 # Om-mærkningen (S4): titler/kollektioner/billedkrav måles udefra — selftesten er offline og fanger
 # at familiekrav eller dommen driver, uden at CI nogensinde rammer netværket.
 check "rebrand-audit-selftest"               python3 tools/rebrand_audit.py --selftest
+# Tildelingen (batch 2) er ren funktion: kortet, overlap og idempotens testes offline.
+check "rebrand-apply-selftest"               python3 tools/rebrand_apply.py --selftest
 check "fejlscan-selftest"                    python3 tools/fejlscan.py --selftest
 check "fejlscan"                             python3 tools/fejlscan.py
 

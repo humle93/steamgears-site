@@ -1,0 +1,71 @@
+name: Rebrand apply
+
+# Tildeler de seks dark academia-kollektioner til produkterne — den handling der ikke kunne gøres fra en
+# agent-sandkasse, fordi der ikke findes et credential der. Kørslen bruger de samme repo-secrets som
+# seo_audit.yml (WP_USER + WP_APP_PASS: et WordPress-application-password på en admin-bruger).
+#
+# Rækkefølgen er: selftest (offline) → plan (offentlig læsning) → apply (kun hvis den er bedt om) → verify.
+# Uden secrets skriver den intet og fejler ikke: den viser planen og en ::warning, så den kan køres uden
+# at nogen har delt adgang.
+
+on:
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: "Skriv tildelingen (ellers kun plan + verify)"
+        type: boolean
+        default: false
+  # Et push der rører værktøjet (eller denne fil) kører tildelingen med det samme — men kun hvis
+  # credentials findes som secrets. Uden dem skriver kørslen intet og advarer i stedet.
+  push:
+    paths:
+      - tools/rebrand_apply.py
+      - tools/rebrand_audit.py
+      - .github/workflows/rebrand-apply.yml
+
+permissions:
+  contents: read
+
+jobs:
+  rebrand:
+    name: Kollektioner
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Selftest (offline)
+        run: python3 tools/rebrand_apply.py --selftest
+
+      - name: Plan mod den offentlige butik
+        env:
+          WP_USER: ${{ secrets.WP_USER }}
+          WP_APP_PASSWORD: ${{ secrets.WP_APP_PASS }}
+        run: |
+          set -o pipefail
+          if [ -z "$WP_APP_PASSWORD" ]; then
+            echo "::warning title=Ingen credentials::WP_USER/WP_APP_PASS er ikke sat — kun plan, intet skrives."
+          fi
+          python3 tools/rebrand_apply.py
+
+      - name: Apply
+        if: ${{ inputs.apply || github.event_name == 'push' }}
+        env:
+          WP_USER: ${{ secrets.WP_USER }}
+          WP_APP_PASSWORD: ${{ secrets.WP_APP_PASS }}
+        run: |
+          set -o pipefail
+          if [ -z "$WP_APP_PASSWORD" ] || [ -z "$WP_USER" ]; then
+            echo "::error title=Mangler credentials::Sæt WP_USER og WP_APP_PASS som repo-secrets (Settings → Secrets and variables → Actions), og kør igen."
+            exit 1
+          fi
+          python3 tools/rebrand_apply.py --apply
+
+      - name: Verify med det samme
+        env:
+          WP_USER: ${{ secrets.WP_USER }}
+          WP_APP_PASSWORD: ${{ secrets.WP_APP_PASS }}
+        run: python3 tools/rebrand_apply.py --verify

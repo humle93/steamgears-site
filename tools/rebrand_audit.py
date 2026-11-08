@@ -25,7 +25,7 @@ import urllib.request
 
 API = "https://steamgears.eu/wp-json/wc/store/v1/products"
 COLLECTIONS = ["dark-academia", "gothic-victorian", "natural-history",
-               "vintage-maritime-prints", "witchy-tarot", "steampunk-capsule"]
+               "vintage-maritime", "witchy-tarot", "steampunk-capsule"]
 OLD_COLLECTIONS = ["airship", "herbarium", "curiosities", "atelier"]
 # familie -> (mål for antal billeder, nøgleord i titlen)
 FAMILIES = {
@@ -91,13 +91,15 @@ def products() -> list[dict]:
 
 
 def counts(slugs: list[str]) -> dict[str, int]:
-    out = {}
-    for slug in slugs:
-        try:
-            out[slug] = len(fetch(API + "?" + urllib.parse.urlencode({"category": slug, "per_page": 100})))
-        except urllib.error.HTTPError:
-            out[slug] = 0
-    return out
+    """Term-tællingerne fra produktkategori-endpointet: ét kald, og det viser også termer med 0.
+
+    Kategori-filteret på produkter kan ikke skelne »tom term« fra »term findes ikke« — det var netop den
+    forskel der blev læst forkert 8/11 (termen hed `vintage-maritime`, ikke `vintage-maritime-prints`).
+    """
+    terms = fetch("https://steamgears.eu/wp-json/wp/v2/product_cat?" +
+                  urllib.parse.urlencode({"per_page": 100, "_fields": "id,slug,name,count"}))
+    found = {term.get("slug"): int(term.get("count") or 0) for term in terms}
+    return {slug: found.get(slug, 0) for slug in slugs}
 
 
 def selftest() -> int:

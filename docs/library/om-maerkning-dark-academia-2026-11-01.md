@@ -180,13 +180,14 @@ python3 tools/rebrand_audit.py          # exit 1 = mindst ét krav mangler
 | Dark Academia | 24 | **0** |
 | Gothic & Victorian | 6 | **0** |
 | Natural History | 6 | **0** |
-| Vintage Maritime Prints | 7 | **0** (arkivet svarer 404 — termen findes ikke) |
+| Vintage Maritime Prints (`vintage-maritime`) | 7 | **0** (termen findes, ID 97 — den er bare tom) |
 | Witchy & Tarot | 3 | **0** |
 | Steampunk Capsule | 7 | **0** |
 | airship, herbarium, curiosities, atelier (gamle) | — | 5 + 5 + 6 + 4 = **alle 20** |
 
-To uafhængige mål siger det samme: `?category=<slug>` giver 0 rækker for alle seks, og
-`/product-category/dark-academia/` svarer 200 med tomt grid. Samtidig **er titlerne i effekt** — 413, 401, 399,
+Tre uafhængige mål siger det samme: `?category=<slug>` giver 0 rækker for alle seks, term-tællingerne i
+`/wp-json/wp/v2/product_cat` står på `count: 0` for ID 94–99, og `/product-category/dark-academia/` svarer 200
+med tomt grid. Samtidig **er titlerne i effekt** — 413, 401, 399,
 403 og 557 bærer de nye navne — så det er tildelingen alene der er forsvundet, formentlig overskrevet af en
 katalog-synk eller af at termene er blevet genskabt. Det er præcis den risiko »Stadig åbent« ovenfor advarede om,
 og den er nu indtruffet.
@@ -195,13 +196,25 @@ og den er nu indtruffet.
 laves igen. Det er skilt ud som eget modul (0,4 t) i `projektstatus.json` med en dokumenteret scope-korrektion,
 så rebrand står på 9 af 14,4 t = 62,5 % — ikke 64,3 %.
 
-**Sådan gentildeles det (kræver skriveadgang — MCP eller wp-admin):**
+**Sådan gentildeles det — værktøjet er bygget, så det ikke skal gøres i hånden:**
 
-1. Opret `vintage-maritime-prints` igen (den er 404 i dag) med navnet *Vintage Maritime Prints*.
-2. Tildel efter grupperne ovenfor: gruppe A → Dark Academia / Natural History / Vintage Maritime Prints efter
-   tabellens søgeord, gruppe B → Gothic & Victorian, gruppe C → Steampunk Capsule. Behold de gamle kategorier.
-3. Tøm cachen (W3TC), og kør `python3 tools/rebrand_audit.py` — acceptkriterium: **0 tomme kollektioner**.
-4. Hvis Printful-synk er aktiv, skal titlerne også spejles i Printful, ellers gentager regressionen sig.
+```bash
+python3 tools/rebrand_apply.py            # plan: hvem mangler hvad (offentlig læsning, intet skrives)
+WP_USER=… WP_APP_PASSWORD=… python3 tools/rebrand_apply.py --apply
+python3 tools/rebrand_apply.py --verify   # acceptkriterium: 0 tomme kollektioner
+```
+
+Tildelingen ligger i `ASSIGNMENT` i `tools/rebrand_apply.py` — de samme 39 id'er som tabellen ovenfor,
+inkl. det tilsigtede overlap (401 i både Dark Academia og Vintage Maritime, 399 i både Dark Academia og
+Natural History). Værktøjet **lægger kun til**: de gamle kategorier (airship, herbarium, curiosities,
+atelier) bevares, og kørslen er idempotent. Termerne findes allerede med ID 94–99, så der oprettes intet.
+
+I CI gør workflowen `.github/workflows/rebrand-apply.yml` det samme med repo-secrets `WP_USER` +
+`WP_APP_PASS` (samme navne som `seo_audit.yml` bruger): *Actions → Rebrand apply → Run workflow*.
+Uden secrets skriver den intet, men viser planen, så den kan køres af hvem som helst uden adgang.
+
+Til sidst: tøm cachen (W3TC) og kør `python3 tools/rebrand_audit.py`. Hvis Printful-synk er aktiv, skal
+tildelingen også spejles der, ellers gentager regressionen sig.
 
 Tallene i detaljer: [`reports/rebrand-status-2026-11-08.md`](../../reports/rebrand-status-2026-11-08.md).
 
