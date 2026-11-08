@@ -79,3 +79,15 @@ Målingen er **ikke kørt**. Den ville svare `blokeret`, fordi ingen af de tre f
 
 Derefter er beviset én kommando: `python3 tools/live_channels.py` — eller næste natlige kørsel, der gør det
 af sig selv og lægger svaret i `reports/`.
+
+## Fælden undervejs: en zip uden filrettigheder
+
+Første push fik ét rødt CI-job — **Zip matches source** — selv om `tools/fejlscan.py` var grøn lokalt. Årsagen
+var ikke indholdet: zip'en blev bygget med `zipfile.ZipInfo(name)` uden `external_attr`, så hver fil kom ud af
+`unzip` med mode `000`. CI's `diff -r` kunne derfor ikke læse dem (`Permission denied`), og sammenligningen
+fejlede på noget der så ud som en indholdsforskel. `fejlscan` læser bytes inde i arkivet og ser derfor ikke
+problemet.
+
+Rettelsen er at sætte mode eksplicit: `0o100644` for filer og `0o40755 | 0x10` for mappeposter, og et fast
+`date_time` så arkivet er reproducerbart. Efterkontrollen er den CI selv laver — `unzip` til en temp-mappe og
+`diff -r` mod kilden — ikke kun en byte-sammenligning.
