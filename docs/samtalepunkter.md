@@ -49,15 +49,30 @@ _Opdateret 2026-11-08 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `db62144 Niche-butik: ét felt rejser butikken — som kladder, med rollback`
 - `d311b12 Ret katalogtallene til det målte: 24 produkter, ikke 39`
 - `aa1355f chore(status): daglig projektstatus 2026-11-08`
 - `eee6ceb Luk batch 4-forberedelsen og giv shoparkivet strukturdata`
 - `1d39063 Dokumentér at den site-planlagte tick kørte af sig selv kl. 14:15`
 - `e98ab1e Læg tick på site-planlægning som uafhængig vej ved siden af GitHub`
-- `c12df1a Ret leverandøren til Printful i hele repoet`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 8/11 — niche-butikken: ét felt bliver en butik, men kun som kladder
+
+- **Beslutning:** ønsket »skriv niche-navn → fuld udrulning af webshop« er bygget som en *plan* plus en
+  reversibel kladde-udrulning (7.64.0), ikke som en auto-publicering. Alt hvad der ikke må gættes —
+  kostpris, mockups, valuta, betaling, CVR, zoner, samtykke — står i en ejer-liste, og hver ejer-fakta i
+  side-copy står som `[EJER: …]`.
+- **Målt:** 32 nye smoke-checks (plan-determinisme, arketypematch, pris over margin-gulv, dry-run uden
+  skrivning, afvisning uden WooCommerce, rollback der beholder publiceret indhold), **1081 PASS i alt**,
+  `php -l` ren, zip byte-identisk, alle 29 værn grønne lokalt.
+- **Fælde:** rollback-rapporten mærkede linjerne med array-nøglen (`products:`), ikke entiteten
+  (`product:`) — fanget af testen, ikke af øjet. Og smoke-harnesset manglede slette-API'et, så
+  WordPress-stubberne til rollback ligger nu i testfilen med en kommentar om hvorfor.
+- **Ikke gjort:** WooCommerce-kørslen. Den kræver at 7.64.0 aktiveres på sitet (ejerens Plugins → Update
+  eller et nyt MCP-token i sandkassen), og står som modulets sidste 0,15 d.
 
 ### 8/11 — nøglerne på én side siger nu hvem de tilhører, og hver ændring huskes uden værdien
 
