@@ -365,6 +365,19 @@ Platform limits: [Instagram content publishing](https://developers.facebook.com/
 
 ## 9. Change log for this document
 
+- **7.62.0 (8/11)** — **alle nøgler på én side, med ejerskab og en ændringshistorik.** Keys-siden har
+  allerede samlet alle 15 hemmeligheder, men den sagde ikke hvem kontoen tilhører eller hvorfor nøglen findes,
+  og en udskiftning efterlod intet spor. Hvert kort har nu `Belongs to` og `Why it is here`, og en
+  sammenklappelig tabel nederst gentager det for alle 15 nøgler; `SGAP_Keys::documentation()` udstiller samme
+  tekst, så dokumentation og skærm ikke kan glide fra hinanden. `SGAP_Keys::record()` skriver hver ændring
+  (sat/skiftet/fjernet) med **længde, 8-tegns sha256-fingerprint, tidspunkt og aktør — aldrig værdien** — til
+  optionen `sgap_key_changes` (ikke autoloadet, loft 120 rækker), og kortet viser den seneste linje. En ændring
+  rydder samtidig det der blev hentet med den gamle nøgle (modelkatalog, Publer-konto-liste, Printful-priser,
+  Bluesky-session) og den gamle nøgletest, så en rotation ikke ligner en død nøgle. Skrivevejen bag abilities og
+  tokens (`SGAP_Settings::set()`) logger selv, fordi `options.php`-hooket ikke ser den. 22 nye smoke-checks
+  (1027 → **1049 PASS**, 0 FAIL) dækker dokumentationen, at hver nøgle har præcis én række, at en gentagen
+  værdi ikke tæller som rotation, at en konstant i `wp-config.php` ikke logges, og at hverken side eller log
+  indeholder værdien.
 - **7.60.1 (8/11)** — **et token fra det gamle felt er stadig et gyldigt token.** 7.33.3 afregistrerede
   `pinterest_token`, men et token indtastet før da ligger stadig i options-tabellen under `sgap_pinterest_token` —
   og intet læste det, så dashboardet sagde “ikke forbundet” mens en `pina_`-nøgle på 101 tegn lå én option væk,

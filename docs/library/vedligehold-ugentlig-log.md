@@ -1,5 +1,17 @@
 # Ugentlig backup + 1 indholdselement — log
 
+## 2026-11-08 (plugin-pas) — nøgler på én side, 7.62.0
+- **Bygget:** `owner`/`why` på alle 13 nøglekort + ejer-tabel, `SGAP_Keys::documentation()`, og
+  `SGAP_Keys::record()` der logger sæt/skift/fjern med længde, 8-tegns sha256, tid og aktør — aldrig værdien.
+  En ændring rydder modelkatalog, Publer-konti, Printful-priser, Bluesky-session og den gamle nøgletest.
+- **Målt:** smoke **1049 PASS / 0 FAIL** (1027 → 1049), `php -l` ren, fejlscan **0 fund**, zip `v7.62.0`
+  **354 369 bytes / 46 filer** (md5 `fc1eb680e649d4168618b422bfcfd74d`), installeret live (`active`, `7.62.0`).
+- **Live:** `documentation()` 15 rækker (15 med owner, 15 med why); `record()` gav `changed`/21 tegn/fingerprint
+  `4ca64038` = sha256-prefix og **0** forekomster af værdien; side-render 13 kort, 15 tabelrækker, tally 3 af 15;
+  historik-linjen verificeret med en midlertidig række (slettet igen — ingen rigtig nøgle rørt).
+- **Fælde:** `novamira` 1.3.6 kræver `--input @<fil>`; uden `@` svarer den »Ability input must be valid JSON«.
+  `do_action('page_sgap-settings')` er tom i WP-CLI (siden hænger på `admin_menu`) — kald `SGAP_Setup::settings_page()`.
+
 ## 2026-11-08 (guides) — tre sæson-guides publiceret
 - **1357 / 1361 / 1359** publiceret: 12,6–12,9k tegn, 2 billeder med alt-tekst og 3 `/go/`-links hver.
 - **Målt:** alle tre svarer **200** (104 007–104 485 bytes); `/go/966/`, `/go/477/`, `/go/941/` → **302** → produkt **200**; billeder **200**.

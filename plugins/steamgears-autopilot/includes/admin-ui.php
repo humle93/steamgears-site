@@ -286,6 +286,15 @@ class SGAP_UI {
 .sgap .sgap-key-field input[type=password]:focus{border-color:var(--brass);box-shadow:var(--ring);outline:none}
 .sgap .sgap-key-field .sgap-secret{width:100%}
 .sgap .sgap-key-test{margin:0;font-size:12px;color:var(--muted);display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.sgap .sgap-key-owner{margin:2px 0 0;padding:10px 12px;border-radius:10px;background:#fffdf7;border:1px dashed var(--line);display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:11px;line-height:1.5}
+.sgap .sgap-key-owner dt{font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--brass-d);white-space:nowrap}
+.sgap .sgap-key-owner dd{margin:0;color:var(--muted)}
+.sgap .sgap-key-history{margin:0;font-size:12px;color:var(--muted);display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.sgap .sgap-key-owners{margin:16px 0 0;border:1px solid var(--line);border-radius:14px;background:#fff;box-shadow:var(--shadow-1);padding:0 16px 12px}
+.sgap .sgap-key-owners summary{cursor:pointer;padding:14px 0;font-weight:700;color:var(--ink)}
+.sgap .sgap-key-owners summary:focus-visible{outline:none;box-shadow:var(--ring);border-radius:8px}
+.sgap .sgap-key-owners table{margin-top:4px}
+.sgap .sgap-key-owners code{font-size:11px;color:var(--muted)}
 .sgap .sgap-key-foot{margin-top:auto;padding-top:10px;border-top:1px solid #f3ead6;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}
 .sgap .sgap-key-foot p{margin:0;font-size:11px;line-height:1.5;color:var(--muted);flex:1 1 150px}
 .sgap .sgap-key-links{display:inline-flex;gap:10px;flex-wrap:wrap}

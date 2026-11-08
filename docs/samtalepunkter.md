@@ -46,15 +46,35 @@ _Opdateret 2026-11-08 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `9c73fe8 Tre saeson-guides publiceret med billeder og /go/-links: SEO-indhold 3 af 3`
+- `1686eab chore(status): daglig projektstatus 2026-11-08`
 - `a0bb957 P1.5: kanalstatus i 7.61.0 goer den blokerede live-verifikation maalbar`
 - `1f0fcec chore(status): daglig projektstatus 2026-11-08`
 - `2f80d56 S4.9 produkttekst synlig via Woo-hook og S4.11 shop-fart lukket`
 - `74c9c62 chore(status): daglig projektstatus 2026-11-08`
-- `768ccad S4 delvist lukket: fortrydelsesfunktion og storrelseskort maalt live`
-- `565e928 chore(status): daglig projektstatus 2026-11-08`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 8/11 — nøglerne på én side siger nu hvem de tilhører, og hver ændring huskes uden værdien
+
+- **P1.18 var lukket i 7.47.0, men svarede ikke på to spørgsmål:** hvis konto en nøgle er, og hvad der skete
+  ved en udskiftning. 7.62.0 giver hvert kort `Belongs to` og `Why it is here`, gentager det i en tabel for alle
+  15 nøgler, og lader `SGAP_Keys::documentation()` levere samme tekst — så skærm og dokumentation ikke kan glide.
+- **Ændringshistorikken gemmer aldrig værdien:** `SGAP_Keys::record()` skriver `set`/`changed`/`cleared` med
+  længde, 8-tegns sha256, tid og aktør til `sgap_key_changes` (ikke autoloadet, loft 120). Målt live:
+  fingerprint `4ca64038` = `substr(sha256(...),0,8)`, og 0 forekomster af værdien i `serialize()`.
+- **To skriveveje, én log:** formularen går gennem `options.php`, så der lyttes på `update_option_sgap_<key>`;
+  abilities og token-fornyelser går gennem `SGAP_Settings::set()`, som logger selv. En statisk spærre pr. nøgle
+  forhindrer dobbelt-rækker, og en `wp-config.php`-konstant logges ikke (den vinder over databasen).
+- **En rotation rydder cachen fra den gamle nøgle** (modelkatalog, Publer-konti, Printful-priser, Bluesky-session)
+  plus den gamle nøgletest — ellers ligner en frisk nøgle en død nøgle.
+- **Fælder:** `novamira` 1.3.6 kræver `--input @<fil>` (uden `@`: »Ability input must be valid JSON«), og
+  `do_action('page_sgap-settings')` er tom i WP-CLI fordi siden hænger på `admin_menu` — kald
+  `SGAP_Setup::settings_page()` direkte. `sgap-key-history` står også i CSS, så optælling af markup skal trække
+  1 fra.
+- **Målt:** smoke **1049 PASS / 0 FAIL** (1027 → 1049), fejlscan 0 fund, zip 354 369 bytes installeret live
+  (7.62.0 `active`), live side-render 13 kort / 15 tabelrækker / tally 3 af 15. Ingen rigtig nøgle blev rørt.
 
 ### 7/11 — S2.5b målt på alle 30 indlæg, S0.4 bekræftet uden cache og 12 døde `/go/`-id'er i guide-kladden
 

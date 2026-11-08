@@ -467,7 +467,14 @@ class SGAP_Settings {
     public static function set(string $key, $value): void {
         // Secrets stay out of the autoloaded options blob, also when a write
         // happens outside the install routine (key test, wizard, abilities).
-        update_option('sgap_' . $key, $value, in_array($key, self::SECRET_KEYS, true) ? false : null);
+        $secret = in_array($key, self::SECRET_KEYS, true);
+        $before = $secret ? (string) get_option('sgap_' . $key, '') : '';
+        update_option('sgap_' . $key, $value, $secret ? false : null);
+        // This path bypasses options.php, so the change log is told directly; the settings
+        // hook sees the same write and is deduped inside SGAP_Keys.
+        if ($secret && class_exists('SGAP_Keys')) {
+            SGAP_Keys::record($key, $before, (string) $value);
+        }
     }
     public static function enabled(string $key): bool {
         return self::get($key, 'no') === 'yes';
