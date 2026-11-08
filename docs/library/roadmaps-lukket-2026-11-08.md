@@ -80,7 +80,8 @@ derfor sat på det målte gulv og er et **loft**, ikke et mål:
 
 `POST /wp-json/sgap/v1/lead` svarer 400 på en ugyldig adresse og `{ok:true,count:N}` på en gyldig, med rækken i
 `sgap_leads` (autoload off). Shortcode `[sgap_lead_form]` står på 801 og 764, og en rigtig indsendelse blev
-registreret og derefter slettet. Den faktiske leverance er 0,3 d, ikke de 1,0 d der var sat af — nævneren er
+registreret og derefter slettet. Kilden er hentet ned i repoet igen (`wordpress/mu-plugins/sgap-lead-form.php`,
+2 832 B), så filen ikke kun findes på sitet. Den faktiske leverance er 0,3 d, ikke de 1,0 d der var sat af — nævneren er
 rettet som scope-korrektion.
 
 ### 1.9 Health Checks drop-in (S0.5)
@@ -155,7 +156,7 @@ det er en korrektion, ikke en omdefinering af målet.
 
 ## 5. Det næste
 
-Intet agent-arbejde. Den korteste vej til 100 % er ejerens svar på de tolv poster i §2 — de fleste er ét tal
+Intet agent-arbejde. Den korteste vej til 100 % er ejerens svar på de fjorten poster i §2 — de fleste er ét tal
 eller ét ja/nej, og de kan alle gives i én besked. Når de kommer, er resten under en dags arbejde: priser og
 valuta (S4.3), adresse og GPSR (S4.2/S4.9), betalings- og forsendelsesaftaler (S4.5/S4.6), Complianz-valget
 (S4.1), de seks produkters publicering (S1.2) og mockups (S4.7).
