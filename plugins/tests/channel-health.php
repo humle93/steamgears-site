@@ -105,3 +105,47 @@ check('channel-health: a missing class is broken, not a missing token',
 do_action('rest_api_init');
 check('channel-health: /channel-health is registered under sgap/v1',
     in_array('/channel-health', $GLOBALS['routes']['sgap/v1'] ?? [], true));
+
+/* ---- P1.5's actual acceptance question: did the platform numbers land? ---- */
+
+check('channel-health: every channel has a platform-type list',
+    array_keys(SGAP_Channel_Health::PLATFORM_TYPES) === array_keys(SGAP_Channel_Health::CHANNELS));
+
+$GLOBALS['rows'] = [];
+$empty = SGAP_Channel_Health::analytics();
+check('channel-health: nothing stored reads as empty, not as a measured zero',
+    $empty['pinterest']['state'] === 'empty' && $empty['pinterest']['total'] === 0.0
+    && $empty['pinterest']['last_at'] === null);
+check('channel-health: Telegram reports no metric instead of a zero',
+    $empty['telegram']['state'] === 'no_metric' && $empty['telegram']['types'] === []);
+
+$GLOBALS['rows'] = [
+    ['channel' => 'pinterest', 'event_type' => 'impressions', 'total' => '12', 'rows' => '1', 'last_at' => '2026-11-08 10:00:00'],
+    ['channel' => 'pinterest', 'event_type' => 'click', 'total' => '9', 'rows' => '3', 'last_at' => '2026-11-08 11:00:00'],
+    ['channel' => 'instagram', 'event_type' => 'likes', 'total' => '4', 'rows' => '2', 'last_at' => '2026-11-08 09:00:00'],
+    ['channel' => 'bluesky', 'event_type' => 'likes', 'total' => '7', 'rows' => '1', 'last_at' => '2026-11-08 08:00:00'],
+    ['channel' => 'mastodon', 'event_type' => 'reposts', 'total' => '3', 'rows' => '1', 'last_at' => '2026-11-07 20:00:00'],
+];
+$wpdb->log = [];
+$measured = SGAP_Channel_Health::analytics();
+check('channel-health: our own click rows are not a platform number',
+    $measured['pinterest']['total'] === 12.0 && $measured['pinterest']['rows'] === 1);
+check('channel-health: likes are counted per channel, not summed over four platforms',
+    $measured['instagram']['counts']['likes'] === 4.0 && $measured['bluesky']['counts']['likes'] === 7.0
+    && $measured['mastodon']['counts']['likes'] === 0.0);
+check('channel-health: a measured channel carries its own last timestamp',
+    $measured['pinterest']['last_at'] === '2026-11-08 10:00:00' && $measured['bluesky']['state'] === 'measured');
+check('channel-health: the analytics query is windowed, not a full-table scan',
+    str_contains(implode("\n", $wpdb->log), 'created_at >='));
+$counted = SGAP_Channel_Health::analytics_summary($measured);
+check('channel-health: the analytics summary counts states and rows',
+    $counted['measured'] === 4 && $counted['empty'] === 1 && $counted['no_metric'] === 1
+    && $counted['rows'] === 5 && $counted['total'] === 6);
+check('channel-health: the window is bounded, and 90 days is the default',
+    SGAP_Channel_Health::MIN_DAYS === 1 && SGAP_Channel_Health::MAX_DAYS === 365
+    && SGAP_Channel_Health::WINDOW_DAYS === 90);
+$wpdb->log = [];
+SGAP_Channel_Health::analytics(100000);
+check('channel-health: an oversized window is clamped instead of asked for',
+    str_contains(implode("\n", $wpdb->log), "created_at >= '"));
+$GLOBALS['rows'] = [];

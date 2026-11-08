@@ -98,7 +98,10 @@ $fail = 0;
 function t($name, $ok, $info = null) { global $fail; echo ($ok ? 'PASS ' : 'FAIL ') . $name . ($info !== null ? ' — ' . substr(is_string($info) ? $info : wp_json_encode($info), 0, 300) : '') . "\n"; if (!$ok) $fail = 1; }
 function run($n, $in = null) { $a = wp_get_ability("steamgears-autopilot/" . $n); if (!$a) return new WP_Error("missing", "ability $n not registered"); return $a->execute($in ?? ($a->get_input_schema() ? [] : null)); }
 $names = array_map(fn($a) => $a->get_name(), array_filter(wp_get_abilities(), fn($a) => str_starts_with($a->get_name(), 'steamgears-autopilot/')));
-t('40 autopilot abilities registered', count($names) === 40, count($names));
+t('41 autopilot abilities registered', count($names) === 41, count($names));
+t('channel-health is registered read-only', (wp_get_ability('steamgears-autopilot/channel-health')->get_meta()['annotations']['readonly'] ?? false) === true);
+$r = run('channel-health', ['days' => 90]);
+t('channel-health answers per channel with the analytics half', is_array($r) && isset($r['channels']['pinterest'], $r['analytics']['telegram']) && ($r['analytics']['telegram']['state'] ?? '') === 'no_metric' && ($r['window_days'] ?? 0) === 90, is_wp_error($r) ? $r->get_error_message() : array_keys((array) $r));
 t('the whole-site SEO ability is registered', in_array('steamgears-autopilot/optimize-site-seo', $names, true));
 foreach ($names as $n) { $m = wp_get_ability($n)->get_meta(); if (empty($m['mcp']['public'])) t("$n public for MCP", false); }
 $r = run('get-settings'); t('get-settings groups + hides secrets', isset($r['General']['quiet_start']) && $r['AI content']['ai_api_key']['value'] === 'set', $r['AI content']['ai_api_key'] ?? $r);

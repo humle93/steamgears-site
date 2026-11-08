@@ -72,6 +72,7 @@ all admin-only, none of them deleting anything:
 | Tool | What it does |
 |---|---|
 | `steamgears-autopilot/status` | Switches, channels, setup state, why sending is paused, queue counts, pending drafts, recent errors, 30-day results |
+| `steamgears-autopilot/channel-health` | Per channel: is a token stored, what is the next step, and which platform numbers actually landed in `sgap_events` (default 90 days). Telegram reports `no_metric` — the Bot API has no per-post numbers — and a channel that is `ready` but `empty` is a token that worked and returned nothing. Read-only; `tools/live_channels.py` uses it to verify P1.5 from outside the site |
 | `steamgears-autopilot/list-drafts` | AI drafts (default: waiting for approval) with the page they promote |
 | `steamgears-autopilot/review-draft` | `queue` (approve + queue), `approve` or `reject` one draft |
 | `steamgears-autopilot/list-queue` | Queue items with status, attempts, errors, tracking links |

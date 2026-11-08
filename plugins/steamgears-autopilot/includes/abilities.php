@@ -56,6 +56,13 @@ class SGAP_Abilities {
                 'Overview of the Steamgears social autopilot: on/off switches, channels, whether Publer and the AI are configured, why sending is paused (if it is), queue counts by status, pending drafts, the last generation run, recent errors and 30-day results per channel.',
                 [], [], [__CLASS__, 'status'], true, true
             ],
+            'channel-health' => [
+                'Channel analytics status',
+                'Per channel: is a token stored, what is the next step, and which platform numbers have actually landed in sgap_events inside the window (default 90 days). Telegram reports no_metric, because the Bot API has no per-post numbers; a channel that is ready but empty is the one where a working token returned nothing.',
+                [
+                    'days' => ['type' => 'integer', 'minimum' => 1, 'maximum' => 365, 'default' => 90]
+                ], [], [__CLASS__, 'channel_health'], true, true
+            ],
             'list-drafts' => [
                 'List AI drafts',
                 'Lists AI-written social posts. Default: those waiting for approval. Each has id, channel, title, text, hashtags and the page it promotes.',
@@ -275,6 +282,27 @@ class SGAP_Abilities {
                  FROM {$wpdb->prefix}sgap_events WHERE created_at >= %s GROUP BY channel",
                 wp_date('Y-m-d H:i:s', time() - 30 * DAY_IN_SECONDS)
             ), ARRAY_A)
+        ];
+    }
+
+    /**
+     * The answer P1.5 is verified with: can the channel run, and did its numbers land?
+     *
+     * Read-only and idempotent: it queries sgap_events and the stored key state, and writes
+     * nothing. The two halves are returned separately instead of summed, because "ready" and
+     * "measured" answer different questions and a channel can be the first without the second.
+     */
+    public static function channel_health($input = null): array {
+        $input = (array) $input;
+        $days = max(SGAP_Channel_Health::MIN_DAYS,
+            min(SGAP_Channel_Health::MAX_DAYS, (int) ($input['days'] ?? SGAP_Channel_Health::WINDOW_DAYS)));
+        $analytics = SGAP_Channel_Health::analytics($days);
+        return [
+            'window_days' => $days,
+            'channels' => SGAP_Channel_Health::report(),
+            'summary' => SGAP_Channel_Health::summary(),
+            'analytics' => $analytics,
+            'analytics_summary' => SGAP_Channel_Health::analytics_summary($analytics),
         ];
     }
 

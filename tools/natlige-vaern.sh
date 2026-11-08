@@ -72,6 +72,7 @@ check "MCP-klassificering"                   python3 tools/test_mcp_klassificer.
 check "MCP OAuth"                            python3 tools/test_mcp_oauth.py
 check "MCP keep-alive"                       python3 tools/test_mcp_keepalive.py
 check "live-tilstand (MCP + profil)"         python3 tools/test_live_state.py
+check "live-kanaler (P1.5)"                python3 tools/test_live_channels.py
 check "niche-scanner"                        python3 tools/test_niche_scanner.py
 check "link-plan-selftest"                  python3 tools/link_plan_check.py --selftest
 check "link-plan"                           python3 tools/link_plan_check.py

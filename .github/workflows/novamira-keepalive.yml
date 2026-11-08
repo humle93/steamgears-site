@@ -122,6 +122,21 @@ jobs:
           fi
           printf '%s' "$new" | gh secret set NOVAMIRA_REFRESH_TOKEN --repo "$GITHUB_REPOSITORY"
           echo "Nyt refresh-token gemt som repository-secret."
+          # P1.5: hvilke platformtal er der faktisk landet i sgap_events, pr. kanal?
+          # Målingen kører med det netop fornyede access-token og skriver sin egen
+          # rapport. Exit 3 (blokeret) er en notice — en kanal uden token er ikke en
+          # fejl — mens exit 1 (et virkende token uden landede tal) er en annotation.
+          kanaler="reports/live-kanaler-$(TZ=Europe/Copenhagen date +%F).md"
+          kode=0
+          python3 tools/live_channels.py > "$kanaler" || kode=$?
+          if [ "$kode" -eq 2 ]; then
+            rm -f "$kanaler"
+            echo "::notice title=P1.5 blev ikke målt::Der var intet access-token efter fornyelsen."
+          elif [ "$kode" -eq 1 ]; then
+            echo "::error title=P1.5: et virkende token landede intet::Se $kanaler — kanalen kan hente, men sgap_events fik ingen platformstal."
+          elif [ "$kode" -eq 3 ]; then
+            echo "::notice title=P1.5 er blokeret endnu::Se $kanaler — mindst én kanal mangler token eller scope."
+          fi
 
       # Rækkefølgen betyder noget: tokenet er gemt ovenfor, FØR målingen farver jobbet.
       # En manglende Dynamic REST eller en tom ai_engine_mcp skal ses, men må ikke koste
@@ -164,7 +179,7 @@ jobs:
         run: |
           git config user.name "Steamgears Keep-alive Bot"
           git config user.email "bot@steamgears.eu"
-          git add reports/live-tilstand-*.md reports/live-tilstand-*.json
+          git add reports/live-tilstand-*.md reports/live-tilstand-*.json reports/live-kanaler-*.md
           if git diff --staged --quiet; then
             echo "Ingen ny måling at gemme."
             exit 0
