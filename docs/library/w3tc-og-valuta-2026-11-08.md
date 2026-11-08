@@ -238,6 +238,10 @@ Målt igen i dette pas, række for række, efter at alle 38 rækker var afregnet
 - **Kurv og kasse:** `/cart/` **200** og `/checkout/` **200** med en vare i kurven (Clockwork Rose,
   395,00 kr; kassens blok-data indeholder totalen `39500`). Hele checkouten blev desuden gennemført tre
   gange tidligere i dag (ordre 1528, 1529, 1530 — alle annulleret med note).
+- **Kollektionerne (målt samme dag gennem Store API `products/categories`):** dark-academia **5**,
+  gothic-victorian **3**, natural-history **2**, vintage-maritime **1**, steampunk-capsule **3**,
+  witchy-tarot **0** — altså fortsat **5 af 6 med produkter** og witchy-tarot tom, som `rebrand_audit`
+  melder det. Prispasset har ikke flyttet én vare mellem kollektionerne.
 - **W3TC urørt:** `minify.enabled`, `dbcache.enabled` og `lazyload.enabled` står stadig `true` i
   `w3tc-config/master.php`; drop-in `wp-content/db.php` er på plads (2 543 bytes); 192 minificerede filer
   (8 084 972 bytes) serveres, og `/`, `/shop/`, `/cart/`, `/checkout/` refererer 15, 19, 35 og 33
