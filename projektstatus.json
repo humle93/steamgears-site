@@ -156,8 +156,8 @@
     {
       "id": "rebrand",
       "name": "Dark academia-rebrand",
-      "next": "Tre ting står tilbage, alle med en navngivet ejerhandling: (1) **gentildeling af de seks kollektioner** (0,4 t) — målt 8/11 via Store API har alle seks 0 produkter, mens de fire gamle bærer alle 20, så batch 2's tildeling er ikke i effekt. Skrivevejen er bygget: `tools/rebrand_apply.py --apply` (eller workflowen »Rebrand apply«) gør det på ét minut, når WP_USER + WP_APP_PASS ligger som repo-secrets; (2) **Batch 4-mockups** (5 t) — Printful-adgang eller 5–8 færdige billeder pr. produkt; (3) **de 29 trash'ede designs** — genoplive eller droppe.",
-      "blocked_by": "Tre led kræver ejerhandling, målt 8/11: (1) **gentildeling af kollektionerne (0,4 t)** — `/wp-json/wc/store/v1/products?category=<slug>` giver 0 produkter for dark-academia, gothic-victorian, natural-history, vintage-maritime-prints, witchy-tarot og steampunk-capsule, mens airship 5, herbarium 5, curiosities 6 og atelier 4 bærer alle 20 publicerede; `vintage-maritime-prints` findes slet ikke (arkivet 404). Titlerne derimod er på plads (fx 413 »Airship Storm — Vintage Engraving Hoodie«), så det er kun tildelingen der skal gentages — og det kræver skriveadgang (MCP/wp-admin), som agenten ikke har; (2) **Batch 4-mockups (5 t)** — Printful-adgang eller 5–8 færdige billeder pr. produkt; målt 20 publicerede med 22 billeder, 0 med 3 eller flere, 62 billedplaceringer mangler, og repoet har 0 trykfiler og 0 tøj-skabeloner; (3) **de 29 trash'ede designs** — 13 af de 45 produkt-id'er er publiceret, 3 er kladder og 29 ligger i papirkurven med de nye titler; genoplive (kræver Printful-synk) eller droppe er ejerens valg.",
+      "next": "Kun to ting står tilbage: (1) **witchy-tarot** kan først få indhold når ejeren siger ja til at gendanne 567 (Tarot Witchy Tee) — og eventuelt 395/411 — fra papirkurven; derefter fylder `python3 tools/rebrand_apply.py --apply --via-cli` termen automatisk, fordi kortet allerede indeholder dem; (2) **Batch 4-mockups** (5 t) kræver Printful-adgang eller 5–8 færdige billeder pr. produkt.",
+      "blocked_by": "To led kræver ejerhandling, målt 8/11: (1) **de 29 trash'ede designs** — herunder de tre produkter der er witchy-tarots eneste kandidater (567, 395, 411); et ja/nej til genoplivning er nok, og tildelingen kører selv bagefter; (2) **Batch 4-mockups (5 t)** — Printful-adgang eller 5–8 færdige billeder pr. produkt; målt 20 publicerede med 22 billeder, 0 med 3 eller flere, 62 billedplaceringer mangler, og repoet har 0 trykfiler og 0 tøj-skabeloner. Kollektionstildelingen er ikke længere blokeret: den blev udført 8/11 gennem Novamira-MCP og målt stabil.",
       "modules": [
         {
           "id": "tekster",
@@ -186,10 +186,10 @@
         {
           "id": "gentildeling",
           "name": "Batch 2-gentildeling: de seks kollektioner skal tildeles igen",
-          "done": 0,
+          "done": 0.4,
           "total": 0.4,
           "unit": "t",
-          "note": "målt 8/11: dark-academia, gothic-victorian, natural-history, vintage-maritime-prints, witchy-tarot og steampunk-capsule har alle 0 produkter (Store API `?category=`), mens de fire gamle bærere har 5/5/6/4 = alle 20. Termen hedder `vintage-maritime` (ID 97) og er også tom. Kræver skriveadgang (MCP/wp-admin) og kan ikke gøres herfra. Verifikation bagefter: `python3 tools/rebrand_audit.py` skal give 0 tomme kollektioner."
+          "note": "udført 8/11 gennem Novamira-MCP (`novamira/execute-php`, token i `~/.local/state/novamira/credentials/`): 11 publicerede produkter tildelt efter det dokumenterede kort, gamle kategorier bevaret, `w3tc_flush_all()` kørt. Målt udefra bagefter: dark-academia 5, gothic-victorian 3, natural-history 2, vintage-maritime 1, steampunk-capsule 3 — witchy-tarot 0, fordi dens tre produkter (567, 395, 411) ligger i papirkurven og genoplivning er ejerens valg. Genkørt plan: 0 mangler (idempotent)."
         }
       ]
     },
@@ -1638,6 +1638,15 @@
       "delta": -1.8,
       "basis": "9 af 14,4 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5 · Batch 4-forberedelse: arbejdsordre, filnavne, alt-tekster, rækkefølge 0,5/0,5 · Batch 2-gentildeling: de seks kollektioner skal tildeles igen 0/0,4)",
       "scope_change": true
+    },
+    {
+      "date": "2026-11-08",
+      "project": "Dark academia-rebrand",
+      "module": "daglig måling",
+      "before": 62.5,
+      "after": 65.3,
+      "delta": 2.8,
+      "basis": "9,4 af 14,4 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5 · Batch 4-forberedelse: arbejdsordre, filnavne, alt-tekster, rækkefølge 0,5/0,5 · Batch 2-gentildeling: de seks kollektioner skal tildeles igen 0,4/0,4)"
     }
   ]
 }

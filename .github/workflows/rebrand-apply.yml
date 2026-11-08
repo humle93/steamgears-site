@@ -1,8 +1,12 @@
 name: Rebrand apply
 
-# Tildeler de seks dark academia-kollektioner til produkterne — den handling der ikke kunne gøres fra en
-# agent-sandkasse, fordi der ikke findes et credential der. Kørslen bruger de samme repo-secrets som
-# seo_audit.yml (WP_USER + WP_APP_PASS: et WordPress-application-password på en admin-bruger).
+# RESERVEVEJ. Tildelingen blev udført 8/11 2026 gennem Novamira-MCP (se
+# docs/library/mcp-skrivevej-novamira-cli-2026-11-08.md): tokenet ligger i
+# ~/.local/state/novamira/credentials/ og fornyes af CLI'en selv, og
+# `python3 tools/rebrand_apply.py --apply --via-cli` gør arbejdet uden repo-secrets.
+# Denne workflow findes til de tilfælde hvor en kørsel skal ske fra CI i stedet: den bruger
+# WP_USER + WP_APP_PASS (et WordPress-application-password på en admin-bruger), de samme navne som
+# seo_audit.yml. Uden dem skriver den intet og advarer — det er bevidst.
 #
 # Kørslen skriver en rapport tilbage i repoet (reports/rebrand-apply-log.md), så resultatet kan læses af
 # enhver — også når logfilerne kræver login. Kode, tal og credential-status, aldrig credential-værdier.

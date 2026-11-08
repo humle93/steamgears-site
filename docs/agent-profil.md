@@ -29,7 +29,7 @@ Der er **seks aktive projekter**, alle målt i [`projektstatus.json`](../projekt
 | --- | --- | --- | --- |
 | `site` | steamgears.eu — site-optimering | **100 %** (20,95 af 20,95 d) | developer-dage |
 | `plugin` | Steamgears Autopilot — plugin | **100 %** (29,85 af 29,85 d) | developer-dage |
-| `rebrand` | Dark academia-rebrand | **62,5 %** (9 af 14,4 t) | timer |
+| `rebrand` | Dark academia-rebrand | **65,3 %** (9,4 af 14,4 t) | timer |
 | `seo` | SEO-indholdsproduktion | **100 %** (8 af 8 guides) | guides |
 | `links` | Døde internlinks | **100 %** (39 af 39 links) | links |
 | `niche` | Niche-butik — plugin P4 | **100 %** (1 af 1 d) | developer-dage |
@@ -141,11 +141,11 @@ direkte publicering som opt-in. **1 128 smoke-checks, alle grønne** (målt 8/11
 
 **Rebrand**
 
-- De oprindelige 39 designs er kortlagt; batch 1–3 (8,5/8,5 t) er udført. Målt 8/11 via Store API er titlerne i
-  effekt, men **alle seks nye kollektioner har 0 produkter** — tildelingen skal gentages (0,4/0,4 t, kræver
-  skriveadgang). Batch 4 mockups står på 0/5 t, forberedelsen er lukket med 0,5/0,5 t.
-- Samlet status er **62,5 % (9 af 14,4 t)**. Gentildelingen kræver MCP/wp-admin; mockup-generering kræver ejerens
-  Printful-adgang eller færdige billeder;
+- De oprindelige 39 designs er kortlagt; batch 1–3 (8,5/8,5 t) er udført, og **tildelingen er gennemført 8/11**
+  (0,4/0,4 t) gennem Novamira-MCP: 11 publicerede produkter, term-tællinger 5/3/2/1/3, witchy-tarot 0 fordi dens
+  tre produkter ligger i papirkurven. Batch 4 mockups står på 0/5 t, forberedelsen er lukket med 0,5/0,5 t.
+- Samlet status er **65,3 % (9,4 af 14,4 t)**. Mockup-generering kræver ejerens Printful-adgang eller færdige
+  billeder; witchy-tarot kræver et ja/nej til at gendanne 567/395/411;
   GPSR-oplysninger kræver CVR og postadresse. Se `projektstatus.json` og `docs/library/batch-4-arbejdsordre-2026-11-08.md`.
 
 ---

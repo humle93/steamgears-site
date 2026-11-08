@@ -9,10 +9,17 @@
 Uden credentials kører det i **plan-tilstand**: det læser den offentlige butik, viser præcis hvilke produkter
 der ville få hvilke kollektioner, og rører intet. Det er standard — `--apply` skal siges eksplicit.
 
-    python3 tools/rebrand_apply.py              # plan (offentlig læsning, ingen skrivning)
-    python3 tools/rebrand_apply.py --apply      # skriv (kræver WP_USER + WP_APP_PASSWORD)
-    python3 tools/rebrand_apply.py --verify     # tæl produkter i de seks kollektioner
-    python3 tools/rebrand_apply.py --selftest   # 9 fixtures, ingen netværk
+    python3 tools/rebrand_apply.py                    # plan (offentlig læsning, ingen skrivning)
+    python3 tools/rebrand_apply.py --apply            # skriv via WP REST (WP_USER + WP_APP_PASSWORD)
+    python3 tools/rebrand_apply.py --apply --via-cli  # skriv via Novamira-MCP (novamira run … execute-php)
+    python3 tools/rebrand_apply.py --verify           # tæl produkter i de seks kollektioner
+    python3 tools/rebrand_apply.py --selftest         # 9 fixtures, ingen netværk
+
+Skrivevejen der faktisk virkede 8/11 2026 var `--via-cli`: Novamira-CLI'en har et gyldigt token i
+`~/.local/state/novamira/credentials/v1/` (owner-only fil, fornyes automatisk af `novamira auth status`), og
+abilityen `novamira/execute-php` kører `wp_set_object_terms()` på sitet. Det er samme mekanisme som blev brugt
+til at omdøbe produkterne 1/11. REST-vejen kræver et application password og er reservevejen (og den
+`.github/workflows/rebrand-apply.yml` bruger).
 
 Tildelingen er den dokumenterede fra docs/library/om-maerkning-dark-academia-2026-11-01.md §»Ny
 kollektionsstruktur«. Overlap er tilsigtet. Eksisterende kategorier bevares — værktøjet lægger kun til.
@@ -23,7 +30,11 @@ from __future__ import annotations
 import base64
 import json
 import os
+import pathlib
+import shutil
+import subprocess
 import sys
+import tempfile
 import time
 import urllib.error
 import urllib.parse
@@ -170,6 +181,70 @@ def verify(term_ids: dict[str, int]) -> bool:
     return not empty
 
 
+def _novamira() -> str:
+    """Find Novamira-CLI'en: PATH først, ellers den npm-installation repoets opsætning bruger."""
+    found = shutil.which("novamira") or shutil.which("novamira", path=os.path.expanduser("~/.novamira-npm/bin"))
+    fallback = os.path.expanduser("~/.novamira-npm/bin/novamira")
+    if found:
+        return found
+    if os.path.exists(fallback):
+        return fallback
+    raise SystemExit("STOP: novamira-CLI'en findes ikke (hverken i PATH eller ~/.novamira-npm/bin).")
+
+
+def apply_via_cli(rows: list[dict], site: str = "steamgears.eu") -> int:
+    """Skriv gennem Novamira-MCP: én execute-php-kørsel der sætter de endelige term-lister.
+
+    Samme mekanisme som blev brugt 1/11 (og som virkede 8/11): `wp_set_object_terms()` med de gamle
+    kategorier bevaret. Kørslen er idempotent — listen er den færdige union, ikke en tilføjelse.
+    """
+    mapping = ",\n".join(f"{row['id']} => [{','.join(str(int(c)) for c in row['categories'])}]" for row in rows)
+    code = f"""$map = [{mapping}];
+$report = [];
+foreach ($map as $pid => $ids) {{
+    $post = get_post($pid);
+    if (!$post || $post->post_status === 'trash') {{ $report[] = ['id' => $pid, 'skip' => true]; continue; }}
+    $res = wp_set_object_terms($pid, array_map('intval', $ids), 'product_cat', false);
+    clean_post_cache($pid);
+    $slugs = [];
+    foreach (get_the_terms($pid, 'product_cat') ?: [] as $term) {{ $slugs[] = $term->slug; }}
+    sort($slugs);
+    $report[] = ['id' => $pid, 'slugs' => $slugs, 'error' => is_wp_error($res) ? $res->get_error_message() : null];
+}}
+if (function_exists('w3tc_flush_all')) {{ w3tc_flush_all(); }}
+return $report;"""
+    with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False, encoding="utf-8") as handle:
+        json.dump({"code": code}, handle)
+        payload = handle.name
+    try:
+        result = subprocess.run([_novamira(), "--site", site, "--json", "--yes",
+                                 "run", "novamira/execute-php", "--input", "@" + payload],
+                                capture_output=True, text=True, timeout=180)
+    finally:
+        os.unlink(payload)
+    raw = result.stdout
+    start = raw.find("{")
+    if start < 0:
+        print(f"STOP: novamira svarede uden JSON (exit {result.returncode}): {result.stderr[-300:]}")
+        return 1
+    try:
+        answer = json.loads(raw[start:])
+    except ValueError as exc:
+        print(f"STOP: kunne ikke læse novamira-svaret: {exc}")
+        return 1
+    if not answer.get("ok"):
+        print(f"STOP: novamira afviste kørslen: {str(answer.get('error'))[:300]}")
+        return 1
+    failures = 0
+    for row in answer["data"]["return_value"]:
+        if row.get("skip") or row.get("error"):
+            failures += 1
+            print(f'  {row["id"]:>5}  FEJL/SKIP {row.get("error") or "papirkurv"}')
+        else:
+            print(f'  {row["id"]:>5}  OK  → {", ".join(row["slugs"])}')
+    return failures
+
+
 def apply(rows: list[dict], auth: dict) -> int:
     failures = 0
     for index, row in enumerate(rows, 1):
@@ -232,6 +307,15 @@ def main() -> int:
         return 2
     if "--verify" in args:
         return 0 if verify(term_ids) else 1
+
+    if "--apply" in args and "--via-cli" in args:
+        rows = plan(public_products(), term_ids)
+        show(rows, term_ids)
+        if not rows:
+            return 0 if verify(term_ids) else 1
+        failures = apply_via_cli(rows)
+        ok = verify(term_ids)
+        return 0 if ok and failures == 0 else 1
 
     auth = _auth_header()
     if "--apply" in args:

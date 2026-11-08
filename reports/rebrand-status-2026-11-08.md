@@ -1,4 +1,8 @@
-# Om-mærkningen målt 8/11 2026 — hvad der er i effekt, og hvad der ikke er
+# Om-mærkningen målt 8/11 2026 — tildelingen er nu gennemført
+
+_**Opdateret efter den vellykkede skrivning:** kollektionerne er tildelt gennem Novamira-MCP. Tabellerne nedenfor
+er den første måling (før skrivningen) og står som historik; resultatet efter står i §2b og i
+[`mcp-skrivevej-novamira-cli-2026-11-08.md`](../docs/library/mcp-skrivevej-novamira-cli-2026-11-08.md)._
 
 _Kør: `python3 tools/rebrand_audit.py` (offentlig Store API, ingen token). Exit 1 = mindst ét krav mangler._
 
@@ -20,7 +24,7 @@ De 20 publicerede produkter bærer de nye titler fra gruppe A og B, ikke de gaml
 To nyere produkter (1255, 1282) bærer »— Steampunk Tee«. Det er gruppe C (steampunk-kapslen), hvor
 steampunk-ordet med vilje bliver stående, så det er ikke en fejl.
 
-## 2. Kollektionerne er **ikke** i effekt
+## 2. Kollektionerne var **ikke** i effekt (før skrivningen kl. 19.0x)
 
 Samme API, filtreret på kategori — to uafhængige mål (API-filter og arkivside) giver samme svar:
 
@@ -59,6 +63,20 @@ effekten af batch 2 er der ikke. Derfor er gentildelingen skilt ud som eget modu
 
 0 af 20 produkter har 3 eller flere billeder. Arbejdsordren med filnavne, alt-tekster og rækkefølge ligger
 i `docs/library/batch-4-arbejdsordre-2026-11-08.md`; selve billederne kan ikke produceres i repoet.
+
+## 2b. Efter skrivningen — 5 af 6 kollektioner har indhold
+
+| Kollektion | Produkter nu |
+|---|---:|
+| dark-academia | **5** |
+| gothic-victorian | **3** |
+| natural-history | **2** |
+| vintage-maritime | **1** |
+| steampunk-capsule | **3** |
+| witchy-tarot | **0** — produkterne 567/395/411 ligger i papirkurven |
+
+11 publicerede produkter blev tildelt i én `novamira/execute-php`-kørsel; genkørt plan melder »0 produkter
+mangler«, og titlerne er uændrede. `witchy-tarot` kræver en ejerbeslutning om genoplivning — ikke teknik.
 
 ## 4. De to ejerhandlinger
 
