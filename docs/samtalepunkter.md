@@ -39,7 +39,7 @@ _Opdateret 2026-11-08 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Næste skridt
 
-- **steamgears.eu — site-optimering** — Intet agent-arbejde tilbage i S0–S4: alle fem bands er færdige og målt, og de resterende poster er ejerens og navngivet i §4c og blocked_by. Målt 8/11: 24 produkter (20 publicerede, 4 kladder) i **DKK**, hvor de **11 produkter med en række i DKK-tabellen** står med **tabellens tal ordret** (335/165/400/435/265/180 kr) og de 13 uden række har uændret pris med id og målt beløb dokumenteret; W3TC kører med **minify, lazy load og database-cache slået til** efter tre gennemførte testordrer (1528/1529/1530, alle annulleret med note); fri fragt i DK og ingen forsendelse til EU/UK/RoW; Stripe + bankoverførsel; Complianz på EU opt-in.
+- **steamgears.eu — site-optimering** — Intet agent-arbejde tilbage i S0–S4: alle fem bands er færdige og målt, og de resterende poster er ejerens og navngivet i §4c og blocked_by. Målt 8/11: 24 produkter (20 publicerede, 4 kladder) i **DKK**. DKK-tabellen fra 2/11 er afregnet **række for række**: af de **38 rækker** (linje 32–69) har **11** et produkt i butikken og står med **tabellens tal ordret** (335/165/400/435/265/180 kr) — målt 11/11 på produktsiden, i JSON-LD, i Store API og i DB med 0 afvigelser — og de **27** øvrige har kun et produkt i **papirkurven** (offentligt 404), så de er dokumenteret som rækker uden produkt med id og status; 0 rækker er uafklarede, og de 13 produkter uden række har uændret pris med id og målt beløb dokumenteret. W3TC kører med **minify, lazy load og database-cache slået til** (192 minificerede filer, 8,08 MB) efter tre gennemførte testordrer (1528/1529/1530, alle annulleret med note); kurv og kasse svarer 200; fri fragt i DK og ingen forsendelse til EU/UK/RoW; Stripe + bankoverførsel; Complianz på EU opt-in.
 - **Steamgears Autopilot — plugin** — Agent-scope er færdigt (29,85 af 29,85 d). Ejeren har lagt Pinterest-tokenet ind i WooCommerce-integrationen, og 7.65.0 — som blev lagt på sitet 8/11 gennem MCP (`Plugin_Upgrader` i `execute-php`; `update` svarer nu »Already up to date«) — henter det nu derfra gennem integrationens egen dekryptering: målt 8/11 virker det (konto `cpaleadsis`, id 688980580401955331), men appen mangler scopes `boards:read`, så pin-lister og Pin Analytics kan stadig ikke måles. Næste skridt er ejerens: genforbind Pinterest med board-adgang (eller et developer-token med boards:read + pins:read). Resten af blocked_by står uændret.
 - **Dark academia-rebrand** — Kun to ting står tilbage: (1) **witchy-tarot** kan først få indhold når ejeren siger ja til at gendanne 567 (Tarot Witchy Tee) — og eventuelt 395/411 — fra papirkurven; derefter fylder `python3 tools/rebrand_apply.py --apply --via-cli` termen automatisk, fordi kortet allerede indeholder dem; (2) **Batch 4-mockups** (5 t) kræver Printful-adgang eller 5–8 færdige billeder pr. produkt.
 - **SEO-indholdsproduktion** — SEO-indholdet er 100 %: fire guides skrevet, tre publiceret, corset-guiden publiceret, 1410 parkeret til september. Ingen åbne poster.
@@ -48,15 +48,28 @@ _Opdateret 2026-11-08 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `f753e02 Priserne sat til dokumentets egne DKK-tal, ordret, og målt 11 af 11 med 0 afvigelser Modul: S4.3 valuta + priser — dokumenteret udførelse Før: — Efter: — Δ: — Grundlag: ingen ændring`
 - `99ce5b8 W3TC slået til og butikken skiftet til DKK — begge poster udført på live og målt udefra Modul: S4.3 valuta + priser, og seo.md #4 W3TC Før: — Efter: — Δ: — Grundlag: ingen ændring`
 - `a3b80a9 Sidste to restpunkter gjort konkrete: P1.5s versionskrav er indfriet, og ingen post står som »blokeret« Modul: restpunkter — roadmap Før: — Efter: — Δ: — Grundlag: ingen ændring`
 - `600c7af Undtag rebrand-workflowens egen rapport-commit, så CI ikke lyser rødt for maskinens eget arbejde Modul: værnet — commit-tjek Før: — Efter: — Δ: — Grundlag: ingen ændring`
 - `2b915aa Restpunkterne er gennemgået med skriveadgang: Complianz og plugin-opdateringen er udført, resten er konkrete ejerhandlinger Modul: restpunkter — site og plugin Før: — Efter: — Δ: — Grundlag: ingen ændring`
 - `477c3bb Merge branch 'main' of https://github.com/humle93/steamgears-site into freebuff/cca5dfcf9656b5d36ff3151f`
-- `05101ef Modul: Steamgears Autopilot — sproget og kilden synlige i køen (7.65.0) Før: 100 %  →  Efter: 100 %  (Δ 0) Grundlag: ingen ændring`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 8/11 — de 27 «manglende» rækker havde produkter: de lå i papirkurven
+
+Tabellen i 2/11-dokumentet har 38 rækker, og det forrige pas satte kun de 11 der havde et produkt i det
+synlige katalog. Det så ud som om de 27 andre rækker ikke havde noget produkt — men et opslag i *alle*
+statusser viste at hver enkelt række har et produkt, blot med `post_status = trash`: maritime prints
+(719–728), goggles og hatte (475/479/481/485), otte tees (553–619), otte hoodies (391–411) og to
+jakke/korset-rækker (487/497). Offentlig URL for dem giver **404**, så de er ikke i butikken, og deres
+priser er derfor urørte: en prisændring på et skjult produkt har ingen prisflade at verificeres på.
+Konklusionen er ikke «blokeret», men en afregning: **11 rækker sat og verificeret, 27 rækker uden produkt i
+butikken med id og status som bevis, 0 uafklarede.** Fælden at huske: `wc_get_product()` og butikkens
+katalog viser kun publicerede varer — skal man afregne en liste mod butikken, skal `wp_posts` spørges i alle
+statusser, ellers ser en papirkurv ud som et tomt svar.
 
 ### 8/11 — priserne er nu tabellens egne tal, ikke en omregning
 

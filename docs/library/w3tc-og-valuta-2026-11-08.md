@@ -38,14 +38,14 @@ gøre noget. W3TC's egen fil blev kopieret på plads (2 543 bytes fra
 
 | Måling | Resultat |
 | --- | --- |
-| Minificerede filer i `wp-content/cache/minify/` | **157 filer, 7 695 269 bytes** |
+| Minificerede filer i `wp-content/cache/minify/` | **157 filer, 7 695 269 bytes** (ved første måling; målt igen efter prispasset: **192 filer, 8 084 972 bytes**) |
 | `/` — unikke minificerede filer i HTML | **15** |
 | Produktside — `<script>`-tags i alt / med `src` | **69 / 33** (33 eksterne samlet i 19 minificerede JS-filer; `seo.md` målte 88 script-tags før) |
 | Produktside — stylesheet-links | **12**, alle minificerede |
 | `/shop/` — alle lokale JS/CSS hentet | **28 af 28 svarer 200**, 18 `application/x-javascript` + 10 `text/css`, 0 fejl |
 | Lazy load på produktsiden | **22 `data-src`**, 5 `noscript`-fallbacks, 4 `class="lazy"` |
 | Sitemap-gennemgang | **33 af 33 sider 200** (12 udvalgte sider + alle 21 produkt-URL'er) |
-| `/cart/` og `/checkout/` med varer i kurven | **200 / 200**, kurven viser 865,00 kr i DKK |
+| `/cart/` og `/checkout/` med varer i kurven | **200 / 200**, kurven viser 865,00 kr i DKK (målt igen efter prispasset med vare 965: **200 / 200**, 395,00 kr) |
 | `/wp-json/`, `/wp-json/sgap/v1/tick`, `/feed/` | **200 / 200 / 200** |
 
 ### Testordren — forudsætningen dokumentet selv krævede
@@ -93,10 +93,79 @@ egen kurs, ingen egen afrunding, ingen »bevar nuværende beløb«-variant.
 
 Kilden er tabellen i dokumentet: den har **38 rækker** (linje 32–69, overskrift på linje 30:
 `| Produkt | USD nu | EUR-forslag | DKK-forslag |`) og dækker ifølge linje 28 »38 produkter med pris«.
-**11 af dem findes i det nuværende katalog**, og de 11 står nu med tabellens DKK-tal i alle deres
-variationer.
 
-### De 11 dokumenterede rækker — tallet ordret fra dokumentet
+**Alle 38 rækker er nu afregnet, én for én.** Rækkerne blev matchet maskinelt mod *hele* produktlageret —
+alle statusser, også papirkurven, og alle variationer — efter navn, med de fire navneafvigelser koblet
+eksplicit (se nedenfor). Resultatet er **11 rækker med et produkt i butikken** (sat til tabellens tal og
+verificeret) og **27 rækker hvis produkt kun findes som `trash`** (ikke i butikken, offentlig URL giver
+404). **0 rækker er uafklarede, og 0 rækker mangler et produkt at pege på.**
+
+### Afregningen: alle 38 rækker, linje for linje
+
+Tabellen nedenfor er hele dokumentets DKK-oversigt. Kolonnen »Dok.linje« er linjenummeret i
+[`valuta-og-priser-2026-11-02.md`](valuta-og-priser-2026-11-02.md), »Dokumentets række« er rækkens eget
+navn og USD-tal ordret, og »DKK« er tabellens tal, som det står. Hver række ender i præcis én af to
+tilstande: **sat og verificeret** (DB + anonym produktside + Store API viser tallet) eller **intet produkt
+i butikken** (`post_status = trash`, offentligt 404).
+
+| Dok.linje | Dokumentets række (ordret) | DKK | Produkt-id | Status | Afregning |
+| ---: | --- | ---: | ---: | --- | --- |
+| 32 | Clockwork Figurehead — Vintage Maritime Print (`$21.90 → 145 kr`) | 145 | 724 | `trash` | Intet produkt i butikken: `post_status = trash`, id 724 giver **404** offentligt — rækken er afregnet uden produkt |
+| 33 | First Mate's Oath — Vintage Maritime Print (`$21.90 → 145 kr`) | 145 | 728 | `trash` | Intet produkt i butikken: `post_status = trash`, id 728 giver **404** offentligt — rækken er afregnet uden produkt |
+| 34 | Sky Corsair — Vintage Maritime Print (`$21.90 → 145 kr`) | 145 | 719 | `trash` | Intet produkt i butikken: `post_status = trash`, id 719 giver **404** offentligt — rækken er afregnet uden produkt |
+| 35 | The Compass Duchess — Vintage Maritime Print (`$21.90 → 145 kr`) | 145 | 726 | `trash` | Intet produkt i butikken: `post_status = trash`, id 726 giver **404** offentligt — rækken er afregnet uden produkt |
+| 36 | The Kraken Widow — Vintage Maritime Print (`$21.90 → 145 kr`) | 145 | 721 | `trash` | Intet produkt i butikken: `post_status = trash`, id 721 giver **404** offentligt — rækken er afregnet uden produkt |
+| 37 | Copper Pilot Goggles - Vintage Windproof Riding (`$24.95 → 165 kr`) | 165 | 477 | `publish` | **Sat og verificeret:** DB `165`, produktside `kr. 165.00`, Store API `16500` |
+| 38 | Steampunk Aviator Goggles - Retro Motorcycle Windproof (`$24.95 → 165 kr`) | 165 | 475 | `trash` | Intet produkt i butikken: `post_status = trash`, id 475 giver **404** offentligt — rækken er afregnet uden produkt |
+| 39 | Airship Armada — Vintage Engraving Tee (`$26.95 → 180 kr`) | 180 | 557 | `publish` | **Sat og verificeret:** DB `180`, produktside `kr. 180.00`, Store API `18000` |
+| 40 | Cabinet of Curiosities — Dark Academia Tee (`$26.95 → 180 kr`) | 180 | 561 | `trash` | Intet produkt i butikken: `post_status = trash`, id 561 giver **404** offentligt — rækken er afregnet uden produkt |
+| 41 | Chrono-Wing Dragonfly — Natural History Tee (`$26.95 → 180 kr`) | 180 | 565 | `trash` | Intet produkt i butikken: `post_status = trash`, id 565 giver **404** offentligt — rækken er afregnet uden produkt |
+| 42 | Clockwork Fox — Natural History Tee (`$26.95 → 180 kr`) | 180 | 559 | `trash` | Intet produkt i butikken: `post_status = trash`, id 559 giver **404** offentligt — rækken er afregnet uden produkt |
+| 43 | Clockwork Tea Robots — Whimsigoth Tee (`$26.95 → 180 kr`) | 180 | 619 | `trash` | Intet produkt i butikken: `post_status = trash`, id 619 giver **404** offentligt — rækken er afregnet uden produkt |
+| 44 | Hummingbird Automaton — Natural History Tee (`$26.95 → 180 kr`) | 180 | 553 | `trash` | Intet produkt i butikken: `post_status = trash`, id 553 giver **404** offentligt — rækken er afregnet uden produkt |
+| 45 | Ink and Steam Muse — Dark Academia Tee (`$26.95 → 180 kr`) | 180 | 563 | `trash` | Intet produkt i butikken: `post_status = trash`, id 563 giver **404** offentligt — rækken er afregnet uden produkt |
+| 46 | Nautilus Voyage — Dark Academia Tee (`$26.95 → 180 kr`) | 180 | 555 | `trash` | Intet produkt i butikken: `post_status = trash`, id 555 giver **404** offentligt — rækken er afregnet uden produkt |
+| 47 | The Clockwork Seer — Tarot Witchy Tee (`$26.95 → 180 kr`) | 180 | 567 | `trash` | Intet produkt i butikken: `post_status = trash`, id 567 giver **404** offentligt — rækken er afregnet uden produkt |
+| 48 | Vintage Driver Goggles - Adult and Kids Cosplay (`$29.95 → 200 kr`) | 200 | 479 | `trash` | Intet produkt i butikken: `post_status = trash`, id 479 giver **404** offentligt — rækken er afregnet uden produkt |
+| 49 | Steampunk Top Hat with Removable Goggles - Black (`$34.95 → 235 kr`) | 235 | 481 | `trash` | Intet produkt i butikken: `post_status = trash`, id 481 giver **404** offentligt — rækken er afregnet uden produkt |
+| 50 | Gothic Bowler Top Hat with Goggles (`$39.95 → 265 kr`) | 265 | 485 | `trash` | Intet produkt i butikken: `post_status = trash`, id 485 giver **404** offentligt — rækken er afregnet uden produkt |
+| 51 | Medieval Assassin Coat — Gothic Split Jacket (`$39.95 → 265 kr`) | 265 | 497 | `trash` | Intet produkt i butikken: `post_status = trash`, id 497 giver **404** offentligt — rækken er afregnet uden produkt |
+| 52 | Victorian Vampire Tailcoat — Brocade Gothic Jacket (`$39.95 → 265 kr`) | 265 | 495 | `publish` | **Sat og verificeret:** DB `265`, produktside `kr. 265.00`, Store API `26500` |
+| 53 | Victorian Lace-Up Corset Top — Brown (`$44.95 → 300 kr`) | 300 | 487 | `trash` | Intet produkt i butikken: `post_status = trash`, id 487 giver **404** offentligt — rækken er afregnet uden produkt |
+| 54 | Airship Storm — Vintage Engraving Hoodie (`$49.95 → 335 kr`) | 335 | 413 | `publish` | **Sat og verificeret:** DB `335`, produktside `kr. 335.00`, Store API `33500` |
+| 55 | Clockwork Heart — Gothic Romance Hoodie (`$49.95 → 335 kr`) | 335 | 411 | `trash` | Intet produkt i butikken: `post_status = trash`, id 411 giver **404** offentligt — rækken er afregnet uden produkt |
+| 56 | Clockwork Octopus — Curiosity Hoodie (`$49.95 → 335 kr`) | 335 | 399 | `publish` | **Sat og verificeret:** DB `335`, produktside `kr. 335.00`, Store API `33500` |
+| 57 | Clockwork Owl — Dark Academia Hoodie (`$49.95 → 335 kr`) | 335 | 405 | `trash` | Intet produkt i butikken: `post_status = trash`, id 405 giver **404** offentligt — rækken er afregnet uden produkt |
+| 58 | Clockwork Skull — Dark Academia Hoodie (`$49.95 → 335 kr`) | 335 | 397 | `trash` | Intet produkt i butikken: `post_status = trash`, id 397 giver **404** offentligt — rækken er afregnet uden produkt |
+| 59 | Compass Mandala — Dark Academia Hoodie (`$49.95 → 335 kr`) | 335 | 393 | `trash` | Intet produkt i butikken: `post_status = trash`, id 393 giver **404** offentligt — rækken er afregnet uden produkt |
+| 60 | Gear Corset Lady — Victorian Gothic Hoodie (`$49.95 → 335 kr`) | 335 | 409 | `trash` | Intet produkt i butikken: `post_status = trash`, id 409 giver **404** offentligt — rækken er afregnet uden produkt |
+| 61 | Gear Filigree — Art Nouveau Mandala Hoodie (`$49.95 → 335 kr`) | 335 | 391 | `trash` | Intet produkt i butikken: `post_status = trash`, id 391 giver **404** offentligt — rækken er afregnet uden produkt |
+| 62 | Keyhole Nouveau — Art Nouveau Hoodie (`$49.95 → 335 kr`) | 335 | 407 | `trash` | Intet produkt i butikken: `post_status = trash`, id 407 giver **404** offentligt — rækken er afregnet uden produkt |
+| 63 | Mechanical Elephant — Curiosity Hoodie (`$49.95 → 335 kr`) | 335 | 403 | `publish` | **Sat og verificeret:** DB `335`, produktside `kr. 335.00`, Store API `33500` |
+| 64 | Sun Compass — Alchemical Hoodie (`$49.95 → 335 kr`) | 335 | 395 | `trash` | Intet produkt i butikken: `post_status = trash`, id 395 giver **404** offentligt — rækken er afregnet uden produkt |
+| 65 | Time Traveler Top Hat with Goggles (`$49.95 → 335 kr`) | 335 | 483 | `publish` | **Sat og verificeret:** DB `335`, produktside `kr. 335.00`, Store API `33500` |
+| 66 | Whale Airship — Vintage Voyage Hoodie (`$49.95 → 335 kr`) | 335 | 401 | `publish` | **Sat og verificeret:** DB `335`, produktside `kr. 335.00`, Store API `33500` |
+| 67 | Steampunk Overbust Corset - Leather Lace-Up Burlesque (`$59.95 → 400 kr`) | 400 | 489 | `publish` | **Sat og verificeret:** DB `400`, produktside `kr. 400.00`, Store API `40000` |
+| 68 | Gothic PU Leather Overbust Corset — Silver (`$64.95 → 435 kr`) | 435 | 491 | `publish` | **Sat og verificeret:** DB `435`, produktside `kr. 435.00`, Store API `43500` |
+| 69 | Wine Red Velvet Tailcoat — Victorian Frock Coat (`$64.95 → 435 kr`) | 435 | 493 | `publish` | **Sat og verificeret:** DB `435`, produktside `kr. 435.00`, Store API `43500` |
+
+Sådan er de 27 papirkurvs-rækker fordelt: **Vintage Maritime Print** 5 (linje 32–36, id 719/721/724/726/728),
+**tees** 8 (linje 40–47, id 553/555/559/561/563/565/567/619), **hoodies** 8 (linje 55–64, id
+391/393/395/397/405/407/409/411), **goggles og hatte** 4 (linje 38/48/49/50, id 475/479/481/485) og
+**jakke/korset** 2 (linje 51/53, id 497/487). Fælles for dem: prisen i databasen er urørt (den står stadig
+i USD-tallets størrelsesorden, fx 49.95), fordi produktet ikke er i butikken — der er ingen offentlig
+prisflade at sætte tallet på, og en prisændring på et skjult produkt ville ikke være verificerbar.
+
+Målt udefra, som anonym: `GET /?post_type=product&p=724` → **404**, og det samme for 475, 487, 391 og 567.
+Kontrolprobe på et offentligt produkt giver 301 → produktside 200. Papirkurven er altså ikke bare en
+status i databasen; produkterne er reelt ude af butikken.
+
+**Én konkret ejerhandling for de 27:** WooCommerce → Produkter → **Papirkurv**, vælg de produkter der skal
+tilbage, tryk **Gendan** — så står priserne klar til at blive sat til tabellens tal i samme kørsel som de
+11 andre. Hvilke der skal genoplives er ejerens beslutning (roadmap S1.2/S4.3), ikke en prisbeslutning;
+derfor er der ikke rørt ved dem her.
+
+### De 11 rækker der blev sat — før og nu
 
 | ID | Produkt (nuværende navn) | Dok.linje | Dokumentets række | Før dette pas | Nu (DB + side) | Ændring |
 | --- | --- | ---: | --- | ---: | ---: | ---: |
@@ -112,8 +181,8 @@ variationer.
 | 495 | Victorian Vampire Tailcoat — Brocade Gothic Jacket | **52** | `$39.95 → 265 kr` | 1665 kr | **265 kr** | −84 % |
 | 557 | Airship Armada — Vintage Engraving Tee | **39** | `$26.95 → 180 kr` | 530 kr | **180 kr** | −66 % |
 
-Fire af rækkerne har et andet produktnavn i dag end i tabellen; det er samme vare, og kolonnen viser
-dokumentets eget navn:
+Fire af de 11 rækker har et andet produktnavn i dag end i tabellen; koblingen er den samme vare, og den er
+lavet eksplicit her (det er også den kobling match-scriptet bruger):
 
 | ID | Navn i dokumentet (linje) | Navn i butikken nu |
 | --- | --- | --- |
@@ -152,15 +221,27 @@ og den tabel er i **USD**, ikke DKK — den kan derfor ikke bruges som DKK-kilde
 
 ### Verificeret på begge flader, 0 afvigelser
 
-- **DB:** hvert af de 11 produkter står med tabeltallet, og **alle variationer** har samme tal (fx 489 med
-  6 variationer: alle `400`; 491 med 6: alle `435`; 493 med 4: alle `435`).
-- **Den offentlige prisflade (produktsiden, læst som anonym):** **11 af 11** viser præcis tabeltallet med
-  `kr.`-symbol — fx `kr. 335.00` (399, 401, 403, 413, 483), `kr. 165.00` (477), `kr. 400.00` (489),
-  `kr. 435.00` (491 og 493), `kr. 265.00` (495), `kr. 180.00` (557). **0 afvigelser.**
-- **Alle produktsider:** **20 af 20** svarer 200 og viser et `kr.`-beløb der matcher både DB og Store API.
-- **Store API:** 20 produkter, alle `currency_code: DKK`, `currency_symbol: kr.`.
-- **Kurv og kasse:** `/cart/` 200, `/checkout/` 200 med en vare i kurven (395,00 kr), og hele checkouten
-  blev desuden gennemført tre gange tidligere i dag (ordre 1528, 1529, 1530 — alle annulleret med note).
+Målt igen i dette pas, række for række, efter at alle 38 rækker var afregnet:
+
+- **DB:** hvert af de 11 offentlige produkter står med tabeltallet, og **alle variationer** har samme tal
+  (489 med 6 variationer: alle `400`; 491 med 6: alle `435`; 493 med 4: alle `435`; 495 med 4: alle `265`;
+  557 med 5: alle `180`; 399/401/403/413 med 5 hver: alle `335`).
+- **Den offentlige prisflade (produktsiden, læst som anonym besøgende med browser-headere):** for hvert af
+  de 11 produkter er **hovedprisblokken** på siden læst, og den viser præcis tabeltallet med `kr.`-symbol:
+  `kr. 335.00` (399, 401, 403, 413, 483), `kr. 165.00` (477), `kr. 400.00` (489), `kr. 435.00` (491 og
+  493), `kr. 265.00` (495), `kr. 180.00` (557). **11 af 11, 0 afvigelser.**
+- **To uafhængige offentlige flader mere:** sidens JSON-LD `Product`-tilbud og Store API (`prices.price`
+  i minor units, fx `33500`) giver samme tal som hovedprisblokken for alle 11. Alle svarer `DKK` /
+  `currency_symbol: kr.`.
+- **Papirkurvs-rækkerne (de 27):** offentlig URL for id 724, 475, 487, 391 og 567 giver **404** — der er
+  ingen prisflade at verificere imod, og det er selve beviset for at rækken ikke har et produkt i butikken.
+- **Kurv og kasse:** `/cart/` **200** og `/checkout/` **200** med en vare i kurven (Clockwork Rose,
+  395,00 kr; kassens blok-data indeholder totalen `39500`). Hele checkouten blev desuden gennemført tre
+  gange tidligere i dag (ordre 1528, 1529, 1530 — alle annulleret med note).
+- **W3TC urørt:** `minify.enabled`, `dbcache.enabled` og `lazyload.enabled` står stadig `true` i
+  `w3tc-config/master.php`; drop-in `wp-content/db.php` er på plads (2 543 bytes); 192 minificerede filer
+  (8 084 972 bytes) serveres, og `/`, `/shop/`, `/cart/`, `/checkout/` refererer 15, 19, 35 og 33
+  minificerede filer.
 
 ### Dokumentets egen modsætning — rå citater, ikke et valg
 

@@ -1,6 +1,6 @@
 # Valuta og priser — forslag til S4.3
 
-> **Status 8/11 2026: udført som dokumenteret.** Butikken kører **DKK**, og de **11 produkter i det nuværende katalog der har en række i tabellen herunder** er sat til **tabellens DKK-tal ordret** (linje 32–69) — ingen kurs, ingen egen afrunding. De **13 produkter uden række** har beholdt deres pris og står med id og målt beløb. Tabellen bygger på USD-priserne fra 2/11, som butikken siden har ændret, så tabellens tal ligger 44–84 % under det butikken viste før — det er dokumenteret med citater og linjenumre i [`w3tc-og-valuta-2026-11-08.md`](w3tc-og-valuta-2026-11-08.md), sammen med den ene ejerhandling der afgør sagen.
+> **Status 8/11 2026: udført og afregnet række for række.** Butikken kører **DKK**. Alle **38 rækker** i tabellen herunder (linje 32–69) er afregnet: **11** har et produkt i butikken og står nu med **tabellens DKK-tal ordret** (ingen kurs, ingen egen afrunding), og **27** har kun et produkt med `post_status = trash` — det er ikke i butikken (offentlig URL giver 404), så rækken er afregnet uden produkt med id og status som bevis. **0 rækker er uafklarede.** De **13 produkter uden række** har beholdt deres pris og står med id og målt beløb. Tabellen bygger på USD-priserne fra 2/11, som butikken siden har ændret, så tabellens tal ligger 44–84 % under det butikken viste før — dokumenteret med citater og linjenumre i [`w3tc-og-valuta-2026-11-08.md`](w3tc-og-valuta-2026-11-08.md), sammen med den ene ejerhandling der afgør sagen.
 
 Butikken kører i **USD**. For en dansk butik med EU-levering betyder det, at kunden skal regne om i
 hovedet, og at momsvisning bliver meningsløs. S4.3 kræver både et valutaskift **og** nye priser —
@@ -85,6 +85,16 @@ produkter og undgår, at en tee koster 179,32 kr.
 Valutaen blev skiftet til **DKK**, og de 11 produkter i det nuværende katalog der har en række i tabellen
 fik **tabellens tal ordret** — 335 / 165 / 335 / 400 / 435 / 435 / 265 / 180 kr — i alle deres variationer.
 Der blev ikke brugt nogen kurs og ingen egen afrunding: tallet er kopieret fra rækken.
+
+**Den fulde afregning — alle 38 rækker.** Tabellen blev derefter matchet maskinelt mod *hele* produktlageret
+(alle statusser, også papirkurven, og alle variationer): **11 rækker** har et produkt i butikken og er sat og
+verificeret, **27 rækker** har kun et produkt med `post_status = trash` og er afregnet som rækker uden produkt
+i butikken — id 719/721/724/726/728 (maritime prints), 475/479/481/485 (goggles og hatte),
+553/555/559/561/563/565/567/619 (tees), 391/393/395/397/405/407/409/411 (hoodies) og 487/497
+(korset/jakke). **0 rækker uden produkt at pege på, 0 uafklarede.** Tabellen med linjenummer, ordret tal,
+produkt-id og status pr. række står i
+[`w3tc-og-valuta-2026-11-08.md`](w3tc-og-valuta-2026-11-08.md) under »Afregningen: alle 38 rækker, linje for
+linje«.
 
 De 13 produkter uden række (765, 766, 767, 940, 941, 942, 954, 965, 966, 967, 970, 1255, 1282) har
 beholdt deres pris. Deres id, målte beløb og beviset for at rækken mangler (0 grep-træf i et dokument med
