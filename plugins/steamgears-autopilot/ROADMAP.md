@@ -365,6 +365,15 @@ Platform limits: [Instagram content publishing](https://developers.facebook.com/
 
 ## 9. Change log for this document
 
+- **7.60.1 (8/11)** — **et token fra det gamle felt er stadig et gyldigt token.** 7.33.3 afregistrerede
+  `pinterest_token`, men et token indtastet før da ligger stadig i options-tabellen under `sgap_pinterest_token` —
+  og intet læste det, så dashboardet sagde “ikke forbundet” mens en `pina_`-nøgle på 101 tegn lå én option væk,
+  uden et felt at se den i. `SGAP_Pinterest::saved_token()` læser nu det gamle navn som fallback, og
+  `migrate_legacy()` (kørt på `init`) kopierer det ind i `pinterest_access_token`, som Keys-kortet viser, så
+  nøglen kan ses, udskiftes og roteres. En gemt ny nøgle vinder altid over den gamle, og det gamle felt lades
+  urørt som tilbagerulningsvej. Seks smoke-checks (1010 → 1016 PASS, 0 FAIL) dækker fallbacken, at anmodningen
+  sender det gamle token, kopien til det synlige felt, at en ny nøgle ikke overskrives, og at ingen af felterne
+  stadig betyder intet token.
 - **Afstemning 7/11 (7.59.0)** — **roadmappet er afstemt linje for linje, og der var intet skjult punkt.** Tre totaler
   var regnet forkert: P0 sagde 4,70 (CC-linkets 0,20 talt to gange, `/go/`'s 0,15 udeladt) → **4,65**; P1 sagde 15,20
   (P1.19's 0,25 talt to gange, queue-post 0,10 udeladt) → **15,05**; P3 sagde 2,75 (0,75 d der aldrig blev fjernet da

@@ -57,6 +57,8 @@ class SGAP_Pinterest {
     const PINS = 'sgap_pinterest_pins';
     const BOOKMARK = 'sgap_pinterest_bookmark';
     const STATE = 'sgap_pinterest_state';
+    /** The field a token was pasted into before 7.33.3 unregistered it. */
+    const LEGACY = 'sgap_pinterest_token';
 
     /** Renew this long before the access token expires, so a failed renewal has room. */
     const MARGIN = 3 * DAY_IN_SECONDS;
@@ -79,6 +81,7 @@ class SGAP_Pinterest {
 
     public static function init(): void {
         add_action(self::CRON, [__CLASS__, 'run']);
+        add_action('init', [__CLASS__, 'migrate_legacy']);
         // Action Scheduler when WooCommerce supplies it, WP-Cron otherwise.
         SGAP_Scheduler::recurring(self::CRON, DAY_IN_SECONDS);
     }
@@ -103,7 +106,31 @@ class SGAP_Pinterest {
 
     /** A token pasted by hand (a Trial token, for instance) with no expiry date. */
     public static function saved_token(): string {
-        return trim((string) SGAP_Settings::get('pinterest_access_token', ''));
+        $token = trim((string) SGAP_Settings::get('pinterest_access_token', ''));
+        if ($token === '') {
+            // Before 7.33.3 the field was called `pinterest_token`. That key is gone from the
+            // settings screen, but a token pasted into it is still in the options table and is
+            // a working credential — without this fallback the dashboard says "not connected"
+            // while a valid token sits one option away, with no field left to see it in.
+            $token = trim((string) get_option(self::LEGACY, ''));
+        }
+        return $token;
+    }
+
+    /**
+     * Copy a token from the unregistered field into the one the Keys card shows, so it can
+     * be seen, replaced and rotated. Idempotent: a saved access token always wins, and the
+     * legacy value is left in place as a rollback path.
+     */
+    public static function migrate_legacy(): void {
+        if (trim((string) SGAP_Settings::get('pinterest_access_token', '')) !== '') {
+            return;
+        }
+        $legacy = trim((string) get_option(self::LEGACY, ''));
+        if ($legacy === '') {
+            return;
+        }
+        SGAP_Settings::set('pinterest_access_token', $legacy);
     }
 
     /** Everything needed to renew without the owner: app credentials plus a refresh token. */
@@ -148,7 +175,7 @@ class SGAP_Pinterest {
         if (self::access_constant() !== '') {
             return self::saved_token(); // Constant wins over anything stored; it cannot be rotated.
         }
-        $cached = (string) get_option(self::ACCESS, '');
+        $cached = self::saved_token();
         $expires = (int) get_option(self::EXPIRES, 0);
         // An unknown expiry (a token pasted by hand) is used until Pinterest refuses it;
         // treating "no expiry recorded" as expired would throw away a working token.

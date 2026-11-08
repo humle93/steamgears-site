@@ -19,6 +19,20 @@ SGAP_Pinterest::$transport = null;
 $GLOBALS['http_calls'] = [];
 $GLOBALS['rows'] = [];
 
+// --- a token pasted before 7.33.3 is still a working credential ------------------------
+$GLOBALS['opts']['sgap_pinterest_token'] = 'pina_legacy_pasted';
+unset($GLOBALS['opts']['sgap_pinterest_access_token']);
+check('pinterest: a legacy pinterest_token still counts as configured', SGAP_Pinterest::configured() && SGAP_Pinterest::saved_token() === 'pina_legacy_pasted');
+check('pinterest: the legacy token is what a request would send', SGAP_Pinterest::token() === 'pina_legacy_pasted');
+SGAP_Pinterest::migrate_legacy();
+check('pinterest: the legacy token is copied into the field the Keys card shows', SGAP_Settings::get('pinterest_access_token') === 'pina_legacy_pasted');
+$GLOBALS['opts']['sgap_pinterest_access_token'] = 'pina_current';
+check('pinterest: a saved access token wins over the legacy copy', SGAP_Pinterest::saved_token() === 'pina_current');
+SGAP_Pinterest::migrate_legacy();
+check('pinterest: the migration never overwrites a saved access token', SGAP_Settings::get('pinterest_access_token') === 'pina_current');
+unset($GLOBALS['opts']['sgap_pinterest_token'], $GLOBALS['opts']['sgap_pinterest_access_token']);
+check('pinterest: with neither field there is still no token', SGAP_Pinterest::saved_token() === '' && !SGAP_Pinterest::configured());
+
 // --- nothing configured: honest words, no request -------------------------------------
 check('pinterest: nothing is configured until a token or app credentials exist', !SGAP_Pinterest::configured() && !SGAP_Pinterest::refreshable());
 check('pinterest: an unconnected site raises no self-check problem', SGAP_Pinterest::problem() === '');
