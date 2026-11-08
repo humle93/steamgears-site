@@ -344,7 +344,7 @@
 - Forside + /shop/ 200 (browser-session/firecrawl; /shop/ titel + produkter verificeret). Raw REST → WAF 456 som sædvanlig, ventet ud mellem kald.
 - Stripe gateway: enabled=true, **testmode=no (live)**, sk_live_51… + live publishable key til stede ✅ (plugin stadig aktivt efter lørdagens re-aktivering).
 - Ordrer seneste 24h: **0 nye, 0 fejlede** (after=31/10 07:00 tom). Seneste ordre stadig #873 (27/10, Henning-test, completed, $0.00). Stadig ingen rigtige live-ordrer.
-- Plugins (37 total, REST-liste): alle kritiske AKTIVE — WooCommerce, Stripe, Rank Math, W3TC, GTM Kit, Complianz (gdpr+terms), Site Kit, MailPoet, Printful. Ingen nye/ukendte plugins; inaktive = kun de kendte (woo-feed, woocommerce-services, wpconsent). NB: website-llms-txt vises nu som *aktiv* (var inaktiv 27/10) — kendt plugin, intet problem.
+- Plugins (37 total, REST-liste): alle kritiske AKTIVE — WooCommerce, Stripe, Rank Math, W3TC, GTM Kit, Complianz (gdpr+terms), Site Kit, MailPoet, Printify. Ingen nye/ukendte plugins; inaktive = kun de kendte (woo-feed, woocommerce-services, wpconsent). NB: website-llms-txt vises nu som *aktiv* (var inaktiv 27/10) — kendt plugin, intet problem.
 - Checkout E2E (browser-session): add-to-cart Clockwork Tea Robots $26.95 → kurv OK (subtotal 26.95, moms 25% = $5.39, fri fragt) → /checkout/ 200 med Stripe Card-element + Direct bank transfer; Stripe Elements-kald alle 200 (deferred_intent usd 2695). Ordre IKKE afgivet.
 - Ingen 5xx eller redirect-loops.
 - Konklusion: Alt i orden. Ingen Henning-ping.
@@ -354,10 +354,10 @@
 - Forside + /shop/ 200 (browser-session; titler verificeret: "Steampunk Costumes & Gear For Sale | Steamgears" + "Steampunk Shop: Tees, Hoodies, Goggles | Steamgears"). /checkout/ redirecter til /cart/ som forventet ved tom kurv ✅. Raw curl → WAF 456 som sædvanlig (browser-session brugt i stedet; REST-kald kom igennem direkte i dag).
 - Stripe gateway: enabled=true, **testmode=no (live)** ✅ (Stripe-plugin stadig aktivt efter lørdagens re-aktivering — ingen gentagelse af deaktiverings-problemet). Aktive gateways: Stripe Card, Amazon Pay, Klarna, Link, bacs.
 - Ordrer seneste 24h: **0 nye, 0 fejlede** (after=01/11 07:00 tom). Seneste ordre stadig #873 (27/10, Henning-test, completed, $0.00). Stadig ingen rigtige live-ordrer (KYC/payout afhænger af Hennings rigtige ordre).
-- Plugins: 34 total. Alle kritiske AKTIVE — WooCommerce, Stripe, Rank Math, W3TC, GTM Kit (via GTM Kit-plugin i listen? verificeret W3TC + Rank Math + Complianz + Site Kit + MailPoet + Printful + WPCode + Ads.txt Manager). Inaktiv nu: kun AI Engine (kendt). NB: plugin-antallet er faldet 37→34 siden 1/11 — woo-feed, woocommerce-services og wpconsent er ikke længere i listen (tilsyneladende afinstalleret, ikke blot deaktiveret — intet kritisk, men note til Henning).
+- Plugins: 34 total. Alle kritiske AKTIVE — WooCommerce, Stripe, Rank Math, W3TC, GTM Kit (via GTM Kit-plugin i listen? verificeret W3TC + Rank Math + Complianz + Site Kit + MailPoet + Printify + WPCode + Ads.txt Manager). Inaktiv nu: kun AI Engine (kendt). NB: plugin-antallet er faldet 37→34 siden 1/11 — woo-feed, woocommerce-services og wpconsent er ikke længere i listen (tilsyneladende afinstalleret, ikke blot deaktiveret — intet kritisk, men note til Henning).
 - Ingen 5xx eller redirect-loops.
 - Konklusion: Alt i orden. Ingen Henning-ping nødvendig (note om plugin-fjernelser i log til ugentlig gennemgang).
-- KORREKTION: **GTM Kit er IKKE i plugin-listen længere** (heller ikke). GA4 kører via Site Kit + GTM (G-3MYLFKY8MY) — plugin-bortfald påvirker sandsynligvis ikke tracking hvis GTM-snippet kommer fra Site Kit/WPCode, men det skal verificeres. Samme status for woo-feed, woocommerce-services, wpconsent: fjernet (ikke deaktiveret). Plugin-antal 37→34. Alle resterende kritiske (WooCommerce, Stripe, Rank Math, W3TC, Complianz, Site Kit, MailPoet, Printful) aktive. → FØLG OP i ugentlig tjek / spørg Henning om han har ryddet plugins.
+- KORREKTION: **GTM Kit er IKKE i plugin-listen længere** (heller ikke). GA4 kører via Site Kit + GTM (G-3MYLFKY8MY) — plugin-bortfald påvirker sandsynligvis ikke tracking hvis GTM-snippet kommer fra Site Kit/WPCode, men det skal verificeres. Samme status for woo-feed, woocommerce-services, wpconsent: fjernet (ikke deaktiveret). Plugin-antal 37→34. Alle resterende kritiske (WooCommerce, Stripe, Rank Math, W3TC, Complianz, Site Kit, MailPoet, Printify) aktive. → FØLG OP i ugentlig tjek / spørg Henning om han har ryddet plugins.
 - GA4-note: /tmp home-raw HTML (browser-fetch, pre-consent) viser hverken googletagmanager/GTM-snippet eller AdSense/ca-pub — forventet før consent (Complianz blokerer marketing/statistics-scripts indtil samtykke) + forside-layout kan servere via cache. GA4-verifikation kræver post-consent render — udskydes til ugentlig tjek (ikke en afvigelse i dag).
 
 ## 03/11 2026 07:00 — Daglig drift/checkout-tjek ✅
@@ -374,7 +374,7 @@
 - Forside + /shop/ 200 (browser-fetch; titler verificeret: "Steampunk Costumes & Gear For Sale" + "Steampunk Shop: Tees, Hoodies, Goggles"). /checkout/ → tom kurv → viser /cart/ "Your cart is currently empty", 200 — forventet adfærd.
 - Stripe gateway: enabled=true, **testmode=no (live)**, sk_live_51… + pk_live_51Ttlwg… til stede ✅. Aktive gateways: stripe (Card), amazon_pay, klarna + bacs (ikke i dagens dump, men Stripe-familien aktive). Inaktive: ACH, Alipay, BLIK, Affirm, Clearpay, EPS, Bancontact m.fl. — som forventet.
 - Ordrer seneste 24h: **0 nye, 0 fejlede** (after=03/11 07:00 tom). Seneste ordre stadig #873 (27/10). Stadig ingen rigtige live-ordrer (KYC/payout afhænger af Hennings rigtige ordre).
-- Plugins (38 i REST-listen, samme som 03/11): alle kritiske AKTIVE — WooCommerce, Stripe, Rank Math, W3TC, Complianz (gdpr+terms), Site Kit, MailPoet, Printful, WPCode (ihaf), Ads.txt Manager. Inaktive: kun royal-links + royal-mcp (kendte). Ingen nye/ukendte plugins.
+- Plugins (38 i REST-listen, samme som 03/11): alle kritiske AKTIVE — WooCommerce, Stripe, Rank Math, W3TC, Complianz (gdpr+terms), Site Kit, MailPoet, Printify, WPCode (ihaf), Ads.txt Manager. Inaktive: kun royal-links + royal-mcp (kendte). Ingen nye/ukendte plugins.
 - Raw curl → WAF 456/454 som sædvanlig (browser-fetch + REST med UA-header og 3-4 min pauser løste det; REST-kald kom igennem: gateways, plugins, orders).
 - Ingen 5xx eller redirect-loops.
 - Konklusion: Alt i orden. Ingen Henning-ping.
@@ -384,7 +384,7 @@
 - Forside + /shop/ 200 (browser-fetch/firecrawl; forside "Steampunk Gear & Costumes – Shop the Looks" med produkter, /shop/ med produktgrid + Add to cart). Raw curl → WAF 454 som sævanlig.
 - Stripe gateway: enabled=true, **testmode=no (live)**, pk_live_51Ttlwg + sk_live_51Ttlwg til stede ✅. Aktive gateways: stripe (Card), stripe_amazon_pay, stripe_klarna, stripe_link, bacs.
 - Ordrer seneste 24h: **0 nye, 0 fejlede** (after=04/11 07:00 tom; bekræftet 2x). Seneste ordre stadig #873 (27/10, Henning-test, completed, $0.00). Stadig ingen rigtige live-ordrer.
-- Plugins (38 total): alle kritiske AKTIVE — WooCommerce, Stripe, Rank Math, W3TC, Complianz (gdpr+terms), Site Kit, MailPoet, Printful, WPCode (ihaf), Ads.txt Manager. Inaktive: kun royal-links + royal-mcp (kendte). Ingen nye/ukendte plugins. GTM Kit fortsat ikke i listen (kendt fra 02/11; GA4 via Site Kit + GTM — følges op i ugentlig tjek).
+- Plugins (38 total): alle kritiske AKTIVE — WooCommerce, Stripe, Rank Math, W3TC, Complianz (gdpr+terms), Site Kit, MailPoet, Printify, WPCode (ihaf), Ads.txt Manager. Inaktive: kun royal-links + royal-mcp (kendte). Ingen nye/ukendte plugins. GTM Kit fortsat ikke i listen (kendt fra 02/11; GA4 via Site Kit + GTM — følges op i ugentlig tjek).
 - Ingen 5xx eller redirect-loops.
 - Konklusion: Alt i orden. Ingen Henning-ping.
 
@@ -396,15 +396,27 @@
 - ⚠️ AFVIGELSE 1 — Plugins: total 38→**42**, og **Printify for WooCommerce er nu INAKTIV** (var aktiv i går). Print-on-demand-fuldførelse af tees/hoodies kan være afbrudt, medmindre Henning med vilje er skiftet til Printful (printful-shipping-for-woocommerce er ny + aktiv). Kræver bekræftelse.
 - ⚠️ AFVIGELSE 2 — Nye/ukendte plugins siden i går (nu aktive): google-listings-and-ads, printful-shipping-for-woocommerce, feeds-for-tiktok, tiktok-for-business (microsoft-clarity ukendt status fra før). Ingen uklassificerede/ondsynede — alle kendte kommercielle plugins, ser ud som bevidst installation (Google/TikTok/Pinterest-kanal-integrationer?). Alle kritiske plugins AKTIVE: WooCommerce, Stripe, Rank Math, W3TC, Complianz (gdpr+terms), Site Kit, MailPoet, WPCode (ihaf), Ads.txt Manager.
 - Ingen 5xx eller redirect-loops.
-- Konklusion: Drift/checkout GRØN, men Printful-deaktivering + 4 nye plugins → kort Henning-ping (muligvis bevidst — Printful-skift?).
-- Handling: E-mail sendt til Henning m. de 2 afvigelser (Printful inaktiv + 4 nye plugins; anmoder om bekræftelse om Printful-skift er bevidst). Drift/checkout-konklusion uændret GRØN.
+- Konklusion: Drift/checkout GRØN, men Printify-deaktivering + 4 nye plugins → kort Henning-ping (muligvis bevidst — Printful-skift?).
+- Handling: E-mail sendt til Henning m. de 2 afvigelser (Printify inaktiv + 4 nye plugins; anmoder om bekræftelse om Printful-skift er bevidst). Drift/checkout-konklusion uændret GRØN.
 
 ## 07/11 2026 07:00 — Daglig drift/checkout-tjek ✅
 
 - Forside + /shop/ 200 (browser-fetch; forside med produkter/poster, /shop/ produktgrid). Raw curl → WAF 454/456 som sædvanlig; REST krævede lange pauser i morgentimerne (5-6 min mellem kald, flere 456 før 200 — WAF meget striks i dag, ikke en side-afvigelse).
 - Stripe gateway: enabled=true, **testmode=no (live)**, pk_live_51Ttlwg til stede ✅. Aktive gateways: stripe (Card), stripe_amazon_pay, stripe_klarna + bacs. Inaktive: ACH, Alipay, BLIK, Affirm, Clearpay, EPS, Bancontact m.fl. — som forventet.
 - Ordrer seneste 24h: **0 nye, 0 fejlede** (after=06/11 07:00 tom). Seneste ordre stadig #873 (27/10). Stadig ingen rigtige live-ordrer.
-- ✅ AFVIGELSE FRA 06/11 LØST: **Printify for WooCommerce er igen AKTIV** — Henning har åbenbart håndteret det (eller aktiveret efter mailen). Plugin-antal 42 (uændret fra i går), og i dag er **ALLE 42 plugins aktive** (i går var Printful den eneste inaktive). De 4 nye plugins fra i går (google-listings-and-ads, printful-shipping, feeds-for-tiktok, tiktok-for-business) stadig aktive + pinterest-for-woocommerce — tæller nu som ny baseline (tilsyneladende bevidste kanal-integrationer; ingen ukendte/uklassificerede plugins).
+- ✅ AFVIGELSE FRA 06/11 LØST: **Printify for WooCommerce er igen AKTIV** — Henning har åbenbart håndteret det (eller aktiveret efter mailen). Plugin-antal 42 (uændret fra i går), og i dag er **ALLE 42 plugins aktive** (i går var Printify den eneste inaktive). De 4 nye plugins fra i går (google-listings-and-ads, printful-shipping, feeds-for-tiktok, tiktok-for-business) stadig aktive + pinterest-for-woocommerce — tæller nu som ny baseline (tilsyneladende bevidste kanal-integrationer; ingen ukendte/uklassificerede plugins).
 - Alle kritiske plugins AKTIVE: WooCommerce, Stripe, Rank Math, W3TC, Complianz (gdpr+terms), Site Kit, MailPoet, WPCode (ihaf), Ads.txt Manager. GTM Kit stadig ikke i REST-listen (kendt; GA4 via Site Kit + GTM).
 - Ingen 5xx eller redirect-loops.
-- Konklusion: Alt i orden; i gårds to afvigelser er Printful-løst + nye plugins registreret som baseline. Ingen ny Henning-ping (mail fra 06/11 står åbent — Henning kan bekræfte Printful-skiftet ad hoc).
+- Konklusion: Alt i orden; i gårds to afvigelser er Printify-løst + nye plugins registreret som baseline. Ingen ny Henning-ping (mail fra 06/11 står åbent — Henning kan bekræfte Printful-skiftet ad hoc).
+
+## 08/11 2026 07:00 — Daglig drift/checkout-tjek
+
+- Forside + /shop/ 200 (browser-fetch; forside "Steampunk Gear & Costumes – Shop the Looks" med produkter/poster, /shop/ produktgrid + priser). Raw curl → WAF 454/456 som sædvanlig; REST krævede 1-2 minutters pauser mellem kald i morgentimerne (flere 456 før 200 — WAF som forventet, ikke en side-afvigelse).
+- Stripe gateway: enabled=true, **testmode=no (live)**, pk_live_51Ttlwg + sk_live til stede ✅ (bekræftet via /wc/v3/payment_gateways).
+- Ordrer seneste 24h: **0 nye, 0 fejlede** (after=07/11 07:00 tom, bekræftet 2x). Seneste ordre stadig #873 (27/10). Stadig ingen rigtige live-ordrer.
+- ⚠️ AFVIGELSE 1 — Plugins: total 42→**24** (stor oprydning siden i går). **FJERNET (uninstalled, ikke kun inaktive):** MailPoet, Printify for WooCommerce, Printful Shipping, Google Listings & Ads→(erstattet af "Google for WooCommerce" 3.10.0 — rebrand, stadig aktiv), feeds-for-tiktok, tiktok-for-business + ca. 12 andre. Kunne være bevidst oprydning efter i gårdens kanal-integrationer — men MailPoet (nyhedsbrev) og Printify (POD-fuldførelse) væk er funktions-tab.
+- ⚠️ AFVIGELSE 2 — **WPCode Lite (ihaf) er nu INAKTIV** (var aktiv i går). WPCode styrer head-snippets inkl. AdSense-snyden på Steamgears → **AdSense-ads kan være stoppet**. Ads.txt Manager stadig aktiv, men selve snippet-injektionen er væk, hvis den lå i WPCode. Kræver bekræftelse.
+- Mindre: website-llms-txt nu inaktiv (lav prio). Complianz 7.5.6→7.5.7 (opdatering, fint). Nye aktive: Novamira 1.12.14, AI Engine 3.9.2 + AI Providers (Anthropic/OpenAI), Database Cleaner, SeedProd, Redirection, WP Mail SMTP — ser ud som bevidst værktøjsopgradering.
+- Alle kritiske plugins AKTIVE: WooCommerce 11.2.2, Stripe 11.1.1, Rank Math 1.0.281, W3TC 2.11.0, Complianz (gdpr+terms), Site Kit 1.191.0. GTM Kit stadig ikke i REST-listen (kendt; GA4 via Site Kit + GTM).
+- Ingen 5xx eller redirect-loops.
+- Konklusion: Drift/checkout GRØN, men 2 afvigelser (massiv plugin-oprydning + WPCode/AdSense-snippet inaktiv) → kort Henning-ping.
