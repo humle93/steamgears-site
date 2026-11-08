@@ -166,6 +166,45 @@ SGAP_Pinterest::forget_refusal('same', 'same');
 check('pinterest: saving an unchanged token keeps the refusal', (SGAP_Pinterest::refused()['code'] ?? 0) === 401);
 unset($GLOBALS['opts']['sgap_pinterest_refused']);
 
+// --- the token the Pinterest for WooCommerce integration already holds --------------
+if (!class_exists('Pinterest_For_Woocommerce')) {
+    class Pinterest_For_Woocommerce {
+        public static $token = '';
+        public static function get_access_token() { return ['access_token' => self::$token]; }
+    }
+}
+unset($GLOBALS['opts']['sgap_pinterest_refused'], $GLOBALS['opts']['sgap_pinterest_scope']);
+Pinterest_For_Woocommerce::$token = 'pina_from_woocommerce';
+$GLOBALS['opts']['sgap_pinterest_access_token'] = 'pina_ours';
+check('pinterest: the renewed integration token wins over a pasted one',
+    SGAP_Pinterest::token_source() === 'woocommerce' && SGAP_Pinterest::token() === 'pina_from_woocommerce');
+$GLOBALS['opts']['sgap_pinterest_refused'] = ['at' => '2026-11-08 16:56:41', 'code' => 401];
+check('pinterest: the choice does not depend on the refusal flag',
+    SGAP_Pinterest::token_source() === 'woocommerce' && SGAP_Pinterest::token() === 'pina_from_woocommerce')
+    && (get_option('sgap_pinterest_refused') !== null);
+$GLOBALS['opts']['sgap_pinterest_access_token'] = '';
+unset($GLOBALS['opts']['sgap_pinterest_refused']);
+check('pinterest: with nothing of our own the integration token is the credential',
+    SGAP_Pinterest::configured() && SGAP_Pinterest::token() === 'pina_from_woocommerce');
+
+// --- "the token works, the call does not": a scope answer is not a dead token --------
+$GLOBALS['opts']['sgap_pinterest_access_token'] = 'pina_from_woocommerce';
+SGAP_Pinterest::$transport = fn($method, $url, $args) => sgap_http(401, ['message' => 'Your token does not have sufficient permissions to perform this operation. Please ensure your token is authorized with the correct set of scopes. Missing: [\'boards:read\']']);
+$scoped = SGAP_Pinterest::scan(1);
+check('pinterest: a scope answer is its own error, not a dead token',
+    is_wp_error($scoped) && $scoped->code === 'sgap_pinterest_scope');
+check('pinterest: the missing scope is named for the owner',
+    (SGAP_Pinterest::missing_scope('Missing: [\'boards:read\']') === 'boards:read')
+    && (SGAP_Pinterest::scope_problem()['scope'] ?? '') === 'boards:read');
+check('pinterest: a scope answer does not mark the token as refused', SGAP_Pinterest::refused() === []);
+SGAP_Pinterest::$transport = fn($method, $url, $args) => sgap_http(200, ['items' => [], 'bookmark' => '']);
+SGAP_Pinterest::scan(1);
+check('pinterest: a working call clears the scope verdict', SGAP_Pinterest::scope_problem() === []);
+Pinterest_For_Woocommerce::$token = '';
+unset($GLOBALS['opts']['sgap_pinterest_refused'], $GLOBALS['opts']['sgap_pinterest_scope']);
+check('pinterest: without the integration a pasted token is still the credential',
+    SGAP_Pinterest::token_source() === 'settings' && SGAP_Pinterest::token() === 'pina_from_woocommerce');
+
 // --- pin listing: bookmark paging, mapping kept across runs -------------------------
 $GLOBALS['opts']['sgap_pinterest_pins'] = [];
 $GLOBALS['opts']['sgap_pinterest_bookmark'] = '';

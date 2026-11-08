@@ -319,7 +319,7 @@ autoritative liste: hvert punkt står med sin målte slutstatus, og hvert ejer-b
 | Rebrand — de trash'ede designs | ⛔ **ny måling 8/11, ejer-beslutning** | Af de **45** produkt-id'er i om-mærkningsdokumentet er **13 publiceret, 3 kladder og 29 i papirkurven** (fx 391, 393, 395, 397, 405, 407, 409, 411, 475, 479, 481, 485, 487, 497, 553, 555, 559, 561, 563, 565, 567, 619, 719, 721, 724, 726, 728, 809, 968). De bærer de nye titler, men står ikke til salg. **Skal de genoplives (og så synkroniseres i Printful) eller droppes?** |
 | `seo.md` #4 | ⛔ blokeret | **Godkendelse af W3TC minify/lazyload/database-cache**, som kræver at en rigtig ordre er gennemført i checkout bagefter |
 | `seo.md` #5 | ⛔ blokeret | **CVR + postadresse** til GPSR-blokken |
-| Plugin P1.5 | ⛔ blokeret (målt 8/11 på 7.64.4) | **Tokens**: Pinterest (den gemte token svarer **401** og der er ingen refresh-token), Instagram, Bluesky, Mastodon, Telegram, Facebook (5 af 6 mangler helt) — indtastes på Settings → Keys. Kanalstatus viser nu `refused` med dato i stedet for `ready` |
+| Plugin P1.5 | ⛔ blokeret (målt 8/11 på 7.64.6) | **Pinterest-scope**: tokenet ligger nu i WooCommerce-integrationen og virker (`/user_account` 200 som `cpaleadsis`), men appen mangler **`boards:read`** — genforbind med board-adgang, så Pin Analytics kan måles. Plus tokens til Instagram, Bluesky, Mastodon, Telegram og Facebook (5 af 6 mangler helt) på Settings → Keys. Kanalstatus skelner nu `refused`, `needs_scope` (med scopet navngivet) og `ready` |
 | Plugin P2.1–P2.3 | ⛔ blokeret | **Ejers beslutning** om Command Center-retning, og derefter de tokens den kræver |
 
 **Talt:** **fjorten** poster er stadig ejer-blokerede (S0.6, S1.2, S3.4b, S4.1, S4.2, S4.3, S4.5, S4.6, S4.7,

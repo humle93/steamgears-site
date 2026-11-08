@@ -59,6 +59,10 @@ class SGAP_Pinterest {
     const STATE = 'sgap_pinterest_state';
     /** When Pinterest last refused the stored token (401). Read by the channel-health screen. */
     const REFUSED = 'sgap_pinterest_refused';
+    /** When Pinterest accepted the token but not the request (missing boards:read, say). */
+    const SCOPE = 'sgap_pinterest_scope';
+    /** The Pinterest for WooCommerce plugin's own credentials store (encrypted token + scopes). */
+    const WC_DATA = 'pinterest_for_woocommerce_data';
     /** The field a token was pasted into before 7.33.3 unregistered it. */
     const LEGACY = 'sgap_pinterest_token';
 
@@ -143,7 +147,42 @@ class SGAP_Pinterest {
     }
 
     public static function configured(): bool {
-        return self::saved_token() !== '' || self::refreshable();
+        return self::saved_token() !== '' || self::woocommerce_token() !== '' || self::refreshable();
+    }
+
+    /**
+     * The OAuth token the *Pinterest for WooCommerce* plugin already holds.
+     *
+     * The value in `pinterest_for_woocommerce_data` is encrypted, so reading the option
+     * directly returns ciphertext that answers 401 — the plugin's own accessor decrypts it.
+     * That token is renewed by the integration itself, which is exactly the token a site
+     * owner who connected Pinterest under WooCommerce already has.
+     */
+    public static function woocommerce_token(): string {
+        if (!class_exists('Pinterest_For_Woocommerce') || !method_exists('Pinterest_For_Woocommerce', 'get_access_token')) {
+            return '';
+        }
+        $token = Pinterest_For_Woocommerce::get_access_token();
+        $value = is_array($token) ? (string) ($token['access_token'] ?? '') : '';
+        return trim($value);
+    }
+
+    /**
+     * Where token() takes its token from — a name, never a value.
+     *
+     * The integration wins whenever it is connected: it is an OAuth token the integration
+     * renews by itself, while a pasted token is a snapshot that expires without warning.
+     * Picking by "has our own been refused yet?" looked right but was not stable — a single
+     * working call clears the refusal, and the dead token came back on the next request.
+     */
+    public static function token_source(): string {
+        if (self::access_constant() !== '') {
+            return 'constant';
+        }
+        if (self::woocommerce_token() !== '') {
+            return 'woocommerce';
+        }
+        return self::saved_token() !== '' ? 'settings' : '';
     }
 
     /**
@@ -178,6 +217,13 @@ class SGAP_Pinterest {
     public static function token(): string {
         if (self::access_constant() !== '') {
             return self::saved_token(); // Constant wins over anything stored; it cannot be rotated.
+        }
+        // The Pinterest for WooCommerce integration renews its own OAuth token, so it is the
+        // better credential whenever it is connected — see token_source() for why this is not
+        // decided by the refusal flag.
+        $integration = self::woocommerce_token();
+        if ($integration !== '') {
+            return $integration;
         }
         $cached = self::saved_token();
         $expires = (int) get_option(self::EXPIRES, 0);
@@ -630,9 +676,50 @@ class SGAP_Pinterest {
         if ($old !== null && $new !== null && (string) $old === (string) $new) {
             return;
         }
-        if (get_option(self::REFUSED, null) !== null) {
-            delete_option(self::REFUSED);
+        foreach ([self::REFUSED, self::SCOPE] as $option) {
+            if (get_option($option, null) !== null) {
+                delete_option($option);
+            }
         }
+    }
+
+    /**
+     * The last "the token is fine, the request is not allowed" answer, or [] when there is none.
+     * Pinterest answers 401 with *sufficient permissions … Missing: ['boards:read']* for a scope
+     * problem — the token authenticates, it simply may not list boards. Reporting that as a dead
+     * token sends the owner to paste a new token that will fail in exactly the same way.
+     */
+    public static function scope_problem(): array {
+        $scope = get_option(self::SCOPE, []);
+        if (!is_array($scope) || (string) ($scope['at'] ?? '') === '') {
+            return [];
+        }
+        return ['at' => (string) $scope['at'], 'scope' => (string) ($scope['scope'] ?? '')];
+    }
+
+    /** Pulls the scope out of Pinterest's own sentence: … Missing: ['boards:read']. */
+    public static function missing_scope(string $message): string {
+        if (preg_match('/Missing:\s*\[([^\]]+)\]/i', $message, $m) === 1) {
+            return trim(str_replace(["'", '"'], '', $m[1]));
+        }
+        return '';
+    }
+
+    /**
+     * One authorised call that proves the credential itself: who the token belongs to.
+     * Needs only `user_accounts:read`, so it works on a token that may not list pins yet.
+     *
+     * @return array{username:string,id:string}|WP_Error
+     */
+    public static function verify() {
+        $account = self::request('/user_account');
+        if (is_wp_error($account)) {
+            return $account;
+        }
+        return [
+            'username' => (string) ($account['username'] ?? ''),
+            'id' => (string) ($account['id'] ?? ''),
+        ];
     }
 
     /** Everything an operator or an MCP client needs to judge the connection. */
@@ -809,13 +896,27 @@ class SGAP_Pinterest {
         $body = json_decode($raw, true);
         if ($code === 200 && is_array($body)) {
             // A working call proves the token; a refusal from last week must not linger.
-            if (get_option(self::REFUSED, null) !== null) {
-                delete_option(self::REFUSED);
+            foreach ([self::REFUSED, self::SCOPE] as $option) {
+                if (get_option($option, null) !== null) {
+                    delete_option($option);
+                }
             }
             return $body;
         }
         $detail = is_array($body) ? self::detail($body) : '';
         if ($code === 401) {
+            $raw = is_array($body) ? (string) ($body['message'] ?? '') : '';
+            if ($raw !== '' && (stripos($raw, 'permission') !== false || stripos($raw, 'Missing:') !== false)) {
+                $scope = self::missing_scope($raw);
+                update_option(self::SCOPE, ['at' => current_time('mysql'), 'scope' => $scope], false);
+                return new WP_Error(
+                    'sgap_pinterest_scope',
+                    'Pinterest accepted the token but not the request: ' . $raw
+                    . ' Reconnect the Pinterest integration with ' . ($scope !== '' ? $scope : 'the missing scope')
+                    . ' (the WooCommerce integration does not request boards:read), or paste a token that has it.',
+                    ['status' => 401]
+                );
+            }
             update_option(self::REFUSED, ['at' => current_time('mysql'), 'code' => 401], false);
             return new WP_Error('sgap_pinterest_401', 'Pinterest refused the access token (HTTP 401)' . ($detail !== '' ? ': ' . $detail : '') . '. Paste a fresh token, or save the app credentials and refresh token so it can renew itself.', ['status' => 401]);
         }

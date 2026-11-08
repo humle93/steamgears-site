@@ -27,6 +27,7 @@ class SGAP_Channel_Health {
         'needs_refresh' => 'No access token, but a refresh token is stored: the next refresh will fetch a new one.',
         'missing_token' => 'Nothing stored — paste the token on the Keys screen, then run the refresh.',
         'refused'       => 'The stored token was refused by the provider (HTTP 401): paste a fresh one, or save credentials that can renew it.',
+        'needs_scope'   => 'The token works, but the provider does not allow the call: reconnect the app with the scope the channel needs.',
         'no_class'      => 'The channel class is not loaded, so the state cannot be read.',
     ];
 
@@ -38,9 +39,12 @@ class SGAP_Channel_Health {
      * 8/11 the screen called Pinterest ready while every call answered 401. A channel that can
      * report its own auth failure now says so here.
      */
-    public static function classify(bool $configured, bool $refreshable, string $refused = ''): string {
+    public static function classify(bool $configured, bool $refreshable, string $refused = '', string $scope = ''): string {
         if ($refused !== '') {
             return 'refused';
+        }
+        if ($scope !== '') {
+            return 'needs_scope';
         }
         if ($configured) {
             return 'ready';
@@ -67,8 +71,13 @@ class SGAP_Channel_Health {
         if (method_exists($class, 'refused')) {
             $refused = (array) call_user_func([$class, 'refused']);
         }
+        $scope_problem = [];
+        if (method_exists($class, 'scope_problem')) {
+            $scope_problem = (array) call_user_func([$class, 'scope_problem']);
+        }
         $refused_at = (string) ($refused['at'] ?? '');
-        $state = self::classify($configured, $refreshable, $refused_at);
+        $scope_at = (string) ($scope_problem['at'] ?? '');
+        $state = self::classify($configured, $refreshable, $refused_at, $scope_at);
         $row = [
             'id' => $id, 'label' => $def['label'],
             'configured' => $configured, 'refreshable' => $refreshable,
@@ -76,6 +85,13 @@ class SGAP_Channel_Health {
         ];
         if ($refused_at !== '') {
             $row['refused_at'] = $refused_at;
+        }
+        if ($scope_at !== '') {
+            $row['scope_at'] = $scope_at;
+            $row['missing_scope'] = (string) ($scope_problem['scope'] ?? '');
+            $row['next'] = $row['missing_scope'] !== ''
+                ? 'The token works; Pinterest only refuses the call. Missing scope: ' . $row['missing_scope'] . '.'
+                : $row['next'];
         }
         return $row;
     }
@@ -96,6 +112,7 @@ class SGAP_Channel_Health {
         $recoverable = 0;
         $missing = 0;
         $refused = 0;
+        $scope = 0;
         foreach ($report as $row) {
             if ($row['state'] === 'ready') {
                 $ready++;
@@ -103,13 +120,15 @@ class SGAP_Channel_Health {
                 $recoverable++;
             } elseif ($row['state'] === 'refused') {
                 $refused++;
+            } elseif ($row['state'] === 'needs_scope') {
+                $scope++;
             } else {
                 $missing++;
             }
         }
         return [
             'ready' => $ready, 'recoverable' => $recoverable, 'refused' => $refused,
-            'missing' => $missing, 'total' => count($report),
+            'needs_scope' => $scope, 'missing' => $missing, 'total' => count($report),
         ];
     }
 

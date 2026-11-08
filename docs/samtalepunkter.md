@@ -34,13 +34,13 @@ _Opdateret 2026-11-08 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 ### Åbne blokeringer
 
 - **steamgears.eu — site-optimering** — Ejerens oplysninger og aftaler, målt 8/11: CVR-nummer og telefon (Complianz har navn »Henning 6«, adresse »Lavgade 44a st th«, e-mail og DK — men telefon er tom og CVR findes ikke i formularen); valuta og alle 24 priser (butikken kører USD); aftaler med MobilePay/PayPal/Klarna (kun Stripe og bankoverførsel er aktive); zonerne til EU/UK/RoW (kun Denmark har en metode — fri fragt uden minimum — og resten af verdenen har ingen, så EU-kunder kan ikke gennemføre en ordre), fragtklasser og fri fragt-grænse; Complianz-valget EU opt-in i stedet for US opt-out; Printful-adgang eller 5–8 færdige mockups pr. produkt (målt: 24 produkter, 26 billeder, 0 produkter med 3 eller flere); ja/nej pr. produkt for 942/765/766/767 (alle fire kladder med pris og SKU); GSC-svarrapport (S0.6); beslutning om de to inaktive plugins; og W3TC-godkendelse efter en rigtig ordre.
-- **Steamgears Autopilot — plugin** — Seks led kræver ejeren, alle målt 8/11: (1) **kanal-tokens** — Pinterest svarer 401 på den gemte token og har ingen refresh-token (målt 16:56Z, kanalstatus står nu som `refused`, ikke `ready`); Instagram, Bluesky, Mastodon, Telegram og Facebook har intet token (5 af 6 mangler); (2) **AIMLAPI-kredit** — sidste generering 7/11 fejlede med »You've run out of funds«, så der laves ingen nye kladder; (3) **`sgap_alert_email`** er tom, så fejl registreres men ingen mail sendes; (4) **full auto vs. godkendelse** — `sgap_full_auto_enabled = no`, og 40 elementer venter på godkendelse; (5) **distributionsvej** — `publish_mode = rss` og 0 Publer-konti; (6) **P2.1–P2.3** kræver ejerens beslutning om Command Center-retningen. Intet af det må gættes.
+- **Steamgears Autopilot — plugin** — Syv led kræver ejeren, alle målt 8/11: (1) **Pinterest-scope** — tokenet ligger nu i WooCommerce-integrationen og er gyldigt (`/user_account` 200 som `cpaleadsis`, id 688980580401955331), men appen har kun ads/billing/catalogs/pins/user_accounts og **mangler `boards:read`**, så `/pins` og `/boards` afvises (målt 17:25Z, kanalstatus står som `needs_scope`); (2) **de øvrige kanal-tokens** — Instagram, Bluesky, Mastodon, Telegram og Facebook har intet token (5 af 6 mangler); (3) **AIMLAPI-kredit** — sidste generering 7/11 fejlede med »You've run out of funds«; (4) **`sgap_alert_email`** er tom, så fejl registreres men ingen mail sendes; (5) **full auto vs. godkendelse** — `sgap_full_auto_enabled = no` og 40 elementer venter; (6) **distributionsvej** — `publish_mode = rss` og 0 Publer-konti; (7) **P2.1–P2.3** kræver ejerens beslutning om Command Center-retningen. Intet af det må gættes.
 - **Dark academia-rebrand** — To led kræver ejeren, målt 8/11: (1) **Batch 4-mockups (5 t)** — Printful-adgang eller 5–8 færdige billeder pr. produkt; kataloget har 26 billeder på 24 produkter, 0 produkter med 3 eller flere, 0 uden alt-tekst og 8 under 1000 px, og repoet indeholder ingen trykfiler eller tøj-skabeloner, så de kan ikke laves her; (2) **de 29 trash'ede designs** — 13 af de 45 produkt-id'er er publiceret, 3 er kladder og 29 ligger i papirkurven med de nye titler; genoplive (kræver Printful-synk) eller droppe er ejerens valg.
 
 ### Næste skridt
 
 - **steamgears.eu — site-optimering** — Intet agent-arbejde tilbage i S0–S4: alle fem bands er færdige og målt, og de 1,5 d der står tilbage er ejer-blokerede og navngivet i §4c og blocked_by. Målt 8/11: 24 produkter (20 publicerede, 4 kladder), USD, fri fragt i DK og ingen forsendelse til EU/UK/RoW, Stripe + bankoverførsel, Complianz på US opt-out.
-- **Steamgears Autopilot — plugin** — Agent-scope er færdigt: P1 er 14,45 af 14,45 d efter 7.64.4, som rettede kanalstatus (en død token blev kaldt »ready«). Det der står tilbage kræver ejeren: tokens til seks kanaler, AIMLAPI-kredit, alarmmodtager, full-auto/godkendelse og en distributionsvej — målt 8/11 og navngivet i blocked_by.
+- **Steamgears Autopilot — plugin** — Agent-scope er færdigt (29,85 af 29,85 d). Ejeren har lagt Pinterest-tokenet ind i WooCommerce-integrationen, og 7.64.6 henter det nu derfra gennem integrationens egen dekryptering: målt 8/11 virker det (konto `cpaleadsis`, id 688980580401955331), men appen mangler scopes `boards:read`, så pin-lister og Pin Analytics kan stadig ikke måles. Næste skridt er ejerens: genforbind Pinterest med board-adgang (eller et developer-token med boards:read + pins:read). Resten af blocked_by står uændret.
 - **Dark academia-rebrand** — Batch 4 (mockups, 5 t) er det eneste tilbage og er ejer-blokeret: repoet har ingen trykfiler eller tøj-skabeloner, og målt 8/11 har 0 af 24 produkter tre eller flere billeder. Dertil en ejer-beslutning: 29 af de 45 produkt-id'er i om-mærkningen ligger i papirkurven med de nye titler — skal de genoplives eller droppes?
 - **SEO-indholdsproduktion** — SEO-indholdet er 100 %: fire guides skrevet, tre publiceret, corset-guiden publiceret, 1410 parkeret til september. Ingen åbne poster.
 - **Døde internlinks** — Vedligehold: tjek nye indlæg mod live-URL'er
@@ -48,15 +48,30 @@ _Opdateret 2026-11-08 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `2d41c94 chore(status): daglig projektstatus 2026-11-08`
+- `145f6f9 Begge roadmaps lukket: 1,5 d + 0,6 d er målt ejer-blokerede`
 - `243f629 Kanalstatus: en afvist token er ikke »ready« (7.64.4)`
 - `1ac26ba Test: evne-tællingen i admin-tools følger de fire niche-evner`
 - `cad5782 chore(status): daglig projektstatus 2026-11-08`
 - `dd977a1 Niche-butik: målt på sitet og rullet tilbage — P4 færdig`
-- `772a1de Modul: agent-profil — faktakort Før: 93,3 % → Efter: 93,3 % (Δ 0) Grundlag: ingen ændring`
-- `a8c26c7 Modul: steamgears.eu — site-optimering (roadmap afstemt mod målte tal) Før: 93,3 % Efter: 93,3 % Δ: 0 Grundlag: ingen ændring`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 8/11 — Pinterest-tokenet ligger i WooCommerce: hentet, virker, mangler `boards:read`
+
+- **Målt:** `pinterest_for_woocommerce_data` → `token_data.access_token` er **ciphertext** (370 tegn) og
+  svarer 401 hvis man læser optionen direkte; `Pinterest_For_Woocommerce::get_access_token()` dekrypterer
+  den. 7.64.6 bruger den vej og vælger token efter **kilde** — integrationens fornyede token vinder, når
+  integrationen er tilsluttet.
+- **Bevis:** `/user_account` → 200 som `cpaleadsis` (id 688980580401955331); `/pins` → `sgap_pinterest_scope`
+  med `Missing: ['boards:read']`; kanalstatus `needs_scope` + `missing_scope: boards:read`.
+- **Fælde:** første version valgte token ud fra »er vores eget afvist?«. Et vellykket kald rydder
+  afvisningen, og så kom det døde token tilbage på næste request (målt som `401 Authentication failed`).
+  Kilde-baseret valg er stabilt; tilstandsbaseret valg var det ikke.
+- **Stadig blokeret:** Pin Analytics kræver pin-id'er fra `/pins`, som kræver `boards:read`. P1.5's 0,6 d
+  står derfor uændret som ejer-blokeret — ét konkret skridt: genforbind med board-adgang.
+
 
 ### 8/11 — begge roadmaps lukket: kanalstatus-fejlen var det sidste stykke
 

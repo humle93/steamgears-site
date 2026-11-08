@@ -44,7 +44,7 @@ dommen via `update_option_sgap_pinterest_access_token` → `forget_refusal()`.
 | `summary()` efter kaldet | **`ready 0 · refused 1 · missing 5`** |
 | `channel('pinterest')` | `state: refused`, `refused_at: 2026-11-08 16:56:41`, next: »paste a fresh one, or save credentials that can renew it« |
 
-10 nye smoke-checks (1084 → **1094 PASS, 0 FAIL**), `php -l` ren, zip byte-identisk med kilden, fejlscan 0 fund.
+21 nye smoke-checks (1084 → **1105 PASS, 0 FAIL**), `php -l` ren, zip byte-identisk med kilden, fejlscan 0 fund.
 
 ## 3. Site-roadmappet: intet agent-arbejde tilbage — 1,5 d kræver ejeren
 
@@ -91,7 +91,7 @@ titler — de skal enten genoplives (og synkroniseres i Printful) eller droppes.
 ## 6. Sådan er det verificeret
 
 ```bash
-./.tools/php plugins/tests/smoke.php            # 1094 PASS, 0 FAIL
+./.tools/php plugins/tests/smoke.php            # 1105 PASS, 0 FAIL
 python3 tools/fejlscan.py                       # ingen fund
 php -l på alle plugin-filer                     # ren
 PHP_BIN=./.tools/php bash tools/natlige-vaern.sh # alle værn grønne
@@ -100,12 +100,38 @@ python3 tools/commit_check.py --range …         # procenterne holder
 ```
 
 Plus de levende målinger ovenfor via `novamira run novamira/execute-php` mod steamgears.eu, og
-`Plugin_Upgrader::install()` af `plugins/steamgears-autopilot-v7.64.4.zip` med SHA-1-kontrol af de installerede
+`Plugin_Upgrader::install()` af `plugins/steamgears-autopilot-v7.64.6.zip` med SHA-1-kontrol af de installerede
 filer.
 
-## 7. Det ejeren skal levere — kort
+## 7. Pinterest-tokenet fra WooCommerce — hentet, virker, mangler et scope
 
-1. **Pinterest-token** (den nuværende svarer 401) eller App ID + app secret + refresh-token; plus tokens til
+Efter den første udgave af dette dokument lagde ejeren et Pinterest-token ind i **Pinterest for
+WooCommerce**. Det ændrede diagnosen, og 7.64.6 henter det nu derfra:
+
+| Måling | Resultat |
+|---|---|
+| Hvor ligger tokenet? | `pinterest_for_woocommerce_data` → `token_data.access_token` (370 tegn **ciphertext**) |
+| Kan optionen læses direkte? | Nej: værdien svarer **401** — den er krypteret af integrationen |
+| Hvordan læses den? | `Pinterest_For_Woocommerce::get_access_token()` (integrationens egen dekryptering) |
+| Virker den? | **Ja**: `/user_account` → **200**, konto `cpaleadsis`, id `688980580401955331` |
+| Hvilke scopes har den? | ads:read/write, billing:read/write, catalogs:read/write, pins:read/write, user_accounts:read/write |
+| Hvad mangler? | **`boards:read`** — `/pins` og `/boards` svarer 401 med *Missing: ['boards:read']* |
+| Hvordan vises det? | Kanalstatus: `needs_scope`, `missing_scope: boards:read` (ikke `refused`, ikke `ready`) |
+
+**Fælde undervejs:** den første version valgte token ud fra »er vores eget afvist?«. Et vellykket
+`/user_account` rydder afvisningen, hvorefter det døde token kom tilbage på næste kald — målt som
+`401 Authentication failed` midt i testen. Rettelsen er at vælge efter **kilde**: integrationens
+fornyede token vinder, når integrationen er tilsluttet, og det valg afhænger ikke af en tilstand der
+kan ryddes.
+
+**Hvad der stadig ikke kan måles:** Pin Analytics kræver pin-id'er, og dem får vi fra `/pins`, som
+kræver `boards:read`. Derfor står P1.5's sidste 0,6 d fortsat som ejer-blokeret — nu med ét konkret
+skridt: genforbind Pinterest med board-adgang (eller indsæt et developer-token med `boards:read`
+og `pins:read`).
+
+## 8. Det ejeren skal levere — kort
+
+1. **Pinterest board-adgang** (`boards:read`) på den integrationstoken der allerede virker; plus tokens til
    Instagram, Bluesky, Mastodon, Telegram og Facebook.
 2. **CVR-nummer og telefon** — og et kig på om »Henning 6« er det rigtige firmanavn i Complianz.
 3. **Valuta (EUR/DKK) og alle 24 priser.**

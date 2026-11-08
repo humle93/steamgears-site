@@ -12,6 +12,7 @@ check('channel-health: a configured channel is ready', SGAP_Channel_Health::clas
 check('channel-health: a refresh token alone is recoverable', SGAP_Channel_Health::classify(false, true) === 'needs_refresh');
 check('channel-health: nothing stored is missing', SGAP_Channel_Health::classify(false, false) === 'missing_token');
 check('channel-health: a refused token beats a stored one', SGAP_Channel_Health::classify(true, true, '2026-11-08 10:00:00') === 'refused');
+check('channel-health: a token without the scope is needs_scope, not ready', SGAP_Channel_Health::classify(true, false, '', '2026-11-08 17:10:00') === 'needs_scope');
 
 $report = SGAP_Channel_Health::report();
 check('channel-health: reports all six channels', count($report) === 6 && isset($report['pinterest'], $report['instagram'], $report['facebook']));
@@ -21,7 +22,7 @@ foreach ($report as $id => $row) {
     $shaped = $shaped
         && ($row['id'] ?? '') === $id
         && ($row['label'] ?? '') !== ''
-        && in_array($row['state'] ?? '', ['ready', 'needs_refresh', 'missing_token', 'refused', 'no_class'], true)
+        && in_array($row['state'] ?? '', ['ready', 'needs_refresh', 'missing_token', 'refused', 'needs_scope', 'no_class'], true)
         && ($row['next'] ?? '') !== '';
 }
 check('channel-health: every row carries id, label, state and next step', $shaped);
@@ -56,7 +57,19 @@ $summary = SGAP_Channel_Health::summary();
 check('channel-health: the summary counts a refused channel on its own line',
     $summary['refused'] === ($before['refused'] ?? 0) + 1
     && $summary['ready'] === $before['ready'] - 1
-    && ($summary['ready'] + $summary['recoverable'] + $summary['refused'] + $summary['missing']) === 6);
+    && ($summary['ready'] + $summary['recoverable'] + $summary['refused'] + $summary['needs_scope'] + $summary['missing']) === 6);
+
+// A valid token that Pinterest will not let us use is a fourth, distinct answer: the
+// owner must reconnect the app with the scope, not paste the same token again.
+SGAP_Pinterest::forget_refusal('smoke-token-value', 'a-fresh-token');
+$opts['sgap_pinterest_scope'] = ['at' => '2026-11-08 17:12:00', 'scope' => 'boards:read'];
+$scoped = SGAP_Channel_Health::channel('pinterest');
+check('channel-health: a missing scope reads as needs_scope with the scope named',
+    $scoped['state'] === 'needs_scope' && ($scoped['missing_scope'] ?? '') === 'boards:read'
+    && str_contains((string) $scoped['next'], 'boards:read'));
+check('channel-health: the scope verdict never contains the token',
+    !str_contains(json_encode($scoped), 'smoke-token-value'));
+unset($opts['sgap_pinterest_scope']);
 SGAP_Pinterest::forget_refusal('smoke-token-value', 'a-fresh-token');
 check('channel-health: a fresh token puts the channel back to ready',
     SGAP_Channel_Health::channel('pinterest')['state'] === 'ready');

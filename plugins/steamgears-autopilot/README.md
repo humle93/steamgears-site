@@ -23,7 +23,7 @@ The whole social autopilot runs inside WordPress (Command Center is retired):
 4. **Measure** – every post links via `/go/<id>/`, so clicks (and WooCommerce
    orders) are counted per channel.
 
-Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.64.4.zip` → Activate. On an existing
+Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.64.6.zip` → Activate. On an existing
 install the same zip arrives through the self-updater (see *Updates*), so an upload is only needed for the
 first install or a recovery.
 
@@ -233,6 +233,13 @@ never rewritten by this screen; content suggestions stay in *Optimise SEO of a p
 401 with a date (`sgap_pinterest_refused`), the report shows `refused_at`, and the summary counts it on
 its own line. Saving a new access token forgets the old verdict, and the next successful call clears
 it. Before 7.64.4 the one channel the screen called ready answered 401 on every call.
+
+**7.64.6** adds two things. The token is read from **Pinterest for WooCommerce** when that
+integration is connected — through its own `get_access_token()`, because the value stored in
+`pinterest_for_woocommerce_data` is encrypted and answers 401 as-is; the integration also renews
+it, so it is preferred over a pasted token. And a **scope** answer is no longer reported as a
+dead token: Pinterest's *insufficient permissions … Missing: ['boards:read']* is recorded as
+`sgap_pinterest_scope` and shown as `needs_scope` with the missing scope named.
 
 ## Pre-flight per channel (7.20)
 
