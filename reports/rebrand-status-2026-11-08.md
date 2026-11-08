@@ -69,6 +69,14 @@ i `docs/library/batch-4-arbejdsordre-2026-11-08.md`; selve billederne kan ikke p
 2. **Mockups (5 t).** Kræver Printful-adgang eller færdige billeder. Acceptkriterium: 0 produkter under
    3 billeder — i dag 20 af 20.
 
+### Forsøgt fra CI: kørslen rapporterer selv at der ikke findes credentials
+
+Workflowen *Rebrand apply* kørte på commit `bdb71a0` og skrev
+[`rebrand-apply-log.md`](rebrand-apply-log.md) i repoet: planen (11 produkter, 14 placeringer), apply-trinnet
+(»ingen credentials — tildelingen er ikke forsøgt«) og linjen **Credentials sat som repo-secrets: nej**.
+Det er ikke en antagelse — det er kørslens eget svar, offentligt læsbart. Repository-secrets er altså tomme,
+og hverken agenten eller CI kan skrive til sitet uden dem.
+
 ### Den konkrete ejerhandling (90 sekunder)
 
 1. Log ind på `steamgears.eu/wp-admin` som admin.

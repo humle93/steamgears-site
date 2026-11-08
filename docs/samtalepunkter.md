@@ -41,19 +41,19 @@ _Opdateret 2026-11-08 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 - **steamgears.eu — site-optimering** — Intet agent-arbejde tilbage i S0–S4: alle fem bands er færdige og målt, og de 1,5 d der står tilbage er ejer-blokerede og navngivet i §4c og blocked_by. Målt 8/11: 24 produkter (20 publicerede, 4 kladder), USD, fri fragt i DK og ingen forsendelse til EU/UK/RoW, Stripe + bankoverførsel, Complianz på US opt-out.
 - **Steamgears Autopilot — plugin** — Agent-scope er færdigt (29,85 af 29,85 d). Ejeren har lagt Pinterest-tokenet ind i WooCommerce-integrationen, og 7.64.6 henter det nu derfra gennem integrationens egen dekryptering: målt 8/11 virker det (konto `cpaleadsis`, id 688980580401955331), men appen mangler scopes `boards:read`, så pin-lister og Pin Analytics kan stadig ikke måles. Næste skridt er ejerens: genforbind Pinterest med board-adgang (eller et developer-token med boards:read + pins:read). Resten af blocked_by står uændret.
-- **Dark academia-rebrand** — Tre ting står tilbage, alle med en navngivet ejerhandling: (1) **gentildeling af de seks kollektioner** (0,4 t) — målt 8/11 via Store API har alle seks 0 produkter, mens de fire gamle bærer alle 20, så batch 2's tildeling er ikke i effekt og skal laves igen med skriveadgang; (2) **Batch 4-mockups** (5 t) — Printful-adgang eller 5–8 færdige billeder pr. produkt; (3) **de 29 trash'ede designs** — genoplive eller droppe.
+- **Dark academia-rebrand** — Tre ting står tilbage, alle med en navngivet ejerhandling: (1) **gentildeling af de seks kollektioner** (0,4 t) — målt 8/11 via Store API har alle seks 0 produkter, mens de fire gamle bærer alle 20, så batch 2's tildeling er ikke i effekt. Skrivevejen er bygget: `tools/rebrand_apply.py --apply` (eller workflowen »Rebrand apply«) gør det på ét minut, når WP_USER + WP_APP_PASS ligger som repo-secrets; (2) **Batch 4-mockups** (5 t) — Printful-adgang eller 5–8 færdige billeder pr. produkt; (3) **de 29 trash'ede designs** — genoplive eller droppe.
 - **SEO-indholdsproduktion** — SEO-indholdet er 100 %: fire guides skrevet, tre publiceret, corset-guiden publiceret, 1410 parkeret til september. Ingen åbne poster.
 - **Døde internlinks** — Vedligehold: tjek nye indlæg mod live-URL'er
 - **Niche-butik — plugin P4** — Færdig som roadmap-punkt P4: modulet er kørt mod det levende site (WordPress 7.1.4, WooCommerce 11.2.2) med 8 produktkladder, 5 kollektioner, en sideskits og en navigation, og rullet tilbage til præcis udgangstilstanden. Næste skridt er ejerens: Printful-adgang, publicering og de øvrige punkter i readiness-listen.
 
 ### Seneste commits
 
+- `bdb71a0 Workflowen rapporterer nu sin egen kørsel, så tildelingsforsøget kan læses uden login Modul: om-mærkning — skrivevej til batch 2 Før: 62,5 % Efter: 62,5 % Δ: 0 Grundlag: ingen ændring`
+- `d70f7bd Merge branch 'main' of https://github.com/humle93/steamgears-site into freebuff/d96c797cb28964a7f8fb9d78`
+- `5cdeec0 Skrivevejen til kollektionerne er bygget: tildelingen kan nu køres med ét klik Modul: om-mærkning — skrivevej til batch 2 Før: 62,5 % Efter: 62,5 % Δ: 0 Grundlag: ingen ændring`
+- `1cefc36 chore(status): daglig projektstatus 2026-11-08`
+- `e01ce62 Om-mærkningen var kun halvt i effekt: kollektionerne er tomme, titlerne er der Modul: om-mærkning (dark academia) Før: 64,3 % Efter: 62,5 % Δ: -1,8 Grundlag: 9 af 14,4 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5 · Batch 4-forberedelse: arbejdsordre, filnavne, alt-tekster, rækkefølge 0,5/0,5 · Batch 2-gentildeling: de seks kollektioner skal tildeles igen 0/0,4)`
 - `bc5c554 Preflight: den publicerede zip er bekræftet byte-identisk, og raw-CDN'en halter ~2 minutter`
-- `060161e Opdateringsvejen til 7.64.9 er prøvet: version og pakke-link svarer, så kun ejerens klik mangler`
-- `3de9c53 MCP-login: opskriften deles med de andre — hvert token bliver hos den der fik det`
-- `a350872 Live kører stadig 7.64.6, og nu står der hvorfor — der findes intet MCP-credential`
-- `e4eb037 Roadmap-headeren stod stadig på 7.64.8 efter bumpet til 7.64.9`
-- `45a3afc Zip'en til 7.64.9 var pakket uden filrettigheder — nu med mode og fast dato`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
