@@ -81,13 +81,14 @@ optionen med det seneste resultat alene kunne ikke vise det.
 
 ### 2.3.1 Den faktiske GitHub-kørsel
 
-Workflowen blev startet med `workflow_dispatch` (den havde ikke haft en planlagt slot endnu). To kørsler,
-begge **success**:
+Workflowen blev startet med `workflow_dispatch` (den havde ikke haft en planlagt slot endnu). Tre kørsler,
+alle **success**:
 
 | Run | Tid (UTC) | Udløser | Resultat | Job-log |
 | --- | --- | --- | --- | --- |
 | [42484917755](https://github.com/humle93/steamgears-site/actions/runs/42484917755) | 13:25:46 → 13:25:53 | `workflow_dispatch` | success | `Forsoeg 1: HTTP 200` (tom krop — gammel version af endpointet) |
 | [42485140090](https://github.com/humle93/steamgears-site/actions/runs/42485140090) | 13:28:42 → 13:28:50 | `workflow_dispatch` | success | `Forsoeg 1: HTTP 200` + `{"ok":true,"skipped":"locked",...}` |
+| [42486836985](https://github.com/humle93/steamgears-site/actions/runs/42486836985) | 13:50:52 → 13:51:00 | `workflow_dispatch` (efter krops-kravet) | success | `Forsoeg 1: HTTP 200` + `{"ok":true,...}` — jobbet kræver nu `"ok":true`, så et tomt 200 ville være fejlet |
 
 Den anden kørsel ramte 60-sekunders-låsen, fordi et manuelt `curl` havde kørt 28 sekunder før — det er
 kontrakten (højst ét tick pr. minut), og svaret er stadig 200 med en forklaring, så jobbet ikke bliver rødt

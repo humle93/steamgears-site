@@ -42,7 +42,7 @@
      "done": 4.05,
      "total": 4.05,
      "unit": "d",
-     "note": "S3.1 0,25 + S3.2 0,1 + S3.3 alt-tekst 0,3 + S3.4 plugin-revision 0,35 + S3.5 fjerde ugentlige post 0,35 + S3.6 kø- og cron-hygiejne 0,5 (326 → 0 ventende webhook-leveringer, 1 084 → 0 forældreløse Facebook-handlinger, 40 → 29 aktive webhooks, 3 cron-events fjernet; GitHub-kørsel 42484917755 og 42485140090 = success med HTTP 200, tick svarer JSON, køhygiejne idempotent og planlagt dagligt 04:10 UTC) + PDF/commit-værn 0,55"
+     "note": "S3.1 0,25 + S3.2 0,1 + S3.3 alt-tekst 0,3 + S3.4 plugin-revision 0,35 + S3.5 fjerde ugentlige post 0,35 + S3.6 kø- og cron-hygiejne 0,5 (326 → 0 ventende webhook-leveringer, 1 084 → 0 forældreløse Facebook-handlinger, 40 → 29 aktive webhooks, 3 cron-events fjernet; GitHub-kørsel 42484917755, 42485140090 og 42486836985 = success med HTTP 200 (den sidste kræver \"ok\":true i kroppen), tick svarer JSON, køhygiejne idempotent og planlagt dagligt 04:10 UTC) + PDF/commit-værn 0,55"
     },
     {
      "id": "s4",
