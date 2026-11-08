@@ -225,10 +225,13 @@ The scan is stored in one option (`sgap_seo_site`) and refreshed lazily once a w
 administrator opens wp-admin, because WP-Cron is not dependable on this cached host. Body text is
 never rewritten by this screen; content suggestions stay in *Optimise SEO of a page*.
 
-## Channel status tells a dead token from a missing one (7.61, tightened 7.64.4)
+## Channel status tells a dead token from a missing one (7.61, tightened 7.64.4 and 7.64.8)
 
-`GET /sgap/v1/channel-health` answers, per channel, which of four states it is in — `ready`,
-`needs_refresh`, `missing_token` or `refused` — plus the sentence that says what to do next. Since
+`GET /sgap/v1/channel-health` answers, per channel, which of six states it is in — `ready`,
+`needs_refresh`, `missing_token`, `refused`, `needs_scope` or `no_class` — plus the sentence that says
+what to do next. `no_class` means the channel's own class did not load: that is a code regression, not
+an empty field, and the summary has its own `broken` counter for it so the screen never asks the owner
+to paste a token to fix a missing file. Since
 7.64.4 a stored token that the provider refuses is **`refused`, not `ready`**: Pinterest records the
 401 with a date (`sgap_pinterest_refused`), the report shows `refused_at`, and the summary counts it on
 its own line. Saving a new access token forgets the old verdict, and the next successful call clears

@@ -84,7 +84,23 @@ check('channel-health: a cleared Telegram reads as missing', $telegram['state'] 
 $summary = SGAP_Channel_Health::summary();
 check('channel-health: the summary adds up to the report', $summary['total'] === 6
     && ($summary['ready'] + $summary['recoverable'] + $summary['missing']
-        + $summary['refused'] + $summary['needs_scope']) === 6);
+        + $summary['refused'] + $summary['needs_scope'] + $summary['broken']) === 6);
+
+// Per-state, not just the total: a counter that folds two states together still sums to six.
+$expected = array_fill_keys(['ready', 'recoverable', 'missing', 'refused', 'needs_scope', 'broken'], 0);
+foreach (SGAP_Channel_Health::report() as $row) {
+    $expected[SGAP_Channel_Health::STATES[$row['state']]]++;
+}
+$counted = [
+    'ready' => $summary['ready'], 'recoverable' => $summary['recoverable'],
+    'missing' => $summary['missing'], 'refused' => $summary['refused'],
+    'needs_scope' => $summary['needs_scope'], 'broken' => $summary['broken'],
+];
+check('channel-health: every counter matches its own state in the report', $counted === $expected);
+check('channel-health: a missing class is broken, not a missing token',
+    SGAP_Channel_Health::STATES['no_class'] === 'broken'
+    && SGAP_Channel_Health::STATES['missing_token'] === 'missing'
+    && count(SGAP_Channel_Health::STATES) === 6);
 
 do_action('rest_api_init');
 check('channel-health: /channel-health is registered under sgap/v1',

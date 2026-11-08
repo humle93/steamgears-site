@@ -31,8 +31,18 @@ class SGAP_Channel_Health {
         'no_class'      => 'The channel class is not loaded, so the state cannot be read.',
     ];
 
+    /** Every state the report can print, and the summary counter each one increments. */
+    const STATES = [
+        'ready'         => 'ready',
+        'needs_refresh' => 'recoverable',
+        'missing_token' => 'missing',
+        'refused'       => 'refused',
+        'needs_scope'   => 'needs_scope',
+        'no_class'      => 'broken',
+    ];
+
     /**
-     * Four states, and no guessing: a refused token beats a stored one, a stored token wins
+     * Six states, and no guessing: a refused token beats a stored one, a stored token wins
      * over a refresh token, and a refresh token alone still counts as recoverable.
      *
      * A token being *stored* was read as `ready` until 7.64.4, which is exactly backwards: on
@@ -105,30 +115,26 @@ class SGAP_Channel_Health {
         return $out;
     }
 
-    /** Counts for the admin line: how many channels can be measured today. */
+    /**
+     * Counts for the admin line: how many channels can be measured today.
+     *
+     * One counter per state, so the line cannot tell the owner to paste a token for a channel whose
+     * class is missing: `broken` means the plugin lost a channel class, `missing` means the owner has
+     * not pasted a key. Folding the two together made a code regression look like an empty field.
+     */
     public static function summary(): array {
         $report = self::report();
-        $ready = 0;
-        $recoverable = 0;
-        $missing = 0;
-        $refused = 0;
-        $scope = 0;
+        $counts = array_fill_keys(array_values(self::STATES), 0);
         foreach ($report as $row) {
-            if ($row['state'] === 'ready') {
-                $ready++;
-            } elseif ($row['state'] === 'needs_refresh') {
-                $recoverable++;
-            } elseif ($row['state'] === 'refused') {
-                $refused++;
-            } elseif ($row['state'] === 'needs_scope') {
-                $scope++;
-            } else {
-                $missing++;
-            }
+            $state = (string) ($row['state'] ?? 'no_class');
+            $key = self::STATES[$state] ?? 'broken';
+            $counts[$key]++;
         }
         return [
-            'ready' => $ready, 'recoverable' => $recoverable, 'refused' => $refused,
-            'needs_scope' => $scope, 'missing' => $missing, 'total' => count($report),
+            'ready' => $counts['ready'], 'recoverable' => $counts['recoverable'],
+            'refused' => $counts['refused'], 'needs_scope' => $counts['needs_scope'],
+            'missing' => $counts['missing'], 'broken' => $counts['broken'],
+            'total' => count($report),
         ];
     }
 
