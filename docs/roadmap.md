@@ -1,6 +1,6 @@
 # Steamgears site — optimisation roadmap
 
-_Last audited: 2026-11-02 · production: WordPress **7.1.4**, PHP **8.5.12**, MySQL 8.4.11, WooCommerce 11.2.1, 33 active plugins · companion to [`plugins/steamgears-autopilot/ROADMAP.md`](../plugins/steamgears-autopilot/ROADMAP.md), which is imported in §5._
+_Last audited: 2026-11-08 · production: WordPress **7.1.4**, PHP **8.5.12**, MySQL 8.4.11, WooCommerce **11.2.2**, **22 active plugins** (afstemt 8/11 mod S3.4 og §2b) · companion to [`plugins/steamgears-autopilot/ROADMAP.md`](../plugins/steamgears-autopilot/ROADMAP.md), which is imported in §5._
 
 This is the roadmap for **steamgears.eu itself** — structure, content, store and hygiene. The plugin has its
 own roadmap; this document tracks what the site needs, and §5 pulls every plugin item in with its site-side
@@ -8,7 +8,9 @@ dependency so there is one place to read the whole plan.
 
 ---
 
-## 0. Short version- **The 25/10 hub structure is complete (6/11).** `/start-here/`, `/build/`, `/inspiration/` were built in rounds 4–7, and `/shipping/` (1396) + `/returns/` (1397) closed the last two on 6/11 — all of them return **200** and are linked from the header, the guides and the policy pages. The single biggest structural gap on the site is therefore closed; in S2 the meta pass (titel/description/fokusnøgleord), the internal linking and the guide cluster are all measured and closed — all of it measured and closed on 8/11 — including the OG image per post, `/shop/`'s H1, the design system on the live site and the mobile header. What remains anywhere is only what the owner alone can supply; §4c names each item.
+## 0. Short version
+
+- **The 25/10 hub structure is complete (6/11).** `/start-here/`, `/build/`, `/inspiration/` were built in rounds 4–7, and `/shipping/` (1396) + `/returns/` (1397) closed the last two on 6/11 — all of them return **200** and are linked from the header, the guides and the policy pages. The single biggest structural gap on the site is therefore closed; in S2 the meta pass (titel/description/fokusnøgleord), the internal linking and the guide cluster are all measured and closed — all of it measured and closed on 8/11 — including the OG image per post, `/shop/`'s H1, the design system on the live site and the mobile header. What remains anywhere is only what the owner alone can supply; §4c names each item.
 - **AI Engine is now the agent's only way into the site.** Production runs **3.9.0, active**, and it serves
   the MCP endpoint `/wp-json/mcp/v1/http` (OAuth approved 2/11 2026, 206 tools). The earlier note — "3.8.9,
   inactive, MCP surface removed" — described 1/11 and is superseded (measured 2/11 2026 with
@@ -56,21 +58,21 @@ published posts have not been crawled link by link. Statements below are limited
 | PHP | 8.5.12 (memory 2048M, max execution 300 s, upload 1 GB) |
 | MySQL | 8.4.11 |
 | Theme | Extendable 2.1.9 |
-| WooCommerce | 11.2.1 (39 published products) |
-| Active plugins | 33 of 38 installed |
+| WooCommerce | 11.2.2 (målt 7/11) · **24 produkter: 20 publiceret, 4 kladder** (målt 8/11; 1/11-auditten talte 39) |
+| Active plugins | **22 aktive, 2 inaktive** (målt 8/11, S3.4; var 33 af 38 den 2/11) |
 | Caching | W3 Total Cache 2.11.0 + `advanced-cache.php` + `object-cache.php` |
 | SEO | Rank Math 1.0.280, Redirection 5.10.1 |
 | Mail | WP Mail SMTP 4.10.3 (relevant for imported P0.1) |
 | Agent access | **New MCP server** at `/wp-json/mcp/v1/http` (AI Engine) since 2/11: `401 rest_forbidden` without a credential, OAuth + PKCE published, dynamic client registration works. The connection waits for one owner click on the approval link — [`mcp-auth.md`](mcp-auth.md) |
 
-### 2b. Deployment status (2026-11-02)
+### 2b. Deployment status (målt 8/11 2026)
 
 The repo ships two things to the site, and they are not always at the same version. The "live" column is read
 from the site itself (`wp_get_plugins`), never inferred from this repo, so it can be re-measured in one call.
 
 | What | In this repo | Live on steamgears.eu | Gap |
 | --- | --- | --- | --- |
-| Steamgears Autopilot | **7.62.0** (`plugins/steamgears-autopilot-v7.62.0.zip`, byte-identical to source) · **8/11: nøglesiden dokumenterer nu ejerskab og begrundelse pr. nøgle og logger hver ændring med længde, sha256-prefix, tid og aktør — aldrig værdien; en rotation rydder cachen fra den gamle nøgle** ([måling](library/noegler-et-sted-2026-11-08.md)) · roadmappet **afstemt linje for linje 7/11**: 29,60 af 30,45 d = **97,2 %**, åbent = 0,85 d = P1.5's live-verifikation ([afstemning](library/roadmap-afstemning-2026-11-07.md)) · **8/11: P1.5 målt — Pinterest svarer HTTP 401 på det gemte token, Instagram har intet token. 7.61.0 bygger kanalstatus (0,25 af 0,85 d), resten er live-verifikation** ([måling](library/pinterest-noegle-gammelt-felt-2026-11-08.md)) | **7.60.1, aktív** (installeret og aktiveret 8/11 2026 gennem Novamira: `wp plugin install` fra repoets zip, `wp plugin activate`; `/wp-json/sgap/v1` → **200 med 19 ruter**, inkl. `/facebook/refresh`, `/reply` og `/hide`) | **Lukket 7/11** — 7.58.0 lå på disken men var inaktiv, og WooCommerce var det også, så et mu-plugin gav 500 på hver side. Nu kører WooCommerce 11.2.2, Stripe, Rank Math, Redirection, Google Listings & Ads, WP Mail SMTP og Autopilot 7.59.0; 18 ubrugte plugins er slettet. Se [library/genaktivering-og-oprydning-2026-11-07.md](library/genaktivering-og-oprydning-2026-11-07.md) |
+| Steamgears Autopilot | **7.62.0** (`plugins/steamgears-autopilot-v7.62.0.zip`, byte-identical to source) · **8/11: nøglesiden dokumenterer nu ejerskab og begrundelse pr. nøgle og logger hver ændring med længde, sha256-prefix, tid og aktør — aldrig værdien; en rotation rydder cachen fra den gamle nøgle** ([måling](library/noegler-et-sted-2026-11-08.md)) · roadmappet **afstemt linje for linje 7/11**: 29,60 af 30,45 d = **97,2 %**, åbent = 0,85 d = P1.5's live-verifikation ([afstemning](library/roadmap-afstemning-2026-11-07.md)) · **8/11: P1.5 målt — Pinterest svarer HTTP 401 på det gemte token, Instagram har intet token. 7.61.0 bygger kanalstatus (0,25 af 0,85 d), resten er live-verifikation** ([måling](library/pinterest-noegle-gammelt-felt-2026-11-08.md)) | **7.60.1, aktív** (installeret og aktiveret 8/11 2026 gennem Novamira: `wp plugin install` fra repoets zip, `wp plugin activate`; `/wp-json/sgap/v1` → **200 med 19 ruter**, inkl. `/facebook/refresh`, `/reply` og `/hide`) | **Åben igen 8/11 — repo 7.62.0, live 7.60.1.** 7.61.0 (kanalstatus) og 7.62.0 (nøglesiden) er bygget men ikke installeret; installeres 8/11 via Novamira fra repoets zip og måles med `wp_get_plugins` + `/wp-json/sgap/v1`. _Tidligere:_ **Lukket 7/11** — 7.58.0 lå på disken men var inaktiv, og WooCommerce var det også, så et mu-plugin gav 500 på hver side. Nu kører WooCommerce 11.2.2, Stripe, Rank Math, Redirection, Google Listings & Ads, WP Mail SMTP og Autopilot 7.59.0; 18 ubrugte plugins er slettet. Se [library/genaktivering-og-oprydning-2026-11-07.md](library/genaktivering-og-oprydning-2026-11-07.md) |
 | MCP server | AI Engine 3.9.0 (site-side, not in this repo) | `/wp-json/mcp/v1/http`, OAuth approved 2/11 2026, 206 tools | **Read access only** — AI Engine's *Drafts Only* is on, so `queue-post` is refused |
 
 **Measured 2/11 2026, after the owner approved the OAuth client:** `wp_list_plugins` returns
@@ -195,7 +197,7 @@ S0.3, which is a repo change.
 | # | Item | Why | Effort |
 | --- | --- | --- | --- |
 | S0.1 | ✅ **Done 1/11** — AI Engine case closed in `sikkerhed-ai-engine-2026-11-01.md` (new §0) and in `README.md`; confirmed 3.8.9 at the time — **superseded 2/11 2026: 3.9.0, active, serving MCP over OAuth** | A security doc that describes an old state trains people to ignore it | 0.25 d |
-| S0.2 | ✅ **Lukket 8/11 — uden fil-adgang, med et filter.** Målt før: **3** `User-agent: *`-grupper i `/robots.txt` (200). Løsningen var ikke at røre host-filen `managed-wordpress-robots.php`, men et eget mu-plugin, `sgap-robots-consolidation.php` (1 282 bytes, `php -l` ren), der fletter grupperne på `robots_txt`-filteret. Målt efter: **1** gruppe, **14** `Disallow` + **1** `Allow` + **1** `Sitemap` bevaret, robots.txt svarer 200. **0,2 d bogført.** **Ejer målt 7/11; rettelsen venter på fil-adgang.** Filen findes ikke fysisk — Rank Math 1.0.281 genererer den (`rank-math/get-robots-txt` → `exists: false`), og et **host-mu-plugin**, `managed-wordpress-robots.php`, tilføjer otte query-param-`Disallow` som sin egen `User-agent: *`-gruppe efter Sitemap. To grupper med samme user-agent er gyldigt (RFC 9309 §2.2.1 slår dem sammen), så rækken er et læsbarheds- og ejerskabsproblem, ikke et indekseringsproblem. Rettelsen (indsæt i første gruppe) ligger klar i [`wordpress/mu-plugins/managed-wordpress-robots.php`](../wordpress/mu-plugins/managed-wordpress-robots.php), men blev **forsøgt skrevet 7/11 og gav et nedbrud** — filindholdet blev interpoleret væk i en dobbelt-citeret PHP-streng, og en parse-fejl i et mu-plugin er en E_COMPILE_ERROR på hvert request, som MCP ikke selv kan rette. Genopretning i [library/robots-og-nedbrud-2026-11-07.md](library/robots-og-nedbrud-2026-11-07.md) §4 **Målt igen 7/11 (dok. §3b):** nedbruddet står stadig — `/wp-json`, `robots.txt`, `sitemap_index.xml` og `/?sgap_feed=` giver alle en 193-bytes parsefejl med **HTTP 200**, og `admin-ajax.php` svarer **500**, så wp-admin er også nede. Rettelsen skal ske via File Manager/SFTP; den rettede fil er `php -l`-ren og **8/8** offline-checks, så vej C kan bruges direkte. | Conflicting robots directives can silently deindex paths | 0.5 d |
+| S0.2 | ✅ **Lukket 8/11 — uden fil-adgang, med et filter.** Målt før: **3** `User-agent: *`-grupper i `/robots.txt` (200). Løsningen var ikke at røre host-filen `managed-wordpress-robots.php`, men et eget mu-plugin, `sgap-robots-consolidation.php` (1 282 bytes, `php -l` ren), der fletter grupperne på `robots_txt`-filteret. Målt efter: **1** gruppe, **14** `Disallow` + **1** `Allow` + **1** `Sitemap` bevaret, robots.txt svarer 200. **0,2 d bogført.** _Historik 7/11, afløst af lukningen 8/11 ovenfor:_ filen fandtes ikke fysisk — Rank Math 1.0.281 genererer den (`rank-math/get-robots-txt` → `exists: false`), og et **host-mu-plugin**, `managed-wordpress-robots.php`, tilføjer otte query-param-`Disallow` som sin egen `User-agent: *`-gruppe efter Sitemap. To grupper med samme user-agent er gyldigt (RFC 9309 §2.2.1 slår dem sammen), så rækken er et læsbarheds- og ejerskabsproblem, ikke et indekseringsproblem. Rettelsen (indsæt i første gruppe) ligger klar i [`wordpress/mu-plugins/managed-wordpress-robots.php`](../wordpress/mu-plugins/managed-wordpress-robots.php), men blev **forsøgt skrevet 7/11 og gav et nedbrud** — filindholdet blev interpoleret væk i en dobbelt-citeret PHP-streng, og en parse-fejl i et mu-plugin er en E_COMPILE_ERROR på hvert request, som MCP ikke selv kan rette. Genopretning i [library/robots-og-nedbrud-2026-11-07.md](library/robots-og-nedbrud-2026-11-07.md) §4 **Målt igen 7/11 (dok. §3b):** nedbruddet står stadig — `/wp-json`, `robots.txt`, `sitemap_index.xml` og `/?sgap_feed=` giver alle en 193-bytes parsefejl med **HTTP 200**, og `admin-ajax.php` svarer **500**, så wp-admin er også nede. Rettelsen skal ske via File Manager/SFTP; den rettede fil er `php -l`-ren og **8/8** offline-checks, så vej C kan bruges direkte. | Conflicting robots directives can silently deindex paths | 0.5 d |
 | S0.3 | ✅ **Done 1/11** — CI matrix now lints PHP 8.0–8.5 and tests WP 6.4 / 7.1 / latest (imported P3.3) | Production runs 8.5.12 / 7.1.4, CI stopped at 8.4 | 0.25 d |
 | S0.4 | ✅ **Lukket 7/11 som overflødig — 0 d forbrugt, ikke ført som fremgang.** De fem URL'er, rækken ville omdirigere, svarer alle **200** med 73.872–79.585 bytes: `/start-here/`, `/build/`, `/inspiration/` blev bygget i S2.1 og `/shipping/` + `/returns/` i S2.2. **Bekræftet med cache-buster 7/11 (`?nocache=20261107`)** efter PHP og 7.59.0 kører igen: `/start-here/` 200 (73.402 B), `/build/` 200 (71.346 B), `/inspiration/` 200 (75.209 B), `/shipping/` 200 (69.496 B) og `/returns/` 200 (70.254 B). Både 301-kortet og Redirection-gruppen er overflødige. **Regnskab:** de 0,5 d er taget **ud af nævneren** (S0 2,85 → **2,35 d**), så site-projektet har nævneren **24,05 d**; det er en scope-ændring, ikke 0,5 d arbejde. | Any nav, pin or ad pointing there loses the visitor entirely | 0 d (udgår)
 | S0.5 | ✅ **Lukket 8/11** — Health Check-plugin'et var allerede væk, men dets **eget drop-in** `health-check-troubleshooting-mode.php` (52 487 B) lå stadig i `wp-content/mu-plugins` og blev indlæst som must-use på hvert request. Filen er slettet 8/11, og `/` og `/shop/` svarer **200** bagefter. 0,25 d. | A troubleshooting tool left active on a live shop is failure surface with no benefit | 0.25 d |
@@ -205,7 +207,7 @@ S0.3, which is a repo change.
 | S0.9 | ✅ **Lukket 7/11** — det inline GA4-tag er væk, og der tælles ikke længere dobbelt. Kilden var **ikke** et snippet: `rank_math_google_analytic_options` havde `measurement_id: G-3MYLFKY8MY` med `install_code: "1"`, og Rank Maths `includes/modules/analytics/class-gtag.php` printer så både `google_gtagjs`-scriptet og den inline `gtag("config", …)`. Ingen fil i `wp-content` indeholdt id'et (34.972 filer scannet), så en filsøgning ville aldrig have fundet den. Feltet er sat til tom streng (property-id og Ads urørt, den gamle serialiserede værdi gemt først), cachen ryddet i tre lag. Målt bagefter: **0** forekomster af `G-3MYLFKY8MY` i HTML og **ét** `g/collect` med `en=page_view` på `/`, `/?nocache=1` og `/shop/`, alle på `G-0HC9BLQ88R`; `AW-18518250875` fyrer stadig. Se [library/analytics-dobbelt-2026-11-06.md](library/analytics-dobbelt-2026-11-06.md) | Dobbeltregningen gjorde hvert besøg til to i to properties, og to tal der ikke kan sammenlignes er værre end ét | 0.25 d |
 | **S0 total** | | | **2.35 d** |
 
-### S1 — store and content that earns (4.6 d)
+### S1 — store and content that earns (3.9 d)
 
 | # | Item | Why | Effort |
 | --- | --- | --- | --- |
@@ -218,7 +220,7 @@ S0.3, which is a repo change.
 | S1.7 | ✅ **Done 2/11** — the 12 campaign posts pre-validated against the live quality gate (`check-post`): 12 clean, 0 warnings | A warning found before queueing costs nothing; the same warning after queueing costs a publish slot | 0.1 d |
 | **S1 total** | | | **3.9 d** (S1.6 målt til 0.3 d, ikke 1.0) |
 
-### S2 — structure and SEO (8.30 d)
+### S2 — structure and SEO (6.9 d)
 
 | # | Item | Why | Effort |
 | --- | --- | --- | --- |
@@ -234,7 +236,7 @@ S0.3, which is a repo change.
 | S2.9 | ✅ **Lukket 8/11 — nu faktisk på sitet og set i browser.** `sga-design-system.php` + `css/sg-design-system.css` er lagt i `wp-content/mu-plugins`/uploads og printes på alle målte sider (`link#sga-design-system`, `body.sg-ui`); `/`, `/shop/`, en guide og en produktside er inspiceret i browser ved 640 px, og mobilsvipet i S2.3 er rettet i samme lag. Målt: kontrastparrene og `tools/design_check.py` uændret grønne; siden er ikke set ved 390 px fordi browserpanelet kører 640 px. 0,5 d. | The whole site's surface was edited rule by rule in template parts, with no single source of truth | 0.5 d |
 | **S2 total** | | | **6.9 d** (S2.1 rettet fra 3.0 til 1.6 d som scope-korrektion) |
 
-### S3 — hygiene (3.55 d)
+### S3 — hygiene (4.05 d)
 
 | # | Item | Why | Effort |
 | --- | --- | --- | --- |
@@ -256,7 +258,7 @@ completed order and one refund. S4.1–S4.5 are blocking before any ad spend.
 | --- | --- | --- | --- |
 | S4.1 | ⛔ **Ejer-blokeret — Complianz skal sættes til EU opt-in (region `eu`, consent `optin`) i stedet for US opt-out.** **Complianz to EU opt-in** — currently `regions: [us]`, `consent_types: [optout]`, so a US opt-out banner sits in front of EU customers and non-essential cookies can fire first; only US legal docs are generated | 2026 Danish enforcement priority; wrong consent model = unusable consent | 0.25 d |
 | S4.2 | ⛔ **Ejer-blokeret — CVR-nummer, registreret navn, postadresse og telefon — de må ikke gættes.** **Legal identity** — CVR, registered name, address and **phone** do not appear anywhere; Complianz imprint is `mode: none`; contact is a gmail address | Forbrugerombudsmanden requires them one click from the front page | 0.25 d |
-| S4.3 | ⛔ **Ejer-blokeret — valuta (EUR eller DKK) **og** alle priser (kataloget er målt til 24 produkter 8/11), ikke kun valutakoden.** **Currency and price model** — store runs in **USD**; switch to EUR or DKK *and* recalculate all 39 prices (changing the currency code alone would turn $21.90 into 21.90 kr) | EU shoppers cannot price-compare a dollar store; VAT display becomes meaningless | 0.5 d |
+| S4.3 | ⛔ **Ejer-blokeret — valuta (EUR eller DKK) **og** alle priser (kataloget er målt til 24 produkter: 20 publicerede og 4 kladder, 8/11), ikke kun valutakoden.** **Currency and price model** — store runs in **USD**; switch to EUR or DKK and recalculate all 24 product prices (changing the currency code alone would turn $21.90 into 21.90 kr) | EU shoppers cannot price-compare a dollar store; VAT display becomes meaningless | 0.5 d |
 | S4.4 | ✅ **Lukket 8/11, målt live (+0,30 d).** `sgap-shop-compliance.php` giver `POST /wp-json/sgap/v1/withdrawal` (ordrenummer, navn, e-mail, varer, grund) med **400** ved ugyldigt input, gemning i `sgap_withdrawals` og mail til butikken; shortcode `[sgap_withdrawal_form]` står på 1133. Målt: `{ok:true,id:1,count:1}`, posten gemt, siden 200, testpost ryddet. **Withdrawal function** — page with procedure + EU model form shipped 1/11 as `/right-of-withdrawal/`; the one-click digital function from 19/6 2026 still needs a form plugin (WPForms Lite cannot create forms via MCP) | Statutory since 19 June 2026; without it the 14-day clock may not start | 0.45 d (0.15 d done) |
 | S4.5 | ⛔ **Ejer-blokeret — aftaler med MobilePay/PayPal/Klarna (Stripe er den eneste i dag).** **Payment methods** — Stripe only; add MobilePay, PayPal, optionally Klarna | Payment apps overtook cards in Danish e-commerce in 2024 and shoppers abandon stores that lack them | 0.4 d + acquirer wait |
 | S4.6 | ⛔ **Ejer-blokeret — 0,1 af 0,4 d er lukket 8/11 (cache-delen), resten er zoner og priser.** Målt: `/cart/`, `/checkout/` og `/my-account/` sendes alle med `cache-control: no-cache, must-revalidate, max-age=0, private`, så W3TC ikke kan levere en cachet kurv — den oprindelige bekymring er dermed afkræftet uden at røre W3TC's config. Målt om forsendelse: **kun én zone (Danmark)** med `free_shipping` og **intet minimum**, og **ingen zone for EU/UK/RoW** — en kunde uden for DK får ingen forsendelsesmetode i checkout. **Ejeren skal levere** zonerne, fragtklasserne (tee/hoodie/poster/mug) og fri fragt-grænsen. | Mixed carts bill two first-item rates; cached checkout silently loses rates | 0.4 d |
@@ -309,8 +311,8 @@ autoritative liste: hvert punkt står med sin målte slutstatus, og hvert ejer-b
 | Plugin P1.5 | ⛔ blokeret | **Tokens**: Pinterest, Instagram, Bluesky, Mastodon, Telegram, Facebook — indtastes på Settings → Keys |
 | Plugin P2.1–P2.3 | ⛔ blokeret | **Ejers beslutning** om Command Center-retning, og derefter de tokens den kræver |
 
-**Talt:** **fjorten** poster er stadig ejer-blokerede (S0.6, S1.2, S3.4b, S4.1, S4.2, S4.3, S4.5, S4.6, S4.7,
-S4.9-GPSR, rebrand batch 4, `seo.md` #4, `seo.md` #5 og kladde 750) plus plugin P1.5 og P2.1–P2.3 — resten er lukket og målt. Ingen af dem kan lukkes af agenten
+**Talt:** **tretten** poster er stadig ejer-blokerede (S0.6, S1.2, S3.4b, S4.1, S4.2, S4.3, S4.5, S4.6, S4.7,
+S4.9-GPSR, rebrand batch 4, `seo.md` #4 og `seo.md` #5) plus plugin P1.5 og P2.1–P2.3 — resten er lukket og målt. Ingen af dem kan lukkes af agenten
 uden at gætte ejerens tal, aftaler eller juridiske valg.
 
 ## 5. Imported from `plugins/steamgears-autopilot/ROADMAP.md`

@@ -6,7 +6,7 @@
       "id": "site",
       "name": "steamgears.eu — site-optimering",
       "note": "roadmap S0–S4",
-      "next": "Intet agent-arbejde tilbage i S0–S4. De åbne poster er ejer-blokerede og navngivet i docs/roadmap.md §4c: GSC-svar (S0.6), ja/nej pr. produkt 942/765/766/767 (S1.2), Complianz EU-valg (S4.1), CVR/adresse/telefon (S4.2, S4.9), valuta + 39 priser (S4.3), betalingsaftaler (S4.5), forsendelseszoner (S4.6), Printful (S4.7). Køen og cron er derimod ryddet og kører nu af sig selv (S3.6).",
+      "next": "Intet agent-arbejde tilbage i S0–S4. De åbne poster er ejer-blokerede og navngivet i docs/roadmap.md §4c: GSC-svar (S0.6), ja/nej pr. produkt 942/765/766/767 (S1.2), Complianz EU-valg (S4.1), CVR/adresse/telefon (S4.2, S4.9), valuta + 24 priser (S4.3), betalingsaftaler (S4.5), forsendelseszoner (S4.6), Printful (S4.7). Køen og cron er derimod ryddet og kører nu af sig selv (S3.6).",
       "blocked_by": "Ejerens oplysninger og aftaler: CVR/registreret navn/postadresse/telefon, valuta og alle priser, betalingsaftaler (MobilePay/PayPal/Klarna), forsendelseszoner og fragtklasser, Complianz EU-model, Printful-adgang, GSC Crawl stats, og ja/nej til publicering af 942/765/766/767.",
       "modules": [
         {
@@ -50,7 +50,7 @@
           "done": 4.05,
           "total": 5.25,
           "unit": "d",
-          "note": "S4.4 0,45 + S4.8 0,5 + S4.10 0,4 + S4.11 0,4 + S4.12 0,2 + S4.13 0,25 + S4.9 (ikke-GPSR) 0,25 + S4.6 0,1 (cache-delen målt: kurv/kasse/konto er private/no-cache; DK har fri fragt uden minimum, EU/UK/RoW mangler zone) = 3,95 + 0,1 (S4.4-udvidelse: ItemList-strukturdata på /shop/ og produktkategorier, målt 0 → 20 elementer på /shop/ og 0 → 5/4 på to kategorier) = 4,05. Tilbage er ejer-blokeret: S4.1 Complianz EU-valg (kræver også CVR/adresse), S4.2/S4.9 CVR+adresse, S4.3 valuta+39 priser, S4.5 betalingsaftaler, S4.6 zoner/fragtklasser/fri fragt, S4.7 mockups"
+          "note": "S4.4 0,45 + S4.8 0,5 + S4.10 0,4 + S4.11 0,4 + S4.12 0,2 + S4.13 0,25 + S4.9 (ikke-GPSR) 0,25 + S4.6 0,1 (cache-delen målt: kurv/kasse/konto er private/no-cache; DK har fri fragt uden minimum, EU/UK/RoW mangler zone) = 3,95 + 0,1 (S4.4-udvidelse: ItemList-strukturdata på /shop/ og produktkategorier, målt 0 → 20 elementer på /shop/ og 0 → 5/4 på to kategorier) = 4,05. Tilbage er ejer-blokeret: S4.1 Complianz EU-valg (kræver også CVR/adresse), S4.2/S4.9 CVR+adresse, S4.3 valuta+24 priser, S4.5 betalingsaftaler, S4.6 zoner/fragtklasser/fri fragt, S4.7 mockups"
         }
       ]
     },
