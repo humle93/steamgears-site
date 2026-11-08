@@ -38,7 +38,7 @@ Det der virker: `woocommerce_short_description`-filteret, som temaet faktisk kal
 | --- | --- |
 | S4.1 Complianz til EU opt-in | Juridisk konfiguration af samtykkemodel. Målt nu: `regions` og `consent_types` er stadig US/optout, og banneret indlæses som `banner-1-optout.css`. Ændringen vælger butikkens juridiske model — det er ejerens valg, ikke en teknikfejl |
 | S4.2 CVR, adresse, telefon | Kræver de faktiske oplysninger; intet kan gættes |
-| S4.3 Valuta og priser | USD → EUR/DKK kræver omregning af alle 39 priser og en beslutning om prispunkt |
+| S4.3 Valuta og priser | USD → EUR/DKK kræver omregning af alle priser (24 produkter i kataloget, målt 8/11) og en beslutning om prispunkt |
 | S4.5 Betalingsmetoder | MobilePay/PayPal/Klarna kræver aftaler og nøgler |
 | S4.6 Forsendelse | Zoner, klasser og fri fragt-grænse er forretningsvalg; W3TC-indstillingerne kan ikke sættes over MCP |
 | S4.7 Produktbilleder | Printful-adgang (samme blokering som rebrand-batch 4) |

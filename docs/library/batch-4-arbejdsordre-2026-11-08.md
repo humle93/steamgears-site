@@ -73,7 +73,7 @@ skal være 0, før modulet kan meldes færdigt.
 
 - **Printful-adgang** (kontoen) til at generere mockups i de fem familier — eller 5–8 færdige billeder pr.
   produkt uploadet direkte.
-- **Valuta og de 39 priser** (S4.3), fordi mockups og pris hænger sammen i samme produktopsætning.
+- **Valuta og alle priser** (S4.3), fordi mockups og pris hænger sammen i samme produktopsætning.
 - **Ja/nej pr. produkt** til 942, 765, 766 og 767 (S1.2).
 
 Uden de tre kan batch 4 ikke lukkes — men alt forarbejdet er nu gjort, så det er ren udførelse.

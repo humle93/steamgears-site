@@ -32,7 +32,7 @@ _Opdateret 2026-11-08 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Åbne blokeringer
 
-- **steamgears.eu — site-optimering** — Ejerens oplysninger og aftaler: CVR/registreret navn/postadresse/telefon, valuta og 39 priser, betalingsaftaler (MobilePay/PayPal/Klarna), forsendelseszoner og fragtklasser, Complianz EU-model, Printful-adgang, GSC Crawl stats, og ja/nej til publicering af 942/765/766/767.
+- **steamgears.eu — site-optimering** — Ejerens oplysninger og aftaler: CVR/registreret navn/postadresse/telefon, valuta og alle priser, betalingsaftaler (MobilePay/PayPal/Klarna), forsendelseszoner og fragtklasser, Complianz EU-model, Printful-adgang, GSC Crawl stats, og ja/nej til publicering af 942/765/766/767.
 - **Steamgears Autopilot — plugin** — Fire driftspunkter kræver ejeren, og de er målt 8/11: (1) **AIMLAPI-kredit** — sidste generering 7/11 fejlede med »You've run out of funds«, så der laves ingen nye kladder; (2) **`sgap_alert_email`** er tom, så fejl registreres men ingen mail sendes; (3) **Full auto vs. godkendelse** — `sgap_full_auto_enabled = no`, og 40 elementer venter på godkendelse; (4) **distributionsvej** — `publish_mode = rss` og 0 Publer-konti, mens Pinterest svarer 401 og fem kanaler mangler token. Dertil P1.5's tokens (Pinterest, Instagram, Bluesky, Mastodon, Telegram, Facebook) og P2.1–P2.3's Command Center-beslutning. Intet af det må gættes.
 - **Dark academia-rebrand** — Batch 4 (mockups, 0 af 5 t) kræver Printful-adgang eller 5–8 færdige mockups pr. produkt uploadet af ejeren; teksten (batch 1–3, 8,5 t) og forberedelsen (0,5 t) er færdig og verificeret. Derfor er 64,3 % = 9/14, mens 100 % af den ikke-ejer-blokerede del er leveret.
 
@@ -46,12 +46,12 @@ _Opdateret 2026-11-08 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `aa1355f chore(status): daglig projektstatus 2026-11-08`
+- `eee6ceb Luk batch 4-forberedelsen og giv shoparkivet strukturdata`
 - `1d39063 Dokumentér at den site-planlagte tick kørte af sig selv kl. 14:15`
 - `e98ab1e Læg tick på site-planlægning som uafhængig vej ved siden af GitHub`
 - `c12df1a Ret leverandøren til Printful i hele repoet`
 - `0295873 Dokumentér tredje grønne kørsel og krops-kravet i tick-jobbet`
-- `2175c0d Bevis cron-tick i drift: to grønne GitHub-kørsler og idempotent køhygiejne`
-- `3bdb459 Merge origin/main (daglig status-brief)`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)

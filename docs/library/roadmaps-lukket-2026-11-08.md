@@ -109,10 +109,10 @@ genstand, et tal eller en aftale som agenten ikke må gætte.
 | S3.4b | **Slet eller behold** `website-llms-txt` og `insert-headers-and-footers` (begge inaktive) |
 | S4.1 | **Beslutning**: Complianz skal køre EU opt-in (`region: eu`, `consent: optin`) i stedet for US opt-out |
 | S4.2 | **CVR-nummer, registreret navn, postadresse og telefon** |
-| S4.3 | **Valuta (EUR eller DKK) og de 39 priser** — ikke kun valutakoden |
+| S4.3 | **Valuta (EUR eller DKK) og alle priser** — ikke kun valutakoden |
 | S4.5 | **Aftaler med MobilePay/PayPal/Klarna** (Stripe er den eneste i dag) |
 | S4.6 | **Forsendelseszoner, fragtklasser og fri fragt-grænse**, plus tilladelse til at ændre W3TC's checkout-indstillinger |
-| S4.7 + rebrand batch 4 | **Printful-adgang eller 5–8 færdige mockups pr. produkt** (39 produkter har max 2) |
+| S4.7 + rebrand batch 4 | **Printful-adgang eller 5–8 færdige mockups pr. produkt** (målt 8/11: 24 produkter i kataloget, alle under 3 billeder) |
 | S4.9 GPSR / `seo.md` #5 | **CVR + postadresse** (samme som S4.2) |
 | `seo.md` #4 | **Slå W3TC Minify (JS+CSS), Lazy load images og Database cache til**, og gennemfør **én rigtig testordre** i checkout bagefter |
 | Plugin P1.5 | **Tokens**: Pinterest, Instagram, Bluesky, Mastodon, Telegram, Facebook — indtastes på Settings → Keys |

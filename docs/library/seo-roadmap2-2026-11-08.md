@@ -9,7 +9,7 @@ ikke-løste punkter**. Her er hvert punkt målt mod det live site før indgreb, 
 | 2 | To `User-agent: *`-grupper i robots.txt | **3 grupper** | mu-plugin `sgap-robots-consolidation.php` (1 282 bytes, `php -l` ren) fletter grupperne via `robots_txt`-filter | **1 gruppe**, 14 `Disallow` + 1 `Allow` + 1 `Sitemap` bevaret, 200 |
 | 3 | Navigation er `wp:page-list` | `page-list` **0** forekomster, nav viser *Start Here · Build · Shop All Products · Curiosities · Airship · Herbarium · Atelier · Gallery · Guides · About · Contact* — ingen kurv/kasse | intet (spec var allerede anvendt) | **lukket som verificeret opfyldt** |
 | 4 | Performance | produktside **267 KB** HTML, **34,8 KB** inline CSS, **88** script-tags (var 458 KB / 151 KB / 105) | intet i denne tur — W3TC-indstillingerne kan stadig ikke sættes over MCP | **står åbent**: kræver admin-adgang eller beslutning om caching-lag |
-| 5 | GPSR mangler postadresse | 39 produkter uden adresse | intet | **står åbent**: afhænger af CVR/adresse (S4.2, ejerbeslutning) |
+| 5 | GPSR mangler postadresse | 24 produkter i kataloget (20 publiceret, 4 kladde) uden adresse | intet | **står åbent**: afhænger af CVR/adresse (S4.2, ejerbeslutning) |
 | 6 | Printful kan overskrive titler | `get_plugins()`: **ingen** POD-connector (hverken Printful eller Printify); `printify_settings` **tom** | intet | **lukket som verificeret**: der er ingen sync der kan overskrive |
 | 7 | `/steampunk-costumes/` ikke indekseret | siden svarer **200**, `<meta name="robots">` = `follow, index`, og den **står i `page-sitemap.xml`** | intet | **ingen fejl på sitet** — opfølgning hører i GSC, ikke i koden |
 
