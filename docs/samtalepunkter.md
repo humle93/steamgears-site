@@ -40,7 +40,7 @@ _Opdateret 2026-11-08 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 ### Næste skridt
 
 - **steamgears.eu — site-optimering** — Intet agent-arbejde tilbage i S0–S4: alle fem bands er færdige og målt, og de 1,5 d der står tilbage er ejer-blokerede og navngivet i §4c og blocked_by. Målt 8/11: 24 produkter (20 publicerede, 4 kladder), USD, fri fragt i DK og ingen forsendelse til EU/UK/RoW, Stripe + bankoverførsel, Complianz på US opt-out.
-- **Steamgears Autopilot — plugin** — Agent-scope er færdigt (29,85 af 29,85 d). Ejeren har lagt Pinterest-tokenet ind i WooCommerce-integrationen, og 7.64.6 henter det nu derfra gennem integrationens egen dekryptering: målt 8/11 virker det (konto `cpaleadsis`, id 688980580401955331), men appen mangler scopes `boards:read`, så pin-lister og Pin Analytics kan stadig ikke måles. Næste skridt er ejerens: genforbind Pinterest med board-adgang (eller et developer-token med boards:read + pins:read). Resten af blocked_by står uændret.
+- **Steamgears Autopilot — plugin** — Agent-scope er færdigt (29,85 af 29,85 d). Ejeren har lagt Pinterest-tokenet ind i WooCommerce-integrationen, og 7.65.0 — som blev lagt på sitet 8/11 gennem MCP (`Plugin_Upgrader` i `execute-php`; `update` svarer nu »Already up to date«) — henter det nu derfra gennem integrationens egen dekryptering: målt 8/11 virker det (konto `cpaleadsis`, id 688980580401955331), men appen mangler scopes `boards:read`, så pin-lister og Pin Analytics kan stadig ikke måles. Næste skridt er ejerens: genforbind Pinterest med board-adgang (eller et developer-token med boards:read + pins:read). Resten af blocked_by står uændret.
 - **Dark academia-rebrand** — Kun to ting står tilbage: (1) **witchy-tarot** kan først få indhold når ejeren siger ja til at gendanne 567 (Tarot Witchy Tee) — og eventuelt 395/411 — fra papirkurven; derefter fylder `python3 tools/rebrand_apply.py --apply --via-cli` termen automatisk, fordi kortet allerede indeholder dem; (2) **Batch 4-mockups** (5 t) kræver Printful-adgang eller 5–8 færdige billeder pr. produkt.
 - **SEO-indholdsproduktion** — SEO-indholdet er 100 %: fire guides skrevet, tre publiceret, corset-guiden publiceret, 1410 parkeret til september. Ingen åbne poster.
 - **Døde internlinks** — Vedligehold: tjek nye indlæg mod live-URL'er
@@ -48,12 +48,12 @@ _Opdateret 2026-11-08 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
-- `0028958 Merge branch 'main' of https://github.com/humle93/steamgears-site into freebuff/d96c797cb28964a7f8fb9d78`
-- `1482787 Rollback-hullet er lukket med målte tal, og CI-kørslen har selv dokumenteret den sidste blokering Modul: plugin — rollback til 7.64.6 Før: 100 % Efter: 100 % Δ: 0 Grundlag: ingen ændring`
-- `2ba1309 chore(rebrand): kørselsrapport for tildelingen`
-- `bdb71a0 Workflowen rapporterer nu sin egen kørsel, så tildelingsforsøget kan læses uden login Modul: om-mærkning — skrivevej til batch 2 Før: 62,5 % Efter: 62,5 % Δ: 0 Grundlag: ingen ændring`
-- `d70f7bd Merge branch 'main' of https://github.com/humle93/steamgears-site into freebuff/d96c797cb28964a7f8fb9d78`
-- `5cdeec0 Skrivevejen til kollektionerne er bygget: tildelingen kan nu køres med ét klik Modul: om-mærkning — skrivevej til batch 2 Før: 62,5 % Efter: 62,5 % Δ: 0 Grundlag: ingen ændring`
+- `477c3bb Merge branch 'main' of https://github.com/humle93/steamgears-site into freebuff/cca5dfcf9656b5d36ff3151f`
+- `05101ef Modul: Steamgears Autopilot — sproget og kilden synlige i køen (7.65.0) Før: 100 %  →  Efter: 100 %  (Δ 0) Grundlag: ingen ændring`
+- `f49f155 chore(rebrand): kørselsrapport for tildelingen`
+- `3a00b36 Merge branch 'main' of https://github.com/humle93/steamgears-site into freebuff/d96c797cb28964a7f8fb9d78`
+- `2079642 CI-verificeringen må ikke lyse rødt for en kollektion der venter på ejerens svar Modul: om-mærkning — batch 2-tildeling Før: 65,3 % Efter: 65,3 % Δ: 0 Grundlag: ingen ændring`
+- `e6c3416 chore(status): daglig projektstatus 2026-11-08`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
