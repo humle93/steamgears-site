@@ -1,7 +1,7 @@
 # Rebrand apply — seneste kørsel
 
 - Tid: 2026-11-08 19:07 UTC
-- Udløst af: `push` · commit `5b41042`
+- Udløst af: `push` · commit `3a00b36`
 - Credentials sat som repo-secrets: **nej** (værdierne læses aldrig her)
 
 ## Plan (hvem mangler hvad)
