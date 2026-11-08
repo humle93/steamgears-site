@@ -181,6 +181,49 @@ kommando efter en afbrydelse.
 gemmer parret uden for repoet, og de to værdier indsættes i wp-admin. Den vej nedenfor (worktree-loop og
 CI-workflow) virker stadig, men er nu kun et supplement.
 
+### Del adgangen med en anden agent eller person
+
+Det der deles er **opskriften, ikke tokenet**. Hver agent registrerer sin egen offentlige klient (DCR), får sit
+eget token-par og kan tilbagekaldes for sig i wp-admin — et token der sendes videre i chat eller mail kan ikke
+tilbagekaldes særskilt, og det er hele grunden til at det ikke gøres.
+
+**Vælg flade først** — de to servere har hver sit resource og scope, og et token udstedt til den ene virker
+ikke på den anden:
+
+| Flade | `MCP_METADATA_URL` | `MCP_RESOURCE` | `MCP_SCOPE` |
+| --- | --- | --- | --- |
+| AI Engine (`/wp-json/mcp/v1/http`, 206 værktøjer) | `https://steamgears.eu/wp-json/mcp/v1/.well-known/oauth-authorization-server` | `https://steamgears.eu/wp-json/mcp/v1/http` | `mcp` |
+| Novamira (3 meta-værktøjer over 207 abilities) | `https://steamgears.eu/.well-known/oauth-authorization-server` | `https://steamgears.eu/wp-json/mcp/novamira-oauth` | `full_access` |
+
+**De fire trin, som den nye agent kører** (alt ligger uden for repoet, mode 600):
+
+```bash
+# 1. egen token-mappe pr. agent, så to agenter ikke overskriver hinandens par
+export MCP_CONFIG_DIR="$HOME/.config/steamgears-mcp/agent-2"
+export MCP_RESOURCE="https://steamgears.eu/wp-json/mcp/novamira-oauth"
+export MCP_SCOPE="full_access"
+python3 tools/mcp_oauth.py --start          # registrerer klient og printer godkendelseslinket
+
+# 2. EJEREN (eller en administrator) åbner linket, logger ind og godkender
+
+# 3. agenten bytter koden — koden er éngangs og lever kun kort
+python3 tools/mcp_oauth.py --finish '<hele redirect-adressen eller code=-værdien>'
+python3 tools/mcp_oauth.py --status
+```
+
+4. **Verificér med et kald, ikke med et håb:** `python3 tools/live_state.py` (Novamira) eller
+   `python3 tools/mcp_rest.py --check` (AI Engine). Et token der er udstedt men ikke virker, skal meldes som
+   fejl — ikke som adgang.
+
+**Hvad den nye agent ikke skal have:** `~/.config/steamgears-mcp/tokens.json` fra en anden maskine, et
+refresh-token i en besked, eller `NOVAMIRA_REFRESH_TOKEN` fra repository-secrets. Skal adgangen køre uden
+ejerens hænder i CI, oprettes `NOVAMIRA_REFRESH_TOKEN` + `NOVAMIRA_SECRETS_TOKEN` som beskrevet nedenfor — det
+er den eneste vej der ikke kræver et menneske ved hver fornyelse, fordi refresh-tokenet **roteres** og det gamle
+dør.
+
+**Tilbagekaldelse:** wp-admin → Novamira → OAuth-apps (eller AI Engine → Settings → MCP for den anden flade).
+Slet klienten, ikke bare filen lokalt — ellers lever tokenet videre indtil det udløber.
+
 ### Hold adgangen i live
 
 Access-tokenet lever **3600 s**, og refresh-tokenet **roteres** ved hver fornyelse (målt 6/11: `refresh_token`

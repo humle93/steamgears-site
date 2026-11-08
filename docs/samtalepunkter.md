@@ -48,15 +48,30 @@ _Opdateret 2026-11-08 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `a350872 Live kører stadig 7.64.6, og nu står der hvorfor — der findes intet MCP-credential`
 - `e4eb037 Roadmap-headeren stod stadig på 7.64.8 efter bumpet til 7.64.9`
 - `45a3afc Zip'en til 7.64.9 var pakket uden filrettigheder — nu med mode og fast dato`
 - `6b3a155 P1.5-målingen: et plugin uden abilityen er blokeret, ikke fejlet`
 - `f136581 P1.5: kanalstatus kan nu måles pr. kanal — platformstallene i sgap_events (7.64.9)`
 - `baf9941 Roadmap: §1–§4 er historik, og hvert åbent punkt har sin ejerblokering (7.64.8)`
-- `e9c13fd Pinterest: tokenkilden bestemmer hvem der må forny (7.64.7)`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 8/11 — MCP-login: opskriften deles, tokenet gør ikke
+
+- **Adgangen deles som en opskrift, ikke som et token.** Hver agent registrerer sin egen offentlige klient
+  (DCR), får sit eget token-par og kan tilbagekaldes for sig i wp-admin. Et token der sendes videre, kan ikke
+  tilbagekaldes særskilt — derfor går der aldrig et token gennem chat eller mail.
+- **De to flader har hver sit resource og scope**, og et token til den ene virker ikke på den anden: AI Engine
+  (`/wp-json/mcp/v1/http`, scope `mcp`) og Novamira (`/wp-json/mcp/novamira-oauth`, scope `full_access`).
+  `.well-known/oauth-authorization-server` peger på **Novamira**, så AI Engine skal have sin metadata fra
+  `/wp-json/mcp/v1/.well-known/oauth-authorization-server`.
+- **Fælden fra tidligere står ved magt:** token-endpoints kræver form-encoding, `tools/list` kræver
+  `Mcp-Session-Id`, og redirecten `http://127.0.0.1:8765/callback` har ingen lytter med vilje — hele adressen
+  kopieres tilbage, og koden er éngangs.
+- Opskriften står nu i [mcp-auth.md](mcp-auth.md) → »Del adgangen med en anden agent eller person«, med
+  env-værdier pr. flade, verificeringskald og hvordan adgangen tilbagekaldes.
 
 ### 8/11 — live-opdateringen til 7.64.9 kunne ikke køres, og nu er det målt hvorfor
 
