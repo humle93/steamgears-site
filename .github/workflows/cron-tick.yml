@@ -32,10 +32,12 @@ jobs:
             echo "Forsoeg $i: HTTP $code"
             cat /tmp/tick.json 2>/dev/null || true
             echo
-            if [ "$code" = "200" ]; then
+            # Et 200 uden krop er ikke nok: endpointet skal svare JSON med "ok":true,
+            # ellers er det en cache, en proxy eller en gammel version der svarer.
+            if [ "$code" = "200" ] && grep -q '"ok":true' /tmp/tick.json 2>/dev/null; then
               exit 0
             fi
             sleep 20
           done
-          echo "::error::Tick svarede ikke 200 efter tre forsoeg"
+          echo "::error::Tick svarede ikke 200 med JSON-krop efter tre forsoeg"
           exit 1

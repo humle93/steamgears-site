@@ -46,12 +46,12 @@ _Opdateret 2026-11-08 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `3bdb459 Merge origin/main (daglig status-brief)`
+- `fa0d058 chore(status): daglig projektstatus 2026-11-08`
+- `f3aaeb0 Merge remote-tracking branch 'origin/main' (daglig status-brief 8/11)`
+- `8d5b140 Ryd køen og sæt cron i gang: 326 ventende leveringer → 0`
+- `97f6a66 chore(status): daglig projektstatus 2026-11-08`
 - `a176cf2 Synkronisér projektstatus.md med de målte 91,3 %`
-- `78209a2 Luk P3 og P4 i §9 og ret nævneren til 21,95 d`
-- `58fac05 Gør lead-formularen og statusmarkeringerne repo-konsistente`
-- `6fb91ec Luk begge roadmaps: kun ejer-blokerede punkter står tilbage`
-- `9ec6b2f Modul: P1.18 nøglesiden — ejerskab og ændringshistorik (7.62.0) Før: 98,0 %  →  Efter: 98,0 %  (Δ 0) Grundlag: ingen ændring`
-- `e625636 chore(status): daglig projektstatus 2026-11-08`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)

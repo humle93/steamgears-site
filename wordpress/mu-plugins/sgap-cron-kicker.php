@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Steamgears cron kicker
  * Description: Kører forfaldne cron-opgaver på et almindeligt sidevisning, når webhotellet har slået WP-Cron fra (DISABLE_WP_CRON) og der ikke er sat et server-cron. Svaret sendes til brugeren først, så kørslen ikke koster ventetid.
- * Version: 1.0.0
+ * Version: 1.1.0
  */
 
 if (!defined('ABSPATH')) {
@@ -23,6 +23,8 @@ if (!defined('ABSPATH')) {
 final class SGAP_Cron_Kicker
 {
     public const OPTION = 'sgap_cron_kicker';
+    public const HISTORY = 'sgap_cron_kicker_history';
+    public const HISTORY_MAX = 12;
     public const LOCK = 'sgap_cron_kicker_lock';
     public const LOCK_TTL = 120;
     public const MAX_HOOKS = 8;
@@ -54,26 +56,97 @@ final class SGAP_Cron_Kicker
     public static function tick(): WP_REST_Response
     {
         if (get_transient('sgap_tick_lock')) {
-            return new WP_REST_Response(['ok' => true, 'skipped' => 'locked'], 200);
+            return new WP_REST_Response(['ok' => true, 'skipped' => 'locked', 'at' => gmdate('c')], 200);
         }
 
         set_transient('sgap_tick_lock', time(), 60);
 
-        // Skriv intentionen før opgaverne kører: en enkelt cron-opgave kan afslutte requesten
-        // (W3TC's oprydning gør), og så ville loggen ellers være tom selv om arbejdet skete.
+        // Svar FØR opgaverne kører. En enkelt cron-opgave kan afslutte requesten (W3TC's
+        // oprydning gør), og så ville svaret ellers være tomt — både for den der kalder
+        // endpointet og for det job-log der skal vise hvad der skete.
+        $due = self::count_due((array) wp_get_ready_cron_jobs());
+        self::send_early([
+            'ok' => true,
+            'at' => gmdate('c'),
+            'state' => 'running',
+            'due_before' => $due,
+            'source' => 'tick',
+        ]);
+
         update_option(self::OPTION, [
             'at' => gmdate('c'),
             'state' => 'running',
-            'due_before' => self::count_due((array) wp_get_ready_cron_jobs()),
+            'due_before' => $due,
         ], false);
 
         $result = self::run_due(12, 40);
         $result['drained'] = class_exists('SGAP_Queue_Hygiene') ? SGAP_Queue_Hygiene::drain_now(3) : 0;
         $result['pending'] = class_exists('SGAP_Queue_Hygiene') ? SGAP_Queue_Hygiene::pending_count() : -1;
+        $result['source'] = 'tick';
 
         update_option(self::OPTION, $result, false);
+        self::record($result);
 
+        // Svaret er allerede sendt ovenfor; dette er kun til typesystemet.
         return new WP_REST_Response(array_merge(['ok' => true], $result), 200);
+    }
+
+    /**
+     * Sender JSON-svaret og afslutter requesten mod klienten, men lader PHP køre videre.
+     *
+     * @param array<string,mixed> $payload
+     */
+    private static function send_early(array $payload): void
+    {
+        if (headers_sent()) {
+            return;
+        }
+
+        if (!defined('DONOTCACHEPAGE')) {
+            define('DONOTCACHEPAGE', true);
+        }
+
+        status_header(200);
+        nocache_headers();
+        header('Content-Type: application/json; charset=utf-8');
+        echo wp_json_encode($payload);
+
+        if (function_exists('fastcgi_finish_request')) {
+            fastcgi_finish_request();
+        } elseif (function_exists('litespeed_finish_request')) {
+            litespeed_finish_request();
+        } else {
+            while (ob_get_level() > 0) {
+                @ob_end_flush();
+            }
+            @flush();
+        }
+
+        ignore_user_abort(true);
+    }
+
+    /**
+     * Holder de seneste kørsler, så det kan bevises at uret faktisk tikker over tid —
+     * optionen `sgap_cron_kicker` viser kun den seneste.
+     *
+     * @param array<string,mixed> $result
+     */
+    private static function record(array $result): void
+    {
+        $history = (array) get_option(self::HISTORY, []);
+        $history[] = [
+            'at' => $result['at'] ?? gmdate('c'),
+            'source' => $result['source'] ?? 'unknown',
+            'due_before' => (int) ($result['due_before'] ?? 0),
+            'ran' => count((array) ($result['ran'] ?? [])),
+            'seconds' => $result['seconds'] ?? 0,
+        ];
+
+        if (count($history) > self::HISTORY_MAX) {
+            $history = array_slice($history, -self::HISTORY_MAX);
+        }
+
+        update_option(self::HISTORY, $history, false);
     }
 
     private static function blocked(): bool
@@ -149,7 +222,9 @@ final class SGAP_Cron_Kicker
             SGAP_Queue_Hygiene::drain_now(3);
         }
 
+        $report['source'] = 'shutdown';
         update_option(self::OPTION, $report, false);
+        self::record($report);
 
         return $report;
     }

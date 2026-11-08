@@ -62,12 +62,37 @@ To veje til at få cron til at køre igen uden at røre `wp-config.php`:
   der ikke afhænger af trafik eller cache.
 
 Endpointet tåler at blive kaldt af en ur: `.github/workflows/cron-tick.yml` prikker det **hvert 15.
-minut** og fejler jobbet med en annotation, hvis svaret ikke er 200 efter tre forsøg.
+minut**, accepterer kun `200` **med `"ok":true` i kroppen** og fejler jobbet med en annotation, hvis det
+ikke lykkes efter tre forsøg. Krops-kravet blev tilføjet efter den første kørsel, hvor et tomt 200 gik
+igennem som grønt.
 
-**Fælde, der kostede en runde:** `tick` returnerer 200 med *tom* krop. Det er ikke en fejl i endpointet:
-en af de kørte cron-opgaver (W3TC's oprydning) afslutter requesten, før JSON'en er sendt. Derfor skriver
-kicker'en sin log **før** opgaverne kører (`state: running`) og igen bagefter, så en afbrudt kørsel stadig
-kan dokumenteres. Workflowen accepterer 200 og læser ikke kroppen.
+**Fælde, der kostede en runde:** den første version af `tick` returnerede 200 med *tom* krop, fordi den
+kørte opgaverne før svaret blev sendt, og W3TC's oprydning afsluttede requesten undervejs. Det gjorde
+job-loggen tom — man kunne se at uret slog, men ikke hvad det ramte. Version 1.1.0 sender derfor JSON'en
+**før** opgaverne kører:
+
+```json
+{"ok":true,"at":"2026-11-08T13:28:20+00:00","state":"running","due_before":28,"source":"tick"}
+```
+
+og skriver derefter resultatet (`ran`, `seconds`, `due_before`) i optionen `sgap_cron_kicker`. Samtidig
+holder `sgap_cron_kicker_history` de seneste 12 kørsler, så det kan bevises at uret tikker over tid —
+optionen med det seneste resultat alene kunne ikke vise det.
+
+### 2.3.1 Den faktiske GitHub-kørsel
+
+Workflowen blev startet med `workflow_dispatch` (den havde ikke haft en planlagt slot endnu). To kørsler,
+begge **success**:
+
+| Run | Tid (UTC) | Udløser | Resultat | Job-log |
+| --- | --- | --- | --- | --- |
+| [42484917755](https://github.com/humle93/steamgears-site/actions/runs/42484917755) | 13:25:46 → 13:25:53 | `workflow_dispatch` | success | `Forsoeg 1: HTTP 200` (tom krop — gammel version af endpointet) |
+| [42485140090](https://github.com/humle93/steamgears-site/actions/runs/42485140090) | 13:28:42 → 13:28:50 | `workflow_dispatch` | success | `Forsoeg 1: HTTP 200` + `{"ok":true,"skipped":"locked",...}` |
+
+Den anden kørsel ramte 60-sekunders-låsen, fordi et manuelt `curl` havde kørt 28 sekunder før — det er
+kontrakten (højst ét tick pr. minut), og svaret er stadig 200 med en forklaring, så jobbet ikke bliver rødt
+af at være for tidligt på den. Ingen secrets, tokens eller særlige rettigheder er nødvendige: jobbet
+kræver kun `contents: read` og et HTTPS-kald til den offentlige URL.
 
 ### 2.3 Målt virkning
 
@@ -124,11 +149,32 @@ De fire øverste står nu i `blocked_by` på plugin-projektet i `projektstatus.j
 
 ---
 
+### 2.3.2 Tilstanden efter ticks (målt 13:32 UTC)
+
+| Måling | Værdi |
+| --- | --- |
+| Ventende `woocommerce_deliver_webhook_async` | **0** |
+| Handlinger med `facebook_for_woocommerce%` | **0** |
+| WooCommerce-webhooks | **29 aktive / 11 disabled** (`wp_wc_webhooks`, WC 11's egen tabel) |
+| Køhygiejne kørt to gange i træk | `orphans_deleted: 0, stale_deleted: 0, duplicates_disabled: 0, cron_events_removed: 0, drained: 0` — **idempotent** |
+| Køhygiejne næste kørsel | `2026-11-09T04:10:00Z`, recurrence `daily` |
+| Tick-historik | 13:28:20 tick (28 forfaldne, 12 kørt), 13:28:29 shutdown (8), 13:29:53 shutdown (8), 13:32:24 tick (31, 12), 13:32:35 shutdown (8) |
+
+At der både står `tick` og `shutdown` i historikken er pointen: uret slår nu ad to veje — GitHub-jobbet
+og de PHP-requests der alligevel eksekveres — så køen ikke afhænger af én af dem.
+
 ## 5. Hvad der ikke er bevist
 
-- **GitHub-workflowen er ikke set køre endnu.** Den ligger i repoet og kører første gang ved næste
-  15-minutters-slot; endpointet er verificeret med `curl` (200, og loggen i `sgap_cron_kicker` viser
-  hvilke opgaver der blev kørt).
+- **Den planlagte (`schedule`) kørsel er ikke observeret endnu** — kun `workflow_dispatch`-kørslerne ovenfor.
+  Workflowen står `active` med `cron: '*/15 * * * *'`, men ved måling 13:49 UTC (20 minutter og to
+  15-minutters-slots efter oprettelsen) havde GitHub ikke startet nogen `schedule`-kørsel. Nye
+  `schedule`-definitioner lægges i kø med forsinkelse, og GitHub garanterer ikke minuttet — derfor er det
+  her kun bevist at mekanismen virker (jobbet grønt, endpointet 200 med JSON), ikke at uret allerede har slået
+  af sig selv gennem GitHub.
+- **Køen hænger dog ikke på den ene vej.** `sgap_cron_kicker_history` viser `shutdown`-kørsler ind imellem
+  `tick`-kørslerne (fx 13:29:53 og 13:32:35), altså at forfaldne opgaver også blev kørt af almindelige
+  PHP-requests uden at nogen agent kaldte endpointet. Og selve køhygiejnen er planlagt **inde i WordPress**
+  (dagligt 04:10), ikke i GitHub.
 - **At `wp-cron.php` er død er målt, men ikke forklaret** på host-niveau. Det kan være Simplys egen
   blokering eller en WAF-regel. Kicker'en gør forklaringen unødvendig, men hvis webhotellet senere
   retter det, kører begge veje parallelt uden skade (begge er låst til ét kald pr. minut).
