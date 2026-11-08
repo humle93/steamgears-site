@@ -23,6 +23,14 @@ en pakke, eller finder en anden end den der ligger i repoet (fælden fra 7.58.2)
 | `tests/` i zip'en | nej — tests følger repoet, ikke installationen |
 | Stier ud af mappen (`..`, absolutte) | ingen |
 
+## Den publicerede kopi er efterprøvet
+
+Efter push (`060161e`) blev den fil WordPress faktisk henter hentet igen og sammenlignet: **385 602 bytes, SHA-256
+`4fb6483b…d196b85` — byte-identisk med repoet.** Det tog **~2 minutter** før `raw.githubusercontent.com` serverede
+den nye fil; indtil da svarede samme URL den *forrige* build af 7.64.9 (385 291 bytes). Koden er identisk i de to
+builds — kun `ROADMAP.md` inde i zip'en er anderledes — men det er værd at vide: et *Update*-klik i de første
+minutter efter et push kan installere den forrige build af samme version.
+
 ## Hvorfor det er den rigtige kontrol
 
 7/11 kostede et *Update*-klik en hel runde, fordi der intet var at installere: versionscache og pakke-link pegede
