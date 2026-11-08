@@ -209,6 +209,13 @@ hostpanel eller ejerens oplysninger.
 | S5.10 | **Miljøværn i CI**: de 13 målte krav som natligt tjek, så et register ikke rådner stille | det der måles i dag, måles ikke i morgen | 0,25 d |
 | **S5 total** | | | **2,90 d** |
 
+**Status samme aften (8/11):** S5.3–S5.6 er kodet i `wordpress/mu-plugins/sgap-hardening.php` med **44
+offline-assertions** i `wordpress/tests/test-hardening.php` (nu værn i den natlige kørsel), og målingen er
+gjort kørbar som `tools/s5_measure.py` — 20 rækker, der skriver `reports/s5-status-<dato>.md`. Pluginnet kan
+**ikke** lægges på sitet herfra: der er hverken MCP-token, CLI eller repository-secrets i sandkassen (målt
+8/11). Den ene ejerhandling er at uploade filen til `wp-content/mu-plugins/`, slette `readme.html` og derefter
+køre `python3 tools/s5_measure.py --strict`; den skal give **0 mangler** før posterne er lukket.
+
 **Rækkefølge:** S5.1 og S5.2 først — de er forudsætningen for at de øvrige kan *bevises* i stedet for at
 blive påstået. Derefter de fire der kan gøres uden ejeren (S5.3–S5.6), så mail og backup (S5.7–S5.8, kræver
 hostpanelet), og til sidst porten og værnene (S5.9–S5.10). S5.1 er **ejer-blokeret** indtil subdomænet findes

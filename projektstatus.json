@@ -59,16 +59,16 @@
       "id": "miljoe",
       "name": "steamgears.eu — miljø, server og sandbox (S5)",
       "note": "roadmap S5 — køreplanen for nye sites (§9) kørt mod sitet 8/11",
-      "next": "S5.1 er ejer-blokeret (subdomæne og certifikat hos Simply). Resten venter på adgang: S5.2 kræver et MCP-token for at læse WP_DEBUG og miljøtypen, S5.3–S5.6 kan gøres i wp-admin og plugins, S5.7–S5.8 kræver hostpanelet, og S5.9–S5.10 er rent repoarbejde.",
+      "next": "Upload wordpress/mu-plugins/sgap-hardening.php til wp-content/mu-plugins/, slet readme.html, og kør python3 tools/s5_measure.py --strict — den skal give 0 mangler. Derefter S5.2 via MCP og S5.7–S5.8 via hostpanelet.",
       "blocked_by": "Subdomæne + certifikat hos Simply (S5.1); hostpanelet til DKIM, backup og object cache (S5.7–S5.8); et MCP-token til at læse WP_DEBUG, WP_ENVIRONMENT_TYPE og cron (S5.2).",
       "modules": [
         {
           "id": "s5",
           "name": "S5 — miljø, server og sandbox",
-          "done": 0,
+          "done": 0.55,
           "total": 2.9,
           "unit": "d",
-          "note": "0 af 2,90 d. Ti poster (S5.1–S5.10) i docs/roadmap.md §4 med målt bevis i docs/library/site-mod-koereplan-2026-11-08.md: 27 krav målt 8/11 — 13 opfyldt, 7 mangler, 7 kan ikke afgøres udefra. Målt: ingen sandkasse (staging/dev/test peger på produktionens IP, certifikatet dækker dem ikke), 2 brugernavne offentlige via /wp-json/wp/v2/users, generator-meta + readme.html, XML-RPC tændt med system.multicall, frame-beskyttelse kun på /my-account/, ingen Permissions-Policy, svag Referrer-Policy, REST-indeks 1,4 MB / 1 193 ruter cachet i et år.",
+          "note": "0,55 af 2,90 d. 8/11: S5.3–S5.6 er kodet i wordpress/mu-plugins/sgap-hardening.php med 44 offline-assertions (wordpress/tests/test-hardening.php, nu værn i den natlige kørsel), og S5.10's måleværktøj tools/s5_measure.py (20 rækker, rapport i reports/s5-status-<dato>.md) er bygget og kørt mod live. Udrulning og live-verifikation udestår: der er hverken MCP-token, CLI eller secrets i sandkassen, så filen skal uploades til wp-content/mu-plugins/ og readme.html slettes. Resten af båndet: S5.1 (0,75) er ejer-blokeret på subdomænet hos Simply, S5.2 (0,30) kræver MCP, S5.7–S5.8 (0,40) kræver hostpanelet, S5.9 (0,25) er repoarbejde og S5.10's sidste 0,15 er CI-koblingen.",
           "verified": false
         }
       ]
@@ -1674,6 +1674,15 @@
       "after": 0.0,
       "delta": null,
       "basis": "0 af 2,9 d"
+    },
+    {
+      "date": "2026-11-08",
+      "project": "steamgears.eu — miljø, server og sandbox (S5)",
+      "module": "daglig måling",
+      "before": 0.0,
+      "after": 19.0,
+      "delta": 19.0,
+      "basis": "0,55 af 2,9 d"
     }
   ]
 }

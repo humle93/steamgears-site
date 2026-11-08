@@ -93,6 +93,9 @@ check "fortrydelsesmail"                     "$PHP_BIN" tools/withdrawal_email_t
 # S4.10: anmeldelses-anmodningen — én mail pr. ordre, 14 dage efter levering, ingen
 # incitamenter. En regression her koster kunder, ikke en fejlkode, så den skal fanges her.
 check "anmeldelsesmail"                      "$PHP_BIN" wordpress/tests/test-review-request.php
+# S5.3–S5.6: hardningen retter seks ting der alle er usynlige når de fejler — en header
+# der ikke sendes, giver ingen fejlkode. Testen kræver derfor hver regel for sig, offline.
+check "hardning (S5)"                        "$PHP_BIN" wordpress/tests/test-hardening.php
 # Fejlsøgning som fast punkt (P3.6): konsistens på tværs af filer — version mod zip,
 # zip mod kilde, includes, biblioteksindekset, tokens og tests der ikke kan fejle.
 # Om-mærkningen (S4): titler/kollektioner/billedkrav måles udefra — selftesten er offline og fanger
