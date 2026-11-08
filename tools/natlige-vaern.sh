@@ -95,6 +95,9 @@ check "fortrydelsesmail"                     "$PHP_BIN" tools/withdrawal_email_t
 check "anmeldelsesmail"                      "$PHP_BIN" wordpress/tests/test-review-request.php
 # Fejlsøgning som fast punkt (P3.6): konsistens på tværs af filer — version mod zip,
 # zip mod kilde, includes, biblioteksindekset, tokens og tests der ikke kan fejle.
+# Om-mærkningen (S4): titler/kollektioner/billedkrav måles udefra — selftesten er offline og fanger
+# at familiekrav eller dommen driver, uden at CI nogensinde rammer netværket.
+check "rebrand-audit-selftest"               python3 tools/rebrand_audit.py --selftest
 check "fejlscan-selftest"                    python3 tools/fejlscan.py --selftest
 check "fejlscan"                             python3 tools/fejlscan.py
 

@@ -11,7 +11,7 @@ der nu er **ejer-blokeret** med navn og tal. Ingen procent er sat op uden et må
 |---|---|---|
 | Steamgears Autopilot — plugin | 98,0 % | P1.5's live-verifikation (0,6 d) |
 | steamgears.eu — site-optimering | 93,3 % | S1.2's sidste 0,3 d, S4's 1,2 d |
-| Dark academia-rebrand | 64,3 % | Batch 4-mockups (5 t) |
+| Dark academia-rebrand | 62,5 % | Batch 4-mockups (5 t) + gentildeling af de seks kollektioner (0,4 t) |
 
 ## 2. Pluginnet: en »ready« kanal der svarede 401
 
@@ -83,7 +83,7 @@ titler — de skal enten genoplives (og synkroniseres i Printful) eller droppes.
 |---|---|---|---|
 | Steamgears Autopilot — plugin | 98,0 % | **100 %** | 29,85 af 29,85 d efter 7.64.4; P1.5's 0,6 d er ejer-blokeret og ude af estimatet |
 | steamgears.eu — site-optimering | 93,3 % | **100 %** | 20,95 af 20,95 d; de 1,5 ejer-blokerede dage er ude af estimatet |
-| Dark academia-rebrand | 64,3 % | 64,3 % | 9,0 af 14,0 t; Batch 4 (5 t) er ejer-blokeret |
+| Dark academia-rebrand | 64,3 % | **62,5 %** | 9,0 af 14,4 t; Batch 4 (5 t) er ejer-blokeret, og kollektionstildelingen er målt væk 8/11 (0,4 t gentildeling, se [../reports/rebrand-status-2026-11-08.md](../reports/rebrand-status-2026-11-08.md)) |
 | Niche-butik — plugin P4 | 100 % | 100 % | uændret, 1,0 af 1,0 d |
 | SEO-indholdsproduktion | 100 % | 100 % | uændret, 9 af 9 |
 | Døde internlinks | 100 % | 100 % | uændret, 39 af 39 |

@@ -26,7 +26,7 @@ _Opdateret 2026-11-08 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 | --- | --- | --- |
 | **steamgears.eu — site-optimering** | **100 %** | 20,95 af 20,95 d (S0 2,35/2,35 · S1 3,6/3,6 · S2 6,9/6,9 · S3 4,05/4,05 · S4 4,05/4,05) |
 | **Steamgears Autopilot — plugin** | **100 %** | 29,85 af 29,85 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25 · P1E 0,25/0,25 · P1F 0,25/0,25 · P1G 0,5/0,5 · P2F 1,5/1,5) |
-| **Dark academia-rebrand** | **64,3 %** | 9 af 14 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5 · BATCH4 0,5/0,5) |
+| **Dark academia-rebrand** | **62,5 %** | 9 af 14,4 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5 · BATCH4 0,5/0,5 · GENTILDELING 0/0,4) |
 | **SEO-indholdsproduktion** | **100 %** | 8 af 8 guides (BATCH 3/3 · COPY 4/4 · CORSET 1/1) |
 | **Døde internlinks** | **100 %** | 39 af 39 links (FIX 39/39) |
 | **Niche-butik — plugin P4** | **100 %** | 1 af 1 d (P4PLAN 0,3/0,3 · P4APPLY 0,25/0,25 · P4UI 0,2/0,2 · P4SHIP 0,1/0,1 · P4LIVE 0,15/0,15) |
@@ -35,25 +35,25 @@ _Opdateret 2026-11-08 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 - **steamgears.eu — site-optimering** — Ejerens oplysninger og aftaler, målt 8/11: CVR-nummer og telefon (Complianz har navn »Henning 6«, adresse »Lavgade 44a st th«, e-mail og DK — men telefon er tom og CVR findes ikke i formularen); valuta og alle 24 priser (butikken kører USD); aftaler med MobilePay/PayPal/Klarna (kun Stripe og bankoverførsel er aktive); zonerne til EU/UK/RoW (kun Denmark har en metode — fri fragt uden minimum — og resten af verdenen har ingen, så EU-kunder kan ikke gennemføre en ordre), fragtklasser og fri fragt-grænse; Complianz-valget EU opt-in i stedet for US opt-out; Printful-adgang eller 5–8 færdige mockups pr. produkt (målt: 24 produkter, 26 billeder, 0 produkter med 3 eller flere); ja/nej pr. produkt for 942/765/766/767 (alle fire kladder med pris og SKU); GSC-svarrapport (S0.6); beslutning om de to inaktive plugins; og W3TC-godkendelse efter en rigtig ordre.
 - **Steamgears Autopilot — plugin** — Syv led kræver ejeren, alle målt 8/11: (1) **Pinterest-scope** — tokenet ligger nu i WooCommerce-integrationen og er gyldigt (`/user_account` 200 som `cpaleadsis`, id 688980580401955331), men appen har kun ads/billing/catalogs/pins/user_accounts og **mangler `boards:read`**, så `/pins` og `/boards` afvises (målt 17:25Z, kanalstatus står som `needs_scope`); (2) **de øvrige kanal-tokens** — Instagram, Bluesky, Mastodon, Telegram og Facebook har intet token (5 af 6 mangler); (3) **AIMLAPI-kredit** — sidste generering 7/11 fejlede med »You've run out of funds«; (4) **`sgap_alert_email`** er tom, så fejl registreres men ingen mail sendes; (5) **full auto vs. godkendelse** — `sgap_full_auto_enabled = no` og 40 elementer venter; (6) **distributionsvej** — `publish_mode = rss` og 0 Publer-konti; (7) **P2.1–P2.3** kræver ejerens beslutning om Command Center-retningen. Intet af det må gættes.
-- **Dark academia-rebrand** — To led kræver ejeren, målt 8/11: (1) **Batch 4-mockups (5 t)** — Printful-adgang eller 5–8 færdige billeder pr. produkt; kataloget har 26 billeder på 24 produkter, 0 produkter med 3 eller flere, 0 uden alt-tekst og 8 under 1000 px, og repoet indeholder ingen trykfiler eller tøj-skabeloner, så de kan ikke laves her; (2) **de 29 trash'ede designs** — 13 af de 45 produkt-id'er er publiceret, 3 er kladder og 29 ligger i papirkurven med de nye titler; genoplive (kræver Printful-synk) eller droppe er ejerens valg.
+- **Dark academia-rebrand** — Tre led kræver ejerhandling, målt 8/11: (1) **gentildeling af kollektionerne (0,4 t)** — `/wp-json/wc/store/v1/products?category=<slug>` giver 0 produkter for dark-academia, gothic-victorian, natural-history, vintage-maritime-prints, witchy-tarot og steampunk-capsule, mens airship 5, herbarium 5, curiosities 6 og atelier 4 bærer alle 20 publicerede; `vintage-maritime-prints` findes slet ikke (arkivet 404). Titlerne derimod er på plads (fx 413 »Airship Storm — Vintage Engraving Hoodie«), så det er kun tildelingen der skal gentages — og det kræver skriveadgang (MCP/wp-admin), som agenten ikke har; (2) **Batch 4-mockups (5 t)** — Printful-adgang eller 5–8 færdige billeder pr. produkt; målt 20 publicerede med 22 billeder, 0 med 3 eller flere, 62 billedplaceringer mangler, og repoet har 0 trykfiler og 0 tøj-skabeloner; (3) **de 29 trash'ede designs** — 13 af de 45 produkt-id'er er publiceret, 3 er kladder og 29 ligger i papirkurven med de nye titler; genoplive (kræver Printful-synk) eller droppe er ejerens valg.
 
 ### Næste skridt
 
 - **steamgears.eu — site-optimering** — Intet agent-arbejde tilbage i S0–S4: alle fem bands er færdige og målt, og de 1,5 d der står tilbage er ejer-blokerede og navngivet i §4c og blocked_by. Målt 8/11: 24 produkter (20 publicerede, 4 kladder), USD, fri fragt i DK og ingen forsendelse til EU/UK/RoW, Stripe + bankoverførsel, Complianz på US opt-out.
 - **Steamgears Autopilot — plugin** — Agent-scope er færdigt (29,85 af 29,85 d). Ejeren har lagt Pinterest-tokenet ind i WooCommerce-integrationen, og 7.64.6 henter det nu derfra gennem integrationens egen dekryptering: målt 8/11 virker det (konto `cpaleadsis`, id 688980580401955331), men appen mangler scopes `boards:read`, så pin-lister og Pin Analytics kan stadig ikke måles. Næste skridt er ejerens: genforbind Pinterest med board-adgang (eller et developer-token med boards:read + pins:read). Resten af blocked_by står uændret.
-- **Dark academia-rebrand** — Batch 4 (mockups, 5 t) er det eneste tilbage og er ejer-blokeret: repoet har ingen trykfiler eller tøj-skabeloner, og målt 8/11 har 0 af 24 produkter tre eller flere billeder. Dertil en ejer-beslutning: 29 af de 45 produkt-id'er i om-mærkningen ligger i papirkurven med de nye titler — skal de genoplives eller droppes?
+- **Dark academia-rebrand** — Tre ting står tilbage, alle med en navngivet ejerhandling: (1) **gentildeling af de seks kollektioner** (0,4 t) — målt 8/11 via Store API har alle seks 0 produkter, mens de fire gamle bærer alle 20, så batch 2's tildeling er ikke i effekt og skal laves igen med skriveadgang; (2) **Batch 4-mockups** (5 t) — Printful-adgang eller 5–8 færdige billeder pr. produkt; (3) **de 29 trash'ede designs** — genoplive eller droppe.
 - **SEO-indholdsproduktion** — SEO-indholdet er 100 %: fire guides skrevet, tre publiceret, corset-guiden publiceret, 1410 parkeret til september. Ingen åbne poster.
 - **Døde internlinks** — Vedligehold: tjek nye indlæg mod live-URL'er
 - **Niche-butik — plugin P4** — Færdig som roadmap-punkt P4: modulet er kørt mod det levende site (WordPress 7.1.4, WooCommerce 11.2.2) med 8 produktkladder, 5 kollektioner, en sideskits og en navigation, og rullet tilbage til præcis udgangstilstanden. Næste skridt er ejerens: Printful-adgang, publicering og de øvrige punkter i readiness-listen.
 
 ### Seneste commits
 
+- `bc5c554 Preflight: den publicerede zip er bekræftet byte-identisk, og raw-CDN'en halter ~2 minutter`
+- `060161e Opdateringsvejen til 7.64.9 er prøvet: version og pakke-link svarer, så kun ejerens klik mangler`
 - `3de9c53 MCP-login: opskriften deles med de andre — hvert token bliver hos den der fik det`
 - `a350872 Live kører stadig 7.64.6, og nu står der hvorfor — der findes intet MCP-credential`
 - `e4eb037 Roadmap-headeren stod stadig på 7.64.8 efter bumpet til 7.64.9`
 - `45a3afc Zip'en til 7.64.9 var pakket uden filrettigheder — nu med mode og fast dato`
-- `6b3a155 P1.5-målingen: et plugin uden abilityen er blokeret, ikke fejlet`
-- `f136581 P1.5: kanalstatus kan nu måles pr. kanal — platformstallene i sgap_events (7.64.9)`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)

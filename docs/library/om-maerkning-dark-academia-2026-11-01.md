@@ -160,12 +160,50 @@ Alle 39 produkter har i dag under 3 billeder. Det er den største enkeltmangel i
 | Witchy & Tarot | 98 | 3 |
 | Steampunk Capsule | 99 | 7 |
 
-**Verifikation:** alle seks arkivsider svarer 200 (`/product-category/dark-academia/` osv.), de nye titler vises på produktsiderne og på `/shop/`, og W3TC blev purget efter ændringerne.
+**Verifikation 1/11:** alle seks arkivsider svarede 200 (`/product-category/dark-academia/` osv.), de nye titler vises på produktsiderne og på `/shop/`, og W3TC blev purget efter ændringerne.
 
 **Stadig åbent:**
 - **Printful-sync.** Titlerne er sat i WooCommerce. Hvis Printful har katalog-synkronisering kørende, kan de blive overskrevet ved næste push — de skal derfor spejles i Printful. Det er ikke verificeret, om sync er aktiv.
 - Slugs er bevaret (fx `/product/clockwork-owl-steampunk-unisex-hoodie/`), så titel og URL nu afviger fra hinanden. Det er et bevidst valg for at undgå 404'ere.
 - Batch 3 (produkttekster) og 4 (mockups) er ikke rørt — uden dem er omdøbningen kun halvt virksom.
+
+## Målt 8/11 2026 — tildelingen er væk, titlerne er der
+
+Målt udefra med den offentlige Store API, ikke på tillid:
+
+```
+python3 tools/rebrand_audit.py          # exit 1 = mindst ét krav mangler
+```
+
+| Kollektion | Produkter 1/11 (dokumenteret) | Produkter 8/11 (målt) |
+|---|---:|---:|
+| Dark Academia | 24 | **0** |
+| Gothic & Victorian | 6 | **0** |
+| Natural History | 6 | **0** |
+| Vintage Maritime Prints | 7 | **0** (arkivet svarer 404 — termen findes ikke) |
+| Witchy & Tarot | 3 | **0** |
+| Steampunk Capsule | 7 | **0** |
+| airship, herbarium, curiosities, atelier (gamle) | — | 5 + 5 + 6 + 4 = **alle 20** |
+
+To uafhængige mål siger det samme: `?category=<slug>` giver 0 rækker for alle seks, og
+`/product-category/dark-academia/` svarer 200 med tomt grid. Samtidig **er titlerne i effekt** — 413, 401, 399,
+403 og 557 bærer de nye navne — så det er tildelingen alene der er forsvundet, formentlig overskrevet af en
+katalog-synk eller af at termene er blevet genskabt. Det er præcis den risiko »Stadig åbent« ovenfor advarede om,
+og den er nu indtruffet.
+
+**Konsekvens for planen:** de 8,5 t for batch 1–3 dækker arbejde der *blev* udført; effekten af batch 2 skal
+laves igen. Det er skilt ud som eget modul (0,4 t) i `projektstatus.json` med en dokumenteret scope-korrektion,
+så rebrand står på 9 af 14,4 t = 62,5 % — ikke 64,3 %.
+
+**Sådan gentildeles det (kræver skriveadgang — MCP eller wp-admin):**
+
+1. Opret `vintage-maritime-prints` igen (den er 404 i dag) med navnet *Vintage Maritime Prints*.
+2. Tildel efter grupperne ovenfor: gruppe A → Dark Academia / Natural History / Vintage Maritime Prints efter
+   tabellens søgeord, gruppe B → Gothic & Victorian, gruppe C → Steampunk Capsule. Behold de gamle kategorier.
+3. Tøm cachen (W3TC), og kør `python3 tools/rebrand_audit.py` — acceptkriterium: **0 tomme kollektioner**.
+4. Hvis Printful-synk er aktiv, skal titlerne også spejles i Printful, ellers gentager regressionen sig.
+
+Tallene i detaljer: [`reports/rebrand-status-2026-11-08.md`](../../reports/rebrand-status-2026-11-08.md).
 
 ## Rækkefølge-rationale
 

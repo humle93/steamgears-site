@@ -1,6 +1,6 @@
 # Batch 4-arbejdsordre — mockups pr. produkt (8/11 2026)
 
-_Fra 63 % til 64,3 %: forberedelsen er nu færdig og målt; selve mockup-billederne kræver stadig ejerens
+_Forberedelsen er færdig og målt; selve mockup-billederne kræver stadig ejerens
 Printful-adgang. Ingen af de 24 produkter har 3 eller flere billeder i dag._
 
 Denne arbejdsordre er det stykke, der **kan** laves uden adgang: hvilke billeder der mangler, hvad de skal

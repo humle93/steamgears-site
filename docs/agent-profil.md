@@ -29,7 +29,7 @@ Der er **seks aktive projekter**, alle målt i [`projektstatus.json`](../projekt
 | --- | --- | --- | --- |
 | `site` | steamgears.eu — site-optimering | **100 %** (20,95 af 20,95 d) | developer-dage |
 | `plugin` | Steamgears Autopilot — plugin | **100 %** (29,85 af 29,85 d) | developer-dage |
-| `rebrand` | Dark academia-rebrand | **64,3 %** (9 af 14 t) | timer |
+| `rebrand` | Dark academia-rebrand | **62,5 %** (9 af 14,4 t) | timer |
 | `seo` | SEO-indholdsproduktion | **100 %** (8 af 8 guides) | guides |
 | `links` | Døde internlinks | **100 %** (39 af 39 links) | links |
 | `niche` | Niche-butik — plugin P4 | **100 %** (1 af 1 d) | developer-dage |
@@ -141,9 +141,11 @@ direkte publicering som opt-in. **1 128 smoke-checks, alle grønne** (målt 8/11
 
 **Rebrand**
 
-- De oprindelige 39 designs er kortlagt; batch 1–3 (8,5/8,5 t) er færdig. Batch 4 mockups står på 0/5 t,
-  mens forberedelsen (arbejdsordre, filnavne, alt-tekster og rækkefølge) er lukket med 0,5/0,5 t.
-- Samlet status er **64,3 % (9/14 t)**. Mockup-generering kræver ejerens Printful-adgang eller færdige billeder;
+- De oprindelige 39 designs er kortlagt; batch 1–3 (8,5/8,5 t) er udført. Målt 8/11 via Store API er titlerne i
+  effekt, men **alle seks nye kollektioner har 0 produkter** — tildelingen skal gentages (0,4/0,4 t, kræver
+  skriveadgang). Batch 4 mockups står på 0/5 t, forberedelsen er lukket med 0,5/0,5 t.
+- Samlet status er **62,5 % (9 af 14,4 t)**. Gentildelingen kræver MCP/wp-admin; mockup-generering kræver ejerens
+  Printful-adgang eller færdige billeder;
   GPSR-oplysninger kræver CVR og postadresse. Se `projektstatus.json` og `docs/library/batch-4-arbejdsordre-2026-11-08.md`.
 
 ---
