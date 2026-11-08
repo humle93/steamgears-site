@@ -6,8 +6,8 @@
       "id": "site",
       "name": "steamgears.eu — site-optimering",
       "note": "roadmap S0–S4",
-      "next": "S4 er delvist lukket: fortrydelsesfunktionen og størrelseskortene er målt live. Tilbage af S4 kræver ejeren: CVR/adresse/telefon (S4.2), valuta og priser (S4.3), betalingsaftaler (S4.5), forsendelsesvalg (S4.6), Printify-billeder (S4.7), GPSR-blok (S4.9) og Complianz' samtykkemodel (S4.1).",
-      "blocked_by": "S4 kræver ejerens oplysninger og aftaler: CVR/adresse/telefon, valutaomregning af 39 priser, MobilePay/PayPal/Klarna-aftaler, forsendelseszoner og fri fragt-grænse, Printify-adgang til mockups, GPSR-adresseblok og valg af EU-samtykkemodel i Complianz.",
+      "next": "Tilbage af S4 kræver ejeren: CVR/adresse/telefon (S4.2) og dermed GPSR-blokken (S4.9), valuta og priser (S4.3), betalingsaftaler (S4.5), forsendelsesvalg (S4.6), Printify-billeder (S4.7) og EU-samtykkemodellen i Complianz (S4.1).",
+      "blocked_by": "S4's resterende punkter kræver ejerens oplysninger og aftaler: CVR, adresse og telefon; valutaomregning af 39 priser; MobilePay/PayPal/Klarna-aftaler; forsendelseszoner og fri fragt-grænse; Printify-adgang til mockups; og valg af EU-samtykkemodel i Complianz.",
       "modules": [
         {
           "id": "s0",
@@ -47,7 +47,7 @@
         {
           "id": "s4",
           "name": "S4 — salgsklar butik",
-          "done": 3.05,
+          "done": 3.7,
           "total": 5.25,
           "unit": "d",
           "note": "S4.4 formular-del + produkttekster + 0,25 d S4.13 merchant-schema: shippingDetails + MerchantReturnPolicy (scope 6/11, endnu ikke udført) + S4.13 merchant-schema 0,1 af 0,25 d (7/11): produktionstiden 3-7 hverdage fra /shipping/ er nu handlingTime i deliveryTime ved siden af transitTime, itemCondition NewCondition er sat hvor den mangler, testen gik 19 -> 30 paastande og produkt-schema er vaern nr. 22 i den natlige koersel. Fragt-linjen kan IKKE kvalificere: Google kraever shippingRate.value/maxValue og butikken har ingen fast fragtpris, saa den er bevidst udeladt. returnPolicyCountry gaelder organisation-niveau, ikke offer-niveau. Ikke deployet — kraever WordPress-adgang. + 0,15 d S4.12 (7/11): fortrydelsesoplysningerne står nu i selve ordremailen (14 dage fra modtagelsen, skriv først, send ikke retur før svar, returfragt hos kunden undtagen fejl, tilbagebetaling inden 14 dage, hygiejneundtagelsen) — hver sætning citeret fra sitets egne sider, ingen opdigtet returadresse eller fragtpris, afsnittene skrevet én gang og renderet som både HTML og ren tekst, 36 påstande i tools/withdrawal_email_test.php som værn nr. 25; ikke deployeret (sitet svarer Parse error), 0,05 d tilbage. + 0,35 d S4.10 (7/11): anmeldelses-anmodningen er bygget som mu-plugin (wordpress/mu-plugins/sgap-review-request.php) — én mail 14 dage efter gennemført ordre, ét link pr. produkt til #reviews, status læst igen ved afsendelse, ordremeta mod dubletter, lukkede anmeldelser udeladt, ingen incitamenter i copy; 26 påstande i wordpress/tests/test-review-request.php, nu værn nr. 26. De sidste 0,05 d er at lægge filen ind og kræver File Manager. + 0,15 d S4.13 + 0,05 d S4.10 + 0,05 d S4.12 (7/11): de tre mu-plugins (sgap-product-schema.php, sgap-review-request.php, sgap-withdrawal-email.php) er lagt ind i wp-content/novamira-sandbox/, W3TC sidecachen er tømt, og tools/schema_check.py bekræfter 20/20 produkter med brand, returret og leveringstid (EXIT=0); både review-request- og withdrawal-hooks er aktive i kørende PHP."
@@ -1456,6 +1456,15 @@
       "after": 85.9,
       "delta": 3.4,
       "basis": "20,65 af 24,05 d (S0 2,35/2,35 · S1 3,9/4,6 · S2 7,85/8,3 · S3 3,5/3,55 · S4 3,05/5,25)"
+    },
+    {
+      "date": "2026-11-08",
+      "project": "steamgears.eu — site-optimering",
+      "module": "daglig måling",
+      "before": 85.9,
+      "after": 88.6,
+      "delta": 2.7,
+      "basis": "21,3 af 24,05 d (S0 2,35/2,35 · S1 3,9/4,6 · S2 7,85/8,3 · S3 3,5/3,55 · S4 3,7/5,25)"
     }
   ]
 }

@@ -1,5 +1,13 @@
 # Ugentlig backup + 1 indholdselement — log
 
+## 2026-11-08 (senere pas) — S4.9 og S4.11 lukket
+**Formål:** de to sidste S4-punkter der ikke kræver ejerens adgang.
+- **S4.9:** produktteksten er nu synlig server-side via `woocommerce_after_single_product_summary`; målt i browser
+  (tee + hoodie: 7-rækkers størrelseskort, cm og inches, fit/materiale/produktion/levering) og i HTML på alle otte
+  tøjprodukter. `/shop/`, `/`, `/right-of-withdrawal/` og `/journal/` har **0** forekomster.
+- **S4.11:** `/shop/` målt til **263 070 bytes / 2,93–3,16 s** (cache 263 442 / 2,46 s) mod kravet 470 KB / 5,8 s.
+- **Fælde:** `?p=<tal>` på `/shop/` giver 404 (WordPress læser `p` som post-id) — brug `?v=` til cache-bust.
+
 ## 2026-11-08 — ugentlig kontrol (værn, smoke, zip, live-målinger)
 **Formål:** S3.5's tredje post. Kørt i agentens cloud-sandkasse med Novamira-adgang, så tallene er både
 repo-værn og live-målinger fra samme dag.
