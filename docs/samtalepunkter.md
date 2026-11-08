@@ -39,24 +39,38 @@ _Opdateret 2026-11-08 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Næste skridt
 
-- **steamgears.eu — site-optimering** — Intet agent-arbejde tilbage i S0–S4: alle fem bands er færdige og målt, og de resterende poster er ejerens og navngivet i §4c og blocked_by. Målt 8/11: 24 produkter (20 publicerede, 4 kladder) i **DKK**. DKK-tabellen fra 2/11 er afregnet **række for række**: af de **38 rækker** (linje 32–69) har **11** et produkt i butikken og står med **tabellens tal ordret** (335/165/400/435/265/180 kr) — målt 11/11 på produktsiden, i JSON-LD, i Store API og i DB med 0 afvigelser — og de **27** øvrige har kun et produkt i **papirkurven** (offentligt 404), så de er dokumenteret som rækker uden produkt med id og status; 0 rækker er uafklarede, og de 13 produkter uden række har uændret pris med id og målt beløb dokumenteret. W3TC kører med **minify, lazy load og database-cache slået til** (192 minificerede filer, 8,08 MB) efter tre gennemførte testordrer (1528/1529/1530, alle annulleret med note); kurv og kasse svarer 200; fri fragt i DK og ingen forsendelse til EU/UK/RoW; Stripe + bankoverførsel; Complianz på EU opt-in.
-- **Steamgears Autopilot — plugin** — Agent-scope er færdigt (29,85 af 29,85 d). Ejeren har lagt Pinterest-tokenet ind i WooCommerce-integrationen, og 7.65.0 — som blev lagt på sitet 8/11 gennem MCP (`Plugin_Upgrader` i `execute-php`; `update` svarer nu »Already up to date«) — henter det nu derfra gennem integrationens egen dekryptering: målt 8/11 virker det (konto `cpaleadsis`, id 688980580401955331), men appen mangler scopes `boards:read`, så pin-lister og Pin Analytics kan stadig ikke måles. Næste skridt er ejerens: genforbind Pinterest med board-adgang (eller et developer-token med boards:read + pins:read). Resten af blocked_by står uændret.
+- **steamgears.eu — site-optimering** — Intet agent-arbejde tilbage i S0–S4: alle fem bands er færdige og målt, og de resterende poster er ejerens og navngivet i §4c og blocked_by. Målt 8/11: 24 produkter (20 publicerede, 4 kladder) i **DKK**. DKK-tabellen fra 2/11 er afregnet **række for række**: af de **38 rækker** (linje 32–69) har **11** et produkt i butikken og står med **tabellens tal ordret** (335/165/400/435/265/180 kr) — målt 11/11 på produktsiden, i JSON-LD, i Store API og i DB med 0 afvigelser — og de **27** øvrige har kun et produkt i **papirkurven** (offentligt 404), så de er dokumenteret som rækker uden produkt med id og status; 0 rækker er uafklarede, og de 13 produkter uden række har uændret pris med id og målt beløb dokumenteret. W3TC kører med **minify, lazy load og database-cache slået til** (192 minificerede filer, 8,08 MB) efter tre gennemførte testordrer (1528/1529/1530, alle annulleret med note); kurv og kasse svarer 200; fri fragt i DK og ingen forsendelse til EU/UK/RoW; Stripe + bankoverførsel; Complianz på EU opt-in. Alle resterende poster er ejerens og står nu samlet i §4d (A–M) med den målte mangel og én konkret handling; målt 8/11 om aftenen er der **ingen** poster tilbage som agenten kan udføre.
+- **Steamgears Autopilot — plugin** — Agent-scope er færdigt (29,85 af 29,85 d). Ejeren har lagt Pinterest-tokenet ind i WooCommerce-integrationen, og 7.65.0 — som blev lagt på sitet 8/11 gennem MCP (`Plugin_Upgrader` i `execute-php`; `update` svarer nu »Already up to date«) — henter det nu derfra gennem integrationens egen dekryptering: målt 8/11 virker det (konto `cpaleadsis`, id 688980580401955331), men appen mangler scopes `boards:read`, så pin-lister og Pin Analytics kan stadig ikke måles. Næste skridt er ejerens: genforbind Pinterest med board-adgang (eller et developer-token med boards:read + pins:read). Resten af blocked_by står uændret. Målt 8/11 om aftenen er `alert_email` tom, så fejl registreres uden at nogen får mail — det er et ejerpunkt i plugin-roadmappens §8.
 - **Dark academia-rebrand** — Kun to ting står tilbage: (1) **witchy-tarot** kan først få indhold når ejeren siger ja til at gendanne 567 (Tarot Witchy Tee) — og eventuelt 395/411 — fra papirkurven; derefter fylder `python3 tools/rebrand_apply.py --apply --via-cli` termen automatisk, fordi kortet allerede indeholder dem; (2) **Batch 4-mockups** (5 t) kræver Printful-adgang eller 5–8 færdige billeder pr. produkt.
 - **SEO-indholdsproduktion** — SEO-indholdet er 100 %: fire guides skrevet, tre publiceret, corset-guiden publiceret, 1410 parkeret til september. Ingen åbne poster.
 - **Døde internlinks** — Vedligehold: tjek nye indlæg mod live-URL'er
-- **Niche-butik — plugin P4** — Færdig som roadmap-punkt P4: modulet er kørt mod det levende site (WordPress 7.1.4, WooCommerce 11.2.2) med 8 produktkladder, 5 kollektioner, en sideskits og en navigation, og rullet tilbage til præcis udgangstilstanden. Næste skridt er ejerens: Printful-adgang, publicering og de øvrige punkter i readiness-listen.
+- **Niche-butik — plugin P4** — Færdig som roadmap-punkt P4: modulet er kørt mod det levende site (WordPress 7.1.4, WooCommerce 11.2.2) med 8 produktkladder, 5 kollektioner, en sideskits og en navigation, og rullet tilbage til præcis udgangstilstanden. Næste skridt er ejerens: Printful-adgang, publicering og de øvrige punkter i readiness-listen. Målt 8/11 om aftenen er `alert_email` tom, så fejl registreres uden at nogen får mail — det er et ejerpunkt i plugin-roadmappens §8.
 
 ### Seneste commits
 
-- `f753e02 Priserne sat til dokumentets egne DKK-tal, ordret, og målt 11 af 11 med 0 afvigelser Modul: S4.3 valuta + priser — dokumenteret udførelse Før: — Efter: — Δ: — Grundlag: ingen ændring`
-- `99ce5b8 W3TC slået til og butikken skiftet til DKK — begge poster udført på live og målt udefra Modul: S4.3 valuta + priser, og seo.md #4 W3TC Før: — Efter: — Δ: — Grundlag: ingen ændring`
-- `a3b80a9 Sidste to restpunkter gjort konkrete: P1.5s versionskrav er indfriet, og ingen post står som »blokeret« Modul: restpunkter — roadmap Før: — Efter: — Δ: — Grundlag: ingen ændring`
-- `600c7af Undtag rebrand-workflowens egen rapport-commit, så CI ikke lyser rødt for maskinens eget arbejde Modul: værnet — commit-tjek Før: — Efter: — Δ: — Grundlag: ingen ændring`
-- `2b915aa Restpunkterne er gennemgået med skriveadgang: Complianz og plugin-opdateringen er udført, resten er konkrete ejerhandlinger Modul: restpunkter — site og plugin Før: — Efter: — Δ: — Grundlag: ingen ændring`
-- `477c3bb Merge branch 'main' of https://github.com/humle93/steamgears-site into freebuff/cca5dfcf9656b5d36ff3151f`
+- `946409d Verifikationsmetoden er også ændret: ls-remote og badges virker ikke anonymt længere Modul: repoets synlighed — dokumentation af kontrolvejen Før: — Efter: — Δ: — Grundlag: ingen ændring`
+- `896c5e7 Målt på sitet selv: selvopdateringen får 404 efter skiftet til privat Modul: repoets synlighed — konsekvens målt på live Før: — Efter: — Δ: — Grundlag: ingen ændring`
+- `7a6cc35 Repoet er gjort privat — og regningen for selvopdateringen er målt Modul: repoets synlighed — privat repo Før: — Efter: — Δ: — Grundlag: ingen ændring`
+- `893e95f Guide til nye WordPress-sites: Git- og staging-metoden målt mod vores`
+- `1a21347 Kollektionerne målt i samme pas: fortsat 5 af 6 med produkter Modul: S4.3 valuta + priser — verificeringslisten Før: — Efter: — Δ: — Grundlag: ingen ændring`
+- `03ac11f Alle 38 DKK-rækker afregnet: de 27 «manglende» rækker havde produkter i papirkurven Modul: S4.3 valuta + priser — fuld række-for-række-afregning Før: — Efter: — Δ: — Grundlag: ingen ændring`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 8/11 — roadmappene var «lukket», men fem påstande var ikke sande længere
+
+Begge roadmaps stod som lukket eller ejer-blokeret. Det holdt ikke hele vejen: da hver påstand blev målt
+igen, var fem forældede — §4c's indledning sagde stadig **USD**, **US opt-out** og »26 billeder på 24
+produkter«, mens virkeligheden var **DKK**, **EU opt-in** og **22 billeder på 20 publicerede**; S4.4 sagde 20
+ItemList-elementer på `/shop/` (målt **16**, siden viser 16 pr. side); S4.5 sagde fem aktive gateways, men kun
+**2 er tilgængelige i kassen** — `amazon_pay`, `klarna` og `link` står tændt uden at kunne vælges; og
+plugin-roadmappen bad ejeren trykke *Update* til 7.64.9, hvilket allerede var kørt (sitet kører 7.65.0).
+Fælden er generel: en roadmap der bliver «lukket» uden at blive målt igen, beder ejeren om noget han allerede
+har gjort og skjuler at en indstilling er faldet tilbage. Derfor er der nu en **§4d** i `docs/roadmap.md` med
+de **tretten ejerpunkter (A–M)** grupperet efter hvad ejeren skal levere — CVR+telefon dækker tre rækker, og
+produktbilleder dækker to — plus de samme punkter i plugin-roadmappens §8. Beviset pr. måling står i
+`docs/library/roadmap-status-2026-11-08.md`.
 
 ### 8/11 — de 27 «manglende» rækker havde produkter: de lå i papirkurven
 

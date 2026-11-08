@@ -18,7 +18,7 @@ typisk en voksen, der skal til cosplay, halloween, marked eller et temafest — 
 | --- | --- |
 | Platform | WordPress 7.1.4 + WooCommerce, PHP 8.5.12, hostet hos **Simply** |
 | Repo | Dokumentation, assets, plugin-kilde og status — **ikke** live-koden. Sitet ændres over MCP |
-| Katalog | **24 produkter** målt 8/11: **20 publicerede, 4 kladder**, 26 billeder i alt (højst 2 pr. produkt); produceret via **Printful**. Ældre logger nævner Printify-plugin'et, som ikke er leverandøren |
+| Katalog | **24 produkter** målt 8/11 om aftenen: **20 publicerede, 4 kladder, 92 i papirkurven**, **22 billeder i alt** (højst 2 pr. produkt, 0 uden alt-tekst); produceret via **Printful**. Butikken kører **DKK**. Ældre logger nævner Printify-plugin'et, som ikke er leverandøren |
 | Indhold | **29 sider** + 18 guides i guide-stakken; seneste roadmap måler sitemap og live-siderne |
 | Sprog | Engelsk på sitet, **dansk i commits og dokumentation** (tekniske termer på engelsk) |
 | Design | "Dark Clockwork Theatre v3"; template part til headeren ligger i [`css/`](../css/) |
@@ -72,14 +72,16 @@ Dette kort er afstemt mod målinger og status pr. **8/11 2026**. Nyere live-tal 
 
 **Sitet**
 
-- Kataloget blev målt 8/11 til **24 produkter (20 publiceret, 4 kladder)**; 46 gamle kladder er i papirkurven.
-  Alle 24 har færre end 3 billeder (26 samlet), og 0 af 41 billeder i brug mangler alt-tekst.
+- Kataloget blev målt 8/11 om aftenen til **24 produkter (20 publiceret, 4 kladder)**, med **92** produkt-id'er i
+  papirkurven. Alle 20 publicerede har færre end 3 billeder (**22** i alt), og **0** billeder mangler alt-tekst.
 - Alle **33 af 33 publicerede indlæg** har mindst ét `/go/`-link; de 22 unikke id'er er målt 302 → produkt → 200,
   og ingen peger på en kladde. Se [`library/s15-produktlink-daekning-2026-11-08.md`](library/s15-produktlink-daekning-2026-11-08.md).
 - `/start-here/`, `/build/`, `/inspiration/`, `/shipping/` og `/returns/` er live; shop-H1, mobilheader,
   designsystem og payload-loft er målt og lukket i [`docs/roadmap.md`](roadmap.md) §4.
-- `/shop/` målte 263 070 bytes og 2,93–3,16 s 8/11 (mod tidligere 470 KB / 5,8 s). Shoppen bruger fortsat USD,
-  Complianz er fortsat US opt-out, og Stripe er den eneste betalingsaftale — ejerbeslutninger står i §4c.
+- `/shop/` målte 263 070 bytes og 2,93–3,16 s 8/11 (mod tidligere 470 KB / 5,8 s). Butikken kører **DKK**
+  (skiftet 8/11), Complianz kører **EU opt-in** (`regions: eu`, `eu_consent_regions: yes`), og af **5**
+  tilsluttede betalingsmetoder er **2 tilgængelige i kassen** (`stripe` og `bacs`) — `amazon_pay`, `klarna` og
+  `link` står tændt uden at kunne vælges. Ejerpunkterne står i §4d.
 - GA4-dobbelttællingen blev rettet 7/11 i Rank Maths option: én `page_view` blev målt på `/`, `/?nocache=1`
   og `/shop/`; Ads-tagget blev bevaret. Kilde: [`library/analytics-dobbelt-2026-11-06.md`](library/analytics-dobbelt-2026-11-06.md).
 - GSC Crawl stats → By response er stadig ejer-blokeret; se S0.6 i roadmappet. Tal og resterende butikspunkter
@@ -87,10 +89,11 @@ Dette kort er afstemt mod målinger og status pr. **8/11 2026**. Nyere live-tal 
 
 **Pluginnet** (`plugins/steamgears-autopilot/`)
 
-- **Version i repo mod live:** repo **7.64.9**, live **7.64.6, aktív** (8/11 2026: `Plugin_Upgrader` fra
-  release-zippen, og de installerede filer er SHA-1-identiske med kilden; `SGAP_VERSION` svarer 7.64.6 i et
-  frisk request. 7.64.7 er tokenrettelsen, 7.64.8 gør kanalstatus entydig, og 7.64.9 gør P1.5 målbar
-  (`channel-health`-abilityen + `tools/live_channels.py`); alle tre venter på ejerens *Plugins → Update*-klik). Ældre
+- **Version i repo mod live:** repo **7.65.1** (en dokumentations-patch af `ROADMAP.md`), live **7.65.0,
+  aktiv** (målt 8/11 om aftenen; opdateringen blev lagt på gennem `Plugin_Upgrader`, og
+  `steamgears-autopilot/update` svarer »Already up to date (7.65.0)« på sitet).
+  7.64.7 er tokenrettelsen, 7.64.8 gør kanalstatus entydig, og 7.64.9 gør P1.5 målbar
+  (`channel-health`-abilityen + `tools/live_channels.py`). Ældre
   historik: 7.58.2 blev lagt på 7/11 med `wp plugin install` fra
   repoets zip og `wp plugin activate` gennem Novamira; `/wp-json/sgap/v1` svarer 200 med 19 ruter, inkl. de tre
   `/facebook/*`). Vejen dertil kostede en runde: 7.58.0 lå på disken men var **inaktiv**, WooCommerce var også
@@ -101,7 +104,7 @@ Dette kort er afstemt mod målinger og status pr. **8/11 2026**. Nyere live-tal 
   `SGAP_REST::NS`; se `docs/library/rest-nedbrud-7-58-0-2026-11-07.md`. Et plugin-folder kan kun skiftes af
   WordPress selv, så en release slutter med ejerens *Plugins → Update*-klik, ikke med et push.
   Status: `docs/roadmap.md` §2b; procedure og efterkontrol: plugin-README §Updates.
-- 58 klasser, 45 PHP-filer, 20.424 linjer (målt 8/11 på 7.64.9); hvert subsystem kan nås fra en rigtig
+- 58 klasser, 45 PHP-filer, 20 454 linjer (målt 8/11 om aftenen på 7.65.0); hvert subsystem kan nås fra en rigtig
   indgang (cron, REST, admin-side, ability eller AJAX). Version **7.19.0** tilføjede
   helsides SEO/GEO/AEO-auditten (`includes/site-seo.php`), som erstatter den per-side-optimering der krævede
   ét klik pr. URL. **7.20.0** tilføjede pre-flight-valideringen (`includes/preflight.php`): hver kø-post tjekkes
@@ -120,7 +123,7 @@ Dette kort er afstemt mod målinger og status pr. **8/11 2026**. Nyere live-tal 
   det deprecerede `impressions`, en metric Instagram endnu ikke har rapporteret udelades i stedet for at blive
   gemt som 0, og matchningen sker på captionen mod `/go/<id>/`. **7.57.0** gjorde fejlsøgningen til et fast
 værn, og **7.58.0** tilføjede Facebook-siden som kanal (P2.6): publicering, insights og moderation med
-direkte publicering som opt-in. **1 128 smoke-checks, alle grønne** (målt 8/11 2026, efter 7.64.9).
+direkte publicering som opt-in. **1 136 smoke-checks, alle grønne** (målt 8/11 2026 om aftenen, på 7.65.0: `1136 PASS · 0 FAIL`).
 - **Niche-butikken (P4) er færdig og målt live:** ét niche-navn blev til 5 kollektioner (210–214), 8
   produktkladder (1517–1524) med `_price`/`_regular_price`/SKU/`_sgap_niche`, en sideskits (1525) og en
   `wp_navigation` (1526) med 8 links — og rollback via admin-knappen slettede alle 15 rækker og gav en
@@ -174,9 +177,10 @@ PYTHONPATH=tools/_deps python3 tools/project_reports.py
 tools/_deps/bin/php -l plugins/steamgears-autopilot/steamgears-autopilot.php
 ```
 
-**Blokeringer der kræver ejeren:** OAuth-browsergodkendelse i en ny sandkasse; *Plugins → Update* til 7.64.9
-(tokenrettelsen, kanalstatus-entydigheden og P1.5-målingen) og en genforbindelse af Pinterest med `boards:read`; P1.5-kanalnøgler; Printful-kostpriser/mockups; ja/nej for produkterne
-942/765/766/767; samt CVR, navn, adresse, telefon, valuta/priser, betalingsaftaler, Complianz-valg og
+**Blokeringer der kræver ejeren:** OAuth-browsergodkendelse i en ny sandkasse; en genforbindelse af Pinterest med
+`boards:read` og P1.5's fem kanalnøgler; Printful-kostpriser/mockups; ja/nej for produkterne 942/765/766/767;
+alarm-e-mail (`alert_email` er tom); AIMLAPI-påfyldning (nøglen svarer »out of funds«, 45 kladder venter); de tre
+Stripe-metoder der er slået til men utilgængelige; samt CVR, navn, adresse, telefon, betalingsaftaler og
 forsendelseszoner. GSC Crawl stats → By response kræver ejerens adgang. Se den aktuelle og komplette liste i
 [`docs/roadmap.md`](roadmap.md) §4c. S0.4's vanity-301'er er lukket som overflødige — opret ikke en Redirection-gruppe.
 

@@ -290,11 +290,14 @@ publiceret 8/11 med to billeder (alt-tekst) og tre `/go/`-links hver, målt **20
 
 **Scope-ændring 8/11:** de 1.5 d der kræver ejeren er flyttet ud af agent-estimatet, så
 `projektstatus.json` regner på det arbejde agenten kan udføre (S1 3.6 af 3.6 d, S4 4.05 af 4.05 d,
-i alt **20.95 af 20.95 d**). Ingen blokeret dag er erklæret færdig. Tallene er målt igen 8/11:
-24 produkter (20 publicerede, 4 kladder, 92 i papirkurven), butikken kører **USD**, kun **Denmark**
-har en forsendelsesmetode (fri fragt uden minimum) mens resten af verdenen har **ingen**, betaling er
-**Stripe + bankoverførsel**, Complianz står på **US opt-out** (`regions: us`, `eu_consent_regions: no`),
-og billedlaget er **26 billeder på 24 produkter — 0 produkter har 3 eller flere**.
+i alt **20.95 af 20.95 d**). Ingen blokeret dag er erklæret færdig. Tallene er målt igen **8/11 om
+aftenen** (hele listen med metode står i [library/roadmap-status-2026-11-08.md](library/roadmap-status-2026-11-08.md)):
+24 produkter (20 publicerede, 4 kladder, 92 i papirkurven), butikken kører **DKK**, kun **Denmark**
+har en forsendelsesmetode (fri fragt uden minimum) mens resten af verdenen har **ingen**, **5**
+betalingsmetoder er slået til men kun **2 er tilgængelige i kassen** (`stripe` og `bacs`), Complianz står på
+**EU opt-in** (`regions: eu`, `eu_consent_regions: yes`), og billedlaget er **22 billeder på 20 publicerede
+produkter — 0 har 3 eller flere** (0 uden alt-tekst). Pluginnet kører **7.65.0** på sitet (**7.65.1** i repoet — en ren dokumentations-patch), køen har **0** ventende,
+og AI-nøglen svarer »run out of funds« med **45** kladder i kø.
 
 Efter gennemgangen 8/11 er der **ingen åbne punkter tilbage som agenten kan udføre**. Tabellen er den
 autoritative liste: hvert punkt står med sin målte slutstatus, og hvert ejer-blokerede punkt står med
@@ -311,11 +314,11 @@ autoritative liste: hvert punkt står med sin målte slutstatus, og hvert ejer-b
 | S2.1 | ✅ lukket som scope-korrektion (seks børne-hubs ville duplikere; `/inspiration/` er en rigtig side) | — |
 | S3.1–S3.6 | ✅ lukket, målt (22 aktive plugins, fjerde vedligeholdelsespost kørt, kø- og cron-hygiejne med 326 → 0 ventende leveringer) | — |
 | S3.4b | ⛔ **kun et slet/behold** — målt 8/11: `website-llms-txt/website-llms-txt.php v8.6.3` og `insert-headers-and-footers/ihaf.php v2.4.1`, begge inaktive og indlæser ingen kode | **Plugins → Inaktive → Slet** på begge, eller skriv »behold« (så lukkes posten som bevidst valg) |
-| S4.4, S4.8, S4.9 (del), S4.10–S4.13 | ✅ lukket, målt (`schema_check` 20/20, review/withdrawal-hooks, OG-billeder; **8/11:** ItemList-strukturdata tilføjet på `/shop/` og produktkategorier — målt 0 → 20 elementer på `/shop/`, 5 på `/product-category/airship/`, 4 på `/product-category/atelier/`, og produktsiderne har stadig kun ét Product-schema) | — |
+| S4.4, S4.8, S4.9 (del), S4.10–S4.13 | ✅ lukket, målt (`schema_check` 20/20, review/withdrawal-hooks, OG-billeder; **8/11:** ItemList-strukturdata tilføjet på `/shop/` og produktkategorier — målt 0 → **16** elementer på `/shop/` (siden viser 16 pr. side), **5** på `/product-category/airship/`, **4** på `/product-category/atelier/`, og produktsiderne har stadig kun ét Product-schema) | — |
 | S4.1 | ✅ **lukket 8/11 — udført på live** | `cmplz_options` gik fra `regions: us` / `eu_consent_regions: no` til **`regions: eu` / `eu_consent_regions: yes`**, med `cmplz_clear_cache()` og `w3tc_flush_all()`. Verificeret udefra i forsidens HTML: `"region":"eu"` og stylesheetet `cmplz-banner-1-optin-css`. Bevis: [library/restpunkt-gennemgang-2026-11-08.md](library/restpunkt-gennemgang-2026-11-08.md) |
 | S4.2 | ⛔ **kun to felter** — målt 8/11: `organisation_name: "Henning 6"`, `address_company: "Lavgade 44a st th"`, `telephone_company: ""`, og der findes intet CVR-felt | **Complianz → Wizard → Organization**: ret firmanavnet, indsæt **telefon** og **CVR**; agenten skriver derefter GPSR-blokken med samme data |
 | S4.3 | ✅ **lukket 8/11 — alle 38 tabelrækker afregnet, dokumentets tal sat ordret og målt udefra** | Butikken kører **DKK**. DKK-tabellen er afregnet **række for række**: af de **38 rækker** har **11** et produkt i butikken og står med **tabellens tal ordret** ([library/valuta-og-priser-2026-11-02.md](library/valuta-og-priser-2026-11-02.md), linje 32–69) står nu med **tabellens tal ordret**: 335 kr (399, 401, 403, 413, 483), 165 kr (477), 400 kr (489), 435 kr (491, 493), 265 kr (495) og 180 kr (557) — i alle variationer. Målt: **11 af 11** produktsider viser præcis det tal med `kr.`-symbol, **0 afvigelser** mod DB og Store API; **20 af 20** produktsider svarer 200. De øvrige **27 rækker** har kun et produkt med `post_status = trash` — altså **intet produkt i butikken** (offentlig URL giver 404); de er afregnet som rækker uden produkt med **id og status som bevis** (719/721/724/726/728, 475/479/481/485, 553/555/559/561/563/565/567/619, 391/393/395/397/405/407/409/411, 487/497), og prisen på dem er urørt, fordi der ikke er nogen offentlig prisflade at sætte tallet på. **0 rækker er uafklarede.** De **13 produkter uden række** (765, 766, 767, 940, 941, 942, 954, 965–967, 970, 1255, 1282) har **ingen række** i dokumentet (0 grep-træf), så deres pris er uændret og står med id, målt pris og det rå dokumentudsagn i [library/w3tc-og-valuta-2026-11-08.md](library/w3tc-og-valuta-2026-11-08.md), hvor hele den 38-rækkers afregning står linje for linje. Dokumentets tabel modsiger sin egen regel på linje 73 (den bygger på USD-priser fra 2/11), og modsætningen står dokumenteret som én ejerhandling: gennemse de 11 priser i WooCommerce → Produkter |
-| S4.5 | ⛔ **kun en aftale** — målt 8/11 er de aktive gateways `stripe`, `stripe_amazon_pay`, `stripe_klarna`, `stripe_link` og `bacs`; MobilePay og PayPal findes ikke | Opret aftalen hos **MobilePay**/**PayPal** og læg nøglerne ind som secret — indtil da er Stripe (med Klarna) dækningen |
+| S4.5 | ⛔ **kun en aftale — og tre metoder der er slået til men ikke virker** — målt 8/11 om aftenen: **5 gateways er `enabled=yes`** (`stripe`, `stripe_amazon_pay`, `stripe_klarna`, `stripe_link`, `bacs`), men **kun 2 er `is_available()`** i kassen: **`stripe` og `bacs`**. De tre Stripe-undermetoder står altså tændt uden at kunne vælges. MobilePay og PayPal findes ikke. Live-nøgletjek kl. 21:24: publer `n/a` (RSS-tilstand), **ai »You've run out of funds«**, **printful »No Printful token saved.«** | To ting: (1) slå **Amazon Pay/Klarna/Link** til i **Stripe Dashboard → Payment methods** — eller slå dem fra i WooCommerce, så kassen ikke lover mere end den holder; (2) opret aftalen hos **MobilePay**/**PayPal** og læg nøglerne ind som secret |
 | S4.6 | ⛔ **kun tre tal** — målt 8/11: zonen »Denmark« har `free_shipping`, og zone 0 (»Locations not covered by your other zones«) har **ingen** metoder, så en EU-kunde ikke kan gennemføre en ordre | Beslut og skriv de tre tal: **hvilke lande**, **pris pr. zone**, og **fri fragt-grænse** (0 eller fx 400 kr). Så konfigurerer agenten zonerne og måler dem |
 | S4.7 | ⛔ **Printful-token eller billeder** — målt 8/11: plugin-status svarer `printful: {"ok": null, "message": "No Printful token saved."}`, og kataloget har 22 billeder på 20 produkter | Sæt **Printful-token** i pluginnet (Settings → Keys) **eller** upload 5–8 billeder pr. produkt efter [library/batch-4-arbejdsordre-2026-11-08.md](library/batch-4-arbejdsordre-2026-11-08.md) |
 | S4.9 GPSR | ⛔ **samme to felter som S4.2** — målt 8/11: telefon er tom, og CVR findes ikke som felt | Indsæt **CVR + telefon** i Complianz → Wizard → Organization; agenten skriver GPSR-blokken bagefter |
@@ -327,9 +330,11 @@ autoritative liste: hvert punkt står med sin målte slutstatus, og hvert ejer-b
 | Plugin P1.5 | ✅/⛔ **opdateringen er udført; kun tokens mangler** — målt 8/11: sitet kørte 7.64.7 og blev opdateret til **7.65.0** gennem `Plugin_Upgrader` i `execute-php` (`foer 7.64.7 → efter 7.65.0`, 388 837 bytes, aktiv), og `steamgears-autopilot/update` svarer nu »Already up to date (7.65.0)«. Live-målingen kørte: `channel-health` giver **pinterest `needs_scope`** og **instagram/bluesky/mastodon/telegram/facebook `missing_token`**, `measured: 0`. Sitet svarer 200 på `/`, `/shop/`, produktside og `/wp-json/sgap/v1/tick` | **Pinterest:** genforbind med `boards:read` (eller developer-token med `boards:read` + `pins:read`) · **Instagram, Bluesky, Mastodon, Telegram, Facebook:** indsæt tokens under **Settings → Keys** i pluginnet. Derefter er målingen én kommando |
 | Plugin P2.1–P2.3 | ✅ **bygget og testet** (7.29.0/7.30.0) — Bluesky, Mastodon og Telegram er kanal-implementeringer med tests | — (live-publicering bruger samme tokens som P1.5, men der er intet kode-arbejde tilbage) |
 
-**Talt efter gennemgangen 8/11:** **ti** poster kræver stadig ejeren (S0.6, S1.2, S3.4b, S4.2, S4.5, S4.6,
-S4.7, S4.9-GPSR, rebrand batch 4 og rebrand-de-trash'ede-designs) plus plugin P1.5's tokens — **elleve i
-alt**. Tre er lukket samme dag: S4.1 (Complianz kører EU opt-in), S4.3 (`DKK` og alle priser sat) og
+**Talt efter gennemgangen 8/11 (aften):** de blokerede rækker er **tolv** (S0.6, S1.2, S3.4b, S4.2, S4.5, S4.6,
+S4.7, S4.9-GPSR, rebrand batch 4, rebrand-de-trash'ede-designs, plugin P1.5 og plugin §8's CC-retning) plus
+`seo.md` #5 — **tretten rækker i alt, som samler sig i tretten ejerpunkter** (A–M i
+[library/roadmap-status-2026-11-08.md](library/roadmap-status-2026-11-08.md) §3), fordi flere rækker deler samme
+mangel: CVR+telefon dækker tre rækker, og produktbilleder dækker to. Tre er lukket samme dag: S4.1 (Complianz kører EU opt-in), S4.3 (`DKK` og alle priser sat) og
 `seo.md` #4 (W3TC minify/lazy load/dbcache slået til efter en rigtig testordre), og P1.5's opdatering er
 udført (sitet kører 7.65.0). Hver af de tretten står nu med den **konkrete** ejerhandling og det rå svar der viser
 hvorfor — se [library/restpunkt-gennemgang-2026-11-08.md](library/restpunkt-gennemgang-2026-11-08.md).
@@ -337,6 +342,33 @@ Nyt fund uden for roadmappet: **AIMLAPI-nøglen er løbet tør for midler**, så
 ikke giver nye kladder (målt 8/11, 45 kladder i kø). P2.1–P2.3 står ikke på listen: koden er bygget og testet, og kun
 live-publiceringen deler P1.5's tokens. Resten er lukket og målt. Ingen af de femten kan lukkes af
 agenten uden at gætte ejerens tal, aftaler eller juridiske valg.
+
+## 4d. De tretten ejerpunkter — alt andet er lukket og målt (8/11 2026)
+
+Efter målingen 8/11 om aftenen er der **ingen poster tilbage som agenten kan udføre**: hvert punkt i §4c er
+enten ✅ lukket med kørt bevis eller ⛔ blokeret af noget ejeren ejer. Nedenstående er den fuldstændige liste —
+grupperet efter **hvad ejeren skal levere**, fordi flere rækker deler samme mangel. Beviserne pr. måling står i
+[library/roadmap-status-2026-11-08.md](library/roadmap-status-2026-11-08.md).
+
+| # | Mangel (målt 8/11) | Rækker | Én konkret handling |
+|---|---|---|---|
+| A | `telephone_company: ""`, intet CVR-felt | S4.2 · S4.9 · `seo.md` #5 | Complianz → Wizard → Organization: indsæt **telefon** og **CVR** |
+| B | Zone 0 har 0 fragtmetoder; kun DK har fri fragt | S4.6 | Beslut **lande**, **pris pr. zone**, **fri fragt-grænse** — agenten konfigurerer og måler |
+| C | 3 Stripe-metoder er slået til men utilgængelige (`amazon_pay`, `klarna`, `link`) | S4.5 | Slå dem til i **Stripe Dashboard**, eller fra i WooCommerce |
+| D | MobilePay og PayPal findes ikke | S4.5 | Opret aftalen og læg nøglerne ind som secret |
+| E | 22 billeder på 20 produkter, 0 med 3+; intet Printful-token | S4.7 · Rebrand batch 4 | **Printful-token** i Settings → Keys, eller 5–8 fotos pr. produkt |
+| F | Fire kladder med pris og SKU (942, 765, 766, 767) | S1.2 | Svar **ja/nej** pr. produkt |
+| G | To inaktive plugins indlæser ingen kode | S3.4b | **Slet** dem, eller skriv »behold« |
+| H | 29 designs i papirkurven; witchy-tarot har 0 produkter | Rebrand · witchy-tarot | Beslut om de 29 skal genoplives, og om 567/395/411 skal tilbage |
+| I | Pinterest `needs_scope`; fem kanaler `missing_token` | Plugin P1.5 | Genforbind Pinterest med `boards:read`; indsæt fem kanal-tokens |
+| J | AIMLAPI: »You've run out of funds« — 45 kladder venter | Indholdsproduktionen | Fyld op på aimlapi.com → Billing |
+| K | `alert_email` er tom | Plugin P0.1 | Sæt en e-mailadresse i Settings → Alerts |
+| L | GSC svarer 401 | S0.6 | Search Console → Crawl statik → By response → screenshot |
+| M | Command Center-retningen er ikke bekræftet | Plugin §8 pkt. 5 | Svar **ja/nej** til énvejs-integration |
+
+**Ikke-blokerende åben beslutning:** A/B/C for plugin'ets opdateringskanal efter at repoet blev privat. Det er
+dokumenteret i [library/repo-privat-2026-11-08.md](library/repo-privat-2026-11-08.md) og holder ikke andre
+punkter tilbage.
 
 ## 5. Imported from `plugins/steamgears-autopilot/ROADMAP.md`
 
@@ -408,6 +440,7 @@ Nyeste først. Hver række siger hvad der blev målt eller bygget, og hvor bevis
 
 | Date | Change |
 | --- | --- |
+| 2026-11-08 (roadmap-status målt på ny — fem påstande rettet, tretten ejerpunkter navngivet) | **Begge roadmaps stod som lukket; nu er hver påstand målt igen, og fem holdt ikke.** Rettet: §4c's indledning sagde **USD**, **US opt-out** og »26 billeder på 24 produkter« — målt er det **DKK**, **EU opt-in** og **22 billeder på 20 publicerede**; S4.4 sagde 20 ItemList-elementer på `/shop/` — målt **16** (siden viser 16 pr. side); S4.5 sagde fem aktive gateways, men kun **2 er tilgængelige i kassen** (`stripe`, `bacs`), mens `amazon_pay`/`klarna`/`link` står tændt uden at kunne vælges; plugin-ROADMAP sagde »målt på 7.64.9« (repo og live er **7.65.0**) og bad ejeren trykke *Update* til 7.64.9 — det er allerede kørt, så skridtet er fjernet. Alt andet er bekræftet med kørt bevis: **1136 smoke-checks PASS / 0 FAIL**, 65 PHP-filer uden syntaksfejl, `schema_check` **20/20**, **110/110** `/go/`-links peger på publicerede produkter (302-stikprøver), kollektioner 5/6, kø **0** ventende, `keycheck` live kl. 21:24 og `channel-health` `needs_scope 1 · missing 5`. Ny §4d lister de **tretten ejerpunkter** (A–M) med præcis mangel og handling. Bevis: [library/roadmap-status-2026-11-08.md](library/roadmap-status-2026-11-08.md) |
 | 2026-11-08 (repoet gjort privat — og regningen målt) | **Repoet er nu privat, og det tager plugin'ets selvopdatering med sig.** `humle93/steamgears-site` gik fra `public` til `private` efter ejerens anmodning (admin bekræftet; kun `private`/`visibility` ændret). Målt anonymt udefra: API, `README.md`, `docs/roadmap.md`, plugin-headeren og codeload-arkivet svarer alle **404** — mens agentens `cloud_git fetch` virker uændret. Konsekvensen er konkret: `SGAP_Updater` læser `raw.githubusercontent.com` anonymt, så `remote_version()` ser 404 og *Update now* melder »Could not read the latest version from GitHub«; zip'en giver **404** fra sitet selv (målt: `remote_version(true)` → `""`, `update_available(true)` → `false`, `wp_remote_get(package_url('7.65.0'))` → 404), så opdateringsvejen er ikke en formodning men et målt svar. Handlinger tælles nu som minutter. Tre veje står i dokumentet: A) bliv privat og upload zip manuelt, B) flyt kun release-zip'en til et offentligt sted, C) gør repoet offentligt igen — **ejerens valg**. (Plugin'ets egen `ROADMAP.md` er ikke rettet: den ligger inde i den udgivne zip, og en rettelse dér ville kræve en ny version og en ny zip. Den levende status står her.) Bevis: [library/repo-privat-2026-11-08.md](library/repo-privat-2026-11-08.md) |
 | 2026-11-08 (alle 38 DKK-rækker afregnet — hullet lukket) | **Valuta-posten er ikke længere et udvalg af 11 rækker: hele dokumentets DKK-tabel er afregnet, linje for linje.** De 38 rækker (linje 32–69) blev matchet maskinelt mod *hele* produktlageret — alle statusser, også papirkurven, og alle variationer. Resultatet: **11 rækker** har et produkt i butikken og står med tabellens tal ordret (verificeret i DB, på den offentlige produktside, i JSON-LD og i Store API, 0 afvigelser), og **27 rækker** har kun et produkt med `post_status = trash` — det er ikke i butikken, og offentlig URL for id 724/475/487/391/567 svarer **404**, så rækken er afregnet som »intet produkt i butikken« med id og status som bevis. **0 rækker mangler et produkt at pege på, 0 er uafklarede.** Prisen på de 27 er urørt: der er ingen offentlig prisflade at sætte tallet på, og gendannelse er ejerens beslutning (S1.2/S4.3), ikke en prisbeslutning. Kurv og kasse svarer fortsat **200/200** (vare 965, 395,00 kr), og W3TC står uændret `true` (minify/dbcache/lazyload, 192 minificerede filer, 8,08 MB). Bevis: [library/w3tc-og-valuta-2026-11-08.md](library/w3tc-og-valuta-2026-11-08.md) |
 | 2026-11-08 (om-mærkningen målt — kollektionerne er væk) | **Om-mærkningen var kun delvist i effekt, og det blev først synligt da den blev målt udefra.** Et nyt værktøj, [../tools/rebrand_audit.py](../tools/rebrand_audit.py) (offentlig Store API, `--selftest` med 8 fixtures, exit 1 ved mangler), viser at titlerne fra batch 1 er på plads, men at **alle seks nye kollektioner har 0 produkter** mens de fire gamle bærer alle 20 publicerede, og at `vintage-maritime-prints` svarer 404. Batch 2's tildeling er altså ikke i effekt og skal gentages (0,4 t, kræver skriveadgang); samme måling viser 22 billeder på 20 produkter og **62 manglende billedplaceringer**. Gentildelingen er skilt ud som eget modul med en dokumenteret scope-korrektion, så de 8,5 t for omdøbning og tekster ikke dækker over et arbejde der skal gøres igen: rebrand går **64,3 % → 62,5 %** (9 af 14,4 t). Bevis: [../reports/rebrand-status-2026-11-08.md](../reports/rebrand-status-2026-11-08.md) |
