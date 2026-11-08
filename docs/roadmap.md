@@ -268,6 +268,13 @@ completed order and one refund. S4.1–S4.5 are blocking before any ad spend.
 
 ---
 
+## 4b. SEO-indholdsproduktionen — 100 % (8/11)
+
+De fire guide-kladder er afgjort: **1357 wall decor**, **1361 mad scientist** og **1359 utility belt** blev
+publiceret 8/11 med to billeder (alt-tekst) og tre `/go/`-links hver, målt **200** live og optaget i
+`post-sitemap.xml` (34 lokationer). **1410** (børne-Halloween) er parkeret til september. Se
+[library/tre-saeson-guides-2026-11-08.md](library/tre-saeson-guides-2026-11-08.md).
+
 ## 5. Imported from `plugins/steamgears-autopilot/ROADMAP.md`
 
 The plugin roadmap is the authority for plugin work; this table is the site-side view of it, so a reader of

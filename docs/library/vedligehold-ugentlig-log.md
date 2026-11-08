@@ -1,5 +1,11 @@
 # Ugentlig backup + 1 indholdselement — log
 
+## 2026-11-08 (guides) — tre sæson-guides publiceret
+- **1357 / 1361 / 1359** publiceret: 12,6–12,9k tegn, 2 billeder med alt-tekst og 3 `/go/`-links hver.
+- **Målt:** alle tre svarer **200** (104 007–104 485 bytes); `/go/966/`, `/go/477/`, `/go/941/` → **302** → produkt **200**; billeder **200**.
+- **Sitemap:** 31 → **34** lokationer efter re-save + sletning af `uploads/rank-math/*.xml` (Rank Maths fil-cache).
+- **SEO-indholdsmodulet:** 3 af 3 = **100 %**.
+
 ## 2026-11-08 (plugin-pas) — P1.5 kanalstatus, 7.61.0
 - **Bygget:** `includes/channel-health.php` + `/sgap/v1/channel-health` (401 uden login) og 11 nye smoke-checks.
 - **Målt:** smoke **1027 PASS / 0 FAIL**, `php -l` ren, fejlscan **0 fund**, zip `v7.61.0` 349 946 bytes / 46 filer,

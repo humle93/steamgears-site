@@ -178,16 +178,18 @@
     {
       "id": "seo",
       "name": "SEO-indholdsproduktion",
-      "next": "Fire guides er skrevet færdige som kladder (1410: 11 403 tegn, 1361: 11 454, 1359: 11 237, 1357). Publicering er ejerens redaktionelle valg; intet er publiceret uden den.",
-      "blocked_by": "Publicering af guide-kladderne kræver ejerens valg af hvilke der skal ud og hvornår. Tidligere modulnavn pegede på id 292/296/295, som er produktvarianter (t-shirt L/M/S), ikke guides.",
+      "next": "Alle fire guides er afgjort: tre publiceret 8/11 (1357, 1361, 1359), og 1410 (børne-Halloween) er parkeret til september, fordi dens sæson toppede i oktober.",
+      "blocked_by": "",
       "modules": [
         {
           "id": "batch",
-          "name": "Publicerede guides (id 292, 296, 295)",
-          "done": 0,
+          "name": "Publicerede guides (1357, 1361, 1359)",
+          "done": 3,
           "total": 3,
           "unit": "guides",
-          "note": "copy klar 3/11; 0 publiceret — venter på fotos, schema og adgang"
+          "note": "copy klar 3/11; 0 publiceret — venter på fotos, schema og adgang",
+          "verified": true,
+          "label": "Publicerede guides (1357, 1361, 1359)"
         },
         {
           "id": "loop",
@@ -200,11 +202,12 @@
         },
         {
           "id": "copy",
-          "name": "Guide-copy klar til publicering (292, 296, 295 + corset)",
+          "name": "Guide-copy klar til publicering (1357, 1361, 1359 + corset)",
           "done": 4,
           "total": 4,
           "unit": "guides",
-          "note": "fire guides skrevet og verificeret 3/11 i docs/library/guides-2026-11-03.md og guides-2026-11-03-corset.md; 4/4 bestod tools/guide_check.py (7 selftest-fixtures). Corset-guiden er det sidste brief-mål kataloget kan bære — vest og boots har ingen produkter"
+          "note": "fire guides skrevet og verificeret 3/11 i docs/library/guides-2026-11-03.md og guides-2026-11-03-corset.md; 4/4 bestod tools/guide_check.py (7 selftest-fixtures). Corset-guiden er det sidste brief-mål kataloget kan bære — vest og boots har ingen produkter",
+          "label": "Guide-copy klar til publicering (1357, 1361, 1359 + corset)"
         },
         {
           "id": "corset",
@@ -214,7 +217,8 @@
           "unit": "guides",
           "note": "publiceret 6/11: kladde 1394 færdiggjort med to /go/-links (489, 491 — begge målt 302) i stedet for rå /product/-hrefs, og et hub-link til /steampunk-costumes/; Rank Math-titel, description og FAQPage-schema var allerede på plads, og det fremhævede billede er 1395"
         }
-      ]
+      ],
+      "verified": true
     },
     {
       "id": "links",
@@ -1474,6 +1478,15 @@
       "after": 98.0,
       "delta": 0.8,
       "basis": "29,85 af 30,45 d (P0 4,65/4,65 · P1 14,45/15,05 · P2 4,75/4,75 · P3 2/2 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5)"
+    },
+    {
+      "date": "2026-11-08",
+      "project": "SEO-indholdsproduktion",
+      "module": "daglig måling",
+      "before": 62.5,
+      "after": 100.0,
+      "delta": 37.5,
+      "basis": "8 af 8 guides (Publicerede guides (id 292, 296, 295) 3/3 · Guide-copy klar til publicering (292, 296, 295 + corset) 4/4 · Corset-guiden publiceret (/steampunk-corset-guide/, 1394) 1/1)"
     }
   ]
 }

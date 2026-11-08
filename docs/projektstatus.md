@@ -25,7 +25,7 @@ Status pr. **2026-11-08** · beregnet af `projektstatus.py` · kilder: [`projekt
 | **steamgears.eu — site-optimering** *(roadmap S0–S4)* | **88,6 %** | 21,3 af 24,05 d (S0 2,35/2,35 · S1 3,9/4,6 · S2 7,85/8,3 · S3 3,5/3,55 · S4 3,7/5,25) |
 | **Steamgears Autopilot — plugin** | **98 %** | 29,85 af 30,45 d (P0 4,65/4,65 · P1 14,45/15,05 · P2 4,75/4,75 · P3 2/2 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5) |
 | **Dark academia-rebrand** | **63 %** | 8,5 af 13,5 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5) |
-| **SEO-indholdsproduktion** | **62,5 %** | 5 af 8 guides (Publicerede guides (id 292, 296, 295) 0/3 · Guide-copy klar til publicering (292, 296, 295 + corset) 4/4 · Corset-guiden publiceret (/steampunk-corset-guide/, 1394) 1/1) · drift: Daglig loop kører |
+| **SEO-indholdsproduktion** | **100 %** | 8 af 8 guides (Publicerede guides (1357, 1361, 1359) 3/3 · Guide-copy klar til publicering (1357, 1361, 1359 + corset) 4/4 · Corset-guiden publiceret (/steampunk-corset-guide/, 1394) 1/1) · drift: Daglig loop kører |
 | **Døde internlinks** | **100 %** | 39 af 39 links |
 <!-- AUTO:DAGLIG:END -->
 
@@ -37,7 +37,7 @@ Status pr. **2026-11-08** · beregnet af `projektstatus.py` · kilder: [`projekt
 | steamgears.eu — site-optimering (88,6 %) | Tilbage af S4 kræver ejeren: CVR/adresse/telefon (S4.2) og dermed GPSR-blokken (S4.9), valuta og priser (S4.3), betalingsaftaler (S4.5), forsendelsesvalg (S4.6), Printify-billeder (S4.7) og EU-samtykkemodellen i Complianz (S4.1). | S4's resterende punkter kræver ejerens oplysninger og aftaler: CVR, adresse og telefon; valutaomregning af 39 priser; MobilePay/PayPal/Klarna-aftaler; forsendelseszoner og fri fragt-grænse; Printify-adgang til mockups; og valg af EU-samtykkemodel i Complianz. |
 | Steamgears Autopilot — plugin (98 %) | P1.5's sidste 0,60 d er live-verifikation og kræver ejerens tokens: Pinterest (401 i dag), Instagram (intet token), Bluesky/Mastodon, Telegram og Facebook. Kanalstatus i 7.61.0 gør turen ét klik. | Pinterest-tokenet er personligt og svarer 401; Instagram kræver Meta-app + IG Business-konto; Bluesky/Mastodon kræver app-password/instans-token; Telegram kræver BotFather-token; Facebook kræver Meta App Review. Ingen af dem må indsættes i chat eller repo. |
 | Dark academia-rebrand (63 %) | Batch 4 — mockups (~130 billeder) | Batch 4-mockups (0 af 5 t) kan ikke laves her: baade roadmap og library/om-maerkning-dark-academia-2026-11-01.md siger at mockups skal genereres i Printify eller uploades, og der er ingen Printify-adgang i dette miljoe. Kræver ejerens Printify-adgang eller upload. |
-| SEO-indholdsproduktion (62,5 %) | Fire guides er skrevet færdige som kladder (1410: 11 403 tegn, 1361: 11 454, 1359: 11 237, 1357). Publicering er ejerens redaktionelle valg; intet er publiceret uden den. | Publicering af guide-kladderne kræver ejerens valg af hvilke der skal ud og hvornår. Tidligere modulnavn pegede på id 292/296/295, som er produktvarianter (t-shirt L/M/S), ikke guides. |
+| SEO-indholdsproduktion (100 %) | Alle fire guides er afgjort: tre publiceret 8/11 (1357, 1361, 1359), og 1410 (børne-Halloween) er parkeret til september, fordi dens sæson toppede i oktober. | ingen |
 | Døde internlinks (100 %) | Vedligehold: tjek nye indlæg mod live-URL'er | ingen |
 <!-- AUTO:BLOKERINGER:END -->
 
@@ -50,6 +50,7 @@ Nyeste først. Append-only — rækker må ikke slettes eller ændres.
 
 | Dato | Projekt | Modul | Før → Efter | Δ | Grundlag |
 | --- | --- | --- | --- | --- | --- |
+| 2026-11-08 | SEO-indholdsproduktion | daglig måling | 62,5 % → 100 % | +37,5 | 8 af 8 guides (Publicerede guides (id 292, 296, 295) 3/3 · Guide-copy klar til publicering (292, 296, 295 + corset) 4/4 · Corset-guiden publiceret (/steampunk-corset-guide/, 1394) 1/1) |
 | 2026-11-08 | Steamgears Autopilot — plugin | daglig måling | 97,2 % → 98 % | +0,8 | 29,85 af 30,45 d (P0 4,65/4,65 · P1 14,45/15,05 · P2 4,75/4,75 · P3 2/2 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5) |
 | 2026-11-08 | steamgears.eu — site-optimering | daglig måling | 85,9 % → 88,6 % | +2,7 | 21,3 af 24,05 d (S0 2,35/2,35 · S1 3,9/4,6 · S2 7,85/8,3 · S3 3,5/3,55 · S4 3,7/5,25) |
 | 2026-11-08 | steamgears.eu — site-optimering | daglig måling | 82,5 % → 85,9 % | +3,4 | 20,65 af 24,05 d (S0 2,35/2,35 · S1 3,9/4,6 · S2 7,85/8,3 · S3 3,5/3,55 · S4 3,05/5,25) |
