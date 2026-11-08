@@ -37,8 +37,7 @@ check('channel-health: a stored Pinterest token reads as ready', $pinned['state'
 
 // Whatever the harness left in the options, every row must agree with its own two flags.
 $consistent = true;
-foreach (SGAP_Channel_Health::report() as $row) {
-    $expected = SGAP_Channel_Health::classify($row['configured'], $row['refreshable'], $row['refused_at'] ?? '');
+foreach (SGAP_Channel_Health::report() as $row) {        $expected = SGAP_Channel_Health::classify($row['configured'], $row['refreshable'], $row['refused_at'] ?? '', $row['scope_at'] ?? '');
     $consistent = $consistent && $row['state'] === $expected;
 }
 check('channel-health: every row agrees with its own flags', $consistent);
@@ -80,9 +79,12 @@ $opts['sgap_telegram_chat_id'] = '';
 $telegram = SGAP_Channel_Health::channel('telegram');
 check('channel-health: a cleared Telegram reads as missing', $telegram['state'] === 'missing_token' && $telegram['configured'] === false);
 
+// Every state the summary knows must be in the sum: with refused and needs_scope left out,
+// the line stopped adding up the moment a channel was anything but ready or empty.
 $summary = SGAP_Channel_Health::summary();
 check('channel-health: the summary adds up to the report', $summary['total'] === 6
-    && ($summary['ready'] + $summary['recoverable'] + $summary['missing']) === 6);
+    && ($summary['ready'] + $summary['recoverable'] + $summary['missing']
+        + $summary['refused'] + $summary['needs_scope']) === 6);
 
 do_action('rest_api_init');
 check('channel-health: /channel-health is registered under sgap/v1',

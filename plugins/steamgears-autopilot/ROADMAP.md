@@ -1,20 +1,20 @@
 # Steamgears Autopilot — audit, roadmap and effort estimates
 
-_Last audited: 2026-11-01 · audit was of **7.15.0** (`ab676db` on `main`); current release **7.59.0**, and
-**7.59.0 is what steamgears.eu runs** (installed 7/11) — 7.58.0 took the whole REST API down: `includes/diagnostics.php`
-registered its route with `SGAP_Admin::NS`, a constant that has never existed, so `rest_api_init` dies with
-a fatal on every `/wp-json/` request (measured 2026-11-07, see
-`docs/library/rest-nedbrud-7-58-0-2026-11-07.md`). **7.58.1 fixes that** with `SGAP_REST::NS`; **7.58.2** adds
-the fix for the second half of the same trap — the dashboard could say “Up to date” for six hours after a
-release, so *Update* had nothing to install. The zip in `plugins/` is **7.58.2**, and nothing reaches the site
-until an update runs from wp-admin · update this file in the same commit as any release._
+_Last audited: 2026-11-08 · the audit further down was of **7.15.0** (`ab676db` on `main`); the current
+release is **7.64.7**, and **7.64.6 is what steamgears.eu runs** (measured 8/11 2026 through Novamira:
+`Plugin_Upgrader` installed the zip, and the installed files are SHA-1-identical to the source). The zip in
+`plugins/` is **7.64.7**, and nothing reaches the site until an update runs from wp-admin · update this file in
+the same commit as any release._
 
-**Measured later the same evening (7/11 2026, through Novamira): the plugin is not active at all.** The site's
-own inventory reads `Steamgears Autopilot v7.58.0 (inactive)`, so `/wp-json/sgap/v1` answers `404 rest_no_route`
-instead of the fatal, and `/wp-json/` is 200 again. **WooCommerce 11.2.2 is inactive as well**, which has a second
-consequence: `mu-plugins/sga-payload-trim.php:134` calls `is_woocommerce()` unguarded, so the homepage, `/shop/`
-and `/?nocache=1` answer **HTTP 500**. So the next release needs three owner actions, in this order: activate
-WooCommerce, activate the plugin (7.58.2, not 7.58.0), and only then can any live claim below be re-measured.
+**History, kept because it explains the rituals:** 7.58.0 took the whole REST API down —
+`includes/diagnostics.php` registered its route with `SGAP_Admin::NS`, a constant that has never existed, so
+`rest_api_init` died with a fatal on every `/wp-json/` request (measured 7/11 2026, see
+`docs/library/rest-nedbrud-7-58-0-2026-11-07.md`). 7.58.1 fixed that with `SGAP_REST::NS`, and 7.58.2 fixed the
+second half of the same trap — the dashboard could say “Up to date” for six hours after a release, so *Update*
+had nothing to install. The release then sat on disk **inactive** while WooCommerce was inactive too, and
+`mu-plugins/sga-payload-trim.php:134` called `is_woocommerce()` unguarded, so the homepage, `/shop/` and
+`/?nocache=1` answered **HTTP 500**. All of it was resolved 7/11: WooCommerce 11.2.2 and the plugin active,
+18 unused plugins deleted, and the cached fatal page flushed with `w3tc_flush_all()`.
 
 This is the working roadmap for `plugins/steamgears-autopilot`. It answers three questions: does every
 function in the plugin actually do something, what is missing before the plugin can truly run unattended,
@@ -24,22 +24,22 @@ and how long each missing piece takes.
 
 ## 0. Short version
 
-- **45 classes. 33 PHP files. 12.816 lines** (measured 7/11 2026 on 7.43.0). Every subsystem is reachable
+- **58 classes. 45 PHP files. 20.274 lines** (measured 8/11 2026 on 7.64.7). Every subsystem is reachable
   from a real entry point (cron, REST, admin page, ability or AJAX); the last dead method,
   `SGAP_Admin::get_setting_help_link()`, was deleted in 7.33.3.
-- **1 setting is registered but never read** (down from 17). Nine invisible leftovers were removed in
+- **0 settings are registered but never read** (down from 17). Nine invisible leftovers were removed in
   7.33.3 (`pinterest_token`, `instagram_token`, `tiktok_token`, `youtube_token`, `youtube_channel_id`,
-  `reddit_username`, `reddit_subreddit`, `email_test_recipient`, `ai_mode`) and the five Etsy keys were
-  hidden in 7.33.4, so the Settings screen no longer promises an Etsy connection that does not exist. Only
-  `labor_rate` is left, and it is a pricing question rather than a code question (section 8).
-- **It now tells you when something is wrong.** Failure mail, a "queue is running dry" alert, retry backoff
-  (5 → 15 → 45 min), a publish audit log and the cross-system duplicate guard all shipped (P0.1–P0.3, P0.5,
-  P0.6). What still stands between "works" and "set and forget": analytics
-  ingestion (P1.5, blocked on Pinterest/Meta) and one unused setting (`labor_rate`, an owner decision).
-- **Estimated effort to a credible set-and-forget v1: 11 developer-days** (all of P0, P1 without analytics,
-  and the two test-hygiene items). Full parity with hosted schedulers is **18–21 developer-days**, before
-  external API approvals that take calendar weeks; with evergreen recycling shipped 6/11, analytics ingestion
-  (P1.5) is the only large item left in that scope.
+  `reddit_username`, `reddit_subreddit`, `email_test_recipient`, `ai_mode`), the five Etsy keys were hidden in
+  7.33.4, and the last one — `labor_rate` — has been read by the ROI card since **7.59.0** (P3.1).
+- **It tells you when something is wrong.** Failure mail, a "queue is running dry" alert per channel, retry
+  backoff (5 → 15 → 45 min), a publish audit log, the cross-system duplicate guard, Action Scheduler when
+  WooCommerce supplies it, and analytics ingestion for all six channels are built and covered by tests (P0.1–P0.7c,
+  P1.5a–c). What still stands between "works" and "set and forget" is **live verification of the analytics**:
+  the code runs, but the numbers only arrive when each channel has a token the owner owns.
+- **Effort: 29,85 developer-days of agent work, all of it done and verified** (`projektstatus.json`), plus
+  **0,6 d of live verification that is owner-blocked** and therefore sits *outside* the estimate — P1.5's last
+  step. Full parity with hosted schedulers is **18–21 developer-days**, before external API approvals that take
+  calendar weeks; of that scope only P2.1–P2.3 (the Command Center direction) is left as an owner decision.
 
 ---
 
@@ -374,6 +374,21 @@ Platform limits: [Instagram content publishing](https://developers.facebook.com/
 
 ## 9. Change log for this document
 
+- **7.64.7 (8/11)** — **tokenkilden bestemmer nu, hvem der må forny, og hvad et 401 betyder.** Tre fejl fra
+  7.64.6 er rettet i `includes/pinterest.php`: (1) et 401 blev fornyet med pluginnets **egne** app-credentials,
+  også når det sendte token kom fra Pinterest for WooCommerce — den fornyelse roterer et andet token end det der
+  fejlede — og et scope-svar (`Missing: ['boards:read']`) blev fornyet forgæves. Fornyelse kræver nu egne
+  credentials **og** at kilden er vores egen, og et scope-svar fornyes aldrig. (2) `refreshable()` betød både
+  »vi kan forny« og »der findes et token«; den er delt i `own_refreshable()` (vores app-credentials +
+  refresh-token) og `refreshable()` (det ene eller det andet), så `status()` ikke længere beder om
+  app-credentials på et site der kører på integrationens token. (3) En afvisning blev ryddet af **ethvert**
+  200-svar, så et 200 fra `/user_account` skjulte at `/pins` mangler `boards:read`; verdictet husker nu sit
+  endpoint og ryddes kun af det endpoint der blev afvist. Afvisninger stemples desuden med kilde **og** et
+  8-tegns sha256-prefix af det token de gælder (aldrig tokenet), så integrationens rotation ikke arver en gammel
+  `refused`. `status()` læser integrationens udløbstid (kun `token_data.refresh_time`/`expires_in` — aldrig
+  ciphertext) og siger »reconnect that integration« i stedet for at bede om et nyt token. 11 nye smoke-checks
+  (1105 → **1116 PASS**, 0 FAIL), og `plugins/tests/channel-health.php` tæller nu alle fem tilstande i sin sum
+  og sender scope-verdictet med i sin egen konsistenskontrol.
 - **7.63.0 (8/11)** — **bogføringsrelease: de færdige mu-plugins er nu også på sitet, og P1.5 står som
   ejer-blokeret med navnet på hver token.** Ingen plugin-kode er ændret; versionen hæves fordi ROADMAP.md er en
   del af zippen, og `fejlscan` kræver at zip og kilde følger hinanden. Målt live 8/11: de seks mu-plugins er

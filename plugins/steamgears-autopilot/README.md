@@ -23,7 +23,7 @@ The whole social autopilot runs inside WordPress (Command Center is retired):
 4. **Measure** – every post links via `/go/<id>/`, so clicks (and WooCommerce
    orders) are counted per channel.
 
-Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.64.6.zip` → Activate. On an existing
+Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.64.7.zip` → Activate. On an existing
 install the same zip arrives through the self-updater (see *Updates*), so an upload is only needed for the
 first install or a recovery.
 
@@ -240,6 +240,14 @@ integration is connected — through its own `get_access_token()`, because the v
 it, so it is preferred over a pasted token. And a **scope** answer is no longer reported as a
 dead token: Pinterest's *insufficient permissions … Missing: ['boards:read']* is recorded as
 `sgap_pinterest_scope` and shown as `needs_scope` with the missing scope named.
+
+**7.64.7** closes the three holes that came with the token change. A 401 on the integration's token is
+**never renewed with this plugin's own app credentials** — those would rotate a token that is not the one
+being sent — and a scope answer is not retried at all. A refusal is stamped with the credential it is
+about (source plus an 8-character sha256 prefix, never the token), so an integration that rotates its
+token does not inherit last week's `refused`. And a scope verdict belongs to **the endpoint that was
+denied**: `/user_account` answering 200 proves the token, not that `/pins` may be read, so only a
+successful `/pins` clears the `boards:read` verdict.
 
 ## Pre-flight per channel (7.20)
 

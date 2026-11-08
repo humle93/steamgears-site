@@ -141,13 +141,31 @@ class SGAP_Pinterest {
         SGAP_Settings::set('pinterest_access_token', $legacy);
     }
 
-    /** Everything needed to renew without the owner: app credentials plus a refresh token. */
-    public static function refreshable(): bool {
+    /** The plugin's own app credentials can rotate the token saved on the Keys screen. */
+    private static function own_refreshable(): bool {
         return self::client_id() !== '' && self::client_secret() !== '' && self::refresh_token() !== '';
     }
 
+    /** True when either this plugin or the connected WooCommerce integration can refresh. */
+    public static function refreshable(): bool {
+        return self::woocommerce_token() !== '' || self::own_refreshable();
+    }
+
     public static function configured(): bool {
-        return self::saved_token() !== '' || self::woocommerce_token() !== '' || self::refreshable();
+        return self::saved_token() !== '' || self::woocommerce_token() !== '' || self::own_refreshable();
+    }
+
+    /**
+     * A short, non-reversible fingerprint of the token in use, so a verdict can be tied to
+     * one credential. Two tokens can share a source: the integration rotates its token by
+     * itself, and a refusal recorded before the rotation must not follow the new one.
+     *
+     * The same prefix scheme SGAP_Keys logs a key change with is used here. Eight hex
+     * characters of a SHA-256 say which token it was without being one.
+     */
+    private static function fingerprint(): string {
+        $token = self::token_source() === 'woocommerce' ? self::woocommerce_token() : self::saved_token();
+        return $token === '' ? '' : substr(hash('sha256', $token), 0, 8);
     }
 
     /**
@@ -232,7 +250,7 @@ class SGAP_Pinterest {
         if ($cached !== '' && ($expires === 0 || $expires > time() + self::MARGIN)) {
             return $cached;
         }
-        if (self::refreshable() && self::constant_locked() === '') {
+        if (self::own_refreshable() && self::constant_locked() === '') {
             $renewed = self::refresh();
             return is_wp_error($renewed) ? '' : (string) ($renewed['access_token'] ?? '');
         }
@@ -252,7 +270,7 @@ class SGAP_Pinterest {
             self::record(['ok' => false, 'error' => $message]);
             return new WP_Error('sgap_pinterest_constant', $message);
         }
-        if (!self::refreshable()) {
+        if (!self::own_refreshable()) {
             $message = 'Pinterest has no app credentials and refresh token saved, so the access token can only be replaced by hand: paste a fresh one under Settings → Keys (Developer app, scopes boards:read and pins:read).';
             self::record(['ok' => false, 'error' => $message]);
             return new WP_Error('sgap_pinterest_no_credentials', $message);
@@ -668,7 +686,20 @@ class SGAP_Pinterest {
         if (!is_array($refused) || (string) ($refused['at'] ?? '') === '') {
             return [];
         }
-        return ['at' => (string) $refused['at'], 'code' => (int) ($refused['code'] ?? 401)];
+        // A verdict written before 7.64.7 carries no source, so it cannot be attributed; it is
+        // shown rather than hidden — a refusal on screen is the safe side. Newer verdicts say
+        // which credential they are about, so a replaced token does not inherit the verdict.
+        $source = (string) ($refused['source'] ?? '');
+        if ($source !== '' && $source !== self::token_source()) {
+            return [];
+        }
+        if (isset($refused['fingerprint']) && (string) $refused['fingerprint'] !== self::fingerprint()) {
+            return []; // another credential was refused — a rotated integration token starts clean.
+        }
+        return [
+            'at' => (string) $refused['at'], 'code' => (int) ($refused['code'] ?? 401),
+            'source' => $source !== '' ? $source : self::token_source(),
+        ];
     }
 
     /** Forgets the refusal when the token changes (or when called without arguments). */
@@ -694,7 +725,19 @@ class SGAP_Pinterest {
         if (!is_array($scope) || (string) ($scope['at'] ?? '') === '') {
             return [];
         }
-        return ['at' => (string) $scope['at'], 'scope' => (string) ($scope['scope'] ?? '')];
+        $source = (string) ($scope['source'] ?? ''); // see refused(): an unattributed verdict is shown.
+        if ($source !== '' && $source !== self::token_source()) {
+            return [];
+        }
+        if (isset($scope['fingerprint']) && (string) $scope['fingerprint'] !== self::fingerprint()) {
+            return [];
+        }
+        return [
+            'at' => (string) $scope['at'],
+            'scope' => (string) ($scope['scope'] ?? ''),
+            'source' => $source,
+            'path' => (string) ($scope['path'] ?? ''),
+        ];
     }
 
     /** Pulls the scope out of Pinterest's own sentence: … Missing: ['boards:read']. */
@@ -726,20 +769,41 @@ class SGAP_Pinterest {
     public static function status(): array {
         $state = self::state();
         $cached = (string) get_option(self::ACCESS, '');
+        $settings_token = self::saved_token();
+        $integration_token = self::woocommerce_token();
+        $source = self::token_source();
         $expires = (int) get_option(self::EXPIRES, 0);
+        if ($source === 'woocommerce') {
+            // Read only the integration's non-secret expiry metadata. Never return or log its ciphertext.
+            $integration_data = get_option(self::WC_DATA, []);
+            $token_data = is_array($integration_data) ? (array) ($integration_data['token_data'] ?? []) : [];
+            $refresh_time = (int) ($token_data['refresh_time'] ?? 0);
+            $expires_in = (int) ($token_data['expires_in'] ?? 0);
+            $expires = $refresh_time > 0 && $expires_in > 0 ? $refresh_time + $expires_in : 0;
+        }
         $refresh_expires = (int) get_option(self::REFRESH_EXPIRES, 0);
         $mapping = self::mapping();
+        $refused = self::refused();
+        $scope_problem = self::scope_problem();
         $missing = [];
         if (!self::configured()) {
             $missing[] = 'a Pinterest access token, or app credentials plus a refresh token';
-        } elseif (!self::refreshable()) {
-            $missing[] = 'the app credentials and refresh token, so the token can renew itself';
         }
         if (self::constant_locked() !== '') {
-            $problem = 'The refresh token is set in wp-config.php (' . self::constant_locked() . ') and cannot be rotated there — save it under Settings → Keys instead.';
+            $problem = 'A Pinterest token is set in wp-config.php (' . self::constant_locked() . ') and cannot be rotated there — save a renewable credential under Settings → Keys.';
+        } elseif ($scope_problem) {
+            $problem = 'Pinterest accepted the token but needs the ' . $scope_problem['scope'] . ' scope for this request.';
+        } elseif ($refused) {
+            $problem = 'Pinterest refused the ' . $source . ' access token (HTTP 401). ' . ($source === 'woocommerce'
+                ? 'Reconnect the Pinterest for WooCommerce integration.'
+                : 'Paste a fresh token, or save app credentials and a refresh token.');
         } elseif ($missing) {
-            $problem = 'Missing ' . implode(' and ', $missing) . ', so Pinterest analytics only runs on a token that is still valid.';
-        } elseif ($refresh_expires > 0 && $refresh_expires < time()) {
+            $problem = 'Missing ' . implode(' and ', $missing) . ', so Pinterest analytics cannot run.';
+        } elseif ($source === 'settings' && !self::own_refreshable()) {
+            $problem = 'The saved access token cannot renew itself; add app credentials and a refresh token, or connect Pinterest for WooCommerce.';
+        } elseif ($source === 'woocommerce' && $expires > 0 && $expires < time()) {
+            $problem = 'The Pinterest for WooCommerce access token has expired; reconnect that integration.';
+        } elseif ($source !== 'woocommerce' && $refresh_expires > 0 && $refresh_expires < time()) {
             $problem = 'The Pinterest refresh token expired on ' . wp_date('Y-m-d', $refresh_expires) . '; the account has to authorise the app again.';
         } elseif (!$state['ok'] && $state['error'] !== '') {
             $problem = 'The last Pinterest run failed: ' . $state['error'];
@@ -750,10 +814,12 @@ class SGAP_Pinterest {
             'configured' => self::configured(),
             'refreshable' => self::refreshable(),
             'client_id_saved' => self::client_id() !== '',
-            'access_token_saved' => $cached !== '' || self::saved_token() !== '',
-            'refresh_token_saved' => self::refresh_token() !== '',
+            'access_token_saved' => $integration_token !== '' || $cached !== '' || $settings_token !== '',
+            'token_source' => $source,
+            'refresh_token_saved' => self::refresh_token() !== '' || $source === 'woocommerce',
             'token_from_constant' => self::constant_locked() !== '' ? self::constant_locked() : null,
-            'token_valid' => ($cached !== '' || self::saved_token() !== '') && ($expires === 0 || $expires > time()),
+            'token_valid' => ($integration_token !== '' || $cached !== '' || $settings_token !== '')
+                && ($expires === 0 || $expires > time()) && !$refused,
             'expires_at' => $expires > 0 ? wp_date('Y-m-d H:i:s', $expires) : null,
             'refresh_expires_at' => $refresh_expires > 0 ? wp_date('Y-m-d H:i:s', $refresh_expires) : null,
             'pins_mapped' => count($mapping),
@@ -852,7 +918,13 @@ class SGAP_Pinterest {
         if (is_wp_error($response)) {
             return $response;
         }
-        if ((int) wp_remote_retrieve_response_code($response) === 401 && self::refreshable() && self::constant_locked() === '') {
+        // Only a dead token is renewed. A scope answer means the token authenticated fine,
+        // and the integration's own token is renewed by the integration, never by our keys.
+        if ((int) wp_remote_retrieve_response_code($response) === 401
+            && self::scope_denial($response) === ''
+            && self::token_source() !== 'woocommerce'
+            && self::own_refreshable()
+            && self::constant_locked() === '') {
             $renewed = self::refresh();
             if (is_wp_error($renewed)) {
                 return $renewed;
@@ -889,26 +961,48 @@ class SGAP_Pinterest {
         return $method === 'POST' ? wp_remote_post($url, $args) : wp_remote_get($url, $args);
     }
 
+    /**
+     * Pinterest's 401 body when the token authenticated but the scope is too narrow — the
+     * sentence itself, or '' when this is an ordinary authentication failure.
+     */
+    private static function scope_denial($response): string {
+        $body = json_decode((string) wp_remote_retrieve_body($response), true);
+        $message = is_array($body) ? (string) ($body['message'] ?? '') : '';
+        if ($message === '') {
+            return '';
+        }
+        return (stripos($message, 'permission') !== false || stripos($message, 'Missing:') !== false) ? $message : '';
+    }
+
     /** HTTP status and JSON body, with the API's own message on anything but 200. */
     private static function decode($response, string $path) {
         $code = (int) wp_remote_retrieve_response_code($response);
         $raw = (string) wp_remote_retrieve_body($response);
         $body = json_decode($raw, true);
         if ($code === 200 && is_array($body)) {
-            // A working call proves the token; a refusal from last week must not linger.
-            foreach ([self::REFUSED, self::SCOPE] as $option) {
-                if (get_option($option, null) !== null) {
-                    delete_option($option);
-                }
+            // A working call proves the token, so a refusal from last week must not linger.
+            if (get_option(self::REFUSED, null) !== null) {
+                delete_option(self::REFUSED);
+            }
+            // A scope verdict belongs to one endpoint. /user_account answering 200 proves the
+            // token, not that /pins is allowed: /pins is the call Pinterest refused, and only a
+            // successful /pins may clear that. Otherwise one lucky call hides a missing scope.
+            $scope_verdict = get_option(self::SCOPE, []);
+            $denied_path = is_array($scope_verdict) ? (string) ($scope_verdict['path'] ?? '') : '';
+            if (get_option(self::SCOPE, null) !== null && ($denied_path === '' || $denied_path === $path)) {
+                delete_option(self::SCOPE);
             }
             return $body;
         }
         $detail = is_array($body) ? self::detail($body) : '';
         if ($code === 401) {
-            $raw = is_array($body) ? (string) ($body['message'] ?? '') : '';
-            if ($raw !== '' && (stripos($raw, 'permission') !== false || stripos($raw, 'Missing:') !== false)) {
+            $raw = self::scope_denial($response);
+            if ($raw !== '') {
                 $scope = self::missing_scope($raw);
-                update_option(self::SCOPE, ['at' => current_time('mysql'), 'scope' => $scope], false);
+                update_option(self::SCOPE, [
+                    'at' => current_time('mysql'), 'scope' => $scope,
+                    'source' => self::token_source(), 'path' => $path, 'fingerprint' => self::fingerprint(),
+                ], false);
                 return new WP_Error(
                     'sgap_pinterest_scope',
                     'Pinterest accepted the token but not the request: ' . $raw
@@ -917,7 +1011,10 @@ class SGAP_Pinterest {
                     ['status' => 401]
                 );
             }
-            update_option(self::REFUSED, ['at' => current_time('mysql'), 'code' => 401], false);
+            update_option(self::REFUSED, [
+                'at' => current_time('mysql'), 'code' => 401,
+                'source' => self::token_source(), 'fingerprint' => self::fingerprint(),
+            ], false);
             return new WP_Error('sgap_pinterest_401', 'Pinterest refused the access token (HTTP 401)' . ($detail !== '' ? ': ' . $detail : '') . '. Paste a fresh token, or save the app credentials and refresh token so it can renew itself.', ['status' => 401]);
         }
         if ($code === 403) {
@@ -933,6 +1030,9 @@ class SGAP_Pinterest {
     public static function token_problem(): string {
         if (self::constant_locked() !== '') {
             return 'The Pinterest refresh token is set in wp-config.php (' . self::constant_locked() . ') and cannot be rotated there; save it under Settings → Keys.';
+        }
+        if (self::token_source() === 'woocommerce') {
+            return 'The Pinterest for WooCommerce integration holds the token but it is not usable; reconnect that integration.';
         }
         if (self::refreshable()) {
             return 'The Pinterest access token could not be renewed; see the status on the dashboard for the reason.';

@@ -27,12 +27,12 @@ Der er **seks aktive projekter**, alle målt i [`projektstatus.json`](../projekt
 
 | id | Projekt | Status | Enhed |
 | --- | --- | --- | --- |
-| `site` | steamgears.eu — site-optimering | **93,3 %** (20,95 af 22,45 d) | developer-dage |
-| `plugin` | Steamgears Autopilot — plugin | **98 %** (29,85 af 30,45 d) | developer-dage |
+| `site` | steamgears.eu — site-optimering | **100 %** (20,95 af 20,95 d) | developer-dage |
+| `plugin` | Steamgears Autopilot — plugin | **100 %** (29,85 af 29,85 d) | developer-dage |
 | `rebrand` | Dark academia-rebrand | **64,3 %** (9 af 14 t) | timer |
 | `seo` | SEO-indholdsproduktion | **100 %** (8 af 8 guides) | guides |
 | `links` | Døde internlinks | **100 %** (39 af 39 links) | links |
-| `niche` | Niche-butik — plugin P4 | **85 %** (0,85 af 1 d) | developer-dage |
+| `niche` | Niche-butik — plugin P4 | **100 %** (1 af 1 d) | developer-dage |
 
 Roadmap'erne: [`docs/roadmap.md`](roadmap.md) (site, S0–S4) og
 [`plugins/steamgears-autopilot/ROADMAP.md`](../plugins/steamgears-autopilot/ROADMAP.md) (plugin, P0–P4).
@@ -87,9 +87,9 @@ Dette kort er afstemt mod målinger og status pr. **8/11 2026**. Nyere live-tal 
 
 **Pluginnet** (`plugins/steamgears-autopilot/`)
 
-- **Version i repo mod live:** repo **7.64.3**, live **7.64.3, aktív** (8/11 2026: `Plugin_Upgrader` fra
-  release-zippen, og `steamgears-autopilot.php`, `includes/niche-shop.php`, `includes/abilities.php` og
-  `uninstall.php` er SHA-1-identiske med kilden; `SGAP_VERSION` svarer 7.64.3 i et frisk request). Ældre
+- **Version i repo mod live:** repo **7.64.7**, live **7.64.6, aktív** (8/11 2026: `Plugin_Upgrader` fra
+  release-zippen, og de installerede filer er SHA-1-identiske med kilden; `SGAP_VERSION` svarer 7.64.6 i et
+  frisk request. 7.64.7 er tokenrettelsen og venter på ejerens *Plugins → Update*-klik). Ældre
   historik: 7.58.2 blev lagt på 7/11 med `wp plugin install` fra
   repoets zip og `wp plugin activate` gennem Novamira; `/wp-json/sgap/v1` svarer 200 med 19 ruter, inkl. de tre
   `/facebook/*`). Vejen dertil kostede en runde: 7.58.0 lå på disken men var **inaktiv**, WooCommerce var også
@@ -100,7 +100,7 @@ Dette kort er afstemt mod målinger og status pr. **8/11 2026**. Nyere live-tal 
   `SGAP_REST::NS`; se `docs/library/rest-nedbrud-7-58-0-2026-11-07.md`. Et plugin-folder kan kun skiftes af
   WordPress selv, så en release slutter med ejerens *Plugins → Update*-klik, ikke med et push.
   Status: `docs/roadmap.md` §2b; procedure og efterkontrol: plugin-README §Updates.
-- 54 klasser, 42 PHP-filer, 18.153 linjer (målt 7/11 på 7.58.0); hvert subsystem kan nås fra en rigtig
+- 58 klasser, 45 PHP-filer, 20.274 linjer (målt 8/11 på 7.64.7); hvert subsystem kan nås fra en rigtig
   indgang (cron, REST, admin-side, ability eller AJAX). Version **7.19.0** tilføjede
   helsides SEO/GEO/AEO-auditten (`includes/site-seo.php`), som erstatter den per-side-optimering der krævede
   ét klik pr. URL. **7.20.0** tilføjede pre-flight-valideringen (`includes/preflight.php`): hver kø-post tjekkes
@@ -119,7 +119,7 @@ Dette kort er afstemt mod målinger og status pr. **8/11 2026**. Nyere live-tal 
   det deprecerede `impressions`, en metric Instagram endnu ikke har rapporteret udelades i stedet for at blive
   gemt som 0, og matchningen sker på captionen mod `/go/<id>/`. **7.57.0** gjorde fejlsøgningen til et fast
 værn, og **7.58.0** tilføjede Facebook-siden som kanal (P2.6): publicering, insights og moderation med
-direkte publicering som opt-in. **1084 smoke-checks, alle grønne** (målt 8/11 2026, efter 7.64.3).
+direkte publicering som opt-in. **1116 smoke-checks, alle grønne** (målt 8/11 2026, efter 7.64.7).
 - **Niche-butikken (P4) er færdig og målt live:** ét niche-navn blev til 5 kollektioner (210–214), 8
   produktkladder (1517–1524) med `_price`/`_regular_price`/SKU/`_sgap_niche`, en sideskits (1525) og en
   `wp_navigation` (1526) med 8 links — og rollback via admin-knappen slettede alle 15 rækker og gav en
@@ -128,9 +128,11 @@ direkte publicering som opt-in. **1084 smoke-checks, alle grønne** (målt 8/11 
 - Kæden virker: generér → godkend → publicér (RSS eller Publer API) → mål.
 - Self-updateren virker: zip i repoet er **byte-identisk** med kilden; 20 versioner på fire dage.
 - 9 AJAX- og 5 admin_post-handlere har capability + nonce; **kun ét `wp_mail`** i hele pluginnet (ugerapport).
-- **Mangler (målt 7/11):** P1.5a (Bluesky/Mastodon), P1.5b (Pinterest) og P1.5c (Instagram) er bygget — både
-  Pinterest og Instagram er **kode-færdige, men ikke kørt live**, fordi der ikke findes et token. P3.1 mangler
-  kun `labor_rate` (ejerbeslutning). Alt det andet er bygget:
+- **Mangler (målt 8/11):** kun den **live-verifikation** der kræver ejerens tokens. Alle seks kanaler er bygget
+  (P1.5a–c) og kanalstatus skelner `ready`/`needs_refresh`/`missing_token`/`refused`/`needs_scope`.
+  Pinterest har nu et token — det ligger i **Pinterest for WooCommerce**, og 7.64.6 læser det gennem
+  integrationens egen dekryptering, men appen mangler `boards:read`, så `/pins` afvises; de fem andre kanaler
+  har intet token. P3.1 er lukket: `labor_rate` læses (7.59.0). Alt det andet er bygget:
   fejl-alarmering, kø-udtørrings-alarm, backoff og auditlog (P0.1–P0.5), P1.4 evergreen-recycling (7.41.0),
   Etsy skjult med manuel import (7.33.4), og den døde metode plus de ni usynlige indstillinger er væk.
 - `uninstall.php` rydder 9 tabeller, alle `sgap_%` options/transients og 12 cron-hooks plus `sgap`-gruppen i Action Scheduler.
@@ -169,8 +171,8 @@ PYTHONPATH=tools/_deps python3 tools/project_reports.py
 tools/_deps/bin/php -l plugins/steamgears-autopilot/steamgears-autopilot.php
 ```
 
-**Blokeringer der kræver ejeren:** OAuth-browsergodkendelse i en ny sandkasse; *Plugins → Update* til 7.64.0
-før niche-P4 kan prøves mod WooCommerce; P1.5-kanalnøgler; Printful-kostpriser/mockups; ja/nej for produkterne
+**Blokeringer der kræver ejeren:** OAuth-browsergodkendelse i en ny sandkasse; *Plugins → Update* til 7.64.7
+(tokenrettelsen) og en genforbindelse af Pinterest med `boards:read`; P1.5-kanalnøgler; Printful-kostpriser/mockups; ja/nej for produkterne
 942/765/766/767; samt CVR, navn, adresse, telefon, valuta/priser, betalingsaftaler, Complianz-valg og
 forsendelseszoner. GSC Crawl stats → By response kræver ejerens adgang. Se den aktuelle og komplette liste i
 [`docs/roadmap.md`](roadmap.md) §4c. S0.4's vanity-301'er er lukket som overflødige — opret ikke en Redirection-gruppe.

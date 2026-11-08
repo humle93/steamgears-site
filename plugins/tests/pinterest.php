@@ -205,6 +205,67 @@ unset($GLOBALS['opts']['sgap_pinterest_refused'], $GLOBALS['opts']['sgap_pintere
 check('pinterest: without the integration a pasted token is still the credential',
     SGAP_Pinterest::token_source() === 'settings' && SGAP_Pinterest::token() === 'pina_from_woocommerce');
 
+// --- the token source decides who may renew it, and what a 401 means ----------------
+// Own credentials are saved while the integration is connected: a 401 on the integration's
+// token must not be "fixed" by rotating our own, because that token is never the one sent.
+$GLOBALS['opts']['sgap_pinterest_client_id'] = 'app-id';
+$GLOBALS['opts']['sgap_pinterest_client_secret'] = 'app-secret';
+$GLOBALS['opts']['sgap_pinterest_refresh_token'] = 'refresh-own';
+$GLOBALS['opts']['sgap_pinterest_access_token'] = 'pina_ours';
+$GLOBALS['opts']['pinterest_for_woocommerce_data'] = ['token_data' => ['refresh_time' => time() - 60, 'expires_in' => 2592000]];
+Pinterest_For_Woocommerce::$token = 'pina_woo_live';
+$GLOBALS['http_calls'] = [];
+SGAP_Pinterest::$transport = function ($method, $url, $args) {
+    $GLOBALS['http_calls'][] = [$method, $url, $args];
+    return sgap_http(401, ['message' => 'Authentication failed']);
+};
+$denied = SGAP_Pinterest::analytics('77', '2026-11-01', '2026-11-07');
+check('pinterest: a 401 on the integration token is never renewed with our own credentials',
+    is_wp_error($denied) && $denied->code === 'sgap_pinterest_401' && count($GLOBALS['http_calls']) === 1
+    && !str_contains((string) $GLOBALS['http_calls'][0][1], '/oauth/token'));
+check('pinterest: the refusal is attributed to the integration, not to our token',
+    (SGAP_Pinterest::refused()['source'] ?? '') === 'woocommerce');
+$status = SGAP_Pinterest::status();
+check('pinterest: status names the integration as the source and reads its expiry',
+    $status['token_source'] === 'woocommerce' && $status['refreshable'] === true
+    && $status['access_token_saved'] === true && ($status['expires_at'] ?? null) !== null
+    && $status['token_valid'] === false);
+check('pinterest: the refusal is explained with the integration as the fix',
+    str_contains((string) $status['problem'], 'refused the woocommerce access token')
+    && str_contains((string) $status['problem'], 'Reconnect the Pinterest for WooCommerce integration'));
+check('pinterest: the status never carries the integration token', !str_contains(json_encode($status), 'pina_woo_live'));
+Pinterest_For_Woocommerce::$token = 'pina_woo_rotated';
+check('pinterest: a rotated integration token is not covered by the old refusal', SGAP_Pinterest::refused() === []);
+$GLOBALS['opts']['pinterest_for_woocommerce_data'] = ['token_data' => ['refresh_time' => time() - 40 * DAY_IN_SECONDS, 'expires_in' => 30 * DAY_IN_SECONDS]];
+check('pinterest: an expired integration token is named as expired, not as missing',
+    str_contains((string) SGAP_Pinterest::status()['problem'], 'has expired')
+    && str_contains((string) SGAP_Pinterest::status()['problem'], 'reconnect that integration'));
+
+// --- a scope verdict belongs to the endpoint that was denied ------------------------
+$GLOBALS['opts']['pinterest_for_woocommerce_data'] = ['token_data' => ['refresh_time' => time(), 'expires_in' => 2592000]];
+$scope_answer = "Your token does not have sufficient permissions. Missing: ['boards:read']";
+SGAP_Pinterest::$transport = function ($method, $url, $args) use ($scope_answer) {
+    $GLOBALS['http_calls'][] = [$method, $url, $args];
+    return str_contains($url, '/pins?')
+        ? sgap_http(401, ['message' => $scope_answer])
+        : sgap_http(200, ['username' => 'cpaleadsis', 'id' => '688980580401955331']);
+};
+SGAP_Pinterest::scan(1);
+check('pinterest: a denied pin listing records the scope with its own endpoint',
+    (SGAP_Pinterest::scope_problem()['scope'] ?? '') === 'boards:read'
+    && (SGAP_Pinterest::scope_problem()['path'] ?? '') === '/pins');
+$who = SGAP_Pinterest::verify();
+check('pinterest: /user_account still authenticates the same token', is_array($who) && $who['username'] === 'cpaleadsis');
+check('pinterest: a 200 from another endpoint does not clear the scope verdict',
+    (SGAP_Pinterest::scope_problem()['scope'] ?? '') === 'boards:read');
+SGAP_Pinterest::$transport = fn($method, $url, $args) => str_contains($url, '/pins?')
+    ? sgap_http(200, ['items' => [], 'bookmark' => ''])
+    : sgap_http(200, []);
+SGAP_Pinterest::scan(1);
+check('pinterest: the endpoint that was denied clears the verdict once it works', SGAP_Pinterest::scope_problem() === []);
+Pinterest_For_Woocommerce::$token = '';
+unset($GLOBALS['opts']['pinterest_for_woocommerce_data'], $GLOBALS['opts']['sgap_pinterest_scope'], $GLOBALS['opts']['sgap_pinterest_refused']);
+
 // --- pin listing: bookmark paging, mapping kept across runs -------------------------
 $GLOBALS['opts']['sgap_pinterest_pins'] = [];
 $GLOBALS['opts']['sgap_pinterest_bookmark'] = '';

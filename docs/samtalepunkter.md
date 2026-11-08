@@ -48,15 +48,40 @@ _Opdateret 2026-11-08 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `3558d13 Pinterest-tokenet hentes nu fra WooCommerce (7.64.6)`
 - `2d41c94 chore(status): daglig projektstatus 2026-11-08`
 - `145f6f9 Begge roadmaps lukket: 1,5 d + 0,6 d er målt ejer-blokerede`
 - `243f629 Kanalstatus: en afvist token er ikke »ready« (7.64.4)`
 - `1ac26ba Test: evne-tællingen i admin-tools følger de fire niche-evner`
 - `cad5782 chore(status): daglig projektstatus 2026-11-08`
-- `dd977a1 Niche-butik: målt på sitet og rullet tilbage — P4 færdig`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 8/11 — kodegennemgang: tokenkilden bestemmer, hvem der må forny (7.64.7)
+
+- **Fund ved at læse koden, ikke ved at køre den:** 7.64.6 hentede tokenet rigtigt fra Pinterest for
+  WooCommerce, men tre ting omkring det var forkert. (1) Et 401 blev fornyet med pluginnets **egne**
+  app-credentials, også når det sendte token kom fra integrationen — den fornyelse roterer et andet token end
+  det der fejlede, så næste kald fejler ens; et scope-svar blev fornyet helt forgæves. (2) `refreshable()` betød
+  både »vi kan forny« og »der findes et token«, så `status()` bad om app-credentials på et site der kørte fint.
+  (3) **Ethvert** 200-svar ryddede `REFUSED` og `SCOPE`, så `/user_account` 200 skjulte at `/pins` mangler
+  `boards:read` — kanalstatus gik fra `needs_scope` til `ready` uden at noget var løst.
+- **Rettelse:** fornyelse kræver egne credentials **og** egen tokenkilde (`own_refreshable()`), et scope-svar
+  fornyes aldrig (`scope_denial()`), og et scope-verdict husker sit **endpoint** og ryddes kun af det endpoint
+  der blev afvist. Afvisninger stemples med kilde + 8-tegns sha256-fingerprint af tokenet (aldrig tokenet), så
+  integrationens rotation ikke arver en gammel `refused`. `status()` læser kun `token_data.refresh_time`/
+  `expires_in` fra integrationen og siger »reconnect that integration«.
+- **Bevis:** 11 nye checks i `plugins/tests/pinterest.php` (bl.a. præcis ét kald og ingen `/oauth/token` ved 401
+  på integrationens token), 1105 → **1116 PASS / 0 FAIL**, alle 29 værn grønne, zip byte-identisk.
+  `plugins/tests/channel-health.php` tæller nu alle fem tilstande i sin sum.
+- **Fælde:** et verdict uden `source` kan ikke henføres til et credential. Det vises fortsat (en afvisning på
+  skærmen er den sikre side) — ellers forsvandt testens refused-række, fordi `SGAP_PINTEREST_ACCESS_TOKEN`
+  defineres sent i smoke-suiten og gør tokenkilden til `constant`.
+- **Dokumentdrift rettet i samme pas:** plugin-ROADMAP'ens header påstod stadig 7.59.0/7.58.0 og inaktivt plugin,
+  §0 talte 45 klasser/33 filer/12.816 linjer (nu 58/45/20.274) og kaldte `labor_rate` ulæst, `docs/roadmap.md` §2b
+  stod på repo 7.62.0/live 7.60.1, og `docs/agent-profil.md` viste 98 %/93,3 %/85 % og 7.64.3. Alle er rettet til
+  `projektstatus.json`s tal; **ingen procent er flyttet** — P1.5's 0,6 d er stadig ejer-blokeret på `boards:read`.
 
 ### 8/11 — Pinterest-tokenet ligger i WooCommerce: hentet, virker, mangler `boards:read`
 
