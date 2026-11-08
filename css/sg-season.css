@@ -1,0 +1,1148 @@
+/* ============================================================================
+   STEAMGEARS — SG SEASON · mobil, menu og årstidsfarver
+   Lægges EFTER temaets og den gamle header-CSS, så den kan rette dem.
+   Kilden er css/sg-season.css i repoet; live kopi ligger i
+   wp-content/mu-plugins/sga-season.css og printes af sga-season.php.
+
+   Rækkefølge: 1 tokens · 2 rysteri · 3 header · 4 menu · 5 indhold
+               6 mobil · 7 brugergrænseflader · 8 tilgængelighed
+   ========================================================================= */
+
+/* =========================================================
+   1 · TOKENS — årstidens farver
+
+   Fire sæt. PHP'en sætter data-season på <html> ud fra måneden:
+   dec–feb winter · mar–maj spring · jun–aug summer · sep–nov autumn.
+   Basis er den samme mørke atelier-flade hele året; det der skifter
+   er messing, accent og frost/sol, så brandet ikke hopper.
+   ========================================================= */
+
+html:root {
+  /* faste atelier-toner */
+  --sg-ink: #0c0f0c;
+  --sg-black: #0b0e0b;
+  --sg-black-soft: #11170f;
+  --sg-charcoal: #172017;
+  --sg-panel-dark: #131a14;
+  --sg-ivory: #f3efe4;
+
+  /* rytme og form */
+  --sg-wrap: 1160px;
+  --sg-gutter: clamp(16px, 4vw, 28px);
+  --sg-section-y: clamp(44px, 7vw, 92px);
+  --sg-radius: 12px;
+  --sg-radius-lg: 18px;
+  --sg-hair: rgba(201, 162, 83, 0.24);
+  --sg-tap: 48px;
+  --sg-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+
+  /* standard = autumn, så der aldrig står udefinerede farver */
+  --sg-season: autumn;
+  --sg-bg: #0e120e;
+  --sg-surface: #141b15;
+  --sg-surface-2: #1a231b;
+  --sg-panel: #1d271e;
+  --sg-text: #f3efe4;
+  --sg-muted: #bdb7a5;
+  --sg-on-dark: #f3efe4;
+  --sg-on-dark-muted: #b6b0a0;
+  --sg-gold: #c9a253;
+  --sg-gold-light: #ebcb84;
+  --sg-gold-dark: #8a6a2c;
+  --sg-brass: #c9a253;
+  --sg-brass-light: #ebcb84;
+  --sg-brass-text: #e0be86;
+  --sg-copper: #b4643a;
+  --sg-wine: #5b2029;
+  --sg-burgundy: #4e1e26;
+  --sg-burgundy-light: #6e2b33;
+  --sg-red: #a8423f;
+  --sg-season-accent: #7fa092;
+  --sg-season-glow: rgba(180, 100, 58, 0.18);
+  --sg-border: var(--sg-hair);
+  --sg-line: 1px solid var(--sg-hair);
+  --sg-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --sg-shadow-2: 0 18px 40px -26px rgba(0, 0, 0, 0.95);
+  --sg-focus: #f0d27c;
+}
+
+/* efterår — messing, rust og tør ivory (september til november) */
+html:root[data-season="autumn"] {
+  --sg-bg: #0e120e;
+  --sg-surface: #141b15;
+  --sg-surface-2: #1a231b;
+  --sg-panel: #1d271e;
+  --sg-season-accent: #b4643a;
+  --sg-season-glow: rgba(180, 100, 58, 0.2);
+  --sg-gold: #cba04a;
+  --sg-gold-light: #f0cf87;
+  --sg-brass: #cba04a;
+  --sg-brass-text: #e6c288;
+}
+
+/* vinter — gran, frost og kold messing (december til februar) */
+html:root[data-season="winter"] {
+  --sg-bg: #0b1013;
+  --sg-surface: #101a1e;
+  --sg-surface-2: #152228;
+  --sg-panel: #172730;
+  --sg-text: #eef2f1;
+  --sg-muted: #b3c1c2;
+  --sg-on-dark: #eef2f1;
+  --sg-on-dark-muted: #aab9ba;
+  --sg-season-accent: #8fb7bd;
+  --sg-season-glow: rgba(143, 183, 189, 0.16);
+  --sg-gold: #cfae66;
+  --sg-gold-light: #f1dda6;
+  --sg-brass: #cfae66;
+  --sg-brass-text: #e8d2a4;
+  --sg-hair: rgba(207, 174, 102, 0.22);
+  --sg-border: var(--sg-hair);
+  --sg-line: 1px solid var(--sg-hair);
+  --sg-focus: #f1dda6;
+}
+
+/* forår — ung gran, messing og en kold mint (marts til maj) */
+html:root[data-season="spring"] {
+  --sg-bg: #0d130f;
+  --sg-surface: #131c16;
+  --sg-surface-2: #18251d;
+  --sg-panel: #1b2a20;
+  --sg-season-accent: #8fae7a;
+  --sg-season-glow: rgba(143, 174, 122, 0.16);
+  --sg-gold: #cdac5c;
+  --sg-gold-light: #f0d999;
+  --sg-brass: #cdac5c;
+  --sg-brass-text: #e4cd95;
+}
+
+/* sommer — sol, messing og varm kobber (juni til august) */
+html:root[data-season="summer"] {
+  --sg-bg: #0f120d;
+  --sg-surface: #171c11;
+  --sg-surface-2: #1d2416;
+  --sg-panel: #212a19;
+  --sg-season-accent: #d9a24b;
+  --sg-season-glow: rgba(217, 162, 75, 0.2);
+  --sg-gold: #d8ab4d;
+  --sg-gold-light: #f6d98c;
+  --sg-brass: #d8ab4d;
+  --sg-brass-text: #ecc97f;
+}
+
+/* temaets blok-farver skal følge den samme palette, ellers står
+   de lyse standardfarver (hvid baggrund, lilla primary) tilbage */
+html:root {
+  --wp--preset--color--background: var(--sg-bg);
+  --wp--preset--color--foreground: var(--sg-text);
+  --wp--preset--color--foreground-alt: var(--sg-brass-text);
+  --wp--preset--color--primary: var(--sg-gold);
+  --wp--preset--color--secondary: var(--sg-season-accent);
+  --wp--preset--color--tertiary: var(--sg-panel);
+  --wp--preset--color--white: var(--sg-ivory);
+  --wp--preset--color--black: var(--sg-ink);
+}
+
+html:root {
+  background-color: var(--sg-bg);
+  scroll-padding-top: 76px; /* sticky header må ikke dække ankeret */
+}
+
+html body.sg-ui,
+html body {
+  background-color: var(--sg-bg) !important;
+  /* den gamle krop havde en bordeaux radial-gradient på alle undersider.
+     Kroppen er nu en flad årstidsflade: en stor gradient over hele siden
+     koster et repaint ved hver scroll på mobil, og hero'en har sin egen glød. */
+  background-image: none !important;
+  color: var(--sg-text);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+html body .wp-site-blocks,
+html body main,
+html body footer,
+html body header {
+  background-color: transparent;
+}
+
+/* footeren havde en 2 px messingkant hele vejen rundt */
+html body footer.wp-block-template-part {
+  border: 0 !important;
+  border-top: 1px solid var(--sg-hair) !important;
+}
+
+/* =========================================================
+   2 · RYSTERI — tre kilder, målt 8/11 2026
+
+   a) AI-boblens `mwai-glass-iris` kører i 10 s på repeat og tvinger
+      en repaint af hele den faste boble hele tiden.
+   b) `backdrop-filter` på en sticky header på 337 px betyder blur af
+      et stort område ved hver scroll-frame på mobil-GPU.
+   c) `transition: all` på grupper og links animerer også layout-egenskaber.
+   ========================================================= */
+
+/* a) loop-animationen i AI-boblen: kun selve ikonet, og kun på mobil */
+@media (max-width: 782px) {
+  .mwai-icon-container,
+  .mwai-trigger,
+  .mwai-trigger * {
+    animation: none !important;
+  }
+
+  .mwai-trigger,
+  .mwai-open-button {
+    box-shadow: 0 6px 18px -6px rgba(0, 0, 0, 0.7) !important;
+    filter: none !important;
+  }
+}
+
+/* c) eksplicitte overgange i stedet for `all` */
+header,
+header *,
+.wp-block-navigation,
+.wp-block-navigation *,
+.wp-block-group {
+  transition-property: color, background-color, border-color, opacity, box-shadow, transform;
+  transition-duration: 0.18s;
+  transition-timing-function: var(--sg-ease);
+}
+
+/* =========================================================
+   3 · HEADER — én række, 60 px, uden de dobbelte guldrammer
+   ========================================================= */
+
+header.wp-block-template-part {
+  position: sticky;
+  top: 0;
+  z-index: 90;
+  background-color: color-mix(in srgb, var(--sg-bg) 97%, transparent);
+  border-bottom: 1px solid var(--sg-hair);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  padding-top: env(safe-area-inset-top, 0px);
+  box-shadow: 0 10px 24px -22px rgba(0, 0, 0, 0.9);
+}
+
+/* den gamle header havde en 63 px guld-slæde som ::after hen over hele
+   bjælken — den er årsagen til »guldstangen« under logoet */
+header .is-style-ext-preset--group--natural-1--header-1::after,
+header .is-style-ext-preset--group--natural-1--header-1::before {
+  display: none !important;
+  content: none !important;
+}
+
+/* rækken skal være gennemsigtig, så bjælken står som én flade */
+header.wp-block-template-part .wp-block-group.alignwide {
+  background: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+header.wp-block-template-part {
+  background-color: color-mix(in srgb, var(--sg-bg) 96%, transparent) !important;
+  padding-bottom: 0 !important;
+}
+
+/* den ydre ramme-boks: ingen ekstra luft, ingen indre ramme */
+header.wp-block-template-part > .wp-block-group,
+header.wp-block-template-part .is-style-ext-preset--group--natural-1--header-1 {
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  background: none !important;
+  min-height: 0 !important;
+}
+
+/* rækken: logo til venstre, værktøj til højre */
+header.wp-block-template-part .wp-block-group.alignwide {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  width: 100%;
+  max-width: var(--sg-wrap);
+  margin-inline: auto !important;
+  padding: 8px var(--sg-gutter) !important;
+  min-height: 0 !important;
+  height: auto !important;
+}
+
+/* de to grupper indeni må ikke have deres egen ramme eller luft */
+header.wp-block-template-part .wp-block-group.alignwide > .wp-block-group {
+  flex: 0 0 auto !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+  min-height: 0 !important;
+  width: auto !important;
+}
+
+header .sg-logo,
+header .wp-block-site-logo a,
+header a[rel="home"] {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  text-decoration: none;
+  border: 0;
+  padding: 0;
+}
+
+header .sg-logo img,
+header .wp-block-site-logo img {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid var(--sg-hair);
+  padding: 2px;
+  background: var(--sg-surface);
+}
+
+header .sg-word,
+header .wp-block-site-title,
+header .wp-block-site-title a {
+  font-family: var(--sg-font-display, Georgia, serif);
+  font-size: clamp(15px, 4.4vw, 19px) !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase;
+  color: var(--sg-ivory) !important;
+  line-height: 1;
+  margin: 0 !important;
+}
+
+header .sg-word b {
+  color: var(--sg-gold-light);
+  font-weight: 700;
+}
+
+/* værktøjsikonerne: 44 px trykflade, ingen ramme */
+.sg-header-tools {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.sg-header-tool {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 10px;
+  color: var(--sg-ivory) !important;
+  justify-content: center;
+  display: inline-flex;
+  align-items: center;
+}
+
+.sg-header-tool:hover,
+.sg-header-tool:focus-visible {
+  background-color: color-mix(in srgb, var(--sg-gold) 16%, transparent);
+  color: var(--sg-gold-light) !important;
+}
+
+/* burgeren: 44 × 44, messing-streger, ikke en guldklods */
+.wp-block-navigation__responsive-container-open,
+.wp-block-navigation__responsive-container-close {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 !important;
+  border: 1px solid var(--sg-hair) !important;
+  border-radius: 10px !important;
+  background: transparent !important;
+  color: var(--sg-gold-light) !important;
+  box-shadow: none !important;
+}
+
+.wp-block-navigation__responsive-container-open svg,
+.wp-block-navigation__responsive-container-close svg {
+  width: 22px;
+  height: 22px;
+  fill: currentColor;
+}
+
+.wp-block-navigation__responsive-container-open:hover,
+.wp-block-navigation__responsive-container-close:hover {
+  background-color: color-mix(in srgb, var(--sg-gold) 14%, transparent) !important;
+  border-color: var(--sg-gold) !important;
+}
+
+/* desktop-navigation: små versaler med messing-understregning */
+@media (min-width: 783px) {
+  .wp-block-navigation__container {
+    gap: 2px !important;
+    align-items: center;
+  }
+
+  .wp-block-navigation .wp-block-navigation-item__content {
+    padding: 10px 12px !important;
+    font-size: 0.78rem !important;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--sg-on-dark) !important;
+    border-radius: 8px;
+    position: relative;
+  }
+
+  .wp-block-navigation .wp-block-navigation-item__content::after {
+    content: "";
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: 5px;
+    height: 1px;
+    background: var(--sg-gold);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.2s var(--sg-ease);
+  }
+
+  .wp-block-navigation .wp-block-navigation-item__content:hover::after,
+  .wp-block-navigation .current-menu-item > .wp-block-navigation-item__content::after {
+    transform: scaleX(1);
+  }
+}
+
+/* =========================================================
+   4 · MENUEN — fuldskærms-sheet i stedet for det halve panel
+   ========================================================= */
+
+.wp-block-navigation__responsive-container.is-menu-open {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  max-width: 100vw !important;
+  height: 100dvh !important;
+  max-height: 100dvh;
+  padding: 0 !important;
+  margin: 0 !important;
+  background-color: var(--sg-bg) !important;
+  color: var(--sg-text) !important;
+  z-index: 100000 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* containeren indeni må ikke have sin egen indrykning eller sit eget scroll */
+.wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation__container,
+.wp-block-navigation__responsive-container.is-menu-open ul {
+  margin: 0 !important;
+  padding-left: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  list-style: none;
+}
+
+/* den hvide kant forsvinder: alt indeni er mørkt */
+.wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation__responsive-container-content,
+.wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation__container {
+  background-color: transparent !important;
+  color: var(--sg-text) !important;
+  width: 100% !important;
+  max-width: 560px;
+  margin-inline: auto;
+  padding: 0 var(--sg-gutter) calc(24px + env(safe-area-inset-bottom, 0px)) !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 0 !important;
+}
+
+/* lukke-knappen: lille cirkel øverst til højre, ikke en guldbjælke */
+.wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation__responsive-container-close {
+  position: fixed !important;
+  top: calc(10px + env(safe-area-inset-top, 0px));
+  right: var(--sg-gutter);
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 50% !important;
+  background-color: color-mix(in srgb, var(--sg-panel) 92%, transparent) !important;
+  border: 1px solid var(--sg-hair) !important;
+  color: var(--sg-gold-light) !important;
+  z-index: 2;
+}
+
+/* luft under lukke-knappen + et lille mærke i toppen */
+.wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation__responsive-container-content {
+  padding-top: calc(54px + env(safe-area-inset-top, 0px)) !important;
+}
+
+/* menupunkter: 56 px rækker, én hårlinje imellem */
+.wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation-item {
+  border-bottom: 1px solid color-mix(in srgb, var(--sg-hair) 70%, transparent);
+  padding: 0 !important;
+}
+
+.wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation-item__content {
+  display: flex !important;
+  align-items: center;
+  min-height: 52px;
+  padding: 2px 0 !important;
+  font-family: var(--sg-font-display, Georgia, serif);
+  font-size: 1.06rem !important;
+  letter-spacing: 0.1em !important;
+  text-transform: uppercase;
+  color: var(--sg-ivory) !important;
+  text-decoration: none;
+}
+
+.wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation-item__content:hover,
+.wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation-item__content:focus-visible {
+  color: var(--sg-gold-light) !important;
+}
+
+.wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation-item__content:focus-visible {
+  outline: 2px solid var(--sg-focus) !important;
+  outline-offset: -3px !important;
+  border-radius: 8px !important;
+}
+
+/* undermenu: mindre skrift, messing-streg til venstre, chevron på knappen */
+.wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation__submenu-container {
+  display: block !important;
+  position: static !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  padding: 0 0 6px 14px !important;
+  border-left: 1px solid var(--sg-hair) !important;
+  margin-left: 2px;
+}
+
+.wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation__submenu-container .wp-block-navigation-item {
+  border-bottom: 0;
+}
+
+.wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation__submenu-container .wp-block-navigation-item__content {
+  min-height: 46px;
+  font-family: var(--sg-font-body, system-ui, sans-serif);
+  font-size: 0.95rem !important;
+  letter-spacing: 0.02em !important;
+  text-transform: none;
+  color: var(--sg-on-dark-muted) !important;
+}
+
+.wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation__submenu-container .wp-block-navigation-item__content:hover {
+  color: var(--sg-gold-light) !important;
+}
+
+/* chevron-knappen ved "Shop" */
+.wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation-submenu__toggle {
+  width: 44px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--sg-gold);
+  border: 0;
+  background: none;
+}
+
+/* sidens indhold må ikke kunne scrolles under menuen */
+body:has(.wp-block-navigation__responsive-container.is-menu-open) {
+  overflow: hidden !important;
+}
+
+/* AI-boblen må ikke ligge oven på menuen */
+body:has(.wp-block-navigation__responsive-container.is-menu-open) .mwai-trigger,
+body:has(.wp-block-navigation__responsive-container.is-menu-open) .mwai-open-button,
+body:has(.wp-block-navigation__responsive-container.is-menu-open) .mwai-chat {
+  display: none !important;
+}
+
+/* =========================================================
+   5 · INDHOLD — den samme atelier-rytme, men strammet
+   ========================================================= */
+
+/* den gamle side-ramme findes i to varianter: `main` på forsiden og en
+   `.is-style-ext-preset--group--...`-gruppe på undersiderne (butik, produkt,
+   kurv). Begge havde messingkant, 4 px glødeskygge og 20-40 px luft, så alt
+   indhold sad i en indre ramme med dobbelt indsnævring. */
+html body .wp-block-group.is-style-ext-preset--group--natural-1--header-1,
+html body .wp-block-group[class*="is-style-ext-preset--group"] {
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+html body .wp-block-group[class*="is-style-ext-preset--group"] {
+  padding: 0 !important;
+}
+
+/* side-wrapperen på undersiderne (butik, produkt, kurv) er en direkte
+   gruppe under .wp-site-blocks. Den får sidenes luft — og sin bordeaux
+   gradient fjernet, så den følger årstiden. */
+html body .wp-site-blocks > .wp-block-group.is-style-ext-preset--group,
+html body .wp-site-blocks > .wp-block-group[class*="is-style-ext-preset--group"],
+html body main.wp-block-group {
+  padding-inline: var(--sg-gutter) !important;
+  padding-block: 0 !important;
+  background-image: none !important;
+  background-color: transparent !important;
+}
+
+/* temaets paneler er bordeaux (#301e20 → #140e10) overalt: kolonner,
+   sektioner, købsboks og brødtextbaggrund. De bliver årstidens flade i
+   stedet, så undersiderne ikke står i en rød kasse midt i et grønt design. */
+html body main .wp-block-group,
+html body main .wp-block-columns {
+  background-image: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* de to produktkolonner (galleri og købsboks) er de eneste der skal være
+   paneler — resten af siden er én flade */
+html body main .wp-block-column {
+  background-image: linear-gradient(160deg, var(--sg-surface-2), var(--sg-surface)) !important;
+  border: 1px solid var(--sg-hair) !important;
+  border-radius: var(--sg-radius) !important;
+}
+
+/* produktsiden: gruppen .woocommerce.product havde 16 px luft, messingkant
+   og den samme bordeaux gradient som resten af det gamle design */
+html body .wp-block-group.woocommerce,
+html body .wp-block-group.woocommerce.product {
+  background-image: linear-gradient(180deg, var(--sg-surface), var(--sg-bg)) !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+}
+
+/* brødkrummen skal kunne læses på én-to linjer, ikke fire */
+html body .wc-block-breadcrumbs,
+html body .woocommerce-breadcrumb {
+  font-size: 11px !important;
+  letter-spacing: 0.1em !important;
+  line-height: 1.5 !important;
+  text-transform: uppercase;
+  color: var(--sg-muted) !important;
+  margin-bottom: 8px !important;
+}
+
+html body .wc-block-breadcrumbs a,
+html body .woocommerce-breadcrumb a {
+  color: var(--sg-brass-text) !important;
+  text-decoration: none !important;
+}
+
+/* produktbilledet må aldrig være større end kolonnen, uanset hvad temaet
+   har sat af bredde og aspect-ratio */
+html body .woocommerce-product-gallery img,
+html body .wp-block-woocommerce-product-image img,
+html body .wc-block-components-product-image img {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+  object-fit: contain !important;
+}
+
+html body .woocommerce-product-gallery__image,
+html body .wp-block-woocommerce-product-image {
+  max-width: 100% !important;
+}
+
+/* Woo-blokken lægger et 4:5-billede i en firkantet boks med »contain«, så
+   der blev en tom bjælke over fotoet. Boksen får samme forhold som billedet;
+   den absolutte inder-container og lazy-load-markeringen får lov at være. */
+html body .wc-block-components-product-image {
+  width: 100% !important;
+  max-width: 100% !important;
+  aspect-ratio: 4 / 5 !important;
+  height: auto !important;
+  overflow: hidden;
+  border-radius: var(--sg-radius);
+}
+
+/* Woo sætter hvert galleri-slide til en fast px-bredde fra en CSS-variabel
+   (målt 668 px i en 222 px kolonne), så billedet blev klippet og der kom en
+   tom bjælke. Slidene følger nu kolonnen. */
+html body [class*="wc-block-product-gallery-large-image"] {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  flex: 1 1 auto !important;
+}
+
+html body .wc-block-components-product-image img {
+  width: 100% !important;
+  max-width: 100% !important;
+  object-fit: contain !important;
+}
+
+/* værktøjslinjen i butikken (»Showing 1–16 of 20 results« + sortering)
+   skal være en rolig panel-række, ikke en bordeaux boks med 20 px luft */
+html body .wp-block-group.alignwide.is-content-justification-space-between {
+  background-image: linear-gradient(180deg, var(--sg-surface), var(--sg-surface-2)) !important;
+  border: 1px solid var(--sg-hair) !important;
+  border-radius: var(--sg-radius) !important;
+  padding: 12px 14px !important;
+  gap: 10px !important;
+}
+
+html body .wp-block-woocommerce-product-collection,
+html body .wc-block-product-template {
+  margin: 0 !important;
+}
+
+/* footerens indre gruppe havde samme bordeaux gradient */
+html body footer .wp-block-group {
+  background-image: none !important;
+}
+
+/* den gamle side-ramme: main havde baade 20 px luft, en messingkant og en
+   bred skygge, så alt indhold sad i en indre »ramme«. Den er væk nu. */
+html body main.wp-block-group {
+  padding: 0 !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+/* den dobbelte indsnævring: post-content havde sin egen luft oveni wrap */
+.entry-content.has-global-padding,
+main .entry-content {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  --wp--style--root--padding-left: 0;
+  --wp--style--root--padding-right: 0;
+}
+
+.sga-wrap {
+  width: 100% !important;
+  max-width: var(--sg-wrap) !important;
+  margin-inline: auto !important;
+  padding-inline: var(--sg-gutter) !important;
+}
+
+.sga-hero {
+  padding-block: clamp(40px, 8vw, 96px) !important;
+  background: radial-gradient(120% 90% at 50% 0%, var(--sg-season-glow), transparent 62%), var(--sg-bg) !important;
+  border-bottom: 1px solid var(--sg-hair);
+}
+
+.sga-section {
+  padding-block: var(--sg-section-y) !important;
+}
+
+.sga-eyebrow {
+  letter-spacing: clamp(2px, 0.9vw, 6px) !important;
+  font-size: clamp(10px, 2.8vw, 12px) !important;
+  line-height: 1.7 !important;
+  color: var(--sg-brass-text) !important;
+  text-wrap: balance;
+}
+
+.sga-h1 {
+  font-size: clamp(28px, 7.4vw, 62px) !important;
+  line-height: 1.1 !important;
+  text-wrap: balance;
+}
+
+.sga-h2 {
+  font-size: clamp(22px, 4.6vw, 38px) !important;
+  line-height: 1.18 !important;
+  text-wrap: balance;
+}
+
+.sga-sub {
+  font-size: clamp(13px, 3.4vw, 18px) !important;
+  letter-spacing: 0.1em !important;
+  text-wrap: balance;
+}
+
+.sga-lede {
+  font-size: clamp(15.5px, 3.9vw, 17.5px) !important;
+  line-height: 1.62 !important;
+  text-wrap: pretty;
+}
+
+.sga-prod {
+  border-radius: var(--sg-radius) !important;
+  border: 1px solid var(--sg-hair) !important;
+  background-color: var(--sg-surface) !important;
+  overflow: hidden;
+  box-shadow: var(--sg-shadow-1);
+}
+
+.sga-prod img,
+.sga-ph img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+}
+
+.sga-btn,
+.sga-ghost {
+  border-radius: 999px !important;
+  min-height: var(--sg-tap);
+  padding: 13px 20px !important;
+  line-height: 1.2 !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 0.08em;
+  font-size: 0.86rem !important;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.sga-note {
+  background: linear-gradient(180deg, var(--sg-surface), var(--sg-surface-2));
+  border-block: 1px solid var(--sg-hair);
+}
+
+footer.wp-block-template-part {
+  border-top: 1px solid var(--sg-hair);
+  padding-inline: 0 !important;
+  background: linear-gradient(180deg, var(--sg-surface), var(--sg-bg)) !important;
+}
+
+/* footer-links: ingen understregning, messing ved hover — mere ro og mere moderne */
+footer a {
+  text-decoration: none !important;
+  color: var(--sg-muted);
+  border-bottom: 1px solid transparent;
+  transition: color 0.18s var(--sg-ease), border-color 0.18s var(--sg-ease);
+}
+
+footer a:hover,
+footer a:focus-visible {
+  color: var(--sg-gold-light);
+  border-bottom-color: var(--sg-gold);
+}
+
+footer .wp-block-column p + p,
+footer .wp-block-column ul + ul {
+  margin-top: 2px;
+}
+
+footer .wp-block-column p {
+  margin-block: 4px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+footer .wp-block-column h4 {
+  font-size: 0.82rem !important;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--sg-brass-text);
+  margin-bottom: 8px;
+}
+
+/* =========================================================
+   6 · MOBIL — 390 px og ned. Det her er hovedretten.
+   ========================================================= */
+
+@media (max-width: 782px) {
+  .sga-hero {
+    padding-block: 32px 36px !important;
+  }
+
+  .sga-section,
+  .sga-note {
+    padding-block: clamp(30px, 7vw, 52px) !important;
+  }
+
+  .sga-eyebrow {
+    margin-bottom: 10px !important;
+  }
+
+  .sga-h1,
+  .sga-h2 {
+    margin-block: 8px 10px !important;
+  }
+
+  .sga-sub {
+    margin-block: 0 14px !important;
+  }
+
+  .sga-hero .sga-eyebrow,
+  .sga-hero .sga-h1,
+  .sga-hero .sga-sub,
+  .sga-hero .sga-lede {
+    text-align: left !important;
+  }
+
+  .sga-hero .sga-h1::after {
+    margin-left: 0 !important;
+  }
+
+  .sga-lede {
+    margin-bottom: 18px !important;
+    text-align: left !important;
+  }
+
+  .sga-hero .sga-lede,
+  .sga-section p,
+  .sga-note blockquote p {
+    text-align: left !important;
+  }
+
+  /* knapper i fuld bredde og stablet: nemmere at ramme med tommelfingeren */
+  .sga-ctarow {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+    width: 100%;
+  }
+
+  .sga-ctarow br {
+    display: none !important;
+  }
+
+  .sga-ctarow .sga-btn,
+  .sga-ctarow .sga-ghost,
+  .sga-journal .sga-btn,
+  .sga-journal .sga-ghost {
+    width: 100% !important;
+  }
+
+  /* to produkter pr. række: siden bliver halvt så lang og ser moderne ud */
+  .sga-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  .sga-prod {
+    min-width: 0;
+  }
+
+  .sga-cols {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+
+  /* produkttitler og pris skal kunne læses i en halv kolonne */
+  .sga-prod h3,
+  .sga-prod .sga-ptitle {
+    font-size: 0.92rem !important;
+    line-height: 1.3 !important;
+  }
+
+  .sga-prod .sga-price,
+  .sga-prod .price {
+    font-size: 0.9rem !important;
+  }
+
+  .sga-prod .sga-btn,
+  .sga-prod .sga-ghost {
+    min-height: 40px;
+    padding: 8px 14px !important;
+    font-size: 0.74rem !important;
+  }
+
+  /* footer: ingen rammer pr. spalte — hårlinjer og venstrejusteret tekst */
+  footer > .wp-block-group,
+  footer .alignwide {
+    padding: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+
+  footer .wp-block-column {
+    padding: 18px 0 !important;
+    border: 0 !important;
+    border-bottom: 1px solid var(--sg-hair) !important;
+    box-shadow: none !important;
+    text-align: left !important;
+  }
+
+  footer .wp-block-column:last-child {
+    border-bottom: 0 !important;
+  }
+
+  footer .wp-block-site-title,
+  footer .wp-block-site-title a,
+  footer h2,
+  footer h3,
+  footer h4,
+  footer p,
+  footer li,
+  footer .sg-copyright {
+    text-align: left !important;
+  }
+
+  footer .wp-block-site-title a {
+    font-size: 1.3rem !important;
+    letter-spacing: 0.1em !important;
+  }
+
+  /* samlingskort og produktkort: mindre indvendig luft, ingen indre ramme */
+  .sga-col {
+    padding: 24px 20px !important;
+    border-radius: var(--sg-radius) !important;
+  }
+
+  .sga-col .sga-num {
+    font-size: 1.6rem !important;
+  }
+
+  .sga-prod {
+    padding: 12px !important;
+  }
+
+  .sga-ph {
+    border: 0 !important;
+    border-radius: 8px !important;
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+
+  .sga-buyrow {
+    padding-top: 10px !important;
+  }
+
+  footer .wp-block-columns {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 22px !important;
+  }
+
+  footer .wp-block-column {
+    flex-basis: auto !important;
+    width: 100% !important;
+  }
+
+  footer h2,
+  footer h4 {
+    font-size: 1.05rem !important;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  footer .wp-block-columns + * {
+    margin-top: 12px;
+  }
+
+  /* ingen vandret scroll, uanset hvad temaet mener */
+  html,
+  body {
+    overflow-x: hidden;
+  }
+
+  /* billeder og tabeller må aldrig sprænge kolonnen */
+  img,
+  table,
+  pre,
+  iframe {
+    max-width: 100%;
+  }
+
+  table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* smalle telefoner: 360 px og ned */
+@media (max-width: 380px) {
+  .sga-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  header .sg-word {
+    letter-spacing: 0.06em !important;
+  }
+}
+
+/* =========================================================
+   7 · BRUGERGRÆNSEFLADER — kurv, kasse, formularer, fokus
+   ========================================================= */
+
+input,
+select,
+textarea,
+.button,
+.wp-block-button__link,
+.woocommerce a.button,
+.woocommerce button.button {
+  font-size: 16px; /* iOS zoommer ikke når feltet er 16 px */
+  border-radius: 10px;
+}
+
+.woocommerce a.button,
+.woocommerce button.button,
+.wp-block-button__link {
+  border-radius: 999px !important;
+  min-height: var(--sg-tap);
+  padding: 12px 22px !important;
+}
+
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--sg-focus);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* hover-løft kun hvor der findes en rigtig mus */
+@media (hover: hover) and (pointer: fine) {
+  .sga-prod:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--sg-shadow-2);
+    border-color: color-mix(in srgb, var(--sg-gold) 55%, transparent) !important;
+  }
+}
+
+/* =========================================================
+   8 · TILGÆNGELIGHED
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --sg-hair: rgba(201, 162, 83, 0.55);
+    --sg-muted: #d9d3c3;
+  }
+
+  .sga-prod {
+    border-width: 2px !important;
+  }
+}
+
+/* print: menuen og boblerne skal ikke med */
+@media print {
+  header.wp-block-template-part,
+  .wp-block-navigation__responsive-container,
+  .mwai-trigger,
+  .cmplz-cookiebanner {
+    display: none !important;
+  }
+}

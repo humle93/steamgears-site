@@ -21,7 +21,7 @@ typisk en voksen, der skal til cosplay, halloween, marked eller et temafest — 
 | Katalog | **24 produkter** målt 8/11 om aftenen: **20 publicerede, 4 kladder, 92 i papirkurven**, **22 billeder i alt** (højst 2 pr. produkt, 0 uden alt-tekst); produceret via **Printful**. Butikken kører **DKK**. Ældre logger nævner Printify-plugin'et, som ikke er leverandøren |
 | Indhold | **29 sider** + 18 guides i guide-stakken; seneste roadmap måler sitemap og live-siderne |
 | Sprog | Engelsk på sitet, **dansk i commits og dokumentation** (tekniske termer på engelsk) |
-| Design | "Dark Clockwork Theatre v3"; template part til headeren ligger i [`css/`](../css/) |
+| Design | "Dark Clockwork Theatre v3" + **sæsonlag**: `css/sg-season.css` (tokens, header, menu, mobil) printes af `mu-plugins/sga-season.php`, der sætter `data-season` efter måneden. Template part til headeren ligger i [`css/`](../css/) |
 
 Der er **seks aktive projekter**, alle målt i [`projektstatus.json`](../projektstatus.json) (status pr. 8/11 2026):
 
@@ -84,6 +84,11 @@ Dette kort er afstemt mod målinger og status pr. **8/11 2026**. Nyere live-tal 
   `link` står tændt uden at kunne vælges. Ejerpunkterne står i §4d.
 - GA4-dobbelttællingen blev rettet 7/11 i Rank Maths option: én `page_view` blev målt på `/`, `/?nocache=1`
   og `/shop/`; Ads-tagget blev bevaret. Kilde: [`library/analytics-dobbelt-2026-11-06.md`](library/analytics-dobbelt-2026-11-06.md).
+- **Mobil og sæson (8/11):** `css/sg-season.css` + `mu-plugins/sga-season.php` ligger som et lag efter
+  temaets CSS. Målt på 320 px: header **337 → 73 px**, indholdskolonne **198 → 278 px**, forside
+  **11 120 → 8 574 px**, 0 elementer uden for viewport, menu som fuldskærms-ark, og de tre rystekilder
+  (10 s AI-løkke, `backdrop-filter`, `transition: all`) er væk. Fire paletter; 8/11 = `autumn`.
+  Desktop er ikke set visuelt. Se [`library/mobil-design-2026-11-08.md`](library/mobil-design-2026-11-08.md).
 - GSC Crawl stats → By response er stadig ejer-blokeret; se S0.6 i roadmappet. Tal og resterende butikspunkter
   skal læses fra den aktuelle roadmap frem for de gamle audits.
 
