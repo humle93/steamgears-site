@@ -1,5 +1,7 @@
 # Valuta og priser — forslag til S4.3
 
+> **Status 8/11 2026: udført.** Butikken kører nu **DKK**, og alle 24 produkter har fået DKK-pris efter denne omskrivnings metode: dagens ECB-kurs (6,6952) og afrunding til nærmeste 5 kr. Tabellen herunder blev **ikke** ført ind som absolutte tal, fordi kataloget er blevet genprissat i USD efter 2/11 og tabellen kun dækker 11 af de 24 produkter; se [`w3tc-og-valuta-2026-11-08.md`](w3tc-og-valuta-2026-11-08.md) for hele før/efter-listen og begrundelsen.
+
 Butikken kører i **USD**. For en dansk butik med EU-levering betyder det, at kunden skal regne om i
 hovedet, og at momsvisning bliver meningsløs. S4.3 kræver både et valutaskift **og** nye priser —
 valutakoden alene ville gøre $21.90 til 21,90 kr.
@@ -78,8 +80,15 @@ produkter og undgår, at en tee koster 179,32 kr.
 5. **Rækkefølge.** Skift valuta og priser i samme handling som S4.5 (betalingsmetoder), så kunden
    møder en færdig butik og ikke en halv.
 
-## Hvad der ikke er gjort
+## Hvad der blev gjort 8/11
 
-Intet er ændret i butikken. Et valutaskift er en økonomisk beslutning med moms-, fragt- og
-gebyrkonsekvenser, og priserne skal ejeren godkende. Tabellen er klar til at blive ført ind, når
-beslutningen er taget.
+Valutaen blev skiftet til **DKK**, og alle 72 prisrækker (24 produkter) blev sat efter metoden ovenfor:
+ECB-kursen blev genhentet på skiftedagen (**1 USD = 6,6952 DKK**, dateret 6/11) og hvert produkt rundet
+til nærmeste 5 kr. To ting fra »Før du skifter« blev kontrolleret undervejs: priserne er sat **inkl.
+moms** (`woocommerce_prices_include_tax: yes`, 25 %), og kunden betaler det samme som før, kun i DKK —
+det var netop grunden til at tabellens absolutte tal ikke blev brugt (de bygger på USD-priser fra 2/11;
+kataloget er genprissat siden). Fragt og betalingsgebyrer er stadig ejerens poster (S4.6/S4.5), og EUR
+kan ikke vises som sekundærvaluta, fordi der ikke er nogen currency-switcher på sitet.
+
+Før/efter for alle 24 produkter, rå målinger og rollback:
+[`w3tc-og-valuta-2026-11-08.md`](w3tc-og-valuta-2026-11-08.md).

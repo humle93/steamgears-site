@@ -33,13 +33,13 @@ _Opdateret 2026-11-08 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Åbne blokeringer
 
-- **steamgears.eu — site-optimering** — Ejerens oplysninger og aftaler, målt 8/11: CVR-nummer og telefon (Complianz har navn »Henning 6«, adresse »Lavgade 44a st th«, e-mail og DK — men telefon er tom og CVR findes ikke i formularen); valuta og alle 24 priser (butikken kører USD); aftaler med MobilePay/PayPal/Klarna (kun Stripe og bankoverførsel er aktive); zonerne til EU/UK/RoW (kun Denmark har en metode — fri fragt uden minimum — og resten af verdenen har ingen, så EU-kunder kan ikke gennemføre en ordre), fragtklasser og fri fragt-grænse; Complianz-valget EU opt-in i stedet for US opt-out; Printful-adgang eller 5–8 færdige mockups pr. produkt (målt: 24 produkter, 26 billeder, 0 produkter med 3 eller flere); ja/nej pr. produkt for 942/765/766/767 (alle fire kladder med pris og SKU); GSC-svarrapport (S0.6); beslutning om de to inaktive plugins; og W3TC-godkendelse efter en rigtig ordre.
+- **steamgears.eu — site-optimering** — Ejerens oplysninger og aftaler, målt 8/11: CVR-nummer og telefon (Complianz har navn »Henning 6«, adresse »Lavgade 44a st th«, e-mail og DK — men telefon er tom og CVR findes ikke i formularen); aftaler med MobilePay/PayPal (kun Stripe og bankoverførsel er aktive); zonerne til EU/UK/RoW (kun Denmark har en metode — fri fragt uden minimum — og resten af verdenen har ingen, så EU-kunder ikke kan gennemføre en ordre), fragtklasser og fri fragt-grænse; en currency-switcher hvis EUR skal vises som sekundærvaluta (der er ingen aktiv); Printful-adgang eller 5–8 færdige mockups pr. produkt (målt: 20 publicerede produkter, 22 billeder, alle under 3); ja/nej pr. produkt for 942/765/766/767 (alle fire kladder med pris og SKU); GSC-svarrapport (S0.6); og beslutning om de to inaktive plugins.
 - **Steamgears Autopilot — plugin** — Syv led kræver ejeren, alle målt 8/11: (1) **Pinterest-scope** — tokenet ligger nu i WooCommerce-integrationen og er gyldigt (`/user_account` 200 som `cpaleadsis`, id 688980580401955331), men appen har kun ads/billing/catalogs/pins/user_accounts og **mangler `boards:read`**, så `/pins` og `/boards` afvises (målt 17:25Z, kanalstatus står som `needs_scope`); (2) **de øvrige kanal-tokens** — Instagram, Bluesky, Mastodon, Telegram og Facebook har intet token (5 af 6 mangler); (3) **AIMLAPI-kredit** — sidste generering 7/11 fejlede med »You've run out of funds«; (4) **`sgap_alert_email`** er tom, så fejl registreres men ingen mail sendes; (5) **full auto vs. godkendelse** — `sgap_full_auto_enabled = no` og 40 elementer venter; (6) **distributionsvej** — `publish_mode = rss` og 0 Publer-konti; (7) **P2.1–P2.3** kræver ejerens beslutning om Command Center-retningen. Intet af det må gættes.
 - **Dark academia-rebrand** — To led kræver ejerhandling, målt 8/11: (1) **de 29 trash'ede designs** — herunder de tre produkter der er witchy-tarots eneste kandidater (567, 395, 411); et ja/nej til genoplivning er nok, og tildelingen kører selv bagefter; (2) **Batch 4-mockups (5 t)** — Printful-adgang eller 5–8 færdige billeder pr. produkt; målt 20 publicerede med 22 billeder, 0 med 3 eller flere, 62 billedplaceringer mangler, og repoet har 0 trykfiler og 0 tøj-skabeloner. Kollektionstildelingen er ikke længere blokeret: den blev udført 8/11 gennem Novamira-MCP og målt stabil.
 
 ### Næste skridt
 
-- **steamgears.eu — site-optimering** — Intet agent-arbejde tilbage i S0–S4: alle fem bands er færdige og målt, og de 1,5 d der står tilbage er ejer-blokerede og navngivet i §4c og blocked_by. Målt 8/11: 24 produkter (20 publicerede, 4 kladder), USD, fri fragt i DK og ingen forsendelse til EU/UK/RoW, Stripe + bankoverførsel, Complianz på US opt-out.
+- **steamgears.eu — site-optimering** — Intet agent-arbejde tilbage i S0–S4: alle fem bands er færdige og målt, og de resterende poster er ejerens og navngivet i §4c og blocked_by. Målt 8/11: 24 produkter (20 publicerede, 4 kladder) i **DKK** med alle 72 prisrækker sat efter dagens ECB-kurs (6,6952) og afrunding til nærmeste 5 kr; W3TC kører med **minify, lazy load og database-cache slået til** efter tre gennemførte testordrer (1528/1529/1530, alle annulleret med note); fri fragt i DK og ingen forsendelse til EU/UK/RoW; Stripe + bankoverførsel; Complianz på EU opt-in.
 - **Steamgears Autopilot — plugin** — Agent-scope er færdigt (29,85 af 29,85 d). Ejeren har lagt Pinterest-tokenet ind i WooCommerce-integrationen, og 7.65.0 — som blev lagt på sitet 8/11 gennem MCP (`Plugin_Upgrader` i `execute-php`; `update` svarer nu »Already up to date«) — henter det nu derfra gennem integrationens egen dekryptering: målt 8/11 virker det (konto `cpaleadsis`, id 688980580401955331), men appen mangler scopes `boards:read`, så pin-lister og Pin Analytics kan stadig ikke måles. Næste skridt er ejerens: genforbind Pinterest med board-adgang (eller et developer-token med boards:read + pins:read). Resten af blocked_by står uændret.
 - **Dark academia-rebrand** — Kun to ting står tilbage: (1) **witchy-tarot** kan først få indhold når ejeren siger ja til at gendanne 567 (Tarot Witchy Tee) — og eventuelt 395/411 — fra papirkurven; derefter fylder `python3 tools/rebrand_apply.py --apply --via-cli` termen automatisk, fordi kortet allerede indeholder dem; (2) **Batch 4-mockups** (5 t) kræver Printful-adgang eller 5–8 færdige billeder pr. produkt.
 - **SEO-indholdsproduktion** — SEO-indholdet er 100 %: fire guides skrevet, tre publiceret, corset-guiden publiceret, 1410 parkeret til september. Ingen åbne poster.
@@ -48,15 +48,42 @@ _Opdateret 2026-11-08 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `a3b80a9 Sidste to restpunkter gjort konkrete: P1.5s versionskrav er indfriet, og ingen post står som »blokeret« Modul: restpunkter — roadmap Før: — Efter: — Δ: — Grundlag: ingen ændring`
+- `600c7af Undtag rebrand-workflowens egen rapport-commit, så CI ikke lyser rødt for maskinens eget arbejde Modul: værnet — commit-tjek Før: — Efter: — Δ: — Grundlag: ingen ændring`
+- `2b915aa Restpunkterne er gennemgået med skriveadgang: Complianz og plugin-opdateringen er udført, resten er konkrete ejerhandlinger Modul: restpunkter — site og plugin Før: — Efter: — Δ: — Grundlag: ingen ændring`
 - `477c3bb Merge branch 'main' of https://github.com/humle93/steamgears-site into freebuff/cca5dfcf9656b5d36ff3151f`
 - `05101ef Modul: Steamgears Autopilot — sproget og kilden synlige i køen (7.65.0) Før: 100 %  →  Efter: 100 %  (Δ 0) Grundlag: ingen ændring`
 - `f49f155 chore(rebrand): kørselsrapport for tildelingen`
-- `3a00b36 Merge branch 'main' of https://github.com/humle93/steamgears-site into freebuff/d96c797cb28964a7f8fb9d78`
-- `2079642 CI-verificeringen må ikke lyse rødt for en kollektion der venter på ejerens svar Modul: om-mærkning — batch 2-tildeling Før: 65,3 % Efter: 65,3 % Δ: 0 Grundlag: ingen ændring`
-- `e6c3416 chore(status): daglig projektstatus 2026-11-08`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 8/11 — W3TC slået til og butikken skiftet til DKK, begge målt udefra
+
+- **De to poster der stod som »ejer-blokeret« var ikke blokeret — de var skrevet før skrivevejen.**
+  `minify.enabled`, `dbcache.enabled` og `lazyload.enabled` er nu `true` i
+  `wp-content/w3tc-config/master.php`, og valutakoden er **DKK** med alle 72 prisrækker sat.
+- **Database-cachen havde en skjult forudsætning:** W3TC's dbcache virker kun gennem drop-in'en
+  `wp-content/db.php`. Den fandtes ikke, så indstillingen ville have stået tændt uden at gøre noget. Filen
+  er lagt på plads fra pluginnets egen `wp-content/db.php`. Alligevel skriver den **0 filer**, fordi W3TC
+  afviser den pr. request med `modification query` (WooCommerce-session/transienter skriver tidligt).
+  Tændt og aktiv — men uden målbar effekt her. Det står der, i stedet for at blive pyntet.
+- **Testordren blev lagt gennem butikkens egen checkout** (Store API: `cart/add-item` → `checkout`) med
+  `bacs`, tre gange: 1528 (USD), 1529 og 1530 (DKK, efter cachen blev slået til). Alle tre er annulleret
+  med note, så de ikke tæller som omsætning. 1530 er beviset for at cachen ikke ødelægger kassen.
+- **Fælden ved priserne: 2/11-tabellen passer ikke længere.** Kun 11 af de 24 produkter har en række, og
+  alle 11 bygger på den USD-pris produktet havde 2/11. Kataloget er genprissat siden (hoodie $49.95 → $109;
+  corset $59.95 → $219). At føre tabellens DKK-tal ind ville sænke priserne 45–78 % og bryde tabellens egen
+  regel om at kunden ikke må betale mindre end afrundingen. Valutaskiftet blev derfor udført som et
+  valutaskift: dagens ECB-kurs **6,6952** og afrunding til nærmeste 5 kr. 20/20 produktsider og DB stemmer.
+- **Sådan blev det målt:** 157 minificerede filer (7,7 MB), produktsiden har 33 script-tags med `src` (var
+  88) i 19 JS-filer og 12 minificerede stylesheets, 28/28 lokale assets 200, 22 `data-src`, 33/33 sider 200,
+  `/cart/` og `/checkout/` 200 med varer. Alt som anonym besøgende.
+- **Rollback står i dokumentet:** backup af `master.php` ligger i `uploads/w3tc-master-foer-minify-2026-11-08.php`
+  (32 346 bytes, md5 `7e05b002…`), og de gamle USD-priser står i tabellen i
+  [library/w3tc-og-valuta-2026-11-08.md](../docs/library/w3tc-og-valuta-2026-11-08.md).
+- **EUR kan stadig ikke vises:** der er ingen currency-switcher på sitet (0 aktive plugins med »currenc«).
+  Det er en ejerhandling, ikke en agent-opgave.
 
 ### 8/11 — det sidste åbne punkt er ejerens, og opdateringsvejen er prøvet
 

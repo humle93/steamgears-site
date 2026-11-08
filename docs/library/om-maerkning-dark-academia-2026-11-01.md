@@ -9,7 +9,7 @@ Konkret kortlægning af hvordan det eksisterende katalog kan flyttes fra "steamp
 1. **Slugs ændres ikke.** 39 produkter har allerede 39 indgående links fra 15 artikler, og vi har 24 døde link-mål i forvejen. Nye titler + gamle slugs er acceptabelt; nye slugs uden redirects ville skabe 39 nye 404'ere.
 2. **Printful overskriver WooCommerce-tekst ved næste sync.** Titler og beskrivelser skal derfor rettes i Printful, ikke (kun) i butikken. Dette er den vigtigste praktiske detalje i hele planen.
 3. **Mockups kan ikke laves via MCP.** De skal genereres i Printful (deres mockup-værktøj) eller uploades — det er ejerarbejde eller kræver adgang til Printful-kontoen.
-4. **Priser røres ikke her.** Valutabeslutningen (USD → EUR/DKK) er en separat opgave og skal køres først, så priserne kun genberegnes én gang.
+4. **Priser røres ikke her.** Valutabeslutningen (USD → EUR/DKK) er en separat opgave og skal køres først, så priserne kun genberegnes én gang. **Udført 8/11:** butikken kører nu DKK, og alle 24 produkter har DKK-pris efter dagens ECB-kurs og afrunding til nærmeste 5 kr — se [`w3tc-og-valuta-2026-11-08.md`](w3tc-og-valuta-2026-11-08.md). Kortet herunder er stadig design- og metadata-planen; priskolonnerne i det er ikke længere gældende.
 
 ## Søgeord der bærer om-mærkningen
 
