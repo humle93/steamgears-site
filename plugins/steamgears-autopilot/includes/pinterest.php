@@ -57,6 +57,8 @@ class SGAP_Pinterest {
     const PINS = 'sgap_pinterest_pins';
     const BOOKMARK = 'sgap_pinterest_bookmark';
     const STATE = 'sgap_pinterest_state';
+    /** When Pinterest last refused the stored token (401). Read by the channel-health screen. */
+    const REFUSED = 'sgap_pinterest_refused';
     /** The field a token was pasted into before 7.33.3 unregistered it. */
     const LEGACY = 'sgap_pinterest_token';
 
@@ -82,6 +84,8 @@ class SGAP_Pinterest {
     public static function init(): void {
         add_action(self::CRON, [__CLASS__, 'run']);
         add_action('init', [__CLASS__, 'migrate_legacy']);
+        // A fresh token deserves a fresh verdict: the old refusal was about the old token.
+        add_action('update_option_sgap_pinterest_access_token', [__CLASS__, 'forget_refusal'], 10, 2);
         // Action Scheduler when WooCommerce supplies it, WP-Cron otherwise.
         SGAP_Scheduler::recurring(self::CRON, DAY_IN_SECONDS);
     }
@@ -608,6 +612,29 @@ class SGAP_Pinterest {
         return $state;
     }
 
+    /**
+     * The last time Pinterest answered 401 on the stored token, or [] when it has not.
+     * A stored token is not the same as a working token; the channel-health screen asks this
+     * so a dead token reads as `refused` instead of `ready`.
+     */
+    public static function refused(): array {
+        $refused = get_option(self::REFUSED, []);
+        if (!is_array($refused) || (string) ($refused['at'] ?? '') === '') {
+            return [];
+        }
+        return ['at' => (string) $refused['at'], 'code' => (int) ($refused['code'] ?? 401)];
+    }
+
+    /** Forgets the refusal when the token changes (or when called without arguments). */
+    public static function forget_refusal($old = null, $new = null): void {
+        if ($old !== null && $new !== null && (string) $old === (string) $new) {
+            return;
+        }
+        if (get_option(self::REFUSED, null) !== null) {
+            delete_option(self::REFUSED);
+        }
+    }
+
     /** Everything an operator or an MCP client needs to judge the connection. */
     public static function status(): array {
         $state = self::state();
@@ -781,10 +808,15 @@ class SGAP_Pinterest {
         $raw = (string) wp_remote_retrieve_body($response);
         $body = json_decode($raw, true);
         if ($code === 200 && is_array($body)) {
+            // A working call proves the token; a refusal from last week must not linger.
+            if (get_option(self::REFUSED, null) !== null) {
+                delete_option(self::REFUSED);
+            }
             return $body;
         }
         $detail = is_array($body) ? self::detail($body) : '';
         if ($code === 401) {
+            update_option(self::REFUSED, ['at' => current_time('mysql'), 'code' => 401], false);
             return new WP_Error('sgap_pinterest_401', 'Pinterest refused the access token (HTTP 401)' . ($detail !== '' ? ': ' . $detail : '') . '. Paste a fresh token, or save the app credentials and refresh token so it can renew itself.', ['status' => 401]);
         }
         if ($code === 403) {

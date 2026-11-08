@@ -23,7 +23,7 @@ The whole social autopilot runs inside WordPress (Command Center is retired):
 4. **Measure** – every post links via `/go/<id>/`, so clicks (and WooCommerce
    orders) are counted per channel.
 
-Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.64.3.zip` → Activate. On an existing
+Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.64.4.zip` → Activate. On an existing
 install the same zip arrives through the self-updater (see *Updates*), so an upload is only needed for the
 first install or a recovery.
 
@@ -224,6 +224,15 @@ Rules by group:
 The scan is stored in one option (`sgap_seo_site`) and refreshed lazily once a week when an
 administrator opens wp-admin, because WP-Cron is not dependable on this cached host. Body text is
 never rewritten by this screen; content suggestions stay in *Optimise SEO of a page*.
+
+## Channel status tells a dead token from a missing one (7.61, tightened 7.64.4)
+
+`GET /sgap/v1/channel-health` answers, per channel, which of four states it is in — `ready`,
+`needs_refresh`, `missing_token` or `refused` — plus the sentence that says what to do next. Since
+7.64.4 a stored token that the provider refuses is **`refused`, not `ready`**: Pinterest records the
+401 with a date (`sgap_pinterest_refused`), the report shows `refused_at`, and the summary counts it on
+its own line. Saving a new access token forgets the old verdict, and the next successful call clears
+it. Before 7.64.4 the one channel the screen called ready answered 401 on every call.
 
 ## Pre-flight per channel (7.20)
 

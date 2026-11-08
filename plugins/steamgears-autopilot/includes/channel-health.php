@@ -26,14 +26,22 @@ class SGAP_Channel_Health {
         'ready'         => 'Ready — run the refresh and the events land in sgap_events.',
         'needs_refresh' => 'No access token, but a refresh token is stored: the next refresh will fetch a new one.',
         'missing_token' => 'Nothing stored — paste the token on the Keys screen, then run the refresh.',
+        'refused'       => 'The stored token was refused by the provider (HTTP 401): paste a fresh one, or save credentials that can renew it.',
         'no_class'      => 'The channel class is not loaded, so the state cannot be read.',
     ];
 
     /**
-     * Three states, and no guessing: a stored token wins, a refresh token alone still
-     * counts as recoverable, anything else is missing input from the owner.
+     * Four states, and no guessing: a refused token beats a stored one, a stored token wins
+     * over a refresh token, and a refresh token alone still counts as recoverable.
+     *
+     * A token being *stored* was read as `ready` until 7.64.4, which is exactly backwards: on
+     * 8/11 the screen called Pinterest ready while every call answered 401. A channel that can
+     * report its own auth failure now says so here.
      */
-    public static function classify(bool $configured, bool $refreshable): string {
+    public static function classify(bool $configured, bool $refreshable, string $refused = ''): string {
+        if ($refused !== '') {
+            return 'refused';
+        }
         if ($configured) {
             return 'ready';
         }
@@ -55,12 +63,21 @@ class SGAP_Channel_Health {
         }
         $configured = (bool) call_user_func([$class, 'configured']);
         $refreshable = method_exists($class, 'refreshable') ? (bool) call_user_func([$class, 'refreshable']) : false;
-        $state = self::classify($configured, $refreshable);
-        return [
+        $refused = [];
+        if (method_exists($class, 'refused')) {
+            $refused = (array) call_user_func([$class, 'refused']);
+        }
+        $refused_at = (string) ($refused['at'] ?? '');
+        $state = self::classify($configured, $refreshable, $refused_at);
+        $row = [
             'id' => $id, 'label' => $def['label'],
             'configured' => $configured, 'refreshable' => $refreshable,
             'state' => $state, 'next' => self::NEXT_STEP[$state] ?? '',
         ];
+        if ($refused_at !== '') {
+            $row['refused_at'] = $refused_at;
+        }
+        return $row;
     }
 
     /** @return array<string,array> one entry per channel, in the order they are reported. */
@@ -78,16 +95,22 @@ class SGAP_Channel_Health {
         $ready = 0;
         $recoverable = 0;
         $missing = 0;
+        $refused = 0;
         foreach ($report as $row) {
             if ($row['state'] === 'ready') {
                 $ready++;
             } elseif ($row['state'] === 'needs_refresh') {
                 $recoverable++;
+            } elseif ($row['state'] === 'refused') {
+                $refused++;
             } else {
                 $missing++;
             }
         }
-        return ['ready' => $ready, 'recoverable' => $recoverable, 'missing' => $missing, 'total' => count($report)];
+        return [
+            'ready' => $ready, 'recoverable' => $recoverable, 'refused' => $refused,
+            'missing' => $missing, 'total' => count($report),
+        ];
     }
 
     public static function register(): void {
