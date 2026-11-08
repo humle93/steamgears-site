@@ -277,6 +277,7 @@ Profilen kan også læses over MCP via den lokale server `tools/mcp_project_prof
 | Spørgsmål | Fil |
 | --- | --- |
 | Hvad skal bygges, i hvilken rækkefølge, hvor lang tid? | `docs/roadmap.md`, `plugins/steamgears-autopilot/ROADMAP.md` |
+| Hvordan publiceres den næste side hurtigt og sikkert? | [`library/deploy-playbook-2026-11-08.md`](library/deploy-playbook-2026-11-08.md) — faser, kontrolscript, DoD, fælder |
 | Hvor langt er vi, og hvorfor? | `projektstatus.json` → `docs/projektstatus.md` |
 | SEO-regler, GEO-skabelon, måling | `docs/seo.md` |
 | MCP-auth, fejlkoder, Publer, Simply | `docs/mcp-auth.md` |
