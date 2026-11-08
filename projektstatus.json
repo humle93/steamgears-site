@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "updated": "2026-11-03",
+  "updated": "2026-11-08",
   "projects": [
     {
       "id": "site",
@@ -594,6 +594,51 @@
       "after": 55.6,
       "delta": 10.2,
       "basis": "13,55 af 24,35 d (P0 3,2/4 · P1 4,85/11,35 · P2 4,5/7 · P3 1/2)"
+    },
+    {
+      "date": "2026-11-08",
+      "project": "steamgears.eu — site-optimering",
+      "module": "ingen ændring",
+      "before": 57.9,
+      "after": 57.9,
+      "delta": 0,
+      "basis": "12,6 af 21,75 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,7/6 · S3 2,45/3,55 · S4 1,4/5)"
+    },
+    {
+      "date": "2026-11-08",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "ingen ændring",
+      "before": 55.6,
+      "after": 55.6,
+      "delta": 0,
+      "basis": "13,55 af 24,35 d (P0 3,2/4 · P1 4,85/11,35 · P2 4,5/7 · P3 1/2)"
+    },
+    {
+      "date": "2026-11-08",
+      "project": "Dark academia-rebrand",
+      "module": "ingen ændring",
+      "before": 63.0,
+      "after": 63.0,
+      "delta": 0,
+      "basis": "8,5 af 13,5 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5)"
+    },
+    {
+      "date": "2026-11-08",
+      "project": "SEO-indholdsproduktion",
+      "module": "ingen ændring",
+      "before": 57.1,
+      "after": 57.1,
+      "delta": 0,
+      "basis": "4 af 7 guides (Publicerede guides (id 292, 296, 295) 0/3 · Guide-copy klar til publicering (292, 296, 295 + corset) 4/4)"
+    },
+    {
+      "date": "2026-11-08",
+      "project": "Døde internlinks",
+      "module": "ingen ændring",
+      "before": 100.0,
+      "after": 100.0,
+      "delta": 0,
+      "basis": "39 af 39 links"
     }
   ]
 }

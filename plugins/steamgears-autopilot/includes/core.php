@@ -1864,18 +1864,22 @@ class SGAP_Admin {
             echo '<p class="sgap-notice"><strong>Blackout.</strong> ' . esc_html(SGAP_Queue::blocked_message('blackout')) . '</p>';
         }
         $table = $wpdb->prefix . 'sgap_queue';
+        // P2.5: the language and the row this one was translated from travel with the row,
+        // so the owner can see which entries are translations instead of guessing from the text.
         $rows = self::table_exists($table)
-            ? $wpdb->get_results("SELECT id, channel, title, status, remind, attempts, scheduled_at, published_at, error FROM {$table} ORDER BY id DESC LIMIT 50")
+            ? $wpdb->get_results("SELECT q.id, q.channel, q.title, q.status, q.remind, q.attempts, q.scheduled_at, q.published_at, q.error,
+                    q.locale, q.source_id, s.title AS source_title, s.locale AS source_locale
+                FROM {$table} q LEFT JOIN {$table} s ON s.id = q.source_id ORDER BY q.id DESC LIMIT 50")
             : [];
         if (!$rows) {
             SGAP_UI::empty_state('clock', 'The queue is empty. Approve a draft under AI Drafts to fill it.');
             self::close();
             return;
         }
-        echo '<div class="sgap-card"><div class="sgap-scroll"><table class="widefat striped sgap-qtable"><thead><tr><th>#</th><th>Channel</th><th>Title</th><th>Status</th><th>Scheduled</th><th>Published</th><th>Tracking link</th><th></th></tr></thead><tbody>';
+        echo '<div class="sgap-card"><div class="sgap-scroll"><table class="widefat striped sgap-qtable"><thead><tr><th>#</th><th>Channel</th><th>Title</th><th>Language</th><th>Source</th><th>Status</th><th>Scheduled</th><th>Published</th><th>Tracking link</th><th></th></tr></thead><tbody>';
         foreach ($rows as $r) {
-            echo '<tr><td data-label="#">' . esc_html($r->id) . '</td><td data-label="Channel">' . SGAP_UI::channel($r->channel) . '</td><td class="sgap-qtitle" data-label="Title">' . esc_html($r->title)
-                . ($r->error ? '<br><small style="color:#b32d2e">' . esc_html($r->error) . '</small>' : '') . '</td><td data-label="Status">'
+            echo '<tr id="sgap-q-' . absint($r->id) . '"><td data-label="#">' . esc_html($r->id) . '</td><td data-label="Channel">' . SGAP_UI::channel($r->channel) . '</td><td class="sgap-qtitle" data-label="Title">' . esc_html($r->title)
+                . ($r->error ? '<br><small style="color:#b32d2e">' . esc_html($r->error) . '</small>' : '') . '</td><td data-label="Language">' . self::language_cell($r) . '</td><td data-label="Source">' . self::source_cell($r) . '</td><td data-label="Status">'
                 . SGAP_UI::status_pill((string) $r->status) . (!empty($r->remind) ? ' <small title="The autopilot leaves this one to you">reminder</small>' : '') . ($r->attempts > 1 ? ' <small>' . esc_html($r->attempts . ' tries') . '</small>' : '') . '</td><td data-label="Scheduled">'
                 . esc_html($r->scheduled_at ? mysql2date('j M H:i', $r->scheduled_at) : '–') . '</td><td data-label="Published">'
                 . esc_html($r->published_at ? mysql2date('j M H:i', $r->published_at) : '–') . '</td><td data-label="Link"><code>' . esc_html(wp_parse_url(SGAP_Tracking::url((int) $r->id), PHP_URL_PATH)) . '</code></td><td data-label="">'
@@ -1889,6 +1893,32 @@ class SGAP_Admin {
         }
         echo '</tbody></table></div></div>';
         self::close();
+    }
+
+    /**
+     * P2.5: the language a queue row is written in, and whether it is a translation.
+     * An empty locale is every row that existed before the feature and every source
+     * post, so it is shown as the site's source language rather than as "unknown".
+     */
+    private static function language_cell(object $r): string {
+        $locale = SGAP_Locales::code((string) ($r->locale ?? ''));
+        return $locale !== ''
+            ? '<code>' . esc_html($locale) . '</code> <small>translation</small>'
+            : '<code>' . esc_html(SGAP_Locales::source()) . '</code> <small>original</small>';
+    }
+
+    /**
+     * P2.5: the queue row this one was translated from, linked so one click jumps
+     * to it. A source that has since been deleted still gets its id, never a guess.
+     */
+    private static function source_cell(object $r): string {
+        $source_id = absint($r->source_id ?? 0);
+        if ($source_id === 0) {
+            return '—';
+        }
+        $title = trim((string) ($r->source_title ?? ''));
+        return '<a href="#sgap-q-' . $source_id . '">#' . $source_id . '</a>'
+            . ($title !== '' ? ' <small>' . esc_html($title) . '</small>' : '');
     }
 
     public static function queue_action(): void {

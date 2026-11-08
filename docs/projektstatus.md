@@ -18,7 +18,7 @@ Betjening: `python3 projektstatus.py --check` (valider + drift), `--dry-run` (vi
 ## 1. Daglig status
 
 <!-- AUTO:DAGLIG:START -->
-Status pr. **2026-11-03** · beregnet af `projektstatus.py` · kilder: [`projektstatus.json`](../projektstatus.json)
+Status pr. **2026-11-08** · beregnet af `projektstatus.py` · kilder: [`projektstatus.json`](../projektstatus.json)
 
 | Projekt | Status i dag | Grundlag |
 | --- | --- | --- |
@@ -50,6 +50,11 @@ Nyeste først. Append-only — rækker må ikke slettes eller ændres.
 
 | Dato | Projekt | Modul | Før → Efter | Δ | Grundlag |
 | --- | --- | --- | --- | --- | --- |
+| 2026-11-08 | Døde internlinks | ingen ændring | 100 % → 100 % | 0 | 39 af 39 links |
+| 2026-11-08 | SEO-indholdsproduktion | ingen ændring | 57,1 % → 57,1 % | 0 | 4 af 7 guides (Publicerede guides (id 292, 296, 295) 0/3 · Guide-copy klar til publicering (292, 296, 295 + corset) 4/4) |
+| 2026-11-08 | Dark academia-rebrand | ingen ændring | 63 % → 63 % | 0 | 8,5 af 13,5 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5) |
+| 2026-11-08 | Steamgears Autopilot — plugin | ingen ændring | 55,6 % → 55,6 % | 0 | 13,55 af 24,35 d (P0 3,2/4 · P1 4,85/11,35 · P2 4,5/7 · P3 1/2) |
+| 2026-11-08 | steamgears.eu — site-optimering | ingen ændring | 57,9 % → 57,9 % | 0 | 12,6 af 21,75 d (S0 1,9/2,6 · S1 2,15/4,6 · S2 4,7/6 · S3 2,45/3,55 · S4 1,4/5) |
 | 2026-11-03 | Steamgears Autopilot — plugin | daglig måling | 45,4 % → 55,6 % | +10,2 | 13,55 af 24,35 d (P0 3,2/4 · P1 4,85/11,35 · P2 4,5/7 · P3 1/2) |
 | 2026-11-03 | Steamgears Autopilot — plugin | daglig måling | 41,3 % → 45,4 % | +4,1 | 11,05 af 24,35 d (P0 3,2/4 · P1 4,85/11,35 · P2 2/7 · P3 1/2) |
 | 2026-11-03 | Steamgears Autopilot — plugin | daglig måling | 37,2 % → 41,3 % | +4,1 | 10,05 af 24,35 d (P0 3,2/4 · P1 4,85/11,35 · P2 1/7 · P3 1/2) |

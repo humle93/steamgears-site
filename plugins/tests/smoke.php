@@ -24,7 +24,7 @@ function sanitize_text_field($s){return trim(strip_tags((string)$s));} function 
 function sanitize_key($s){return preg_replace('/[^a-z0-9_\-]/','',strtolower((string)$s));} function absint($v){return abs((int)$v);}
 function esc_url_raw($u,$p=null){return preg_match('#^https?://#',$u)?$u:'';} function wp_parse_url($u,$c=-1){return parse_url($u,$c);}
 function wp_parse_args($a,$d){return array_merge($d,$a);} function add_query_arg($a,$u){return $u.(str_contains($u,'?')?'&':'?').http_build_query($a,'','&',PHP_QUERY_RFC3986);}
-function current_time($t){return '2026-10-30 12:00:00';} function wp_date($f,$t=null){return date($f,$t??time());}
+function current_time($t){return '2026-10-30 12:00:00';} function wp_date($f,$t=null){return date($f,$t??time());} function mysql2date($f,$d,$t=true){return date($f, strtotime((string)$d));}
 function current_user_can($c){return true;} function get_current_user_id(){return 1;} function get_site_transient($k){return false;} function set_site_transient(...$a){} function wp_remote_get(...$a){return new WP_Error('offline','offline');} function wp_nonce_field_stub(){} function delete_option($k){unset($GLOBALS["opts"][$k]);} function wp_json_encode($v){return json_encode($v);} function is_wp_error($v){return $v instanceof WP_Error;}
 function wp_strip_all_tags($s){return strip_tags((string)$s);} function attachment_url_to_postid($u){return (int)($GLOBALS['attachment_for'][$u]??0);} function get_post_meta($id,$k='',$s=false){return $GLOBALS['postmeta'][$id][$k]??'';} function url_to_postid($u){return (int)($GLOBALS['postid_for'][$u]??0);} function get_post_status($id){return (string)($GLOBALS['poststatus'][$id]??'publish');} function wp_get_attachment_metadata($id){return $GLOBALS['attachment_meta'][$id]??[];} function get_post_mime_type($id){return (string)($GLOBALS['attachment_mime'][$id]??'');} function wp_die($m=''){throw new RuntimeException((string)$m);} function check_admin_referer($a=''){return true;}
 $GLOBALS['abilities']=[]; $GLOBALS['ability_categories']=[];
@@ -878,6 +878,38 @@ unset($GLOBALS['filters']['sgap_locale_translator']);
 $core_src = file_get_contents(__DIR__.'/../steamgears-autopilot/includes/core.php');
 check('locales: the queue table stores language and source id', str_contains($core_src,'locale VARCHAR(10)') && str_contains($core_src,'source_id BIGINT UNSIGNED'));
 check('locales: every caption is translated through the AI module', str_contains(file_get_contents(__DIR__.'/../steamgears-autopilot/includes/locales.php'),'SGAP_AI::json_call('));
+
+// Kø-siden: sproget og kildeposten skal kunne ses på rækken, ikke gættes ud fra teksten.
+$GLOBALS['rows'] = [
+    (object)['id'=>102,'channel'=>'pinterest','title'=>'Messingbrille','status'=>'queued','remind'=>0,'attempts'=>0,
+        'scheduled_at'=>'2026-11-09 10:00:00','published_at'=>null,'error'=>null,
+        'locale'=>'da','source_id'=>100,'source_title'=>'Brass goggles','source_locale'=>''],
+    (object)['id'=>100,'channel'=>'pinterest','title'=>'Brass goggles','status'=>'queued','remind'=>0,'attempts'=>0,
+        'scheduled_at'=>'2026-11-09 10:00:00','published_at'=>null,'error'=>null,
+        'locale'=>'','source_id'=>0,'source_title'=>null,'source_locale'=>null],
+];
+$wpdb->next='wp_sgap_queue'; $wpdb->log=[];
+ob_start(); SGAP_Admin::queue(); $html=ob_get_clean();
+$sql = implode("\n", $wpdb->log);
+check('queue page: the query reads language and source, not just the id', str_contains($sql,'q.locale') && str_contains($sql,'q.source_id') && str_contains($sql,'LEFT JOIN wp_sgap_queue'));
+check('queue page: a language column names the language of each row', str_contains($html,'data-label="Language"') && str_contains($html,'<code>da</code>'));
+check('queue page: a variant says it is a translation, the source says it is the original', str_contains($html,'<small>translation</small>') && str_contains($html,'<small>original</small>'));
+check('queue page: a variant names and links the post it was translated from', str_contains($html,'href="#sgap-q-100"') && str_contains($html,'>#100</a>') && str_contains($html,'Brass goggles'));
+check('queue page: a source row has no source of its own', substr_count($html,'data-label="Source">—')===1);
+check('queue page: every row can be jumped to by id', str_contains($html,'id="sgap-q-102"') && str_contains($html,'id="sgap-q-100"'));
+
+$GLOBALS['rows'][0]->source_title='<script>alert(1)</script>';
+ob_start(); SGAP_Admin::queue(); $html=ob_get_clean();
+check('queue page: a source title is escaped', str_contains($html,'&lt;script&gt;') && !str_contains($html,'<script>alert(1)</script>'));
+
+$GLOBALS['rows']=[
+    (object)['id'=>103,'channel'=>'pinterest','title'=>'Messingbrille','status'=>'queued','remind'=>0,'attempts'=>0,
+        'scheduled_at'=>'2026-11-09 10:00:00','published_at'=>null,'error'=>null,
+        'locale'=>'da','source_id'=>7,'source_title'=>null,'source_locale'=>null],
+];
+ob_start(); SGAP_Admin::queue(); $html=ob_get_clean();
+check('queue page: a deleted source is still named by its id', str_contains($html,'href="#sgap-q-7">#7</a>') && !str_contains($html,'data-label="Source">—'));
+$GLOBALS['rows']=[];
 
 // P3.2/P3.5-slut
 exit(empty($GLOBALS['fail'])?0:1);
