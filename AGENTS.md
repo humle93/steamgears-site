@@ -224,6 +224,10 @@ Gælder alt arbejde i `plugins/`.
 - Zip-filen **skal** ligge i `plugins/` på `main` og hedde `steamgears-autopilot-v<version>.zip`. Selvopdateringen
   henter præcis `https://raw.githubusercontent.com/humle93/steamgears-site/main/plugins/steamgears-autopilot-v<version>.zip`
   (`SGAP_Updater::package_url()`), så en zip i rodmappen eller på en sidegren bliver aldrig fundet.
+  **Forbehold (8/11 2026):** repoet er nu **privat**, og `SGAP_Updater` henter anonymt — zip-linket svarer
+  derfor ikke længere stabilt for sitet. Reglen om placering og navn gælder stadig, men opdatering sker indtil
+  videre ved at uploade zip'en under *Plugins → Tilføj nyt → Upload*; se
+  [`docs/library/repo-privat-2026-11-08.md`](docs/library/repo-privat-2026-11-08.md).
 
 ## 8. Context-håndtering — samtalens vigtigste punkter
 
