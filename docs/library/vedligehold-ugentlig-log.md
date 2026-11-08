@@ -1,5 +1,12 @@
 # Ugentlig backup + 1 indholdselement — log
 
+## 2026-11-08 (plugin-pas) — P1.5 kanalstatus, 7.61.0
+- **Bygget:** `includes/channel-health.php` + `/sgap/v1/channel-health` (401 uden login) og 11 nye smoke-checks.
+- **Målt:** smoke **1027 PASS / 0 FAIL**, `php -l` ren, fejlscan **0 fund**, zip `v7.61.0` 349 946 bytes / 46 filer,
+  installeret live (`status: active, version: 7.61.0`).
+- **Live kanalstatus:** ready 1 · recoverable 0 · missing 5 (Pinterest `ready`, men 401 ved refresh).
+- **Fælde:** `SGAP_VERSION`-konstanten skal bumpes sammen med headeren, ellers fanger fejlscan en version-mismatch.
+
 ## 2026-11-08 (senere pas) — S4.9 og S4.11 lukket
 **Formål:** de to sidste S4-punkter der ikke kræver ejerens adgang.
 - **S4.9:** produktteksten er nu synlig server-side via `woocommerce_after_single_product_summary`; målt i browser

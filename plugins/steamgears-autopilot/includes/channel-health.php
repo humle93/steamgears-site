@@ -1,0 +1,110 @@
+<?php
+/**
+ * P1.5 — one screen that says, per channel, what the plugin can and cannot do right now.
+ *
+ * The analytics ingestion itself is built (P1.5a/b/c). What was missing is the step before
+ * it can be verified: the owner could not see *why* a channel stayed silent. This class
+ * separates the three cases that look identical from the outside — no token at all, a token
+ * that is stored but not refreshable, and a channel that is ready to be measured — so the
+ * next action is a sentence rather than a guess.
+ */
+
+if (!defined('ABSPATH')) exit;
+
+class SGAP_Channel_Health {
+    /** Channels whose analytics end up in sgap_events, and the class that owns each one. */
+    const CHANNELS = [
+        'pinterest' => ['label' => 'Pinterest', 'class' => 'SGAP_Pinterest'],
+        'instagram' => ['label' => 'Instagram', 'class' => 'SGAP_Instagram'],
+        'bluesky'   => ['label' => 'Bluesky',   'class' => 'SGAP_Bluesky'],
+        'mastodon'  => ['label' => 'Mastodon',  'class' => 'SGAP_Mastodon'],
+        'telegram'  => ['label' => 'Telegram',  'class' => 'SGAP_Telegram'],
+        'facebook'  => ['label' => 'Facebook',  'class' => 'SGAP_Facebook'],
+    ];
+
+    const NEXT_STEP = [
+        'ready'         => 'Ready — run the refresh and the events land in sgap_events.',
+        'needs_refresh' => 'No access token, but a refresh token is stored: the next refresh will fetch a new one.',
+        'missing_token' => 'Nothing stored — paste the token on the Keys screen, then run the refresh.',
+        'no_class'      => 'The channel class is not loaded, so the state cannot be read.',
+    ];
+
+    /**
+     * Three states, and no guessing: a stored token wins, a refresh token alone still
+     * counts as recoverable, anything else is missing input from the owner.
+     */
+    public static function classify(bool $configured, bool $refreshable): string {
+        if ($configured) {
+            return 'ready';
+        }
+        return $refreshable ? 'needs_refresh' : 'missing_token';
+    }
+
+    public static function channel(string $id): array {
+        $def = self::CHANNELS[$id] ?? null;
+        if ($def === null) {
+            return [];
+        }
+        $class = $def['class'];
+        if (!class_exists($class) || !method_exists($class, 'configured')) {
+            return [
+                'id' => $id, 'label' => $def['label'], 'configured' => false,
+                'refreshable' => false, 'state' => 'no_class',
+                'next' => self::NEXT_STEP['no_class'],
+            ];
+        }
+        $configured = (bool) call_user_func([$class, 'configured']);
+        $refreshable = method_exists($class, 'refreshable') ? (bool) call_user_func([$class, 'refreshable']) : false;
+        $state = self::classify($configured, $refreshable);
+        return [
+            'id' => $id, 'label' => $def['label'],
+            'configured' => $configured, 'refreshable' => $refreshable,
+            'state' => $state, 'next' => self::NEXT_STEP[$state] ?? '',
+        ];
+    }
+
+    /** @return array<string,array> one entry per channel, in the order they are reported. */
+    public static function report(): array {
+        $out = [];
+        foreach (array_keys(self::CHANNELS) as $id) {
+            $out[$id] = self::channel($id);
+        }
+        return $out;
+    }
+
+    /** Counts for the admin line: how many channels can be measured today. */
+    public static function summary(): array {
+        $report = self::report();
+        $ready = 0;
+        $recoverable = 0;
+        $missing = 0;
+        foreach ($report as $row) {
+            if ($row['state'] === 'ready') {
+                $ready++;
+            } elseif ($row['state'] === 'needs_refresh') {
+                $recoverable++;
+            } else {
+                $missing++;
+            }
+        }
+        return ['ready' => $ready, 'recoverable' => $recoverable, 'missing' => $missing, 'total' => count($report)];
+    }
+
+    public static function register(): void {
+        $auth = [SGAP_Abilities::class, 'can_manage'];
+        register_rest_route('sgap/v1', '/channel-health', [
+            'methods' => 'GET',
+            'callback' => [__CLASS__, 'rest_report'],
+            'permission_callback' => $auth,
+        ]);
+    }
+
+    public static function rest_report() {
+        return new WP_REST_Response([
+            'channels' => self::report(),
+            'summary' => self::summary(),
+        ], 200);
+    }
+}
+
+add_action('rest_api_init', ['SGAP_Channel_Health', 'register']);
