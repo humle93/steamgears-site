@@ -96,6 +96,9 @@ check "anmeldelsesmail"                      "$PHP_BIN" wordpress/tests/test-rev
 # S5.3–S5.6: hardningen retter seks ting der alle er usynlige når de fejler — en header
 # der ikke sendes, giver ingen fejlkode. Testen kræver derfor hver regel for sig, offline.
 check "hardning (S5)"                        "$PHP_BIN" wordpress/tests/test-hardening.php
+# S5.9: promote-gaten. Preflighten er det eneste der står mellem et uheld og et
+# release-tag, så dens 24 fixtures kører hver nat — de rammer ikke git-historikken.
+check "release-gate (S5.9)"                  python3 tools/test_release.py
 # Fejlsøgning som fast punkt (P3.6): konsistens på tværs af filer — version mod zip,
 # zip mod kilde, includes, biblioteksindekset, tokens og tests der ikke kan fejle.
 # Om-mærkningen (S4): titler/kollektioner/billedkrav måles udefra — selftesten er offline og fanger

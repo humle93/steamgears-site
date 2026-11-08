@@ -1,0 +1,58 @@
+name: Promote-værn
+
+# S5.9: den del af gaten der virker på Free-planen.
+#
+# GitHub kan ikke kræve status checks på et privat Free-repo, så reglen håndhæves
+# i stedet her: hvert push og hver PR kører den samme preflight som release-workflowen
+# bruger, og et rødt svar er synligt på commit'en. Kombineret med den natlige kørsel
+# betyder det, at en zip der ikke matcher headeren, eller et tag der allerede findes,
+# ikke kan ligge på main uden at nogen har set det.
+#
+# Den lokale pre-push-hook er den samme kommando: python3 tools/release.py --install-hook
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: promote-vaern-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  preflight:
+    name: Preflight (version, zip, tag)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Preflight
+        run: |
+          git fetch origin main --quiet || true
+          python3 tools/release.py --check
+
+      - name: Beskyttelsesrapport
+        run: python3 tools/release.py --protection
+
+      - name: Gate-fixtures
+        run: python3 tools/test_release.py
+
+      - name: Skriv job-summary
+        if: always()
+        run: |
+          {
+            echo "## Promote-gate"
+            echo
+            echo "\`python3 tools/release.py --check\` kræver: rent træ, én zip der matcher"
+            echo "plugin-headerens \`Version:\`, og at \`v<version>\` ikke findes endnu. Grenen"
+            echo "\`main\` er kun et krav ved \`--tag\`."
+            echo
+            echo "Rollback-rutinen står i [docs/release-og-rollback.md](../blob/main/docs/release-og-rollback.md)."
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,113 @@
+name: Release (manuel promote)
+
+# S5.9: promote-trinnet er manuelt og kræver et menneske, der skriver TAG.
+#
+# Hvorfor ikke et GitHub Environment med required reviewer? Fordi repoet er
+# privat på Free-planen, hvor environment-regler ignoreres — en "beskyttet"
+# produktion ville se beskyttet ud uden at være det (målt 8/11 2026, se
+# docs/library/website-guide-2026-11-08.md §9.4). Denne workflow er i stedet
+# selve porten: den kører kun på main, kun manuelt, og kun med den version der
+# faktisk ligger i plugin-headeren.
+#
+# Tagget er det punkt rollback-rutinen peger på (docs/release-og-rollback.md).
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version der skal udgives (skal matche plugin-headeren, fx 7.65.1)'
+        required: true
+        type: string
+      confirm:
+        description: 'Skriv TAG for at bekræfte, at et menneske står bag'
+        required: true
+        type: string
+      write_release:
+        description: 'Opret også en GitHub-release med noterne'
+        required: false
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Tag og release
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Bekræft promote
+        env:
+          CONFIRM: ${{ inputs.confirm }}
+        run: |
+          if [ "$CONFIRM" != "TAG" ]; then
+            echo "::error title=Ingen bekræftelse::Skriv TAG i confirm-feltet. Intet er tagget."
+            exit 1
+          fi
+
+      - name: Preflight (version, zip, tag, værn)
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          git fetch --tags --quiet
+          python3 tools/release.py --check --guards --confirm "$VERSION"
+
+      - name: Opret annotated tag
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          TAG="v${VERSION}"
+          if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
+            echo "::error title=Tag findes::Tagget $TAG findes allerede. Versionér op i stedet."
+            exit 1
+          fi
+          python3 tools/release.py --notes > /tmp/release-notes.md
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          {
+            echo "Release ${VERSION}"
+            echo
+            cat /tmp/release-notes.md
+          } > /tmp/tag-message.txt
+          git tag --annotate "$TAG" --file /tmp/tag-message.txt
+          git push origin "$TAG"
+
+      - name: GitHub-release
+        if: ${{ inputs.write_release }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          TAG="v${VERSION}"
+          gh release create "$TAG" \
+            --title "Release ${VERSION}" \
+            --notes-file /tmp/release-notes.md \
+            --verify-tag
+
+      - name: Skriv job-summary
+        if: always()
+        env:
+          VERSION: ${{ inputs.version }}
+          CONFIRM: ${{ inputs.confirm }}
+        run: |
+          {
+            echo "## Release $VERSION"
+            echo
+            echo "| Felt | Værdi |"
+            echo "| --- | --- |"
+            echo "| Bekræftelse | ${CONFIRM:-—} |"
+            echo "| Tag | v${VERSION} |"
+            echo "| Commit | \`${GITHUB_SHA:0:12}\` |"
+            echo "| Udført af | \`${GITHUB_ACTOR}\` |"
+            echo
+            echo "Rollback: se [docs/release-og-rollback.md](../blob/main/docs/release-og-rollback.md)."
+          } >> "$GITHUB_STEP_SUMMARY"

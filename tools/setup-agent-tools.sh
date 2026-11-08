@@ -48,6 +48,10 @@ echo "== Commit-msg-værn =="
 # Hooken ligger i .git/hooks/ og følger ikke med repoet, så den installeres her.
 python3 tools/commit_check.py --install
 
+# S5.9: samme sted ligger promote-gaten. Den afviser et push hvor version, zip,
+# tag eller værn ikke holder — Free-planen kan ikke beskytte main på et privat repo.
+python3 tools/release.py --install-hook
+
 echo
 echo "== Klar =="
 echo "  PDF:  PYTHONPATH=tools/_deps python3 tools/project_reports.py"
