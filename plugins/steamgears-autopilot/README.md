@@ -23,7 +23,7 @@ The whole social autopilot runs inside WordPress (Command Center is retired):
 4. **Measure** – every post links via `/go/<id>/`, so clicks (and WooCommerce
    orders) are counted per channel.
 
-Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.47.0.zip` → Activate. On an existing
+Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.64.0.zip` → Activate. On an existing
 install the same zip arrives through the self-updater (see *Updates*), so an upload is only needed for the
 first install or a recovery.
 
@@ -483,6 +483,38 @@ Nothing on the site calls Command Center.
   quiet site. A real host cron (below) is still the better fix.
 - The **Command Center URL** setting (General) adds a "Log ind i Command Center" button to the dashboard. It opens
   the dashboard in a new tab. Leave it empty to hide the button. The plugin does not call Command Center; the link is only a shortcut.
+
+## One niche, one shop (7.64)
+
+*Steamgears → Shop → Niche shop* answers one question: **what is the shop about?** Type a niche
+— `steampunk airship`, `cottagecore mushroom`, `celestial zodiac` — and the plugin turns it into a
+shop skeleton you can publish from:
+
+1. **A plan, before anything is written.** Ten archetypes (steampunk, dark academia, gothic,
+   cottagecore, nautical, botanical, cyberpunk, celestial, retro, and a neutral fallback) decide the
+   five collections, the motifs, the voice and the brand suggestions. The plan holds priced products
+   across the print-on-demand families (tee, hoodie, art print, tote, mug, phone case), five page
+   drafts, a menu and the schema types the shop needs. Same niche and settings give the same plan
+   key, so a plan can be reviewed and shared before it is created.
+2. **Drafts, never live products.** *Create drafts* writes `product_cat` terms, WooCommerce product
+   drafts (price, SKU, `_sgap_niche` marker) and page drafts. Nothing is published, no existing
+   product is touched, and every id is stored under the run key.
+3. **Roll back in one click.** The Runs table keeps the ten newest runs. A rollback deletes the
+   drafts and empty terms *that run* created and keeps anything already published — the report says
+   which is which.
+4. **Honest about the rest.** Every plan ends with the steps only the owner can take: Printful access
+   (real costs and 5–8 mockups), publishing approval, currency and prices, payment methods,
+   CVR/name/address/phone, the EU consent model, shipping zones, and confirming the shop name. The
+   page copy marks each owner-only fact with `[EJER: …]` instead of inventing it.
+
+Prices always clear the margin floor in *Settings → Shop & feeds* (`woo_min_margin`); the price is
+the higher of `cost × 2.6` and `SGAP_MCP_Woo::floor_price()`, ending in `,95`. Costs are marked
+`estimate` until Printful is connected, so no number in the plan pretends to be measured.
+
+From Claude or any MCP client: `niche-plan` (read-only), `niche-apply`, `niche-runs` and
+`niche-rollback`. Over REST: `POST /wp-json/sgap/v1/niche` (`niche`, `count`, `margin`, `apply`),
+`POST /sgap/v1/niche/rollback` (`plan_key`, `dry`) and `GET /sgap/v1/niche/runs`. All of them need
+`manage_options`.
 
 ## Updates
 

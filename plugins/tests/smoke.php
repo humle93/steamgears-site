@@ -1524,5 +1524,6 @@ require __DIR__.'/evergreen.php';
 require __DIR__.'/keys.php';
 require __DIR__.'/channel-health.php';
 require __DIR__.'/menu.php';
+require __DIR__.'/niche-shop.php';
 // P3.2/P3.5-slut
 exit(empty($GLOBALS['fail'])?0:1);

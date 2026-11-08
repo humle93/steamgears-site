@@ -29,12 +29,14 @@ _Opdateret 2026-11-08 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 | **Dark academia-rebrand** | **64,3 %** | 9 af 14 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5 · BATCH4 0,5/0,5) |
 | **SEO-indholdsproduktion** | **100 %** | 8 af 8 guides (BATCH 3/3 · COPY 4/4 · CORSET 1/1) |
 | **Døde internlinks** | **100 %** | 39 af 39 links (FIX 39/39) |
+| **Niche-butik — plugin P4** | **85 %** | 0,85 af 1 d (P4PLAN 0,3/0,3 · P4APPLY 0,25/0,25 · P4UI 0,2/0,2 · P4SHIP 0,1/0,1 · P4LIVE 0/0,15) |
 
 ### Åbne blokeringer
 
 - **steamgears.eu — site-optimering** — Ejerens oplysninger og aftaler: CVR/registreret navn/postadresse/telefon, valuta og alle priser, betalingsaftaler (MobilePay/PayPal/Klarna), forsendelseszoner og fragtklasser, Complianz EU-model, Printful-adgang, GSC Crawl stats, og ja/nej til publicering af 942/765/766/767.
 - **Steamgears Autopilot — plugin** — Fire driftspunkter kræver ejeren, og de er målt 8/11: (1) **AIMLAPI-kredit** — sidste generering 7/11 fejlede med »You've run out of funds«, så der laves ingen nye kladder; (2) **`sgap_alert_email`** er tom, så fejl registreres men ingen mail sendes; (3) **Full auto vs. godkendelse** — `sgap_full_auto_enabled = no`, og 40 elementer venter på godkendelse; (4) **distributionsvej** — `publish_mode = rss` og 0 Publer-konti, mens Pinterest svarer 401 og fem kanaler mangler token. Dertil P1.5's tokens (Pinterest, Instagram, Bluesky, Mastodon, Telegram, Facebook) og P2.1–P2.3's Command Center-beslutning. Intet af det må gættes.
 - **Dark academia-rebrand** — Batch 4 (mockups, 0 af 5 t) kræver Printful-adgang eller 5–8 færdige mockups pr. produkt uploadet af ejeren; teksten (batch 1–3, 8,5 t) og forberedelsen (0,5 t) er færdig og verificeret. Derfor er 64,3 % = 9/14, mens 100 % af den ikke-ejer-blokerede del er leveret.
+- **Niche-butik — plugin P4** — Kørslen på det levende site kræver ejerens klik: et nyt MCP-token i denne sandkasse (OAuth-linket fra tools/mcp_oauth.py --start) eller Plugins → Update til 7.64.0. Indtil da er WooCommerce-delen af udrulningen kun dækket af stub-tests, og det står som de sidste 0,15 d.
 
 ### Næste skridt
 
@@ -43,15 +45,16 @@ _Opdateret 2026-11-08 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 - **Dark academia-rebrand** — Batch 4 er det eneste tilbage. Forberedelsen (0,5 t) er færdig og målt; selve mockup-genereringen er ejer-blokeret. Næste skridt er ejerens: Printful-adgang eller 5–8 færdige billeder pr. produkt.
 - **SEO-indholdsproduktion** — SEO-indholdet er 100 %: fire guides skrevet, tre publiceret, corset-guiden publiceret, 1410 parkeret til september. Ingen åbne poster.
 - **Døde internlinks** — Vedligehold: tjek nye indlæg mod live-URL'er
+- **Niche-butik — plugin P4** — Modulet er bygget og grønt lokalt (32 smoke-checks, php -l, fejlscan, zip byte-identisk). Det der mangler er én kørsel mod rigtig WooCommerce: activation af 7.64.0 på sitet og et niche-run med efterfølgende rollback, så kladde-flowet er målt og ikke kun testet.
 
 ### Seneste commits
 
+- `d311b12 Ret katalogtallene til det målte: 24 produkter, ikke 39`
 - `aa1355f chore(status): daglig projektstatus 2026-11-08`
 - `eee6ceb Luk batch 4-forberedelsen og giv shoparkivet strukturdata`
 - `1d39063 Dokumentér at den site-planlagte tick kørte af sig selv kl. 14:15`
 - `e98ab1e Læg tick på site-planlægning som uafhængig vej ved siden af GitHub`
 - `c12df1a Ret leverandøren til Printful i hele repoet`
-- `0295873 Dokumentér tredje grønne kørsel og krops-kravet i tick-jobbet`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)

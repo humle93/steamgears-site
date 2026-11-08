@@ -171,6 +171,38 @@ class SGAP_Abilities {
                     'scan' => ['type' => 'integer', 'minimum' => 1, 'maximum' => 500, 'default' => 100, 'description' => 'How many of the newest published posts to check'],
                     'limit' => ['type' => 'integer', 'minimum' => 1, 'maximum' => 100, 'default' => 20, 'description' => 'How many of the worst posts to return']
                 ], [], [__CLASS__, 'meta_audit'], true, true
+            ],
+            'niche-plan' => [
+                'Plan a shop from a niche',
+                'Turns one niche name into a complete shop plan: brand suggestions, five collections, priced products across the print-on-demand families, page drafts, a menu, the schema types the shop needs, and a readiness list of the steps only the owner can take. Read-only — nothing is created.',
+                [
+                    'niche' => ['type' => 'string', 'minLength' => 2, 'maxLength' => 60, 'description' => 'The niche, e.g. "steampunk airship" or "cottagecore mushroom"'],
+                    'count' => ['type' => 'integer', 'minimum' => 1, 'maximum' => 40, 'default' => 10, 'description' => 'How many products the plan should hold'],
+                    'margin' => ['type' => 'integer', 'minimum' => 0, 'maximum' => 500, 'description' => 'Margin floor in percent. Default: the shop setting (Settings → Shop & feeds).']
+                ], ['niche'], [__CLASS__, 'niche_plan'], true, true
+            ],
+            'niche-apply' => [
+                'Create the shop drafts from a niche',
+                'Runs the niche plan and creates WooCommerce product drafts, product categories and page drafts. Nothing is published, no existing product is touched, and every created id is stored under a run key so the whole run can be rolled back.',
+                [
+                    'niche' => ['type' => 'string', 'minLength' => 2, 'maxLength' => 60],
+                    'count' => ['type' => 'integer', 'minimum' => 1, 'maximum' => 40, 'default' => 10],
+                    'margin' => ['type' => 'integer', 'minimum' => 0, 'maximum' => 500],
+                    'force' => ['type' => 'boolean', 'default' => false, 'description' => 'Create again even if this plan key has already been applied.']
+                ], ['niche'], [__CLASS__, 'niche_apply'], false, false
+            ],
+            'niche-runs' => [
+                'List niche shop runs',
+                'Lists the niche runs that created drafts, with their key, the niche and how many collections, products and pages each created. Read-only.',
+                [], [], [__CLASS__, 'niche_runs'], true, true
+            ],
+            'niche-rollback' => [
+                'Roll back a niche shop run',
+                'Deletes the drafts and unused product categories one niche run created. Published items and items not created by that run are kept and reported. Destructive: it deletes draft content, so it needs the run key from niche-runs.',
+                [
+                    'plan_key' => ['type' => 'string', 'minLength' => 6, 'description' => 'The run key returned by niche-apply'],
+                    'dry' => ['type' => 'boolean', 'default' => false, 'description' => 'Only report what would be deleted']
+                ], ['plan_key'], [__CLASS__, 'niche_rollback'], false, false
             ]
         ];
     }
@@ -413,6 +445,42 @@ class SGAP_Abilities {
     /** Read-only audit of titles and meta descriptions. Delegates to SGAP_Meta_Audit so the logic can be tested. */
     public static function meta_audit($input = null): array {
         return SGAP_Meta_Audit::audit($input);
+    }
+
+    /* ---- niche shop: one field, then drafts ---- */
+
+    public static function niche_plan($input = null) {
+        $input = (array) $input;
+        $plan = SGAP_Niche_Shop::plan((string) ($input['niche'] ?? ''), $input);
+        return is_wp_error($plan) ? $plan : SGAP_Niche_Shop::summary($plan);
+    }
+
+    public static function niche_apply($input = null) {
+        $input = (array) $input;
+        $input['apply'] = true;
+        return SGAP_Niche_Shop::run($input);
+    }
+
+    public static function niche_runs($input = null): array {
+        $runs = SGAP_Niche_Shop::runs();
+        $out = [];
+        foreach ($runs as $key => $run) {
+            $out[] = [
+                'plan_key' => $key,
+                'niche' => (string) ($run['niche'] ?? ''),
+                'created_at' => (string) ($run['created_at'] ?? ''),
+                'collections' => count($run['created']['collections'] ?? []),
+                'products' => count($run['created']['products'] ?? []),
+                'pages' => count($run['created']['pages'] ?? []),
+                'errors' => $run['errors'] ?? []
+            ];
+        }
+        return ['count' => count($out), 'runs' => $out];
+    }
+
+    public static function niche_rollback($input = null) {
+        $input = (array) $input;
+        return SGAP_Niche_Shop::rollback((string) ($input['plan_key'] ?? ''), empty($input['dry']));
     }
 
     public static function check_publer($input = null) {

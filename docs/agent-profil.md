@@ -114,7 +114,7 @@ Alt her er målt mod den live side eller læst i kilden. Er noget ændret siden 
   det deprecerede `impressions`, en metric Instagram endnu ikke har rapporteret udelades i stedet for at blive
   gemt som 0, og matchningen sker på captionen mod `/go/<id>/`. **7.57.0** gjorde fejlsøgningen til et fast
 værn, og **7.58.0** tilføjede Facebook-siden som kanal (P2.6): publicering, insights og moderation med
-direkte publicering som opt-in. **990 smoke-checks, alle grønne.**
+direkte publicering som opt-in. **1081 smoke-checks, alle grønne** (målt 8/11 2026, efter 7.64.0).
 - Kæden virker: generér → godkend → publicér (RSS eller Publer API) → mål.
 - Self-updateren virker: zip i repoet er **byte-identisk** med kilden; 20 versioner på fire dage.
 - 9 AJAX- og 5 admin_post-handlere har capability + nonce; **kun ét `wp_mail`** i hele pluginnet (ugerapport).
