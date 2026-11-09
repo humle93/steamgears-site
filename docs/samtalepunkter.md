@@ -54,15 +54,50 @@ _Opdateret 2026-11-09 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `09acb7c Bil-interiør valgt som niche — forberedelsen er regnet, ikke gættet`
 - `dd0ca40 chore(status): daglig projektstatus 2026-11-09`
 - `a7e3dee S5.8: backup og gendannelse øvet — 269 af 269 tabeller identiske`
 - `94fa623 ROI-modellen for en dropshipping-niche er nu et dokument, ikke en engangsberegning`
 - `076d464 S5: vejen til 100 % er fem ejerhandlinger, og DKIM-påstanden holdt ikke`
 - `74a5a78 docs: Jungle Scouts formål og brug — og hvad det ikke kan svare på`
-- `5e3e66f Plugin 7.65.4: femten inline side-scripts er blevet syv filer og et localize-objekt`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 9/11 (sen aften) — bil-interiør har fået sit eget repo, og det hedder `kabine`
+
+**Planen flyttede ud af dette repo.** `humle93/kabine` er oprettet som **privat** repo med `main` som
+eneste gren — ikke en kopi af steamgears, men et lille, selvstændigt repo med kun det, KABINE har brug
+for. Elleve filer i fire commits: `AGENTS.md` (samme form som her: procenter, daglig status,
+AUTO-blokke), `docs/agent-profil.md` (hvad projektet er, hvad der er målt, og hvad der ikke kan gøres
+uden ejeren), `docs/roadmap.md` (faserne A1-A9 med tidsestimat), `docs/library/plan-2026-11-09.md`
+(30-dages planen), `docs/library/enhedsokonomi-2026-11-09.csv` (regnearket bag tallene),
+`projektstatus.json` + `docs/projektstatus.md` (36,5 %, 9,5 af 26 t) og en kompakt `projektstatus.py`
+på 11,5 KB med ti selftest-fixtures.
+
+**Statusværnet er ikke kopieret, det er skrevet til formålet.** Steamgears-versionen er 47 KB, fordi
+den dækker otte projekter med blandede enheder og 164 historik-rækker. `kabine` har ét projekt og én
+enhed, så scriptet behøver kun skemavalidering, 100 %-kravet (`verified`), fald-værnet
+(`scope_change`) og drift-kontrol mellem JSON og Markdown. Kørt på det uploadede træ: `--selftest`
+10/10 bestået, `--check` 36,5 % og ingen drift.
+
+**To ting er bevidst ikke med.** `reports/*.pdf` og `tools/md_to_pdf.py` kunne ikke overføres gennem
+den API-vej, der blev brugt til at seede repoet, så PDF-eksport er ikke sat op i `kabine` endnu —
+Markdown er kilden, og det står i AGENTS §5, roadmap §3 og bibliotekets indeks, så ingen leder efter
+en renderer, der ikke er der. Og der er **ingen git-credentials** i sandkassen til det nye repo;
+seeding foregik gennem GitHub-API'et, og det er værd at vide, før næste pas prøver `git push`.
+
+**Verifikation:** alle elleve filer er hashet med `git hash-object` og sammenlignet med GitHubs
+blob-SHA'er — 0 afvigelser. Det var nødvendigt, fordi den lokale staging-fil var 4.681 bytes mod
+GitHubs 4.666. Forskellen var præcis de 15 bytes i en forældet sti (`bilinterioer-launch-…` →
+`plan-2026-11-09.md`), altså en rettelse og ikke en tabt bid — men den skulle måles, ikke gættes.
+
+**Fælde for næste pas:** API-seeding kræver literal tekst, og store filer skal ikke skrives som
+håndskrevet base64 for at komme uden om det. En afkortet base64-streng dekodede til 1.181 bytes uden
+at fejle. Hash mod blob-SHA'erne i stedet, så »oppe« og »identisk« bliver to forskellige påstande.
+
+**Rapporten bliver her:** `library/bilinterioer-launch-2026-11-09.md` og PDF'en er steamgears'
+research og flytter ikke med; `kabine`s `plan-2026-11-09.md` er den kørende version.
 
 ### 9/11 (aften) — bil-interiør valgt som niche, og valget er nu et regnestykke
 
