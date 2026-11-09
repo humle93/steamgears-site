@@ -79,7 +79,17 @@ jobs:
           php-version: '8.2'
           extensions: mysqli
           coverage: none
-          tools: wp-cli
+          tools: composer
+      # setup-php's wp-cli-trin fejler på ubuntu-26.04 ("Could not setup wp-cli", målt 9/11 2026
+      # i kørsel 42568069074: PHP, mysqli og composer blev installeret, wp-cli ikke — og så døde
+      # integration.sh med "wp: command not found"). Phar'en hentes derfor selv og lægges i PATH.
+      - name: Install wp-cli
+        run: |
+          set -euo pipefail
+          curl -fsSL -o /tmp/wp-cli.phar https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+          chmod +x /tmp/wp-cli.phar
+          sudo mv /tmp/wp-cli.phar /usr/local/bin/wp
+          wp --info
       - name: Install, activate, exercise and uninstall the plugin
         env:
           WP_VERSION: ${{ matrix.wp }}
