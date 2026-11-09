@@ -43,6 +43,7 @@ en nøgle. Det ligger derfor i Autopilot, hvor opdatering, nøgler, backup og CI
 | `POST /api/submit` tager `sr`, `kind=link`, `title`, `url`, `api_type=json` | Kun link posts; `submit()` nægter en URL der ikke peger på sitets eget host |
 | Et afslag kommer som **HTTP 200 med `json.errors`**, ikke som en fejlkode | `submit()` læser `json.errors` og gør den første besked til fejlteksten |
 | Offentlige lister er `GET /r/<sub>/hot?limit=25&raw_json=1`; `data.children[]`, `score`, `num_comments` | Radaren rangerer `score + 2 × kommentarer`: et spørgsmål med svar er mere værd end et billede |
+| **Data API kræver forhåndsgodkendelse** (Responsible Builder Policy, 5/10 2026), og kommerciel brug kræver en skriftlig aftale (Developer Terms §4.1) | Modulet er bygget så den manuelle vej virker uden API: køen står stille indtil en cron sender, og radaren er valgfri. Guiden i [`reddit-opsaetning-2026-11-09.md`](reddit-opsaetning-2026-11-09.md) har de to spor |
 | Reddits egne regler og hvert subreddits regler forbyder selvpromovering i andres tråde | Modulet **kommenterer aldrig**; radaren læser og foreslår, ejeren svarer |
 
 **Det vigtigste designvalg:** ingen automatiske kommentarer, ingen automatisk crosspost til flere subreddits, og
@@ -133,9 +134,11 @@ efter den, men det første rigtige kald er ejerens.
 
 1. **Installer 7.66.0**: *Plugins → Tilføj nyt → Upload* med `plugins/steamgears-autopilot-v7.66.0.zip`.
    Repoet er privat, så selvopdateringen kan ikke hente zip'en anonymt.
-2. **Opret en Reddit script-app** på `reddit.com/prefs/apps` (type *script*, redirect uri `http://localhost:8080`).
+2. **Vælg spor**: post linket i hånden de første uger (virker i dag), eller ansøg om Data API-adgang og opret
+   derefter en Reddit script-app på `reddit.com/prefs/apps` (type *script*, redirect uri `http://localhost:8080`).
    Gem app-id og secret under *Settings → Keys → Reddit*, og brugernavn under *Forum & Reddit*.
    Adgangskoden bruges **kun** til at hente det første refresh token; derefter roterer plugin'et det selv.
+   Trin, feltmapping og fejlkoder står i [`reddit-opsaetning-2026-11-09.md`](reddit-opsaetning-2026-11-09.md).
 3. **Opret forummet som side**: indsæt `[steamgears_forum]` på en side og læg den i menuen. Selve arkivet
    `/forum/` virker også uden shortcoden.
 4. **Map tavler til subreddits**: term meta `reddit_sub` på `sgap_board`-termen. Uden mapping bruges standarden,
