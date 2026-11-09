@@ -1,0 +1,331 @@
+{
+  "schema": [
+    "Organization",
+    "WebSite",
+    "BreadcrumbList",
+    "ItemList",
+    "Product",
+    "FAQPage"
+  ],
+  "slug": "sensorisk",
+  "name": "STILLE",
+  "niche": "sensorisk ro og neurodivergent hverdag",
+  "host": "stille.dk",
+  "platform": "shopify",
+  "tagline": "Ro, der kan tages på.",
+  "audience": "Voksne med sansetraghed og deres pårørende, der vil have ro i hverdagen uden at gøre det til en diagnose.",
+  "status": "fravalgt",
+  "plan_key": "niche-sensorisk-5p",
+  "collections": [
+    {
+      "slug": "tryk",
+      "name": "Tryk",
+      "description": "Vaegt og berøring, der dæmper signalerne."
+    },
+    {
+      "slug": "lyd",
+      "name": "Lyd",
+      "description": "Daempning uden at lukke verden helt ude."
+    },
+    {
+      "slug": "sansero",
+      "name": "Sansero",
+      "description": "Det der hjaelper i sofaen, i skolen og på kontoret."
+    },
+    {
+      "slug": "rejse",
+      "name": "Rejse",
+      "description": "Det samme, men i en taske."
+    },
+    {
+      "slug": "pakker",
+      "name": "Pakker",
+      "description": "Sammensatte løsninger til søvn, arbejde og rejse."
+    }
+  ],
+  "products": [
+    {
+      "slug": "vaegtet-haettetroej",
+      "name": "Vægtet hættetrøje",
+      "price": 549.0,
+      "cost": 165,
+      "shipping": 45,
+      "packaging": 12,
+      "return_rate": 0.12,
+      "return_cost": 95,
+      "role": "hero",
+      "ads": true,
+      "collection": "tryk",
+      "short": "To kilo jævn vægt fordelt over skuldre og ryg.",
+      "bullets": [
+        "Jaevn vægt, ingen punkter",
+        "Stoerrelser efter brystmål",
+        "Høj returrate - pasforms-følsom"
+      ],
+      "netto": 439.2,
+      "payment": 7.15,
+      "db": 210.05,
+      "db_after_return": 173.44,
+      "db_percent": 39.49,
+      "break_even_cpa": 173.44,
+      "break_even_roas": 3.17,
+      "sku": "SG-SEN-2C8CC1"
+    },
+    {
+      "slug": "sansetaeppe",
+      "name": "Sansetæppe",
+      "price": 699.0,
+      "cost": 210,
+      "shipping": 65,
+      "packaging": 18,
+      "return_rate": 0.1,
+      "return_cost": 149,
+      "role": "hero-2",
+      "ads": true,
+      "collection": "sansero",
+      "short": "Syv kilo glasperler i kanaler, så vægten bliver på tæppet.",
+      "bullets": [
+        "Syv kanaler, jævn fordeling",
+        "Aftageligt betræk",
+        "Til sofa, seng og læse-situationer"
+      ],
+      "netto": 559.2,
+      "payment": 8.83,
+      "db": 257.37,
+      "db_after_return": 216.73,
+      "db_percent": 38.76,
+      "break_even_cpa": 216.73,
+      "break_even_roas": 3.23,
+      "sku": "SG-SEN-21BACB"
+    },
+    {
+      "slug": "trykvest",
+      "name": "Trykvest",
+      "price": 449.0,
+      "cost": 120,
+      "shipping": 45,
+      "packaging": 10,
+      "return_rate": 0.12,
+      "return_cost": 95,
+      "role": "hero-3",
+      "ads": true,
+      "collection": "tryk",
+      "short": "Kort vest, når du ikke vil have ærmer.",
+      "bullets": [
+        "Kan bruges under tøj",
+        "Justerbar i siden",
+        "Velegnet til arbejde og transport"
+      ],
+      "netto": 359.2,
+      "payment": 6.03,
+      "db": 178.17,
+      "db_after_return": 145.39,
+      "db_percent": 40.48,
+      "break_even_cpa": 145.39,
+      "break_even_roas": 3.09,
+      "sku": "SG-SEN-BAAD2A"
+    },
+    {
+      "slug": "loop-oerepropper",
+      "name": "Loop-ørepropper",
+      "price": 149.0,
+      "cost": 35,
+      "shipping": 0,
+      "packaging": 4,
+      "return_rate": 0.05,
+      "return_cost": 85,
+      "role": "bump",
+      "ads": false,
+      "collection": "lyd",
+      "short": "Dæmper 18 dB uden at gøre lyden mudret.",
+      "bullets": [
+        "Til koncerter, kontor og trafik",
+        "Fem størrelser i pakken",
+        "Mer-salg i kassen, ikke annonce"
+      ],
+      "netto": 119.2,
+      "payment": 2.67,
+      "db": 77.53,
+      "db_after_return": 69.4,
+      "db_percent": 58.22,
+      "break_even_cpa": 69.4,
+      "break_even_roas": 2.15,
+      "sku": "SG-SEN-54C188"
+    },
+    {
+      "slug": "sansero-pakke",
+      "name": "Sansero-pakken",
+      "price": 1099.0,
+      "cost": 330,
+      "shipping": 79,
+      "packaging": 24,
+      "return_rate": 0.1,
+      "return_cost": 199,
+      "role": "bundle",
+      "ads": true,
+      "collection": "pakker",
+      "short": "Taeppe og hættetrøje sammen, med ét løfte.",
+      "bullets": [
+        "To produkter, een beslutning",
+        "Bedste dækningsbidrag pr. ordre",
+        "Gaveklar"
+      ],
+      "netto": 879.2,
+      "payment": 13.31,
+      "db": 432.89,
+      "db_after_return": 369.7,
+      "db_percent": 42.05,
+      "break_even_cpa": 369.7,
+      "break_even_roas": 2.97,
+      "sku": "SG-SEN-90CDB5"
+    }
+  ],
+  "pages": [
+    {
+      "slug": "start-here",
+      "title": "Start her",
+      "body": "<p><strong>STILLE</strong> — Ro, der kan tages på.</p><p>Butikken sælger sensorisk ro og neurodivergent hverdag til voksne med sansetraghed og deres pårørende, der vil have ro i hverdagen uden at gøre det til en diagnose.</p><h2>Begynd med</h2><ol><li><strong>Tryk</strong> — Vaegt og berøring, der dæmper signalerne.</li><li><strong>Vægtet hættetrøje</strong> — To kilo jævn vægt fordelt over skuldre og ryg.</li><li><strong>Levering og retur</strong> — hvad der kommer hvornår.</li></ol><p>[EJER: det ene, butikken gør anderledes, i en sætning ejeren selv ville sige.]</p>"
+    },
+    {
+      "slug": "om-os",
+      "title": "Om os",
+      "body": "<p>STILLE er en lille dansk butik med sensorisk ro og neurodivergent hverdag. Ro, der kan tages på.</p><p>[EJER: registreret firmanavn, CVR, adresse og telefon — kræves i handelsbetingelserne og i GPSR-blokken.]</p><p>[EJER: hvem står bag, og hvordan svarer man.]</p>"
+    },
+    {
+      "slug": "levering-og-retur",
+      "title": "Levering og retur",
+      "body": "<p>Alle ordrer sendes fra lager i Danmark.</p><ul><li>Behandlingstid: [EJER: dage].</li><li>Levering: [EJER: zoner og dage].</li><li>Fragtpris: [EJER: pris pr. zone, fri fragt over X kr.].</li></ul><h2>Fortrydelsesret</h2><p>Du har 14 dage fra modtagelsen. [EJER: returadresse og hvem der betaler returfragten.]</p><p>Brug fortrydelsesformularen på <a href=\"/fortrydelse/\">Fortrydelse</a>.</p>"
+    },
+    {
+      "slug": "maal-og-pasform",
+      "title": "Mål og pasform",
+      "body": "<p>Målene står på produktsiden. Mål det sted, varen skal sidde, inden du bestiller.</p><ul><li>[EJER: mål og tolerancer pr. vare, målt på en prøve.]</li><li>[EJER: maksimal belastning, hvis varen bærer noget.]</li><li>[EJER: hvad der ikke er egnet — underlag, vægt, temperatur.]</li></ul>"
+    },
+    {
+      "slug": "kontakt",
+      "title": "Kontakt",
+      "body": "<p>Spørgsmål om en ordre, en størrelse eller en retur?</p><p>E-mail: [EJER: butikkens e-mail] · Telefon: [EJER: telefon] · Adresse: [EJER: adresse].</p><p>Vi svarer inden for [EJER: timer].</p>"
+    }
+  ],
+  "menu": [
+    "Start her",
+    "Shop",
+    "Tryk",
+    "Lyd",
+    "Sansero",
+    "Guides",
+    "Om os",
+    "Kontakt"
+  ],
+  "hooks": [
+    "Jeg kan ikke holde ud at have tøj på. Nu har jeg det her.",
+    "Ro behoever ikke være et lukket værelse.",
+    "To kilo, fordelt rigtigt, gør en forskel."
+  ],
+  "kpi": [
+    {
+      "gate": "Hook rate",
+      "limit": ">= 25 %"
+    },
+    {
+      "gate": "Konvertering",
+      "limit": ">= 1,0 %"
+    },
+    {
+      "gate": "Retur",
+      "limit": "<= 12 %, ellers stopper pasformen salget"
+    },
+    {
+      "gate": "CPA",
+      "limit": "<= break-even pr. vare"
+    }
+  ],
+  "owner_steps": [
+    "E1: CVR, telefon, adresse og bankaftale",
+    "E2: leverandør med GPSR-dokumentation og to prøver i to vægtklasser",
+    "E3: registrering i producentregistret for emballage",
+    "E4: domæne og Shopify-konto",
+    "E5: beslut om community-samarbejde før foerste annonce",
+    "E6: annoncekonto med betalingsmetode"
+  ],
+  "owner_blockers": [
+    "[EJER: adresse]",
+    "[EJER: butikkens e-mail]",
+    "[EJER: dage]",
+    "[EJER: det ene, butikken gør anderledes, i en sætning ejeren selv ville sige.]",
+    "[EJER: hvad der ikke er egnet — underlag, vægt, temperatur.]",
+    "[EJER: hvem står bag, og hvordan svarer man.]",
+    "[EJER: maksimal belastning, hvis varen bærer noget.]",
+    "[EJER: mål og tolerancer pr. vare, målt på en prøve.]",
+    "[EJER: pris pr. zone, fri fragt over X kr.]",
+    "[EJER: registreret firmanavn, CVR, adresse og telefon — kræves i handelsbetingelserne og i GPSR-blokken.]",
+    "[EJER: returadresse og hvem der betaler returfragten.]",
+    "[EJER: telefon]",
+    "[EJER: timer]",
+    "[EJER: zoner og dage]"
+  ],
+  "assumptions": {
+    "fixed_monthly": 1400.0,
+    "vat": 0.25,
+    "payment_rate": 0.014,
+    "payment_fixed": 1.0,
+    "costs": "estimater, ingen leverandørtilbud"
+  },
+  "counts": {
+    "collections": 5,
+    "products": 5,
+    "ads": 4,
+    "pages": 5,
+    "owner_fields": 14,
+    "owner_steps": 6
+  },
+  "economics": {
+    "hero_break_even_cpa": 173.44,
+    "hero_break_even_roas": 3.17,
+    "worst_ad_break_even_cpa": 145.39,
+    "bundle_lift": 196.26,
+    "orders_to_cover_fixed": 9
+  },
+  "readiness": [
+    {
+      "id": "E1",
+      "owner": true,
+      "step": "CVR, telefon, adresse og bankaftale"
+    },
+    {
+      "id": "E2",
+      "owner": true,
+      "step": "leverandør med GPSR-dokumentation og to prøver i to vægtklasser"
+    },
+    {
+      "id": "E3",
+      "owner": true,
+      "step": "registrering i producentregistret for emballage"
+    },
+    {
+      "id": "E4",
+      "owner": true,
+      "step": "domæne og Shopify-konto"
+    },
+    {
+      "id": "E5",
+      "owner": true,
+      "step": "beslut om community-samarbejde før foerste annonce"
+    },
+    {
+      "id": "E6",
+      "owner": true,
+      "step": "annoncekonto med betalingsmetode"
+    },
+    {
+      "id": "printful",
+      "owner": true,
+      "step": "Mockups og trykfiler pr. vare"
+    },
+    {
+      "id": "publish",
+      "owner": true,
+      "step": "Godkend og publicér — agenten skriver kun kladder"
+    }
+  ]
+}

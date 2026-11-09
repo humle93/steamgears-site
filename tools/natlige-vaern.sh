@@ -118,6 +118,10 @@ check "rebrand-audit-selftest"               python3 tools/rebrand_audit.py --se
 check "rebrand-apply-selftest"               python3 tools/rebrand_apply.py --selftest
 check "fejlscan-selftest"                    python3 tools/fejlscan.py --selftest
 check "fejlscan"                             python3 tools/fejlscan.py
+# De fire niche-payloads: økonomien regnes efter på ny, ejerfelterne tælles, og
+# "ads: true" på en vare under 120 kr i break-even-CPA afvises. Driftstjekket fanger
+# en håndredigeret payload, som ellers ville blive importeret som den var.
+check "niche-payloads"                       python3 tools/deploy/niche_preflight.py --check
 
 # Rendereren fejlede 2/11 på to måder der ikke gav en fejlkode: et sidebrud midt i et afsnit
 # skrev resten af dokumentet uden for papiret (niche-vurderingen blev 20 sider), og glyffer

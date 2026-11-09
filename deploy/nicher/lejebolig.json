@@ -1,0 +1,358 @@
+{
+  "schema": [
+    "Organization",
+    "WebSite",
+    "BreadcrumbList",
+    "ItemList",
+    "Product",
+    "FAQPage"
+  ],
+  "slug": "lejebolig",
+  "name": "OPLOFT",
+  "niche": "lejebolig-venlig opbevaring",
+  "host": "oploft.dk",
+  "platform": "shopify",
+  "tagline": "Opbevaring, der kan flytte med.",
+  "audience": "Lejere i danske byer, der vil have opbevaring uden at bore i en bolig, de skal flytte fra.",
+  "status": "vurderet",
+  "plan_key": "niche-lejebolig-6p",
+  "collections": [
+    {
+      "slug": "reolsystemer",
+      "name": "Reolsystemer",
+      "description": "Gulv-til-loft uden værktøj og uden huller."
+    },
+    {
+      "slug": "doersystemer",
+      "name": "Doersystemer",
+      "description": "Hylder og kroge, der hager over døren."
+    },
+    {
+      "slug": "vaegopbevaring",
+      "name": "Vaegopbevaring",
+      "description": "Klæbende hylder med dokumenteret belastning."
+    },
+    {
+      "slug": "moduler",
+      "name": "Moduler",
+      "description": "Kasser og indsatser, der kan stables om."
+    },
+    {
+      "slug": "systempakker",
+      "name": "Systempakker",
+      "description": "Hele løsninger til entre, bad og soveværelse."
+    }
+  ],
+  "products": [
+    {
+      "slug": "teleskopreol-gulv-til-loft",
+      "name": "Teleskopreol, gulv til loft",
+      "price": 749.0,
+      "cost": 210,
+      "shipping": 79,
+      "packaging": 18,
+      "return_rate": 0.07,
+      "return_cost": 149,
+      "role": "hero",
+      "ads": true,
+      "collection": "reolsystemer",
+      "short": "Spaendes fast mellem gulv og loft uden skruer.",
+      "bullets": [
+        "240-290 cm, justerbar",
+        "Fire hylder, mindst 5 kg pr. hylde",
+        "Karton delt i 2-3 sektioner under 115 cm"
+      ],
+      "netto": 599.2,
+      "payment": 9.39,
+      "db": 282.81,
+      "db_after_return": 252.58,
+      "db_percent": 42.15,
+      "break_even_cpa": 252.58,
+      "break_even_roas": 2.97,
+      "sku": "SG-LEJ-DAB8B1"
+    },
+    {
+      "slug": "haengereol-doer",
+      "name": "Hængereol til dør",
+      "price": 399.0,
+      "cost": 105,
+      "shipping": 59,
+      "packaging": 12,
+      "return_rate": 0.07,
+      "return_cost": 149,
+      "role": "hero-2",
+      "ads": false,
+      "collection": "doersystemer",
+      "short": "Seks rum til sko og småting, uden et eneste hul i døren.",
+      "bullets": [
+        "Haenger over døren",
+        "Seks rum med bund",
+        "Til entre, bad eller soveværelse"
+      ],
+      "netto": 319.2,
+      "payment": 5.47,
+      "db": 137.73,
+      "db_after_return": 117.66,
+      "db_percent": 36.86,
+      "break_even_cpa": 117.66,
+      "break_even_roas": 3.39,
+      "sku": "SG-LEJ-2FAF45"
+    },
+    {
+      "slug": "klaebende-vaaghylde",
+      "name": "Klæbende væghylde",
+      "price": 299.0,
+      "cost": 78,
+      "shipping": 49,
+      "packaging": 8,
+      "return_rate": 0.07,
+      "return_cost": 99,
+      "role": "entry",
+      "ads": false,
+      "collection": "vaegopbevaring",
+      "short": "Baerer 10 kg på fliser uden boring - med testet underlag.",
+      "bullets": [
+        "10 kg dokumenteret",
+        "Kun til glatte, rene underlag",
+        "Belastningsangivelsen er varens vigtigste egenskab"
+      ],
+      "netto": 239.2,
+      "payment": 4.35,
+      "db": 99.85,
+      "db_after_return": 85.93,
+      "db_percent": 35.92,
+      "break_even_cpa": 85.93,
+      "break_even_roas": 3.48,
+      "sku": "SG-LEJ-A720D7"
+    },
+    {
+      "slug": "modulkaesser-3-pak",
+      "name": "Modulkasser, 3-pak",
+      "price": 349.0,
+      "cost": 96,
+      "shipping": 55,
+      "packaging": 10,
+      "return_rate": 0.07,
+      "return_cost": 129,
+      "role": "entry",
+      "ads": false,
+      "collection": "moduler",
+      "short": "Tre kasser, der stables i tre ho ejder og flytter med.",
+      "bullets": [
+        "Stables og stables om",
+        "Passer i standardreoler",
+        "Ingen montering"
+      ],
+      "netto": 279.2,
+      "payment": 4.91,
+      "db": 113.29,
+      "db_after_return": 96.33,
+      "db_percent": 34.5,
+      "break_even_cpa": 96.33,
+      "break_even_roas": 3.62,
+      "sku": "SG-LEJ-06610C"
+    },
+    {
+      "slug": "krog-6-pak",
+      "name": "Krog, 6-pak (mer-salg)",
+      "price": 149.0,
+      "cost": 39,
+      "shipping": 0,
+      "packaging": 4,
+      "return_rate": 0.05,
+      "return_cost": 85,
+      "role": "bump",
+      "ads": false,
+      "collection": "vaegopbevaring",
+      "short": "Seks kroge, der hager over hylden uden at bore.",
+      "bullets": [
+        "Ingen ekstra fragt",
+        "Tilbydes i kassen",
+        "Kan ikke bære en annonce alene"
+      ],
+      "netto": 119.2,
+      "payment": 2.67,
+      "db": 73.53,
+      "db_after_return": 65.6,
+      "db_percent": 55.03,
+      "break_even_cpa": 65.6,
+      "break_even_roas": 2.27,
+      "sku": "SG-LEJ-1E8813"
+    },
+    {
+      "slug": "entrepakke",
+      "name": "Entrepakke",
+      "price": 899.0,
+      "cost": 250,
+      "shipping": 79,
+      "packaging": 20,
+      "return_rate": 0.07,
+      "return_cost": 179,
+      "role": "bundle",
+      "ads": true,
+      "collection": "systempakker",
+      "short": "Reol, dørsystem og kasser i ét system til entreen.",
+      "bullets": [
+        "Hele entreen i ét køb",
+        "Alt kan flytte med",
+        "Ingen huller i væggen"
+      ],
+      "netto": 719.2,
+      "payment": 11.07,
+      "db": 359.13,
+      "db_after_return": 321.46,
+      "db_percent": 44.7,
+      "break_even_cpa": 321.46,
+      "break_even_roas": 2.8,
+      "sku": "SG-LEJ-072610"
+    }
+  ],
+  "pages": [
+    {
+      "slug": "start-here",
+      "title": "Start her",
+      "body": "<p><strong>OPLOFT</strong> — Opbevaring, der kan flytte med.</p><p>Butikken sælger lejebolig-venlig opbevaring til lejere i danske byer, der vil have opbevaring uden at bore i en bolig, de skal flytte fra.</p><h2>Begynd med</h2><ol><li><strong>Reolsystemer</strong> — Gulv-til-loft uden værktøj og uden huller.</li><li><strong>Teleskopreol, gulv til loft</strong> — Spaendes fast mellem gulv og loft uden skruer.</li><li><strong>Levering og retur</strong> — hvad der kommer hvornår.</li></ol><p>[EJER: det ene, butikken gør anderledes, i en sætning ejeren selv ville sige.]</p>"
+    },
+    {
+      "slug": "om-os",
+      "title": "Om os",
+      "body": "<p>OPLOFT er en lille dansk butik med lejebolig-venlig opbevaring. Opbevaring, der kan flytte med.</p><p>[EJER: registreret firmanavn, CVR, adresse og telefon — kræves i handelsbetingelserne og i GPSR-blokken.]</p><p>[EJER: hvem står bag, og hvordan svarer man.]</p>"
+    },
+    {
+      "slug": "levering-og-retur",
+      "title": "Levering og retur",
+      "body": "<p>Alle ordrer sendes fra lager i Danmark.</p><ul><li>Behandlingstid: [EJER: dage].</li><li>Levering: [EJER: zoner og dage].</li><li>Fragtpris: [EJER: pris pr. zone, fri fragt over X kr.].</li></ul><h2>Fortrydelsesret</h2><p>Du har 14 dage fra modtagelsen. [EJER: returadresse og hvem der betaler returfragten.]</p><p>Brug fortrydelsesformularen på <a href=\"/fortrydelse/\">Fortrydelse</a>.</p>"
+    },
+    {
+      "slug": "maal-og-pasform",
+      "title": "Mål og pasform",
+      "body": "<p>Målene står på produktsiden. Mål det sted, varen skal sidde, inden du bestiller.</p><ul><li>[EJER: mål og tolerancer pr. vare, målt på en prøve.]</li><li>[EJER: maksimal belastning, hvis varen bærer noget.]</li><li>[EJER: hvad der ikke er egnet — underlag, vægt, temperatur.]</li></ul>"
+    },
+    {
+      "slug": "kontakt",
+      "title": "Kontakt",
+      "body": "<p>Spørgsmål om en ordre, en størrelse eller en retur?</p><p>E-mail: [EJER: butikkens e-mail] · Telefon: [EJER: telefon] · Adresse: [EJER: adresse].</p><p>Vi svarer inden for [EJER: timer].</p>"
+    }
+  ],
+  "menu": [
+    "Start her",
+    "Shop",
+    "Reolsystemer",
+    "Doersystemer",
+    "Vaegopbevaring",
+    "Guides",
+    "Om os",
+    "Kontakt"
+  ],
+  "hooks": [
+    "Du må ikke bore. Du har stadig brug for plads.",
+    "Saadan faar du plads uden at miste depositummet.",
+    "Tre kvadratmeter du ikke vidste du havde."
+  ],
+  "kpi": [
+    {
+      "gate": "Konvertering ved 300 besoeg",
+      "limit": ">= 2,0 % - ellers er prisen eller siden problemet"
+    },
+    {
+      "gate": "CPA",
+      "limit": "<= break-even pr. vare"
+    },
+    {
+      "gate": "Retur",
+      "limit": "<= 10 %"
+    },
+    {
+      "gate": "Klage over hold",
+      "limit": "0 dokumenterede sager"
+    }
+  ],
+  "owner_steps": [
+    "E1: CVR, telefon, adresse og bankaftale",
+    "E2: leverandørtilbud på reol og dørsystem, med TARIC og fragt til DK",
+    "E3: registrering i producentregistret for emballage",
+    "E4: domæne og Shopify-konto",
+    "E5: pristest mod IKEA's 585 kr. før lagerkoeb",
+    "E6: annoncekonto med betalingsmetode"
+  ],
+  "owner_blockers": [
+    "[EJER: adresse]",
+    "[EJER: butikkens e-mail]",
+    "[EJER: dage]",
+    "[EJER: det ene, butikken gør anderledes, i en sætning ejeren selv ville sige.]",
+    "[EJER: hvad der ikke er egnet — underlag, vægt, temperatur.]",
+    "[EJER: hvem står bag, og hvordan svarer man.]",
+    "[EJER: maksimal belastning, hvis varen bærer noget.]",
+    "[EJER: mål og tolerancer pr. vare, målt på en prøve.]",
+    "[EJER: pris pr. zone, fri fragt over X kr.]",
+    "[EJER: registreret firmanavn, CVR, adresse og telefon — kræves i handelsbetingelserne og i GPSR-blokken.]",
+    "[EJER: returadresse og hvem der betaler returfragten.]",
+    "[EJER: telefon]",
+    "[EJER: timer]",
+    "[EJER: zoner og dage]"
+  ],
+  "assumptions": {
+    "fixed_monthly": 1400.0,
+    "vat": 0.25,
+    "payment_rate": 0.014,
+    "payment_fixed": 1.0,
+    "costs": "estimater, ingen leverandørtilbud"
+  },
+  "counts": {
+    "collections": 5,
+    "products": 6,
+    "ads": 2,
+    "pages": 5,
+    "owner_fields": 14,
+    "owner_steps": 6
+  },
+  "economics": {
+    "hero_break_even_cpa": 252.58,
+    "hero_break_even_roas": 2.97,
+    "worst_ad_break_even_cpa": 252.58,
+    "bundle_lift": 68.88,
+    "orders_to_cover_fixed": 6
+  },
+  "readiness": [
+    {
+      "id": "E1",
+      "owner": true,
+      "step": "CVR, telefon, adresse og bankaftale"
+    },
+    {
+      "id": "E2",
+      "owner": true,
+      "step": "leverandørtilbud på reol og dørsystem, med TARIC og fragt til DK"
+    },
+    {
+      "id": "E3",
+      "owner": true,
+      "step": "registrering i producentregistret for emballage"
+    },
+    {
+      "id": "E4",
+      "owner": true,
+      "step": "domæne og Shopify-konto"
+    },
+    {
+      "id": "E5",
+      "owner": true,
+      "step": "pristest mod IKEA's 585 kr. før lagerkoeb"
+    },
+    {
+      "id": "E6",
+      "owner": true,
+      "step": "annoncekonto med betalingsmetode"
+    },
+    {
+      "id": "printful",
+      "owner": true,
+      "step": "Mockups og trykfiler pr. vare"
+    },
+    {
+      "id": "publish",
+      "owner": true,
+      "step": "Godkend og publicér — agenten skriver kun kladder"
+    }
+  ]
+}

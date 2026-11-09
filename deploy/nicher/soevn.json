@@ -1,0 +1,331 @@
+{
+  "schema": [
+    "Organization",
+    "WebSite",
+    "BreadcrumbList",
+    "ItemList",
+    "Product",
+    "FAQPage"
+  ],
+  "slug": "soevn",
+  "name": "IMMER",
+  "niche": "søvn og aftenro",
+  "host": "immer.dk",
+  "platform": "shopify",
+  "tagline": "Aftenen, der slutter ordentligt.",
+  "audience": "Danske voksne, der sover daarligt og har prøvet melatonin, men ikke en tyngdedyne.",
+  "status": "fravalgt",
+  "plan_key": "niche-soevn-5p",
+  "collections": [
+    {
+      "slug": "tyngde",
+      "name": "Tyngde",
+      "description": "Dyner og tæpper med dokumenteret vægt."
+    },
+    {
+      "slug": "moerke",
+      "name": "Moerke",
+      "description": "Masker, der lukker lyset ude uden at trykke."
+    },
+    {
+      "slug": "natlyd",
+      "name": "Natlyd",
+      "description": "Hvid støj og faldende toner."
+    },
+    {
+      "slug": "aften",
+      "name": "Aften",
+      "description": "Rutiner og småting til de sidste 30 minutter."
+    },
+    {
+      "slug": "natpakker",
+      "name": "Natpakker",
+      "description": "Soevnpakker til hjemme og til rejse."
+    }
+  ],
+  "products": [
+    {
+      "slug": "tyngdedyne",
+      "name": "Tyngdedyne",
+      "price": 799.0,
+      "cost": 240,
+      "shipping": 79,
+      "packaging": 22,
+      "return_rate": 0.1,
+      "return_cost": 179,
+      "role": "hero",
+      "ads": true,
+      "collection": "tyngde",
+      "short": "Seks kilo glasperler, der fordeler sig efter kroppen.",
+      "bullets": [
+        "Ca. 10 % af kropsvaegt",
+        "Aftageligt, vaskbart betræk",
+        "Ikke til boern under 2 år"
+      ],
+      "netto": 639.2,
+      "payment": 9.95,
+      "db": 288.25,
+      "db_after_return": 241.53,
+      "db_percent": 37.79,
+      "break_even_cpa": 241.53,
+      "break_even_roas": 3.31,
+      "sku": "SG-SOE-84ECED"
+    },
+    {
+      "slug": "soevnmaska",
+      "name": "Søvnmaske",
+      "price": 349.0,
+      "cost": 85,
+      "shipping": 39,
+      "packaging": 8,
+      "return_rate": 0.06,
+      "return_cost": 85,
+      "role": "hero-2",
+      "ads": true,
+      "collection": "moerke",
+      "short": "Formet efter næsen, så lyset ikke slipper ind ved kinden.",
+      "bullets": [
+        "100 % mørke uden tryk på øjnene",
+        "Justerbar rem",
+        "Kan vaskes"
+      ],
+      "netto": 279.2,
+      "payment": 4.91,
+      "db": 142.29,
+      "db_after_return": 128.65,
+      "db_percent": 46.08,
+      "break_even_cpa": 128.65,
+      "break_even_roas": 2.71,
+      "sku": "SG-SOE-548216"
+    },
+    {
+      "slug": "hvid-stoej",
+      "name": "Hvid støj",
+      "price": 499.0,
+      "cost": 140,
+      "shipping": 49,
+      "packaging": 12,
+      "return_rate": 0.06,
+      "return_cost": 95,
+      "role": "hero-3",
+      "ads": true,
+      "collection": "natlyd",
+      "short": "Fem toner, timer og ingen app, der skal opdateres.",
+      "bullets": [
+        "Fem toner og timer",
+        "Ingen konto, ingen sky",
+        "Batteri til hele natten"
+      ],
+      "netto": 399.2,
+      "payment": 6.59,
+      "db": 191.61,
+      "db_after_return": 174.41,
+      "db_percent": 43.69,
+      "break_even_cpa": 174.41,
+      "break_even_roas": 2.86,
+      "sku": "SG-SOE-A70384"
+    },
+    {
+      "slug": "rejseoerepropper",
+      "name": "Rejseoerepropper",
+      "price": 199.0,
+      "cost": 40,
+      "shipping": 0,
+      "packaging": 6,
+      "return_rate": 0.06,
+      "return_cost": 85,
+      "role": "bump",
+      "ads": false,
+      "collection": "aften",
+      "short": "Til hotellet, flyet og den anden persons snorken.",
+      "bullets": [
+        "Fire størrelser",
+        "Lille etui",
+        "Mer-salg, ikke selvstændig annonce"
+      ],
+      "netto": 159.2,
+      "payment": 3.23,
+      "db": 109.97,
+      "db_after_return": 98.27,
+      "db_percent": 61.73,
+      "break_even_cpa": 98.27,
+      "break_even_roas": 2.03,
+      "sku": "SG-SOE-6E777A"
+    },
+    {
+      "slug": "soevnpakke",
+      "name": "Soevnpakken",
+      "price": 999.0,
+      "cost": 295,
+      "shipping": 79,
+      "packaging": 26,
+      "return_rate": 0.08,
+      "return_cost": 199,
+      "role": "bundle",
+      "ads": true,
+      "collection": "natpakker",
+      "short": "Dyne, maske og hvid støj i ét køb.",
+      "bullets": [
+        "Tre varer, een rutine",
+        "Højeste dækningsbidrag",
+        "Gaveklar til december"
+      ],
+      "netto": 799.2,
+      "payment": 12.19,
+      "db": 387.01,
+      "db_after_return": 340.13,
+      "db_percent": 42.56,
+      "break_even_cpa": 340.13,
+      "break_even_roas": 2.94,
+      "sku": "SG-SOE-B8C056"
+    }
+  ],
+  "pages": [
+    {
+      "slug": "start-here",
+      "title": "Start her",
+      "body": "<p><strong>IMMER</strong> — Aftenen, der slutter ordentligt.</p><p>Butikken sælger søvn og aftenro til danske voksne, der sover daarligt og har prøvet melatonin, men ikke en tyngdedyne.</p><h2>Begynd med</h2><ol><li><strong>Tyngde</strong> — Dyner og tæpper med dokumenteret vægt.</li><li><strong>Tyngdedyne</strong> — Seks kilo glasperler, der fordeler sig efter kroppen.</li><li><strong>Levering og retur</strong> — hvad der kommer hvornår.</li></ol><p>[EJER: det ene, butikken gør anderledes, i en sætning ejeren selv ville sige.]</p>"
+    },
+    {
+      "slug": "om-os",
+      "title": "Om os",
+      "body": "<p>IMMER er en lille dansk butik med søvn og aftenro. Aftenen, der slutter ordentligt.</p><p>[EJER: registreret firmanavn, CVR, adresse og telefon — kræves i handelsbetingelserne og i GPSR-blokken.]</p><p>[EJER: hvem står bag, og hvordan svarer man.]</p>"
+    },
+    {
+      "slug": "levering-og-retur",
+      "title": "Levering og retur",
+      "body": "<p>Alle ordrer sendes fra lager i Danmark.</p><ul><li>Behandlingstid: [EJER: dage].</li><li>Levering: [EJER: zoner og dage].</li><li>Fragtpris: [EJER: pris pr. zone, fri fragt over X kr.].</li></ul><h2>Fortrydelsesret</h2><p>Du har 14 dage fra modtagelsen. [EJER: returadresse og hvem der betaler returfragten.]</p><p>Brug fortrydelsesformularen på <a href=\"/fortrydelse/\">Fortrydelse</a>.</p>"
+    },
+    {
+      "slug": "maal-og-pasform",
+      "title": "Mål og pasform",
+      "body": "<p>Målene står på produktsiden. Mål det sted, varen skal sidde, inden du bestiller.</p><ul><li>[EJER: mål og tolerancer pr. vare, målt på en prøve.]</li><li>[EJER: maksimal belastning, hvis varen bærer noget.]</li><li>[EJER: hvad der ikke er egnet — underlag, vægt, temperatur.]</li></ul>"
+    },
+    {
+      "slug": "kontakt",
+      "title": "Kontakt",
+      "body": "<p>Spørgsmål om en ordre, en størrelse eller en retur?</p><p>E-mail: [EJER: butikkens e-mail] · Telefon: [EJER: telefon] · Adresse: [EJER: adresse].</p><p>Vi svarer inden for [EJER: timer].</p>"
+    }
+  ],
+  "menu": [
+    "Start her",
+    "Shop",
+    "Tyngde",
+    "Moerke",
+    "Natlyd",
+    "Guides",
+    "Om os",
+    "Kontakt"
+  ],
+  "hooks": [
+    "Jeg har prøvet melatonin. Det her virker på en anden måde.",
+    "Din søvn starter 30 minutter før, du går i seng.",
+    "Seks kilo fordelt rigtigt slukker ikke kroppen - den holder den."
+  ],
+  "kpi": [
+    {
+      "gate": "Hook rate",
+      "limit": ">= 25 %"
+    },
+    {
+      "gate": "Konvertering",
+      "limit": ">= 1,0 %"
+    },
+    {
+      "gate": "CPA",
+      "limit": "<= break-even pr. vare"
+    },
+    {
+      "gate": "Retur",
+      "limit": "<= 10 %"
+    }
+  ],
+  "owner_steps": [
+    "E1: CVR, telefon, adresse og bankaftale",
+    "E2: leverandør med GPSR-dokumentation, vægtklasse og vasketest",
+    "E3: registrering i producentregistret for emballage",
+    "E4: domæne og Shopify-konto",
+    "E5: beslut om Q4-start, hvor CPM er 30-60 % højere",
+    "E6: annoncekonto med betalingsmetode"
+  ],
+  "owner_blockers": [
+    "[EJER: adresse]",
+    "[EJER: butikkens e-mail]",
+    "[EJER: dage]",
+    "[EJER: det ene, butikken gør anderledes, i en sætning ejeren selv ville sige.]",
+    "[EJER: hvad der ikke er egnet — underlag, vægt, temperatur.]",
+    "[EJER: hvem står bag, og hvordan svarer man.]",
+    "[EJER: maksimal belastning, hvis varen bærer noget.]",
+    "[EJER: mål og tolerancer pr. vare, målt på en prøve.]",
+    "[EJER: pris pr. zone, fri fragt over X kr.]",
+    "[EJER: registreret firmanavn, CVR, adresse og telefon — kræves i handelsbetingelserne og i GPSR-blokken.]",
+    "[EJER: returadresse og hvem der betaler returfragten.]",
+    "[EJER: telefon]",
+    "[EJER: timer]",
+    "[EJER: zoner og dage]"
+  ],
+  "assumptions": {
+    "fixed_monthly": 1400.0,
+    "vat": 0.25,
+    "payment_rate": 0.014,
+    "payment_fixed": 1.0,
+    "costs": "estimater, ingen leverandørtilbud"
+  },
+  "counts": {
+    "collections": 5,
+    "products": 5,
+    "ads": 4,
+    "pages": 5,
+    "owner_fields": 14,
+    "owner_steps": 6
+  },
+  "economics": {
+    "hero_break_even_cpa": 241.53,
+    "hero_break_even_roas": 3.31,
+    "worst_ad_break_even_cpa": 128.65,
+    "bundle_lift": 98.6,
+    "orders_to_cover_fixed": 6
+  },
+  "readiness": [
+    {
+      "id": "E1",
+      "owner": true,
+      "step": "CVR, telefon, adresse og bankaftale"
+    },
+    {
+      "id": "E2",
+      "owner": true,
+      "step": "leverandør med GPSR-dokumentation, vægtklasse og vasketest"
+    },
+    {
+      "id": "E3",
+      "owner": true,
+      "step": "registrering i producentregistret for emballage"
+    },
+    {
+      "id": "E4",
+      "owner": true,
+      "step": "domæne og Shopify-konto"
+    },
+    {
+      "id": "E5",
+      "owner": true,
+      "step": "beslut om Q4-start, hvor CPM er 30-60 % højere"
+    },
+    {
+      "id": "E6",
+      "owner": true,
+      "step": "annoncekonto med betalingsmetode"
+    },
+    {
+      "id": "printful",
+      "owner": true,
+      "step": "Mockups og trykfiler pr. vare"
+    },
+    {
+      "id": "publish",
+      "owner": true,
+      "step": "Godkend og publicér — agenten skriver kun kladder"
+    }
+  ]
+}

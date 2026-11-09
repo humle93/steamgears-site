@@ -1,0 +1,691 @@
+{
+  "schema": 1,
+  "updated": "2026-11-09",
+  "note": "Kilden til de fire niche-payloads. Alt her er input; netto, dækningsbidrag, break-even-CPA og ROAS beregnes af tools/deploy/niche_preflight.py og skrives i deploy/nicher/<slug>.json. Indkoebs-, fragt- og annoncepriser er estimater, indtil der ligger leverandørtilbud.",
+  "payment": {
+    "rate": 0.014,
+    "fixed": 1.0,
+    "vat": 0.25
+  },
+  "niches": [
+    {
+      "slug": "kabine",
+      "name": "KABINE",
+      "niche": "bil-interiør og detailing",
+      "host": "kabine.dk",
+      "platform": "shopify",
+      "audience": "Danske bilejere og leasingkunder, 28-55 år, der vil have bilen ren uden at betale 1.500 kr. til en detailer.",
+      "tagline": "Kabinen er bilens interiør. Vi gør den ren.",
+      "status": "valgt",
+      "collections": [
+        {
+          "slug": "interioer",
+          "name": "Interiør",
+          "description": "Saeder, panel og alle de steder støvsugeren ikke når."
+        },
+        {
+          "slug": "aflevering",
+          "name": "Aflevering",
+          "description": "Til dig der skal aflevere leasingbilen og have depositummet tilbage."
+        },
+        {
+          "slug": "opbevaring",
+          "name": "Opbevaring",
+          "description": "Smaa systemer til kabinens mange løse dele."
+        },
+        {
+          "slug": "pleje",
+          "name": "Pleje",
+          "description": "Mikrofiber, børster og det der holder tekstilet pænt."
+        },
+        {
+          "slug": "gaver",
+          "name": "Gaver",
+          "description": "Til ham eller hende, der elsker sin bil højere end gennemsnittet."
+        }
+      ],
+      "products": [
+        {
+          "slug": "kabine-kit-01",
+          "name": "Kabine Kit 01",
+          "price": 499,
+          "cost": 95,
+          "shipping": 45,
+          "packaging": 10,
+          "return_rate": 0.06,
+          "return_cost": 85,
+          "role": "hero",
+          "ads": true,
+          "collection": "interioer",
+          "short": "Børste, mikrofiber og interiørrens i ét sæt til hele kabinen.",
+          "bullets": [
+            "Fire indgreb: sæde, panel, samm og luftdåse",
+            "Nok til to biler",
+            "Ingen væske i pakken - rensenmiddel købes i EU"
+          ]
+        },
+        {
+          "slug": "kabine-kit-02-aflevering",
+          "name": "Kabine Kit 02 - Aflevering",
+          "price": 449,
+          "cost": 85,
+          "shipping": 45,
+          "packaging": 10,
+          "return_rate": 0.06,
+          "return_cost": 85,
+          "role": "hero-2",
+          "ads": true,
+          "collection": "aflevering",
+          "short": "Det sæt du bruger, når leasingbilen skal afleveres om en uge.",
+          "bullets": [
+            "Tre dokumenterede svage punkter i kabinen",
+            "Rens uden at efterlade blanke pletter",
+            "Til aflevering eller depositum-tilbagebetaling"
+          ]
+        },
+        {
+          "slug": "saede-gap-organizer",
+          "name": "Sæde-gap-organizer",
+          "price": 199,
+          "cost": 30,
+          "shipping": 39,
+          "packaging": 6,
+          "return_rate": 0.08,
+          "return_cost": 85,
+          "role": "entry",
+          "ads": false,
+          "collection": "opbevaring",
+          "short": "Lukker sømmen mellem sæde og konsol, hvor telefonen og kaffen ender.",
+          "bullets": [
+            "Tilpasses sædets bredde",
+            "Holder telefon, nøgler og kaffe",
+            "Kan ikke bære en annonce alene - kun mer-salg"
+          ]
+        },
+        {
+          "slug": "saede-gap-organizer-bump",
+          "name": "Sæde-gap-organizer (mer-salg)",
+          "price": 129,
+          "cost": 30,
+          "shipping": 0,
+          "packaging": 4,
+          "return_rate": 0.03,
+          "return_cost": 85,
+          "role": "bump",
+          "ads": false,
+          "collection": "opbevaring",
+          "short": "Samme organizer, lagt i pakken du allerede betaler for.",
+          "bullets": [
+            "Ingen ekstra fragt",
+            "Tilbydes i kassen",
+            "Ren margin, ingen anskaffelsesomkostning"
+          ]
+        },
+        {
+          "slug": "kabine-bundle-01",
+          "name": "Kabine Bundle 01",
+          "price": 599,
+          "cost": 125,
+          "shipping": 45,
+          "packaging": 12,
+          "return_rate": 0.06,
+          "return_cost": 85,
+          "role": "bundle",
+          "ads": true,
+          "collection": "gaver",
+          "short": "Kit 01 og sæde-gap-organizeren i samme pakke.",
+          "bullets": [
+            "Loefter gennemsnitsordren",
+            "Eet køb, hele kabinen",
+            "Gaveklar aeske"
+          ]
+        }
+      ],
+      "hooks": [
+        "Din bil er ikke beskidt. Den er bare aldrig blevet renset her.",
+        "Detaileren ville have 1.500 kr. Jeg brugte 499.",
+        "Tre steder i din bil du aldrig har rengjort."
+      ],
+      "kpi": [
+        {
+          "gate": "Hook rate, 3 sek.",
+          "limit": ">= 25 %"
+        },
+        {
+          "gate": "CTR",
+          "limit": ">= 1,2 %"
+        },
+        {
+          "gate": "Konvertering",
+          "limit": ">= 0,8 %"
+        },
+        {
+          "gate": "CPA",
+          "limit": "<= break-even, ellers pause efter tre dage"
+        }
+      ],
+      "owner_steps": [
+        "E1: CVR, telefon, adresse og bankaftale",
+        "E2: leverandoervalg med GPSR-dokumentation og to prøver",
+        "E3: registrering i producentregistret for emballage",
+        "E4: domaenet kabine.dk og Shopify-konto",
+        "E5: startdato - Q4-priser eller januar",
+        "E6: annoncekonto med betalingsmetode"
+      ]
+    },
+    {
+      "slug": "lejebolig",
+      "name": "OPLOFT",
+      "niche": "lejebolig-venlig opbevaring",
+      "host": "oploft.dk",
+      "platform": "shopify",
+      "audience": "Lejere i danske byer, der vil have opbevaring uden at bore i en bolig, de skal flytte fra.",
+      "tagline": "Opbevaring, der kan flytte med.",
+      "status": "vurderet",
+      "collections": [
+        {
+          "slug": "reolsystemer",
+          "name": "Reolsystemer",
+          "description": "Gulv-til-loft uden værktøj og uden huller."
+        },
+        {
+          "slug": "doersystemer",
+          "name": "Doersystemer",
+          "description": "Hylder og kroge, der hager over døren."
+        },
+        {
+          "slug": "vaegopbevaring",
+          "name": "Vaegopbevaring",
+          "description": "Klæbende hylder med dokumenteret belastning."
+        },
+        {
+          "slug": "moduler",
+          "name": "Moduler",
+          "description": "Kasser og indsatser, der kan stables om."
+        },
+        {
+          "slug": "systempakker",
+          "name": "Systempakker",
+          "description": "Hele løsninger til entre, bad og soveværelse."
+        }
+      ],
+      "products": [
+        {
+          "slug": "teleskopreol-gulv-til-loft",
+          "name": "Teleskopreol, gulv til loft",
+          "price": 749,
+          "cost": 210,
+          "shipping": 79,
+          "packaging": 18,
+          "return_rate": 0.07,
+          "return_cost": 149,
+          "role": "hero",
+          "ads": true,
+          "collection": "reolsystemer",
+          "short": "Spaendes fast mellem gulv og loft uden skruer.",
+          "bullets": [
+            "240-290 cm, justerbar",
+            "Fire hylder, mindst 5 kg pr. hylde",
+            "Karton delt i 2-3 sektioner under 115 cm"
+          ]
+        },
+        {
+          "slug": "haengereol-doer",
+          "name": "Hængereol til dør",
+          "price": 399,
+          "cost": 105,
+          "shipping": 59,
+          "packaging": 12,
+          "return_rate": 0.07,
+          "return_cost": 149,
+          "role": "hero-2",
+          "ads": false,
+          "collection": "doersystemer",
+          "short": "Seks rum til sko og småting, uden et eneste hul i døren.",
+          "bullets": [
+            "Haenger over døren",
+            "Seks rum med bund",
+            "Til entre, bad eller soveværelse"
+          ]
+        },
+        {
+          "slug": "klaebende-vaaghylde",
+          "name": "Klæbende væghylde",
+          "price": 299,
+          "cost": 78,
+          "shipping": 49,
+          "packaging": 8,
+          "return_rate": 0.07,
+          "return_cost": 99,
+          "role": "entry",
+          "ads": false,
+          "collection": "vaegopbevaring",
+          "short": "Baerer 10 kg på fliser uden boring - med testet underlag.",
+          "bullets": [
+            "10 kg dokumenteret",
+            "Kun til glatte, rene underlag",
+            "Belastningsangivelsen er varens vigtigste egenskab"
+          ]
+        },
+        {
+          "slug": "modulkaesser-3-pak",
+          "name": "Modulkasser, 3-pak",
+          "price": 349,
+          "cost": 96,
+          "shipping": 55,
+          "packaging": 10,
+          "return_rate": 0.07,
+          "return_cost": 129,
+          "role": "entry",
+          "ads": false,
+          "collection": "moduler",
+          "short": "Tre kasser, der stables i tre ho ejder og flytter med.",
+          "bullets": [
+            "Stables og stables om",
+            "Passer i standardreoler",
+            "Ingen montering"
+          ]
+        },
+        {
+          "slug": "krog-6-pak",
+          "name": "Krog, 6-pak (mer-salg)",
+          "price": 149,
+          "cost": 39,
+          "shipping": 0,
+          "packaging": 4,
+          "return_rate": 0.05,
+          "return_cost": 85,
+          "role": "bump",
+          "ads": false,
+          "collection": "vaegopbevaring",
+          "short": "Seks kroge, der hager over hylden uden at bore.",
+          "bullets": [
+            "Ingen ekstra fragt",
+            "Tilbydes i kassen",
+            "Kan ikke bære en annonce alene"
+          ]
+        },
+        {
+          "slug": "entrepakke",
+          "name": "Entrepakke",
+          "price": 899,
+          "cost": 250,
+          "shipping": 79,
+          "packaging": 20,
+          "return_rate": 0.07,
+          "return_cost": 179,
+          "role": "bundle",
+          "ads": true,
+          "collection": "systempakker",
+          "short": "Reol, dørsystem og kasser i ét system til entreen.",
+          "bullets": [
+            "Hele entreen i ét køb",
+            "Alt kan flytte med",
+            "Ingen huller i væggen"
+          ]
+        }
+      ],
+      "hooks": [
+        "Du må ikke bore. Du har stadig brug for plads.",
+        "Saadan faar du plads uden at miste depositummet.",
+        "Tre kvadratmeter du ikke vidste du havde."
+      ],
+      "kpi": [
+        {
+          "gate": "Konvertering ved 300 besoeg",
+          "limit": ">= 2,0 % - ellers er prisen eller siden problemet"
+        },
+        {
+          "gate": "CPA",
+          "limit": "<= break-even pr. vare"
+        },
+        {
+          "gate": "Retur",
+          "limit": "<= 10 %"
+        },
+        {
+          "gate": "Klage over hold",
+          "limit": "0 dokumenterede sager"
+        }
+      ],
+      "owner_steps": [
+        "E1: CVR, telefon, adresse og bankaftale",
+        "E2: leverandørtilbud på reol og dørsystem, med TARIC og fragt til DK",
+        "E3: registrering i producentregistret for emballage",
+        "E4: domæne og Shopify-konto",
+        "E5: pristest mod IKEA's 585 kr. før lagerkoeb",
+        "E6: annoncekonto med betalingsmetode"
+      ]
+    },
+    {
+      "slug": "sensorisk",
+      "name": "STILLE",
+      "niche": "sensorisk ro og neurodivergent hverdag",
+      "host": "stille.dk",
+      "platform": "shopify",
+      "audience": "Voksne med sansetraghed og deres pårørende, der vil have ro i hverdagen uden at gøre det til en diagnose.",
+      "tagline": "Ro, der kan tages på.",
+      "status": "fravalgt",
+      "collections": [
+        {
+          "slug": "tryk",
+          "name": "Tryk",
+          "description": "Vaegt og berøring, der dæmper signalerne."
+        },
+        {
+          "slug": "lyd",
+          "name": "Lyd",
+          "description": "Daempning uden at lukke verden helt ude."
+        },
+        {
+          "slug": "sansero",
+          "name": "Sansero",
+          "description": "Det der hjaelper i sofaen, i skolen og på kontoret."
+        },
+        {
+          "slug": "rejse",
+          "name": "Rejse",
+          "description": "Det samme, men i en taske."
+        },
+        {
+          "slug": "pakker",
+          "name": "Pakker",
+          "description": "Sammensatte løsninger til søvn, arbejde og rejse."
+        }
+      ],
+      "products": [
+        {
+          "slug": "vaegtet-haettetroej",
+          "name": "Vægtet hættetrøje",
+          "price": 549,
+          "cost": 165,
+          "shipping": 45,
+          "packaging": 12,
+          "return_rate": 0.12,
+          "return_cost": 95,
+          "role": "hero",
+          "ads": true,
+          "collection": "tryk",
+          "short": "To kilo jævn vægt fordelt over skuldre og ryg.",
+          "bullets": [
+            "Jaevn vægt, ingen punkter",
+            "Stoerrelser efter brystmål",
+            "Høj returrate - pasforms-følsom"
+          ]
+        },
+        {
+          "slug": "sansetaeppe",
+          "name": "Sansetæppe",
+          "price": 699,
+          "cost": 210,
+          "shipping": 65,
+          "packaging": 18,
+          "return_rate": 0.1,
+          "return_cost": 149,
+          "role": "hero-2",
+          "ads": true,
+          "collection": "sansero",
+          "short": "Syv kilo glasperler i kanaler, så vægten bliver på tæppet.",
+          "bullets": [
+            "Syv kanaler, jævn fordeling",
+            "Aftageligt betræk",
+            "Til sofa, seng og læse-situationer"
+          ]
+        },
+        {
+          "slug": "trykvest",
+          "name": "Trykvest",
+          "price": 449,
+          "cost": 120,
+          "shipping": 45,
+          "packaging": 10,
+          "return_rate": 0.12,
+          "return_cost": 95,
+          "role": "hero-3",
+          "ads": true,
+          "collection": "tryk",
+          "short": "Kort vest, når du ikke vil have ærmer.",
+          "bullets": [
+            "Kan bruges under tøj",
+            "Justerbar i siden",
+            "Velegnet til arbejde og transport"
+          ]
+        },
+        {
+          "slug": "loop-oerepropper",
+          "name": "Loop-ørepropper",
+          "price": 149,
+          "cost": 35,
+          "shipping": 0,
+          "packaging": 4,
+          "return_rate": 0.05,
+          "return_cost": 85,
+          "role": "bump",
+          "ads": false,
+          "collection": "lyd",
+          "short": "Dæmper 18 dB uden at gøre lyden mudret.",
+          "bullets": [
+            "Til koncerter, kontor og trafik",
+            "Fem størrelser i pakken",
+            "Mer-salg i kassen, ikke annonce"
+          ]
+        },
+        {
+          "slug": "sansero-pakke",
+          "name": "Sansero-pakken",
+          "price": 1099,
+          "cost": 330,
+          "shipping": 79,
+          "packaging": 24,
+          "return_rate": 0.1,
+          "return_cost": 199,
+          "role": "bundle",
+          "ads": true,
+          "collection": "pakker",
+          "short": "Taeppe og hættetrøje sammen, med ét løfte.",
+          "bullets": [
+            "To produkter, een beslutning",
+            "Bedste dækningsbidrag pr. ordre",
+            "Gaveklar"
+          ]
+        }
+      ],
+      "hooks": [
+        "Jeg kan ikke holde ud at have tøj på. Nu har jeg det her.",
+        "Ro behoever ikke være et lukket værelse.",
+        "To kilo, fordelt rigtigt, gør en forskel."
+      ],
+      "kpi": [
+        {
+          "gate": "Hook rate",
+          "limit": ">= 25 %"
+        },
+        {
+          "gate": "Konvertering",
+          "limit": ">= 1,0 %"
+        },
+        {
+          "gate": "Retur",
+          "limit": "<= 12 %, ellers stopper pasformen salget"
+        },
+        {
+          "gate": "CPA",
+          "limit": "<= break-even pr. vare"
+        }
+      ],
+      "owner_steps": [
+        "E1: CVR, telefon, adresse og bankaftale",
+        "E2: leverandør med GPSR-dokumentation og to prøver i to vægtklasser",
+        "E3: registrering i producentregistret for emballage",
+        "E4: domæne og Shopify-konto",
+        "E5: beslut om community-samarbejde før foerste annonce",
+        "E6: annoncekonto med betalingsmetode"
+      ]
+    },
+    {
+      "slug": "soevn",
+      "name": "IMMER",
+      "niche": "søvn og aftenro",
+      "host": "immer.dk",
+      "platform": "shopify",
+      "audience": "Danske voksne, der sover daarligt og har prøvet melatonin, men ikke en tyngdedyne.",
+      "tagline": "Aftenen, der slutter ordentligt.",
+      "status": "fravalgt",
+      "collections": [
+        {
+          "slug": "tyngde",
+          "name": "Tyngde",
+          "description": "Dyner og tæpper med dokumenteret vægt."
+        },
+        {
+          "slug": "moerke",
+          "name": "Moerke",
+          "description": "Masker, der lukker lyset ude uden at trykke."
+        },
+        {
+          "slug": "natlyd",
+          "name": "Natlyd",
+          "description": "Hvid støj og faldende toner."
+        },
+        {
+          "slug": "aften",
+          "name": "Aften",
+          "description": "Rutiner og småting til de sidste 30 minutter."
+        },
+        {
+          "slug": "natpakker",
+          "name": "Natpakker",
+          "description": "Soevnpakker til hjemme og til rejse."
+        }
+      ],
+      "products": [
+        {
+          "slug": "tyngdedyne",
+          "name": "Tyngdedyne",
+          "price": 799,
+          "cost": 240,
+          "shipping": 79,
+          "packaging": 22,
+          "return_rate": 0.1,
+          "return_cost": 179,
+          "role": "hero",
+          "ads": true,
+          "collection": "tyngde",
+          "short": "Seks kilo glasperler, der fordeler sig efter kroppen.",
+          "bullets": [
+            "Ca. 10 % af kropsvaegt",
+            "Aftageligt, vaskbart betræk",
+            "Ikke til boern under 2 år"
+          ]
+        },
+        {
+          "slug": "soevnmaska",
+          "name": "Søvnmaske",
+          "price": 349,
+          "cost": 85,
+          "shipping": 39,
+          "packaging": 8,
+          "return_rate": 0.06,
+          "return_cost": 85,
+          "role": "hero-2",
+          "ads": true,
+          "collection": "moerke",
+          "short": "Formet efter næsen, så lyset ikke slipper ind ved kinden.",
+          "bullets": [
+            "100 % mørke uden tryk på øjnene",
+            "Justerbar rem",
+            "Kan vaskes"
+          ]
+        },
+        {
+          "slug": "hvid-stoej",
+          "name": "Hvid støj",
+          "price": 499,
+          "cost": 140,
+          "shipping": 49,
+          "packaging": 12,
+          "return_rate": 0.06,
+          "return_cost": 95,
+          "role": "hero-3",
+          "ads": true,
+          "collection": "natlyd",
+          "short": "Fem toner, timer og ingen app, der skal opdateres.",
+          "bullets": [
+            "Fem toner og timer",
+            "Ingen konto, ingen sky",
+            "Batteri til hele natten"
+          ]
+        },
+        {
+          "slug": "rejseoerepropper",
+          "name": "Rejseoerepropper",
+          "price": 199,
+          "cost": 40,
+          "shipping": 0,
+          "packaging": 6,
+          "return_rate": 0.06,
+          "return_cost": 85,
+          "role": "bump",
+          "ads": false,
+          "collection": "aften",
+          "short": "Til hotellet, flyet og den anden persons snorken.",
+          "bullets": [
+            "Fire størrelser",
+            "Lille etui",
+            "Mer-salg, ikke selvstændig annonce"
+          ]
+        },
+        {
+          "slug": "soevnpakke",
+          "name": "Soevnpakken",
+          "price": 999,
+          "cost": 295,
+          "shipping": 79,
+          "packaging": 26,
+          "return_rate": 0.08,
+          "return_cost": 199,
+          "role": "bundle",
+          "ads": true,
+          "collection": "natpakker",
+          "short": "Dyne, maske og hvid støj i ét køb.",
+          "bullets": [
+            "Tre varer, een rutine",
+            "Højeste dækningsbidrag",
+            "Gaveklar til december"
+          ]
+        }
+      ],
+      "hooks": [
+        "Jeg har prøvet melatonin. Det her virker på en anden måde.",
+        "Din søvn starter 30 minutter før, du går i seng.",
+        "Seks kilo fordelt rigtigt slukker ikke kroppen - den holder den."
+      ],
+      "kpi": [
+        {
+          "gate": "Hook rate",
+          "limit": ">= 25 %"
+        },
+        {
+          "gate": "Konvertering",
+          "limit": ">= 1,0 %"
+        },
+        {
+          "gate": "CPA",
+          "limit": "<= break-even pr. vare"
+        },
+        {
+          "gate": "Retur",
+          "limit": "<= 10 %"
+        }
+      ],
+      "owner_steps": [
+        "E1: CVR, telefon, adresse og bankaftale",
+        "E2: leverandør med GPSR-dokumentation, vægtklasse og vasketest",
+        "E3: registrering i producentregistret for emballage",
+        "E4: domæne og Shopify-konto",
+        "E5: beslut om Q4-start, hvor CPM er 30-60 % højere",
+        "E6: annoncekonto med betalingsmetode"
+      ]
+    }
+  ]
+}
