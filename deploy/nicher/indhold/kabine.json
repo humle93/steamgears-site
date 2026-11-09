@@ -1,0 +1,298 @@
+{
+  "schema": 1,
+  "slug": "kabine",
+  "tagline": "Ren kabine. Uden detailerpris.",
+  "positioning": "Til bilejere og leasingkunder, der vil have en kabine, der føles ren, men ikke vil betale 1.500 kr. for en detailer eller bruge en weekend på det. KABINE sælger få, forklarede værktøjssæt — ikke en katalog på 1.600 produkter.",
+  "page_extra": "pleje-og-brug",
+  "products": {
+    "kabine-kit-01": {
+      "name": "Kabine Kit 01 — interiørsæt",
+      "short": "Børste, to mikrofibre og et mundstykke, der når sømme, huller og luftdyser.",
+      "bullets": [
+        "Når sømme, huller og luftdyser, hvor støvsugeren ikke kommer til",
+        "To mikrofibre: én til at løsne snavs, én til at tørre efter",
+        "Ingen væske i pakken — du bruger den interiørrens, du allerede har"
+      ],
+      "long": "<p>Støvsugeren tager gulvet og måtterne. Den tager ikke sømmen mellem sæde og konsol, kanten ved håndbremsen eller luftdyserne, hvor støvet samler sig i små grå ringe. Det er de steder, der får en bil til at føles beskidt, selv når den er støvsuget.</p><p>Kit 01 er værktøjet til de steder: en børste med et smalt mundstykke, der kommer ned i sømmen, og to mikrofibre — én fugtig til at løsne, én tør til at tørre efter, så der ikke står blanke pletter.</p><h2>Sådan bruger du det</h2><ol><li>Støvsug løst snavs væk først. Børsten skal løsne, ikke flytte grus rundt.</li><li>Kom lidt interiørrens på den fugtige mikrofiber — ikke direkte på panelet. Arbejd i sømmen med mundstykket.</li><li>Tør efter med den tørre mikrofiber med det samme. Så undgår du skjolder.</li></ol><h2>Det skal du selv have</h2><p>Der er ingen væske i pakken. Vi sender ikke rensemiddel, fordi væske gør forsendelsen dyrere og langsommere. Brug en interiørrens, du kender, og prøv den først på et skjult sted.</p><p><strong>Ikke egnet til</strong> læder, alcantara eller skærme uden en test på et skjult område. Er du i tvivl, så spørg os, før du går i gang.</p>",
+      "specs": [
+        "Indhold: børste, smalt mundstykke og to mikrofibre",
+        "Mål og vægt: [EJER: målt på prøve]",
+        "Materialer: [EJER: fra leverandørens datablad]",
+        "Velegnet til: sæder, paneler, samlinger og luftdyser",
+        "Ikke egnet til: læder, alcantara og skærme uden test",
+        "Rens: mikrofibre vaskes ved 40 °C uden skyllemiddel"
+      ],
+      "seo_title": "Kabine Kit 01 — interiørsæt til bilen | KABINE",
+      "seo_description": "Børste, mundstykke og to mikrofibre til sømme, paneler og luftdyser. Ingen væske i pakken. Se hvad sættet indeholder, og hvordan du bruger det.",
+      "image_alt": "Kabine Kit 01 med børste, mundstykke og to mikrofibre på et mørkt bilsæde"
+    },
+    "kabine-kit-02-aflevering": {
+      "name": "Kabine Kit 02 — Aflevering",
+      "short": "Til leasingbilen, der skal afleveres: rens sømme, paneler og luftdyser, før bilen bliver set efter.",
+      "bullets": [
+        "Til sædekanter, midterpanel og luftdyser — de steder, der oftest ses efter",
+        "Beregnet til én grundig rensning før aflevering",
+        "Med tjekliste, så du ikke opdager sømmen efter afleveringen"
+      ],
+      "long": "<p>Når leasingbilen skal afleveres, bliver den set efter. Ikke efter om du har vasket den, men efter om kabinen ser ud, som da du fik den. Sædekanter, panelet omkring gearvælgeren og luftdyserne er de steder, hvor et halvt års hverdag sidder fast.</p><p>Kit 02 er det samme værktøj som Kit 01, men sammensat til opgaven: én grundig rensning af kabinen, før du kører ind. Du får børsten med mundstykket, to mikrofibre og en kort tjekliste, du kan gå efter.</p><h2>Tjeklisten</h2><ul><li>Sømmen mellem sæde og konsol — støv, krummer og mønter.</li><li>Kanten ved håndbremsen og gearvælgeren.</li><li>Luftdyserne — støv i lamellerne.</li><li>Panelerne omkring dørhåndtag og knapper.</li></ul><p><strong>Det lover vi ikke:</strong> hvad din leasingaftale kræver, eller hvad et depositum dækker. Det står i din kontrakt. Vi giver dig værktøjet og tjeklisten, så du kan komme igennem de steder, der bliver set efter.</p><p>Ingen væske i pakken. Brug den interiørrens, du har, og test den først på et skjult sted.</p>",
+      "specs": [
+        "Indhold: børste, smalt mundstykke, to mikrofibre og tjekliste",
+        "Mål og vægt: [EJER: målt på prøve]",
+        "Materialer: [EJER: fra leverandørens datablad]",
+        "Velegnet til: sædekanter, paneler og luftdyser",
+        "Ikke egnet til: læder, alcantara og skærme uden test",
+        "Rens: mikrofibre vaskes ved 40 °C uden skyllemiddel"
+      ],
+      "seo_title": "Kabine Kit 02 — Aflevering til leasingbil | KABINE",
+      "seo_description": "Rens sædekanter, paneler og luftdyser før leasingbilen afleveres. Kit med børste, mundstykke, to mikrofibre og tjekliste. Ingen væske i pakken.",
+      "image_alt": "Kabine Kit 02 til leasingaflevering med børste og mikrofibre ved bilens midterkonsol"
+    },
+    "saede-gap-organizer": {
+      "name": "Sæde-gap-organizer",
+      "short": "Lukker mellemrummet mellem sæde og konsol, hvor telefonen, nøglerne og kaffen ender.",
+      "bullets": [
+        "Fylder mellemrummet mellem sæde og midterkonsol",
+        "Holder telefon, nøgler og en lukket kop",
+        "Universel model — mål mellemrummet, før du bestiller"
+      ],
+      "long": "<p>Mellemrummet mellem forsædet og midterkonsollen er bilens mest effektive lomme. Telefonen glider ned, nøglerne forsvinder, og kaffen står og vipper. Organizeren fylder mellemrummet ud, så tingene bliver liggende i stedet for at falde igennem.</p><p>Den er universal, men ikke magisk: mål afstanden mellem sædet og konsollen, og sammenlign med målene på produktsiden. Er mellemrummet for bredt eller for smalt, passer den ikke.</p><h2>Før du bestiller</h2><ol><li>Skub forsædet helt frem, og mål mellemrummet på det bredeste sted.</li><li>Mål også dybden, så organizerens forkant ikke rammer sikkerhedsselen.</li><li>Skriv til os, hvis du er i tvivl. Vi svarer hellere én gang for meget end at sende noget, der ikke passer.</li></ol><p><strong>Brug ikke</strong> organizer til åbne drikkevarer eller som erstatning for bilens opbevaringsrum. Den holder tingene på plads — den lukker ikke væske inde.</p>",
+      "specs": [
+        "Mål: [EJER: længde, bredde og højde målt på prøve]",
+        "Passer mellemrum: [EJER: min.–maks. cm]",
+        "Materiale: [EJER: fra leverandørens datablad]",
+        "Farve: sort",
+        "Rengøring: aftørres med fugtig klud",
+        "Ikke egnet til: åbne drikkevarer og biler uden midterkonsol"
+      ],
+      "seo_title": "Sæde-gap-organizer til bilen | KABINE",
+      "seo_description": "Luk mellemrummet mellem sæde og konsol. Holder telefon, nøgler og lukket kop. Mål mellemrummet før køb — se mål og rengøring her.",
+      "image_alt": "Sæde-gap-organizer i mellemrummet mellem bilsæde og midterkonsol"
+    },
+    "saede-gap-organizer-bump": {
+      "name": "Sæde-gap-organizer — tilkøb",
+      "short": "Samme organizer til 129 kr., når du allerede har en ordre i gang.",
+      "bullets": [
+        "Ingen ekstra fragt",
+        "Lægges i samme pakke som din ordre",
+        "Kan kun købes sammen med en anden vare"
+      ],
+      "long": "<p>Det er den samme organizer som den almindelige, men til 129 kr. når du allerede har en ordre i gang. Den kan ikke købes alene, fordi fragten ville koste mere end varen.</p><p>Tilbuddet møder dig i kassen, når du har lagt noget andet i kurven. Vil du hellere købe den separat, finder du den almindelige model i kollektionen Opbevaring.</p><p>Mål mellemrummet mellem sæde og konsol, før du tilføjer den. Målene står på den almindelige produktside.</p>",
+      "specs": [
+        "Samme vare som Sæde-gap-organizer",
+        "Pris: 129 kr. som tilkøb",
+        "Ingen ekstra fragt",
+        "Kun sammen med en anden vare",
+        "Mål: [EJER: længde, bredde og højde]",
+        "Rengøring: aftørres med fugtig klud"
+      ],
+      "seo_title": "Sæde-gap-organizer — tilkøb 129 kr. | KABINE",
+      "seo_description": "Tilføj sæde-gap-organizeren til din ordre for 129 kr. Ingen ekstra fragt. Kan kun købes sammen med en anden vare.",
+      "image_alt": "Sæde-gap-organizer som tilkøb ved kassen hos KABINE"
+    },
+    "kabine-bundle-01": {
+      "name": "Kabine Bundle 01",
+      "short": "Kit 01 og sæde-gap-organizeren i én pakke — til hele kabinen, ikke bare gulvmåtterne.",
+      "bullets": [
+        "Kit 01 plus organizer — 698 kr. købt hver for sig",
+        "Samlet pris 599 kr., du sparer 99 kr.",
+        "Gaveklar kasse og én levering"
+      ],
+      "long": "<p>Kit 01 tager sømme, paneler og luftdyser. Organizeren tager mellemrummet, hvor tingene ellers falder ned. Tilsammen dækker de det, der får en kabine til at føles rodet — ikke bare det, der kan støvsuges.</p><p>Køber du dem hver for sig, koster de 698 kr. Bundlen koster 599 kr. Du sparer 99 kr. og får én levering i stedet for to.</p><p>Bundlen er også den nemmeste gave: bilen er en fast del af hverdagen for de fleste familier, og sættet kræver ingen montering, ingen app og ingen opladning. Læg et kort i kassen, og den er klar.</p><p>Ingen væske i pakken. Brug den interiørrens, du har, og test den først på et skjult sted.</p>",
+      "specs": [
+        "Indhold: Kabine Kit 01 og Sæde-gap-organizer",
+        "Samlet værdi: 698 kr.",
+        "Pris: 599 kr.",
+        "Ingen væske i pakken",
+        "Mål og materialer: se de to produktsider",
+        "Gaveklar kasse: [EJER: bekræft emballage på prøve]"
+      ],
+      "seo_title": "Kabine Bundle 01 — interiørsæt og organizer | KABINE",
+      "seo_description": "Kit 01 og sæde-gap-organizeren samlet. 599 kr. i stedet for 698 kr. Til sømme, paneler, luftdyser og mellemrummet ved konsollen.",
+      "image_alt": "Kabine Bundle 01 med interiørsæt og sæde-gap-organizer i gaveklar kasse"
+    }
+  },
+  "collections": [
+    {
+      "slug": "interioer",
+      "name": "Interiør",
+      "intro": "<p>Værktøjet til det, støvsugeren ikke tager: sømme, paneler, luftdyser og mellemrum. Start med Kit 01, hvis du vil have hele kabinen på en gang.</p>",
+      "seo_title": "Interiør til bilen — sømme, paneler og luftdyser | KABINE",
+      "seo_description": "Interiørsæt og organizer til bilens kabine. Kom ned i sømme og luftdyser uden en detailerpris. Se Kit 01 og Bundle 01."
+    },
+    {
+      "slug": "aflevering",
+      "name": "Aflevering",
+      "intro": "<p>Til dig, der skal aflevere leasingbilen. Rens de steder, der bliver set efter, og tag tjeklisten med. Vi lover ikke, hvad din kontrakt kræver — det gør vi ikke.</p>",
+      "seo_title": "Klar til leasingaflevering — kabine og tjekliste | KABINE",
+      "seo_description": "Rens sædekanter, paneler og luftdyser før leasingbilen afleveres. Kit 02 med børste, mikrofibre og tjekliste. Ingen væske i pakken."
+    },
+    {
+      "slug": "opbevaring",
+      "name": "Opbevaring",
+      "intro": "<p>Mellemrummet mellem sæde og konsol er bilens mest effektive lomme. Organizeren lukker det, så telefon, nøgler og kaffe bliver, hvor du lagde dem.</p>",
+      "seo_title": "Opbevaring i bilen — sæde-gap-organizer | KABINE",
+      "seo_description": "Sæde-gap-organizer der holder telefon, nøgler og lukket kop på plads. Mål mellemrummet før køb. Se mål og tilkøbspris."
+    },
+    {
+      "slug": "pleje",
+      "name": "Pleje",
+      "intro": "<p>Sådan holder du værktøjet og kabinen ved lige: vask mikrofibrene uden skyllemiddel, brug lidt rens ad gangen, og tør efter med det samme. Guiden ligger under Pleje og brug.</p>",
+      "seo_title": "Pleje af bilens kabine og mikrofibre | KABINE",
+      "seo_description": "Sådan rengør du sømme og paneler uden skjolder, og sådan vasker du mikrofibrene. Kort guide fra KABINE."
+    },
+    {
+      "slug": "gaver",
+      "name": "Gaver",
+      "intro": "<p>Til den, der lige har fået bil, skal aflevere en leasingbil eller bare er træt af støv i luftdyserne. Bundlen kræver ingen montering og ingen app.</p>",
+      "seo_title": "Gaver til bilejere — kabinepleje | KABINE",
+      "seo_description": "Giv et interiørsæt til bilen: børste, mikrofibre og organizer i én pakke. Ingen montering, ingen væske, klar til gave."
+    }
+  ],
+  "pages": [
+    {
+      "slug": "start-here",
+      "title": "Start her",
+      "seo_title": "Start her — ren kabine uden detailerpris | KABINE",
+      "seo_description": "Sådan vælger du mellem Kit 01, Kit 02 og Bundle 01. Se hvad der følger med, hvad du selv skal bruge, og hvordan du kommer i gang.",
+      "body": "<p><strong>KABINE — ren kabine uden detailerpris.</strong></p><p>Støvsugeren tager gulvet. Den tager ikke sømmen mellem sæde og konsol, kanten ved håndbremsen eller støvet i luftdyserne. Det er de steder, der får bilen til at føles beskidt, selv når den er støvsuget. Vi sælger værktøjet til dem — og kun det.</p><h2>Vælg efter opgaven</h2><ul><li><strong>Vil du have hele kabinen?</strong> <a href='/produkter/kabine-kit-01/'>Kit 01</a> har børste, mundstykke og to mikrofibre. 499 kr.</li><li><strong>Skal leasingbilen afleveres?</strong> <a href='/produkter/kabine-kit-02-aflevering/'>Kit 02</a> er samme værktøj med en tjekliste til afleveringen. 449 kr.</li><li><strong>Vil du have det hele i én pakke?</strong> <a href='/produkter/kabine-bundle-01/'>Bundle 01</a> er Kit 01 og organizer til 599 kr. i stedet for 698 kr.</li></ul><h2>Sådan virker det</h2><ol><li>Støvsug løst snavs væk.</li><li>Løsn snavset i sømmen med børsten og lidt interiørrens på en fugtig mikrofiber.</li><li>Tør efter med den tørre mikrofiber, før det tørrer.</li></ol><p>Du skal selv have interiørrens. Vi sender ikke væske, fordi det gør pakken dyrere og langsommere — og fordi du sandsynligvis allerede har en flaske, du kender.</p><h2>Det får du ikke</h2><p>Vi er ikke en detailer, og vi lover ikke, at bilen bliver som ny. Vi sælger et lille, forklaret sæt, der gør det nemt at komme de rigtige steder hen. Er du i tvivl om materialet i din bil, så spørg os, før du går i gang.</p><p><a href='/ofte-stillede-spoergsmaal/'>Læs de ofte stillede spørgsmål</a> eller <a href='/kontakt/'>skriv til os</a>.</p>"
+    },
+    {
+      "slug": "om-os",
+      "title": "Om os",
+      "seo_title": "Om KABINE — få, forklarede værktøjssæt | KABINE",
+      "seo_description": "KABINE sælger få, forklarede sæt til bilens kabine. Læs hvorfor vi ikke fører 1.600 produkter, og hvordan vi arbejder med prøver og mål.",
+      "body": "<p>KABINE er bygget omkring én idé: en bil føles ikke ren, fordi den er støvsuget. Den føles ren, fordi nogen har været i sømmen, ved håndbremsen og i luftdyserne.</p><p>De fleste butikker til bilpleje sælger alt. Vi sælger få sæt, forklarer hvad de kan, og skriver hvad de ikke kan. Du skal ikke bruge en aften på at sammenligne ti børster for at finde ud af, at den ene er til fælge.</p><h2>Sådan arbejder vi</h2><ul><li>Vi sælger først en vare, når vi har haft den i hånden og målt den.</li><li>Vi skriver mål og begrænsninger på produktsiden — også når det gør varen mindre attraktiv.</li><li>Vi sender ikke væske i pakken. Det holder fragten nede og undgår reglerne for farligt gods.</li><li>Vi lover ikke, hvad en leasingkontrakt kræver, eller hvad en detailer kan gøre. Det kan vi ikke.</li></ul><h2>Hvem står bag</h2><p>[EJER: registreret firmanavn, CVR, adresse og telefon — de samme oplysninger som i handelsbetingelserne.]</p><p>[EJER: hvem står bag butikken, og hvorfor lige kabinen? Skriv det med ejerens egne ord, ikke som en kampagne.]</p><p>Spørgsmål? <a href='/kontakt/'>Skriv til os</a>. Vi svarer inden for [EJER: timer].</p>"
+    },
+    {
+      "slug": "levering-og-retur",
+      "title": "Levering og retur",
+      "seo_title": "Levering og retur | KABINE",
+      "seo_description": "Behandlingstid, fragt og levering til Danmark. 14 dages fortrydelsesret og 2 års reklamationsret. Se hvordan du returnerer.",
+      "body": "<p>Vi sender fra Danmark. Nedenstående er butikkens vilkår — de skal være udfyldt, før butikken åbner.</p><ul><li>Behandlingstid: [EJER: antal hverdage, før pakken afgives til fragt].</li><li>Levering: [EJER: fragtfirma, zoner og forventede leveringsdage].</li><li>Fragtpris: [EJER: pris pr. zone og eventuel fri fragt over et beløb].</li><li>Sporing: du får et sporingsnummer på e-mail, når pakken er sendt.</li></ul><h2>Hvis pakken er beskadiget</h2><p>Tag billeder af emballagen og varen, og skriv til [EJER: e-mail] inden for [EJER: antal dage]. Så finder vi en løsning — erstatning, ny vare eller pengene tilbage.</p><h2>Fortrydelsesret</h2><p>Du har 14 dage fra den dag, du modtager varen, til at fortryde. Fortæl os det skriftligt, inden fristen udløber, og send varen retur i samme stand, som du modtog den. Du kan bruge formularen på <a href='/fortrydelse/'>Fortrydelse</a>.</p><p>Returadresse: [EJER: adresse]. Returfragt: [EJER: hvem betaler, og hvad den koster]. Vi tilbagebetaler inden for 14 dage efter, at vi har modtaget varen eller dokumentation for, at den er sendt retur.</p><h2>Reklamation</h2><p>Du har 2 års reklamationsret efter købeloven. Skriv til [EJER: e-mail] med ordrenummer og et billede af fejlen. Vi reparerer, erstatter eller tilbagebetaler — det afhænger af fejlen.</p><p>Er vi ikke enige, kan du klage til Forbrugerklagenævnet via <a href='https://www.naevneneshus.dk/'>Nævnenes Hus</a>.</p>"
+    },
+    {
+      "slug": "pleje-og-brug",
+      "title": "Pleje og brug",
+      "seo_title": "Sådan rengør du bilens kabine — guide | KABINE",
+      "seo_description": "Sådan bruger du Kit 01 og Kit 02: støvsug først, løsn snavs i sømmen, tør efter med det samme. Og sådan vasker du mikrofibrene.",
+      "body": "<h2>Fem minutter, tre steder</h2><p>Du behøver ikke tømme bilen for at gøre en forskel. Tag sømmen mellem sæde og konsol, kanten ved håndbremsen og luftdyserne. Det er der, støvet samler sig, og det er der, bilen ser beskidt ud.</p><h2>Sådan gør du</h2><ol><li><strong>Støvsug først.</strong> Løst grus skal væk, før du begynder at løsne snavs. Ellers ridser du.</li><li><strong>Lidt rens ad gangen.</strong> Kom rensen på mikrofibren, ikke direkte på panelet. For meget væske giver skjolder og kan trænge ned i samlinger.</li><li><strong>Tør efter med det samme.</strong> Den tørre mikrofiber tager resten, før det tørrer.</li><li><strong>Lad luften komme til.</strong> Åbn dørene i et par minutter, så fugten forsvinder.</li></ol><h2>Materialer du skal være forsigtig med</h2><p>Læder, alcantara og skærme tåler ikke alle rensemidler. Test altid på et skjult sted først, og brug så lidt væske som muligt. Er du i tvivl, så lad være — og spørg os.</p><h2>Vask af mikrofibre</h2><p>Vask ved 40 °C uden skyllemiddel. Skyllemiddel lægger en film på fibrene, så de ikke længere tager snavs. Lad dem lufttørre; undgå tørretumbler.</p><h2>Opbevaring</h2><p>Læg børsten i handskerummet eller i den medfølgende pose, så mundstykket ikke bliver bulet. Mikrofibrene skal være tørre, før de lægges sammen.</p>"
+    },
+    {
+      "slug": "handelsbetingelser",
+      "title": "Handelsbetingelser",
+      "seo_title": "Handelsbetingelser | KABINE",
+      "seo_description": "Salgsvilkår for KABINE: virksomhedsoplysninger, priser, betaling, levering, fortrydelsesret, reklamation og tvist.",
+      "body": "<p>Disse betingelser gælder for køb i KABINEs netbutik. Betingelserne skal gennemgås af ejeren og en rådgiver, før butikken åbner.</p><h2>Virksomhed</h2><p>[EJER: registreret firmanavn], CVR [EJER: CVR-nummer], [EJER: adresse], [EJER: e-mail], [EJER: telefon].</p><h2>Priser og betaling</h2><p>Alle priser er i danske kroner og inkl. moms. Prisen, du ser i kassen, er den pris, du betaler. Vi opkræver ikke kortgebyr. Betaling kan ske med [EJER: betalingsmetoder]. Beløbet trækkes, når ordren behandles.</p><h2>Levering</h2><p>Vi leverer til [EJER: lande]. Behandlingstid og fragtpris står på <a href='/levering-og-retur/'>Levering og retur</a>. Risikoen for varen overgår til dig ved levering.</p><h2>Fortrydelsesret</h2><p>Du har 14 dages fortrydelsesret fra modtagelsen. Fortæl os det skriftligt inden fristen, og send varen retur i samme stand. Returfragten betales af [EJER: kunde/butik]. Vi tilbagebetaler inden for 14 dage efter modtagelsen eller dokumentation for retur. Se <a href='/fortrydelse/'>Fortrydelse</a>.</p><h2>Reklamation</h2><p>Du har 2 års reklamationsret. Ved fejl: skriv til [EJER: e-mail] med ordrenummer og beskrivelse. Vi afhjælper, ombytter eller tilbagebetaler efter købelovens regler.</p><h2>Ansvar</h2><p>Vi er ikke ansvarlige for indirekte tab, herunder tabt fortjeneste, medmindre andet følger af ufravigelig lovgivning. Vores ansvar er begrænset til varens pris.</p><h2>Tvist</h2><p>Dansk ret gælder. Er vi ikke enige, kan du klage til Forbrugerklagenævnet via <a href='https://www.naevneneshus.dk/'>Nævnenes Hus</a>. [EJER: eventuel brancheklageordning].</p><p>Senest opdateret: [EJER: dato].</p>"
+    },
+    {
+      "slug": "privatlivspolitik",
+      "title": "Privatlivspolitik",
+      "seo_title": "Privatlivspolitik og cookies | KABINE",
+      "seo_description": "Hvilke personoplysninger KABINE behandler, hvorfor, hvor længe, hvem der får dem, og hvordan du bruger dine rettigheder.",
+      "body": "<p>Vi behandler personoplysninger for at kunne sælge og levere varer. Denne politik skal gennemgås af ejeren og en rådgiver, før butikken åbner.</p><h2>Dataansvarlig</h2><p>[EJER: firmanavn], CVR [EJER: CVR], [EJER: adresse]. Kontakt: [EJER: e-mail].</p><h2>Hvilke oplysninger</h2><ul><li>Navn, adresse, e-mail og telefon, når du bestiller eller kontakter os.</li><li>Ordreoplysninger: varer, beløb, leveringsvalg og ordrenummer.</li><li>Betalingsoplysninger behandles af [EJER: betalingsudbyder]. Vi ser ikke dit kortnummer.</li><li>Tekniske oplysninger: IP-adresse, browser og besøgte sider, hvis du accepterer cookies.</li></ul><h2>Formål og grundlag</h2><p>Vi behandler oplysningerne for at opfylde købsaftalen (GDPR art. 6, stk. 1, litra b), for at overholde bogføringsloven (litra c) og for at forbedre butikken, når du har givet samtykke (litra a).</p><h2>Hvor længe</h2><p>Ordreoplysninger opbevares i [EJER: antal år] af hensyn til bogføring og reklamation. Nyhedsbrev og cookies opbevares, indtil du trækker dit samtykke tilbage.</p><h2>Hvem får oplysningerne</h2><p>Vi bruger databehandlere til drift og levering: [EJER: webshop-platform], [EJER: betalingsudbyder], [EJER: fragtfirma], [EJER: e-mail- og analyseværktøjer]. Der er indgået databehandleraftaler. Overførsel til lande uden for EU sker kun med et gyldigt overførselsgrundlag.</p><h2>Dine rettigheder</h2><p>Du kan bede om indsigt, rettelse, sletning og begrænsning, gøre indsigelse og trække samtykke tilbage. Skriv til [EJER: e-mail]. Du kan klage til Datatilsynet.</p><h2>Cookies</h2><p>Vi bruger nødvendige cookies til kurv og login. Statistik- og marketingcookies sættes kun, hvis du accepterer dem i cookiebanneret. Du kan ændre dit valg via linket i footeren.</p><p>Senest opdateret: [EJER: dato].</p>"
+    },
+    {
+      "slug": "fortrydelse",
+      "title": "Fortrydelse",
+      "seo_title": "Fortrydelsesret og returformular | KABINE",
+      "seo_description": "Sådan fortryder du dit køb inden 14 dage. Udfyld formularen, send varen retur, og få pengene tilbage. Se returadresse og frister.",
+      "body": "<h2>Du har 14 dage</h2><p>Du kan fortryde dit køb inden 14 dage fra den dag, du modtager varen. Fristen regnes fra modtagelsen. Du skal give os besked, inden fristen udløber — du behøver ikke at have sendt varen endnu.</p><h2>Sådan fortryder du</h2><ol><li>Udfyld formularen nedenfor, eller send en e-mail til [EJER: e-mail] med ordrenummer og ønske om fortrydelse.</li><li>Pak varen forsvarligt. Brug gerne den emballage, du modtog den i.</li><li>Send til [EJER: returadresse]. Returfragt: [EJER: hvem betaler, og hvad den koster].</li><li>Vi tilbagebetaler inden for 14 dage efter modtagelsen eller dokumentation for, at varen er sendt.</li></ol><h2>Formular</h2><p>Til [EJER: firmanavn], [EJER: adresse], [EJER: e-mail]:</p><p>Jeg fortryder hermed mit køb af: ______________________<br>Ordrenummer: ______________________<br>Modtaget den: ______________________<br>Navn: ______________________<br>Adresse: ______________________<br>Dato: ______________________<br>Underskrift: ______________________</p><h2>Vigtigt</h2><p>Du må gerne prøve varen, som du ville gøre i en butik. Du hæfter for værdiforringelse, hvis du har brugt den mere, end hvad der er nødvendigt for at fastslå dens art, egenskaber og funktion. Varer, der er fremstillet efter dine ønsker, kan ikke fortrydes.</p><p>Spørgsmål? <a href='/kontakt/'>Skriv til os</a>.</p>"
+    },
+    {
+      "slug": "kontakt",
+      "title": "Kontakt",
+      "seo_title": "Kontakt KABINE | KABINE",
+      "seo_description": "Skriv til KABINE om en ordre, et produkt eller en retur. Se e-mail, telefon, adresse og svartid.",
+      "body": "<p>Spørgsmål om en ordre, et produkt eller en retur? Skriv til os — vi svarer hellere grundigt end hurtigt.</p><ul><li>E-mail: [EJER: butikkens e-mail]</li><li>Telefon: [EJER: telefon]</li><li>Adresse: [EJER: adresse]</li><li>Svartid: [EJER: timer] på hverdage</li></ul><h2>Før du skriver</h2><p>Målene på organizer og kit står på produktsiderne. Levering, retur og fortrydelse står under <a href='/levering-og-retur/'>Levering og retur</a> og <a href='/fortrydelse/'>Fortrydelse</a>. Måske står svaret allerede der.</p><h2>Erhverv</h2><p>[EJER: firmanavn], CVR [EJER: CVR], [EJER: adresse].</p>"
+    }
+  ],
+  "faq": [
+    {
+      "q": "Hvad er forskellen på Kit 01 og Kit 02?",
+      "a": "Indholdet er det samme: børste, mundstykke og to mikrofibre. Kit 02 er sammensat til leasingaflevering og har en tjekliste med de steder, der oftest ses efter. Skal du bare have en ren kabine, er Kit 01 nok."
+    },
+    {
+      "q": "Følger der rensemiddel med?",
+      "a": "Nej. Vi sender ikke væske, fordi det gør pakken dyrere og langsommere. Brug en interiørrens, du kender, og test den først på et skjult sted."
+    },
+    {
+      "q": "Kan jeg bruge sættet på læder og alcantara?",
+      "a": "Vær forsigtig. Test altid på et skjult område, og brug så lidt væske som muligt. Er du i tvivl om materialet, så skriv til os, før du går i gang."
+    },
+    {
+      "q": "Hvor lang tid tager det at rense kabinen?",
+      "a": "De tre vigtigste steder — sømmen, kanten ved håndbremsen og luftdyserne — tager omkring 15 minutter. En grundig rens af hele kabinen tager længere, alt efter hvor længe den har været forsømt."
+    },
+    {
+      "q": "Passer organizer til min bil?",
+      "a": "Den er universal, men ikke magisk. Mål mellemrummet mellem sæde og midterkonsol, og sammenlign med målene på produktsiden. Er du i tvivl, så skriv bilmodel til os, så svarer vi, om vi kender målene."
+    },
+    {
+      "q": "Hvor lang er leveringstiden?",
+      "a": "Behandlingstid og levering står på Levering og retur. Vi opdaterer siden, så snart lager og fragtaftale er på plads."
+    },
+    {
+      "q": "Kan jeg fortryde købet?",
+      "a": "Ja. Du har 14 dage fra modtagelsen. Du skal give os besked inden fristen og sende varen retur i samme stand. Se Fortrydelse for formular og returadresse."
+    },
+    {
+      "q": "Hvorfor sælger I ikke interiørrens?",
+      "a": "Fordi væske gør forsendelsen dyrere og kræver andre regler for transport. Vi koncentrerer os om værktøjet og lader dig bruge et rensemiddel, du allerede kender."
+    }
+  ],
+  "hooks": [
+    "Din bil er ikke beskidt. Den er bare aldrig blevet renset her.",
+    "Detaileren ville have 1.500 kr. Sættet koster 499.",
+    "Tre steder i bilen, du aldrig har rengjort.",
+    "Leasingbilen skal afleveres om en uge. Start i sømmen."
+  ],
+  "ads": [
+    {
+      "name": "Sømmen",
+      "angle": "Problemet, ingen har set",
+      "primary": "Støvsugeren tager gulvet. Den tager ikke sømmen mellem sæde og konsol, hvor støv, krummer og mønter samler sig. Kit 01 har børsten og mundstykket, der kommer ned. To mikrofibre følger med — én til at løsne, én til at tørre efter. 499 kr. Ingen væske i pakken.",
+      "headline": "Kom ned i sømmen",
+      "description": "Børste, mundstykke og to mikrofibre. 499 kr.",
+      "creative": "Hånd-only close-up. Første tre sekunder: en finger trækker en støvlinje frem fra sømmen. Ingen ansigt, intet andet brand i billedet. Klip til børsten, der går ned i sømmen, og en ren mikrofiber.",
+      "landing": "/produkter/kabine-kit-01/"
+    },
+    {
+      "name": "Prisen",
+      "angle": "Detailerpris mod gør-det-selv",
+      "primary": "En detailer tager 1.500 kr. for en kabine. Kit 01 koster 499, og du kan gøre det igen om et halvt år. Det er ikke samme resultat — men det er de samme tre steder, der bliver rene.",
+      "headline": "Ren kabine til 499 kr.",
+      "description": "Interiørsæt med børste og mikrofibre. Se hvad der følger med.",
+      "creative": "Tekstkort med to tal: 1.500 kr. og 499 kr. Derefter hånd, der viser børsten og en ren søm. Ingen påstand om, at resultatet er identisk.",
+      "landing": "/produkter/kabine-kit-01/"
+    },
+    {
+      "name": "Afleveringen",
+      "angle": "Leasing og tjeklisten",
+      "primary": "Leasingbilen skal afleveres. Der bliver set efter sædekanter, panelet ved gearvælgeren og luftdyserne. Kit 02 samler værktøjet og en tjekliste til de steder. 449 kr. Vi lover ikke, hvad din kontrakt kræver — det står i kontrakten.",
+      "headline": "Klar til aflevering?",
+      "description": "Kit 02 med børste, mikrofibre og tjekliste. 449 kr.",
+      "creative": "Fire hurtige klip: søm, gearpanel, luftdyse, tjekliste. Hånd-only. Ingen bilmærke, ingen forhandlerskilt.",
+      "landing": "/produkter/kabine-kit-02-aflevering/"
+    }
+  ],
+  "emails": [
+    {
+      "name": "Velkomst",
+      "subject": "Sådan kommer du i gang med Kit 01",
+      "preheader": "Tre steder, 15 minutter, ingen væske i pakken.",
+      "body": "Hej,\n\nTak for din ordre. Her er den korte version, så du ikke skal lede efter den på siden.\n\n1. Støvsug løst snavs væk først.\n2. Kom lidt interiørrens på den fugtige mikrofiber — ikke direkte på panelet.\n3. Arbejd i sømmen med mundstykket, og tør efter med den tørre mikrofiber med det samme.\n\nStart med sømmen mellem sæde og konsol, kanten ved håndbremsen og luftdyserne. Det er der, forskellen ses.\n\nEr du i tvivl om materialet i din bil, så svar på denne mail, før du går i gang.\n\nBedste hilsner\n[EJER: navn] · KABINE"
+    },
+    {
+      "name": "Brug",
+      "subject": "Vask mikrofibrene rigtigt",
+      "preheader": "Uden skyllemiddel. Ellers tager de ikke snavs.",
+      "body": "Hej,\n\nEn lille ting, der gør en stor forskel: mikrofibre skal vaskes uden skyllemiddel. Skyllemiddel lægger en film på fibrene, så de holder op med at tage snavs. Vask ved 40 °C, og lad dem lufttørre.\n\nOg husk: lidt rens ad gangen. For meget væske giver skjolder og kan trænge ned i samlinger.\n\nHar du et spørgsmål, så svar bare på denne mail.\n\nBedste hilsner\n[EJER: navn] · KABINE"
+    },
+    {
+      "name": "Aflevering",
+      "subject": "Tjeklisten før leasingafleveringen",
+      "preheader": "Fire steder, der bliver set efter.",
+      "body": "Hej,\n\nSkal bilen afleveres? Tag de fire steder først:\n\n• Sømmen mellem sæde og konsol.\n• Kanten ved håndbremsen og gearvælgeren.\n• Luftdyserne.\n• Panelerne omkring dørhåndtag og knapper.\n\nVi lover ikke, hvad din leasingaftale kræver, eller hvad et depositum dækker — det står i din kontrakt. Men det er de steder, der oftest bliver set efter.\n\nGod tur.\n\n[EJER: navn] · KABINE"
+    }
+  ]
+}

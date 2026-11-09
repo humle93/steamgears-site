@@ -166,9 +166,9 @@
       ],
       "owner_steps": [
         "E1: CVR, telefon, adresse og bankaftale",
-        "E2: leverandoervalg med GPSR-dokumentation og to prøver",
+        "E2: leverandørvalg med GPSR-dokumentation og to prøver",
         "E3: registrering i producentregistret for emballage",
-        "E4: domaenet kabine.dk og Shopify-konto",
+        "E4: domænet kabine.dk og Shopify-konto",
         "E5: startdato - Q4-priser eller januar",
         "E6: annoncekonto med betalingsmetode"
       ]
@@ -332,7 +332,7 @@
       ],
       "kpi": [
         {
-          "gate": "Konvertering ved 300 besoeg",
+          "gate": "Konvertering ved 300 besøg",
           "limit": ">= 2,0 % - ellers er prisen eller siden problemet"
         },
         {
@@ -353,7 +353,7 @@
         "E2: leverandørtilbud på reol og dørsystem, med TARIC og fragt til DK",
         "E3: registrering i producentregistret for emballage",
         "E4: domæne og Shopify-konto",
-        "E5: pristest mod IKEA's 585 kr. før lagerkoeb",
+        "E5: pristest mod IKEA's 585 kr. før lagerkøb",
         "E6: annoncekonto med betalingsmetode"
       ]
     },
@@ -518,7 +518,7 @@
         "E2: leverandør med GPSR-dokumentation og to prøver i to vægtklasser",
         "E3: registrering i producentregistret for emballage",
         "E4: domæne og Shopify-konto",
-        "E5: beslut om community-samarbejde før foerste annonce",
+        "E5: beslut om community-samarbejde før første annonce",
         "E6: annoncekonto med betalingsmetode"
       ]
     },

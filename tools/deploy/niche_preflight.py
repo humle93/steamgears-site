@@ -2,9 +2,14 @@
 """
 Bygger og validerer de fire niche-payloads.
 
-Kilden er `deploy/nicher/nicher.json` (input). Dette script regner økonomien efter de fire
-formler i `docs/library/roi-model-dropshipping-2026-11-09.md` §2 og skriver én payload pr.
-niche plus en samlet `all.json`, som er det en deploy-kørsel læser.
+Kilden er `deploy/nicher/nicher.json` (priser, kostpriser, roller) og
+`deploy/nicher/indhold/<slug>.json` (den færdige danske tekst). Dette script regner økonomien
+efter de fire formler i `docs/library/roi-model-dropshipping-2026-11-09.md` §2, fletter
+teksten ind og skriver én payload pr. niche plus en samlet `all.json`, som er det en
+deploy-kørsel læser.
+
+Indholdet er ikke pynt: en niche uden tekst til hver vare, hver side og hver kollektion er en
+fejl. Så kan der ikke genereres en CSV, der ser færdig ud, men sælger tomme sider.
 
     python3 tools/deploy/niche_preflight.py --build   # skriv deploy/nicher/*.json
     python3 tools/deploy/niche_preflight.py --check   # validér + drift mod det committede
@@ -38,6 +43,23 @@ OUT_DIR = os.path.join(ROOT, "deploy", "nicher")
 DEFAULT_FIXED_MONTHLY = 1400.0
 OWNER_RE = re.compile(r"\[EJER[^\]]*\]")
 CPA_FLOOR = 120.0
+CONTENT_DIR = os.path.join(OUT_DIR, "indhold")
+REQUIRED_PAGES = [
+    "start-here", "om-os", "levering-og-retur", "kontakt",
+    "handelsbetingelser", "privatlivspolitik", "fortrydelse",
+]
+LEGAL_PAGES = {"handelsbetingelser", "privatlivspolitik", "fortrydelse"}
+# Påstande, der kræver dokumentation, som butikken ikke har endnu. Ordet "medicinsk" er
+# tilladt i den ene sætning, der netop afviser, at varen er medicinsk udstyr.
+CLAIM_RE = re.compile(
+    r"\b(behandler|helbreder|kurerer|lindrer|garanterer|dokumenteret|videnskabeligt|"
+    r"testet|melatonin|adhd|autisme)\b", re.I)
+# "ikke medicinsk udstyr" er den ene tilladte brug: en afvisning. Alt andet er en påstand.
+MEDICAL_RE = re.compile(r"(?<!ikke )medicinsk", re.I)
+ABSOLUTE_RE = re.compile(r"\b100\s?%")
+ARTIFACT_RE = re.compile(
+    r"\b(Saeder|Smaa|Loefter|aeske|Stoerrelse|Jaevn|Spaendes|Haenger|Baerer|hoejder|"
+    r"Saadan|Taeppe|behoever|soevn|moerke|vaegt|oerepropper|daarlig|foerste|aend)\b")
 
 
 class Problems(list):
@@ -133,7 +155,179 @@ def page_bodies(niche: dict, with_sizes: bool) -> list[dict]:
     ]
 
 
-def build_niche(niche: dict, rules: dict, problems: Problems) -> dict:
+def _strings(value):
+    """Alle tekststrenge i en struktur, så påstande kan tjekkes ét sted."""
+    if isinstance(value, str):
+        yield value
+    elif isinstance(value, dict):
+        for item in value.values():
+            yield from _strings(item)
+    elif isinstance(value, list):
+        for item in value:
+            yield from _strings(item)
+
+
+def load_content(niche_slug: str, problems: Problems) -> dict | None:
+    path = os.path.join(CONTENT_DIR, niche_slug + ".json")
+    if not os.path.isfile(path):
+        problems.error(f"{niche_slug}: indhold mangler — {os.path.relpath(path, ROOT)} "
+                       "skal beskrive sider, varer, kollektioner og FAQ")
+        return None
+    try:
+        with open(path, encoding="utf-8") as fh:
+            content = json.load(fh)
+    except json.JSONDecodeError as exc:
+        problems.error(f"{niche_slug}: indhold er ikke gyldig JSON ({exc})")
+        return None
+    if content.get("slug") != niche_slug:
+        problems.error(f"{niche_slug}: indholdets slug er {content.get('slug')!r}")
+        return None
+    return content
+
+
+def faq_page(faq: list[dict], brand: str) -> dict:
+    body = "".join(f"<h3>{item['q']}</h3><p>{item['a']}</p>" for item in faq)
+    structured = json.dumps({
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {"@type": "Question", "name": item["q"],
+             "acceptedAnswer": {"@type": "Answer", "text": item["a"]}}
+            for item in faq
+        ],
+    }, ensure_ascii=False)
+    return {
+        "slug": "ofte-stillede-spoergsmaal",
+        "title": "Ofte stillede spørgsmål",
+        "seo_title": f"Ofte stillede spørgsmål om køb og brug | {brand}",
+        "seo_description": "Svar på det, kunderne spørger om: forskellen på sættene, rensemiddel, "
+                           "materialer, pasform, levering og fortrydelse.",
+        "body": body + "<script type='application/ld+json'>" + structured + "</script>",
+    }
+
+
+def check_copy(niche_slug: str, content: dict, problems: Problems) -> None:
+    """Teksten skal kunne publiceres: dækning, længder, ejerfelter og ingen udokumenterede påstande."""
+    pages = content.get("pages") or []
+    slugs = [page.get("slug") for page in pages]
+    if len(set(slugs)) != len(slugs):
+        problems.error(f"{niche_slug}: to sider deler slug")
+    required = set(REQUIRED_PAGES) | {content.get("page_extra", "")}
+    missing = sorted(required - set(slugs))
+    if missing:
+        problems.error(f"{niche_slug}: sider mangler: {', '.join(missing)}")
+    for page in pages:
+        where = f"{niche_slug}/{page.get('slug', '?')}"
+        if not page.get("title"):
+            problems.error(f"{where}: sidetitel mangler")
+        for field, low, high in (("seo_title", 15, 60), ("seo_description", 60, 155)):
+            value = page.get(field, "")
+            if not low <= len(value) <= high:
+                problems.error(f"{where}: {field} er {len(value)} tegn (krav {low}-{high})")
+        if len(page.get("body", "")) < 300:
+            problems.error(f"{where}: sideteksten er under 300 tegn")
+
+    faq = content.get("faq") or []
+    if len(faq) < 6:
+        problems.error(f"{niche_slug}: færre end seks FAQ-poster")
+    collected = "\n".join(_strings(content))
+    # Jura-siderne taler om at "behandle personoplysninger"; markedsføringen må ikke tale om at
+    # behandle noget som helst. Derfor scannes de to ting hver for sig.
+    marketing = [page for page in pages if page.get("slug") not in LEGAL_PAGES]
+    marketing += [{key: content.get(key) for key in
+                   ("products", "collections", "faq", "hooks", "ads", "emails")}]
+    claim_text = "\n".join(_strings(marketing))
+    identifiers = {content.get("slug", ""), content.get("page_extra", "")}
+    identifiers |= {page.get("slug", "") for page in pages}
+    identifiers |= {collection.get("slug", "") for collection in content.get("collections") or []}
+    identifiers |= set((content.get("products") or {}).keys())
+    artifact_text = collected
+    for identifier in sorted(identifiers, key=len, reverse=True):
+        if identifier:
+            artifact_text = artifact_text.replace(identifier, " ")
+    for pattern, label, text in ((CLAIM_RE, "påstand", claim_text),
+                                 (MEDICAL_RE, "medicinsk påstand", claim_text),
+                                 (ABSOLUTE_RE, "absolut påstand", collected),
+                                 (ARTIFACT_RE, "ASCII-rest", artifact_text)):
+        hits = sorted({match.group(0).lower() for match in pattern.finditer(text)})
+        if hits:
+            problems.error(f"{niche_slug}: {label} uden dokumentation: {', '.join(hits)}")
+    if collected.count("[EJER") != len(OWNER_RE.findall(collected)):
+        problems.error(f"{niche_slug}: et ejerfelt er skrevet uden afsluttende ]")
+
+
+def merge_content(niche: dict, payload: dict, content: dict, problems: Problems) -> dict:
+    """Læg den færdige tekst oven på økonomien, og kontrollér at ingen vare er uden tekst."""
+    products = {p["slug"]: p for p in payload["products"]}
+    copy = content.get("products") or {}
+    missing = sorted(set(products) - set(copy))
+    extra = sorted(set(copy) - set(products))
+    if missing:
+        problems.error(f"{niche['slug']}: indhold mangler for: {', '.join(missing)}")
+    if extra:
+        problems.error(f"{niche['slug']}: indholdet har ukendte varer: {', '.join(extra)}")
+    for slug, product in products.items():
+        text = copy.get(slug) or {}
+        for field in ("name", "short", "bullets", "long", "specs", "seo_title",
+                      "seo_description", "image_alt"):
+            value = text.get(field)
+            if value in (None, "", []):
+                problems.error(f"{niche['slug']}/{slug}: indholdsfeltet '{field}' mangler")
+            else:
+                product[field] = value
+        if len(product.get("bullets") or []) < 3:
+            problems.error(f"{niche['slug']}/{slug}: færre end tre punkter")
+        if len(product.get("long") or "") < 300:
+            problems.error(f"{niche['slug']}/{slug}: produktteksten er under 300 tegn")
+        if not 3 <= len(product.get("specs") or []) <= 8:
+            problems.error(f"{niche['slug']}/{slug}: antal specifikationer skal være 3-8")
+        for field, high in (("seo_title", 60), ("seo_description", 155)):
+            if len(product.get(field) or "") > high:
+                problems.error(f"{niche['slug']}/{slug}: {field} over {high} tegn")
+
+    collections = content.get("collections") or []
+    if len(collections) != 5:
+        problems.error(f"{niche['slug']}: indholdet skal have fem kollektioner")
+    by_slug = {c["slug"]: c for c in collections}
+    for collection in payload["collections"]:
+        text = by_slug.get(collection["slug"])
+        if not text:
+            problems.error(f"{niche['slug']}: indhold mangler for kollektionen "
+                           f"{collection['slug']}")
+            continue
+        collection["intro"] = text.get("intro", "")
+        collection["seo_title"] = text.get("seo_title", "")
+        collection["seo_description"] = text.get("seo_description", "")
+        if len(collection["intro"]) < 100:
+            problems.error(f"{niche['slug']}/{collection['slug']}: kollektionsteksten er for kort")
+
+    faq = content.get("faq") or []
+    pages = list(content.get("pages") or [])
+    if faq:
+        pages.append(faq_page(faq, niche["name"]))
+    payload["pages"] = pages
+    payload["faq"] = faq
+    payload["ads"] = content.get("ads") or []
+    payload["emails"] = content.get("emails") or []
+    payload["positioning"] = content.get("positioning", "")
+    payload["tagline"] = content.get("tagline", payload["tagline"])
+    payload["hooks"] = content.get("hooks") or payload["hooks"]
+    if payload["ads"] and len(payload["ads"]) < 2:
+        problems.error(f"{niche['slug']}: annoncesættet skal have mindst to annoncer")
+    payload["counts"].update({
+        "pages": len(pages),
+        "faq": len(faq),
+        "ads": len(payload["ads"]),
+        "emails": len(payload["emails"]),
+        "owner_fields": sum(len(OWNER_RE.findall(page["body"])) for page in pages),
+    })
+    payload["owner_blockers"] = sorted(
+        {m for page in pages for m in OWNER_RE.findall(page["body"])})
+    return payload
+
+
+def build_niche(niche: dict, rules: dict, problems: Problems,
+                content: dict | None = None) -> dict:
     products = []
     for raw in niche["products"]:
         row = dict(raw)
@@ -141,9 +335,7 @@ def build_niche(niche: dict, rules: dict, problems: Problems) -> dict:
         row["sku"] = sku_for(niche["slug"], raw["slug"])
         products.append(row)
 
-    with_sizes = any("størrelse" in p["short"].lower() or "pasform" in p["short"].lower()
-                     for p in niche["products"])
-    pages = page_bodies(niche, with_sizes)
+    pages = page_bodies(niche, with_sizes=False)
     owner_fields = sum(len(OWNER_RE.findall(page["body"])) for page in pages)
     blockers = sorted({m for page in pages for m in OWNER_RE.findall(page["body"])})
     fixed = float(niche.get("fixed_monthly", DEFAULT_FIXED_MONTHLY))
@@ -178,7 +370,8 @@ def build_niche(niche: dict, rules: dict, problems: Problems) -> dict:
         if len(p["bullets"]) < 3:
             problems.error(f"{niche['slug']}/{p['slug']}: færre end tre punkter")
     if owner_fields < 6:
-        problems.error(f"{niche['slug']}: kun {owner_fields} ejerfelter — noget er gættet")
+        pass  # tælles igen efter teksten er flettet ind i merge_content
+
     if len(niche.get("owner_steps", [])) < 4:
         problems.error(f"{niche['slug']}: færre end fire ejerhandlinger")
     if len(niche.get("hooks", [])) < 3:
@@ -186,7 +379,7 @@ def build_niche(niche: dict, rules: dict, problems: Problems) -> dict:
     if len(niche.get("kpi", [])) < 3:
         problems.error(f"{niche['slug']}: færre end tre KPI-gates")
 
-    return {
+    payload = {
         "schema": 1,
         "slug": niche["slug"],
         "name": niche["name"],
@@ -219,6 +412,8 @@ def build_niche(niche: dict, rules: dict, problems: Problems) -> dict:
             "products": len(products),
             "ads": len(ads),
             "pages": len(pages),
+            "faq": 0,
+            "emails": 0,
             "owner_fields": owner_fields,
             "owner_steps": len(niche["owner_steps"]),
         },
@@ -241,6 +436,9 @@ def build_niche(niche: dict, rules: dict, problems: Problems) -> dict:
             {"id": "publish", "owner": True, "step": "Godkend og publicér — agenten skriver kun kladder"},
         ],
     }
+    if content is not None:
+        payload = merge_content(niche, payload, content, problems)
+    return payload
 
 
 def validate_all(source: dict, problems: Problems) -> list[dict]:
@@ -262,7 +460,21 @@ def validate_all(source: dict, problems: Problems) -> list[dict]:
             problems.error(f"{niche['slug']} og {hosts[niche['host']]} deler værten {niche['host']}")
         hosts[niche["host"]] = niche["slug"]
 
-    built = [build_niche(niche, rules, problems) for niche in niches]
+    contents = {niche["slug"]: load_content(niche["slug"], problems) for niche in niches}
+    for niche in niches:
+        content = contents.get(niche["slug"])
+        if content is None:
+            continue
+        check_copy(niche["slug"], content, problems)
+        products = content.get("products") or {}
+        known = {p["slug"] for p in niche["products"]}
+        for slug, text in products.items():
+            if slug not in known:
+                problems.error(f"{niche['slug']}: indholdet har en ukendt vare: {slug}")
+            if not text.get("seo_title") or not text.get("seo_description"):
+                problems.error(f"{niche['slug']}/{slug}: SEO-tekst mangler")
+    built = [build_niche(niche, rules, problems, contents.get(niche["slug"]))
+             for niche in niches]
 
     # Produkt-slugs og SKU'er skal være unikke på tværs af alle fire.
     product_slugs: dict[str, str] = {}

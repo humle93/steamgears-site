@@ -357,9 +357,9 @@
     {
       "id": "bilinterioer",
       "name": "KABINE — bil-interiør som ny butik",
-      "note": "Forberedelse frem mod første annonce. Model, tal og plan står i docs/library/bilinterioer-launch-2026-11-09.md (+ PDF). Aritmetikken er kørt gennem de fire formler i roi-model-dropshipping-2026-11-09.md §2 og verificeret med Python 9/11.",
-      "next": "Fem forberedelsesmoduler er færdige (9,5 af 26 t, 36,5 %): niche og brand valgt, enhedsøkonomi regnet, 30-dages plan med KPI-gates skrevet, ti hooks som manuskript, og kravlisten for butik, betaling, tracking og jura. Resten er butiksopsætning (6 t), leverandør og prøver (4 t), juridiske sider (2,5 t) og første annoncerunde (4 t) — alle fire starter først når ejeren har leveret E1-E6.",
-      "blocked_by": "Seks ejerhandlinger, målt 9/11: E1 CVR, telefon, adresse og bankaftale til butikken (uden dem ingen faktura, ingen MobilePay, ingen lovlig handel); E2 leverandørvalg med GPSR-dokumentation og to prøver (ellers er indkøbspris, kvalitet og leveringstid gæt); E3 registrering i producentregistret for emballage (markedsføring må ikke starte før); E4 domænet kabine.dk eller et alternativ plus Shopify-konto; E5 beslutning om start 9/11 i Q4-priser eller 5/1 til lavere CPA; E6 annoncekonto med betalingsmetode og 10.000 kr. Ingen af de seks kan lukkes af agenten — hver kræver en konto, et panel eller en underskrift.",
+      "note": "Forberedelse frem mod første annonce. Model, tal og plan står i docs/library/bilinterioer-launch-2026-11-09.md (+ PDF); porteføljerækkefølgen og deploymentplanen for alle fire nicher står i docs/library/niche-roadmap-2026-11-09.md (+ PDF). Aritmetikken er kørt gennem de fire formler i roi-model-dropshipping-2026-11-09.md §2 og verificeret med Python 9/11.",
+      "next": "Seks forberedelsesmoduler er færdige (15,5 af 32 t, 48,4 %): niche og brand valgt, enhedsøkonomi regnet, 30-dages plan med KPI-gates skrevet, ti hooks som manuskript, kravlisten for butik, betaling, tracking og jura, og roadmap plus færdig tekst til alle fire nicher. Resten er butiksopsætning (6 t), leverandør og prøver (4 t), juridiske sider (2,5 t) og første annoncerunde (4 t) — alle fire starter først når ejeren har leveret E1-E6. Domænemåling 9/11: alle fire ønskede .dk-domæner er taget, så E4 kræver en købs-/leje- eller rename-beslutning.",
+      "blocked_by": "Seks ejerhandlinger, målt 9/11: E1 CVR, telefon, adresse og bankaftale til butikken (uden dem ingen faktura, ingen MobilePay, ingen lovlig handel); E2 leverandørvalg med GPSR-dokumentation og to prøver (ellers er indkøbspris, kvalitet og leveringstid gæt); E3 registrering i producentregistret for emballage (markedsføring må ikke starte før); E4 navn og domæne plus Shopify-konto — kabine.dk, oploft.dk, stille.dk og immer.dk er alle registreret (DNS, 9/11), så der skal købes, lejes eller renames; E5 beslutning om start 9/11 i Q4-priser eller 5/1 til lavere CPA; E6 annoncekonto med betalingsmetode og 10.000 kr. Ingen af de seks kan lukkes af agenten — hver kræver en konto, et panel eller en underskrift.",
       "modules": [
         {
           "id": "b1",
@@ -432,6 +432,14 @@
           "total": 4,
           "unit": "t",
           "note": "Ikke startet: kræver E5 og E6."
+        },
+        {
+          "id": "b10",
+          "name": "Niche-portefølje: roadmap og færdig butikstekst",
+          "done": 6,
+          "total": 6,
+          "unit": "t",
+          "note": "Fire nicher rangeret efter seks vægtede kriterier: KABINE 4,00, IMMER 3,55, OPLOFT 3,30, STILLE 2,40; KABINE starter. Roadmap med faser, gates, stopregler og deploymentplan ligger i docs/library/niche-roadmap-2026-11-09.md. Indholdspakken deploy/nicher/indhold/ dækker 21 varer og 36 sider med 204 ejerfelter, FAQ med JSON-LD samt tre annoncer og tre mails til KABINE; niche_preflight --check afviser manglende tekst, forkerte SEO-længder og udokumenterede påstande. Domænemåling: alle fire .dk-navne er taget."
         }
       ],
       "verified": false
@@ -1932,6 +1940,15 @@
       "after": 60.0,
       "delta": 1.4,
       "basis": "1,8 af 3 d"
+    },
+    {
+      "date": "2026-11-09",
+      "project": "KABINE — bil-interiør som ny butik",
+      "module": "niche-portefølje: roadmap og tekst",
+      "before": 36.5,
+      "after": 48.4,
+      "delta": 11.9,
+      "basis": "15,5 af 32 t (Niche-valg, brand og produktstige 2/2 · ROI-model og enhedsøkonomi 2/2 · 30-dages plan og KPI-gates 2/2 · Kreativt: ti hooks som manuskript 2/2 · Kravliste: butik, betaling, tracking og jura 1,5/1,5 · Butiksopsætning: Shopify, MobilePay, CAPI, sider 0/6 · Leverandørvalg, GPSR-dokumentation og prøver 0/4 · Juridiske sider: handelsbetingelser, retur, privatliv 0/2,5 · Første annoncerunde uge 1-2 0/4 · Niche-portefølje: roadmap og færdig butikstekst 6/6)"
     }
   ]
 }

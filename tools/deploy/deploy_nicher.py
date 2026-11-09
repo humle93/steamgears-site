@@ -50,13 +50,17 @@ SHOPIFY_COLUMNS = [
 
 def product_html(payload: dict, product: dict) -> str:
     bullets = "".join(f"<li>{b}</li>" for b in product["bullets"])
+    specs = "".join(f"<li>{s}</li>" for s in product.get("specs", []))
     return (
-        f"<p>{product['short']}</p>"
+        f"<p><strong>{product['short']}</strong></p>"
         f"<ul>{bullets}</ul>"
-        f"<p>Kollektion: {product['collection']}. {payload['tagline']}</p>"
-        "<ul><li>Produktionstid: [EJER: dage].</li>"
+        f"{product.get('long', '')}"
+        f"<h2>Specifikationer</h2><ul>{specs}</ul>"
+        "<h2>Levering og retur</h2><ul>"
+        "<li>Produktionstid: [EJER: dage].</li>"
         "<li>Levering: [EJER: zoner og dage].</li>"
         "<li>Retur: 14 dages fortrydelsesret, [EJER: returadresse].</li></ul>"
+        f"<p>{payload['tagline']}</p>"
     )
 
 
@@ -68,7 +72,7 @@ def grams(product: dict) -> int:
 def write_shopify_csv(payload: dict) -> str:
     path = os.path.join(OUT_DIR, f"shopify-{payload['slug']}.csv")
     with open(path, "w", encoding="utf-8", newline="") as fh:
-        writer = csv.DictWriter(fh, fieldnames=SHOPIFY_COLUMNS)
+        writer = csv.DictWriter(fh, fieldnames=SHOPIFY_COLUMNS, lineterminator="\n")
         writer.writeheader()
         for product in payload["products"]:
             writer.writerow({
@@ -92,9 +96,9 @@ def write_shopify_csv(payload: dict) -> str:
                 "Variant Taxable": "TRUE",
                 "Variant Barcode": "",
                 "Image Src": "",
-                "Image Alt Text": product["name"],
-                "SEO Title": f"{product['name']} · {payload['name']}",
-                "SEO Description": product["short"][:155],
+                "Image Alt Text": product.get("image_alt") or product["name"],
+                "SEO Title": product.get("seo_title") or f"{product['name']} · {payload['name']}",
+                "SEO Description": (product.get("seo_description") or product["short"])[:155],
                 "Status": "draft",
             })
     return path
@@ -103,24 +107,48 @@ def write_shopify_csv(payload: dict) -> str:
 def write_pages(payload: dict) -> str:
     path = os.path.join(OUT_DIR, f"{payload['slug']}-sider.md")
     lines = [
-        f"# {payload['name']} — fem sider, klar til at klistre ind",
+        f"# {payload['name']} — {len(payload['pages'])} sider og al tekst, klar til at klistre ind",
         "",
-        f"Kilde: `deploy/nicher/{payload['slug']}.json`. Siderne er kladder; "
+        f"Kilde: `deploy/nicher/{payload['slug']}.json` (økonomi) og "
+        f"`deploy/nicher/indhold/{payload['slug']}.json` (tekst). Siderne er kladder; "
         "hvert `[EJER: …]` skal erstattes af en oplysning, ejeren har givet, "
         "før siden må publiceres.",
         "",
     ]
     for page in payload["pages"]:
         lines += [f"## {page['title']}", "", f"Slug: `/{page['slug']}/`", "",
+                  f"SEO-titel: {page.get('seo_title', '')}", "",
+                  f"Meta-beskrivelse: {page.get('seo_description', '')}", "",
                   page["body"], ""]
     lines += [
         "## Kollektioner, der skal oprettes",
         "",
-        "| Navn | Slug | Beskrivelse |",
-        "| --- | --- | --- |",
     ]
-    lines += [f"| {c['name']} | `{c['slug']}` | {c['description']} |"
-              for c in payload["collections"]]
+    for c in payload["collections"]:
+        lines += [f"### {c['name']}", "", f"Slug: `{c['slug']}`", "",
+                  f"SEO-titel: {c.get('seo_title', '')}", "",
+                  f"Meta-beskrivelse: {c.get('seo_description', '')}", "",
+                  c.get("intro", c.get("description", "")), ""]
+    if payload.get("ads"):
+        lines += ["## Annoncer", ""]
+        for ad in payload["ads"]:
+            lines += [f"### {ad['name']} — {ad['angle']}", "",
+                      f"**Primær tekst:** {ad['primary']}", "",
+                      f"**Overskrift:** {ad['headline']}", "",
+                      f"**Beskrivelse:** {ad['description']}", "",
+                      f"**Kreativt:** {ad['creative']}", "",
+                      f"**Landingsside:** `{ad['landing']}`", ""]
+    if payload.get("emails"):
+        lines += ["## E-mails", ""]
+        for mail in payload["emails"]:
+            lines += [f"### {mail['name']}", "",
+                      f"**Emne:** {mail['subject']}", "",
+                      f"**Preheader:** {mail['preheader']}", "",
+                      "```", mail["body"], "```", ""]
+    lines += ["## Produkter — titel og SEO (resten ligger i CSV'en)", "",
+              "| Vare | SEO-titel | Meta-beskrivelse |", "| --- | --- | --- |"]
+    lines += [f"| {p['name']} | {p.get('seo_title', '')} | {p.get('seo_description', '')} |"
+              for p in payload["products"]]
     lines += ["", "## Ejeri punkter, der blokerer publicering", ""]
     lines += [f"- `{b}`" for b in payload["owner_blockers"]]
     lines += ["", "## Ejerhandlinger", ""]
