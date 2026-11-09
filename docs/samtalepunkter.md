@@ -29,7 +29,7 @@ _Opdateret 2026-11-09 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 | **steamgears.eu — miljø, server og sandbox (S5)** | **60 %** | 1,8 af 3 d (S5 1,8/3) |
 | **Steamgears Autopilot — plugin** | **100 %** | 31 af 31 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25 · P1E 0,25/0,25 · P1F 0,25/0,25 · P1G 0,5/0,5 · P2F 1,5/1,5 · P3OPT 0,6/0,6 · P3JS 0,3/0,3 · P3LIVE 0,25/0,25) |
 | **Dark academia-rebrand** | **71,3 %** | 12,4 af 17,4 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5 · BATCH4 0,5/0,5 · GENTILDELING 0,4/0,4 · MOBIL-OG-SAESON 3/3) |
-| **SEO-indholdsproduktion** | **100 %** | 8 af 8 guides (BATCH 3/3 · COPY 4/4 · CORSET 1/1) |
+| **SEO-indholdsproduktion** | **100 %** | 12 af 12 guides (BATCH 3/3 · COPY 4/4 · CORSET 1/1 · DKK 4/4) |
 | **Døde internlinks** | **100 %** | 39 af 39 links (FIX 39/39) |
 | **Niche-butik — plugin P4** | **100 %** | 1 af 1 d (P4PLAN 0,3/0,3 · P4APPLY 0,25/0,25 · P4UI 0,2/0,2 · P4SHIP 0,1/0,1 · P4LIVE 0,15/0,15) |
 | **KABINE — bil-interiør som ny butik** | **48,4 %** | 15,5 af 32 t (B1 2/2 · B2 2/2 · B3 2/2 · B4 2/2 · B5 1,5/1,5 · B6 0/6 · B7 0/4 · B8 0/2,5 · B9 0/4 · B10 6/6) |
@@ -41,6 +41,7 @@ _Opdateret 2026-11-09 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 - **steamgears.eu — miljø, server og sandbox (S5)** — Subdomæne + certifikat hos Simply (S5.1); DNS-panelet hos Simply til DKIM og DMARC-rapporter (S5.7 — ændringen kan ikke ses i zonen 9/11); hostpanelet til den sidste del af S5.8 (gendannelse til staging og  værtens backup-politik med opbevaring ≥ 14 dage; øvelsen selv er målt på live 9/11); GitHub Pro/Team til branch protection og environment-regler (S5.9). Ingen af de fire kan lukkes af agenten — hver kræver en konto eller et panel ejeren råder over.
 - **Steamgears Autopilot — plugin** — Syv led kræver ejeren, alle målt 8/11: (1) **Pinterest-scope** — tokenet ligger nu i WooCommerce-integrationen og er gyldigt (`/user_account` 200 som `cpaleadsis`, id 688980580401955331), men appen har kun ads/billing/catalogs/pins/user_accounts og **mangler `boards:read`**, så `/pins` og `/boards` afvises (målt 17:25Z, kanalstatus står som `needs_scope`); (2) **de øvrige kanal-tokens** — Instagram, Bluesky, Mastodon, Telegram og Facebook har intet token (5 af 6 mangler); (3) **AIMLAPI-kredit** — sidste generering 7/11 fejlede med »You've run out of funds«; (4) **`sgap_alert_email`** er tom, så fejl registreres men ingen mail sendes; (5) **full auto vs. godkendelse** — `sgap_full_auto_enabled = no` og 40 elementer venter; (6) **distributionsvej** — `publish_mode = rss` og 0 Publer-konti; (7) **P2.1–P2.3** kræver ejerens beslutning om Command Center-retningen. Intet af det må gættes.
 - **Dark academia-rebrand** — To led kræver ejerhandling, målt 8/11: (1) **de 29 trash'ede designs** — herunder de tre produkter der er witchy-tarots eneste kandidater (567, 395, 411); et ja/nej til genoplivning er nok, og tildelingen kører selv bagefter; (2) **Batch 4-mockups (5 t)** — Printful-adgang eller 5–8 færdige billeder pr. produkt; målt 20 publicerede med 22 billeder, 0 med 3 eller flere, 62 billedplaceringer mangler, og repoet har 0 trykfiler og 0 tøj-skabeloner. Kollektionstildelingen er ikke længere blokeret: den blev udført 8/11 gennem Novamira-MCP og målt stabil.
+- **SEO-indholdsproduktion** — Publicering kræver ejerens skriveadgang: post 292, 296 og 295 er kladder, og side 550 skal have den nye hub-copy. Copyen er færdig og målt — hvert /go/-id findes i butikken (13 unikke, 0 døde), og hvert beløb er i DKK efter docs/library/priser-live-2026-11-09.md. Mangler: to egne fotos pr. guide, Rank Math-felter og schema, og et MCP-token som kun ejeren kan godkende.
 - **KABINE — bil-interiør som ny butik** — Seks ejerhandlinger, målt 9/11: E1 CVR, telefon, adresse og bankaftale til butikken (uden dem ingen faktura, ingen MobilePay, ingen lovlig handel); E2 leverandørvalg med GPSR-dokumentation og to prøver (ellers er indkøbspris, kvalitet og leveringstid gæt); E3 registrering i producentregistret for emballage (markedsføring må ikke starte før); E4 navn og domæne plus Shopify-konto — kabine.dk, oploft.dk, stille.dk og immer.dk er alle registreret (DNS, 9/11), så der skal købes, lejes eller renames; E5 beslutning om start 9/11 i Q4-priser eller 5/1 til lavere CPA; E6 annoncekonto med betalingsmetode og 10.000 kr. Ingen af de seks kan lukkes af agenten — hver kræver en konto, et panel eller en underskrift.
 
 ### Næste skridt
@@ -50,24 +51,47 @@ _Opdateret 2026-11-09 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 - **steamgears.eu — miljø, server og sandbox (S5)** — Tilbage er fire poster, alle ejerens: sandkassen (S5.1, subdomæne + certifikat hos Simply), DKIM/DMARC (S5.7 — målt igen 9/11 efter ejerens melding: zonen er **uændret**, `_dmarc.steamgears.eu` er stadig en CNAME til `dmarc.simply.com` med Simplys egne `rua`/`ruf`, apex har kun SPF, og 32 DKIM-selektorer plus CNAME-pejl på otte svarer tomt), de sidste 0,05 d af S5.8 (gendannelse til staging — resten er målt på live 9/11 med 269/269 tabeller og RTO 6 s; værtens backup-politik ≥ 14 dage er stadig ikke dokumenteret) og branch protection (S5.9, GitHub svarer 403 »Upgrade to GitHub Pro«, målt 9/11). S5.7 lukkes af en TXT med butikkens egen adresse plus `v=DKIM1; k=rsa; p=…` på en selector.
 - **Steamgears Autopilot — plugin** — Agent-scope er færdigt (31,00 af 31,00 d) og 7.65.5 kører nu på sitet. Det eneste åbne er P1.5's live-verifikation (0,6 d, ejer-blokeret): Pinterest-tokenet mangler `boards:read`, og fem kanaler mangler tokens.
 - **Dark academia-rebrand** — Kun to ting står tilbage: (1) **witchy-tarot** kan først få indhold når ejeren siger ja til at gendanne 567 (Tarot Witchy Tee) — og eventuelt 395/411 — fra papirkurven; derefter fylder `python3 tools/rebrand_apply.py --apply --via-cli` termen automatisk, fordi kortet allerede indeholder dem; (2) **Batch 4-mockups** (5 t) kræver Printful-adgang eller 5–8 færdige billeder pr. produkt.
-- **SEO-indholdsproduktion** — SEO-indholdet er 100 %: fire guides skrevet, tre publiceret, corset-guiden publiceret, 1410 parkeret til september. Ingen åbne poster.
+- **SEO-indholdsproduktion** — Indsæt copyen i 292/296/295 og side 550 med fotos, Rank Math-felter og FAQPage-schema; kør python3 tools/guide_check.py som efterkontrol. Publiceringen kræver ejerens OAuth-godkendelse af MCP eller et WordPress application password — der findes ingen credential i sandkassen.
 - **Døde internlinks** — Vedligehold: tjek nye indlæg mod live-URL'er
 - **Niche-butik — plugin P4** — Færdig som roadmap-punkt P4: modulet er kørt mod det levende site (WordPress 7.1.4, WooCommerce 11.2.2) med 8 produktkladder, 5 kollektioner, en sideskits og en navigation, og rullet tilbage til præcis udgangstilstanden. Næste skridt er ejerens: Printful-adgang, publicering og de øvrige punkter i readiness-listen. Målt 8/11 om aftenen er `alert_email` tom, så fejl registreres uden at nogen får mail — det er et ejerpunkt i plugin-roadmappens §8.
 - **KABINE — bil-interiør som ny butik** — Seks forberedelsesmoduler er færdige (15,5 af 32 t, 48,4 %): niche og brand valgt, enhedsøkonomi regnet, 30-dages plan med KPI-gates skrevet, ti hooks som manuskript, kravlisten for butik, betaling, tracking og jura, og roadmap plus færdig tekst til alle fire nicher. Resten er butiksopsætning (6 t), leverandør og prøver (4 t), juridiske sider (2,5 t) og første annoncerunde (4 t) — alle fire starter først når ejeren har leveret E1-E6. Domænemåling 9/11: alle fire ønskede .dk-domæner er taget, så E4 kræver en købs-/leje- eller rename-beslutning.
 
 ### Seneste commits
 
+- `f75a5da Modul: SEO — /go/-links målt live, og et værn mod fortidige prislister Før: 100 % → Efter: 100 % (Δ 0) Grundlag: ingen ændring`
 - `527ad1c Beslutningsnotat til teleskopreolen: hvad der skal forhandles, og i hvilken rækkefølge`
 - `542ddd5 Tilbudssammenligning på ét kald, så tre leverandørsvar kan vejes mod hinanden`
 - `4550ec9 Modul: F6 — to fredagstråde skrevet Før: 96,7 % Efter: 96,7 % Δ: 0 Grundlag: ingen ændring`
 - `1f45eb4 Modul: F6 — 14-dages plan for spor A Før: 96,7 % Efter: 96,7 % Δ: 0 Grundlag: ingen ændring`
 - `e043000 Modul: F6 — ejer-guide til Reddit-app Før: 96,7 % Efter: 96,7 % Δ: 0 Grundlag: ingen ændring`
-- `901b3a4 chore(status): daglig projektstatus 2026-11-09`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
 
-### 9/11 — de publicerede guides er rene; repo-copyen er ikke
+### 9/11 — al guide-copy er nu prissat i den butik der faktisk findes
+
+- **Fire copyfiler var ikke publicerbare:** `guides-2026-11-03.md` (292, 296, 295), `guides-2026-11-03-corset.md`
+  (1394) og hub-copyen `hub-steampunk-costumes-2026-11-03.md` (side 550). De länkede 12 slettede produkter,
+  prissatte i USD mod en butik i DKK, og var skrevet til et katalog på 39 produkter som nu er 20.
+- **De er skrevet om, ikke søg-erstattet.** Hver plads har fået den nærmeste levende erstatning, og teksten
+  omkring den er skrevet om, fordi designene bag de gamle id'er ikke findes: goggles 475 → **477**, top hat
+  481 → **483**, split coat 497 → **495/493**, hoodie 397/411 → **399/413**, tees 561/563/567 → **557/954**,
+  maritime prints 724/728 → **965/967**, corset 487 → **489**, bowler 485 → **940**.
+- **Nye totaler, alle udregnet fra Store API 9/11:** men's essentials **3.370,00 kr.** · tre budgetter
+  **560 / 1.075 / 2.010,00 kr.** · women's essentials **4.160,00 kr.** · corset **4.005,00 kr.** · hub
+  **3.370,00 kr.** Minimumsudstyr 765,00 kr. (goggles + hat + tailcoat).
+- **Nyt prisgrundlag:** `docs/library/priser-live-2026-11-09.md` er nu den **eneste** priskilde
+  `guide_check.py` læser. De gamle USD-lister kan ikke længere bruges som facit — det var netop derfor et grønt
+  værn kunne dække over tolv døde links.
+- **Værnet fejler nu på fejlklassen, ikke bare på formen:** 404 i butikken, `$` i en DKK-fil, en pris uden hold i
+  prislisten, et total der ikke er summen af sine dele, og en butik der svarer i en anden valuta. Netværkskaldet
+  er **standard**; `--offline` findes kun til miljøer uden netværk. 16/16 fixtures grønne.
+- **Bevis på at det virker:** samme fil fra før rettelsen blev kørt gennem det nye værn og gav `FAIL` på alle tre
+  guides plus `DØD /go/475/ → 404`. Efter rettelsen: **13 unikke id'er, 0 døde, 0 valutaafvigelser**.
+- **Tilbage:** publicering. Post 292/296/295 er kladder, side 550 skal have den nye copy, og der skal to egne
+  fotos pr. guide til. Det kræver skriveadgang — der findes ingen credential i sandkassen.
+
+### 9/11 — de publicerede guides er rene; repo-copyen er ikke### 9/11 — de publicerede guides er rene; repo-copyen er ikke
 
 - **REST er tilbage:** `/wp-json/?cb=98761` svarer **200 med 1.454.146 B `application/json`**. Det var den kanal
   der gjorde dagens måling mulig.

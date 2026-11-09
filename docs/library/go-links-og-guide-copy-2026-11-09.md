@@ -1,5 +1,10 @@
 # `/go/`-links og guide-copy — målt 9/11 2026
 
+> **Rettet samme dag.** Copyfilerne er nu skrevet om til den levende butiks katalog og valuta: 13 levende
+> `/go/`-id'er, DKK-priser og genberegnede totaler. `python3 tools/guide_check.py` (uden flag) melder
+> **0 døde id'er og 0 valutaafvigelser** for alle fire guides, og værnet fejler fortsat på den gamle fil — se §7.
+> Tabellerne nedenfor er målingen **før** rettelsen og står som dokumentation for fejlen, ikke som status.
+
 De tre publicerede guides (1357, 1361, 1359) er rene: hvert produktlink peger på et produkt butikken
 faktisk har. **Guide-copyen i repoet gør ikke.** `docs/library/guides-2026-11-03.md` og
 `…-corset.md` er skrevet til det katalog og den valuta butikken havde 2.–3/11, og tolv af deres atten
@@ -94,19 +99,36 @@ python3 tools/guide_check.py --live
 Det kører **ikke** i den natlige kontrol, fordi det kræver netværk; det køres i hånden før en publicering.
 
 ## 6. Konsekvens og næste skridt
+Copyen er nu publiceringsklar på butikkens egne vilkår. Fire filer er skrevet om —
+`guides-2026-11-03.md` (292, 296, 295), `guides-2026-11-03-corset.md` (1394) og hub-copyen
+`hub-steampunk-costumes-2026-11-03.md` (side 550) — med disse tal, alle læst i Store API 9/11:
 
-`guides-2026-11-03.md` og `…-corset.md` har fået en statuslinje øverst: **de må ikke publiceres som de
-står.** Den publicerede serie (1357, 1361, 1359 + corset) dækker SEO-modulet, og de sider er målt rene
-ovenfor.
-
-Skal de tre gamle guides (292, 296, 295) alligevel bruges, er om-mappingen den nærmeste levende
-erstatning pr. plads — og tallene er rene, fordi de kommer fra Store API 9/11:
-
-| Guide | Ti pladser / tre trin | Total |
+| Fil | Produkter | Total |
 | --- | --- | ---: |
 | Men's essentials (292) | 477 · 483 · 495 · 493 · 413 · 399 · 557 · 954 · 965 · 967 | **3.370,00 kr.** |
 | Three budgets (296) | 477+965 · +483+557 · +495+413+399 | **560 / 1.075 / 2.010,00 kr.** |
 | Women's essentials (295) | 489 · 491 · 477 · 483 · 495 · 493 · 413 · 954 · 965 · 940 | **4.160,00 kr.** |
+| Corset (1394) | 489 · 491 · 477 · 483 · 495 · 493 · 954 · 940 · 965 · 557 | **4.005,00 kr.** |
+| Hub (550) | de ti fra men's essentials | **3.370,00 kr.** |
 
-Teksten omkring hvert produkt skal skrives om — designene bag de døde id'er findes ikke længere, så et
-søg-og-erstat duer ikke. Rækkefølgen er: skriv om, kør `--live` til den er grøn, publicér.
+Prisgrundlaget er [`priser-live-2026-11-09.md`](priser-live-2026-11-09.md), som nu er den **eneste** kilde
+`guide_check.py` læser — de gamle USD-lister fra 2.–3/11 kan ikke længere bruges som facit.
+
+## 7. Sådan kan fejlen ikke komme igen
+
+`tools/guide_check.py` fejler nu på fire måder, der alle er dækket af fixtures i `--selftest` (16/16):
+
+| Regel | Fixture |
+| --- | --- |
+| et `/go/<id>/` som butikken svarer 404 på | «slettet produkt fanges» |
+| et `$`-beløb i en fil hvis butik prissætter i DKK | «dollar i en DKK-fil fanges» |
+| en pris der ikke står i den målte liste | «opdigtet pris fanges» |
+| et total der ikke er summen af sine dele | «forkert total fanges» |
+| butikken svarer i en anden valuta end copyen | «valuta-skred fanges» |
+| butikken kan ikke måles (5xx/netværk) | «umålbar butik bliver advarsel, ikke bestået» |
+
+Netværkskaldet er **standard**, ikke et flag: den gamle fil blev kørt igen som kontrol og gav `FAIL` på alle
+tre guides plus `DØD /go/475/ → 404`. `--offline` findes kun til miljøer uden netværk.
+
+Det, der stadig kræver et menneske, er publiceringen: post 292, 296 og 295 er kladder, og side 550 skal have
+den nye copy. Intet af det kan gøres uden skriveadgang til WordPress.

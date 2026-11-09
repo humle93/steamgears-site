@@ -1,5 +1,14 @@
 # Link-plan: de ældre publicerede guides — 3/11 2026
 
+> **Historisk plan — ikke gældende status (målt igen 9/11 2026).** Planen er skrevet 3/11 mod det katalog
+> butikken havde dengang (39 produkter, USD). Butikken har nu 20 produkter i DKK, og **12 af de id'er planen
+> bruger, svarer 404** (`woocommerce_rest_product_invalid_id`). Planen er derfor bevaret som regnskab for hvad
+> der blev indsat dengang — ikke som en liste over links der kan bruges nu. Den gældende kontrol er
+> `python3 tools/guide_check.py`, som måler hver `/go/<id>/` i den copy der skal publiceres mod butikken og
+> fejler på døde id'er og valuta-skred; se
+> [`go-links-og-guide-copy-2026-11-09.md`](go-links-og-guide-copy-2026-11-09.md).
+
+
 De fire nye guides fik `/go/<id>/`-links og en fast struktur. De ældre publicerede guides har ikke fået samme
 behandling. **4/11 2026 er alle fyrre rækker afgjort:** 34 links står nu på en publiceret side og er målt der,
 og 6 af planens produkter nævnes slet ikke i den publicerede artikel og afventer en omskrivning af den. Hver

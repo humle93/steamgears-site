@@ -303,8 +303,8 @@
     {
       "id": "seo",
       "name": "SEO-indholdsproduktion",
-      "next": "SEO-indholdet er 100 %: fire guides skrevet, tre publiceret, corset-guiden publiceret, 1410 parkeret til september. Ingen åbne poster.",
-      "blocked_by": "",
+      "next": "Indsæt copyen i 292/296/295 og side 550 med fotos, Rank Math-felter og FAQPage-schema; kør python3 tools/guide_check.py som efterkontrol. Publiceringen kræver ejerens OAuth-godkendelse af MCP eller et WordPress application password — der findes ingen credential i sandkassen.",
+      "blocked_by": "Publicering kræver ejerens skriveadgang: post 292, 296 og 295 er kladder, og side 550 skal have den nye hub-copy. Copyen er færdig og målt — hvert /go/-id findes i butikken (13 unikke, 0 døde), og hvert beløb er i DKK efter docs/library/priser-live-2026-11-09.md. Mangler: to egne fotos pr. guide, Rank Math-felter og schema, og et MCP-token som kun ejeren kan godkende.",
       "modules": [
         {
           "id": "batch",
@@ -341,6 +341,13 @@
           "total": 1,
           "unit": "guides",
           "note": "publiceret 6/11: kladde 1394 færdiggjort med to /go/-links (489, 491 — begge målt 302) i stedet for rå /product/-hrefs, og et hub-link til /steampunk-costumes/; Rank Math-titel, description og FAQPage-schema var allerede på plads, og det fremhævede billede er 1395"
+        },
+        {
+          "id": "dkk",
+          "name": "Guide-copy i DKK mod den levende butik (292, 296, 295, 1394)",
+          "done": 4,
+          "total": 4,
+          "unit": "guides"
         }
       ],
       "verified": true
