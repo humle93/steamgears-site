@@ -964,4 +964,5 @@ Alt nedenfor er data agenten **ikke** må gætte. Ingen af felterne er udfyldt m
 
 - Den publicerer intet. Hvert trin kræver et login, en konto eller en underskrift — der findes ingen credential i agentens sandkasse (målt igen 9/11).
 - Den opfinder ingen data. Hvor et tal mangler, står `[EJER: …]`; alle markeringer står grupperet i §10.
+- **Kopiér HTML-blokkene fra denne markdown-fil, ikke fra PDF'en.** PDF-eksporten gengiver `—` som `--` inde i kodeblokke (samme tekst, andet tegn); links og beløb er upåvirkede, men produktnavne skal have em-dash med, som butikken skriver dem.
 - Den ændrer ikke copyen: blokkene er genereret ud af de filer `tools/guide_check.py` validerer, og priserne kommer fra `priser-live-2026-11-09.md`. Ændrer du i en copyfil, skal blokken herover genereres igen — værnene vil fange det, hvis en pris eller et id ikke længere holder.
