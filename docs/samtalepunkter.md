@@ -68,6 +68,23 @@ _Opdateret 2026-11-09 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ## Beslutninger og fund (nyeste først)
 
+### 9/11 (nat) — sitet kørte 7.65.5, så OpenRouter fandtes ikke der endnu
+
+- **Målt gennem MCP (AI Engine-fladen, 271 værktøjer):** `steamgears-autopilot_status` svarer
+  `"version": "7.65.5"`, `ai_provider: aimlapi`, `ai_model: anthropic/claude-opus-5.5`, `pending_drafts: 45`, og
+  `key_test.ai` = »AIMLAPI refused the key: You've run out of funds« (23:36). Seneste generering 19:44 samme dag:
+  2 kilder, **0 kladder**, 2 AIMLAPI-fejl. Ejerens »jeg har opdateret pluginnet og sat en ny OpenRouter-nøgle«
+  holdt altså ikke: 7.67.0 er ikke installeret (den ligger i repoet), og provider-listen på sitet kender kun
+  `anthropic`, `aimlapi` og `openai_compatible` — OpenRouter findes slet ikke i koden dér, og nøglen kan derfor
+  ikke være gemt som OpenRouter. Nøgletesten viser samtidig at den gemte nøgle stadig er en AIMLAPI-nøgle
+  (AIMLAPI svarer 402 om kredit, ikke 401 om ukendt nøgle).
+- **Roden er den kendte:** repoet er privat, så `SGAP_Updater` (anonym raw-hentning) ikke kan hente zip'en.
+  Opdatering sker kun ved upload af `plugins/steamgears-autopilot-v7.67.0.zip` under *Plugins → Tilføj nyt → Upload*.
+- **Fælden undervejs:** de to MCP-flader blev blandet — `MCP_METADATA_URL` pegede på Novamira, mens
+  `MCP_RESOURCE`/`MCP_SCOPE` pegede på AI Engine — og token-kaldet svarede `401 invalid_client`. Opskriften og
+  fælden står nu i [`mcp-auth.md`](mcp-auth.md): alle tre variabler høre sammen, `MCP_CONFIG_DIR` pr. flade, og
+  koden er éngangs (en kode med en anden `state` kan ikke byttes).
+
 ### 9/11 — OpenRouter er nu en egen provider, ikke en håndskreven URL
 
 - **Baggrund:** AIMLAPI-nøglen svarer »You've run out of funds«, så tekst-genereringen står stille. Pluginnet

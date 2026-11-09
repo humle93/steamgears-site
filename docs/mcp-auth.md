@@ -195,6 +195,16 @@ ikke på den anden:
 | AI Engine (`/wp-json/mcp/v1/http`, 206 værktøjer) | `https://steamgears.eu/wp-json/mcp/v1/.well-known/oauth-authorization-server` | `https://steamgears.eu/wp-json/mcp/v1/http` | `mcp` |
 | Novamira (3 meta-værktøjer over 207 abilities) | `https://steamgears.eu/.well-known/oauth-authorization-server` | `https://steamgears.eu/wp-json/mcp/novamira-oauth` | `full_access` |
 
+**Fælde: standardmiljøet blander de to flader** (målt 9/11, kostede en runde). `tools/mcp_oauth.py` har
+`MCP_METADATA_URL` pegende på **Novamira**s authorization-server, men `MCP_RESOURCE` og `MCP_SCOPE` pegende på
+**AI Engine** (`mcp`). En klient registreret ved den ene server kan ikke indløse en kode ved den anden: token-kaldet
+svarer `401 invalid_client`, og `--status` siger stadig »intet token«. Sæt derfor alle tre variabler sammen, og
+brug `MCP_CONFIG_DIR` pr. flade — `--start` registrerer kun en klient når mappen er tom, så en gammel `client_id`
+bliver ellers genbrugt mod den forkerte server. Koden er desuden **éngangs**: en kode fra et tidligere link (anden
+`state`, som browseren viser pænt i adresselinjen) kan ikke byttes, uanset hvor frisk den ser ud. En korrekt
+AI Engine-godkendelse giver `Bearer`, session og **271 værktøjer** (`--check`), og derefter kan
+`tools/mcp_rest.py --call steamgears-autopilot_status` læse sitets plugin-version uden ejerens browser.
+
 **De fire trin, som den nye agent kører** (alt ligger uden for repoet, mode 600):
 
 ```bash
