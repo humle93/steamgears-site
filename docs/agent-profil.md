@@ -23,16 +23,19 @@ typisk en voksen, der skal til cosplay, halloween, marked eller et temafest — 
 | Sprog | Engelsk på sitet, **dansk i commits og dokumentation** (tekniske termer på engelsk) |
 | Design | "Dark Clockwork Theatre v3" + **sæsonlag**: `css/sg-season.css` (tokens, header, menu, mobil) printes af `mu-plugins/sga-season.php`, der sætter `data-season` efter måneden. Template part til headeren ligger i [`css/`](../css/) |
 
-Der er **seks aktive projekter**, alle målt i [`projektstatus.json`](../projektstatus.json) (status pr. 8/11 2026):
+Der er **ni aktive projekter**, alle målt i [`projektstatus.json`](../projektstatus.json) (status pr. 9/11 2026):
 
 | id | Projekt | Status | Enhed |
 | --- | --- | --- | --- |
+| `forum` | Forum + Reddit — trafikaccelerator (P5) | **96,7 %** (2,9 af 3 d) | developer-dage |
 | `site` | steamgears.eu — site-optimering | **100 %** (20,95 af 20,95 d) | developer-dage |
-| `plugin` | Steamgears Autopilot — plugin | **100 %** (30,75 af 30,75 d) | developer-dage |
-| `rebrand` | Dark academia-rebrand | **65,3 %** (9,4 af 14,4 t) | timer |
-| `seo` | SEO-indholdsproduktion | **100 %** (8 af 8 guides) | guides |
+| `miljoe` | steamgears.eu — miljø, server og sandbox (S5) | **60 %** (1,8 af 3 d) | developer-dage |
+| `plugin` | Steamgears Autopilot — plugin | **100 %** (31 af 31 d) | developer-dage |
+| `rebrand` | Dark academia-rebrand | **71,3 %** (12,4 af 17,4 t) | timer |
+| `seo` | SEO-indholdsproduktion | **100 %** (13 af 13 guides) | guides |
 | `links` | Døde internlinks | **100 %** (39 af 39 links) | links |
 | `niche` | Niche-butik — plugin P4 | **100 %** (1 af 1 d) | developer-dage |
+| `bilinterioer` | KABINE — bil-interiør som ny butik | **48,4 %** (15,5 af 32 t) | timer |
 
 Roadmap'erne: [`docs/roadmap.md`](roadmap.md) (site, S0–S4) og
 [`plugins/steamgears-autopilot/ROADMAP.md`](../plugins/steamgears-autopilot/ROADMAP.md) (plugin, P0–P4).
@@ -152,7 +155,7 @@ direkte publicering som opt-in. **1 192 smoke-checks, alle grønne** (målt 9/11
 - De oprindelige 39 designs er kortlagt; batch 1–3 (8,5/8,5 t) er udført, og **tildelingen er gennemført 8/11**
   (0,4/0,4 t) gennem Novamira-MCP: 11 publicerede produkter, term-tællinger 5/3/2/1/3, witchy-tarot 0 fordi dens
   tre produkter ligger i papirkurven. Batch 4 mockups står på 0/5 t, forberedelsen er lukket med 0,5/0,5 t.
-- Samlet status er **65,3 % (9,4 af 14,4 t)**. Mockup-generering kræver ejerens Printful-adgang eller færdige
+- Samlet status er **71,3 % (12,4 af 17,4 t)**. Mockup-generering kræver ejerens Printful-adgang eller færdige
   billeder; witchy-tarot kræver et ja/nej til at gendanne 567/395/411;
   GPSR-oplysninger kræver CVR og postadresse. Se `projektstatus.json` og `docs/library/batch-4-arbejdsordre-2026-11-08.md`.
 
@@ -269,7 +272,7 @@ Profilen kan også læses over MCP via den lokale server `tools/mcp_project_prof
 ## 7. Sådan arbejder du i repoet
 
 1. Læs `AGENTS.md` + denne fil, og kør `python3 projektstatus.py --check` før du ændrer noget.
-2. Meld **Modul / % før / % efter / Δ / Grundlag** i svaret — og den daglige status for alle fem projekter.
+2. Meld **Modul / % før / % efter / Δ / Grundlag** i svaret — og den daglige status for alle ni projekter.
    Blokeret arbejde tæller ikke som fremgang.
 3. Nye dokumenter i `docs/`, audits og research i `docs/library/`, og de skal skrives ind i
    [`docs/library/README.md`](library/README.md) — ellers bliver de forældreløse.
@@ -279,7 +282,11 @@ Profilen kan også læses over MCP via den lokale server `tools/mcp_project_prof
    samme tur — og senest af den natlige auto-push kl. 02 dansk tid (`.github/workflows/natlig-push.yml`), der
    committer alt i træet og pusher med genforsøg. Nattens kørsel er et sikkerhedsnet: den ser ikke ucommittet
    arbejde i en sandkasse, så et push i turen er stadig den regel der gælder.
-6. **Rør ikke** site-data, nøgler eller `.mcp.json`-hemmeligheder. Nøgler hører i miljøvariabler, aldrig i repo.
+6. **Copy og priser tjekkes maskinelt:** `python3 tools/guide_check.py` finder hver copyfil på indhold
+   (`**H1:**`/Rank Math-tabellen), måler hvert `/go/<id>/` mod den levende butik og fejler på døde id'er,
+   valuta-skred og totaler der ikke stemmer. `--coverage` viser hvad der er copy, og hvilke dokumenter der med
+   vilje citerer gamle tal; en fil med links eller mange priser som ingen af delene er, får kørslen til at fejle.
+7. **Rør ikke** site-data, nøgler eller `.mcp.json`-hemmeligheder. Nøgler hører i miljøvariabler, aldrig i repo.
 
 ## 8. Kort over viden
 

@@ -58,17 +58,32 @@ _Opdateret 2026-11-09 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `3568573 Modul: SEO — vaernene daekker alle fem copyfiler, ikke fire Før: 100 % → Efter: 100 % (Δ 0) Grundlag: ingen ændring`
+- `e223c3f chore(status): daglig projektstatus 2026-11-09`
 - `92617f1 Modul: SEO — al guide-copy prissat i den butik der faktisk findes Før: 100 % → Efter: 100 % (Δ 0) Grundlag: ingen ændring`
 - `f75a5da Modul: SEO — /go/-links målt live, og et værn mod fortidige prislister Før: 100 % → Efter: 100 % (Δ 0) Grundlag: ingen ændring`
 - `527ad1c Beslutningsnotat til teleskopreolen: hvad der skal forhandles, og i hvilken rækkefølge`
 - `542ddd5 Tilbudssammenligning på ét kald, så tre leverandørsvar kan vejes mod hinanden`
-- `4550ec9 Modul: F6 — to fredagstråde skrevet Før: 96,7 % Efter: 96,7 % Δ: 0 Grundlag: ingen ændring`
-- `1f45eb4 Modul: F6 — 14-dages plan for spor A Før: 96,7 % Efter: 96,7 % Δ: 0 Grundlag: ingen ændring`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
 
-### 9/11 — værnene dækker nu alle fem copyfiler, ikke fire
+### 9/11 — afslutning: profilen siger nu det samme som tallene
+
+- **Agentprofilen var det sidste sted hvor repoet modsagde sig selv:** den listede **seks** projekter og
+  `rebrand 65,3 %`, mens `projektstatus.json` havde **ni** og 71,3 %. Nu er tabellen skrevet ud af JSON'en
+  (forum 96,7 · site 100 · miljø 60 · plugin 100 · rebrand 71,3 · seo 100 · links 100 · niche 100 · KABINE 48,4),
+  og §7 har fået den regel der blev indført i dag: copy og priser tjekkes med `tools/guide_check.py`, og
+  `--coverage` viser hvad der er copy og hvad der ikke er.
+- **Et sidste fortidslevn:** copyen i `guides-2026-11-03.md` bad om at køre `guide_check.py --live`, men flaget
+  findes ikke længere — netværket er standard. Rettet, så noten ikke sender nogen efter et flag der ikke virker.
+- **Status:** 6 af 6 copy-blokke, 24/24 fixtures, `projektstatus --check` og `samtalepunkter --check` uden drift.
+- **Hvad der reelt er tilbage i hele projektet er ejerens**, ikke agentens: WordPress-skriveadgang (292/296/295,
+  side 550, post 699 — som stadig viser USD), Simply-panelet (subdomæne, DKIM/DMARC, backup-politik), GitHub Pro
+  (branch protection), Printful/færdige mockups (Batch 4 + witchy-tarot), Reddit-app og kanal-tokens, og
+  KABINE's E1–E6. Intet af det kan gættes eller købes af en agent.
+
+### 9/11 — værnene dækker nu alle fem copyfiler, ikke fire### 9/11 — værnene dækker nu alle fem copyfiler, ikke fire
 
 - **Måltallet løj.** `guide_check` meldte «4 af 4 guides», fordi den kun ledte efter filnavnet `guides-*.md`.
   Hub-copyen til `/steampunk-costumes/` var skrevet om 9/11 **uden at blive målt**, og outfit-siden til post 699
