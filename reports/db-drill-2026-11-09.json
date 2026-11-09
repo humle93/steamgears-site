@@ -1,0 +1,23 @@
+{
+ "dato": "2026-11-09",
+ "database": "steamgears_eu_db",
+ "prefix": "clk857797e3d3_",
+ "legacy_tables_excluded": 12,
+ "dump_bytes": 3338987,
+ "dump_sha256": "e1d028e8800a9a625e25474a116683339f48d4d09a5184f55ae117cdfc2100e3",
+ "dump_seconds": 5,
+ "restore_seconds": 6,
+ "parity_seconds": 1,
+ "cleanup_seconds": 1,
+ "rpo_hours": 0,
+ "rto_seconds": 6,
+ "tables_expected": 269,
+ "tables_restored": 269,
+ "row_mismatches": 0,
+ "missing_tables": 0,
+ "dropped_tables": 269,
+ "dropped_views": 4,
+ "left_behind": 0,
+ "errors": {},
+ "ok": true
+}

@@ -30,3 +30,6 @@ artifacts/
 .samtalepunkter-backups/
 # Novamira CLI + dens token (runtime, aldrig i repoet)
 .novamira-global/
+
+# Midlertidige MCP-payloads fra agentsandkassen
+.tmp/

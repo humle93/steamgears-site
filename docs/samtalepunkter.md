@@ -25,8 +25,8 @@ _Opdateret 2026-11-09 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 | Projekt | Status | Grundlag |
 | --- | --- | --- |
 | **steamgears.eu — site-optimering** | **100 %** | 20,95 af 20,95 d (S0 2,35/2,35 · S1 3,6/3,6 · S2 6,9/6,9 · S3 4,05/4,05 · S4 4,05/4,05) |
-| **steamgears.eu — miljø, server og sandbox (S5)** | **51,7 %** | 1,5 af 2,9 d (S5 1,5/2,9) |
-| **Steamgears Autopilot — plugin** | **100 %** | 30,75 af 30,75 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25 · P1E 0,25/0,25 · P1F 0,25/0,25 · P1G 0,5/0,5 · P2F 1,5/1,5 · P3OPT 0,6/0,6 · P3JS 0,3/0,3) |
+| **steamgears.eu — miljø, server og sandbox (S5)** | **58,6 %** | 1,7 af 2,9 d (S5 1,7/2,9) |
+| **Steamgears Autopilot — plugin** | **100 %** | 31 af 31 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25 · P1E 0,25/0,25 · P1F 0,25/0,25 · P1G 0,5/0,5 · P2F 1,5/1,5 · P3OPT 0,6/0,6 · P3JS 0,3/0,3 · P3LIVE 0,25/0,25) |
 | **Dark academia-rebrand** | **71,3 %** | 12,4 af 17,4 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5 · BATCH4 0,5/0,5 · GENTILDELING 0,4/0,4 · MOBIL-OG-SAESON 3/3) |
 | **SEO-indholdsproduktion** | **100 %** | 8 af 8 guides (BATCH 3/3 · COPY 4/4 · CORSET 1/1) |
 | **Døde internlinks** | **100 %** | 39 af 39 links (FIX 39/39) |
@@ -42,8 +42,8 @@ _Opdateret 2026-11-09 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 ### Næste skridt
 
 - **steamgears.eu — site-optimering** — Intet agent-arbejde tilbage i S0–S4: alle fem bands er færdige og målt, og de resterende poster er ejerens og navngivet i §4c og blocked_by. Målt 8/11: 24 produkter (20 publicerede, 4 kladder) i **DKK**. DKK-tabellen fra 2/11 er afregnet **række for række**: af de **38 rækker** (linje 32–69) har **11** et produkt i butikken og står med **tabellens tal ordret** (335/165/400/435/265/180 kr) — målt 11/11 på produktsiden, i JSON-LD, i Store API og i DB med 0 afvigelser — og de **27** øvrige har kun et produkt i **papirkurven** (offentligt 404), så de er dokumenteret som rækker uden produkt med id og status; 0 rækker er uafklarede, og de 13 produkter uden række har uændret pris med id og målt beløb dokumenteret. W3TC kører med **minify, lazy load og database-cache slået til** (192 minificerede filer, 8,08 MB) efter tre gennemførte testordrer (1528/1529/1530, alle annulleret med note); kurv og kasse svarer 200; fri fragt i DK og ingen forsendelse til EU/UK/RoW; Stripe + bankoverførsel; Complianz på EU opt-in. Alle resterende poster er ejerens og står nu samlet i §4d (A–M) med den målte mangel og én konkret handling; målt 8/11 om aftenen er der **ingen** poster tilbage som agenten kan udføre.
-- **steamgears.eu — miljø, server og sandbox (S5)** — Tilbage er kun ejerens fire poster: sandkassen (S5.1, subdomæne + certifikat hos Simply), DKIM/DMARC-rapporterne (S5.7, to DNS-poster i Simplys panel), backup/restore øvet (S5.8, hostpanelet) og branch protection (S5.9, kræver Pro/Team på et privat repo — GitHub svarer 403 »Upgrade to GitHub Pro«, målt 9/11; kør python3 tools/release.py --protection for de fem indstillinger). S5.2 blev læst og lukket 9/11 og står ikke længere tilbage. Målingen holdes op hver nat af tools/natlige-vaern.sh, og rækkefølgen med de fem handlinger står i docs/roadmap.md §4e.
-- **Steamgears Autopilot — plugin** — Agent-scope er færdigt (30,75 af 30,75 d). Ejeren har lagt Pinterest-tokenet ind i WooCommerce-integrationen, og 7.65.0 — som blev lagt på sitet 8/11 gennem MCP (`Plugin_Upgrader` i `execute-php`; `update` svarer nu »Already up to date«) — henter det nu derfra gennem integrationens egen dekryptering: målt 8/11 virker det (konto `cpaleadsis`, id 688980580401955331), men appen mangler scopes `boards:read`, så pin-lister og Pin Analytics kan stadig ikke måles. Næste skridt er ejerens: genforbind Pinterest med board-adgang (eller et developer-token med boards:read + pins:read). Resten af blocked_by står uændret. Målt 8/11 om aftenen er `alert_email` tom, så fejl registreres uden at nogen får mail — det er et ejerpunkt i plugin-roadmappens §8.
+- **steamgears.eu — miljø, server og sandbox (S5)** — Tilbage er fire poster, alle ejerens: sandkassen (S5.1, subdomæne + certifikat hos Simply), DKIM/DMARC (S5.7, to DNS-poster i Simplys panel), de sidste 0,05 d af S5.8 (gendannelse til staging — resten er målt på live 9/11) og branch protection (S5.9, GitHub svarer 403 »Upgrade to GitHub Pro«, målt 9/11).
+- **Steamgears Autopilot — plugin** — Agent-scope er færdigt (31,00 af 31,00 d) og 7.65.5 kører nu på sitet. Det eneste åbne er P1.5's live-verifikation (0,6 d, ejer-blokeret): Pinterest-tokenet mangler `boards:read`, og fem kanaler mangler tokens.
 - **Dark academia-rebrand** — Kun to ting står tilbage: (1) **witchy-tarot** kan først få indhold når ejeren siger ja til at gendanne 567 (Tarot Witchy Tee) — og eventuelt 395/411 — fra papirkurven; derefter fylder `python3 tools/rebrand_apply.py --apply --via-cli` termen automatisk, fordi kortet allerede indeholder dem; (2) **Batch 4-mockups** (5 t) kræver Printful-adgang eller 5–8 færdige billeder pr. produkt.
 - **SEO-indholdsproduktion** — SEO-indholdet er 100 %: fire guides skrevet, tre publiceret, corset-guiden publiceret, 1410 parkeret til september. Ingen åbne poster.
 - **Døde internlinks** — Vedligehold: tjek nye indlæg mod live-URL'er
@@ -51,15 +51,37 @@ _Opdateret 2026-11-09 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `076d464 S5: vejen til 100 % er fem ejerhandlinger, og DKIM-påstanden holdt ikke`
+- `74a5a78 docs: Jungle Scouts formål og brug — og hvad det ikke kan svare på`
 - `5e3e66f Plugin 7.65.4: femten inline side-scripts er blevet syv filer og et localize-objekt`
 - `3b6c61e chore(status): daglig projektstatus 2026-11-09`
 - `d498c04 Rebrand: 1 024 px målt — brudpunktet holder, men produkttitlen tabte 202 px`
 - `22c665b chore(status): daglig projektstatus 2026-11-09`
-- `d6e5736 Rebrand: mellembruddene målt — seks layoutfejl fundet og rettet ved 320–1 023 px`
-- `608b711 chore(status): daglig projektstatus 2026-11-09`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 9/11 (aften) — S5.8 blev et måltal, og plugin 7.65.5 kom i drift
+
+**Backup og gendannelse var en forsikring i roadmappet. Nu er den kørt.** `tools/wp_db_drill.py` dumper databasen med
+`mysqldump`, gendanner den under scratch-prefixet `sgtest_` og sammenligner rækkeantal for **hver** tabel. Målt:
+**3 338 987 bytes / 5 s** dump, **6 s** gendannelse, **269 af 269 tabeller identiske**, 269 tabeller + 4 visninger
+ryddet, **0 tilbage**. RPO 0 t ved kommando, RTO 6 s — skrevet i `docs/release-og-rollback.md` §3.3.
+
+**Tre fælder som en naiv gendannelse falder i:** (1) der kan **ikke** oprettes en ekstra database (`GRANT ALL`
+gælder kun `steamgears_eu_db`; `CREATE DATABASE` svarer 1044), (2) databasen bærer et **gammelt WordPress-prefix**
+`clk4219fc96b5_` med 12 tabeller som `mysqldump` tager med — og den skriver `DROP TABLE IF EXISTS` før hver tabel, så en
+gendannelse med prefix-bytte **overskriver dem** (værktøjet udelader dem på dump-siden), og (3) **visninger står i
+`information_schema` som tabeller**, så `DROP TABLE` efterlader dem — første kørsel droppede 273 og efterlod 4.
+
+**Plugin 7.65.4 var i repoet men ikke i drift.** Sitet kørte 7.65.0, så P3.7's og P3.8's besparelser var bygget uden at
+være live. Zip'en gik gennem MCP i to base64-dele og blev installeret med `Plugin_Upgrader::install(…, overwrite_package)`;
+live kører nu **7.65.5** (bogføringsrelease fordi `ROADMAP.md` er en del af zip'en), og fire kontrollerede filer er
+**byte-identiske** mellem site og repo. Målt live: dashboard **17 566 bytes HTML med 0 inline `<script>` og 0 inline
+`<style>`**, syv side-scripts, fire sider 200 og `/sgap/v1/tick` 200.
+
+**S5.9 er fortsat ejerens:** GitHub svarer **403 »Upgrade to GitHub Pro or make this repository public«** på branch
+protection for et privat repo på Free-planen.
 
 ### 9/11 — vejen til 100 % er fem ejerhandlinger, og DKIM fandtes ikke
 

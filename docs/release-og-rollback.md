@@ -117,6 +117,31 @@ Kode rulles aldrig tilbage for at rette data. En gendannelse er en **beslutning*
 - Gendan først til **staging**, mål at butikken virker, og først derefter til produktion.
 - Skriv tidspunkt, backup-id og hvad der gik tabt i `docs/library/`.
 
+**Målt 9/11 2026 — vores egen vej, ikke kun værtens:** `python3 tools/wp_db_drill.py` tager en dump med
+`mysqldump` og **beviser** at den kan afspilles, uden at røre de levende tabeller:
+
+| Måltal | Målt 9/11 | Hvordan |
+| --- | --- | --- |
+| RPO (hvor meget data må forsvinde) | **0 t** ved kommando · 24 t på værtens daglige backup | dump tages on-demand; værtens kadence kan ikke ses udefra |
+| Dump | **3 338 987 bytes** (gzip) på **5 s**, sha256 `e1d028e8…` | 269 tabeller, 64,4 MB rå |
+| RTO (gendannelse) | **6 s** på serveren · + tid til staging/live-flyt | gendannelse i scratch-prefix `sgtest_` |
+| Bevis for indhold | **269 af 269 tabeller med identisk rækkeantal**, 0 mangler | `COUNT(*)` pr. tabel på begge sider |
+| Oprydning | 269 tabeller + 4 visninger droppet, **0 tilbage** | `DROP TABLE` + `DROP VIEW` |
+
+Tre ting skal man vide før man bruger den i en krise:
+
+1. **Der kan ikke oprettes en ekstra database.** `GRANT ALL` gælder kun `steamgears_eu_db`, så
+   `CREATE DATABASE` svarer `ERROR 1044` — gendannelsen skal ske i samme database under et scratch-prefix,
+   og alle tabeller skal ryddes bagefter (værktøjet fejler hvis noget står tilbage).
+2. **Et gammelt WordPress-prefix ligger stadig i databasen** (`clk4219fc96b5_`, 12 tabeller, 136 rækker).
+   En dump tager dem med, og en naiv gendannelse overskriver dem, fordi `mysqldump` skriver
+   `DROP TABLE IF EXISTS` før hver tabel. Værktøjet udelader dem på dump-siden.
+3. **Visninger står i `information_schema` som tabeller.** `DROP TABLE` fejler på dem, så en oprydning der
+   kun bruger `DROP TABLE` efterlader dem — de skal droppes med `DROP VIEW` (4 i denne database).
+
+En gendannelse er stadig en beslutning: prefix-bytte ændrer også data (fx `{prefix}user_roles` i `options`),
+så en afspilning beviser at dumpet er komplet — ikke at siden ville virke urørt i produktion.
+
 ---
 
 ## 4. Hvornår rulles der tilbage
