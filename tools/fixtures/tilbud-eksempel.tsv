@@ -1,0 +1,4 @@
+navn	incoterms	pris_100	pris_300	pris_500	pris_1000	fragt_pr_stk	told_pct	toldbehandling	tpl	moq	karton_laengde	karton_vaegt	hs	oprindelse	proeve_pris	gpsr	belastningstest	eu_ansvarlig	levering_dage	landed_ifoelge
+A · FOB fra CN	FOB	268	232	214	198	38	0	12	0	300	112	13,4	9403 20 80	CN	520	ja	ja	nej	35	282
+B · DAP fra PL	DAP	255	240	232	225			0	0	200	118	15,2	9403 20 80	PL	480	ja	ja	ja	21	240
+C · EXW fra CN	EXW	199	168	152	141	52	0	18	6	500	132	16,8	9403 20 80	CN	700	nej	nej	nej	45	

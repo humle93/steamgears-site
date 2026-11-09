@@ -64,6 +64,8 @@ check "php -l (plugins)"                     lint_php
 check "projektstatus --selftest"             python3 projektstatus.py --selftest
 check "projektstatus --check"                python3 projektstatus.py --check
 check "commit-besked --selftest"             python3 tools/commit_check.py --selftest
+check "tilbudssammenligning --selftest"      python3 tools/tilbuds_sammenligning.py --selftest
+check "tilbudssammenligning (eksempelark)"   python3 tools/tilbuds_sammenligning.py tools/fixtures/tilbud-eksempel.tsv --cpa 281
 check "kampagne-indlæser --selftest"         python3 tools/load_campaign.py --selftest
 check "plugin-smoke"                         "$PHP_BIN" plugins/tests/smoke.php
 check "updater-cache"                       "$PHP_BIN" plugins/tests/updater_cache.php
