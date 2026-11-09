@@ -31,6 +31,7 @@ _Opdateret 2026-11-09 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 | **SEO-indholdsproduktion** | **100 %** | 8 af 8 guides (BATCH 3/3 · COPY 4/4 · CORSET 1/1) |
 | **Døde internlinks** | **100 %** | 39 af 39 links (FIX 39/39) |
 | **Niche-butik — plugin P4** | **100 %** | 1 af 1 d (P4PLAN 0,3/0,3 · P4APPLY 0,25/0,25 · P4UI 0,2/0,2 · P4SHIP 0,1/0,1 · P4LIVE 0,15/0,15) |
+| **KABINE — bil-interiør som ny butik** | **36,5 %** | 9,5 af 26 t (B1 2/2 · B2 2/2 · B3 2/2 · B4 2/2 · B5 1,5/1,5 · B6 0/6 · B7 0/4 · B8 0/2,5 · B9 0/4) |
 
 ### Åbne blokeringer
 
@@ -38,6 +39,7 @@ _Opdateret 2026-11-09 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 - **steamgears.eu — miljø, server og sandbox (S5)** — Subdomæne + certifikat hos Simply (S5.1); DNS-panelet hos Simply til DKIM og DMARC-rapporter (S5.7); hostpanelet til backup og restore (S5.8); GitHub Pro/Team til branch protection og environment-regler (S5.9). Ingen af de fire kan lukkes af agenten — hver kræver en konto eller et panel ejeren råder over.
 - **Steamgears Autopilot — plugin** — Syv led kræver ejeren, alle målt 8/11: (1) **Pinterest-scope** — tokenet ligger nu i WooCommerce-integrationen og er gyldigt (`/user_account` 200 som `cpaleadsis`, id 688980580401955331), men appen har kun ads/billing/catalogs/pins/user_accounts og **mangler `boards:read`**, så `/pins` og `/boards` afvises (målt 17:25Z, kanalstatus står som `needs_scope`); (2) **de øvrige kanal-tokens** — Instagram, Bluesky, Mastodon, Telegram og Facebook har intet token (5 af 6 mangler); (3) **AIMLAPI-kredit** — sidste generering 7/11 fejlede med »You've run out of funds«; (4) **`sgap_alert_email`** er tom, så fejl registreres men ingen mail sendes; (5) **full auto vs. godkendelse** — `sgap_full_auto_enabled = no` og 40 elementer venter; (6) **distributionsvej** — `publish_mode = rss` og 0 Publer-konti; (7) **P2.1–P2.3** kræver ejerens beslutning om Command Center-retningen. Intet af det må gættes.
 - **Dark academia-rebrand** — To led kræver ejerhandling, målt 8/11: (1) **de 29 trash'ede designs** — herunder de tre produkter der er witchy-tarots eneste kandidater (567, 395, 411); et ja/nej til genoplivning er nok, og tildelingen kører selv bagefter; (2) **Batch 4-mockups (5 t)** — Printful-adgang eller 5–8 færdige billeder pr. produkt; målt 20 publicerede med 22 billeder, 0 med 3 eller flere, 62 billedplaceringer mangler, og repoet har 0 trykfiler og 0 tøj-skabeloner. Kollektionstildelingen er ikke længere blokeret: den blev udført 8/11 gennem Novamira-MCP og målt stabil.
+- **KABINE — bil-interiør som ny butik** — Seks ejerhandlinger, målt 9/11: E1 CVR, telefon, adresse og bankaftale til butikken (uden dem ingen faktura, ingen MobilePay, ingen lovlig handel); E2 leverandørvalg med GPSR-dokumentation og to prøver (ellers er indkøbspris, kvalitet og leveringstid gæt); E3 registrering i producentregistret for emballage (markedsføring må ikke starte før); E4 domænet kabine.dk eller et alternativ plus Shopify-konto; E5 beslutning om start 9/11 i Q4-priser eller 5/1 til lavere CPA; E6 annoncekonto med betalingsmetode og 10.000 kr. Ingen af de seks kan lukkes af agenten — hver kræver en konto, et panel eller en underskrift.
 
 ### Næste skridt
 
@@ -48,18 +50,69 @@ _Opdateret 2026-11-09 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 - **SEO-indholdsproduktion** — SEO-indholdet er 100 %: fire guides skrevet, tre publiceret, corset-guiden publiceret, 1410 parkeret til september. Ingen åbne poster.
 - **Døde internlinks** — Vedligehold: tjek nye indlæg mod live-URL'er
 - **Niche-butik — plugin P4** — Færdig som roadmap-punkt P4: modulet er kørt mod det levende site (WordPress 7.1.4, WooCommerce 11.2.2) med 8 produktkladder, 5 kollektioner, en sideskits og en navigation, og rullet tilbage til præcis udgangstilstanden. Næste skridt er ejerens: Printful-adgang, publicering og de øvrige punkter i readiness-listen. Målt 8/11 om aftenen er `alert_email` tom, så fejl registreres uden at nogen får mail — det er et ejerpunkt i plugin-roadmappens §8.
+- **KABINE — bil-interiør som ny butik** — Fem forberedelsesmoduler er færdige (9,5 af 26 t, 36,5 %): niche og brand valgt, enhedsøkonomi regnet, 30-dages plan med KPI-gates skrevet, ti hooks som manuskript, og kravlisten for butik, betaling, tracking og jura. Resten er butiksopsætning (6 t), leverandør og prøver (4 t), juridiske sider (2,5 t) og første annoncerunde (4 t) — alle fire starter først når ejeren har leveret E1-E6.
 
 ### Seneste commits
 
+- `dd0ca40 chore(status): daglig projektstatus 2026-11-09`
+- `a7e3dee S5.8: backup og gendannelse øvet — 269 af 269 tabeller identiske`
+- `94fa623 ROI-modellen for en dropshipping-niche er nu et dokument, ikke en engangsberegning`
 - `076d464 S5: vejen til 100 % er fem ejerhandlinger, og DKIM-påstanden holdt ikke`
 - `74a5a78 docs: Jungle Scouts formål og brug — og hvad det ikke kan svare på`
 - `5e3e66f Plugin 7.65.4: femten inline side-scripts er blevet syv filer og et localize-objekt`
-- `3b6c61e chore(status): daglig projektstatus 2026-11-09`
-- `d498c04 Rebrand: 1 024 px målt — brudpunktet holder, men produkttitlen tabte 202 px`
-- `22c665b chore(status): daglig projektstatus 2026-11-09`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 9/11 (aften) — bil-interiør valgt som niche, og valget er nu et regnestykke
+
+**Fire nicher blev vejet, og bil-interiør/detailing blev valgt.** Sensorisk/neurodivergent kræver
+ægte community-troværdighed i kreativet, katte-tech trækker elektronik, CE/WEEE og support ind, og
+søvn er mættet på kreativt niveau med den højeste annoncepris. Bil-interiør er den mindst dårlige
+niche for en ny butik: kreativet kan optages hånd-only uden ansigt, efterspørgslen er evergreen, der
+findes ingen pasform og dermed lav retur. **Ikke den mest spændende — den mest overlevelige.**
+
+**Brand og produktstige er besluttet:** KABINE (»kabinen« er bilens interiør på dansk), hero Kabine
+Kit 01 til 499 kr., Kit 02 Aflevering til 449 kr. med egen landingsside, og sæde-gap-organizeren
+(199 kr., 129 kr. som order bump) som mer-salg — aldrig som selvstændig annonce. Væske i pakken er
+fravalgt: rensemidler er farligt gods, må ikke flyve og kræver CLP + sikkerhedsdatablad, så væsken
+købes i EU.
+
+**Målt gennem de fire formler i `roi-model-dropshipping-2026-11-09.md` §2** (aritmetikken er kørt med
+Python, ikke i hovedet): hero-DB **222,95 kr.**, blandet AOV **556,65 kr.**, blandet DB **248,82 kr.**
+og break-even-ROAS **2,24x**. Tre fund styrer planen: (1) **CPA over 249 kr. er et underskud, uanset
+volumen** — der findes ingen ordremængde, der redder en negativ enhedsøkonomi; (2) 199-kroners-varen
+taber penge allerede ved CPA 70 og skal derfor kun være bump; (3) bundlen er her et **AOV-løft**
+(2,24x mod 2,25x) og ikke den redningsplanke, den var i småhunde-casen — bilvarens højere pris bærer
+annoncerne selv.
+
+**Måned 1 er kalibreret til at lande på nul:** 10.000 kr. i fire uger med stigende CPA-præcision giver
+45,68 ordrer, og der kræves 45,82 — resultatet er **−34,30 kr.** Det er med vilje: måned 1 er en
+udgift til markedsundersøgelse, og det, der ejes 8. december, er anmeldelser, hooks og pixel-data.
+
+**To fejl blev fanget i eget arbejde, før de nåede dokumentet.** ROI-udtrykket dividerede et årligt
+resultat med en månedlig nævner og gav 414-731 % i stedet for 34-61 %; og order bump'en var sat ind i
+CPA-tabellen, hvor den per definition ikke kan tabe, fordi den ikke har nogen anskaffelsesomkostning —
+en kategorifejl, der ville have forkastet et mer-salg med 62,20 kr. i ren margin. PDF'ens visuelle
+kontrol afslørede desuden to ting, tallene ikke kunne: kolonneoverskrifter der brækkede midt i ordet,
+og en CPA-tabel så bred at tallene brød over to linjer. Begge er rettet (tabellen er transponeret), så
+eksporten er læsbar og ikke bare korrekt.
+
+**Fælde for næste pas:** parenteser i et **modulnavn** bryder commit-værnets parsing af grundlaget.
+`basis_problem()` fjerner `\([^)]*\)` fra rækkens basis, og et modulnavn som »Første annoncerunde
+(uge 1-2)« får regexen til at stoppe ved den indre parentes — så blev »9,5 af 26 t« læst som
+»9,5 af 26 t 0/4)« og beskeden afvist. Modulnavne skal derfor være uden parenteser; rækken blev
+genereret igen efter omdøbningen, og grundlaget kan nu citeres som `9,5 af 26 t`.
+
+**Statusmæssigt er det en ny gren, ikke et nyt projekt i den gamle betydning:** `bilinterioer` er lagt
+i `projektstatus.json` som det ottende projekt med **baseline 36,5 % (9,5 af 26 t)** — de fem
+forberedelsesmoduler er færdige, mens butiksopsætning, leverandør, jura og første annoncerunde først
+kan starte når ejeren har leveret E1-E6 (CVR/bank, leverandør med GPSR-dokumentation,
+emballageregistrering, domæne, startdato og annoncekonto). Dagens tidligere ROI-dokument fik med vilje
+ingen projektlinje: det var ét research-dokument, dette er en køreplan med budget.
+
+Bevis: [library/bilinterioer-launch-2026-11-09.md](library/bilinterioer-launch-2026-11-09.md) og
+[reports/bilinterioer-launch-2026-11-09.pdf](../reports/bilinterioer-launch-2026-11-09.pdf).
 
 ### 9/11 (aften) — S5.8 blev et måltal, og plugin 7.65.5 kom i drift
 

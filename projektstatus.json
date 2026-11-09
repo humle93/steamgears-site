@@ -353,6 +353,88 @@
         }
       ],
       "verified": true
+    },
+    {
+      "id": "bilinterioer",
+      "name": "KABINE — bil-interiør som ny butik",
+      "note": "Forberedelse frem mod første annonce. Model, tal og plan står i docs/library/bilinterioer-launch-2026-11-09.md (+ PDF). Aritmetikken er kørt gennem de fire formler i roi-model-dropshipping-2026-11-09.md §2 og verificeret med Python 9/11.",
+      "next": "Fem forberedelsesmoduler er færdige (9,5 af 26 t, 36,5 %): niche og brand valgt, enhedsøkonomi regnet, 30-dages plan med KPI-gates skrevet, ti hooks som manuskript, og kravlisten for butik, betaling, tracking og jura. Resten er butiksopsætning (6 t), leverandør og prøver (4 t), juridiske sider (2,5 t) og første annoncerunde (4 t) — alle fire starter først når ejeren har leveret E1-E6.",
+      "blocked_by": "Seks ejerhandlinger, målt 9/11: E1 CVR, telefon, adresse og bankaftale til butikken (uden dem ingen faktura, ingen MobilePay, ingen lovlig handel); E2 leverandørvalg med GPSR-dokumentation og to prøver (ellers er indkøbspris, kvalitet og leveringstid gæt); E3 registrering i producentregistret for emballage (markedsføring må ikke starte før); E4 domænet kabine.dk eller et alternativ plus Shopify-konto; E5 beslutning om start 9/11 i Q4-priser eller 5/1 til lavere CPA; E6 annoncekonto med betalingsmetode og 10.000 kr. Ingen af de seks kan lukkes af agenten — hver kræver en konto, et panel eller en underskrift.",
+      "modules": [
+        {
+          "id": "b1",
+          "name": "Niche-valg, brand og produktstige",
+          "done": 2,
+          "total": 2,
+          "unit": "t",
+          "note": "Bil-interiør valgt frem for sensorisk/neurodivergent, katte-tech og søvn; brand KABINE; hero Kabine Kit 01 (499), Kit 02 Aflevering (449) og sæde-gap-organizer (199) som order bump (129); væske i pakken fravalgt på grund af ADR, CLP og flyveforbud."
+        },
+        {
+          "id": "b2",
+          "name": "ROI-model og enhedsøkonomi",
+          "done": 2,
+          "total": 2,
+          "unit": "t",
+          "note": "Syv input pr. produkt gennem de fire formler: hero-DB 222,95 kr., blandet AOV 556,65 kr., blandet DB 248,82 kr. og break-even ROAS 2,24x. Tre fund: break-even-CPA er 249 kr., 199-varen taber penge allerede ved CPA 70, og bundlen er et AOV-løft (2,24x mod 2,25x) — ikke en redningsplanke som i småhunde-casen."
+        },
+        {
+          "id": "b3",
+          "name": "30-dages plan og KPI-gates",
+          "done": 2,
+          "total": 2,
+          "unit": "t",
+          "note": "9/11-8/12 med 800/1.700/3.000/4.500 kr. i spend, KPI-gate pr. uge, dag-14-gate, kill- og scale-regler, kontantbehov 15.700 kr. og den kalibrerede måned 1: 45,68 ordrer mod 45,82 der kræves for at gå i nul (−34,30 kr.)."
+        },
+        {
+          "id": "b4",
+          "name": "Kreativt: ti hooks som manuskript",
+          "done": 2,
+          "total": 2,
+          "unit": "t",
+          "note": "Ti hånd-only manuskripter på 15-30 sek. med de tre første sekunder angivet (sømmen, ASMR, leasing, prisen, tre steder, kæresten, gap, depositum, timeren, gaven) plus to regler: intet andet brand i hooket, og ingen påstand uden bevis i samme klip."
+        },
+        {
+          "id": "b5",
+          "name": "Kravliste: butik, betaling, tracking og jura",
+          "done": 1.5,
+          "total": 1.5,
+          "unit": "t",
+          "note": "Ti krav med begrundelse og status: MobilePay/Apple Pay/kort, Meta CAPI + Consent Mode v2, 1-3 dages levering, 14 dages fortrydelse og 2 års reklamation, GPSR med EU-ansvarlig person, emballageproducentansvar, ingen falsk før-pris, værdi under 150 EUR (IOSS), ingen væske i fly, TARIC før indkøbsprisen er reel."
+        },
+        {
+          "id": "b6",
+          "name": "Butiksopsætning: Shopify, MobilePay, CAPI, sider",
+          "done": 0,
+          "total": 6,
+          "unit": "t",
+          "note": "Ikke startet: kræver E4 (domæne og konto)."
+        },
+        {
+          "id": "b7",
+          "name": "Leverandørvalg, GPSR-dokumentation og prøver",
+          "done": 0,
+          "total": 4,
+          "unit": "t",
+          "note": "Ikke startet: kræver E2. Indkøb 85-125 kr. og fragt 45 kr. er estimater indtil der ligger tilbud."
+        },
+        {
+          "id": "b8",
+          "name": "Juridiske sider: handelsbetingelser, retur, privatliv",
+          "done": 0,
+          "total": 2.5,
+          "unit": "t",
+          "note": "Ikke startet: kræver E1 (CVR, adresse, telefon) og E3."
+        },
+        {
+          "id": "b9",
+          "name": "Første annoncerunde uge 1-2",
+          "done": 0,
+          "total": 4,
+          "unit": "t",
+          "note": "Ikke startet: kræver E5 og E6."
+        }
+      ],
+      "verified": false
     }
   ],
   "history": [
@@ -1832,6 +1914,15 @@
       "after": 58.6,
       "delta": 6.9,
       "basis": "1,7 af 2,9 d"
+    },
+    {
+      "date": "2026-11-09",
+      "project": "KABINE — bil-interiør som ny butik",
+      "module": "baseline",
+      "before": null,
+      "after": 36.5,
+      "delta": null,
+      "basis": "9,5 af 26 t (Niche-valg, brand og produktstige 2/2 · ROI-model og enhedsøkonomi 2/2 · 30-dages plan og KPI-gates 2/2 · Kreativt: ti hooks som manuskript 2/2 · Kravliste: butik, betaling, tracking og jura 1,5/1,5 · Butiksopsætning: Shopify, MobilePay, CAPI, sider 0/6 · Leverandørvalg, GPSR-dokumentation og prøver 0/4 · Juridiske sider: handelsbetingelser, retur, privatliv 0/2,5 · Første annoncerunde uge 1-2 0/4)"
     }
   ]
 }
