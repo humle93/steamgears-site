@@ -94,7 +94,7 @@ Dette kort er afstemt mod målinger og status pr. **8/11 2026**. Nyere live-tal 
 
 **Pluginnet** (`plugins/steamgears-autopilot/`)
 
-- **Version i repo mod live:** repo **7.65.2** (kode- og UI-optimering), live **7.65.0,
+- **Version i repo mod live:** repo **7.65.3** (kode- og UI-optimering plus dokumentations-patch), live **7.65.0,
   aktiv** (målt 8/11 om aftenen; opdateringen blev lagt på gennem `Plugin_Upgrader`, og
   `steamgears-autopilot/update` svarer »Already up to date (7.65.0)« på sitet).
   7.64.7 er tokenrettelsen, 7.64.8 gør kanalstatus entydig, og 7.64.9 gør P1.5 målbar

@@ -96,6 +96,10 @@ check "anmeldelsesmail"                      "$PHP_BIN" wordpress/tests/test-rev
 # S5.3–S5.6: hardningen retter seks ting der alle er usynlige når de fejler — en header
 # der ikke sendes, giver ingen fejlkode. Testen kræver derfor hver regel for sig, offline.
 check "hardning (S5)"                        "$PHP_BIN" wordpress/tests/test-hardening.php
+# S5.10: hardningen ligger på sitet fra 9/11, så den udefra målte tilstand holdes op hver nat.
+# Testen ovenfor beviser at reglerne er kodet rigtigt; denne måling beviser at de også når
+# klienten gennem W3TCs sidecache — det var netop der de tre headere forsvandt.
+check "S5-måling (live)"                     python3 tools/s5_measure.py --strict
 # S5.9: promote-gaten. Preflighten er det eneste der står mellem et uheld og et
 # release-tag, så dens 24 fixtures kører hver nat — de rammer ikke git-historikken.
 check "release-gate (S5.9)"                  python3 tools/test_release.py

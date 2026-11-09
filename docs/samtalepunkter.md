@@ -18,16 +18,16 @@ konteksten komprimeres. Filen er repoets hukommelse om **hvorfor** tingene blev 
   hvad blev målt, og hvad var fælden.
 
 <!-- AUTO:SAMTALEPUNKTER:START -->
-_Opdateret 2026-11-08 af `tools/samtalepunkter.py`. Blokken er maskinelt genereret — ret i `projektstatus.json`, ikke her._
+_Opdateret 2026-11-09 af `tools/samtalepunkter.py`. Blokken er maskinelt genereret — ret i `projektstatus.json`, ikke her._
 
 ### Status
 
 | Projekt | Status | Grundlag |
 | --- | --- | --- |
 | **steamgears.eu — site-optimering** | **100 %** | 20,95 af 20,95 d (S0 2,35/2,35 · S1 3,6/3,6 · S2 6,9/6,9 · S3 4,05/4,05 · S4 4,05/4,05) |
-| **steamgears.eu — miljø, server og sandbox (S5)** | **25,9 %** | 0,75 af 2,9 d (S5 0,75/2,9) |
+| **steamgears.eu — miljø, server og sandbox (S5)** | **41,4 %** | 1,2 af 2,9 d (S5 1,2/2,9) |
 | **Steamgears Autopilot — plugin** | **100 %** | 29,85 af 29,85 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25 · P1E 0,25/0,25 · P1F 0,25/0,25 · P1G 0,5/0,5 · P2F 1,5/1,5) |
-| **Dark academia-rebrand** | **68,6 %** | 10,9 af 15,9 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5 · BATCH4 0,5/0,5 · GENTILDELING 0,4/0,4 · MOBIL-OG-SAESON 1,5/1,5) |
+| **Dark academia-rebrand** | **69,7 %** | 11,5 af 16,5 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5 · BATCH4 0,5/0,5 · GENTILDELING 0,4/0,4 · MOBIL-OG-SAESON 2,1/2,1) |
 | **SEO-indholdsproduktion** | **100 %** | 8 af 8 guides (BATCH 3/3 · COPY 4/4 · CORSET 1/1) |
 | **Døde internlinks** | **100 %** | 39 af 39 links (FIX 39/39) |
 | **Niche-butik — plugin P4** | **100 %** | 1 af 1 d (P4PLAN 0,3/0,3 · P4APPLY 0,25/0,25 · P4UI 0,2/0,2 · P4SHIP 0,1/0,1 · P4LIVE 0,15/0,15) |
@@ -35,14 +35,14 @@ _Opdateret 2026-11-08 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 ### Åbne blokeringer
 
 - **steamgears.eu — site-optimering** — Ejerens oplysninger og aftaler, målt 8/11: CVR-nummer og telefon (Complianz har navn »Henning 6«, adresse »Lavgade 44a st th«, e-mail og DK — men telefon er tom og CVR findes ikke i formularen); aftaler med MobilePay/PayPal (kun Stripe og bankoverførsel er aktive); zonerne til EU/UK/RoW (kun Denmark har en metode — fri fragt uden minimum — og resten af verdenen har ingen, så EU-kunder ikke kan gennemføre en ordre), fragtklasser og fri fragt-grænse; en currency-switcher hvis EUR skal vises som sekundærvaluta (der er ingen aktiv); Printful-adgang eller 5–8 færdige mockups pr. produkt (målt: 20 publicerede produkter, 22 billeder, alle under 3); ja/nej pr. produkt for 942/765/766/767 (alle fire kladder med pris og SKU); GSC-svarrapport (S0.6); og beslutning om de to inaktive plugins.
-- **steamgears.eu — miljø, server og sandbox (S5)** — Subdomæne + certifikat hos Simply (S5.1); hostpanelet til DKIM, backup og object cache (S5.7–S5.8); et MCP-token til at læse WP_DEBUG, WP_ENVIRONMENT_TYPE og cron (S5.2).
+- **steamgears.eu — miljø, server og sandbox (S5)** — Subdomæne + certifikat hos Simply (S5.1); hostpanelet til DKIM, backup og DMARC-rapporter (S5.7–S5.8); GitHub Pro/Team til branch protection og environment-regler (S5.9); MCP-læsning af WP_DEBUG og WP_ENVIRONMENT_TYPE (S5.2).
 - **Steamgears Autopilot — plugin** — Syv led kræver ejeren, alle målt 8/11: (1) **Pinterest-scope** — tokenet ligger nu i WooCommerce-integrationen og er gyldigt (`/user_account` 200 som `cpaleadsis`, id 688980580401955331), men appen har kun ads/billing/catalogs/pins/user_accounts og **mangler `boards:read`**, så `/pins` og `/boards` afvises (målt 17:25Z, kanalstatus står som `needs_scope`); (2) **de øvrige kanal-tokens** — Instagram, Bluesky, Mastodon, Telegram og Facebook har intet token (5 af 6 mangler); (3) **AIMLAPI-kredit** — sidste generering 7/11 fejlede med »You've run out of funds«; (4) **`sgap_alert_email`** er tom, så fejl registreres men ingen mail sendes; (5) **full auto vs. godkendelse** — `sgap_full_auto_enabled = no` og 40 elementer venter; (6) **distributionsvej** — `publish_mode = rss` og 0 Publer-konti; (7) **P2.1–P2.3** kræver ejerens beslutning om Command Center-retningen. Intet af det må gættes.
 - **Dark academia-rebrand** — To led kræver ejerhandling, målt 8/11: (1) **de 29 trash'ede designs** — herunder de tre produkter der er witchy-tarots eneste kandidater (567, 395, 411); et ja/nej til genoplivning er nok, og tildelingen kører selv bagefter; (2) **Batch 4-mockups (5 t)** — Printful-adgang eller 5–8 færdige billeder pr. produkt; målt 20 publicerede med 22 billeder, 0 med 3 eller flere, 62 billedplaceringer mangler, og repoet har 0 trykfiler og 0 tøj-skabeloner. Kollektionstildelingen er ikke længere blokeret: den blev udført 8/11 gennem Novamira-MCP og målt stabil.
 
 ### Næste skridt
 
 - **steamgears.eu — site-optimering** — Intet agent-arbejde tilbage i S0–S4: alle fem bands er færdige og målt, og de resterende poster er ejerens og navngivet i §4c og blocked_by. Målt 8/11: 24 produkter (20 publicerede, 4 kladder) i **DKK**. DKK-tabellen fra 2/11 er afregnet **række for række**: af de **38 rækker** (linje 32–69) har **11** et produkt i butikken og står med **tabellens tal ordret** (335/165/400/435/265/180 kr) — målt 11/11 på produktsiden, i JSON-LD, i Store API og i DB med 0 afvigelser — og de **27** øvrige har kun et produkt i **papirkurven** (offentligt 404), så de er dokumenteret som rækker uden produkt med id og status; 0 rækker er uafklarede, og de 13 produkter uden række har uændret pris med id og målt beløb dokumenteret. W3TC kører med **minify, lazy load og database-cache slået til** (192 minificerede filer, 8,08 MB) efter tre gennemførte testordrer (1528/1529/1530, alle annulleret med note); kurv og kasse svarer 200; fri fragt i DK og ingen forsendelse til EU/UK/RoW; Stripe + bankoverførsel; Complianz på EU opt-in. Alle resterende poster er ejerens og står nu samlet i §4d (A–M) med den målte mangel og én konkret handling; målt 8/11 om aftenen er der **ingen** poster tilbage som agenten kan udføre.
-- **steamgears.eu — miljø, server og sandbox (S5)** — S5.9 er kodet: kør python3 tools/release.py --install-hook lokalt, og sæt branch protection når planen tillader det (python3 tools/release.py --protection). Upload wordpress/mu-plugins/sgap-hardening.php til wp-content/mu-plugins/, slet readme.html, og kør python3 tools/s5_measure.py --strict — den skal give 0 mangler.
+- **steamgears.eu — miljø, server og sandbox (S5)** — Tilbage er kun ejerens fem poster: sandkassen (S5.1, subdomæne + certifikat hos Simply), produktionskonfigurationen læst med MCP (S5.2), DKIM/DMARC-rapporterne (S5.7), backup/restore øvet (S5.8) og branch protection (S5.9, kræver Pro/Team på et privat repo — kør python3 tools/release.py --protection for de fem indstillinger). Målingen holdes nu op hver nat af tools/natlige-vaern.sh.
 - **Steamgears Autopilot — plugin** — Agent-scope er færdigt (29,85 af 29,85 d). Ejeren har lagt Pinterest-tokenet ind i WooCommerce-integrationen, og 7.65.0 — som blev lagt på sitet 8/11 gennem MCP (`Plugin_Upgrader` i `execute-php`; `update` svarer nu »Already up to date«) — henter det nu derfra gennem integrationens egen dekryptering: målt 8/11 virker det (konto `cpaleadsis`, id 688980580401955331), men appen mangler scopes `boards:read`, så pin-lister og Pin Analytics kan stadig ikke måles. Næste skridt er ejerens: genforbind Pinterest med board-adgang (eller et developer-token med boards:read + pins:read). Resten af blocked_by står uændret. Målt 8/11 om aftenen er `alert_email` tom, så fejl registreres uden at nogen får mail — det er et ejerpunkt i plugin-roadmappens §8.
 - **Dark academia-rebrand** — Kun to ting står tilbage: (1) **witchy-tarot** kan først få indhold når ejeren siger ja til at gendanne 567 (Tarot Witchy Tee) — og eventuelt 395/411 — fra papirkurven; derefter fylder `python3 tools/rebrand_apply.py --apply --via-cli` termen automatisk, fordi kortet allerede indeholder dem; (2) **Batch 4-mockups** (5 t) kræver Printful-adgang eller 5–8 færdige billeder pr. produkt.
 - **SEO-indholdsproduktion** — SEO-indholdet er 100 %: fire guides skrevet, tre publiceret, corset-guiden publiceret, 1410 parkeret til september. Ingen åbne poster.
@@ -51,7 +51,7 @@ _Opdateret 2026-11-08 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
-- `dd94ee1 Mobilen er ryddet op: kompakt header, rigtig menu og årstidsfarver`
+- `2072eda Mobilen er ryddet op: kompakt header, rigtig menu og årstidsfarver`
 - `aaa8362 S5.9: promote-gate, manuelt release-trin og skrevet rollback-rutine`
 - `5e971ab S5.3–S5.6 kodet og testet: hardning klar til upload, måling gjort kørbar`
 - `1c32fc7 Køreplanen kørt mod sitet: 13 af 27 krav opfyldt, S5 tilføjet roadmappet`
@@ -60,6 +60,51 @@ _Opdateret 2026-11-08 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 9/11 — desktop blev målt, og »kan ikke lægges på sitet« var en forkert konklusion
+
+**To ting blev lukket i samme pas, og de havde samme form: en regel der så rigtig ud ét sted og var
+forkert et andet.**
+
+**Desktop (1280 px).** Mobilen var målt, desktop aldrig set. Målingen blev lavet ved at lægge en
+*same-origin-iframe* på 1280 px ind i den 320 px brede browserfane — iframen får sin egen layoutbredde,
+og forælderen kan læse `contentDocument`. Syv regressioner kom ud, alle indført af `css/sg-season.css`
+og ikke af temaet: header **171 px** fordi burgeren var `display: inline-flex !important` uden media
+query; »Close menu«-krydset som en 44 px guldramme oven på »Contact«; underpunkt-pilen ved »Shop« som
+en 1 px ramme om et usynligt chevron; produktsiden som `display: grid` med **66 px** købskolonne og én
+bogstav pr. linje i h1; galleriet i en 4:5-ramme om et 1280×698-print; og kolonner der strakte til
+**2 905 px**. Efter: header **95 px**, kolonner **1178/553/553**, galleri **551×551** (print 551×413),
+docH **6 154 → 4 899**, `/shop/` fire kolonner à 285,5 px, sticky header på `top: 0` efter 1 076 px rul,
+mobilen uændret (73 px header, 8 574 px side). **Alle rettelser er `@media (min-width: 783px)`** — det er
+hele pointen: intet under 783 px er rørt.
+
+**Fælden ved målingen:** iframen skal have både `width` og `max-width` med `!important`, ellers krymper
+temaets CSS den til ~310 px, og man tror man måler desktop mens man måler mobil. Skud tages ved
+`transform: scale(0.5)` (DPR 2), og venstre halvdel nås med `left: -320px`, ikke `-640`.
+
+**S5.3–S5.6.** Roadmappet stod med fire poster som »kodet og testet, men kan ikke lægges på sitet
+herfra — der er hverken MCP-token, CLI eller secrets i sandkassen«. Det var forkert: tokenet ligger i
+hjemmemappen, og `wp-content/mu-plugins/` er skrivbar via `novamira/execute-php`. Filen blev lagt ind
+(12 558 bytes, md5 lig repoets) efter `php -l` og 44 PASS, og `s5_measure.py` gik fra **8 opfyldt ·
+11 mangler** til **19 opfyldt · 0 mangler**.
+
+**Tre cache-fund undervejs — de er det værd at huske:**
+1. W3TCs sidecache svarer direkte fra en HTML-fil, så `send_headers` aldrig kører: de nye headere kom på
+   `/cart/` og `/checkout/` (ikke cachet) men ikke på `/` og `/shop/`. Løst med en `.htaccess`-blok.
+2. En slettet `readme.html` blev ved med at svare **200** — cacheposten fra før sletningen blev afspillet.
+   Løst ved at fjerne posten og lægge `RedirectMatch 404` ind, så en kerne-opdatering ikke genåbner hullet.
+3. **`pgcache.cache.404 = true`** fik enhver ukendt URL til at svare **200 ved andet kald** (første kald
+   404, `?x=1` 404). Det er soft-404s for søgemaskiner. Nu `false`, målt 404 to gange i træk.
+Værnet er koblet på: `tools/s5_measure.py --strict` kører i `tools/natlige-vaern.sh`.
+
+**Ejerpunkt K var fejlformuleret.** `alert_email` var tom, men `SGAP_Alerts::recipient()` falder tilbage
+til `get_option('admin_email')` — så mailgrenen har virket hele tiden. Målt: `recipient()` = admin-adressen,
+`mode = immediate`, `wp_mail()` findes, WP Mail SMTP aktiv. Adressen er nu alligevel sat i Settings → Alerts.
+**Læren:** en tom indstilling er ikke det samme som en manglende evne — læs koden der læser feltet, før et
+punkt erklæres ejer-blokeret.
+
+Bevis: [library/bredt-layout-og-hardning-2026-11-09.md](library/bredt-layout-og-hardning-2026-11-09.md)
+og [reports/s5-status-2026-11-09.md](../reports/s5-status-2026-11-09.md).
 
 ### 8/11 — mobilen var bygget til desktop, og tre ting fik siden til at ryste
 

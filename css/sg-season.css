@@ -352,6 +352,22 @@ header .sg-word b {
   color: var(--sg-gold-light) !important;
 }
 
+/* På desktop er menuen inline-links (WP's eget mønster); burgeren hører kun til mobil.
+   Uden denne blok tvang reglen nedenfor burgeren frem i 1280 px, så header blev 171 px
+   høj med både links og burger — målt 8/11. */
+@media (min-width: 783px) {
+  .wp-block-navigation__responsive-container-open:not(.always-shown) {
+    display: none !important;
+  }
+
+  /* Lukke-krydset hører kun til det åbne mobilark. Stod det fremme på
+     desktop, lagde det sig oven på »Contact« som en 44 px guldramme (målt 8/11). */
+  .wp-block-navigation__responsive-container:not(.is-menu-open)
+    .wp-block-navigation__responsive-container-close {
+    display: none !important;
+  }
+}
+
 /* burgeren: 44 × 44, messing-streger, ikke en guldklods */
 .wp-block-navigation__responsive-container-open,
 .wp-block-navigation__responsive-container-close {
@@ -417,6 +433,26 @@ header .sg-word b {
   .wp-block-navigation .wp-block-navigation-item__content:hover::after,
   .wp-block-navigation .current-menu-item > .wp-block-navigation-item__content::after {
     transform: scaleX(1);
+  }
+
+  /* Underpunkt-pilen ved »Shop« var en 1 px guldramme om et mørkt, usynligt
+     chevron — den stod som en løs guldstreg i menuen (målt 8/11). */
+  .wp-block-navigation__submenu-icon,
+  .wp-block-navigation-submenu__toggle {
+    border: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    color: var(--sg-gold) !important;
+    width: 18px !important;
+    min-width: 18px;
+    padding: 0 !important;
+  }
+
+  .wp-block-navigation__submenu-icon svg,
+  .wp-block-navigation-submenu__toggle svg {
+    width: 12px;
+    height: 12px;
+    stroke: currentColor;
   }
 }
 
@@ -622,14 +658,28 @@ html body main .wp-block-column {
 }
 
 /* produktsiden: gruppen .woocommerce.product havde 16 px luft, messingkant
-   og den samme bordeaux gradient som resten af det gamle design */
-html body .wp-block-group.woocommerce,
+   og den samme bordeaux gradient som resten af det gamle design */html body .wp-block-group.woocommerce,
 html body .wp-block-group.woocommerce.product {
   background-image: linear-gradient(180deg, var(--sg-surface), var(--sg-bg)) !important;
   border: 0 !important;
   border-radius: 0 !important;
   padding: 0 !important;
   box-shadow: none !important;
+}
+
+/* Produktsiden: temaets produktgruppe var en to-kolonne-grid, men den eneste
+   gæst i kolonne to er Pinterests »Gem«-knap. Ved 1280 px tog den 506 px, så
+   købsboksen blev 66 px bred og h1 stod én bogstav pr. linje (målt 8/11).
+   Gruppen bliver en almindelig blok, og Gem-knappen flyder ind over indholdet. */
+@media (min-width: 783px) {
+  html body .wp-block-group.woocommerce.product {
+    display: block !important;
+  }
+
+  html body .wp-block-group.woocommerce.product > .pinterest-for-woocommerce-image-wrapper {
+    float: right;
+    margin: 0 0 12px 12px;
+  }
 }
 
 /* brødkrummen skal kunne læses på én-to linjer, ikke fire */
@@ -675,6 +725,37 @@ html body .wc-block-components-product-image {
   height: auto !important;
   overflow: hidden;
   border-radius: var(--sg-radius);
+}
+
+/* På desktop er der plads til billedet: den faste 4:5-ramme var kun nødvendig
+   i den smalle mobilkolonne. Her følger rammen fotoets eget forhold, så et
+   landskabsprint ikke svæver i tom luft (målt 8/11: 551 × 689 ramme om et
+   print på 551 × 394). Gitterkortene i butikken beholder 4:5. */
+@media (min-width: 783px) {
+  html body .wp-block-woocommerce-product-gallery [class*="wc-block-product-gallery-large-image"] {
+    height: auto !important;
+  }
+
+  /* 4:3-ramme i stedet for mobilens 4:5: på 551 px bredde gav 4:5 et print
+     på 551 × 300 placeret i en 689 px høj ramme — 60 % tom flade.
+     Rammen er nu 551 × 413, og billedet fylder den med »contain«. */
+  html body .wp-block-woocommerce-product-gallery .wc-block-components-product-image {
+    aspect-ratio: 4 / 3 !important;
+    height: auto !important;
+  }
+
+  html body .wp-block-woocommerce-product-gallery img {
+    width: 100% !important;
+    height: 100% !important;
+    aspect-ratio: auto !important;
+    object-fit: contain !important;
+  }
+
+  /* kolonnerne må ikke strækkes til den højeste: galleri-panelet blev 2 905 px
+     højt med 2 200 px tom flade under fotoet */
+  html body.single-product main .wp-block-columns.alignwide {
+    align-items: flex-start !important;
+  }
 }
 
 /* Woo sætter hvert galleri-slide til en fast px-bredde fra en CSS-variabel

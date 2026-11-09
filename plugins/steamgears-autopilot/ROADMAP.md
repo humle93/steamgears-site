@@ -226,7 +226,7 @@ rules for us, so our job is to stop feeding it invalid payloads rather than to r
 Effort is developer-days for one developer who knows this codebase, excluding waiting on external reviews.
 "Live path" means the code change only — every item assumes the existing smoke + integration suites pass.
 
-**Where the plan stands (målt 8/11 2026 om aftenen; live kører 7.65.0, repoet er 7.65.1 — en ren
+**Where the plan stands (målt 8/11 2026 om aftenen; live kører 7.65.0, repoet er 7.65.3 — en ren
 dokumentations-patch af denne fil).** Every row below is
 built, covered by the smoke suite and CI-verified; the only open work is **P1.5's live verification**, which
 needs the owner. Målt i samme pas: **1136 smoke-checks PASS / 0 FAIL**, 65 PHP-filer uden syntaksfejl, og
@@ -423,9 +423,14 @@ Platform limits: [Instagram content publishing](https://developers.facebook.com/
    mu-plugins (`sga-design-system`, `sgap-product-schema`, `sgap-review-request`, `sgap-withdrawal-email`,
    `sgap-og-images`) plus `sgap-shop-h1` er nu lagt ind og verificeret på det levende site (7.63.0 dengang; sitet kører 7.65.0 nu).
 
-8. ⛔ **Åbent — kun ejeren.** **Alarm-e-mail:** `alert_email` er tom (`SGAP_Settings::get('alert_email') === ''`),
-   så fejl registreres i diagnostikken men **ingen mail sendes** (P0.1's mailgren er bygget og testet). Sæt en
-   e-mailadresse i **Settings → Alerts** — så er P0.1 også i praksis lukket.
+8. ✅ **Lukket 9/11 — formuleringen var forkert, ikke funktionen.** Posten lød: »`alert_email` er tom,
+   så fejl registreres i diagnostikken men ingen mail sendes«. Målt 9/11: `SGAP_Alerts::recipient()` falder
+   tilbage til `get_option('admin_email')` når feltet er tomt eller ugyldigt, og hjælpeteksten i Settings siger
+   det samme (*Where alerts go. Empty = the site admin address*). På live returnerer `recipient()`
+   admin-adressen, `mode` er `immediate`, `wp_mail()` findes og **WP Mail SMTP er aktiv** — så P0.1's mailgren
+   har virket hele tiden. Adressen er alligevel skrevet ind i **Settings → Alerts**, så den står synligt i
+   stedet for at være en usynlig fallback. Læren er generel: en tom indstilling er ikke det samme som en
+   manglende evne — læs koden der læser feltet, før et punkt erklæres ejer-blokeret.
 9. ⛔ **Åbent — men ikke-blokerende.** **Plugin'ets opdateringskanal** efter at repoet blev privat: A) bliv privat og
    læg zip'en ind manuelt, B) flyt kun release-zip'en til et offentligt sted, C) gør repoet offentligt igen.
    `SGAP_Updater` henter anonymt fra `raw.githubusercontent.com`, og målt 8/11 svarer både versionsfil og pakke
@@ -435,6 +440,15 @@ Platform limits: [Instagram content publishing](https://developers.facebook.com/
 
 ## 9. Change log for this document
 
+- **7.65.3 (9/11) — §8 pkt. 8 lukket, og hardningen ligger nu på sitet.** `SGAP_Alerts::recipient()` falder
+  tilbage til admin-adressen, så »alarm-e-mailen er tom« var en fejlformulering, ikke en mangel; adressen er
+  alligevel skrevet ind i Settings → Alerts. Samme pas lagde `wp-content/mu-plugins/sgap-hardening.php` på
+  det levende site (12 558 bytes, md5 lig repoets), hvilket tidligere stod som umuligt — Novamira-tokenet
+  ligger i hjemmemappen. Målt udefra: `s5_measure.py` gik fra **8 opfyldt · 11 mangler** til
+  **19 opfyldt · 0 mangler**, og tre cache-fund kom med: W3TC svarede uden om PHP (headere manglede på
+  cachede sider), en slettet `readme.html` blev afspillet med 200 fra cachen, og `pgcache.cache.404 = true`
+  fik enhver ukendt URL til at svare 200 ved andet kald. Værnet er koblet på i `tools/natlige-vaern.sh`.
+  Bevis: [docs/library/bredt-layout-og-hardning-2026-11-09.md](../../docs/library/bredt-layout-og-hardning-2026-11-09.md)
 - **7.65.2 (8/11) — admin-siderne baerer ikke laengere deres eget CSS.** Stylesheetet laa inline i `<head>` (40 452 tegn) og blev hentet igen ved hvert sidevisning; menu-CSS/JS og et submit-script laa oveni. Nu er der fire asset-filer, en `SGAP_Assets`-loader med `is_plugin_screen()`, mtime som version og enqueue kun for `manage_options` — 41,8 KB mindre HTML pr. side og cachebare filer. Samtidig er UI'et rettet paa fire punkter: fokus-ring, mobil-tabeller, mobil-grid og reduceret bevaegelse. 36 nye smoke-checks; 1172 PASS / 0 FAIL.
 - **7.65.1 (8/11 aften) — status målt på ny: to påstande var forældede, og ejerlisten er nu præcis.** §5 målte 7.64.9; live er **7.65.0** og repoet **7.65.1** (denne patch ændrer kun dokumentationen), og
 suiten giver **1136 PASS / 0 FAIL**. P1.5 bad ejeren trykke *Update* til 7.64.9 — det var allerede kørt (`update` svarer »Already up to date (7.65.0)«), så skridtet er fjernet og listen er nu to skridt. Kanalmålingen står med friske tal fra 21:24: `summary()` = `ready 0 · needs_scope 1 · missing 5`, `analytics_summary()` = `measured 0 · empty 5 · no_metric 1`. §8 har fået to punkter: alarm-e-mailen er tom, og opdateringskanalen A/B/C efter at repoet blev privat; CC-spørgsmålet er gjort til et ja/nej med konsekvens. Bevis: [docs/library/roadmap-status-2026-11-08.md](../../docs/library/roadmap-status-2026-11-08.md)

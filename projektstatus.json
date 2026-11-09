@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "updated": "2026-11-08",
+  "updated": "2026-11-09",
   "projects": [
     {
       "id": "site",
@@ -58,17 +58,17 @@
     {
       "id": "miljoe",
       "name": "steamgears.eu — miljø, server og sandbox (S5)",
-      "note": "roadmap S5 — køreplanen for nye sites (§9) kørt mod sitet 8/11",
-      "next": "S5.9 er kodet: kør python3 tools/release.py --install-hook lokalt, og sæt branch protection når planen tillader det (python3 tools/release.py --protection). Upload wordpress/mu-plugins/sgap-hardening.php til wp-content/mu-plugins/, slet readme.html, og kør python3 tools/s5_measure.py --strict — den skal give 0 mangler.",
-      "blocked_by": "Subdomæne + certifikat hos Simply (S5.1); hostpanelet til DKIM, backup og object cache (S5.7–S5.8); et MCP-token til at læse WP_DEBUG, WP_ENVIRONMENT_TYPE og cron (S5.2).",
+      "note": "roadmap S5 — køreplanen for nye sites (§9) kørt mod sitet 8/11; S5.3–S5.6 udrullet og målt 9/11",
+      "next": "Tilbage er kun ejerens fem poster: sandkassen (S5.1, subdomæne + certifikat hos Simply), produktionskonfigurationen læst med MCP (S5.2), DKIM/DMARC-rapporterne (S5.7), backup/restore øvet (S5.8) og branch protection (S5.9, kræver Pro/Team på et privat repo — kør python3 tools/release.py --protection for de fem indstillinger). Målingen holdes nu op hver nat af tools/natlige-vaern.sh.",
+      "blocked_by": "Subdomæne + certifikat hos Simply (S5.1); hostpanelet til DKIM, backup og DMARC-rapporter (S5.7–S5.8); GitHub Pro/Team til branch protection og environment-regler (S5.9); MCP-læsning af WP_DEBUG og WP_ENVIRONMENT_TYPE (S5.2).",
       "modules": [
         {
           "id": "s5",
           "name": "S5 — miljø, server og sandbox",
-          "done": 0.75,
+          "done": 1.2,
           "total": 2.9,
           "unit": "d",
-          "note": "0,55 af 2,90 d. 8/11: S5.3–S5.6 er kodet i wordpress/mu-plugins/sgap-hardening.php med 44 offline-assertions (wordpress/tests/test-hardening.php, nu værn i den natlige kørsel), og S5.10's måleværktøj tools/s5_measure.py (20 rækker, rapport i reports/s5-status-<dato>.md) er bygget og kørt mod live. Udrulning og live-verifikation udestår: der er hverken MCP-token, CLI eller secrets i sandkassen, så filen skal uploades til wp-content/mu-plugins/ og readme.html slettes. Resten af båndet: S5.1 (0,75) er ejer-blokeret på subdomænet hos Simply, S5.2 (0,30) kræver MCP, S5.7–S5.8 (0,40) kræver hostpanelet, S5.9 (0,25) er repoarbejde og S5.10's sidste 0,15 er CI-koblingen. 8/11 (S5.9): tools/release.py (preflight, tag, --protection, 26 fixtures), pre-push-hook installeret via tools/setup-agent-tools.sh, .github/workflows/release.yml (kun manuel, kræver TAG) og docs/release-og-rollback.md med fire rollback-niveauer. Beskyttede branches kan ikke slås til på Free/private — de fem indstillinger står i --protection og i dokumentet.",
+          "note": "1,20 af 2,90 d — fem poster er ✅ med målt bevis, resten er ejerens. 9/11: S5.3 (0,30), S5.4 (0,20), S5.5 (0,15) og S5.6 (0,30) blev lagt på sitet som wp-content/mu-plugins/sgap-hardening.php (12 558 bytes, md5 lig repoets, 44 offline-assertions) og målt udefra: s5_measure.py gik fra 8 opfyldt · 11 mangler til 19 opfyldt · 0 mangler (users 404, ?author=→apex, forfatterarkiv noindex, XML-RPC 403, REST max-age 60, readme 404, fire headere på alle fire sider). Tre cache-fund: W3TC svarede uden om PHP så headerne manglede på cachede sider (løst i .htaccess), en slettet readme.html blev afspillet med 200 fra cachen, og pgcache.cache.404 = true fik enhver ukendt URL til at svare 200 ved andet kald (nu false, målt 404 to gange). S5.10 (0,25) er koblet på som værn: tools/s5_measure.py --strict kører i tools/natlige-vaern.sh og giver exit 0. Den tidligere note krediterede kodede men ikke-udrullede poster; tallet er derfor regnet om fra rækkernes egne estimater. Tilbage: S5.1 0,75 (sandkassen), S5.2 0,30 (MCP-læsning), S5.7 0,15, S5.8 0,25 og S5.9 0,25.",
           "verified": false
         }
       ]
@@ -220,10 +220,10 @@
         {
           "id": "mobil-og-saeson",
           "name": "Mobil-CSS, menu og årstidsfarver",
-          "done": 1.5,
-          "total": 1.5,
+          "done": 2.1,
+          "total": 2.1,
           "unit": "t",
-          "note": "udført og verificeret 8/11 i cloud-browseren på 320 px: header 337 → 73 px, indholdskolonne 198 → 278 px, forsiden 11 120 → 8 574 px, 0 elementer uden for viewport, fuldskærmsmenu med 44 px lukkeknap og tre rystekilder fjernet (10 s AI-løkke, backdrop-filter, transition: all). Årstidspaletter (winter/spring/summer/autumn) i css/sg-season.css, data-season sat af mu-plugins/sga-season.php; målt 8/11 = autumn. Desktop er ikke set visuelt — viewporten er 320 px."
+          "note": "udført og verificeret 8/11 i cloud-browseren på 320 px: header 337 → 73 px, indholdskolonne 198 → 278 px, forsiden 11 120 → 8 574 px, 0 elementer uden for viewport, fuldskærmsmenu med 44 px lukkeknap og tre rystekilder fjernet (10 s AI-løkke, backdrop-filter, transition: all). Årstidspaletter (winter/spring/summer/autumn) i css/sg-season.css, data-season sat af mu-plugins/sga-season.php. 8/11 sent +0,6 t: desktop målt ved 1280 px i en same-origin-iframe og syv regressioner rettet som @media (min-width: 783px) — header 171 → 95 px, »Close menu«-krydset skjult, underpunkt-pilen gjort synlig, produktsiden fra grid med 66 px købskolonne til 1178/553/553 (docH 6 154 → 4 899), galleriet fra 4:5 til 4:3 (551×551), kolonnerne fra 2 905 px stræk til flex-start, og /shop/ målt til fire kolonner à 285,5 px. Mobilen er uændret."
         }
       ]
     },
@@ -1717,6 +1717,69 @@
       "after": 25.9,
       "delta": 6.9,
       "basis": "0,75 af 2,9 d"
+    },
+    {
+      "date": "2026-11-09",
+      "project": "steamgears.eu — site-optimering",
+      "module": "ingen ændring",
+      "before": 100.0,
+      "after": 100.0,
+      "delta": 0,
+      "basis": "20,95 af 20,95 d (S0 2,35/2,35 · S1 3,6/3,6 · S2 6,9/6,9 · S3 4,05/4,05 · S4 4,05/4,05)"
+    },
+    {
+      "date": "2026-11-09",
+      "project": "steamgears.eu — miljø, server og sandbox (S5)",
+      "module": "daglig måling",
+      "before": 25.9,
+      "after": 41.4,
+      "delta": 15.5,
+      "basis": "1,2 af 2,9 d"
+    },
+    {
+      "date": "2026-11-09",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "ingen ændring",
+      "before": 100.0,
+      "after": 100.0,
+      "delta": 0,
+      "basis": "29,85 af 29,85 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5)"
+    },
+    {
+      "date": "2026-11-09",
+      "project": "Dark academia-rebrand",
+      "module": "daglig måling",
+      "before": 68.6,
+      "after": 69.7,
+      "delta": 1.1,
+      "basis": "11,5 af 16,5 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5 · Batch 4-forberedelse: arbejdsordre, filnavne, alt-tekster, rækkefølge 0,5/0,5 · Batch 2-gentildeling: de seks kollektioner skal tildeles igen 0,4/0,4 · Mobil-CSS, menu og årstidsfarver 2,1/2,1)"
+    },
+    {
+      "date": "2026-11-09",
+      "project": "SEO-indholdsproduktion",
+      "module": "ingen ændring",
+      "before": 100.0,
+      "after": 100.0,
+      "delta": 0,
+      "basis": "8 af 8 guides (Publicerede guides (1357, 1361, 1359) 3/3 · Guide-copy klar til publicering (1357, 1361, 1359 + corset) 4/4 · Corset-guiden publiceret (/steampunk-corset-guide/, 1394) 1/1)"
+    },
+    {
+      "date": "2026-11-09",
+      "project": "Døde internlinks",
+      "module": "ingen ændring",
+      "before": 100.0,
+      "after": 100.0,
+      "delta": 0,
+      "basis": "39 af 39 links"
+    },
+    {
+      "date": "2026-11-09",
+      "project": "Niche-butik — plugin P4",
+      "module": "ingen ændring",
+      "before": 100.0,
+      "after": 100.0,
+      "delta": 0,
+      "basis": "1 af 1 d (Plan-motor: arketyper, priser, sider 0,3/0,3 · Kladde-udrulning og rollback 0,25/0,25 · Admin-side, REST og fire evner 0,2/0,2 · Tests, zip og dokumentation 0,1/0,1 · Kørsel mod rigtig WooCommerce 0,15/0,15)"
     }
   ]
 }
