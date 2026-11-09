@@ -32,14 +32,14 @@ permissions:
 jobs:
   rebrand:
     name: Kollektioner
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       WP_USER: ${{ secrets.WP_USER }}
       WP_APP_PASSWORD: ${{ secrets.WP_APP_PASS }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 

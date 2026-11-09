@@ -17,7 +17,7 @@ permissions:
 jobs:
   smoke:
     name: Lint + smoke test (PHP ${{ matrix.php }})
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -36,7 +36,7 @@ jobs:
 
   zip:
     name: Zip matches source
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
       - name: Exactly one zip, same files and content as plugins/steamgears-autopilot
@@ -54,7 +54,7 @@ jobs:
 
   wordpress:
     name: WordPress ${{ matrix.wp }} + MySQL
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
