@@ -98,13 +98,23 @@ Tre kørsler for `e316a04`: **3 success, 0 failure, 0 in_progress**. Den månedl
 backup-øvelse, projektstatus og keep-alive blev kørt af pushet fordi deres egen fil var rørt,
 så de er også målt på 26.04.
 
-## 6. Hvad der ikke er målt endnu
+## 6. De tidsstyrede workflows
 
-`cron-tick`, `natlig-push`, `niche-scan`, `seo_audit`, `rebrand-apply` og `release` blev ikke
-udløst af pushet — deres ændring er kun YAML-valideret. De kører på deres tidsplan (cron-tick
-hvert 15. minut, natlig-push kl. 00–01 UTC, niche-scan 00:30, seo_audit mandag 06:00), og
-`release` kræver et menneske bag `confirm: TAG`. Næste naturlige kontrol er den første
-planlagte kørsel efter 9/11 kl. 05:38 UTC.
+`cron-tick` blev udløst i hånden efter pushet (run **42569252806**, 12 s): jobbet `tick` kørte på
+label **`ubuntu-26.04`** og gik grønt, så det offentlige tick-endpoint svarede JSON med `"ok":true`
+fra det nye image.
+
+**Målt undervejs:** `cron-tick` er sat til `*/15 * * * *`, men den seneste **planlagte** kørsel var
+kl. **01:48 UTC**, altså næsten fire timer før arbejdspasset kl. 05:38 — og workflowen har kun
+**7 kørsler i alt**, siden den blev oprettet. GitHub køer tidsstyrede workflows med forsinkelse og
+kan springe ture over på travle tidspunkter; det er ikke noget image-skiftet har ændret, men det
+betyder at »uret« i praksis slår med ujævne mellemrum, og at en måling af Action Scheduler-køen
+ikke kan hvile på at turen er kørt hvert kvarter.
+
+Ikke målt endnu: `natlig-push`, `niche-scan`, `seo_audit`, `rebrand-apply` og `release`. De tre
+første kører næste gang på deres tidsplan (natlig-push kl. 00–01 UTC, niche-scan 00:30, seo_audit
+mandag 06:00), og `release` kræver et menneske bag `confirm: TAG`, så den bliver ikke udløst af et
+agentpas.
 
 ## 7. Opskrift til næste image-skift
 
