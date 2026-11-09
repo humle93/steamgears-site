@@ -307,15 +307,6 @@ class SGAP_Setup {
             . ($help !== '' ? '<p>' . esc_html($help) . '</p>' : '') . '</div><div class="sgap-field-input">' . self::field($key, $wizard) . '</div></div>';
     }
 
-    /** Shared JS: switches, channel cards, choice cards. */
-    private static function field_js(): string {
-        return '<script>(function(){document.querySelectorAll(".sgap-channel-grid").forEach(function(g){var v=g.parentNode.querySelector(".sgap-channels-value");'
-            . 'g.addEventListener("change",function(){var on=[];g.querySelectorAll("input:checked").forEach(function(i){on.push(i.value);});v.value=on.join(",");'
-            . 'g.querySelectorAll(".sgap-channel-card").forEach(function(c){c.classList.toggle("on",c.querySelector("input").checked);});});});'
-            . 'document.querySelectorAll(".sgap-choice-row").forEach(function(r){r.addEventListener("change",function(){r.querySelectorAll(".sgap-choice").forEach(function(c){c.classList.toggle("on",c.querySelector("input").checked);});'
-            . 'var f=r.closest("form");if(f)f.dispatchEvent(new Event("sgap-choice"));});});})();</script>';
-    }
-
     /* ---- Settings page ---- */
 
     public static function settings_page(): void {
@@ -354,15 +345,8 @@ class SGAP_Setup {
         echo '<div class="sgap-savebar"><span class="sgap-dirty" hidden>Unsaved changes</span><span class="description">Every tab is saved at once.</span>';
         submit_button('Save settings', 'primary', 'submit', false);
         echo '</div></form>';
-        echo '<script>(function(){var f=document.querySelector("form.sgap-settings"),b=f&&f.querySelector(".sgap-dirty");if(!f||!b)return;'
-            . 'function edge(){var d=false;f.querySelectorAll("input,select,textarea").forEach(function(i){if(i.type==="hidden"||i.name==="nonce")return;if(i.type==="checkbox"||i.type==="radio"){if(i.checked!==i.defaultChecked)d=true;}else if(i.value!==i.defaultValue){d=true;}});b.hidden=!d;}'
-            . 'f.addEventListener("input",edge);f.addEventListener("change",edge);edge();})();</script>';
-        echo self::field_js();
-        echo '<script>(function(){var tabs=document.querySelectorAll(".sgap-tab[data-tab]"),panels=document.querySelectorAll(".sgap-panel");'
-            . 'function show(id){tabs.forEach(function(t){t.classList.toggle("on",t.dataset.tab===id);});panels.forEach(function(p){p.hidden=p.dataset.panel!==id;});try{localStorage.setItem("sgapTab",id);}catch(e){}}'
-            . 'tabs.forEach(function(t){t.addEventListener("click",function(){show(t.dataset.tab);});});'
-            . 'var h=location.hash.replace("#","");var saved="";try{saved=localStorage.getItem("sgapTab")||"";}catch(e){}'
-            . 'if(h&&document.querySelector("[data-panel=\'"+h+"\']"))show(h);else if(saved&&document.querySelector("[data-panel=\'"+saved+"\']"))show(saved);})();</script>';
+        // Markeringen af ugemte aendringer ligger i assets/pages/setup.js.
+        SGAP_Assets::page_script('setup', 'SGAP_SETUP', ['ajax' => admin_url('admin-ajax.php'), 'nonce' => wp_create_nonce('sgap_setup')]);
         SGAP_Admin::close();
     }
 
@@ -443,33 +427,13 @@ class SGAP_Setup {
         echo '</div></div>';
 
         $cfg = ['ajax' => admin_url('admin-ajax.php'), 'nonce' => wp_create_nonce('sgap_setup')];
-        echo self::field_js();
-        echo '<script>(function(){var C=' . wp_json_encode($cfg) . ',order=["ai","channels","publer","schedule","extras","done"],rail=document.querySelectorAll(".sgap-rail li");'
-            . 'function show(id){document.querySelectorAll(".sgap-step").forEach(function(s){s.hidden=s.dataset.step!==id;});var i=order.indexOf(id);'
-            . 'rail.forEach(function(li,k){li.classList.toggle("on",k===i);li.classList.toggle("past",k<i);});history.replaceState(null,"","#step-"+id);window.scrollTo({top:0,behavior:"smooth"});}'
-            . 'rail.forEach(function(li){li.addEventListener("click",function(){show(li.dataset.step);});});'
-            . 'function post(action,fd){fd.append("action",action);fd.append("nonce",C.nonce);return fetch(C.ajax,{method:"POST",credentials:"same-origin",body:fd}).then(function(r){return r.json();});}'
-            . 'function modes(f){var m=f.querySelector("input[name=\'settings[publish_mode]\']:checked");f.querySelectorAll(".sgap-mode").forEach(function(d){d.hidden=!m||d.dataset.mode!==m.value;});}'
-            . 'var pf=document.querySelector(".sgap-step[data-step=publer]");modes(pf);pf.addEventListener("change",function(){modes(pf);});'
-            . 'document.querySelectorAll("form.sgap-step").forEach(function(f){f.querySelectorAll("[data-back]").forEach(function(b){b.addEventListener("click",function(){show(order[order.indexOf(f.dataset.step)-1]);});});'
-            . 'f.addEventListener("submit",function(e){e.preventDefault();var btn=f.querySelector("[data-next]"),label=btn.innerHTML;btn.disabled=true;btn.textContent="Saving…";var fd=new FormData(f);'
-            . 'if(f.dataset.step==="publer"&&!fd.has("feeds_done[]"))fd.append("feeds_done","");if(f.dataset.step==="extras")fd.append("finish","1");'
-            . 'post("sgap_setup_save",fd).then(function(j){if(!j.success)throw new Error(j.data||"Could not save");'
-            . 'if(f.dataset.step==="ai"){btn.textContent="Testing the key…";return post("sgap_setup_test",new FormData()).then(function(t){var a=t.data.ai,box=f.querySelector(".sgap-test-result");'
-            . 'box.innerHTML="<span class=\\"sgap-pill "+(a.ok?"ok":"bad")+"\\">AI "+(a.ok?"✓":"✗")+"</span> <span></span>";box.lastChild.textContent=a.message;return a.ok;});}return true;})'
-            . '.then(function(go){btn.disabled=false;btn.innerHTML=label;if(go){var next=order[order.indexOf(f.dataset.step)+1];if(next==="done")done();show(next);}})'
-            . '.catch(function(err){btn.disabled=false;btn.innerHTML=label;alert(err.message);});});});'
-            . 'function done(){location.hash="step-done";location.reload();}'
-            . 'document.querySelectorAll(".sgap-copy").forEach(function(b){var h=b.innerHTML;b.addEventListener("click",function(){var u=b.dataset.url,ok=function(){b.textContent="Copied ✓";setTimeout(function(){b.innerHTML=h;},2000);},'
-            . 'old=function(){var t=document.createElement("textarea");t.value=u;document.body.appendChild(t);t.select();try{document.execCommand("copy");}catch(e){}t.remove();ok();};'
-            . 'if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(u).then(ok,old);}else{old();}});});'
-            . 'var start=(location.hash.match(/step-(\\w+)/)||[])[1];show(order.indexOf(start)>=0?start:"ai");})();</script>';
+        SGAP_Assets::page_script('setup', 'SGAP_SETUP', ['ajax' => admin_url('admin-ajax.php'), 'nonce' => wp_create_nonce('sgap_setup')]);
         // The "done" step lists the checklist, rendered server-side.
         ob_start();
         self::checklist_card();
         $card = ob_get_clean();
-        echo '<template id="sgap-done-tpl">' . ($card !== '' ? $card : '<p>Everything is done. Enjoy the autopilot!</p>') . '</template>'
-            . '<script>(function(){var t=document.getElementById("sgap-done-tpl"),d=document.querySelector(".sgap-done-list");if(t&&d)d.appendChild(t.content.cloneNode(true));})();</script>';
+        // Skabelonen kopieres ind i listen af assets/pages/setup.js.
+        echo '<template id="sgap-done-tpl">' . ($card !== '' ? $card : '<p>Everything is done. Enjoy the autopilot!</p>') . '</template>';
         SGAP_Admin::close();
     }
 }

@@ -7,9 +7,10 @@
  * small submit script per page. That HTML was downloaded again on every page view and
  * could never be cached by the browser.
  *
- * Now the three files are ordinary assets: `assets/admin.css`, `admin.js` for the plugin's
- * own screens, and `menu.css`/`menu.js` for the sidebar menu that WordPress shows on every
- * admin page. They carry the file's own modification time as their version, so a change is
+ * Now the files are ordinary assets: `assets/admin.css`, `admin.js` for the plugin's own
+ * screens, `menu.css`/`menu.js` for the sidebar menu that WordPress shows on every admin
+ * page, and one file per page in `assets/pages/` for the behaviour that used to be written
+ * into the page as an inline <script> with its configuration as JSON. They carry the file's own modification time as their version, so a change is
  * never served stale after an update, and they are only loaded for users who can manage
  * the plugin.
  *
@@ -95,6 +96,27 @@ class SGAP_Assets {
         }
         wp_enqueue_style(self::STYLE, self::url('admin.css'), [], self::version('admin.css'), 'all');
         wp_enqueue_script(self::SCRIPT, self::url('admin.js'), [], self::version('admin.js'), true);
+    }
+
+    /**
+     * One page's behaviour, with its configuration as a JS global.
+     *
+     * The pages used to build their own `<script>` with `wp_json_encode($cfg)` inside it,
+     * which cannot be cached, cannot be linted and grows the HTML on every request. The
+     * file now lives in assets/pages/, and the configuration that has to be computed per
+     * request (nonces, the chat history, the tool catalogue) is handed over by
+     * wp_localize_script, which prints it as one object before the script runs.
+     */
+    public static function page_script(string $name, string $object, array $config = []): void {
+        if (!function_exists('wp_enqueue_script')) {
+            return;
+        }
+        $file = 'pages/' . $name . '.js';
+        $handle = 'sgap-page-' . $name;
+        wp_enqueue_script($handle, self::url($file), [], self::version($file), true);
+        if ($config !== [] && function_exists('wp_localize_script')) {
+            wp_localize_script($handle, $object, $config);
+        }
     }
 
     /** Styling and the "More" toggle for the sidebar menu. */

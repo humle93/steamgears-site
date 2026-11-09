@@ -76,7 +76,7 @@
     {
       "id": "plugin",
       "name": "Steamgears Autopilot — plugin",
-      "next": "Agent-scope er færdigt (29,85 af 29,85 d). Ejeren har lagt Pinterest-tokenet ind i WooCommerce-integrationen, og 7.65.0 — som blev lagt på sitet 8/11 gennem MCP (`Plugin_Upgrader` i `execute-php`; `update` svarer nu »Already up to date«) — henter det nu derfra gennem integrationens egen dekryptering: målt 8/11 virker det (konto `cpaleadsis`, id 688980580401955331), men appen mangler scopes `boards:read`, så pin-lister og Pin Analytics kan stadig ikke måles. Næste skridt er ejerens: genforbind Pinterest med board-adgang (eller et developer-token med boards:read + pins:read). Resten af blocked_by står uændret. Målt 8/11 om aftenen er `alert_email` tom, så fejl registreres uden at nogen får mail — det er et ejerpunkt i plugin-roadmappens §8.",
+      "next": "Agent-scope er færdigt (30,75 af 30,75 d). Ejeren har lagt Pinterest-tokenet ind i WooCommerce-integrationen, og 7.65.0 — som blev lagt på sitet 8/11 gennem MCP (`Plugin_Upgrader` i `execute-php`; `update` svarer nu »Already up to date«) — henter det nu derfra gennem integrationens egen dekryptering: målt 8/11 virker det (konto `cpaleadsis`, id 688980580401955331), men appen mangler scopes `boards:read`, så pin-lister og Pin Analytics kan stadig ikke måles. Næste skridt er ejerens: genforbind Pinterest med board-adgang (eller et developer-token med boards:read + pins:read). Resten af blocked_by står uændret. Målt 8/11 om aftenen er `alert_email` tom, så fejl registreres uden at nogen får mail — det er et ejerpunkt i plugin-roadmappens §8.",
       "blocked_by": "Syv led kræver ejeren, alle målt 8/11: (1) **Pinterest-scope** — tokenet ligger nu i WooCommerce-integrationen og er gyldigt (`/user_account` 200 som `cpaleadsis`, id 688980580401955331), men appen har kun ads/billing/catalogs/pins/user_accounts og **mangler `boards:read`**, så `/pins` og `/boards` afvises (målt 17:25Z, kanalstatus står som `needs_scope`); (2) **de øvrige kanal-tokens** — Instagram, Bluesky, Mastodon, Telegram og Facebook har intet token (5 af 6 mangler); (3) **AIMLAPI-kredit** — sidste generering 7/11 fejlede med »You've run out of funds«; (4) **`sgap_alert_email`** er tom, så fejl registreres men ingen mail sendes; (5) **full auto vs. godkendelse** — `sgap_full_auto_enabled = no` og 40 elementer venter; (6) **distributionsvej** — `publish_mode = rss` og 0 Publer-konti; (7) **P2.1–P2.3** kræver ejerens beslutning om Command Center-retningen. Intet af det må gættes.",
       "modules": [
         {
@@ -174,9 +174,17 @@
           "total": 0.6,
           "unit": "d",
           "note": "7.65.2: stylesheet + menu-CSS/JS + submit-script flyttet fra inline <head> til assets/admin.css, admin.js, menu.css, menu.js og enqueuet af SGAP_Assets (menu overalt, side-assets kun på pluginets skærme, kun manage_options, mtime som version). 41,8 KB mindre HTML pr. admin-side og cachebare filer. UI: :focus-visible, mobil-tabeller, mobil-grid, reduced motion, tabular-nums. 36 nye smoke-checks i plugins/tests/assets.php; suiten 1172 PASS / 0 FAIL."
+        },
+        {
+          "id": "p3js",
+          "name": "P3.8 — inline side-scripts flyttet til asset-filer",
+          "done": 0.3,
+          "total": 0.3,
+          "unit": "d",
+          "note": "7.65.4: femten inline <script>-blokke i ni includes er blevet syv filer i assets/pages/ (dashboard, studio, seo, chat, tools, niche, setup), enqueuet af SGAP_Assets::page_script() med mtime som version; konfigurationen (nonces, chat-historik, vaerktoejskatalog) sendes med wp_localize_script. JS-teksten er udtrukket mekanisk og er byte-identisk med det der blev printet foer (sammenlignet mod HEAD), node --check-ren. Loftet paa 12 inline side-scripts er erstattet af krav om nul; kun JSON-LD er tilbage. 20 nye smoke-checks; suiten 1192 PASS / 0 FAIL."
         }
       ],
-      "total": 30.45,
+      "total": 30.75,
       "verified": true
     },
     {
@@ -1743,7 +1751,7 @@
       "before": 100.0,
       "after": 100.0,
       "delta": 0,
-      "basis": "29,85 af 29,85 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5)"
+      "basis": "30,75 af 30,75 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5 · P3.7 0,6/0,6 · P3.8 0,3/0,3)"
     },
     {
       "date": "2026-11-09",

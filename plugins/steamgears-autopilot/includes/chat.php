@@ -698,27 +698,7 @@ class SGAP_Chat {
             }
             echo '</div>';
         }
-        echo '<script>(function(){var T=' . wp_json_encode($rows) . ';'
-            . 'var grid=document.getElementById("sgap-toolgrid"),search=document.getElementById("sgap-tool-search"),count=document.getElementById("sgap-toolcount"),empty=document.getElementById("sgap-tool-empty"),cats=document.getElementById("sgap-tool-cats");'
-            . 'var active="";'
-            . 'function esc(s){return String(s==null?"":s).replace(/[&<>"\']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\\"":"&quot;","\'":"&#39;"}[c];});}'
-            . 'function card(t){return "<article class=\\"sgap-toolcard\\">"+"<h3><code>"+esc(t.short)+"</code>"'
-            . '+(t.readonly?"<span class=\\"sgap-badge read\\">read</span>":"<span class=\\"sgap-badge write\\">write</span>")'
-            . '+(t.chat?"":"<span class=\\"sgap-badge mute\\">blocked in chat</span>")'
-            . '+(t.bound?"<span class=\\"sgap-badge bound\\">bound</span>":"<span class=\\"sgap-badge mute\\">via run-tool</span>")+"</h3>"'
-            . '+"<p class=\\"sgap-toolmeta\\">"+esc(t.category)+"</p>"'
-            . '+(t.description?"<p class=\\"sgap-tool-desc\\">"+esc(t.description)+"</p>":"")+"</article>";}'
-            . 'function render(){var q=search.value.toLowerCase().trim();var hits=T.filter(function(t){'
-            . 'if(active&&t.category!==active)return false;if(!q)return true;'
-            . 'return (t.name+" "+t.short+" "+t.category+" "+t.description).toLowerCase().indexOf(q)>-1;});'
-            . 'grid.innerHTML=hits.map(card).join("");count.textContent=hits.length+" of "+T.length+" tools";empty.hidden=hits.length>0;}'
-            . 'search.addEventListener("input",render);'
-            . 'cats.addEventListener("click",function(e){var b=e.target.closest(".sgap-cat");if(!b)return;'
-            . 'active=b.getAttribute("data-cat")||"";Array.prototype.forEach.call(cats.querySelectorAll(".sgap-cat"),function(x){x.classList.toggle("is-on",x===b);});render();});'
-            . 'document.addEventListener("keydown",function(e){'
-            . 'if(e.key==="/"&&document.activeElement!==search&&!/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)){e.preventDefault();search.focus();}'
-            . 'if(e.key==="Escape"&&document.activeElement===search){search.value="";render();search.blur();}});'
-            . 'render();})();</script>';
+        SGAP_Assets::page_script('tools', 'SGAP_TOOLS', $rows);
         SGAP_Admin::close();
     }
 
@@ -751,33 +731,7 @@ class SGAP_Chat {
         }
         echo '</div><form id="sgap-chat-form" class="sgap-chat-form"><textarea id="sgap-chat-input" rows="2" placeholder="Skriv til AI\'en … (Enter sender, Shift+Enter ny linje)"' . ($key_set ? '' : ' disabled') . '></textarea>'
             . '<button class="button button-primary" id="sgap-chat-send"' . ($key_set ? '' : ' disabled') . '><span class="dashicons dashicons-arrow-right-alt"></span>Send</button></form></div>';
-        echo '<script>(function(){var C=' . wp_json_encode($config) . ';'
-            . 'var log=document.getElementById("sgap-chat-log"),form=document.getElementById("sgap-chat-form"),input=document.getElementById("sgap-chat-input"),send=document.getElementById("sgap-chat-send"),sug=document.getElementById("sgap-chat-suggest");'
-            . 'function esc(s){return s.replace(/[&<>"\']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\\"":"&quot;","\'":"&#39;"}[c];});}'
-            . 'function md(t){var out=[],list=false;esc(t).split("\\n").forEach(function(l){var m=l.match(/^\\s*(?:[-*]|\\d+\\.)\\s+(.*)$/);'
-            . 'if(m){if(!list){out.push("<ul>");list=true;}out.push("<li>"+inl(m[1])+"</li>");return;}if(list){out.push("</ul>");list=false;}'
-            . 'var h=l.match(/^#{1,4}\\s+(.*)$/);out.push(h?"<strong>"+inl(h[1])+"</strong><br>":(l.trim()===""?"<br>":inl(l)+"<br>"));});if(list)out.push("</ul>");return out.join("");}'
-            . 'function inl(s){return s.replace(/\\*\\*(.+?)\\*\\*/g,"<b>$1</b>").replace(/`([^`]+)`/g,"<code>$1</code>");}'
-            . 'function add(role,text,tools){var d=document.createElement("div");d.className="sgap-msg sgap-"+role;d.innerHTML=(role==="assistant"?md(text):esc(text).replace(/\\n/g,"<br>"))'
-            . '+(tools&&tools.length?"<div class=\\"sgap-msg-tools\\">⚙ "+tools.map(esc).join(" · ")+"</div>":"");log.appendChild(d);log.scrollTop=log.scrollHeight;return d;}'
-            . 'if(!C.history.length){add("assistant","Hej! Jeg kan se status, skrive og godkende opslag, frigive køen og ændre indstillinger. Hvad skal vi lave?");}'
-            . 'C.history.forEach(function(t){add(t.role,t.content,t.tools);});if(C.history.length)sug.style.display="none";'
-            . 'function post(action,data){var b=new URLSearchParams(data||{});b.append("action",action);b.append("nonce",C.nonce);return fetch(C.ajax,{method:"POST",credentials:"same-origin",body:b}).then(function(r){return r.json();});}'
-            . 'function ask(text){text=text.trim();if(!text)return;sug.style.display="none";add("user",text);input.value="";send.disabled=true;input.disabled=true;'
-            . 'var wait=add("assistant","");wait.classList.add("sgap-typing");wait.innerHTML="<span></span><span></span><span></span>";'
-            . 'post("sgap_chat",{message:text}).then(function(j){wait.remove();if(j&&j.success){add("assistant",j.data.text,j.data.tools);}else{add("error",(j&&j.data)||"Something went wrong.");}})'
-            . '.catch(function(e){wait.remove();add("error","Could not reach the site: "+e.message);}).then(function(){send.disabled=false;input.disabled=false;input.focus();});}'
-            . 'form.addEventListener("submit",function(e){e.preventDefault();ask(input.value);});'
-            . 'input.addEventListener("keydown",function(e){if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();ask(input.value);}});'
-            . 'sug.addEventListener("click",function(e){if(e.target.classList.contains("sgap-chip"))ask(e.target.textContent);});'
-            . 'document.getElementById("sgap-chat-clear").addEventListener("click",function(){post("sgap_chat_clear").then(function(){log.innerHTML="";sug.style.display="";add("assistant","Ny samtale. Hvad skal vi lave?");});});'
-            . 'var tBtn=document.getElementById("sgap-chat-refresh-tools"),tPill=document.getElementById("sgap-chat-tools-pill");'
-            . 'tBtn.addEventListener("click",function(){tBtn.disabled=true;post("sgap_chat_tools").then(function(j){tBtn.disabled=false;if(!j||!j.success)return;'
-            . 'var d=j.data;if(tPill)tPill.textContent=d.count+" of "+d.available+" bound";'
-            . 'if(d.signature!==C.signature){var add_n=d.count-C.tools;C.tools=d.count;C.signature=d.signature;'
-            . 'add("assistant",add_n>0?("Værktøjskataloget er opdateret: "+add_n+" nyt værktøj"+(add_n===1?"":"er")+" ("+d.count+" i alt)."):("Værktøjskataloget ændrede sig ("+d.count+" værktøjer nu)."));}})'
-            . '.catch(function(){tBtn.disabled=false;});});'
-            . '})();</script>';
+        SGAP_Assets::page_script('chat', 'SGAP_CHAT', $config);
         SGAP_Admin::close();
     }
 }

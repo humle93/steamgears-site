@@ -528,26 +528,7 @@ class SGAP_Studio {
             . '<p><button class="button"><span class="dashicons dashicons-search"></span>Optimise meta</button></p></form>';
         SGAP_UI::card_close();
         $cfg = ['ajax' => admin_url('admin-ajax.php'), 'nonce' => wp_create_nonce('sgap_studio')];
-        echo '<script>(function(){var C=' . wp_json_encode($cfg) . ',out=document.getElementById("sgap-studio-out");'
-            . 'function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\\"":"&quot;"}[c];});}'
-            . 'var steps={write:["Researching the topic…","Writing the draft…","Adding headings, FAQ and links…","Creating the featured image…","Saving the draft…"],image:["Painting the image…","Saving to the media library…"],optimize:["Reading the page…","Writing better meta…"]};'
-            . 'function card(html){var d=document.createElement("div");d.className="sgap-card";d.innerHTML=html;out.prepend(d);return d;}'
-            . 'document.querySelectorAll(".sgap-studio-form").forEach(function(f){f.addEventListener("submit",function(e){e.preventDefault();var task=f.dataset.task,btn=f.querySelector("button"),fd=new FormData(f);'
-            . 'var b=new URLSearchParams();fd.forEach(function(v,k){b.append(k,v);});b.append("action","sgap_studio");b.append("task",task);b.append("nonce",C.nonce);'
-            . 'btn.disabled=true;var i=0,s=steps[task],c=card("<h2><span class=\\"dashicons dashicons-update sgap-spin\\"></span>Working</h2><div class=\\"sgap-progress\\"><progress></progress><p>"+s[0]+"</p></div>");'
-            . 'var timer=setInterval(function(){i=Math.min(i+1,s.length-1);c.querySelector(".sgap-progress p").textContent=s[i];},task==="write"?20000:12000);'
-            . 'fetch(C.ajax,{method:"POST",credentials:"same-origin",body:b}).then(function(r){return r.json();}).then(function(j){clearInterval(timer);btn.disabled=false;'
-            . 'if(!j||!j.success){c.innerHTML="<h2>Something went wrong</h2><p>"+esc((j&&j.data)||"No answer")+"</p>";c.classList.add("sgap-bad");return;}var d=j.data;'
-            . 'if(task==="write"){c.innerHTML="<h2><span class=\\"dashicons dashicons-yes-alt\\"></span>Draft ready: "+esc(d.title)+"</h2>"'
-            . '+(d.image&&d.image.url?"<img src=\\""+esc(d.image.url)+"\\" alt=\\"\\" class=\\"sgap-studio-img\\">":"")'
-            . '+"<p>"+["Focus keyword: <b>"+esc(d.focus_keyword)+"</b>","~"+d.words+" words",d.internal_links+" internal links","SEO meta: "+esc((d.seo_meta_saved_for||[]).join(", ")),"Research: "+esc(d.keyword_research)].join(" · ")+"</p>"'
-            . '+"<p class=\\"description\\"><b>"+esc(d.meta_title)+"</b><br>"+esc(d.meta_description)+"</p>"'
-            . '+(d.image&&d.image.error?"<p class=\\"description\\">Image: "+esc(d.image.error)+"</p>":"")'
-            . '+"<p class=\\"sgap-actions\\"><a class=\\"button button-primary\\" href=\\""+esc(d.edit_url)+"\\">Edit draft</a><a class=\\"button\\" target=\\"_blank\\" href=\\""+esc(d.preview_url)+"\\">Preview</a></p>";}'
-            . 'else if(task==="image"){c.innerHTML="<h2><span class=\\"dashicons dashicons-yes-alt\\"></span>Image created</h2><img src=\\""+esc(d.url)+"\\" alt=\\"\\" class=\\"sgap-studio-img\\"><p class=\\"description\\">"+esc(d.model)+(d.featured_image_of?" · set as featured image":"")+" · <a href=\\""+esc(d.url)+"\\" target=\\"_blank\\">open</a></p>";}'
-            . 'else{c.innerHTML="<h2><span class=\\"dashicons dashicons-yes-alt\\"></span>SEO updated: "+esc(d.title)+"</h2><p>Focus keyword: <b>"+esc(d.focus_keyword)+"</b></p><p class=\\"description\\"><b>"+esc(d.meta_title)+"</b><br>"+esc(d.meta_description)+"</p>"'
-            . '+(d.suggestions&&d.suggestions.length?"<p><b>Ideas for the content:</b></p><ul style=\\"list-style:disc;margin-left:18px\\">"+d.suggestions.map(function(x){return "<li>"+esc(x)+"</li>";}).join("")+"</ul>":"");}'
-            . '}).catch(function(err){clearInterval(timer);btn.disabled=false;c.innerHTML="<h2>Could not reach the site</h2><p>"+esc(err.message)+"</p>";});});});})();</script>';
+        SGAP_Assets::page_script('studio', 'SGAP_STUDIO', $cfg);
         /* ---- whole-site SEO / AEO / GEO ---- */
         SGAP_UI::card_open('Optimise the whole site', 'admin-site-alt3');
         echo '<p>One pass over every published page, post and product: SEO, answer engines (AEO) and generative engines (GEO). '
@@ -569,7 +550,7 @@ class SGAP_Studio {
         SGAP_UI::card_close();
         echo '</div></div><div id="sgap-seo-site-out"></div>';
         if (class_exists('SGAP_Site_SEO')) {
-            echo '<script>' . SGAP_Site_SEO::script() . '</script>';
+            SGAP_Assets::page_script('seo', 'SGAP_SEO', ['ajax' => admin_url('admin-ajax.php'), 'nonce' => wp_create_nonce('sgap_studio')]);
         }
         SGAP_Admin::close();
     }

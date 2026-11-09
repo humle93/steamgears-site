@@ -237,12 +237,7 @@ class SGAP_Rescue {
             . '<p id="sgap-rescue-text" class="description">' . esc_html("{$s['copied']} copied") . ($s['given_up'] ? esc_html(" · {$s['given_up']} could not be downloaded") : '') . '</p>'
             . '<button type="button" class="button button-primary" id="sgap-rescue-go"><span class="dashicons dashicons-download"></span>Copy them now</button></div>';
         $cfg = ['ajax' => admin_url('admin-ajax.php'), 'nonce' => wp_create_nonce('sgap_rescue')];
-        echo '<script>(function(){var C=' . wp_json_encode($cfg) . ',b=document.getElementById("sgap-rescue-go"),t=document.getElementById("sgap-rescue-text"),bar=document.querySelector(".sgap-rescue .sgap-bar span");'
-            . 'function run(){var f=new URLSearchParams({action:"sgap_rescue",nonce:C.nonce});fetch(C.ajax,{method:"POST",credentials:"same-origin",body:f}).then(function(r){return r.json();}).then(function(j){'
-            . 'if(!j.success){t.textContent=j.data||"Error";b.disabled=false;return;}var d=j.data;bar.style.width=Math.round(100*d.copied/Math.max(1,d.external_files))+"%";'
-            . 't.textContent=d.copied+" of "+d.external_files+" copied · "+d.places_updated+" places updated"+(d.given_up?" · "+d.given_up+" could not be downloaded":"");'
-            . 'if(d.waiting>0)run();else{b.textContent="Done ✓";}}).catch(function(e){t.textContent=e.message;b.disabled=false;});}'
-            . 'b.addEventListener("click",function(){b.disabled=true;b.textContent="Copying…";run();});})();</script>';
+        // Knappen styres af assets/pages/dashboard.js, som dashboardet selv enqueuer.
     }
 }
 

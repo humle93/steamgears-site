@@ -56,20 +56,45 @@ $admin_js = (string) file_get_contents($dir . 'admin.js');
 check('admin.js: ventetilstand på knapper', str_contains($admin_js, 'disabled=true') && str_contains($admin_js, 'admin-post.php'));
 check('admin.js: ingen script-tags i filen', !str_contains($admin_js, '<script'));
 
-// Ingen include-fil må sende CSS ind i <head> igen. Side-scripts med konfiguration
-// (JSON pr. side) er der stadig elleve af; de har et loft, så de ikke vokser.
+// Ingen include-fil må sende CSS eller JavaScript ind i <head> igen. Det ene <script>
+// der er tilbage er JSON-LD, som er data og ikke kode.
 $inline_styles = [];
 $inline_scripts = 0;
+$ld_json = 0;
+$all = '';
 foreach (glob(SGAP_PATH . 'includes/*.php') as $file) {
     $body = (string) file_get_contents($file);
+    $all .= $body;
     if (str_contains($body, "echo '<style")) {
         $inline_styles[] = basename($file);
     }
     $inline_scripts += substr_count($body, "echo '<script");
+    $ld_json += substr_count($body, "'<script type=\"application/ld+json\">");
 }
 check('assets: ingen include echoer <style>', $inline_styles === []);
-check('assets: side-scripts er ikke vokset (loft 12)', $inline_scripts <= 12);
+check('assets: ingen include echoer et <script>', $inline_scripts === 0);
+check('assets: kun JSON-LD står tilbage som <script>', substr_count($all, "'<script") === $ld_json && $ld_json > 0);
 check('menu: menu-CSS er ikke inline længere', !str_contains((string) file_get_contents(SGAP_PATH . 'includes/admin-menu.php'), '<style'));
+
+// Sidernes adfærd ligger i assets/pages/ — én fil pr. side, ingen script-tags i filen.
+$page_files = ['studio', 'tools', 'chat', 'dashboard', 'setup', 'niche', 'seo'];
+foreach ($page_files as $name) {
+    $path = SGAP_PATH . 'assets/pages/' . $name . '.js';
+    check("page: {$name}.js findes og har kode", is_readable($path) && filesize($path) > 400);
+    check("page: {$name}.js har ingen script-tags", !str_contains((string) file_get_contents($path), '<script'));
+}
+
+// Kontrakten: filen enqueues i footeren, og konfigurationen følger med som ét objekt.
+$GLOBALS['enqueued_scripts'] = [];
+$GLOBALS['localized'] = [];
+SGAP_Assets::page_script('demo', 'SGAP_DEMO', ['nonce' => 'abc', 'rows' => [1, 2]]);
+check('page_script: enqueuer assets/pages/<navn>.js', str_ends_with((string) ($GLOBALS['enqueued_scripts']['sgap-page-demo'] ?? ''), '/assets/pages/demo.js'));
+check('page_script: konfigurationen bliver et JS-objekt', ($GLOBALS['localized']['sgap-page-demo']['SGAP_DEMO']['nonce'] ?? '') === 'abc' && ($GLOBALS['localized']['sgap-page-demo']['SGAP_DEMO']['rows'] ?? []) === [1, 2]);
+check('page_script: versionen er filens mtime når filen findes', ctype_digit(SGAP_Assets::version('pages/chat.js')));
+$GLOBALS['enqueued_scripts'] = [];
+$GLOBALS['localized'] = [];
+SGAP_Assets::page_script('niche', 'SGAP_NICHE');
+check('page_script: uden konfiguration kommer der ingen localize', isset($GLOBALS['enqueued_scripts']['sgap-page-niche']) && !isset($GLOBALS['localized']['sgap-page-niche']));
 
 // Skærmgenkendelsen er ren og skal ikke ramme andre sider i wp-admin.
 check('screen: pluginets hovedside', SGAP_Assets::is_plugin_screen('toplevel_page_steamgears-autopilot'));

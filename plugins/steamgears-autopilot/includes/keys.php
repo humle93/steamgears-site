@@ -468,11 +468,6 @@ class SGAP_Keys {
             . (isset($result['printful']['message']) ? ' ' . esc_html('Printful: ' . $result['printful']['message']) : '')
             . '</span></div>';
         $cfg = ['ajax' => admin_url('admin-ajax.php'), 'nonce' => wp_create_nonce('sgap_setup')];
-        echo '<script>(function(){var b=document.getElementById("sgap-test-keys"),o=document.getElementById("sgap-test-keys-out"),C=' . wp_json_encode($cfg) . ';if(!b)return;'
-            . 'b.addEventListener("click",function(){var l=b.innerHTML;b.disabled=true;b.textContent="Testing…";var fd=new FormData();fd.append("action","sgap_setup_test");fd.append("nonce",C.nonce);'
-            . 'fetch(C.ajax,{method:"POST",credentials:"same-origin",body:fd}).then(function(r){return r.json();}).then(function(j){var d=j&&j.data?j.data:{};'
-            . 'var parts=[];["ai","publer","printful"].forEach(function(k){if(d[k]&&d[k].message)parts.push({ai:"AI",publer:"Publer",printful:"Printful"}[k]+": "+d[k].message);});'
-            . 'o.textContent=parts.join(" ");}).catch(function(){o.textContent="Could not reach the test endpoint.";})'
-            . '.then(function(){b.disabled=false;b.innerHTML=l;});});})();</script>';
+        // "Test connections" ligger i assets/pages/setup.js sammen med resten af siden.
     }
 }

@@ -1959,23 +1959,8 @@ class SGAP_Admin {
             'nonce' => wp_create_nonce('sgap_generate'),
             'back' => admin_url('admin.php?page=steamgears-autopilot')
         ];
-        echo '<script>(function(){var C=' . wp_json_encode($gen) . ';'
-            . 'var f=document.querySelector(\'form input[name="task"][value="generate"]\');if(!f||!window.fetch)return;f=f.form;'
-            . 'var box=document.getElementById("sgap-progress"),bar=document.getElementById("sgap-progress-bar"),txt=document.getElementById("sgap-progress-text");'
-            . 'function call(action,data){var b=new URLSearchParams(data||{});b.append("action",action);b.append("nonce",C.nonce);'
-            . 'return fetch(C.ajax,{method:"POST",credentials:"same-origin",body:b}).then(function(r){return r.json();}).then(function(j){if(!j||!j.success)throw new Error((j&&j.data)||"request failed");return j.data;});}'
-            . 'f.addEventListener("submit",function(e){e.preventDefault();e.stopImmediatePropagation();var btn=f.querySelector("button");btn.disabled=true;'
-            . 'document.querySelectorAll(".wrap > .notice").forEach(function(n){n.remove();});box.style.display="block";bar.removeAttribute("value");txt.textContent="Choosing pages…";'
-            . 'var tot={sources:0,drafts:0,queued:0},errs=[];'
-            . 'call("sgap_gen_plan").then(function(plan){var pages=plan.pages,i=0;bar.max=Math.max(pages.length,1);bar.value=0;'
-            . 'if(!pages.length){txt.textContent="No page needs a post right now.";}'
-            . 'function next(){if(i>=pages.length){bar.value=bar.max;txt.textContent="Done: "+tot.drafts+" posts written. Saving…";'
-            . 'var d={sources:tot.sources,drafts:tot.drafts,queued:tot.queued};errs.forEach(function(x,k){d["errors["+k+"]"]=x;});'
-            . 'return call("sgap_gen_done",d).then(function(){location.href=C.back;});}'
-            . 'var p=pages[i];txt.textContent="Writing "+plan.channels.length+" posts for \u201c"+p.title+"\u201d ("+(i+1)+" of "+pages.length+")…";'
-            . 'return call("sgap_gen_one",{post_id:p.id}).then(function(r){tot.sources+=r.sources;tot.drafts+=r.drafts;tot.queued+=r.queued;errs=errs.concat(r.errors);},'
-            . 'function(err){tot.sources++;errs.push(p.title+": "+err.message);}).then(function(){i++;bar.value=i;return next();});}'
-            . 'return next();}).catch(function(err){txt.textContent="Stopped: "+err.message;btn.disabled=false;});},true);})();</script>';
+        $dashboard = $gen + ['rescue' => ['ajax' => $gen['ajax'], 'nonce' => wp_create_nonce('sgap_rescue')]];
+        SGAP_Assets::page_script('dashboard', 'SGAP_DASHBOARD', $dashboard);
         $last = get_option('sgap_last_generate');
         if (is_array($last)) {
             echo '<p class="description">Last generation: ' . esc_html($last['at'] . ' – ' . $last['drafts'] . ' drafts, ' . $last['queued'] . ' queued' . ($last['errors'] ? ', ' . count($last['errors']) . ' errors' : '')) . '</p>';
@@ -1997,9 +1982,7 @@ class SGAP_Admin {
         echo '<p class="description">In Publer: <em>Explore → RSS Feeds → add feed</em> → paste → <em>Settings → Auto-post</em>, '
             . 'tick "use link title/description as caption", <em>photo</em> for Instagram/Pinterest, <em>link</em> for the rest, and pick the account.</p>'
             . '<p><a class="button button-primary" href="https://app.publer.com/" target="_blank" rel="noopener"><span class="dashicons dashicons-external"></span>Open Publer</a></p>';
-        echo '<script>document.querySelectorAll(".sgap-copy").forEach(function(b){b.addEventListener("click",function(){var u=b.dataset.url,h=b.innerHTML,done=function(){b.textContent="Copied ✓";setTimeout(function(){b.innerHTML=h;},2000);};'
-            . 'var old=function(){var t=document.createElement("textarea");t.value=u;document.body.appendChild(t);t.select();try{document.execCommand("copy");}catch(e){}t.remove();done();};'
-            . 'if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(u).then(done,old);}else{old();}});});</script>';
+        // Copy-knapperne styres af assets/pages/dashboard.js, som siden selv enqueuer.
         SGAP_UI::card_close();
     }
 

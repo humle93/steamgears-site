@@ -26,7 +26,7 @@ _Opdateret 2026-11-09 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 | --- | --- | --- |
 | **steamgears.eu — site-optimering** | **100 %** | 20,95 af 20,95 d (S0 2,35/2,35 · S1 3,6/3,6 · S2 6,9/6,9 · S3 4,05/4,05 · S4 4,05/4,05) |
 | **steamgears.eu — miljø, server og sandbox (S5)** | **51,7 %** | 1,5 af 2,9 d (S5 1,5/2,9) |
-| **Steamgears Autopilot — plugin** | **100 %** | 30,45 af 30,45 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25 · P1E 0,25/0,25 · P1F 0,25/0,25 · P1G 0,5/0,5 · P2F 1,5/1,5 · P3OPT 0,6/0,6) |
+| **Steamgears Autopilot — plugin** | **100 %** | 30,75 af 30,75 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25 · P1E 0,25/0,25 · P1F 0,25/0,25 · P1G 0,5/0,5 · P2F 1,5/1,5 · P3OPT 0,6/0,6 · P3JS 0,3/0,3) |
 | **Dark academia-rebrand** | **71,3 %** | 12,4 af 17,4 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5 · BATCH4 0,5/0,5 · GENTILDELING 0,4/0,4 · MOBIL-OG-SAESON 3/3) |
 | **SEO-indholdsproduktion** | **100 %** | 8 af 8 guides (BATCH 3/3 · COPY 4/4 · CORSET 1/1) |
 | **Døde internlinks** | **100 %** | 39 af 39 links (FIX 39/39) |
@@ -43,7 +43,7 @@ _Opdateret 2026-11-09 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 - **steamgears.eu — site-optimering** — Intet agent-arbejde tilbage i S0–S4: alle fem bands er færdige og målt, og de resterende poster er ejerens og navngivet i §4c og blocked_by. Målt 8/11: 24 produkter (20 publicerede, 4 kladder) i **DKK**. DKK-tabellen fra 2/11 er afregnet **række for række**: af de **38 rækker** (linje 32–69) har **11** et produkt i butikken og står med **tabellens tal ordret** (335/165/400/435/265/180 kr) — målt 11/11 på produktsiden, i JSON-LD, i Store API og i DB med 0 afvigelser — og de **27** øvrige har kun et produkt i **papirkurven** (offentligt 404), så de er dokumenteret som rækker uden produkt med id og status; 0 rækker er uafklarede, og de 13 produkter uden række har uændret pris med id og målt beløb dokumenteret. W3TC kører med **minify, lazy load og database-cache slået til** (192 minificerede filer, 8,08 MB) efter tre gennemførte testordrer (1528/1529/1530, alle annulleret med note); kurv og kasse svarer 200; fri fragt i DK og ingen forsendelse til EU/UK/RoW; Stripe + bankoverførsel; Complianz på EU opt-in. Alle resterende poster er ejerens og står nu samlet i §4d (A–M) med den målte mangel og én konkret handling; målt 8/11 om aftenen er der **ingen** poster tilbage som agenten kan udføre.
 - **steamgears.eu — miljø, server og sandbox (S5)** — Tilbage er kun ejerens fem poster: sandkassen (S5.1, subdomæne + certifikat hos Simply), produktionskonfigurationen læst med MCP (S5.2), DKIM/DMARC-rapporterne (S5.7), backup/restore øvet (S5.8) og branch protection (S5.9, kræver Pro/Team på et privat repo — kør python3 tools/release.py --protection for de fem indstillinger). Målingen holdes nu op hver nat af tools/natlige-vaern.sh.
-- **Steamgears Autopilot — plugin** — Agent-scope er færdigt (29,85 af 29,85 d). Ejeren har lagt Pinterest-tokenet ind i WooCommerce-integrationen, og 7.65.0 — som blev lagt på sitet 8/11 gennem MCP (`Plugin_Upgrader` i `execute-php`; `update` svarer nu »Already up to date«) — henter det nu derfra gennem integrationens egen dekryptering: målt 8/11 virker det (konto `cpaleadsis`, id 688980580401955331), men appen mangler scopes `boards:read`, så pin-lister og Pin Analytics kan stadig ikke måles. Næste skridt er ejerens: genforbind Pinterest med board-adgang (eller et developer-token med boards:read + pins:read). Resten af blocked_by står uændret. Målt 8/11 om aftenen er `alert_email` tom, så fejl registreres uden at nogen får mail — det er et ejerpunkt i plugin-roadmappens §8.
+- **Steamgears Autopilot — plugin** — Agent-scope er færdigt (30,75 af 30,75 d). Ejeren har lagt Pinterest-tokenet ind i WooCommerce-integrationen, og 7.65.0 — som blev lagt på sitet 8/11 gennem MCP (`Plugin_Upgrader` i `execute-php`; `update` svarer nu »Already up to date«) — henter det nu derfra gennem integrationens egen dekryptering: målt 8/11 virker det (konto `cpaleadsis`, id 688980580401955331), men appen mangler scopes `boards:read`, så pin-lister og Pin Analytics kan stadig ikke måles. Næste skridt er ejerens: genforbind Pinterest med board-adgang (eller et developer-token med boards:read + pins:read). Resten af blocked_by står uændret. Målt 8/11 om aftenen er `alert_email` tom, så fejl registreres uden at nogen får mail — det er et ejerpunkt i plugin-roadmappens §8.
 - **Dark academia-rebrand** — Kun to ting står tilbage: (1) **witchy-tarot** kan først få indhold når ejeren siger ja til at gendanne 567 (Tarot Witchy Tee) — og eventuelt 395/411 — fra papirkurven; derefter fylder `python3 tools/rebrand_apply.py --apply --via-cli` termen automatisk, fordi kortet allerede indeholder dem; (2) **Batch 4-mockups** (5 t) kræver Printful-adgang eller 5–8 færdige billeder pr. produkt.
 - **SEO-indholdsproduktion** — SEO-indholdet er 100 %: fire guides skrevet, tre publiceret, corset-guiden publiceret, 1410 parkeret til september. Ingen åbne poster.
 - **Døde internlinks** — Vedligehold: tjek nye indlæg mod live-URL'er
@@ -51,15 +51,34 @@ _Opdateret 2026-11-09 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `3b6c61e chore(status): daglig projektstatus 2026-11-09`
+- `d498c04 Rebrand: 1 024 px målt — brudpunktet holder, men produkttitlen tabte 202 px`
+- `22c665b chore(status): daglig projektstatus 2026-11-09`
 - `d6e5736 Rebrand: mellembruddene målt — seks layoutfejl fundet og rettet ved 320–1 023 px`
 - `608b711 chore(status): daglig projektstatus 2026-11-09`
 - `7a2fd57 S5.2 læst: produktionskonfigurationen er dokumenteret, og editoren lukket`
-- `4f43ff6 chore(status): daglig projektstatus 2026-11-09`
-- `45f4e1e S5.3-S5.6 er lagt på sitet og målt, og desktop er set ved 1280 px`
-- `f208619 snapshot: renoveret header/footer template-parts live-hentet 08/11 (Codebuff-rebrand)`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 9/11 — plugin'ets side-scripts var stadig PHP-strenge med JSON indeni
+
+Efter 7.65.2 (CSS ud af `<head>`) stod der **femten** `<script>`-blokke tilbage i ni includes. Hver side byggede
+sin egen JS som PHP-literal med `wp_json_encode($cfg)` midt i — cirka 30 KB HTML pr. sidevisning der aldrig
+kunne caches, og kode der ikke kunne `node --check`es.
+
+Tre beslutninger: (1) **syv filer i `assets/pages/`** i stedet for femten blokke — `dashboard.js` bærer både
+genereringen, kopiér-knapperne og redningskortet, fordi de tre kort står på samme side; (2) konfigurationen
+sendes med **`wp_localize_script`** gennem `SGAP_Assets::page_script($navn, $objekt, $config)`, så nonces,
+chat-historikken og værktøjskataloget stadig beregnes pr. request, men som ét objekt; (3) loftet på 12 inline
+side-scripts blev **fjernet** og erstattet af et krav om nul — kun JSON-LD i `studio.php` er tilbage, fordi det
+er data og ikke kode.
+
+Fælden der gjorde det sikkert: JS'en blev **trukket mekanisk ud** af PHP-literalerne og derefter sammenlignet
+byte for byte med det HEAD printede for alle syv filer. En håndskrevet omskrivning ville have ændret escapes i
+`esc()`-funktionerne uden at nogen kunne se det. To ting mere kostede en runde: smoke-harnessen manglede en
+`plugins_url()`-stub, fordi `SGAP_UI::css()` nu kalder asset-loaderen ved første side-render — og den anden
+chat havde allerede udgivet **7.65.3**, så dette pas blev rebaset til **7.65.4** oven på deres alarmer/hardning.
 
 ### 9/11 (eftermiddag) — 1 024 px: brudpunktet holdt, produkttitlen gjorde ikke
 

@@ -27,6 +27,10 @@ function sanitize_key($s){return preg_replace('/[^a-z0-9_\-]/','',strtolower((st
 function esc_url_raw($u,$p=null){return preg_match('#^https?://#',$u)?$u:'';} function wp_parse_url($u,$c=-1){return parse_url($u,$c);}
 function wp_parse_args($a,$d){return array_merge($d,$a);} function add_query_arg($a,$u){return $u.(str_contains($u,'?')?'&':'?').http_build_query($a,'','&',PHP_QUERY_RFC3986);}
 function current_time($t){return '2026-10-30 12:00:00';} function wp_date($f,$t=null){return date($f,$t??time());} function mysql2date($f,$d,$t=null){return $d?date($f,strtotime((string)$d)):'';}
+function plugins_url($p='',$f=''){ return 'https://steamgears.eu/wp-content/plugins/steamgears-autopilot/'.ltrim((string)$p,'/'); }
+function wp_enqueue_script($h,$src='',$d=[],$v=false,$f=false){ $GLOBALS['enqueued_scripts'][$h]=$src; }
+function wp_enqueue_style($h,$src='',$d=[],$v=false,$m='all'){ $GLOBALS['enqueued_styles'][$h]=$src; }
+function wp_localize_script($h,$name,$data){ $GLOBALS['localized'][$h][$name]=$data; }
 function current_user_can($c){return true;} function get_current_user_id(){return 1;} function get_site_transient($k){return false;} function set_site_transient(...$a){} function wp_remote_get(...$a){return new WP_Error('offline','offline');} function wp_nonce_field_stub(){} function delete_option($k){unset($GLOBALS["opts"][$k]);} function wp_json_encode($v){return json_encode($v);} function is_wp_error($v){return $v instanceof WP_Error;}
 function wp_strip_all_tags($s){return strip_tags((string)$s);} function attachment_url_to_postid($u){return (int)($GLOBALS['attachment_for'][$u]??0);} function get_post_meta($id,$k='',$s=false){return $GLOBALS['postmeta'][$id][$k]??'';} function url_to_postid($u){return (int)($GLOBALS['postid_for'][$u]??0);} function get_post_status($id){return (string)($GLOBALS['poststatus'][$id]??'publish');} function wp_get_attachment_metadata($id){return $GLOBALS['attachment_meta'][$id]??[];} function get_post_mime_type($id){return (string)($GLOBALS['attachment_mime'][$id]??'');} function wp_die($m=''){throw new RuntimeException((string)$m);} function check_admin_referer($a=''){return true;}
 $GLOBALS['abilities']=[]; $GLOBALS['ability_categories']=[];
@@ -393,7 +397,8 @@ check('site seo: ids() picks one status only', SGAP_Site_SEO::ids([['id' => 'a',
 // 6/11: site_checks() skrev «home» uden $ og gav en fatal error midt i en admin-request.
 check('site seo: the domain checks run without a fatal error', count(SGAP_Site_SEO::site_checks()) === 4);
 ob_start(); do_action('page_sgap-studio'); $studio = ob_get_clean();
-check('site seo: the studio page carries the whole-site card and its script', str_contains($studio, 'sgap-seo-site-out') && str_contains($studio, 'Scan the whole site') && str_contains($studio, 'sgap_seo_site'));
+check('site seo: the studio page carries the whole-site card and enqueues its scripts', str_contains($studio, 'sgap-seo-site-out') && str_contains($studio, 'Scan the whole site') && isset($GLOBALS['enqueued_scripts']['sgap-page-studio']) && isset($GLOBALS['enqueued_scripts']['sgap-page-seo']) && isset($GLOBALS['localized']['sgap-page-seo']['SGAP_SEO']['nonce']));
+check('site seo: the card is not shipped as an inline script', !str_contains($studio, '<script>'));
 /* --- pre-flight per channel (P1.1) --- */
 $sgap_url=SGAP_Tracking::url(7);
 check('preflight: threads budget subtracts the tracking link', SGAP_Preflight::caption_budget('threads',$sgap_url)===500-mb_strlen($sgap_url)-2);

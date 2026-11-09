@@ -28,7 +28,7 @@ Der er **seks aktive projekter**, alle målt i [`projektstatus.json`](../projekt
 | id | Projekt | Status | Enhed |
 | --- | --- | --- | --- |
 | `site` | steamgears.eu — site-optimering | **100 %** (20,95 af 20,95 d) | developer-dage |
-| `plugin` | Steamgears Autopilot — plugin | **100 %** (30,45 af 30,45 d) | developer-dage |
+| `plugin` | Steamgears Autopilot — plugin | **100 %** (30,75 af 30,75 d) | developer-dage |
 | `rebrand` | Dark academia-rebrand | **65,3 %** (9,4 af 14,4 t) | timer |
 | `seo` | SEO-indholdsproduktion | **100 %** (8 af 8 guides) | guides |
 | `links` | Døde internlinks | **100 %** (39 af 39 links) | links |
@@ -94,7 +94,7 @@ Dette kort er afstemt mod målinger og status pr. **8/11 2026**. Nyere live-tal 
 
 **Pluginnet** (`plugins/steamgears-autopilot/`)
 
-- **Version i repo mod live:** repo **7.65.3** (kode- og UI-optimering plus dokumentations-patch), live **7.65.0,
+- **Version i repo mod live:** repo **7.65.4** (inline CSS og side-JS flyttet ud i filer), live **7.65.0,
   aktiv** (målt 8/11 om aftenen; opdateringen blev lagt på gennem `Plugin_Upgrader`, og
   `steamgears-autopilot/update` svarer »Already up to date (7.65.0)« på sitet).
   7.64.7 er tokenrettelsen, 7.64.8 gør kanalstatus entydig, og 7.64.9 gør P1.5 målbar
@@ -128,7 +128,7 @@ Dette kort er afstemt mod målinger og status pr. **8/11 2026**. Nyere live-tal 
   det deprecerede `impressions`, en metric Instagram endnu ikke har rapporteret udelades i stedet for at blive
   gemt som 0, og matchningen sker på captionen mod `/go/<id>/`. **7.57.0** gjorde fejlsøgningen til et fast
 værn, og **7.58.0** tilføjede Facebook-siden som kanal (P2.6): publicering, insights og moderation med
-direkte publicering som opt-in. **1 136 smoke-checks, alle grønne** (målt 8/11 2026 om aftenen, på 7.65.0: `1136 PASS · 0 FAIL`).
+direkte publicering som opt-in. **1 192 smoke-checks, alle grønne** (målt 9/11 2026 på 7.65.4: `1192 PASS · 0 FAIL`).
 - **Niche-butikken (P4) er færdig og målt live:** ét niche-navn blev til 5 kollektioner (210–214), 8
   produktkladder (1517–1524) med `_price`/`_regular_price`/SKU/`_sgap_niche`, en sideskits (1525) og en
   `wp_navigation` (1526) med 8 links — og rollback via admin-knappen slettede alle 15 rækker og gav en
