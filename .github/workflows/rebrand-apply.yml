@@ -32,7 +32,7 @@ permissions:
 jobs:
   rebrand:
     name: Kollektioner
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     env:
       WP_USER: ${{ secrets.WP_USER }}
       WP_APP_PASSWORD: ${{ secrets.WP_APP_PASS }}
