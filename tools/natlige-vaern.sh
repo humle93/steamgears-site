@@ -118,6 +118,9 @@ check "backup-øvelse (frist + paritet)"      python3 tools/db_drill_check.py --
 check "rebrand-audit-selftest"               python3 tools/rebrand_audit.py --selftest
 # Tildelingen (batch 2) er ren funktion: kortet, overlap og idempotens testes offline.
 check "rebrand-apply-selftest"               python3 tools/rebrand_apply.py --selftest
+# Pinterest-forbindelsen: autorisations-URL, kodeudtræk, PHP-escaping og de PHP-skabeloner der
+# veksler koden server-side testes offline — selve vekslingen kræver ejerens app-id.
+check "pinterest-forbindelse-selftest"       python3 tools/pinterest_connect.py --selftest
 check "fejlscan-selftest"                    python3 tools/fejlscan.py --selftest
 check "fejlscan"                             python3 tools/fejlscan.py
 # De fire niche-payloads: økonomien regnes efter på ny, ejerfelterne tælles, og
