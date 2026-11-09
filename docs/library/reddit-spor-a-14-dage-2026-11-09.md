@@ -48,6 +48,13 @@ klikker på den — derfor 400+.
 Tråd 5 og 6 er ikke fyld: de er de to emner folk faktisk spørger om i november, og de giver konkrete svar at
 skrive i andres tråde uden at linke.
 
+Tråd 1 og 2 er skrevet færdige som publicerbar HTML med Reddit-titel og disclosure-kommentar:
+[`docs/forum/workshop-goggles-2026-11-13.md`](../forum/workshop-goggles-2026-11-13.md) og
+[`docs/forum/buying-order-2026-11-20.md`](../forum/buying-order-2026-11-20.md). De linkes til
+`/diy-vs-buy-steampunk-goggles/`, `/build/weathering/`, `/build/tools-and-materials/`, `/start-here/`,
+`/steampunk-cosplay-on-a-budget/` og `/steampunk-accessories/` — alle seks sider er bekræftet i
+SEO-audit'ets sideliste, ikke gættet.
+
 ---
 
 ## 3. Kalenderen
