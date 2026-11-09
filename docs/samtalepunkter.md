@@ -27,7 +27,7 @@ _Opdateret 2026-11-09 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 | **steamgears.eu — site-optimering** | **100 %** | 20,95 af 20,95 d (S0 2,35/2,35 · S1 3,6/3,6 · S2 6,9/6,9 · S3 4,05/4,05 · S4 4,05/4,05) |
 | **steamgears.eu — miljø, server og sandbox (S5)** | **51,7 %** | 1,5 af 2,9 d (S5 1,5/2,9) |
 | **Steamgears Autopilot — plugin** | **100 %** | 30,45 af 30,45 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25 · P1E 0,25/0,25 · P1F 0,25/0,25 · P1G 0,5/0,5 · P2F 1,5/1,5 · P3OPT 0,6/0,6) |
-| **Dark academia-rebrand** | **69,7 %** | 11,5 af 16,5 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5 · BATCH4 0,5/0,5 · GENTILDELING 0,4/0,4 · MOBIL-OG-SAESON 2,1/2,1) |
+| **Dark academia-rebrand** | **70,6 %** | 12 af 17 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5 · BATCH4 0,5/0,5 · GENTILDELING 0,4/0,4 · MOBIL-OG-SAESON 2,6/2,6) |
 | **SEO-indholdsproduktion** | **100 %** | 8 af 8 guides (BATCH 3/3 · COPY 4/4 · CORSET 1/1) |
 | **Døde internlinks** | **100 %** | 39 af 39 links (FIX 39/39) |
 | **Niche-butik — plugin P4** | **100 %** | 1 af 1 d (P4PLAN 0,3/0,3 · P4APPLY 0,25/0,25 · P4UI 0,2/0,2 · P4SHIP 0,1/0,1 · P4LIVE 0,15/0,15) |
@@ -51,15 +51,49 @@ _Opdateret 2026-11-09 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `7a2fd57 S5.2 læst: produktionskonfigurationen er dokumenteret, og editoren lukket`
+- `4f43ff6 chore(status): daglig projektstatus 2026-11-09`
 - `45f4e1e S5.3-S5.6 er lagt på sitet og målt, og desktop er set ved 1280 px`
 - `f208619 snapshot: renoveret header/footer template-parts live-hentet 08/11 (Codebuff-rebrand)`
 - `214a6c6 docs snapshot 09/11 (competitors, vedligehold+drive-watch logs, daily brief 08/11)`
 - `4f4d6c3 chore(status): daglig projektstatus 2026-11-08`
-- `5b6462e Admin-UI: CSS og JS ud af <head>, 41,8 KB mindre pr. side og fire UI-rettelser`
-- `29715cb chore(status): daglig projektstatus 2026-11-08`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 9/11 — mellembruddene: fem fejl lå mellem mobil og desktop
+
+**Mobilen var målt ved 320 og desktop ved 1 280 — men ingen af dem siger noget om 768 og 800, og
+det var præcis der fejlene lå.** Seks layoutfejl blev fundet og rettet:
+
+1. **Headere ved 768 og 767 var 171 px** med både 12 inline-links og burger. Temaet viser nemlig
+   de inline-links helt ned til ~600 px, mens min desktop-regel først begyndte ved 783 px.
+   Brudpunktet er nu **1 024 px** (målt: de 12 links kræver ~1 000 px), og de inline links er
+   skjult under det. Header: **73 px** ved 768.
+2. **210 px vandret scroll ved 800 px.** Samme årsag: nowrap-gruppen med logo, links og værktøj
+   var 805 px bred og ragede ud til 1 011 px. Nu 0.
+3. **Forsidens varegrid faldt til én kolonne** mellem 783 og 1 023 px («Selected Works» blev
+   7 111 px, forsiden 11 633 px). Nu tre pr. række → sektionen 1 588 px, forsiden 6 263 px.
+4. **Butikken faldt til én kolonne**: 16 varer gav en side på 18 343 px. Nu to kolonner → 6 767 px.
+   Her kostede det en runde: temaets `ul…[class*="columns-"]`-regel har **højere specificitet**
+   end en ren klasse-selector, så min `!important`-regel tab. `!important` slår ikke altid —
+   man skal matche specificiteten.
+5. **Pris og «View Product» overlappede** i de 223 px brede kort: rækken var 188 px, pris 68,
+   knap 121. Nu pris på egen linje og knappen i fuld bredde under.
+6. **Ved 320 px stod produkttitlen i 54 px bredde** — én bogstav pr. linje — fordi købsboksen er
+   fire grupper inde i hinanden med 20 px luft hver (224 → 180 → 138 → 96 → 54). Nu 186 × 76 px.
+
+**Fælden der blev rullet tilbage:** mobilgalleriets 4:5-ramme kunne ikke sættes til `auto` — et
+flex-barn med `aspect-ratio: auto` strækkes til højeste søskende, og sliden blev **1 502 px**.
+Samme fælde som desktop-galleriet 8/11. Reglen er fjernet igen frem for at ligge som død CSS.
+
+**Tilbage i rebrand er kun batch 4 (mockups, 5 t), og den er bruger-blokeret:** der kræves enten et
+**Printful-token** (Settings → Keys) eller **5–8 fotos pr. produkt** efter
+`library/batch-4-arbejdsordre-2026-11-08.md`. Repoet har ingen trykfiler, så mockups kan ikke
+produceres her. **Nyt fund undervejs:** forsidens varekort viser priser i **USD** (`$21.90+`) mens
+butikken kører **DKK** — ikke rettet, fordi priser er ejerens flade.
+
+Bevis: [library/tablet-og-mellembrud-2026-11-09.md](library/tablet-og-mellembrud-2026-11-09.md).
 
 ### 9/11 — desktop blev målt, og »kan ikke lægges på sitet« var en forkert konklusion
 

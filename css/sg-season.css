@@ -352,10 +352,19 @@ header .sg-word b {
   color: var(--sg-gold-light) !important;
 }
 
-/* På desktop er menuen inline-links (WP's eget mønster); burgeren hører kun til mobil.
-   Uden denne blok tvang reglen nedenfor burgeren frem i 1280 px, så header blev 171 px
-   høj med både links og burger — målt 8/11. */
-@media (min-width: 783px) {
+/* Menuen skifter ved 1024 px, ikke ved 783. Målt 9/11: temaet viser de 12
+   inline-links helt ned til ~600 px, og de fylder 643–819 px — ved 800 px gav
+   det 210 px vandret scroll og en header-gruppe der ragede ud over kanten
+   (805 px bred, højre kant 1 011 px), og ved 768 px stod både links OG burger
+   fremme, så headeren blev 171 px høj. Mellem 600 og 1 023 px er derfor
+   burgeren mønstret, og de inline links er skjult indtil de kan være der. */
+@media (max-width: 1023px) {
+  .wp-block-navigation__responsive-container:not(.is-menu-open) {
+    display: none !important;
+  }
+}
+
+@media (min-width: 1024px) {
   .wp-block-navigation__responsive-container-open:not(.always-shown) {
     display: none !important;
   }
@@ -400,7 +409,7 @@ header .sg-word b {
 }
 
 /* desktop-navigation: små versaler med messing-understregning */
-@media (min-width: 783px) {
+@media (min-width: 1024px) {
   .wp-block-navigation__container {
     gap: 2px !important;
     align-items: center;
@@ -787,6 +796,69 @@ html body .wp-block-group.alignwide.is-content-justification-space-between {
 html body .wp-block-woocommerce-product-collection,
 html body .wc-block-product-template {
   margin: 0 !important;
+}
+
+/* Købsboksen er fire grupper inde i hinanden, og hver af dem lagde 20 px
+   luft til: ved 320 px gik 224 px kolonne → 180 → 138 → 96 → **54 px titel**,
+   så produkttitlen stod én bogstav pr. linje (målt 9/11). På smalle skærme
+   har de indre grupper ingen vandret luft, og den yderste ramme 14 px. */
+/* Mobilgalleriets 4:5-ramme blev forsøgt sat til »auto« 9/11, men flex-containeren
+   strakte så sliden til 1 502 px (samme fælde som desktop-galleriet). Rammen står
+   derfor urørt på mobil: 222 × 278 px med objektet centreret. */
+
+@media (max-width: 599px) {
+  body.single-product .is-style-ext-preset--buy-box {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+
+  body.single-product .is-style-ext-preset--buy-box .wp-block-group {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+}
+
+/* Tablet (600–1 023 px). Målt 9/11 ved 768 px: butikken faldt til ÉN kolonne
+   på 668 px, så de 16 varer gav en side på 18 441 px, og produkttitlen stod i
+   17,6 px — mindre end brødteksten — fordi temaets fluid-typografi først
+   springer ved 783 px. To varer pr. række og en titel der følger bredden. */
+@media (min-width: 600px) and (max-width: 1023px) {
+  /* [class*="columns-"] er med, fordi temaets egen regel
+     `ul.wc-block-product-template__responsive[class*="columns-"]` (én klasse +
+     ét attribut) ellers vinder over en ren klasse-selector — målt 9/11: den
+     tvang stadig 1fr ved 768 px, selv om reglen her havde !important. */
+  html body ul.wc-block-product-template__responsive[class*="columns-"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 20px !important;
+  }
+
+  html body.single-product .wp-block-post-title {
+    font-size: clamp(26px, 4.6vw, 38px) !important;
+    line-height: 1.15 !important;
+  }
+}
+
+/* Forsidens varegrid («Selected Works») havde kun en regel under 783 px og ved
+   380 px; mellem 783 og 1 023 px faldt det tilbage til én kolonne, så de ti
+   varer gav en sektion på 7 111 px (målt 9/11 ved 800 px). Tre pr. række. */
+@media (min-width: 783px) and (max-width: 1023px) {
+  .sga-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 16px !important;
+  }
+
+  /* Pris og »View Product« stod på én linje i 223 px brede kort: rækken var
+     188 px, pris 68 og knap 121, så knappen lagde sig ind over prisen (målt
+     9/11 ved 800 px). Prisen får sin egen linje og knappen hele bredden. */
+  .sga-buyrow {
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+  }
+
+  .sga-buyrow .sga-add {
+    width: 100% !important;
+    text-align: center !important;
+  }
 }
 
 /* footerens indre gruppe havde samme bordeaux gradient */
