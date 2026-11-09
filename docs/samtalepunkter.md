@@ -58,12 +58,12 @@ _Opdateret 2026-11-09 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `73dd8f7 Modul: MCP-adgang — sitets plugin-version målt gennem AI Engine-fladen Før: — Efter: — Δ: — Grundlag: ingen ændring`
+- `5d1317e Modul: P1.23 — OpenRouter som egen tekst-provider Før: 100 % → Efter: 100 % (Δ 0) Grundlag: ingen ændring`
 - `d608356 Modul: publiceringskørsel — note om PDF-eksporten Før: 100 % → Efter: 100 % (Δ 0) Grundlag: ingen ændring`
 - `383c143 Modul: publiceringskørsel — alt åbent arbejde i én rækkefølge Før: 100 % → Efter: 100 % (Δ 0) Grundlag: ingen ændring`
 - `52d675c Modul: afslutning — profilen og tallene siger det samme Før: 100 % → Efter: 100 % (Δ 0) Grundlag: ingen ændring`
 - `7c65b51 chore(status): daglig projektstatus 2026-11-09`
-- `3568573 Modul: SEO — vaernene daekker alle fem copyfiler, ikke fire Før: 100 % → Efter: 100 % (Δ 0) Grundlag: ingen ændring`
-- `e223c3f chore(status): daglig projektstatus 2026-11-09`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
