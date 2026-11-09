@@ -129,6 +129,7 @@ IKKE_COPY = {
     "docs/library/seo-sporet-2026-11-08.md": "spor/procesdokument",
     "docs/library/go-links-og-guide-copy-2026-11-09.md": "målingen 9/11; citerer den fil der blev rettet",
     "docs/library/guide-vaern-daekning-2026-11-09.md": "målingen af værnsdækningen; citerer filer og beløb",
+    "docs/publiceringskoersel-2026-11-09.md": "publiceringskørslen; citerer copyen ordret (kilden er copyfilerne)",
     "docs/library/go-links-verifikation-2026-11-07.md": "verifikation 7/11",
     "docs/library/seo-dashboard-fakta-26-10.md": "faktasamling fra 26/10 med datidens priser",
     "docs/library/seo-regler-geo-optimering-log.md": "log",

@@ -201,6 +201,10 @@ Yes. The shop prices in DKK, and every amount on this page was read from the liv
 
 Start at [steampunk costumes](https://steamgears.eu/steampunk-costumes/) if you want the method rather than the looks, then read [men's essentials](https://steamgears.eu/mens-steampunk-costume-essentials/) for the ten-piece build and [the corset guide](https://steamgears.eu/steampunk-corset-guide/) before you buy a corset online.
 
+[sg-shoprow]
+
+[sg-buy]
+
 ### Publishing notes
 
 1. Replace the body of post 699; keep the slug and the post ID so the inbound links and the Rank Math history survive.
