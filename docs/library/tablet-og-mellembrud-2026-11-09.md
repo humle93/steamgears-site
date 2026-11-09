@@ -14,7 +14,7 @@ er taget ved at skalere iframen (`transform: scale(300/bredde)`), så hele bredd
 
 | # | Bredde | Symptom målt | Årsag | Efter |
 | --- | --- | --- | --- | --- |
-| 1 | 600–1 023 | Header **171 px** med både 12 links og burger (768 og 767 px) | Temaet viser de inline links helt ned til ~600 px, men min desktop-regel begyndte først ved 783 px, og burgeren var tvunget synlig under den | Burger **< 1 024 px**, inline links **≥ 1 024 px**; header **73 px** ved 768 og 95 px ved 1 024 |
+| 1 | 600–1 023 | Header **171 px** med både syv inline-links og burger (768 og 767 px) | Temaet viser de inline links helt ned til ~600 px, men min desktop-regel begyndte først ved 783 px, og burgeren var tvunget synlig under den | Burger **< 1 024 px**, inline links **≥ 1 024 px**; header **73 px** ved 768 og 95 px ved 1 024 |
 | 2 | 783–1 023 | **210 px vandret scroll** ved 800 px: header-gruppen var 805 px bred med højre kant i 1 011 px | Samme brudpunkt; den nowrap-gruppe der rummer logo, links og værktøj kræver ~1 024 px | Ingen overflow (scrollWidth 790 ved 800 px) |
 | 3 | 783–1 023 | Forsidens varegrid faldt til **én kolonne**: «Selected Works» blev **7 111 px** høj | `.sga-grid` havde kun regler under 783 px og under 380 px | Tre pr. række → sektionen **1 588 px**, forsiden 11 633 → **6 263 px** |
 | 4 | 600–1 023 | Butikken faldt til **én kolonne** på 668 px: 16 varer gav **18 343 px** side | Temaets `ul.wc-block-product-template__responsive[class*="columns-"] { 1fr !important }` (én klasse + ét attribut) slog min ren-klasse-selector, selv med `!important` | To kolonner à 341 px → siden **6 767 px** |

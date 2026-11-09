@@ -27,7 +27,7 @@ _Opdateret 2026-11-09 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 | **steamgears.eu — site-optimering** | **100 %** | 20,95 af 20,95 d (S0 2,35/2,35 · S1 3,6/3,6 · S2 6,9/6,9 · S3 4,05/4,05 · S4 4,05/4,05) |
 | **steamgears.eu — miljø, server og sandbox (S5)** | **51,7 %** | 1,5 af 2,9 d (S5 1,5/2,9) |
 | **Steamgears Autopilot — plugin** | **100 %** | 30,45 af 30,45 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25 · P1E 0,25/0,25 · P1F 0,25/0,25 · P1G 0,5/0,5 · P2F 1,5/1,5 · P3OPT 0,6/0,6) |
-| **Dark academia-rebrand** | **70,6 %** | 12 af 17 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5 · BATCH4 0,5/0,5 · GENTILDELING 0,4/0,4 · MOBIL-OG-SAESON 2,6/2,6) |
+| **Dark academia-rebrand** | **71,3 %** | 12,4 af 17,4 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5 · BATCH4 0,5/0,5 · GENTILDELING 0,4/0,4 · MOBIL-OG-SAESON 3/3) |
 | **SEO-indholdsproduktion** | **100 %** | 8 af 8 guides (BATCH 3/3 · COPY 4/4 · CORSET 1/1) |
 | **Døde internlinks** | **100 %** | 39 af 39 links (FIX 39/39) |
 | **Niche-butik — plugin P4** | **100 %** | 1 af 1 d (P4PLAN 0,3/0,3 · P4APPLY 0,25/0,25 · P4UI 0,2/0,2 · P4SHIP 0,1/0,1 · P4LIVE 0,15/0,15) |
@@ -51,24 +51,62 @@ _Opdateret 2026-11-09 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `d6e5736 Rebrand: mellembruddene målt — seks layoutfejl fundet og rettet ved 320–1 023 px`
+- `608b711 chore(status): daglig projektstatus 2026-11-09`
 - `7a2fd57 S5.2 læst: produktionskonfigurationen er dokumenteret, og editoren lukket`
 - `4f43ff6 chore(status): daglig projektstatus 2026-11-09`
 - `45f4e1e S5.3-S5.6 er lagt på sitet og målt, og desktop er set ved 1280 px`
 - `f208619 snapshot: renoveret header/footer template-parts live-hentet 08/11 (Codebuff-rebrand)`
-- `214a6c6 docs snapshot 09/11 (competitors, vedligehold+drive-watch logs, daily brief 08/11)`
-- `4f4d6c3 chore(status): daglig projektstatus 2026-11-08`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 9/11 (eftermiddag) — 1 024 px: brudpunktet holdt, produkttitlen gjorde ikke
+
+**Brudpunktet blev flyttet til 1 024 px i sidste runde uden at 1 024 selv blev målt.**
+Målt nu, plus 1 023/1 025 omkring det, på forside, `/shop/` og produktside:
+
+- **1 023 px:** burger, 0 inline-links, header **73 px**.
+- **1 024 px:** **syv** inline-links (START HERE…CONTACT) der fylder 625 px og slutter i
+  840 af gruppens 1 014 px, ingen burger, header **95 px**.
+- **1 025 px:** uændret fra 1 024. **0 overflow** ved alle tre — `scrollWidth` = `clientWidth`.
+- Butikken: 4 kolonner à 222 px, pris y 700 og knap y 793 (ingen overlap).
+  Forsiden: 3 kolonner à 302 px, købsrække 56 px med pris og knap på én linje.
+
+**Fejlen målingen afslørede:** produkttitlen stod i **223 px bredde i en 425 px
+kolonne** (234 px høj) — og i **137 × 365 px, ni linjer**, ved 782 px. Årsagen er den
+samme som mobil-fixet 8/11: fire indlejrede grupper med 24 px luft hver. Tabet er
+**konstant 202 px**: kolonne 425 → titel 223, 513 → 311, 553 → 351.
+
+Rettet med to regler der beviseligt ikke rører 320, 768 eller 1 280: 0 px luft i
+**782–1 023 px** med titel efter kolonnen, og **flydende luft ≥1 024 px**
+(`clamp(0px, calc((100vw - 1024px)/8), 24px)`) — 0 px ved 1 024 og temaets 24 px fra
+1 216, så 1 280 er præcis som før. Målt efter: 782 → **257 × 115**, 900 → **305 × 132**,
+1 023 → **367 × 149**, 1 024 → **367 × 154** (docH 5 529 → **5 449**), 1 025 → 367 × 155,
+1 280 → **351 × 168 uændret** (padding stadig 24 px). 320 og 768 er målt uændrede
+(docH 8 574 / 11 099 / 8 922 og 6 906 / 6 766 / 5 799).
+
+**Rettet tal:** den tidligere dokumentation sagde »12 inline-links kræver ~1 010 px«.
+Der er **syv**; de fem ekstra i DOM'en er undermenu-punkter med bredde 0. Brudpunktet
+er rigtigt, men begrundet i at gruppen med logo og værktøj rager ud — ikke i linkenes bredde.
+
+**Ikke rettet:** produkttitlen på 320 px er **17,6 px** (temaets bundgrænse) — den er
+ikke rørt, fordi 320 px skulle verificeres uændret, og står som kandidat til næste pas.
+Forsidens kort viser stadig **USD** mod butikkens **DKK** (ejerens flade).
+Butikken skifter 2 → 4 kolonner ved 1 024 px (469 → 222 px kort) — det er temaets grid,
+målt uden overlap og uden overflow.
+
+Bevis: [library/1024-brudpunktet-2026-11-09.md](library/1024-brudpunktet-2026-11-09.md).
 
 ### 9/11 — mellembruddene: fem fejl lå mellem mobil og desktop
 
 **Mobilen var målt ved 320 og desktop ved 1 280 — men ingen af dem siger noget om 768 og 800, og
 det var præcis der fejlene lå.** Seks layoutfejl blev fundet og rettet:
 
-1. **Headere ved 768 og 767 var 171 px** med både 12 inline-links og burger. Temaet viser nemlig
+1. **Headere ved 768 og 767 var 171 px** med både syv inline-links og burger. Temaet viser nemlig
    de inline-links helt ned til ~600 px, mens min desktop-regel først begyndte ved 783 px.
-   Brudpunktet er nu **1 024 px** (målt: de 12 links kræver ~1 000 px), og de inline links er
+   Brudpunktet er nu **1 024 px** (målt: de syv links fylder 625 px, og det er gruppen med
+   logo og værktøj der rager ud), og de inline links er
    skjult under det. Header: **73 px** ved 768.
 2. **210 px vandret scroll ved 800 px.** Samme årsag: nowrap-gruppen med logo, links og værktøj
    var 805 px bred og ragede ud til 1 011 px. Nu 0.

@@ -220,10 +220,10 @@
         {
           "id": "mobil-og-saeson",
           "name": "Mobil-CSS, menu og årstidsfarver",
-          "done": 2.6,
-          "total": 2.6,
+          "done": 3.0,
+          "total": 3.0,
           "unit": "t",
-          "note": "udført og verificeret 8/11 i cloud-browseren på 320 px: header 337 → 73 px, indholdskolonne 198 → 278 px, forsiden 11 120 → 8 574 px, 0 elementer uden for viewport, fuldskærmsmenu med 44 px lukkeknap og tre rystekilder fjernet (10 s AI-løkke, backdrop-filter, transition: all). Årstidspaletter (winter/spring/summer/autumn) i css/sg-season.css, data-season sat af mu-plugins/sga-season.php. 8/11 sent +0,6 t: desktop målt ved 1280 px i en same-origin-iframe og syv regressioner rettet som @media (min-width: 783px) — header 171 → 95 px, »Close menu«-krydset skjult, underpunkt-pilen gjort synlig, produktsiden fra grid med 66 px købskolonne til 1178/553/553 (docH 6 154 → 4 899), galleriet fra 4:5 til 4:3 (551×551), kolonnerne fra 2 905 px stræk til flex-start, og /shop/ målt til fire kolonner à 285,5 px. Mobilen er uændret. 9/11 (+0,5 t): mellembruddene målt ved 320/768/800/1 024/1 280 px — seks layoutfejl rettet og målt: header 171 → 73 px ved 768 (burger nu < 1 024 px, inline links ≥ 1 024), 210 px vandret scroll ved 800 → 0, forsidens varegrid 7 111 → 1 588 px (3 pr. række), butikken 18 343 → 6 767 px (2 kolonner, krævede [class*=\"columns-\"] for at slå temaets specificitet), pris/CTA-overlap → knap i fuld bredde, og produkttitlen på 320 px 54 → 186 px bred. 320 og 1 280 uændrede. Mobilgalleriet blev forsøgt ændret og rullet tilbage: aspect-ratio auto på et flex-barn gav 1 502 px slide."
+          "note": "udført og verificeret 8/11 i cloud-browseren på 320 px: header 337 → 73 px, indholdskolonne 198 → 278 px, forsiden 11 120 → 8 574 px, 0 elementer uden for viewport, fuldskærmsmenu med 44 px lukkeknap og tre rystekilder fjernet (10 s AI-løkke, backdrop-filter, transition: all). Årstidspaletter (winter/spring/summer/autumn) i css/sg-season.css, data-season sat af mu-plugins/sga-season.php. 8/11 sent +0,6 t: desktop målt ved 1280 px i en same-origin-iframe og syv regressioner rettet som @media (min-width: 783px) — header 171 → 95 px, »Close menu«-krydset skjult, underpunkt-pilen gjort synlig, produktsiden fra grid med 66 px købskolonne til 1178/553/553 (docH 6 154 → 4 899), galleriet fra 4:5 til 4:3 (551×551), kolonnerne fra 2 905 px stræk til flex-start, og /shop/ målt til fire kolonner à 285,5 px. Mobilen er uændret. 9/11 (+0,5 t): mellembruddene målt ved 320/768/800/1 024/1 280 px — seks layoutfejl rettet og målt: header 171 → 73 px ved 768 (burger nu < 1 024 px, inline links ≥ 1 024), 210 px vandret scroll ved 800 → 0, forsidens varegrid 7 111 → 1 588 px (3 pr. række), butikken 18 343 → 6 767 px (2 kolonner, krævede [class*=\"columns-\"] for at slå temaets specificitet), pris/CTA-overlap → knap i fuld bredde, og produkttitlen på 320 px 54 → 186 px bred. 320 og 1 280 uændrede. Mobilgalleriet blev forsøgt ændret og rullet tilbage: aspect-ratio auto på et flex-barn gav 1 502 px slide. 9/11 (+0,4 t): 1 024 px-brudpunktet målt (1 023 burger/73 px · 1 024 syv links/95 px · 1 025 uændret, 0 overflow) og produkttitlens 202 px tab fundet og rettet: 223 → 367 px bred ved 1 024 (234 → 154 px høj), 137 → 257 px ved 782, 351 × 168 px uændret ved 1 280. 320 og 768 målt uændrede."
         }
       ]
     },
@@ -1798,6 +1798,15 @@
       "after": 70.6,
       "delta": 0.9,
       "basis": "12 af 17 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5 · Batch 4-forberedelse: arbejdsordre, filnavne, alt-tekster, rækkefølge 0,5/0,5 · Batch 2-gentildeling: de seks kollektioner skal tildeles igen 0,4/0,4 · Mobil-CSS, menu og årstidsfarver 2,6/2,6)"
+    },
+    {
+      "date": "2026-11-09",
+      "project": "Dark academia-rebrand",
+      "module": "daglig måling",
+      "before": 70.6,
+      "after": 71.3,
+      "delta": 0.7,
+      "basis": "12,4 af 17,4 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5 · Batch 4-forberedelse: arbejdsordre, filnavne, alt-tekster, rækkefølge 0,5/0,5 · Batch 2-gentildeling: de seks kollektioner skal tildeles igen 0,4/0,4 · Mobil-CSS, menu og årstidsfarver 3/3)"
     }
   ]
 }
