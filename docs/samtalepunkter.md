@@ -24,6 +24,7 @@ _Opdateret 2026-11-09 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 | Projekt | Status | Grundlag |
 | --- | --- | --- |
+| **Forum + Reddit — trafikaccelerator (P5)** | **96,7 %** | 2,9 af 3 d (F1 1,2/1,2 · F2 0,8/0,8 · F3 0,3/0,3 · F4 0,3/0,3 · F5 0,3/0,3 · F6 0/0,1) |
 | **steamgears.eu — site-optimering** | **100 %** | 20,95 af 20,95 d (S0 2,35/2,35 · S1 3,6/3,6 · S2 6,9/6,9 · S3 4,05/4,05 · S4 4,05/4,05) |
 | **steamgears.eu — miljø, server og sandbox (S5)** | **60 %** | 1,8 af 3 d (S5 1,8/3) |
 | **Steamgears Autopilot — plugin** | **100 %** | 31 af 31 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25 · P1E 0,25/0,25 · P1F 0,25/0,25 · P1G 0,5/0,5 · P2F 1,5/1,5 · P3OPT 0,6/0,6 · P3JS 0,3/0,3 · P3LIVE 0,25/0,25) |
@@ -31,18 +32,20 @@ _Opdateret 2026-11-09 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 | **SEO-indholdsproduktion** | **100 %** | 8 af 8 guides (BATCH 3/3 · COPY 4/4 · CORSET 1/1) |
 | **Døde internlinks** | **100 %** | 39 af 39 links (FIX 39/39) |
 | **Niche-butik — plugin P4** | **100 %** | 1 af 1 d (P4PLAN 0,3/0,3 · P4APPLY 0,25/0,25 · P4UI 0,2/0,2 · P4SHIP 0,1/0,1 · P4LIVE 0,15/0,15) |
-| **KABINE — bil-interiør som ny butik** | **36,5 %** | 9,5 af 26 t (B1 2/2 · B2 2/2 · B3 2/2 · B4 2/2 · B5 1,5/1,5 · B6 0/6 · B7 0/4 · B8 0/2,5 · B9 0/4) |
+| **KABINE — bil-interiør som ny butik** | **48,4 %** | 15,5 af 32 t (B1 2/2 · B2 2/2 · B3 2/2 · B4 2/2 · B5 1,5/1,5 · B6 0/6 · B7 0/4 · B8 0/2,5 · B9 0/4 · B10 6/6) |
 
 ### Åbne blokeringer
 
+- **Forum + Reddit — trafikaccelerator (P5)** — Ejerens Reddit-konto og script-app (app-id, secret, brugernavn, adgangskode) samt upload af zip'en gennem Plugins → Tilføj nyt; derefter første rigtige link post og måling af refresh-token-rotationen over to kørsler. WP-Crons forsinkelse på det cachede site er dækket af den eksisterende cron-kicker, men ikke målt for denne kø.
 - **steamgears.eu — site-optimering** — Ejerens oplysninger og aftaler, målt 8/11: CVR-nummer og telefon (Complianz har navn »Henning 6«, adresse »Lavgade 44a st th«, e-mail og DK — men telefon er tom og CVR findes ikke i formularen); aftaler med MobilePay/PayPal (kun Stripe og bankoverførsel er aktive); zonerne til EU/UK/RoW (kun Denmark har en metode — fri fragt uden minimum — og resten af verdenen har ingen, så EU-kunder ikke kan gennemføre en ordre), fragtklasser og fri fragt-grænse; en currency-switcher hvis EUR skal vises som sekundærvaluta (der er ingen aktiv); Printful-adgang eller 5–8 færdige mockups pr. produkt (målt: 20 publicerede produkter, 22 billeder, alle under 3); ja/nej pr. produkt for 942/765/766/767 (alle fire kladder med pris og SKU); GSC-svarrapport (S0.6); og beslutning om de to inaktive plugins.
 - **steamgears.eu — miljø, server og sandbox (S5)** — Subdomæne + certifikat hos Simply (S5.1); DNS-panelet hos Simply til DKIM og DMARC-rapporter (S5.7 — ændringen kan ikke ses i zonen 9/11); hostpanelet til den sidste del af S5.8 (gendannelse til staging og  værtens backup-politik med opbevaring ≥ 14 dage; øvelsen selv er målt på live 9/11); GitHub Pro/Team til branch protection og environment-regler (S5.9). Ingen af de fire kan lukkes af agenten — hver kræver en konto eller et panel ejeren råder over.
 - **Steamgears Autopilot — plugin** — Syv led kræver ejeren, alle målt 8/11: (1) **Pinterest-scope** — tokenet ligger nu i WooCommerce-integrationen og er gyldigt (`/user_account` 200 som `cpaleadsis`, id 688980580401955331), men appen har kun ads/billing/catalogs/pins/user_accounts og **mangler `boards:read`**, så `/pins` og `/boards` afvises (målt 17:25Z, kanalstatus står som `needs_scope`); (2) **de øvrige kanal-tokens** — Instagram, Bluesky, Mastodon, Telegram og Facebook har intet token (5 af 6 mangler); (3) **AIMLAPI-kredit** — sidste generering 7/11 fejlede med »You've run out of funds«; (4) **`sgap_alert_email`** er tom, så fejl registreres men ingen mail sendes; (5) **full auto vs. godkendelse** — `sgap_full_auto_enabled = no` og 40 elementer venter; (6) **distributionsvej** — `publish_mode = rss` og 0 Publer-konti; (7) **P2.1–P2.3** kræver ejerens beslutning om Command Center-retningen. Intet af det må gættes.
 - **Dark academia-rebrand** — To led kræver ejerhandling, målt 8/11: (1) **de 29 trash'ede designs** — herunder de tre produkter der er witchy-tarots eneste kandidater (567, 395, 411); et ja/nej til genoplivning er nok, og tildelingen kører selv bagefter; (2) **Batch 4-mockups (5 t)** — Printful-adgang eller 5–8 færdige billeder pr. produkt; målt 20 publicerede med 22 billeder, 0 med 3 eller flere, 62 billedplaceringer mangler, og repoet har 0 trykfiler og 0 tøj-skabeloner. Kollektionstildelingen er ikke længere blokeret: den blev udført 8/11 gennem Novamira-MCP og målt stabil.
-- **KABINE — bil-interiør som ny butik** — Seks ejerhandlinger, målt 9/11: E1 CVR, telefon, adresse og bankaftale til butikken (uden dem ingen faktura, ingen MobilePay, ingen lovlig handel); E2 leverandørvalg med GPSR-dokumentation og to prøver (ellers er indkøbspris, kvalitet og leveringstid gæt); E3 registrering i producentregistret for emballage (markedsføring må ikke starte før); E4 domænet kabine.dk eller et alternativ plus Shopify-konto; E5 beslutning om start 9/11 i Q4-priser eller 5/1 til lavere CPA; E6 annoncekonto med betalingsmetode og 10.000 kr. Ingen af de seks kan lukkes af agenten — hver kræver en konto, et panel eller en underskrift.
+- **KABINE — bil-interiør som ny butik** — Seks ejerhandlinger, målt 9/11: E1 CVR, telefon, adresse og bankaftale til butikken (uden dem ingen faktura, ingen MobilePay, ingen lovlig handel); E2 leverandørvalg med GPSR-dokumentation og to prøver (ellers er indkøbspris, kvalitet og leveringstid gæt); E3 registrering i producentregistret for emballage (markedsføring må ikke starte før); E4 navn og domæne plus Shopify-konto — kabine.dk, oploft.dk, stille.dk og immer.dk er alle registreret (DNS, 9/11), så der skal købes, lejes eller renames; E5 beslutning om start 9/11 i Q4-priser eller 5/1 til lavere CPA; E6 annoncekonto med betalingsmetode og 10.000 kr. Ingen af de seks kan lukkes af agenten — hver kræver en konto, et panel eller en underskrift.
 
 ### Næste skridt
 
+- **Forum + Reddit — trafikaccelerator (P5)** — Ejer-guiden ligger i docs/library/reddit-opsaetning-2026-11-09.md (+ PDF): to spor, fordi Reddits vilkår (5/10 2026) kræver forhåndsgodkendelse til Data API og en skriftlig aftale ved kommerciel brug — spor A poster i hånden med UTM og virker i dag, spor B kræver Reddits ja og app-type script. Koden er bygget og grøn i smoke (1 277 PASS / 0 FAIL): CPT med native kommentarer, formularværn, DiscussionForumPosting, OAuth med tre grants, link-post-kø med loft/interval/backoff, radar og admin-side. Tilbage er kun det der kræver ejeren: installer plugins/steamgears-autopilot-v7.66.0.zip (repoet er privat, så selvopdateringen kan ikke hente den), opret en Reddit script-app og gem app-id, secret, brugernavn og adgangskode, indsæt [steamgears_forum] på en side, og map tavler til subreddits via term meta reddit_sub. Intet HTTP-kald er kørt mod Reddit endnu — klienten er testet gennem SGAP_Reddit::$transport.
 - **steamgears.eu — site-optimering** — Intet agent-arbejde tilbage i S0–S4: alle fem bands er færdige og målt, og de resterende poster er ejerens og navngivet i §4c og blocked_by. Målt 8/11: 24 produkter (20 publicerede, 4 kladder) i **DKK**. DKK-tabellen fra 2/11 er afregnet **række for række**: af de **38 rækker** (linje 32–69) har **11** et produkt i butikken og står med **tabellens tal ordret** (335/165/400/435/265/180 kr) — målt 11/11 på produktsiden, i JSON-LD, i Store API og i DB med 0 afvigelser — og de **27** øvrige har kun et produkt i **papirkurven** (offentligt 404), så de er dokumenteret som rækker uden produkt med id og status; 0 rækker er uafklarede, og de 13 produkter uden række har uændret pris med id og målt beløb dokumenteret. W3TC kører med **minify, lazy load og database-cache slået til** (192 minificerede filer, 8,08 MB) efter tre gennemførte testordrer (1528/1529/1530, alle annulleret med note); kurv og kasse svarer 200; fri fragt i DK og ingen forsendelse til EU/UK/RoW; Stripe + bankoverførsel; Complianz på EU opt-in. Alle resterende poster er ejerens og står nu samlet i §4d (A–M) med den målte mangel og én konkret handling; målt 8/11 om aftenen er der **ingen** poster tilbage som agenten kan udføre.
 - **steamgears.eu — miljø, server og sandbox (S5)** — Tilbage er fire poster, alle ejerens: sandkassen (S5.1, subdomæne + certifikat hos Simply), DKIM/DMARC (S5.7 — målt igen 9/11 efter ejerens melding: zonen er **uændret**, `_dmarc.steamgears.eu` er stadig en CNAME til `dmarc.simply.com` med Simplys egne `rua`/`ruf`, apex har kun SPF, og 32 DKIM-selektorer plus CNAME-pejl på otte svarer tomt), de sidste 0,05 d af S5.8 (gendannelse til staging — resten er målt på live 9/11 med 269/269 tabeller og RTO 6 s; værtens backup-politik ≥ 14 dage er stadig ikke dokumenteret) og branch protection (S5.9, GitHub svarer 403 »Upgrade to GitHub Pro«, målt 9/11). S5.7 lukkes af en TXT med butikkens egen adresse plus `v=DKIM1; k=rsa; p=…` på en selector.
 - **Steamgears Autopilot — plugin** — Agent-scope er færdigt (31,00 af 31,00 d) og 7.65.5 kører nu på sitet. Det eneste åbne er P1.5's live-verifikation (0,6 d, ejer-blokeret): Pinterest-tokenet mangler `boards:read`, og fem kanaler mangler tokens.
@@ -50,19 +53,38 @@ _Opdateret 2026-11-09 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 - **SEO-indholdsproduktion** — SEO-indholdet er 100 %: fire guides skrevet, tre publiceret, corset-guiden publiceret, 1410 parkeret til september. Ingen åbne poster.
 - **Døde internlinks** — Vedligehold: tjek nye indlæg mod live-URL'er
 - **Niche-butik — plugin P4** — Færdig som roadmap-punkt P4: modulet er kørt mod det levende site (WordPress 7.1.4, WooCommerce 11.2.2) med 8 produktkladder, 5 kollektioner, en sideskits og en navigation, og rullet tilbage til præcis udgangstilstanden. Næste skridt er ejerens: Printful-adgang, publicering og de øvrige punkter i readiness-listen. Målt 8/11 om aftenen er `alert_email` tom, så fejl registreres uden at nogen får mail — det er et ejerpunkt i plugin-roadmappens §8.
-- **KABINE — bil-interiør som ny butik** — Fem forberedelsesmoduler er færdige (9,5 af 26 t, 36,5 %): niche og brand valgt, enhedsøkonomi regnet, 30-dages plan med KPI-gates skrevet, ti hooks som manuskript, og kravlisten for butik, betaling, tracking og jura. Resten er butiksopsætning (6 t), leverandør og prøver (4 t), juridiske sider (2,5 t) og første annoncerunde (4 t) — alle fire starter først når ejeren har leveret E1-E6.
+- **KABINE — bil-interiør som ny butik** — Seks forberedelsesmoduler er færdige (15,5 af 32 t, 48,4 %): niche og brand valgt, enhedsøkonomi regnet, 30-dages plan med KPI-gates skrevet, ti hooks som manuskript, kravlisten for butik, betaling, tracking og jura, og roadmap plus færdig tekst til alle fire nicher. Resten er butiksopsætning (6 t), leverandør og prøver (4 t), juridiske sider (2,5 t) og første annoncerunde (4 t) — alle fire starter først når ejeren har leveret E1-E6. Domænemåling 9/11: alle fire ønskede .dk-domæner er taget, så E4 kræver en købs-/leje- eller rename-beslutning.
 
 ### Seneste commits
 
-- `8cbe50a S5.7: DKIM/DMARC meldt sat op — zonen svarer det samme`
-- `b1c9b50 Leverandørbrief til teleskopreolen: én låst spec, et svarsskema og GPSR som krav i første mail`
-- `543ff5d CI: backup-kørslen følger repoets runner- og action-valg`
-- `c4c82f0 chore(status): daglig projektstatus 2026-11-09`
-- `e704314 S5.11: backup-øvelsen er nu et månedligt værn med RTO og paritet som serie`
-- `a20f11c chore(rebrand): kørselsrapport for tildelingen`
+- `542ddd5 Tilbudssammenligning på ét kald, så tre leverandørsvar kan vejes mod hinanden`
+- `4550ec9 Modul: F6 — to fredagstråde skrevet Før: 96,7 % Efter: 96,7 % Δ: 0 Grundlag: ingen ændring`
+- `1f45eb4 Modul: F6 — 14-dages plan for spor A Før: 96,7 % Efter: 96,7 % Δ: 0 Grundlag: ingen ændring`
+- `e043000 Modul: F6 — ejer-guide til Reddit-app Før: 96,7 % Efter: 96,7 % Δ: 0 Grundlag: ingen ændring`
+- `901b3a4 chore(status): daglig projektstatus 2026-11-09`
+- `3178292 Modul: baseline Før: — Efter: 96,7 % Δ: — Grundlag: 2,9 af 3 d (F1 1,2/1,2 · F2 0,8/0,8 · F3 0,3/0,3 · F4 0,3/0,3 · F5 0,3/0,3 · F6 0/0,1)`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 9/11 — tilbudsbeslutningen: forhandlingsrummet er regnet, ikke gættet
+
+De tre tilbud blev kørt gennem `tools/tilbuds_sammenligning.py` ved **begge** CPA-niveauer — 200 som
+driftsmål og 281 som modellens break-even — fordi dommen vender mellem dem: ved 281 kan ingen af de tre
+købes til 749 kr, ved 200 kan to.
+
+Det, der bar notatet, var at **prisen og landed ikke kan redde casen hver for sig**: hvert enkeltgreb lander
+inden for få kroner af nul (B ved 789 kr = +2 kr, A ved 849 kr = +7 kr, 30 kr i rabat = 0 kr), og et nul
+tåler ikke en returrate på 12 %. Anbefalingen er derfor en kombination — 15 kr i landed og prisen til
+789 kr giver 17 kr i luft — og B kommer først, fordi DAP fra Polen har fragten i prisen (42 kr billigere
+landed end A trods 8 kr højere stykpris) og koster 48.000 kr i kontantbinding mod A's 90.750 og C's
+114.500.
+
+Fælden: **C's problem er ikke prisen.** Den er billigst pr. styk (168 mod 240) og næstdyrest i landed, men
+kan ikke sælges — nej til GPSR og nej til belastningstest — så en prissamtale om den er spildt, indtil
+dokumentationen findes.
+
+Bevis: [library/beslutningsnotat-teleskopreol-2026-11-09.md](library/beslutningsnotat-teleskopreol-2026-11-09.md).
 
 ### 9/11 — DKIM/DMARC blev meldt sat op, men zonen svarer det samme
 
