@@ -35,14 +35,14 @@ _Opdateret 2026-11-09 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 ### Åbne blokeringer
 
 - **steamgears.eu — site-optimering** — Ejerens oplysninger og aftaler, målt 8/11: CVR-nummer og telefon (Complianz har navn »Henning 6«, adresse »Lavgade 44a st th«, e-mail og DK — men telefon er tom og CVR findes ikke i formularen); aftaler med MobilePay/PayPal (kun Stripe og bankoverførsel er aktive); zonerne til EU/UK/RoW (kun Denmark har en metode — fri fragt uden minimum — og resten af verdenen har ingen, så EU-kunder ikke kan gennemføre en ordre), fragtklasser og fri fragt-grænse; en currency-switcher hvis EUR skal vises som sekundærvaluta (der er ingen aktiv); Printful-adgang eller 5–8 færdige mockups pr. produkt (målt: 20 publicerede produkter, 22 billeder, alle under 3); ja/nej pr. produkt for 942/765/766/767 (alle fire kladder med pris og SKU); GSC-svarrapport (S0.6); og beslutning om de to inaktive plugins.
-- **steamgears.eu — miljø, server og sandbox (S5)** — Subdomæne + certifikat hos Simply (S5.1); hostpanelet til DKIM, backup og DMARC-rapporter (S5.7–S5.8); GitHub Pro/Team til branch protection og environment-regler (S5.9); MCP-læsning af WP_DEBUG og WP_ENVIRONMENT_TYPE (S5.2).
+- **steamgears.eu — miljø, server og sandbox (S5)** — Subdomæne + certifikat hos Simply (S5.1); DNS-panelet hos Simply til DKIM og DMARC-rapporter (S5.7); hostpanelet til backup og restore (S5.8); GitHub Pro/Team til branch protection og environment-regler (S5.9). Ingen af de fire kan lukkes af agenten — hver kræver en konto eller et panel ejeren råder over.
 - **Steamgears Autopilot — plugin** — Syv led kræver ejeren, alle målt 8/11: (1) **Pinterest-scope** — tokenet ligger nu i WooCommerce-integrationen og er gyldigt (`/user_account` 200 som `cpaleadsis`, id 688980580401955331), men appen har kun ads/billing/catalogs/pins/user_accounts og **mangler `boards:read`**, så `/pins` og `/boards` afvises (målt 17:25Z, kanalstatus står som `needs_scope`); (2) **de øvrige kanal-tokens** — Instagram, Bluesky, Mastodon, Telegram og Facebook har intet token (5 af 6 mangler); (3) **AIMLAPI-kredit** — sidste generering 7/11 fejlede med »You've run out of funds«; (4) **`sgap_alert_email`** er tom, så fejl registreres men ingen mail sendes; (5) **full auto vs. godkendelse** — `sgap_full_auto_enabled = no` og 40 elementer venter; (6) **distributionsvej** — `publish_mode = rss` og 0 Publer-konti; (7) **P2.1–P2.3** kræver ejerens beslutning om Command Center-retningen. Intet af det må gættes.
 - **Dark academia-rebrand** — To led kræver ejerhandling, målt 8/11: (1) **de 29 trash'ede designs** — herunder de tre produkter der er witchy-tarots eneste kandidater (567, 395, 411); et ja/nej til genoplivning er nok, og tildelingen kører selv bagefter; (2) **Batch 4-mockups (5 t)** — Printful-adgang eller 5–8 færdige billeder pr. produkt; målt 20 publicerede med 22 billeder, 0 med 3 eller flere, 62 billedplaceringer mangler, og repoet har 0 trykfiler og 0 tøj-skabeloner. Kollektionstildelingen er ikke længere blokeret: den blev udført 8/11 gennem Novamira-MCP og målt stabil.
 
 ### Næste skridt
 
 - **steamgears.eu — site-optimering** — Intet agent-arbejde tilbage i S0–S4: alle fem bands er færdige og målt, og de resterende poster er ejerens og navngivet i §4c og blocked_by. Målt 8/11: 24 produkter (20 publicerede, 4 kladder) i **DKK**. DKK-tabellen fra 2/11 er afregnet **række for række**: af de **38 rækker** (linje 32–69) har **11** et produkt i butikken og står med **tabellens tal ordret** (335/165/400/435/265/180 kr) — målt 11/11 på produktsiden, i JSON-LD, i Store API og i DB med 0 afvigelser — og de **27** øvrige har kun et produkt i **papirkurven** (offentligt 404), så de er dokumenteret som rækker uden produkt med id og status; 0 rækker er uafklarede, og de 13 produkter uden række har uændret pris med id og målt beløb dokumenteret. W3TC kører med **minify, lazy load og database-cache slået til** (192 minificerede filer, 8,08 MB) efter tre gennemførte testordrer (1528/1529/1530, alle annulleret med note); kurv og kasse svarer 200; fri fragt i DK og ingen forsendelse til EU/UK/RoW; Stripe + bankoverførsel; Complianz på EU opt-in. Alle resterende poster er ejerens og står nu samlet i §4d (A–M) med den målte mangel og én konkret handling; målt 8/11 om aftenen er der **ingen** poster tilbage som agenten kan udføre.
-- **steamgears.eu — miljø, server og sandbox (S5)** — Tilbage er kun ejerens fem poster: sandkassen (S5.1, subdomæne + certifikat hos Simply), produktionskonfigurationen læst med MCP (S5.2), DKIM/DMARC-rapporterne (S5.7), backup/restore øvet (S5.8) og branch protection (S5.9, kræver Pro/Team på et privat repo — kør python3 tools/release.py --protection for de fem indstillinger). Målingen holdes nu op hver nat af tools/natlige-vaern.sh.
+- **steamgears.eu — miljø, server og sandbox (S5)** — Tilbage er kun ejerens fire poster: sandkassen (S5.1, subdomæne + certifikat hos Simply), DKIM/DMARC-rapporterne (S5.7, to DNS-poster i Simplys panel), backup/restore øvet (S5.8, hostpanelet) og branch protection (S5.9, kræver Pro/Team på et privat repo — GitHub svarer 403 »Upgrade to GitHub Pro«, målt 9/11; kør python3 tools/release.py --protection for de fem indstillinger). S5.2 blev læst og lukket 9/11 og står ikke længere tilbage. Målingen holdes op hver nat af tools/natlige-vaern.sh, og rækkefølgen med de fem handlinger står i docs/roadmap.md §4e.
 - **Steamgears Autopilot — plugin** — Agent-scope er færdigt (30,75 af 30,75 d). Ejeren har lagt Pinterest-tokenet ind i WooCommerce-integrationen, og 7.65.0 — som blev lagt på sitet 8/11 gennem MCP (`Plugin_Upgrader` i `execute-php`; `update` svarer nu »Already up to date«) — henter det nu derfra gennem integrationens egen dekryptering: målt 8/11 virker det (konto `cpaleadsis`, id 688980580401955331), men appen mangler scopes `boards:read`, så pin-lister og Pin Analytics kan stadig ikke måles. Næste skridt er ejerens: genforbind Pinterest med board-adgang (eller et developer-token med boards:read + pins:read). Resten af blocked_by står uændret. Målt 8/11 om aftenen er `alert_email` tom, så fejl registreres uden at nogen får mail — det er et ejerpunkt i plugin-roadmappens §8.
 - **Dark academia-rebrand** — Kun to ting står tilbage: (1) **witchy-tarot** kan først få indhold når ejeren siger ja til at gendanne 567 (Tarot Witchy Tee) — og eventuelt 395/411 — fra papirkurven; derefter fylder `python3 tools/rebrand_apply.py --apply --via-cli` termen automatisk, fordi kortet allerede indeholder dem; (2) **Batch 4-mockups** (5 t) kræver Printful-adgang eller 5–8 færdige billeder pr. produkt.
 - **SEO-indholdsproduktion** — SEO-indholdet er 100 %: fire guides skrevet, tre publiceret, corset-guiden publiceret, 1410 parkeret til september. Ingen åbne poster.
@@ -51,15 +51,33 @@ _Opdateret 2026-11-09 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `5e3e66f Plugin 7.65.4: femten inline side-scripts er blevet syv filer og et localize-objekt`
 - `3b6c61e chore(status): daglig projektstatus 2026-11-09`
 - `d498c04 Rebrand: 1 024 px målt — brudpunktet holder, men produkttitlen tabte 202 px`
 - `22c665b chore(status): daglig projektstatus 2026-11-09`
 - `d6e5736 Rebrand: mellembruddene målt — seks layoutfejl fundet og rettet ved 320–1 023 px`
 - `608b711 chore(status): daglig projektstatus 2026-11-09`
-- `7a2fd57 S5.2 læst: produktionskonfigurationen er dokumenteret, og editoren lukket`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 9/11 — vejen til 100 % er fem ejerhandlinger, og DKIM fandtes ikke
+
+Målet var at køre roadmappet til 100 %. Målt: **5 af 7 projekter er 100 %**; miljø står på 51,7 % og rebrand på
+71,3 %, og de to projekters rest er **1,40 d + 5,0 t** fordelt på fem poster der alle kræver et panel, en
+DNS-zone eller et abonnement (S5.1 sandkassen, S5.7 DMARC/DKIM, S5.8 backup/restore, S5.9 branch protection,
+Batch 4-mockups). Ingen af dem blev talt som fremgang — §1 forbyder det, og tallet står derfor stille.
+
+Tre fund undervejs: (1) **DKIM findes ikke.** Rækken påstod at selectoren fandtes; 30 selectorer er prøvet med
+`dig` og `_domainkey.steamgears.eu` findes slet ikke, så `p=reject` hviler på SPF alene og en videresendt
+ordremail kan afvises. (2) **S5-regnskabet krediterede S5.2** som rest efter den blev lukket samme dag, og skrev
+1,20 af 2,90 d — nu 1,50 og fire restposter. (3) **S5.9 er plan-blokeret:** GitHub svarer 403 »Upgrade to
+GitHub Pro or make this repository public«, så koden er færdig og indstillingen umulig.
+
+Fælden: en note der tilføjes ved hvert pas men aldrig ryddes, ender med at modsige sig selv — derfor står
+restposterne nu ét sted (`docs/roadmap.md` §4e) med procent og bevis pr. handling.
+
+Bevis: [library/vej-til-100-2026-11-09.md](library/vej-til-100-2026-11-09.md).
 
 ### 9/11 — plugin'ets side-scripts var stadig PHP-strenge med JSON indeni
 
