@@ -83,7 +83,24 @@ class SGAP_Install {
         'sgap_mcp_client_id' => '',
         'sgap_printful_api_key' => '',
         'sgap_printful_store_id' => '',
-        'sgap_woo_min_margin' => 45
+        'sgap_woo_min_margin' => 45,
+        'sgap_forum_enabled' => 'yes',
+        'sgap_forum_slug' => 'forum',
+        'sgap_forum_topics_per_page' => 20,
+        'sgap_forum_intro' => '',
+        'sgap_reddit_enabled' => 'yes',
+        'sgap_reddit_auto_share' => 'yes',
+        'sgap_reddit_client_id' => '',
+        'sgap_reddit_client_secret' => '',
+        'sgap_reddit_username' => '',
+        'sgap_reddit_password' => '',
+        'sgap_reddit_refresh_token' => '',
+        'sgap_reddit_default_sub' => 'steampunk',
+        'sgap_reddit_radar_subs' => 'steampunk,cosplay',
+        'sgap_reddit_keywords' => 'steampunk,cosplay,goggles,top hat,brass',
+        'sgap_reddit_daily_cap' => 2,
+        'sgap_reddit_min_words' => 120,
+        'sgap_reddit_min_interval' => 90
     ];
 
     public static function activate(): void {
@@ -296,6 +313,25 @@ class SGAP_Install {
         KEY channel_created (channel,created_at)
         ) $charset;");
 
+        dbDelta("CREATE TABLE {$wpdb->prefix}sgap_reddit_posts (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        topic_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+        subreddit VARCHAR(21) NOT NULL DEFAULT '',
+        title VARCHAR(300) NOT NULL DEFAULT '',
+        url TEXT NOT NULL,
+        reddit_id VARCHAR(32) NOT NULL DEFAULT '',
+        reddit_url TEXT NULL,
+        status VARCHAR(20) NOT NULL DEFAULT 'queued',
+        attempts TINYINT UNSIGNED NOT NULL DEFAULT 0,
+        scheduled_at DATETIME NULL,
+        sent_at DATETIME NULL,
+        error TEXT NULL,
+        created_at DATETIME NOT NULL,
+        PRIMARY KEY  (id),
+        KEY topic_status (topic_id,status),
+        KEY status_scheduled (status,scheduled_at)
+        ) $charset;");
+
         foreach (self::DEFAULTS as $key => $value) {
             add_option($key, $value);
         }
@@ -337,13 +373,13 @@ register_deactivation_hook(SGAP_FILE, ['SGAP_Install', 'deactivate']);
 
 /* ---------------- SETTINGS ---------------- */
 class SGAP_Settings {
-    const BOOL_KEYS = ['autopilot_enabled', 'full_auto_enabled', 'auto_images', 'auto_seo', 'auto_publish_articles', 'weekly_report', 'evergreen_enabled'];
+    const BOOL_KEYS = ['autopilot_enabled', 'full_auto_enabled', 'auto_images', 'auto_seo', 'auto_publish_articles', 'weekly_report', 'evergreen_enabled', 'forum_enabled', 'reddit_enabled', 'reddit_auto_share'];
     const HOUR_KEYS = ['quiet_start', 'quiet_end'];
     const INT_KEYS = [
         'daily_cap','batch_size','labor_rate','monthly_budget','target_roi',
         'winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max','posts_per_day','articles_per_week','alert_dry_days','audit_keep_days','dupe_days','mastodon_limit',
         'evergreen_after_days','evergreen_max_shares','evergreen_batch',
-        'woo_min_margin'
+        'woo_min_margin','forum_topics_per_page','reddit_daily_cap','reddit_min_words','reddit_min_interval'
     ];
     /** Never echoed back to the browser; can be overridden by SGAP_<KEY> constants in wp-config.php. */
     const SECRET_KEYS = [
@@ -353,10 +389,11 @@ class SGAP_Settings {
         'mcp_refresh_token','printful_api_key',
         'pinterest_access_token','pinterest_refresh_token','pinterest_client_secret',
         'instagram_access_token',
-        'facebook_access_token'
+        'facebook_access_token',
+        'reddit_client_secret','reddit_password','reddit_refresh_token'
     ];
     /** Multi-line text settings, shown as a textarea. */
-    const TEXTAREA_KEYS = ['blackout_ranges', 'banned_words'];
+    const TEXTAREA_KEYS = ['blackout_ranges', 'banned_words', 'forum_intro'];
     const TEXT_KEYS = [
         'publer_workspace_id','publer_pinterest_board','channels','ai_model','ai_base_url','image_model','content_language','rescue_hosts',
         'telegram_chat_id',
@@ -364,7 +401,8 @@ class SGAP_Settings {
         'blackout_ranges','banned_words','utm_campaign','bluesky_handle','mastodon_instance',
         'pinterest_client_id','instagram_user_id','facebook_page_id',
         'locale_source','locales','command_center_url','mcp_client_id',
-        'printful_store_id'
+        'printful_store_id','forum_slug','forum_intro','reddit_client_id','reddit_username',
+        'reddit_default_sub','reddit_radar_subs','reddit_keywords'
     ];
     /** Settings with a fixed list of values, shown as a select. */
     const CHOICE_KEYS = [
@@ -387,7 +425,10 @@ class SGAP_Settings {
         'Evergreen' => ['evergreen_enabled','evergreen_after_days','evergreen_max_shares','evergreen_batch'],
         'Alerts and log' => ['alert_mode','alert_email','alert_dry_days','channel_caps','audit_keep_days'],
         'Shop & feeds' => ['merchant_feed_secret','printful_api_key','printful_store_id','woo_min_margin'],
-        'MCP access' => ['mcp_client_id','mcp_refresh_token']
+        'MCP access' => ['mcp_client_id','mcp_refresh_token'],
+        'Forum & Reddit' => ['forum_enabled','forum_slug','forum_topics_per_page','forum_intro',
+            'reddit_enabled','reddit_auto_share','reddit_default_sub','reddit_radar_subs','reddit_keywords',
+            'reddit_daily_cap','reddit_min_words','reddit_min_interval','reddit_client_id','reddit_username']
     ];
 
     const HELP = [
@@ -455,7 +496,24 @@ class SGAP_Settings {
         'mcp_refresh_token' => 'The refresh token from that approval (tools/mcp_oauth.py --finish saves it in ~/.config/steamgears-mcp/tokens.json). The plugin renews the access token every 30 minutes and writes the rotated refresh token back here, so it must live in the database — a wp-config.php constant cannot be updated by the server. Never shown again after saving; an empty field keeps the stored value.',
         'printful_api_key' => 'Printful API token (Dashboard → Settings → API). Optional: it lets the shop tools read the real cost price of a sync product instead of asking you to fill in the cost field on every product. Not the same key as AIMLAPI.',
         'printful_store_id' => 'The Printful store id the token belongs to (Dashboard → Stores). Sent as X-PF-Store-Id; empty means the token\'s default store.',
-        'woo_min_margin' => 'The margin a price must keep above the cost price, in percent. The shop tools never propose or apply a price below cost × (1 + this), rounded up to .95. 45 % on a cost of 100 refuses anything under 145.95.'
+        'woo_min_margin' => 'The margin a price must keep above the cost price, in percent. The shop tools never propose or apply a price below cost × (1 + this), rounded up to .95. 45 % on a cost of 100 refuses anything under 145.95.',
+        'forum_enabled' => 'Open or close the forum. Closing it hides the shortcode and stops new threads; existing threads stay readable, because a dead link is worse than a closed door.',
+        'forum_slug' => 'The address of the forum, e.g. forum gives /forum/. Change it and visit Settings → Permalinks once, or the archive answers 404 until WordPress rebuilds its rules.',
+        'forum_topics_per_page' => 'How many threads the forum index shows before it pages.',
+        'forum_intro' => 'Optional intro above the thread list. One or two sentences about what belongs here; empty leaves it out.',
+        'reddit_enabled' => 'Master switch for Reddit. Off means no queue rows and no radar calls; the forum itself keeps working.',
+        'reddit_auto_share' => 'On: a published thread long enough for a discussion is queued as a link post to its board\'s subreddit. Off: nothing leaves the site until you press Queue on the forum page.',
+        'reddit_default_sub' => 'The subreddit used when a board has no mapping of its own. A board can override it with the term meta key reddit_sub.',
+        'reddit_radar_subs' => 'Up to five subreddits the radar reads, comma-separated, e.g. steampunk,cosplay. Reading needs only the app id and secret.',
+        'reddit_keywords' => 'Words that make a Reddit thread worth answering, comma-separated. Matched in the title and the body, case-insensitive.',
+        'reddit_daily_cap' => 'Most link posts to Reddit per day, across all threads. Two is already a lot for a shop account.',
+        'reddit_min_words' => 'A thread shorter than this is not queued automatically: a link post to a two-line thread is a downvote waiting to happen.',
+        'reddit_min_interval' => 'Minimum minutes between two link posts. Reddit refuses bursts and remembers the account that sent them.',
+        'reddit_client_id' => 'The app id of a Reddit script app (reddit.com/prefs/apps → create app → script). Not a secret, but useless without the secret.',
+        'reddit_client_secret' => 'The secret of the same script app. Never shown again after saving; an empty field keeps the stored value.',
+        'reddit_username' => 'The Reddit account that posts. Required for publishing, together with the password — or the refresh token below.',
+        'reddit_password' => 'The password of that account. Used once to obtain a refresh token, then kept because Reddit rotates the token on every use. Never shown again; an empty field keeps the stored value.',
+        'reddit_refresh_token' => 'Written by the plugin after a successful password grant, and replaced every time Reddit rotates it. A wp-config.php constant cannot be rotated, so it is refused.'
     ];
 
     public static function get(string $key, $default = '') {

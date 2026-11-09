@@ -154,6 +154,17 @@ class SGAP_Keys {
             'hint' => 'A Page access token, not a user token. The page id and the Graph version live under Publishing. Scopes: pages_show_list, pages_read_engagement, pages_manage_posts, pages_manage_engagement.',
             'optional' => true
         ],
+        'reddit' => [
+            'title' => 'Reddit',
+            'icon' => 'share',
+            'keys' => ['reddit_client_secret', 'reddit_password', 'reddit_refresh_token'],
+            'owner' => 'You — your own Reddit account and the script app you create at reddit.com/prefs/apps.',
+            'why' => 'Publishes one link post per thread to the subreddit you name. The radar only reads; this card is what allows writing.',
+            'body' => 'The script app\'s secret, plus either the account password or the refresh token Reddit rotates on every use. The app id and the username are not secrets and live under Forum & Reddit.',
+            'links' => [['Reddit apps', 'https://www.reddit.com/prefs/apps']],
+            'hint' => 'reddit.com/prefs/apps → create app → type script → redirect uri http://localhost:8080. Save the app id and username under Forum & Reddit; the plugin writes the refresh token here itself.',
+            'optional' => true
+        ],
         'telegram' => [
             'title' => 'Telegram',
             'icon' => 'email-alt',

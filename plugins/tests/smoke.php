@@ -16,22 +16,22 @@ function update_option($k,$v,$autoload=null){$GLOBALS['opts'][$k]=$v; $GLOBALS['
 function register_setting($g,$k,$a){ $GLOBALS['settings'][$k]=$a; } function wp_clear_scheduled_hook($h,$a=[]){ $GLOBALS['cleared'][]=$h; }
 function add_menu_page($t,$m,$c,$slug,$cb){ add_action('page_'.$slug,$cb);} function add_submenu_page($p,$t,$m,$c,$slug,$cb){ add_action('page_'.$slug,$cb);}
 function esc_html($s){return htmlspecialchars((string)$s);} function esc_attr($s){return htmlspecialchars((string)$s);} function esc_url($s){return $s;} function esc_textarea($s){return htmlspecialchars((string)$s);}
-function get_transient($k){return false;} function set_transient(...$a){} function delete_transient($k){} function settings_fields($g){} function submit_button(){}
+function get_transient($k){return $GLOBALS['transients'][$k]??false;} function set_transient($k,$v,$t=0){ if(!empty($GLOBALS['transient_store'])) $GLOBALS['transients'][$k]=$v; } function delete_transient($k){ unset($GLOBALS['transients'][$k]); } function settings_fields($g){} function submit_button(){}
 function site_url($p=''){return 'https://steamgears.eu/'.$p;} function admin_url($p=''){return '/wp-admin/'.$p;} function rest_url($p=''){return '/wp-json/'.$p;} function home_url($p=''){return 'https://steamgears.eu'.$p;}
-function get_bloginfo($k=''){return 'Steamgears';} function wp_timezone_string(){return 'UTC';} function get_the_title($id){ if(is_object($id)){return (string)($id->post_title!==''?$id->post_title:'Post '.($id->ID??0));} $p=$GLOBALS['post_by_id'][(int)$id]??null; return $p? (string)$p->post_title : 'Post '.$id; } function get_permalink($id){return 'https://steamgears.eu/?p='.$id;} function has_post_thumbnail($id){return false;} function get_post_type($id){return 'post';} function pll_get_post($id,$locale=''){return (int)($GLOBALS['pll_map'][$locale]??0);}
+function get_bloginfo($k=''){return 'Steamgears';} function wp_timezone_string(){return 'UTC';} function get_the_title($id){ if(is_object($id)){return (string)($id->post_title!==''?$id->post_title:'Post '.($id->ID??0));} $p=$GLOBALS['post_by_id'][(int)$id]??null; return $p? (string)$p->post_title : 'Post '.$id; } function get_permalink($id){return 'https://steamgears.eu/?p='.$id;} function has_post_thumbnail($id){return false;} function get_post_type($id){return (string)($GLOBALS['post_type_by_id'][(int)$id]??'post');} function pll_get_post($id,$locale=''){return (int)($GLOBALS['pll_map'][$locale]??0);}
 function get_posts($a=[]){ $r=$GLOBALS['posts_result']??[]; return array_slice($r,0,(int)($a['numberposts']??(count($r)?:1))); } function post_type_exists($t){return in_array($t,['post','page'],true);} function get_post($id){return $GLOBALS['post_by_id'][(int)$id]??null;}
 function update_post_meta($id,$k,$v){ $GLOBALS['postmeta'][(int)$id][$k]=$v; return true; } function delete_post_meta($id,$k){ unset($GLOBALS['postmeta'][(int)$id][$k]); return true; } function get_the_post_thumbnail_url($id,$s=''){ return $GLOBALS['thumb'][(int)$id]??''; } function add_meta_box(...$a){ $GLOBALS['metaboxes'][]=$a; } function wp_is_post_revision($id){ return false; } function wp_verify_nonce($n,$a=''){ return true; } function has_excerpt($p){ return is_object($p) && !empty($p->post_excerpt); } function strip_shortcodes($t){ return (string)$t; } function wp_trim_words($t,$n=55,$more='…'){ $w=preg_split('/\s+/',trim((string)$t)); return implode(' ',array_slice($w,0,$n)).(count($w)>$n?$more:''); } function get_user_meta($u,$k,$s=false){return '';} function update_user_meta($u,$k,$v){return true;} function get_edit_post_link($id,$c=''){return '/edit/'.$id;} function get_preview_post_link($id){return '/preview/'.$id;}
 function wp_nonce_field(...$a){return '';} function wp_create_nonce($a=''){return 'n';} function selected($a,$b,$e){return $a===$b?' selected':'';} function checked($a,$b=true,$e=true){return $a===$b?' checked':'';}
 function sanitize_text_field($s){return trim(strip_tags((string)$s));} function sanitize_textarea_field($s){return trim(strip_tags((string)$s));}
 function sanitize_key($s){return preg_replace('/[^a-z0-9_\-]/','',strtolower((string)$s));} function absint($v){return abs((int)$v);}
 function esc_url_raw($u,$p=null){return preg_match('#^https?://#',$u)?$u:'';} function wp_parse_url($u,$c=-1){return parse_url($u,$c);}
-function wp_parse_args($a,$d){return array_merge($d,$a);} function add_query_arg($a,$u){return $u.(str_contains($u,'?')?'&':'?').http_build_query($a,'','&',PHP_QUERY_RFC3986);}
+function wp_parse_args($a,$d){return array_merge($d,$a);} function add_query_arg($a,$u=null,$b=null){ if($b!==null){ $a=[(string)$a=>(string)$u]; $u=$b; } if(!is_array($a)){ $a=[(string)$a=>'']; } return $u.(str_contains((string)$u,'?')?'&':'?').http_build_query($a,'','&',PHP_QUERY_RFC3986); }
 function current_time($t){return '2026-10-30 12:00:00';} function wp_date($f,$t=null){return date($f,$t??time());} function mysql2date($f,$d,$t=null){return $d?date($f,strtotime((string)$d)):'';}
 function plugins_url($p='',$f=''){ return 'https://steamgears.eu/wp-content/plugins/steamgears-autopilot/'.ltrim((string)$p,'/'); }
 function wp_enqueue_script($h,$src='',$d=[],$v=false,$f=false){ $GLOBALS['enqueued_scripts'][$h]=$src; }
 function wp_enqueue_style($h,$src='',$d=[],$v=false,$m='all'){ $GLOBALS['enqueued_styles'][$h]=$src; }
 function wp_localize_script($h,$name,$data){ $GLOBALS['localized'][$h][$name]=$data; }
-function current_user_can($c){return true;} function get_current_user_id(){return 1;} function get_site_transient($k){return false;} function set_site_transient(...$a){} function wp_remote_get(...$a){return new WP_Error('offline','offline');} function wp_nonce_field_stub(){} function delete_option($k){unset($GLOBALS["opts"][$k]);} function wp_json_encode($v){return json_encode($v);} function is_wp_error($v){return $v instanceof WP_Error;}
+function current_user_can($c){ if(isset($GLOBALS['deny_caps']) && in_array($c,(array)$GLOBALS['deny_caps'],true)) return false; return true; } function get_current_user_id(){return 1;} function get_site_transient($k){return false;} function set_site_transient(...$a){} function wp_remote_get(...$a){return new WP_Error('offline','offline');} function wp_nonce_field_stub(){} function delete_option($k){unset($GLOBALS["opts"][$k]);} function wp_json_encode($v){return json_encode($v);} function is_wp_error($v){return $v instanceof WP_Error;}
 function wp_strip_all_tags($s){return strip_tags((string)$s);} function attachment_url_to_postid($u){return (int)($GLOBALS['attachment_for'][$u]??0);} function get_post_meta($id,$k='',$s=false){return $GLOBALS['postmeta'][$id][$k]??'';} function url_to_postid($u){return (int)($GLOBALS['postid_for'][$u]??0);} function get_post_status($id){return (string)($GLOBALS['poststatus'][$id]??'publish');} function wp_get_attachment_metadata($id){return $GLOBALS['attachment_meta'][$id]??[];} function get_post_mime_type($id){return (string)($GLOBALS['attachment_mime'][$id]??'');} function wp_die($m=''){throw new RuntimeException((string)$m);} function check_admin_referer($a=''){return true;}
 $GLOBALS['abilities']=[]; $GLOBALS['ability_categories']=[];
 function wp_register_ability($n,$a=[]){ $GLOBALS['abilities'][$n]=$a; return true; } function wp_register_ability_category($s,$a=[]){ $GLOBALS['ability_categories'][$s]=$a; return true; }
@@ -45,15 +45,53 @@ class WP_REST_Response{ function __construct(public $data,public $status=200){} 
 class WP_REST_Request implements ArrayAccess{ function __construct(public array $p){} function get_param($k){return $this->p[$k]??null;}
  function offsetGet($k):mixed{return $this->p[$k]??null;} function offsetExists($k):bool{return isset($this->p[$k]);} function offsetSet($k,$v):void{} function offsetUnset($k):void{} }
 function wp_next_scheduled($h){return (int)($GLOBALS['next_scheduled'][$h]??0);} function wp_schedule_event(...$a){$GLOBALS['cron'][]=$a[2];} function flush_rewrite_rules($h=true){$GLOBALS['flushed']=1;} function add_rewrite_rule(...$a){$GLOBALS['rules'][]=$a[0];} function wp_set_option_autoload_values($a){$GLOBALS['noauto']=$a;}
-class W{ public $prefix='wp_'; public $posts='wp_posts'; public $postmeta='wp_postmeta'; public $options='wp_options'; function get_charset_collate(){return '';} public $insert_id=0; public $log=[]; public $next=null; public $row=null;
+class W{ public $prefix='wp_'; public $posts='wp_posts'; public $postmeta='wp_postmeta'; public $options='wp_options'; public $comments='wp_comments'; function get_charset_collate(){return '';} public $insert_id=0; public $log=[]; public $next=null; public $row=null;
  function get_var($q){$this->log[]=$q; return is_array($this->next)?array_shift($this->next):$this->next;} function prepare($q,...$a){ if(count($a)==1&&is_array($a[0]))$a=$a[0]; return vsprintf(str_replace(['%s','%d','%f'],["'%s'",'%d','%F'],$q),$a);} function esc_like($s){return $s;}
  function get_results($q,$o=null){$this->log[]=$q;return $GLOBALS['rows']??[];} function get_row($q){$this->log[]=$q;return $this->row ?? null;} function query($q){$this->log[]=$q;return 0;}
  function insert($t,$d){$this->log[]="INSERT $t ".json_encode($d); $this->insert_id=42; return 1;} function update($t,$d,$w){$this->log[]="UPDATE $t ".json_encode($d);return 1;} }
 $wpdb=new W; $wpdb->row=null;
+// ---- P5: forum + Reddit stubs (kept here so the plugin can boot without WordPress) ----
+$GLOBALS['reg_post_types']=[]; $GLOBALS['reg_taxonomies']=[]; $GLOBALS['shortcodes']=[];
+function register_post_type($t,$a=[]){ $GLOBALS['reg_post_types'][$t]=$a; return true; }
+function register_taxonomy($t,$o,$a=[]){ $GLOBALS['reg_taxonomies'][$t]=$a; return true; }
+function add_shortcode($t,$cb){ $GLOBALS['shortcodes'][$t]=$cb; }
+function shortcode_atts($d,$a=[],$s=''){ return array_merge($d,(array)$a); }
+function has_shortcode($c,$t){ return str_contains((string)$c,'['.$t); }
+function is_singular($t=''){ return $t==='' ? (bool)($GLOBALS['is_singular']??false) : (($GLOBALS['is_singular_type']??'')===$t); }
+function get_queried_object_id(){ return (int)($GLOBALS['queried_id']??0); }
+function get_the_ID(){ return (int)($GLOBALS['queried_id']??0); }
+function is_user_logged_in(){ return ($GLOBALS['logged_in']??true)!==false; }
+function wp_login_url($r=''){ return 'https://steamgears.eu/wp-login.php'; }
+function wp_registration_url(){ return 'https://steamgears.eu/wp-login.php?action=register'; }
+function wp_safe_redirect($u,$s=302){ $GLOBALS['redirects'][]=$u; return true; }
+function wp_kses_post($s){ return (string)$s; }
+function wp_unslash($v){ return $v; }
+function wp_insert_post($a,$e=false){ $GLOBALS['inserted_posts'][]=$a; return 123; }
+function wp_insert_term($n,$t,$a=[]){ $GLOBALS['inserted_terms'][]=[$n,$t]; return ['term_id'=>7]; }
+function term_exists($t,$tax=''){ return $GLOBALS['existing_terms'][$t]??null; }
+function wp_set_object_terms($id,$terms,$tax,$append=false){ $GLOBALS['object_terms'][(int)$id]=$terms; return $terms; }
+function get_terms($a=[]){ return $GLOBALS['terms']??[]; }
+function wp_get_post_terms($id,$tax,$a=[]){ return $GLOBALS['terms_for'][(int)$id]??[]; }
+function get_term_meta($id,$k,$single=false){ return $GLOBALS['termmeta'][(int)$id][$k] ?? $GLOBALS['term_meta'][(int)$id][$k] ?? ''; }
+function get_post_type_archive_link($t){ return home_url('/forum/'); }
+function get_query_var($k,$d=''){ return $GLOBALS['query_vars'][$k]??$d; }
+function get_the_date($f='',$id=null){ return date($f, strtotime('2026-11-09 09:00:00')); }
+function get_the_modified_date($f='',$id=null){ return date($f, strtotime('2026-11-09 10:00:00')); }
+function get_post_field($f,$id){ return $GLOBALS['post_fields'][(int)$id][$f]??''; }
+function get_the_author_meta($f,$id=0){ return $f==='display_name'?'Henning':'x'; }
+function get_comments($a=[]){ return $GLOBALS['comments']??[]; }
+function get_comments_number($id){ return (int)($GLOBALS['comments_for'][(int)$id]??0); }
+function sanitize_title($s){ return trim(preg_replace('/[^a-z0-9]+/','-',strtolower((string)$s)),'-'); }
+function paginate_links($a=[]){ return ''; }
+class WP_Query {
+    public $posts=[]; public $found_posts=0; public $max_num_pages=1;
+    function __construct($a=[]){ $this->posts=$GLOBALS['query_posts']??[]; $this->found_posts=count($this->posts); }
+    function have_posts(){ return false; }
+}
 require __DIR__.'/../steamgears-autopilot/steamgears-autopilot.php';
 function check($name,$ok){ echo ($ok?'PASS ':'FAIL ')."$name\n"; if(!$ok) $GLOBALS['fail']=1; }
 do_action('init'); do_action('admin_init'); do_action('admin_menu');
-check('install: 9 tables', count($GLOBALS['ddl']??[])===9); check('install: publish log table', str_contains(implode("\n",$GLOBALS['ddl']??[]),'sgap_publish_log')); check('install: cleanup cron', in_array('sgap_daily_cleanup',$GLOBALS['cron']??[])); check('install: /go/ rule + flush', ($GLOBALS['rules'][0]??'')==='^go/([0-9]+)/?$' && !empty($GLOBALS['flushed'])); check('install: secrets not autoloaded', isset($GLOBALS['noauto']['sgap_ai_api_key'])); check('version stored', $opts['sgap_version']===SGAP_VERSION);
+check('install: 10 tables', count($GLOBALS['ddl']??[])===10); check('install: publish log table', str_contains(implode("\n",$GLOBALS['ddl']??[]),'sgap_publish_log')); check('install: cleanup cron', in_array('sgap_daily_cleanup',$GLOBALS['cron']??[])); check('install: /go/ rule + flush', ($GLOBALS['rules'][0]??'')==='^go/([0-9]+)/?$' && !empty($GLOBALS['flushed'])); check('install: secrets not autoloaded', isset($GLOBALS['noauto']['sgap_ai_api_key'])); check('version stored', $opts['sgap_version']===SGAP_VERSION);
 // P3.3 — AI-profiler: persona, værktøjsadgang og access all
 check('profiles: three profiles', count(SGAP_Profiles::all())===3 && isset(SGAP_Profiles::all()['site_admin'], SGAP_Profiles::all()['wp_seo_expert']));
 check('profiles: default is the limited assistant', SGAP_Profiles::id()==='assistant' && !SGAP_Profiles::is_full());
@@ -880,7 +918,7 @@ $created=array_values($created);
 $uninstall=(string)file_get_contents(__DIR__.'/../steamgears-autopilot/uninstall.php');
 preg_match_all("/'(sgap_[a-z_]+)'/", $uninstall, $m2);
 $declared=array_values(array_unique($m2[1]));
-check('uninstall: install creates 9 tables ('.count($created).')', count($created)===9);
+check('uninstall: install creates 10 tables ('.count($created).')', count($created)===10);
 check('uninstall: declares every table install creates', array_diff($created,$declared)===[]);
 $wpdb->log=[]; $GLOBALS['deleted_meta_keys']=[];
 if (!defined('WP_UNINSTALL_PLUGIN')) define('WP_UNINSTALL_PLUGIN', true);
@@ -1532,5 +1570,6 @@ require __DIR__.'/menu.php';
 require __DIR__.'/assets.php';
 require __DIR__.'/niche-shop.php';
 require __DIR__.'/queue-page.php';
+require __DIR__.'/forum.php';
 // P3.2/P3.5-slut
 exit(empty($GLOBALS['fail'])?0:1);

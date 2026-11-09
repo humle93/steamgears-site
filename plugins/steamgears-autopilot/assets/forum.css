@@ -1,0 +1,196 @@
+/*
+ * Forum styling. Loaded by SGAP_Forum::assets() only on a thread or a page that carries
+ * [steamgears_forum]. Colours come from the theme's own custom properties where they
+ * exist, so the forum joins the dark clockwork palette instead of inventing a second one.
+ */
+.sgf {
+    --sgf-line: color-mix(in srgb, currentColor 18%, transparent);
+    --sgf-surface: color-mix(in srgb, currentColor 5%, transparent);
+    color: inherit;
+    line-height: 1.55;
+}
+
+.sgf h2,
+.sgf h3 {
+    margin: 0 0 0.35em;
+    line-height: 1.2;
+}
+
+.sgf .sgf-head p {
+    margin: 0 0 1.25em;
+    max-width: 62ch;
+    opacity: 0.85;
+}
+
+.sgf-notice {
+    border-left: 3px solid #b08d57;
+    background: var(--sgf-surface);
+    padding: 0.6em 0.9em;
+    margin: 0 0 1.2em;
+}
+
+.sgf-notice-error {
+    border-left-color: #a33a3a;
+}
+
+.sgf-boards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4em;
+    margin: 0 0 1em;
+}
+
+.sgf-boards a {
+    border: 1px solid var(--sgf-line);
+    border-radius: 999px;
+    padding: 0.25em 0.75em;
+    text-decoration: none;
+    font-size: 0.9em;
+}
+
+.sgf-boards a.is-active {
+    border-color: #b08d57;
+    background: var(--sgf-surface);
+}
+
+.sgf-boards span {
+    opacity: 0.6;
+    margin-left: 0.25em;
+}
+
+.sgf-search {
+    display: flex;
+    gap: 0.5em;
+    margin: 0 0 1.2em;
+    flex-wrap: wrap;
+}
+
+.sgf-search input {
+    flex: 1 1 16em;
+    min-width: 0;
+}
+
+.sgf-card {
+    border: 1px solid var(--sgf-line);
+    border-radius: 6px;
+    padding: 1.1em 1.2em;
+    margin: 0 0 1.4em;
+    background: var(--sgf-surface);
+}
+
+.sgf-card label {
+    display: block;
+    margin: 0.7em 0 0.25em;
+    font-size: 0.9em;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    opacity: 0.75;
+}
+
+.sgf-card input[type="text"],
+.sgf-card input[type="search"],
+.sgf-card select,
+.sgf-card textarea {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.sgf-button,
+.sgf-card button {
+    display: inline-block;
+    border: 1px solid #b08d57;
+    border-radius: 4px;
+    padding: 0.55em 1.1em;
+    background: transparent;
+    color: inherit;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.sgf-button:hover,
+.sgf-button:focus-visible,
+.sgf-card button:hover,
+.sgf-card button:focus-visible {
+    background: #b08d57;
+    color: #14110c;
+}
+
+/* The honeypot is for bots: people never see it, and neither does a screen reader. */
+.sgf-hp {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
+
+.sgf-threads {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.sgf-threads li {
+    border-top: 1px solid var(--sgf-line);
+    padding: 0.8em 0;
+}
+
+.sgf-threads li:first-child {
+    border-top: 0;
+}
+
+.sgf-thread-title {
+    display: block;
+    font-size: 1.05em;
+    text-decoration: none;
+}
+
+.sgf-meta {
+    display: block;
+    font-size: 0.85em;
+    opacity: 0.7;
+    margin-top: 0.2em;
+}
+
+.sgf-badge {
+    display: inline-block;
+    margin-left: 0.4em;
+    border: 1px solid var(--sgf-line);
+    border-radius: 3px;
+    padding: 0 0.4em;
+    font-size: 0.8em;
+}
+
+.sgf-badge-sent {
+    border-color: #3f7d4f;
+}
+
+.sgf-badge-failed {
+    border-color: #a33a3a;
+}
+
+.sgf-thread-head .sgf-cta {
+    margin: 0.9em 0 1.4em;
+}
+
+.sgf-tips ul {
+    margin: 0.4em 0 0.6em;
+    padding-left: 1.1em;
+}
+
+.sgf-empty {
+    border: 1px dashed var(--sgf-line);
+    border-radius: 6px;
+    padding: 1.2em;
+    opacity: 0.8;
+}
+
+@media (max-width: 640px) {
+    .sgf-card {
+        padding: 0.9em;
+    }
+
+    .sgf-boards {
+        gap: 0.3em;
+    }
+}

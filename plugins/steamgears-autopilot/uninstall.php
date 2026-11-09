@@ -10,7 +10,7 @@ global $wpdb;
 foreach ([
     'sgap_queue', 'sgap_events', 'sgap_cro', 'sgap_learning',
     'sgap_ai_drafts', 'sgap_reposts', 'sgap_suppression', 'sgap_etsy_orders',
-    'sgap_publish_log'
+    'sgap_publish_log', 'sgap_reddit_posts'
 ] as $table) {
     $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}{$table}");
 }
@@ -23,11 +23,15 @@ $wpdb->query(
 );
 
 delete_post_meta_by_key('_sgap_promoted_at');
+delete_post_meta_by_key('_sgap_reddit_url');
+delete_post_meta_by_key('_sgap_reddit_sub');
+delete_post_meta_by_key('_sgap_reddit_state');
 
 foreach ([
     'sgap_daily_cleanup', 'sgap_publish_tick', 'sgap_generate', 'sgap_process_queue', 'sgap_etsy_sync', 'sgap_etsy_inventory',
     'sgap_weekly_report', 'sgap_repost_check', 'sgap_suppression_check', 'sgap_mcp_refresh',
-    'sgap_engagement_refresh', 'sgap_pinterest_refresh', 'sgap_instagram_refresh', 'sgap_facebook_refresh'
+    'sgap_engagement_refresh', 'sgap_pinterest_refresh', 'sgap_instagram_refresh', 'sgap_facebook_refresh',
+    'sgap_reddit_tick'
 ] as $hook) {
     wp_clear_scheduled_hook($hook);
 }

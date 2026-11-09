@@ -16,7 +16,7 @@ class SGAP_Menu {
     const GROUPS = [
         '' => ['steamgears-autopilot' => 'Overview', 'sgap-setup' => ''],
         'Create' => ['sgap-chat' => 'AI Chat', 'sgap-studio' => 'Content Studio', 'sgap-ai' => 'Drafts to approve'],
-        'Publish' => ['sgap-queue' => 'Queue', 'sgap-campaigns' => 'Campaigns', 'sgap-evergreen' => 'Evergreen', 'sgap-fullauto' => 'Full Auto'],
+        'Publish' => ['sgap-queue' => 'Queue', 'sgap-campaigns' => 'Campaigns', 'sgap-evergreen' => 'Evergreen', 'sgap-fullauto' => 'Full Auto', 'sgap-forum' => 'Forum & Reddit'],
         'Shop' => ['sgap-niche' => 'Niche shop', 'sgap-merchant' => 'Shop & feeds', 'sgap-etsy' => 'Etsy'],
         'Insight' => ['sgap-reports' => 'Reports'],
         'Configure' => ['sgap-settings' => 'Settings & keys']

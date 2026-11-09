@@ -3,6 +3,63 @@
   "updated": "2026-11-09",
   "projects": [
     {
+      "id": "forum",
+      "name": "Forum + Reddit — trafikaccelerator (P5)",
+      "note": "plugin P5 — forum, Reddit-kø og radar",
+      "next": "Koden er bygget og grøn i smoke (1 277 PASS / 0 FAIL): CPT med native kommentarer, formularværn, DiscussionForumPosting, OAuth med tre grants, link-post-kø med loft/interval/backoff, radar og admin-side. Tilbage er kun det der kræver ejeren: installer plugins/steamgears-autopilot-v7.66.0.zip (repoet er privat, så selvopdateringen kan ikke hente den), opret en Reddit script-app og gem app-id, secret, brugernavn og adgangskode, indsæt [steamgears_forum] på en side, og map tavler til subreddits via term meta reddit_sub. Intet HTTP-kald er kørt mod Reddit endnu — klienten er testet gennem SGAP_Reddit::$transport.",
+      "blocked_by": "Ejerens Reddit-konto og script-app (app-id, secret, brugernavn, adgangskode) samt upload af zip'en gennem Plugins → Tilføj nyt; derefter første rigtige link post og måling af refresh-token-rotationen over to kørsler. WP-Crons forsinkelse på det cachede site er dækket af den eksisterende cron-kicker, men ikke målt for denne kø.",
+      "modules": [
+        {
+          "id": "f1",
+          "name": "F1 — forum-kerne",
+          "done": 1.2,
+          "total": 1.2,
+          "unit": "d",
+          "note": "CPT sgap_topic + taksonomi sgap_board med fire tavler seedet på init, [steamgears_forum], trådside med tavle/svarantal/Reddit-link, nyt-emne-formular med nonce + honeypot + 3 pr. time, pending for ikke-moderatorer, DiscussionForumPosting med forfatter/datoer/svar/comments, produkttips gennem /go/, admin-side og assets/forum.css kun på forum-sider."
+        },
+        {
+          "id": "f2",
+          "name": "F2 — Reddit-klient og kø",
+          "done": 0.8,
+          "total": 0.8,
+          "unit": "d",
+          "note": "OAuth med client_credentials (læsning), password og refresh_token (skrivning), token-cache pr. grant, 401 rydder cachen og prøver én gang, /api/submit som kind=link, json.errors læses som fejl, egen tabel sgap_reddit_posts med dublet-værn, 2 posts/døgn, 90 minutters interval, backoff 5 → 15 → 45 min og terminal failed efter tredje forsøg, status off/missing_token/read_only/refused/ready."
+        },
+        {
+          "id": "f3",
+          "name": "F3 — radar og attribution",
+          "done": 0.3,
+          "total": 0.3,
+          "unit": "d",
+          "note": "hot-lister pr. subreddit (op til fem), nøgleord delt på komma så flerords-fraser virker, stickied og sete id'er sprunget over, rangering score + 2 × kommentarer, 12 items, set-ringbuffer på 400, cache i en time, én fejlende subreddit stopper ikke de andre; UTM på hvert delt link (utm_source=reddit, utm_medium=forum, utm_campaign=<tavle>)."
+        },
+        {
+          "id": "f4",
+          "name": "F4 — admin, settings og REST",
+          "done": 0.3,
+          "total": 0.3,
+          "unit": "d",
+          "note": "Siden Forum & Reddit med fire tal, Reddit-status, trådtabel med Queue on Reddit, radar-tabel og kø-tabel; fane Forum & Reddit med 14 settings og 3 secrets på Keys (eget Reddit-kort); fem REST-ruter (/forum/topics offentlig, /forum/share, /reddit/status, /reddit/radar, /reddit/share); menupunkt i Publish."
+        },
+        {
+          "id": "f5",
+          "name": "F5 — tests, zip og dokumentation",
+          "done": 0.3,
+          "total": 0.3,
+          "unit": "d",
+          "note": "plugins/tests/forum.php med stubs i smoke.php dækker registrering, indeks, formularværn (gæst, honeypot, titel, længde, tavle, rate), moderation, JSON-LD, tre grants, submit-afslag, kø, loft/interval, tick med succes/backoff/terminal, maybe_queue, radar, status, REST og admin-side uden secrets i HTML; php -l på 67 filer; zip 7.66.0 byte-identisk; docs/library/forum-reddit-2026-11-09.md + PDF."
+        },
+        {
+          "id": "f6",
+          "name": "F6 — live install og første link post",
+          "done": 0,
+          "total": 0.1,
+          "unit": "d",
+          "note": "Ikke udført: kræver ejerens upload og Reddit-app. Omfatter installation af 7.66.0, første rigtige link post til et subreddit, og at refresh-tokenet er roteret korrekt efter to kørsler."
+        }
+      ]
+    },
+    {
       "id": "site",
       "name": "steamgears.eu — site-optimering",
       "note": "roadmap S0–S4",
@@ -1949,6 +2006,15 @@
       "after": 48.4,
       "delta": 11.9,
       "basis": "15,5 af 32 t (Niche-valg, brand og produktstige 2/2 · ROI-model og enhedsøkonomi 2/2 · 30-dages plan og KPI-gates 2/2 · Kreativt: ti hooks som manuskript 2/2 · Kravliste: butik, betaling, tracking og jura 1,5/1,5 · Butiksopsætning: Shopify, MobilePay, CAPI, sider 0/6 · Leverandørvalg, GPSR-dokumentation og prøver 0/4 · Juridiske sider: handelsbetingelser, retur, privatliv 0/2,5 · Første annoncerunde uge 1-2 0/4 · Niche-portefølje: roadmap og færdig butikstekst 6/6)"
+    },
+    {
+      "date": "2026-11-09",
+      "project": "Forum + Reddit — trafikaccelerator (P5)",
+      "module": "baseline",
+      "before": null,
+      "after": 96.7,
+      "delta": null,
+      "basis": "2,9 af 3 d (F1 1,2/1,2 · F2 0,8/0,8 · F3 0,3/0,3 · F4 0,3/0,3 · F5 0,3/0,3 · F6 0/0,1)"
     }
   ]
 }

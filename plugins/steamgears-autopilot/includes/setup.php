@@ -32,7 +32,13 @@ class SGAP_Setup {
         'instagram_user_id' => 'Instagram account ID', 'instagram_graph_host' => 'Graph host',
         'instagram_access_token' => 'Instagram access token',
         'facebook_access_token' => 'Facebook page token',
-        'facebook_page_id' => 'Facebook page id'
+        'facebook_page_id' => 'Facebook page id',
+        'forum_enabled' => 'Forum', 'forum_slug' => 'Forum address', 'forum_topics_per_page' => 'Threads per page', 'forum_intro' => 'Forum intro',
+        'reddit_enabled' => 'Reddit', 'reddit_auto_share' => 'Share new threads automatically', 'reddit_default_sub' => 'Default subreddit',
+        'reddit_radar_subs' => 'Radar subreddits', 'reddit_keywords' => 'Radar keywords', 'reddit_daily_cap' => 'Reddit posts per day',
+        'reddit_min_words' => 'Words before a thread is shared', 'reddit_min_interval' => 'Minutes between two posts',
+        'reddit_client_id' => 'Reddit app id', 'reddit_client_secret' => 'Reddit app secret', 'reddit_username' => 'Reddit username',
+        'reddit_password' => 'Reddit password', 'reddit_refresh_token' => 'Reddit refresh token'
     ];
 
     /**
@@ -43,7 +49,7 @@ class SGAP_Setup {
      * key added to the wrong tab later still shows up in exactly one place.
      */
     const TABS = [
-        'keys' => ['Keys', 'lock', ['publer_api_key', 'ai_api_key', 'image_api_key', 'serpapi_key', 'telegram_bot_token', 'merchant_feed_secret', 'bluesky_app_password', 'mastodon_token', 'mcp_refresh_token', 'printful_api_key', 'pinterest_access_token', 'pinterest_refresh_token', 'pinterest_client_secret', 'instagram_access_token', 'facebook_access_token']],
+        'keys' => ['Keys', 'lock', ['publer_api_key', 'ai_api_key', 'image_api_key', 'serpapi_key', 'telegram_bot_token', 'merchant_feed_secret', 'bluesky_app_password', 'mastodon_token', 'mcp_refresh_token', 'printful_api_key', 'pinterest_access_token', 'pinterest_refresh_token', 'pinterest_client_secret', 'instagram_access_token', 'facebook_access_token', 'reddit_client_secret', 'reddit_password', 'reddit_refresh_token']],
         'basics' => ['Basics', 'admin-home', ['autopilot_enabled', 'full_auto_enabled', 'channels', 'posts_per_day']],
         'ai' => ['AI & images', 'superhero-alt', ['ai_profile', 'ai_provider', 'ai_model', 'ai_base_url', 'content_language', 'image_model']],
         'publishing' => ['Publishing', 'megaphone', ['publish_mode', 'publer_workspace_id', 'publer_pinterest_board', 'pinterest_client_id', 'instagram_user_id', 'instagram_graph_host', 'facebook_page_id', 'facebook_graph_version', 'facebook_direct', 'bluesky_handle', 'mastodon_instance', 'mastodon_limit', 'telegram_chat_id', 'quality_gate', 'banned_words', 'dupe_days']],
@@ -52,7 +58,10 @@ class SGAP_Setup {
         'shop' => ['Shop & feeds', 'cart', ['woo_min_margin']],
         'mcp' => ['MCP access', 'admin-links', ['mcp_client_id']],
         'automation' => ['Automation', 'update-alt', ['auto_images', 'auto_seo', 'articles_per_week', 'auto_publish_articles', 'weekly_report', 'rescue_hosts']],
-        'advanced' => ['Economics', 'chart-line', ['labor_rate', 'monthly_budget', 'target_roi', 'winner_min_clicks', 'loser_min_clicks', 'repost_max']]
+        'advanced' => ['Economics', 'chart-line', ['labor_rate', 'monthly_budget', 'target_roi', 'winner_min_clicks', 'loser_min_clicks', 'repost_max']],
+        'forum' => ['Forum & Reddit', 'admin-comments', ['forum_enabled', 'forum_slug', 'forum_topics_per_page', 'forum_intro',
+            'reddit_enabled', 'reddit_auto_share', 'reddit_default_sub', 'reddit_radar_subs', 'reddit_keywords',
+            'reddit_daily_cap', 'reddit_min_words', 'reddit_min_interval', 'reddit_client_id', 'reddit_username']]
     ];
 
     /**
@@ -68,7 +77,8 @@ class SGAP_Setup {
         'shop' => 'Printful\'s store, the product feed and the margin floor the shop tools may not undercut.',
         'mcp' => 'The client id the site uses when it renews its own MCP token.',
         'automation' => 'What runs by itself: AI images, SEO meta on new posts, weekly articles and the image rescue.',
-        'advanced' => 'Your hourly rate and the numbers that decide whether a post is a winner, a loser or worth repeating.'
+        'advanced' => 'Your hourly rate and the numbers that decide whether a post is a winner, a loser or worth repeating.',
+        'forum' => 'A forum for the questions the shop answers in public, and the Reddit account that gives the threads readers.'
     ];
 
     const CHANNEL_LABELS = [

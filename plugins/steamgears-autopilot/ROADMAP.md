@@ -1,9 +1,9 @@
 # Steamgears Autopilot — audit, roadmap and effort estimates
 
-_Last audited: 2026-11-08 · the audit further down was of **7.15.0** (`ab676db` on `main`); live and repo both
-run **7.65.5** (measured 9/11 2026 through Novamira: the zip was installed with `Plugin_Upgrader` and the
-installed version reads back as 7.65.5). The zip in `plugins/` is **7.65.5**, and nothing reaches the site until
-an update runs from wp-admin · update this file in the same commit as any release._
+_Last audited: 2026-11-09 · the audit further down was of **7.15.0** (`ab676db` on `main`); the site runs
+**7.65.5** (measured 9/11 2026 through Novamira: the zip was installed with `Plugin_Upgrader` and the installed
+version reads back as 7.65.5). The repo, and the zip in `plugins/`, is **7.66.0** (P5: forum and Reddit), so the
+next *Plugins → Update* is a real upgrade and not a no-op · update this file in the same commit as any release._
 
 **The 7.64.9 upgrade has no agent path, measured 8/11 2026:** there is no MCP credential anywhere — 0
 repository secrets, no token file in the sandbox, and the public routes that exist answer `401` — so the
@@ -328,6 +328,64 @@ Threads and LinkedIn stay behind Publer.
 | --- | --- | --- |
 | P4.1 | ✅ **Done 8/11 (7.64.3) — one field, one shop, measured on the live site.** `includes/niche-shop.php` (plan motor, apply, rollback, admin page) plus four abilities and three REST routes. The planner is pure PHP: ten archetypes with keywords, collections, motifs and tone; six POD families with default costs; prices through `SGAP_MCP_Woo::floor_price()` so the margin floor in *Shop & feeds* is obeyed; five page drafts where every owner-only fact is written as `[EJER: …]`; and a menu that becomes real links (a `wp_navigation` post on a block theme, a nav menu elsewhere). Apply creates **drafts only** (product categories, products with price/SKU/`_sgap_niche`, pages, navigation), records every id under a plan key in `sgap_niche_runs`, and refuses without WooCommerce instead of half-writing. Rollback deletes only that run's drafts, empty terms and menu and keeps published items, reported line by line. **Live run on steamgears.eu** (WordPress 7.1.4, WooCommerce 11.2.2, plugin 7.64.3, files SHA-1-identical to source): `POST /sgap/v1/niche` with "cottagecore mushroom", 8 products → plan key `26f9ebdd1c39`, collections 210–214, product drafts 1517–1524 with `_price`/`_regular_price`/SKU/`_sgap_niche` (32.95, 70.95, 20.95, 23.95, 22.95, 24.95, 32.95, 70.95), page 1525 and navigation 1526 with 8 links; the shop's 20 published products and its 32 categories/32 pages were untouched, drafts stayed 404. Rollback through the admin button deleted all 15 rows (`kept: []`) and left a state identical to the pre-run one field by field. The admin page was verified in a browser (plan built over `admin-ajax.php` 200, already-applied notice, rollback, no JS errors from our code); that pass found and fixed the missing menu (7.64.1), a "1 pages" plural (7.64.2) and a `TypeError` on an already-applied plan that left the button stuck (7.64.3). 36 smoke checks in `plugins/tests/niche-shop.php`; the suite is at **1 128 PASS / 0 FAIL** on 7.64.9, `php -l` clean, zip byte-identical. See `docs/library/niche-butik-2026-11-08.md`. | 1.00 d |
 | **P4 total** | | **1.00 d** — done and measured |
+
+### P5 — forum og Reddit som trafikaccelerator (7.66.0)
+
+**Formålet er ikke "et forum".** Et tomt forum er en tom side. Modulet bygges som en trafikmaskine med tre
+led, og hvert led kan måles: (1) **forummet** giver hver diskussion en indekserbar side med `DiscussionForumPosting`,
+som søgemaskiner og AI-svar kan citere; (2) **Reddit** er den eneste kanal hvor en lille butik kan låne andres
+publikum uden annoncebudget — hver publiceret tråd kan sendes som et **link post** til et emne-relevant subreddit
+med UTM, så besøget kan føres tilbage til den tråd der sendte det; (3) **radaren** finder de tråde hvor nogen
+allerede spørger om noget vi sælger, så ejeren kan svare som menneske i stedet for at spamme.
+
+Beslutninger, der styrer koden:
+
+- **Emner er en CPT (`sgap_topic`), svar er WordPress-kommentarer.** Native kommentarer giver moderation,
+  spamfilter, trådning og `comment`-arrays i JSON-LD uden en egen svar-tabel. Tavler (`sgap_board`) er en
+  taksonomi, så en tavle kan mappes til et subreddit uden at røre koden.
+- **Kun link posts, aldrig automatiske kommentarer på Reddit.** Automatisk selvpromovering i andres tråde er
+  spam efter Reddits egne regler og koster kontoen. Radaren **læser** og foreslår; den skriver intet.
+- **Reddit-køen er egen tabel (`sgap_reddit_posts`)** og ikke `sgap_queue`: Publer kender ikke Reddit, og et
+  link post har andre felter (subreddit, reddit-id, permalink) end en social post. Køen har backoff 5 → 15 → 45
+  min, dagligt loft, minimumsinterval og dublet-værn på emne-id.
+- **Attribution er UTM + `/go/`.** Linket der sendes til Reddit er `?utm_source=reddit&utm_medium=forum&utm_campaign=<tavle>`,
+  og trådens produkttips peger på butikkens `/go/<id>/`-links, så en Reddit-læser lander på et produkt og ikke
+  på en blindgyde. Uden det er "trafik" et tal uden kilde.
+- **Tokenet er en script-app (refresh token).** Læsning (radaren) kan køre med `client_credentials` uden
+  brugerkontekst; publicering kræver en bruger og dermed app-id, secret, brugernavn, adgangskode og det
+  refresh token Reddit roterer. Alle fem er secrets og vises aldrig igen.
+- **Forummet er ikke åbent for gæster.** Læsning er offentlig; skrivning kræver login, nonce, honeypot og
+  3 emner/time pr. bruger, og alt fra ikke-moderatorer lander som `pending`. Et åbent forum på et cachet site
+  bliver en spam-magnet inden for en uge.
+
+| Trin | Indhold | Estimat | Akkumuleret |
+| --- | --- | --- | --- |
+| F1 | Forum-kerne: CPT + tavle-taksonomi, `[steamgears_forum]`, trådside, nyt-emne-formular med værn, kommentar-svar, moderation, `DiscussionForumPosting`, produkttips | 1,20 d | **40,0 %** |
+| F2 | Reddit-klient: OAuth (refresh/password/client_credentials), token-cache, `/api/submit`, kø med backoff, loft og minimumsinterval, status og fejltekst | 0,80 d | **66,7 %** |
+| F3 | Radar: hot/new pr. subreddit, nøgleord, set-ringbuffer, scoring, cache; UTM på delte links | 0,30 d | **76,7 %** |
+| F4 | Admin-siden *Forum & Reddit*, indstillinger (ny fane), REST-ruter, menupunkt | 0,30 d | **86,7 %** |
+| F5 | Tests: smoke-fixtures for forum, kø, token, radar og værn; zip; dokumentation + PDF | 0,30 d | **96,7 %** |
+| F6 | Live: zip installeret, Reddit-app oprettet, første link post målt | 0,10 d | **100 %** — ejer-blokeret |
+
+**Filstruktur (komplet):**
+
+```
+plugins/steamgears-autopilot/
+  includes/forum.php          NY   SGAP_Forum — CPT, tavler, shortcode, formular, JSON-LD, admin-side
+  includes/reddit.php         NY   SGAP_Reddit — OAuth, submit, kø, radar, status, REST
+  assets/forum.css            NY   frontend-styling, kun på forum-sider
+  includes/core.php           ÆND table-DDL + settings (DEFAULTS, INT/BOOL/TEXT/SECRET, SECTIONS, HELP)
+  includes/setup.php          ÆND fane "Forum & Reddit", labels og tab-hint
+  includes/admin-menu.php     ÆND siden i Publish-gruppen
+  uninstall.php               ÆND tabel, options, post meta, cron
+  steamgears-autopilot.php    ÆND requires, init-kald, version 7.66.0
+plugins/tests/smoke.php       ÆND stubs + require af forum-testen
+plugins/tests/forum.php       NY   40+ checks
+```
+
+**Hvad der ikke bygges, og hvorfor:** automatiske Reddit-kommentarer (spam, kontodød), egen login-udbyder
+(WordPress har brugerne), tråd-afstemning og badges (ingen trafikværdi før der er brugere), og Reddit-login på
+sitet (kræver en Reddit-app til OAuth og giver en konto vi ikke kan moderere).
 
 ---
 
