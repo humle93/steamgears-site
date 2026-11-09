@@ -57,17 +57,38 @@ _Opdateret 2026-11-09 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `527ad1c Beslutningsnotat til teleskopreolen: hvad der skal forhandles, og i hvilken rækkefølge`
 - `542ddd5 Tilbudssammenligning på ét kald, så tre leverandørsvar kan vejes mod hinanden`
 - `4550ec9 Modul: F6 — to fredagstråde skrevet Før: 96,7 % Efter: 96,7 % Δ: 0 Grundlag: ingen ændring`
 - `1f45eb4 Modul: F6 — 14-dages plan for spor A Før: 96,7 % Efter: 96,7 % Δ: 0 Grundlag: ingen ændring`
 - `e043000 Modul: F6 — ejer-guide til Reddit-app Før: 96,7 % Efter: 96,7 % Δ: 0 Grundlag: ingen ændring`
 - `901b3a4 chore(status): daglig projektstatus 2026-11-09`
-- `3178292 Modul: baseline Før: — Efter: 96,7 % Δ: — Grundlag: 2,9 af 3 d (F1 1,2/1,2 · F2 0,8/0,8 · F3 0,3/0,3 · F4 0,3/0,3 · F5 0,3/0,3 · F6 0/0,1)`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
 
-### 9/11 — tilbudsbeslutningen: forhandlingsrummet er regnet, ikke gættet
+### 9/11 — de publicerede guides er rene; repo-copyen er ikke
+
+- **REST er tilbage:** `/wp-json/?cb=98761` svarer **200 med 1.454.146 B `application/json`**. Det var den kanal
+  der gjorde dagens måling mulig.
+- **De fire live-guides er målt link for link, og alle produkt-id'er findes:** 1357 → 965/966/967, 1361 →
+  477/483/940, 1359 → 477/940/941, corset (1394) → 489/491. Ingen døde `/go/`-links på de publicerede sider.
+- **Men corset-guiden er rettet live uden at filen er det.** Siden bærer to links, mens
+  `docs/library/guides-2026-11-03-corset.md` stadig rummer ti id'er, hvoraf seks er døde. Repoet er altså ikke
+  beviset for hvad der står på sitet — det skal måles.
+- **Copyen til 292/296/295 kan ikke publiceres som den står:** butikken har **20 produkter i DKK**, copyen er
+  skrevet til 39 i USD, og **12 af 18 `/go/`-id'er svarer 404** (`woocommerce_rest_product_invalid_id`). Otte af
+  dem «virker» som 302 og lander på `?post_type=product&p=<id>`, som er en 404-side — derfor er et 302 ikke et
+  bevis. Begge filer har nu en statuslinje øverst.
+- **Hvorfor det gik ubemærket:** `guide_check.py` målte copyen mod **sin egen** produktmapping og prislister fra
+  1.–3/11. Et værn der måler mod et fortidigt grundlag består altid.
+- **Nyt værn:** `python3 tools/guide_check.py --live` slår hvert `/go/`-id op i Store API, fejler på 404 og på
+  valuta-skred, og giver en **advarsel** — aldrig et «bestået» — når butikken ikke kan måles. 15/15 fixtures; ikke
+  i den natlige kørsel, fordi det kræver netværk.
+- **Om-mappingen** (nærmeste levende erstatning og DKK-totaler: 3.370,00 · 560/1.075/2.010,00 · 4.160,00) står i
+  `docs/library/go-links-og-guide-copy-2026-11-09.md` §6. Teksten skal skrives om, ikke søg-erstattes.
+
+### 7/11 — opdateringsfælden: “Update” havde intet at installere### 9/11 — tilbudsbeslutningen: forhandlingsrummet er regnet, ikke gættet
 
 De tre tilbud blev kørt gennem `tools/tilbuds_sammenligning.py` ved **begge** CPA-niveauer — 200 som
 driftsmål og 281 som modellens break-even — fordi dommen vender mellem dem: ved 281 kan ingen af de tre

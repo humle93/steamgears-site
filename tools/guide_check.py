@@ -14,7 +14,12 @@ Reglerne der kontrolleres, står i docs/seo.md §1 og §3:
 
 Brug:
     python3 tools/guide_check.py                 # tjekker alle docs/library/guides-*.md
+    python3 tools/guide_check.py --live          # oveni: hvert /go/<id>/ måles mod den levende butik
     python3 tools/guide_check.py --selftest      # beviser at værnene fanger fejl
+
+`--live` er ikke med i den natlige kørsel, fordi den kræver netværk; den køres i hånden før en
+publicering. Den findes, fordi et /go/-link kan se rigtigt ud i copyen og alligevel pege på et
+produkt der er slettet — og fordi butikken kan skifte valuta uden at et eneste ord i teksten ændrer sig.
 """
 
 import glob
@@ -237,6 +242,66 @@ def check_guide(name: str, block: str, slugs: set | None = None) -> list:
     return problems
 
 
+STORE_API = "https://steamgears.eu/wp-json/wc/store/v1/products"
+
+
+def fetch_product(pid: str) -> dict:
+    """Slår ét produkt op i den levende butik. Returnerer {"ok": bool, ...} og kaster ikke.
+
+    Butikken svarer 404 med `woocommerce_rest_product_invalid_id` for et slettet produkt og 200 med
+    `prices` for et levende. Alt andet (netværk, WAF, 5xx) meldes som `ukendt`, så en målefejl ikke
+    bliver til en påstand om at linket virker.
+    """
+    import json
+    import urllib.error
+    import urllib.request
+
+    req = urllib.request.Request(f"{STORE_API}/{pid}", headers={"User-Agent": "curl/8"})
+    try:
+        with urllib.request.urlopen(req, timeout=25) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+        prices = data.get("prices") or {}
+        minor = int(prices.get("currency_minor_unit", 2))
+        return {
+            "ok": True,
+            "name": data.get("name", ""),
+            "currency": prices.get("currency_code", ""),
+            "price": int(prices.get("price", "0")) / (10 ** minor),
+        }
+    except urllib.error.HTTPError as exc:
+        if exc.code == 404:
+            return {"ok": False, "status": 404}
+        return {"ok": None, "status": exc.code}
+    except Exception as exc:  # netværk, timeout, ugyldig JSON
+        return {"ok": None, "status": type(exc).__name__}
+
+
+def check_live(ids: dict, fetch) -> list:
+    """Sammenligner copyens /go/-id'er og $-beløb med den levende butik.
+
+    `ids` er {id: [guide-navne]}. `fetch(id)` returnerer samme form som `fetch_product`.
+    Returnerer (fejl, advarsler, målte produkter).
+    """
+    problems, warnings, measured = [], [], {}
+    currencies = set()
+    for pid in sorted(ids):
+        info = fetch(pid)
+        measured[pid] = info
+        where = ", ".join(sorted(set(ids[pid])))
+        if info.get("ok") is False:
+            problems.append(f"/go/{pid}/ findes ikke i butikken (404) — brugt i {where}")
+        elif info.get("ok") is None:
+            warnings.append(f"/go/{pid}/ kunne ikke måles ({info.get('status')}) — ikke godkendt som virkende")
+        else:
+            currencies.add(info.get("currency", ""))
+    if "DKK" in currencies:
+        problems.append(
+            "butikken prissætter i DKK, men copyen regner i $ — hvert beløb og hvert total skal omregnes "
+            "til butikkens valuta, ellers er tallet i teksten ikke det tal kunden ser"
+        )
+    return problems, warnings, measured
+
+
 def run(paths: list) -> int:
     failures = 0
     total = 0
@@ -340,7 +405,24 @@ Hele sættet koster $337.40.
         failed += 0 if ok else 1
         print(f"{'PASS' if ok else 'FAIL'} {label}" + ("" if ok else f" (forventede {expect}, fik {got}: {found})"))
 
-    print(f"\n{len(cases) + 2 - failed} af {len(cases) + 2} selftest-fixtures bestod")
+    # --live-værnet: et slettet produkt skal fanges, og et levende må ikke melde DKK-skred forkert.
+    dead = check_live({"475": ["Guide 1"]}, lambda pid: {"ok": False, "status": 404})
+    alive_dkk = check_live({"413": ["Guide 1"]}, lambda pid: {"ok": True, "name": "Hoodie", "currency": "DKK", "price": 335.0})
+    alive_usd = check_live({"413": ["Guide 1"]}, lambda pid: {"ok": True, "name": "Hoodie", "currency": "USD", "price": 49.95})
+    export = [
+        ("slettet produkt fanges", bool(dead[0]), 1),
+        ("valutaskred fanges", any("DKK" in p for p in alive_dkk[0]), 1),
+        ("samme valuta giver ingen fejl", bool(alive_usd[0]), 0),
+        ("umålbar butik bliver advarsel, ikke bestået", bool(alive_usd[1]) and not alive_usd[0], 0),
+    ]
+    for label, found, expect in export:
+        got = 1 if found else 0
+        ok = got == expect
+        failed += 0 if ok else 1
+        print(f"{'PASS' if ok else 'FAIL'} {label}" + ("" if ok else f" (forventede {expect}, fik {got})"))
+
+    total_fixtures = len(cases) + 2 + len(export)
+    print(f"\n{total_fixtures - failed} af {total_fixtures} selftest-fixtures bestod")
     return 1 if failed else 0
 
 
@@ -351,7 +433,33 @@ def main() -> int:
     if not paths:
         print("FAIL ingen docs/library/guides-*.md fundet")
         return 1
-    return run(paths)
+    code = run(paths)
+    if "--live" not in sys.argv:
+        return code
+
+    used: dict = {}
+    for path in paths:
+        with open(path, encoding="utf-8") as fh:
+            text = fh.read()
+        for name, block in blocks(text):
+            for pid in re.findall(r"/go/(\d+)/", copy_section(block)):
+                used.setdefault(pid, []).append(name.split("—")[0].strip())
+
+    print(f"\n[--live] måler {len(used)} unikke /go/-id'er mod butikken")
+    problems, warnings, measured = check_live(used, fetch_product)
+    for pid in sorted(measured):
+        info = measured[pid]
+        if info.get("ok"):
+            print(f"  OK    /go/{pid}/ → {info['name']} ({info['currency']} {info['price']:.2f})")
+        elif info.get("ok") is False:
+            print(f"  DØD   /go/{pid}/ → 404")
+        else:
+            print(f"  UKENDT /go/{pid}/ → {info.get('status')}")
+    for problem in problems:
+        print(f"FAIL  {problem}")
+    for warning in warnings:
+        print(f"ADVARSEL {warning}")
+    return 1 if problems else code
 
 
 if __name__ == "__main__":
