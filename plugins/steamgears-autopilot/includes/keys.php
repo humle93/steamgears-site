@@ -24,7 +24,7 @@ class SGAP_Keys {
      * session fetched with the old key would otherwise answer 401 until it expired on its own.
      */
     const CACHE_MAP = [
-        'ai_api_key' => ['sgap_ai_catalog_aimlapi', 'sgap_ai_catalog_anthropic', 'sgap_ai_catalog_openai_compatible'],
+        'ai_api_key' => ['sgap_ai_catalog_aimlapi', 'sgap_ai_catalog_anthropic', 'sgap_ai_catalog_openai_compatible', 'sgap_ai_catalog_openrouter'],
         'image_api_key' => ['sgap_ai_catalog_aimlapi'],
         'publer_api_key' => ['sgap_publer_accounts'],
         'publer_workspace_id' => ['sgap_publer_accounts'],
@@ -45,11 +45,11 @@ class SGAP_Keys {
             'title' => 'AI text',
             'icon' => 'superhero-alt',
             'keys' => ['ai_api_key'],
-            'owner' => 'You — your own AIMLAPI or Anthropic account, paid by you.',
+            'owner' => 'You — your own AIMLAPI, Anthropic or OpenRouter account, paid by you.',
             'why' => 'Without it nothing writes: no posts, no articles, no chat answers and no AI photos.',
-            'body' => 'Writes the posts, the articles and the answers in the chat. One AIMLAPI key covers Claude and 300+ models; an Anthropic key works directly too.',
-            'links' => [['AIMLAPI', 'https://aimlapi.com/'], ['Anthropic', 'https://console.anthropic.com/settings/keys']],
-            'hint' => 'AIMLAPI: Dashboard → API keys. Anthropic: console.anthropic.com → API keys.',
+            'body' => 'Writes the posts, the articles and the answers in the chat. One AIMLAPI key covers Claude and 300+ models; an Anthropic key works directly too; an OpenRouter key puts hundreds of models from many providers behind one bill.',
+            'links' => [['AIMLAPI', 'https://aimlapi.com/'], ['Anthropic', 'https://console.anthropic.com/settings/keys'], ['OpenRouter', 'https://openrouter.ai/keys']],
+            'hint' => 'AIMLAPI: Dashboard → API keys. Anthropic: console.anthropic.com → API keys. OpenRouter: openrouter.ai/keys, then pick a model under AI & images.',
             'test' => 'ai'
         ],
         'images' => [

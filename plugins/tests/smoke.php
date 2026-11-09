@@ -253,6 +253,38 @@ $cb=SGAP_AI::chat_body(SGAP_AI::model(),'x');
 check('aimlapi: low reasoning effort and JSON mode', ($cb['reasoning_effort']??'')==='low' && $cb['response_format']['type']==='json_object');
 update_option('sgap_ai_provider','openai_compatible'); update_option('sgap_ai_model','gpt-x');
 check('openai-compatible: own base url and model, no reasoning_effort', SGAP_AI::base_url()==='https://example.com/v1' && SGAP_AI::model()==='gpt-x' && !isset(SGAP_AI::chat_body('gpt-x','x')['reasoning_effort']));
+// OpenRouter som egen provider: fast adresse, intet opdigtet standardmodel, og en nøgletest
+// der beviser nøglen med ét token — OpenRouter svarer /models uden nøgle, så den vej ville
+// kalde enhver nøgle gyldig.
+update_option('sgap_ai_provider','openrouter'); update_option('sgap_ai_model','');
+update_option('sgap_ai_base_url','https://wrong.example/v1'); update_option('sgap_ai_api_key','or-key');
+check('openrouter: the provider is accepted and named', SGAP_AI::provider()==='openrouter' && SGAP_AI::provider_name()==='OpenRouter');
+check('openrouter: the address is fixed, so a typed base url cannot redirect the key', SGAP_AI::base_url()==='https://openrouter.ai/api/v1' && SGAP_AI::uses_chat_completions());
+check('openrouter: there is no invented default model', SGAP_AI::default_model()==='' && SGAP_AI::model()==='');
+$GLOBALS['http_calls']=[];
+$json=SGAP_AI::json_call('sys','prompt',['type'=>'object']);
+check('openrouter: without a model the error names the provider and nothing is sent', $json instanceof WP_Error
+    && str_contains($json->get_error_message(),'OpenRouter') && $GLOBALS['http_calls']===[]);
+$no_model=SGAP_KeyCheck::check_ai();
+check('openrouter: the key test asks for a model before spending a request', ($no_model['ok']??null)===false
+    && str_contains($no_model['message'],'pick an AI model') && $GLOBALS['http_calls']===[]);
+update_option('sgap_ai_model','anthropic/claude-sonnet-4.6');
+$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[sgap_http(401,['error'=>['message'=>'User not found.']])];
+$bad=SGAP_KeyCheck::check_ai();
+check('openrouter: a refused key is refused, with the api reason', ($bad['ok']??null)===false
+    && str_contains($bad['message'],'refused') && str_contains($bad['message'],'User not found'));
+$GLOBALS['http_queue']=[sgap_http(402,['error'=>['message'=>'Insufficient credits']])];
+$no_credit=SGAP_KeyCheck::check_ai();
+check('openrouter: an empty account is named as no credit', ($no_credit['ok']??null)===false && str_contains($no_credit['message'],'no credit'));
+$GLOBALS['http_queue']=[sgap_http(404,['error'=>['message'=>'No endpoints found for model']])];
+$gone=SGAP_KeyCheck::check_ai();
+check('openrouter: a model it does not offer says so', str_contains($gone['message'],'does not offer the model'));
+$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[sgap_http(200,['choices'=>[['message'=>['content'=>''],'finish_reason'=>'length']]])];
+$ok=SGAP_KeyCheck::check_ai();
+check('openrouter: a working key passes with one token spent, on its own endpoint', ($ok['ok']??null)===true
+    && str_contains($ok['message'],'anthropic/claude-sonnet-4.6') && count($GLOBALS['http_calls'])===1
+    && $GLOBALS['http_calls'][0][0]==='https://openrouter.ai/api/v1/chat/completions');
+$GLOBALS['http_queue']=[];
 update_option('sgap_ai_provider','anthropic'); update_option('sgap_ai_model',''); update_option('sgap_ai_base_url','');
 check('anthropic: default model unchanged', SGAP_AI::model()==='claude-opus-5-5' && !SGAP_AI::uses_chat_completions());
 check('ai: JSON inside a ```json fence is parsed', count(SGAP_AI::parse_posts("Here you go:\n```json\n{\"posts\":[{\"channel\":\"facebook\",\"text\":\"Hi\"}]}\n```",['facebook']))===1);

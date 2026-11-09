@@ -174,6 +174,9 @@ class SGAP_KeyCheck {
         if (SGAP_AI::provider() === 'aimlapi') {
             return self::check_aimlapi($key);
         }
+        if (SGAP_AI::provider() === 'openrouter') {
+            return self::check_openrouter($key);
+        }
         if (SGAP_AI::provider() === 'openai_compatible') {
             return self::check_openai_compatible($key);
         }
@@ -229,6 +232,45 @@ class SGAP_KeyCheck {
             return ['ok' => false, 'message' => "AIMLAPI does not offer the model \"{$model}\". Leave AI model empty for " . SGAP_AI::AIMLAPI_MODEL . '.'];
         }
         return ['ok' => false, 'message' => "AIMLAPI answered HTTP {$code}" . ($detail !== '' ? ": {$detail}" : '; try again later.')];
+    }
+
+    /**
+     * OpenRouter answers `/models` without a key, so asking it would call every key valid. The
+     * key is therefore proven with a one-token chat request to the chosen model — and when no
+     * model is chosen the answer says that instead of spending a request on a guess.
+     */
+    private static function check_openrouter(string $key): array {
+        $model = SGAP_AI::model();
+        if ($model === '') {
+            return ['ok' => false, 'message' => 'OpenRouter key saved, but pick an AI model under Settings → AI & images — OpenRouter has no default model.'];
+        }
+        $response = wp_remote_post(SGAP_AI::base_url() . '/chat/completions', [
+            'timeout' => 30,
+            'headers' => ['Authorization' => 'Bearer ' . $key, 'Content-Type' => 'application/json'],
+            'body' => wp_json_encode(['model' => $model, 'max_tokens' => 1, 'messages' => [['role' => 'user', 'content' => 'ping']]])
+        ]);
+        if (is_wp_error($response)) {
+            return ['ok' => false, 'message' => 'Could not reach OpenRouter: ' . $response->get_error_message()];
+        }
+        $code = (int) wp_remote_retrieve_response_code($response);
+        $body = json_decode((string) wp_remote_retrieve_body($response), true);
+        $detail = is_array($body) ? (string) ($body['error']['message'] ?? $body['message'] ?? '') : '';
+        if ($code >= 200 && $code < 300) {
+            return ['ok' => true, 'message' => "OpenRouter key works, model {$model} answers."];
+        }
+        if ($code === 401 || $code === 403) {
+            return ['ok' => false, 'message' => 'OpenRouter refused the key' . ($detail !== '' ? ": {$detail}" : '.')];
+        }
+        if ($code === 402) {
+            return ['ok' => false, 'message' => 'OpenRouter key works, but the account has no credit left. Add credits at openrouter.ai/credits.'];
+        }
+        if ($code === 404 || ($code === 400 && stripos($detail, 'model') !== false)) {
+            return ['ok' => false, 'message' => "OpenRouter does not offer the model \"{$model}\". Pick one from the list under Settings → AI & images."];
+        }
+        if ($code === 429) {
+            return ['ok' => false, 'message' => 'OpenRouter key works, but it is rate limited right now (HTTP 429); try again in a minute.'];
+        }
+        return ['ok' => false, 'message' => "OpenRouter answered HTTP {$code}" . ($detail !== '' ? ": {$detail}" : '; try again later.')];
     }
 
     private static function check_openai_compatible(string $key): array {

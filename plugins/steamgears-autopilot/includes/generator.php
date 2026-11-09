@@ -16,10 +16,18 @@ class SGAP_AI {
     const DEFAULT_BASE_URL = 'https://api.aimlapi.com/v1';
     /** Default model on AIMLAPI (Claude through AIMLAPI's OpenAI-compatible API). */
     const AIMLAPI_MODEL = 'anthropic/claude-opus-5.5';
+    /**
+     * OpenRouter: one OpenAI-compatible endpoint in front of hundreds of models from many
+     * providers. The address is fixed, like AIMLAPI's, so a typo in the base URL cannot point
+     * the key at a different service. There is deliberately no default model: OpenRouter's
+     * catalogue changes week by week, so the model is picked from the live list instead of
+     * being guessed here.
+     */
+    const OPENROUTER_URL = 'https://openrouter.ai/api/v1';
 
     public static function provider(): string {
         $provider = (string) SGAP_Settings::get('ai_provider', 'anthropic');
-        return in_array($provider, ['anthropic', 'aimlapi', 'openai_compatible'], true) ? $provider : 'anthropic';
+        return in_array($provider, ['anthropic', 'aimlapi', 'openai_compatible', 'openrouter'], true) ? $provider : 'anthropic';
     }
 
     /** AIMLAPI and other OpenAI-compatible providers use /chat/completions. */
@@ -33,7 +41,10 @@ class SGAP_AI {
         return $model !== '' ? $model : self::default_model();
     }
 
-    /** The model the provider itself recommends: what an empty Settings field means. */
+    /**
+     * The model the provider itself recommends: what an empty Settings field means. OpenRouter
+     * has none on purpose — a hardcoded slug ages, and its live catalogue is the source.
+     */
     public static function default_model(): string {
         return ['anthropic' => self::DEFAULT_MODEL, 'aimlapi' => self::AIMLAPI_MODEL][self::provider()] ?? '';
     }
@@ -186,12 +197,18 @@ class SGAP_AI {
     }
 
     public static function base_url(): string {
+        // A provider with its own fixed host ignores the free-text base URL: the key belongs to
+        // that service, so the address cannot be redirected by a typo in Settings.
+        $fixed = ['aimlapi' => self::DEFAULT_BASE_URL, 'openrouter' => self::OPENROUTER_URL][self::provider()] ?? '';
+        if ($fixed !== '') {
+            return $fixed;
+        }
         $base = trim((string) SGAP_Settings::get('ai_base_url'));
-        return rtrim(self::provider() === 'aimlapi' || $base === '' ? self::DEFAULT_BASE_URL : $base, '/');
+        return rtrim($base === '' ? self::DEFAULT_BASE_URL : $base, '/');
     }
 
     public static function provider_name(): string {
-        return ['anthropic' => 'Anthropic', 'aimlapi' => 'AIMLAPI'][self::provider()] ?? self::base_url();
+        return ['anthropic' => 'Anthropic', 'aimlapi' => 'AIMLAPI', 'openrouter' => 'OpenRouter'][self::provider()] ?? self::base_url();
     }
 
     const SYSTEM = 'You write social media posts for Steamgears (steamgears.eu), a shop and blog for steampunk '
@@ -350,7 +367,7 @@ class SGAP_AI {
     private static function openai_compatible(string $key, string $prompt) {
         $model = self::model();
         if ($model === '') {
-            return new WP_Error('sgap_ai_model', 'Set an AI model in Settings for the OpenAI-compatible provider.');
+            return new WP_Error('sgap_ai_model', 'Set an AI model in Settings for ' . self::provider_name() . '.');
         }
         $base = self::base_url();
         $response = wp_remote_post($base . '/chat/completions', [
@@ -401,7 +418,7 @@ class SGAP_AI {
         }
         $model = self::model();
         if ($model === '') {
-            return new WP_Error('sgap_ai_model', 'Set an AI model in Settings for the OpenAI-compatible provider.');
+            return new WP_Error('sgap_ai_model', 'Set an AI model in Settings for ' . self::provider_name() . '.');
         }
         if (function_exists('set_time_limit')) {
             @set_time_limit(300);

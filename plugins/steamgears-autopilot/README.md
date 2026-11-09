@@ -612,15 +612,18 @@ description lengths and writes nothing.
 3. *Channels*: e.g. `facebook, instagram, pinterest`. For Pinterest also set the
    board id. Instagram and Pinterest need a featured image on the post.
 4. *AI content*: provider **Anthropic** with a Claude API key (model defaults to
-   `claude-opus-5-5`), or **OpenAI-compatible** (AIMLAPI by default) with a key
-   and a model name.
+   `claude-opus-5-5`), **AIMLAPI** (Claude and 300+ models behind one key), **OpenRouter**
+   (one key in front of hundreds of models from many providers — the address is fixed to
+   `https://openrouter.ai/api/v1` and there is no default model, so pick one from the live list),
+   or **Other OpenAI-compatible** with your own address, a key and a model name.
 5. *General*: switch **Autopilot** on. Leave **Full auto** off at first and approve
    the drafts by hand until you like the tone.
 6. Use **Generate posts now** / **Publish queue now** on the dashboard to try it
    without waiting for the cron.
 
 **Key test.** Saving a Publer or AI key (or the workspace, channels, provider or
-model) tests it straight away; the result appears at the top of the page and on
+model) tests it straight away — OpenRouter with a single-token chat call to the chosen model,
+because its `/models` answers without a key and would call every key valid; the result appears at the top of the page and on
 the dashboard (✓/✗), and *Test API keys* repeats it. Publer: key valid, scopes,
 workspace (filled in automatically when the key has only one), an account for
 every channel, Pinterest board set. Claude: key valid and model available via the

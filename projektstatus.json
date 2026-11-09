@@ -133,8 +133,8 @@
     {
       "id": "plugin",
       "name": "Steamgears Autopilot — plugin",
-      "next": "Agent-scope er færdigt (31,00 af 31,00 d) og 7.65.5 kører nu på sitet. Det eneste åbne er P1.5's live-verifikation (0,6 d, ejer-blokeret): Pinterest-tokenet mangler `boards:read`, og fem kanaler mangler tokens.",
-      "blocked_by": "Syv led kræver ejeren, alle målt 8/11: (1) **Pinterest-scope** — tokenet ligger nu i WooCommerce-integrationen og er gyldigt (`/user_account` 200 som `cpaleadsis`, id 688980580401955331), men appen har kun ads/billing/catalogs/pins/user_accounts og **mangler `boards:read`**, så `/pins` og `/boards` afvises (målt 17:25Z, kanalstatus står som `needs_scope`); (2) **de øvrige kanal-tokens** — Instagram, Bluesky, Mastodon, Telegram og Facebook har intet token (5 af 6 mangler); (3) **AIMLAPI-kredit** — sidste generering 7/11 fejlede med »You've run out of funds«; (4) **`sgap_alert_email`** er tom, så fejl registreres men ingen mail sendes; (5) **full auto vs. godkendelse** — `sgap_full_auto_enabled = no` og 40 elementer venter; (6) **distributionsvej** — `publish_mode = rss` og 0 Publer-konti; (7) **P2.1–P2.3** kræver ejerens beslutning om Command Center-retningen. Intet af det må gættes.",
+      "next": "Agent-scope er færdigt (31,00 af 31,00 d) og 7.67.0 ligger i repoet. Det eneste åbne er P1.5's live-verifikation (0,6 d, ejer-blokeret) samt den nye OpenRouter-nøgle: vælg OpenRouter under Settings → AI & images, sæt nøglen og vælg en model, så tekst-genereringen kan køre igen mens AIMLAPI-kontoen er tom. Pinterest-tokenet mangler `boards:read`, og fem kanaler mangler tokens.",
+      "blocked_by": "Syv led kræver ejeren, alle målt 8/11: (1) **Pinterest-scope** — tokenet ligger nu i WooCommerce-integrationen og er gyldigt (`/user_account` 200 som `cpaleadsis`, id 688980580401955331), men appen har kun ads/billing/catalogs/pins/user_accounts og **mangler `boards:read`**, så `/pins` og `/boards` afvises (målt 17:25Z, kanalstatus står som `needs_scope`); (2) **de øvrige kanal-tokens** — Instagram, Bluesky, Mastodon, Telegram og Facebook har intet token (5 af 6 mangler); (3) **AI-kredit** — AIMLAPI-nøglen svarer »You've run out of funds« (7/11); OpenRouter er nu et eget provider-valg (7.67.0), så en OpenRouter-nøgle + et modelvalg er vejen ud, men nøglen er ejerens og skal sættes under Settings → Keys; (4) **`sgap_alert_email`** er tom, så fejl registreres men ingen mail sendes; (5) **full auto vs. godkendelse** — `sgap_full_auto_enabled = no` og 40 elementer venter; (6) **distributionsvej** — `publish_mode = rss` og 0 Publer-konti; (7) **P2.1–P2.3** kræver ejerens beslutning om Command Center-retningen. Intet af det må gættes.",
       "modules": [
         {
           "id": "p0",
@@ -247,9 +247,18 @@
           "total": 0.25,
           "unit": "d",
           "note": "udført og målt 9/11: sitet kørte 7.65.0 mens repoet var 7.65.4, så P3.7 og P3.8 var bygget men ikke i drift. Zip 398 668 bytes (sha256 `e399813b…`) uploadet gennem MCP i to base64-dele, installeret med `Plugin_Upgrader::install(..., overwrite_package)` — 7.65.0 → 7.65.4 → **7.65.5**, stadig aktiv. `steamgears-autopilot.php`, `ROADMAP.md`, `includes/assets.php` og `assets/pages/dashboard.js` er målt **byte-identiske** mellem site og repo. Live: `SGAP_Admin::dashboard()` giver **17 566 bytes HTML med 0 inline `<script>` og 0 inline `<style>`**, syv side-scripts, to CSS-filer; `/`, `/shop/`, produktside og `/cart/` svarer 200 (75 124 / 269 514 / 282 839 / 378 718 bytes), og `/wp-json/sgap/v1/tick` 200. 7.65.5 er en bogføringsrelease (kun ROADMAP.md), hævet fordi filen er en del af zip'en."
+        },
+        {
+          "id": "p1or",
+          "name": "P1.23 — OpenRouter som egen tekst-provider",
+          "done": 0.25,
+          "total": 0.25,
+          "unit": "d",
+          "verified": true,
+          "note": "7.67.0 (9/11): openrouter er et eget provider-valg med fast adresse (https://openrouter.ai/api/v1), så det håndskrevne base-URL-felt ikke kan omdirigere nøglen; SGAP_KeyCheck::check_openrouter() beviser nøglen med ét token i stedet for at spørge /models, som OpenRouter svarer uden nøgle (enhver nøgle blev før kaldt gyldig), og oversætter 401/403, 402, 404/400 og 429 til hver sin rettelse. Ingen standardmodel: kataloget læses fra /models og caches under sgap_ai_catalog_openrouter. 9 smoke-checks (1277 → 1286 PASS, 0 FAIL). Nøglen er ejerens og sættes under Settings → Keys; AIMLAPI-kontoen står stadig som »out of funds«."
         }
       ],
-      "total": 30.75,
+      "total": 31.0,
       "verified": true
     },
     {

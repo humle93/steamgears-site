@@ -384,7 +384,7 @@ class SGAP_Setup {
         // 1 AI
         $provider = SGAP_AI::provider();
         echo '<form class="sgap-card sgap-step" data-step="ai"><h2>Which AI should write for you?</h2><p class="sgap-sub">The AI writes your social posts, articles and answers in the chat.</p><div class="sgap-choice-row sgap-big">';
-        foreach (['aimlapi' => ['AIMLAPI', 'Recommended. Claude and 300+ models plus images with one key. Pay as you go.'], 'anthropic' => ['Anthropic (Claude)', 'Directly from Anthropic. Text only – images need an AIMLAPI key.'], 'openai_compatible' => ['Other', 'OpenAI, OpenRouter or any OpenAI-compatible API.']] as $value => [$title, $text]) {
+        foreach (['aimlapi' => ['AIMLAPI', 'Recommended. Claude and 300+ models plus images with one key. Pay as you go.'], 'anthropic' => ['Anthropic (Claude)', 'Directly from Anthropic. Text only – images need an AIMLAPI key.'], 'openrouter' => ['OpenRouter', 'One key in front of hundreds of models from many providers. Pick a model after saving.'], 'openai_compatible' => ['Other', 'OpenAI or any OpenAI-compatible API with your own address.']] as $value => [$title, $text]) {
             echo '<label class="sgap-choice' . ($provider === $value ? ' on' : '') . '"><input type="radio" name="settings[ai_provider]" value="' . esc_attr($value) . '"' . checked($provider, $value, false) . '><span><strong>' . esc_html($title) . '</strong><small>' . esc_html($text) . '</small></span></label>';
         }
         $ai_saved = trim((string) SGAP_Settings::get('ai_api_key', '')) !== '' || SGAP_Settings::constant_name('ai_api_key');
