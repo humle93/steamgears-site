@@ -235,9 +235,17 @@ Gælder alt arbejde i `plugins/`.
   henter præcis `https://raw.githubusercontent.com/humle93/steamgears-site/main/plugins/steamgears-autopilot-v<version>.zip`
   (`SGAP_Updater::package_url()`), så en zip i rodmappen eller på en sidegren bliver aldrig fundet.
   **Forbehold (8/11 2026):** repoet er nu **privat**, og `SGAP_Updater` henter anonymt — zip-linket svarer
-  derfor ikke længere stabilt for sitet. Reglen om placering og navn gælder stadig, men opdatering sker indtil
-  videre ved at uploade zip'en under *Plugins → Tilføj nyt → Upload*; se
-  [`docs/library/repo-privat-2026-11-08.md`](docs/library/repo-privat-2026-11-08.md).
+  derfor ikke længere stabilt for sitet (målt 9/11: `404`). Reglen om placering og navn gælder stadig.
+  **Opdatering kan gøres af agenten over MCP (målt 9/11, 7.65.5 → 7.67.0):** læg zip'en på serveren med
+  `novamira_create-upload-link` + `PUT`, og installer den med
+  `novamira_run-wp-cli` og `{"args":["plugin","install","<sti>","--force","--activate"]}` — `args` **skal**
+  være et array, ellers svarer WP-CLI med hjælpetekst og `exit_code: 0`. `manage-plugin` duer ikke (kun
+  wordpress.org efter slug). Ryd zip'en bagefter med `novamira_delete-file`. Fælden: den første request efter
+  installationen kan dø i `dbDelta` på W3TC's DB-cache og give 500 i hele REST-laget, indtil `install()` går
+  igennem ved næste request — se
+  [`docs/library/plugin-installation-via-mcp-2026-11-09.md`](docs/library/plugin-installation-via-mcp-2026-11-09.md)
+  (den manuelle vej under *Plugins → Tilføj nyt → Upload* virker stadig og står i
+  [`repo-privat-2026-11-08.md`](docs/library/repo-privat-2026-11-08.md)).
 
 ## 8. Context-håndtering — samtalens vigtigste punkter
 
