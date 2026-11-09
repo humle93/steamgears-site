@@ -44,7 +44,7 @@ _Opdateret 2026-11-09 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 ### Næste skridt
 
 - **steamgears.eu — site-optimering** — Intet agent-arbejde tilbage i S0–S4: alle fem bands er færdige og målt, og de resterende poster er ejerens og navngivet i §4c og blocked_by. Målt 8/11: 24 produkter (20 publicerede, 4 kladder) i **DKK**. DKK-tabellen fra 2/11 er afregnet **række for række**: af de **38 rækker** (linje 32–69) har **11** et produkt i butikken og står med **tabellens tal ordret** (335/165/400/435/265/180 kr) — målt 11/11 på produktsiden, i JSON-LD, i Store API og i DB med 0 afvigelser — og de **27** øvrige har kun et produkt i **papirkurven** (offentligt 404), så de er dokumenteret som rækker uden produkt med id og status; 0 rækker er uafklarede, og de 13 produkter uden række har uændret pris med id og målt beløb dokumenteret. W3TC kører med **minify, lazy load og database-cache slået til** (192 minificerede filer, 8,08 MB) efter tre gennemførte testordrer (1528/1529/1530, alle annulleret med note); kurv og kasse svarer 200; fri fragt i DK og ingen forsendelse til EU/UK/RoW; Stripe + bankoverførsel; Complianz på EU opt-in. Alle resterende poster er ejerens og står nu samlet i §4d (A–M) med den målte mangel og én konkret handling; målt 8/11 om aftenen er der **ingen** poster tilbage som agenten kan udføre.
-- **steamgears.eu — miljø, server og sandbox (S5)** — Tilbage er fire poster, alle ejerens: sandkassen (S5.1, subdomæne + certifikat hos Simply), DKIM/DMARC (S5.7 — målt igen 9/11 efter ejerens melding: zonen er **uændret**, `_dmarc.steamgears.eu` er stadig en CNAME til `dmarc.simply.com` med Simplys egne `rua`/`ruf`, apex har kun SPF, og 34 DKIM-selektorer plus CNAME-pejl på otte svarer tomt), de sidste 0,05 d af S5.8 (gendannelse til staging — resten er målt på live 9/11 med 269/269 tabeller og RTO 6 s; værtens backup-politik ≥ 14 dage er stadig ikke dokumenteret) og branch protection (S5.9, GitHub svarer 403 »Upgrade to GitHub Pro«, målt 9/11). S5.7 lukkes af en TXT med butikkens egen adresse plus `v=DKIM1; k=rsa; p=…` på en selector.
+- **steamgears.eu — miljø, server og sandbox (S5)** — Tilbage er fire poster, alle ejerens: sandkassen (S5.1, subdomæne + certifikat hos Simply), DKIM/DMARC (S5.7 — målt igen 9/11 efter ejerens melding: zonen er **uændret**, `_dmarc.steamgears.eu` er stadig en CNAME til `dmarc.simply.com` med Simplys egne `rua`/`ruf`, apex har kun SPF, og 32 DKIM-selektorer plus CNAME-pejl på otte svarer tomt), de sidste 0,05 d af S5.8 (gendannelse til staging — resten er målt på live 9/11 med 269/269 tabeller og RTO 6 s; værtens backup-politik ≥ 14 dage er stadig ikke dokumenteret) og branch protection (S5.9, GitHub svarer 403 »Upgrade to GitHub Pro«, målt 9/11). S5.7 lukkes af en TXT med butikkens egen adresse plus `v=DKIM1; k=rsa; p=…` på en selector.
 - **Steamgears Autopilot — plugin** — Agent-scope er færdigt (31,00 af 31,00 d) og 7.65.5 kører nu på sitet. Det eneste åbne er P1.5's live-verifikation (0,6 d, ejer-blokeret): Pinterest-tokenet mangler `boards:read`, og fem kanaler mangler tokens.
 - **Dark academia-rebrand** — Kun to ting står tilbage: (1) **witchy-tarot** kan først få indhold når ejeren siger ja til at gendanne 567 (Tarot Witchy Tee) — og eventuelt 395/411 — fra papirkurven; derefter fylder `python3 tools/rebrand_apply.py --apply --via-cli` termen automatisk, fordi kortet allerede indeholder dem; (2) **Batch 4-mockups** (5 t) kræver Printful-adgang eller 5–8 færdige billeder pr. produkt.
 - **SEO-indholdsproduktion** — SEO-indholdet er 100 %: fire guides skrevet, tre publiceret, corset-guiden publiceret, 1410 parkeret til september. Ingen åbne poster.
@@ -54,12 +54,12 @@ _Opdateret 2026-11-09 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `8cbe50a S5.7: DKIM/DMARC meldt sat op — zonen svarer det samme`
 - `b1c9b50 Leverandørbrief til teleskopreolen: én låst spec, et svarsskema og GPSR som krav i første mail`
 - `543ff5d CI: backup-kørslen følger repoets runner- og action-valg`
 - `c4c82f0 chore(status): daglig projektstatus 2026-11-09`
 - `e704314 S5.11: backup-øvelsen er nu et månedligt værn med RTO og paritet som serie`
 - `a20f11c chore(rebrand): kørselsrapport for tildelingen`
-- `06d0fa5 CI'ens actions kører nu på Node 24 og en fast runner-image`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
@@ -68,7 +68,7 @@ _Opdateret 2026-11-09 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 Efter meldingen om at DKIM/DMARC var sat op hos Simply, blev posten målt igen med det samme. **Zonen er
 uændret:** alle tre autoritative navneservere svarer `_dmarc.steamgears.eu` → CNAME `dmarc.simply.com`, hvis TXT
-er Simplys egen politik (`rua`/`ruf` hos `dmarc@robot.simply.com`); apex har kun SPF; og 34 DKIM-selektorer plus
+er Simplys egen politik (`rua`/`ruf` hos `dmarc@robot.simply.com`); apex har kun SPF; og 32 DKIM-selektorer plus
 CNAME-pejl på otte svarer tomt. S5.7 står derfor stadig åben (0,15 d).
 
 Backup-delen blev også efterspurgt, men den er allerede lukket som agent-arbejde i samme døgn: `wp_db_drill.py`
