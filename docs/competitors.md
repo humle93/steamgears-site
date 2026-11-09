@@ -508,3 +508,36 @@ Ingen logget i DB (lav prio / allerede dækket af retailer-cluster-billede).
 1. **RANKING-BEREDSKAB FØRST: refresh /steampunk-costumes/ + /diy-steampunk-goggles/** — begge faldt ud af top-30 i nat. Frisk datostempel, udvidet intro, FAQ-blok (PAA-stil à la steampunkary), stærkere internt links fra nye artikler. Dette er højere prio end nyt indhold.
 2. **"Steampunk Gift Guide: What to Buy (and What Not To)"** — MSS claimte gift-intent 06/11 og kører nu BF-timer; vores version med Vol 2-tees + AE-gear + sg-buy og december 10-shipping-vinkel skal live ASAP.
 3. **"The Airship Captain's Wardrobe: Complete Look at Three Budgets"** — MR's frock-coat/tailcoat-expansion + steampunkary's aviator-guide presser Complete Look #1 fra to sider; vores version er den eneste med faktiske indkøbslinks.
+
+## Scan 2026-11-09
+### Frontend-observationer (fetch ~01:00-01:20 UTC, UA SteamgearsSiteBuilder/1.0)
+- **my-steampunk-style.com** — BF-countdown KØRER STADIG (endDate 2026-11-12T22:59Z) + "Early Black Friday Access" på forsiden. Blog-index: stadig 21 slugs (verificeret fuldt), ingen nye siden gift-guiden. (DB: række logget)
+- **steampunkary.com** — answers.json rebuilt 08/11 15:38, SAMME 554 items (384 unikke spørgsmål; 34 gift/budget-FAQer verificeret). Ny FAQ-cluster: "Gifts by Budget", "\$100 and Up: Gifts That Stay", "Steampunk Gifts for Her". Search-prompt afslører keyword-fokus: goggles, corsets, top hats. (DB: række logget)
+- **museumreplicas.com/steampunk** — Category-JSON bekræfter 67 produkter i steampunk-træet. Sword cane-familie udvidet (Knob/Lion Head/Viking Wolf/Scottish/Victorian, \$129.95-179.95) + Cybersteam Goggles \$19.95 + closeout på Peplum Blouse (\$19.95) og Regent Street Vest (\$34.95). Ingen nye SKU-navne vs. 08/11. (DB: række logget)
+- **vintagedancer.com** — Uændret split: www 403 (CF 1000), apex /steampunk/ 200 med 22 guide-URLs. Mens-essentials stadig datet 2015. (DB: række logget)
+- **steampunkhub.uk** — NY opdagelse: forside = 265 bytes SPA-shell (kun gtag + skip-link), alt indhold JS-renderet. Holdes dog #3 på costume guide. (DB: række logget)
+- **steampunkoutfits.com** — Uændret (dato 25/08). 15. dag uden content. EMD-clusteret sover fortsat. (DB: række logget)
+- **halloweencostumes.com** — Uge 4 frossen: 6x Clearance + "New Costumes for 2026", 0x black friday/christmas på steampunk-kategori. (DB: række logget)
+- Observer-status uændret: steampunkjournal.org (parked), brassgoggles.co.uk (TCP-timeout), steampunkgoggles.com/blog (død 2017), airshipambassador.com (statisk), darkknightarmoury.com (live, uændret kategoritræ).
+
+### SERP top-3 (web_search gl=us, 09/11)
+- **"steampunk costume guide"**: 1) steampunkfashionguide 2) writerlesleydonaldson 3) steampunkhub.uk. Også steampunkary/how-to-dress, historicalemporium, halloweencostumes, cnbeyer, psylofashion, steampunksetting, devilfashion. 🎯 **Steamgears TILBAGE i top-10: #8 (steampunk-costumes/)** + #28 sustainable-steampunk.
+- **"diy steampunk goggles"**: 1) upcycledesignlab 2) thewoodlandelf 3) amaco. Også geekdad 2013, WIRED 2012, instructables ×2, YouTube ×3, adafruit. 🎯 **Steamgears #8 (diy-steampunk-goggles/)** + #26 build/. Tekstformat-hullet består (top-5 = 2012-2013 + upcycling-niveau).
+- **"steampunk accessories"**: 1) my-steampunk-style 2) otherworldfashion 3) steampunkstyler. Også kinkyangel, sougolink-listicle, medievalcollectibles (NY), museumreplicas, antredesyria, thepiratedressing, steampunkwonders, steampunkwolf (NY). **Steamgears IKKE i top-30.**
+
+### Nye domæner → watchlist (4 logget i DB)
+- thedarkattitude.com — shop-blog, "Steampunk Style Explained" NY top-14 på costume guide
+- scoopmeadow.com — praktisk guide "without the costume shop" NY top-18
+- medievalcollectibles.com — stor retailer, dedikeret steampunk-kategori NY top-10 på accessories
+- steampunkstore.fr — europæisk shop med engelsk 2026-dated komplet guide, top-20
+
+### Keyword-signaler
+- ✅ RANKING-RECOVERY: begge vores hub-sider er tilbage i top-10 (costume #8, goggles #8) efter gårsdagens fald ud af top-30. Refresh-planen ser ud til at have virket — verificér i GSC i morges.
+- Accessories-SERP er nu ren retailer/EMD-cluster + medievalcollectibles ny — kommerciel intent dominerer; vi mangler en kategori/landingsside på /accessories.
+- MSS holder BF-fasen til 12/11; ary satsede på gift/budget-FAQer — gift-intent er nu clusterets fælles spoor.
+- steampunkhub.uk rangerer top-3 med en SPA-shell = SERP-kvaliteten på "first steampunk event"-intent er lav.
+
+### 3 indholdsmuligheder for steamgears.eu
+1. **"Steampunk Accessories: The Complete Checklist (With Real Prices)"** — accessories-SERP er ren retailer-cluster uden ét autoritativt checklist/listicle-format med priser; sougolink's 2023-listicle er det eneste indholdssignal. Vores 77-produkter-katalog + AE-gear kan fylde formatet med rigtige priser + sg-buy. Højeste prioritet: vi er ikke i top-30 her.
+2. **"Your First Steampunk Event: What to Wear, What to Expect"** — steampunkhub.uk's #3-position sidder på en SPA-shell uden stærkt indhold; ary's how-to-dress dækker kun outfit. Event-intent (ren faire, LARP, konventioner) er uudnyttet hos os.
+3. **"Steampunk Gifts by Budget: Under \$25, Under \$50, Under \$100"** — ary's nye FAQ-cluster ("Gifts by Budget", "\$100 and Up") + MSS's BF-timer = gift-budget-intent eskalerer før jul; vores version med Vol 2/3-tees + AE-gear + december-shipping-deadline bør live før 12/11.

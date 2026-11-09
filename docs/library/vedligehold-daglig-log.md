@@ -420,3 +420,17 @@
 - Alle kritiske plugins AKTIVE: WooCommerce 11.2.2, Stripe 11.1.1, Rank Math 1.0.281, W3TC 2.11.0, Complianz (gdpr+terms), Site Kit 1.191.0. GTM Kit stadig ikke i REST-listen (kendt; GA4 via Site Kit + GTM).
 - Ingen 5xx eller redirect-loops.
 - Konklusion: Drift/checkout GRØN, men 2 afvigelser (massiv plugin-oprydning + WPCode/AdSense-snippet inaktiv) → kort Henning-ping.
+
+## 09/11 2026 07:00 — Daglig drift/checkout-tjek
+
+- Forside + /shop/ 200 (browser-fetch; forside Atelier-layout med produkter/poster, /shop/ titel + produktgrid verificeret). Raw curl → WAF 454/456 som sædvanlig; REST krævede 1-2,5 minutters pauser (flere 456 før 200). /checkout/ tom kurv → redirect til /cart/ "Your cart is currently empty" — forventet.
+- Stripe gateway: enabled=true, **testmode=no (live)**, pk_live_51Ttlwg + sk_live til stede ✅ (via /wc/v3/payment_gateways). Aktive gateways: stripe (Card), stripe_amazon_pay, stripe_klarna, stripe_link + bacs.
+- Ordrer seneste 24h: **3 — alle cancelled Henning-test**, 0 fejlede betalinger:
+  - #1528 08/11 20:27 · USD 69,00 · Copper Pilot Goggles
+  - #1529 08/11 20:32 · DKK 395,00 · Clockwork Rose — Herbarium Art Print
+  - #1530 08/11 20:39 · DKK 395,00 · The Raven Chronometer — Herbarium Art Print
+  Alle "Test W3TC" <humle91@hotmail.com>, betalingsmetode bacs, created_via=store-api, cancelled. NB: to ordrer i **DKK** (tidligere USD-prissætning) — butikken lader til nu at være skiftet til DKK-priser (muligvis bevidst Henning-test i aften). Ingen rigtige live-ordrer endnu (seneste reelle stadig #873 27/10).
+- Plugins (24 total): alle kritiske AKTIVE — WooCommerce 11.2.2, Stripe 11.1.1, Rank Math 1.0.281, W3TC 2.11.0, Complianz 7.5.7 (gdpr+terms), Site Kit 1.191.0, Ads.txt Manager. Kanal-plugins aktive: Google for WooCommerce 3.10.0, Pinterest for WooCommerce 1.6.2, Novamira 1.12.15, AI Engine 3.9.2.
+- ⚠️ CARRY-OVER fra 08/11: **WPCode Lite (ihaf) stadig INAKTIV** — AdSense head-snippet-injektion muligvis stadig væk (ads.txt er OK og serverer nye pub-8388762344150338 via browser; snippet i HTML kunne ikke verificeres pga. WAF). MailPoet fortsat uninstalled (kendt funktions-tab fra 08/11). Ingen NYE ukendte/uklassificerede plugins siden i går — 08/11-oprydningen ser stabil ud.
+- Ingen 5xx eller redirect-loops.
+- Konklusion: Drift/checkout GRØN. Én carry-over-afvigelse (WPCode/AdSense-snippet) — allerede pinget i gårds mail (08/11); ingen ny mail i dag (ingen nye afvigelser ud over carry-over). DKK-notatet følger med i uge-recap/næste mail til Henning.
