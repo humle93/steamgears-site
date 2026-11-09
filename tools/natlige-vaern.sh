@@ -103,6 +103,12 @@ check "S5-måling (live)"                     python3 tools/s5_measure.py --stri
 # S5.9: promote-gaten. Preflighten er det eneste der står mellem et uheld og et
 # release-tag, så dens 24 fixtures kører hver nat — de rammer ikke git-historikken.
 check "release-gate (S5.9)"                  python3 tools/test_release.py
+# S5.11: backup-øvelsen var et engangstal (kørt 9/11). Fristen og tallene holdes op hver
+# nat: seneste kørsel må højst være 31 dage gammel, og den skal være grøn — 0
+# rækkeafvigelser, 0 mangler, 0 rester og RTO under budget. Historikken i
+# reports/db-drill-history.json gør RTO og paritet til en serie i stedet for ét tal.
+check "backup-øvelse-selftest"               python3 tools/db_drill_check.py --selftest
+check "backup-øvelse (frist + paritet)"      python3 tools/db_drill_check.py --strict
 # Fejlsøgning som fast punkt (P3.6): konsistens på tværs af filer — version mod zip,
 # zip mod kilde, includes, biblioteksindekset, tokens og tests der ikke kan fejle.
 # Om-mærkningen (S4): titler/kollektioner/billedkrav måles udefra — selftesten er offline og fanger

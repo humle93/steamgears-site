@@ -25,7 +25,7 @@ _Opdateret 2026-11-09 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 | Projekt | Status | Grundlag |
 | --- | --- | --- |
 | **steamgears.eu — site-optimering** | **100 %** | 20,95 af 20,95 d (S0 2,35/2,35 · S1 3,6/3,6 · S2 6,9/6,9 · S3 4,05/4,05 · S4 4,05/4,05) |
-| **steamgears.eu — miljø, server og sandbox (S5)** | **58,6 %** | 1,7 af 2,9 d (S5 1,7/2,9) |
+| **steamgears.eu — miljø, server og sandbox (S5)** | **60 %** | 1,8 af 3 d (S5 1,8/3) |
 | **Steamgears Autopilot — plugin** | **100 %** | 31 af 31 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25 · P1E 0,25/0,25 · P1F 0,25/0,25 · P1G 0,5/0,5 · P2F 1,5/1,5 · P3OPT 0,6/0,6 · P3JS 0,3/0,3 · P3LIVE 0,25/0,25) |
 | **Dark academia-rebrand** | **71,3 %** | 12,4 af 17,4 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5 · BATCH4 0,5/0,5 · GENTILDELING 0,4/0,4 · MOBIL-OG-SAESON 3/3) |
 | **SEO-indholdsproduktion** | **100 %** | 8 af 8 guides (BATCH 3/3 · COPY 4/4 · CORSET 1/1) |
@@ -54,15 +54,37 @@ _Opdateret 2026-11-09 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `a20f11c chore(rebrand): kørselsrapport for tildelingen`
+- `06d0fa5 CI'ens actions kører nu på Node 24 og en fast runner-image`
+- `91ea4e5 Niche 2 er regnet igennem: lejebolig-opbevaring bærer trafik, men kun over ca. 600 kr`
+- `1a6d341 Bil-interiør har fået sit eget repo, så planen ikke længere bor her`
+- `c6ad294 chore(status): daglig projektstatus 2026-11-09`
 - `09acb7c Bil-interiør valgt som niche — forberedelsen er regnet, ikke gættet`
-- `dd0ca40 chore(status): daglig projektstatus 2026-11-09`
-- `a7e3dee S5.8: backup og gendannelse øvet — 269 af 269 tabeller identiske`
-- `94fa623 ROI-modellen for en dropshipping-niche er nu et dokument, ikke en engangsberegning`
-- `076d464 S5: vejen til 100 % er fem ejerhandlinger, og DKIM-påstanden holdt ikke`
-- `74a5a78 docs: Jungle Scouts formål og brug — og hvad det ikke kan svare på`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 9/11 (nat) — øvelsen er nu et månedligt værn, ikke et engangstal
+
+**Beslutningen:** S5.8's tal (RTO 6 s, 269/269 tabeller) måler kun noget, hvis øvelsen bliver kørt igen. Derfor
+læser `tools/db_drill_check.py` nu historikken og kræver (a) at seneste kørsel er **højst 31 dage** gammel, med
+**3 dages varsel**, og (b) at den var **grøn**: 0 rækkeafvigelser, 0 mangler, 0 rester efter oprydning,
+ikke-tomt dump og **RTO under 300 s** (målt 6 s — budgettet skal fange en regression, ikke en dagsform).
+15 offline-fixtures dækker forfalden frist, én afvigelse, rester, langsom RTO, tomt dump, nul tabeller, korrupte
+kilder og trenden.
+
+**Historikken er ny:** `reports/db-drill-history.json` får én række pr. kørsel. Dagsfilen
+`reports/db-drill-<dato>.json` overskrives af en ny kørsel samme dag — det gjorde den 9/11, hvor anden kørsel
+kl. 05:07 gav 3 335 364 bytes / 4 s og samme RTO 6 s. Uden historikken ville det første tal være væk.
+
+**Kadencen:** værnet kører **hver nat** i `tools/natlige-vaern.sh` (fristen tælles ned dagligt), og
+`.github/workflows/backup-doelse.yml` kører den **1. i hver måned** og skriver trenden i job-summaryen.
+
+**Grænsen, som den er målt og ikke gættet:** kørslen kan ikke udføre øvelsen fra CI. Den kræver
+Novamira-MCP-adgang, og keep-alive-kørslen **roterer** refresh-tokenet — en fornyelse mere i en anden workflow
+ville slå begge kørsler ihjel. Arbejdsdelingen er derfor: natlig måling fejler når fristen er overskredet,
+månedskørsel varsler med den præcise kommando, og selve kørslen er en agenthandling. Automatisk udførelse kræver
+en databaseforbindelse uden om MCP — en ejerbeslutning.
 
 ### 9/11 (sen aften) — bil-interiør har fået sit eget repo, og det hedder `kabine`
 

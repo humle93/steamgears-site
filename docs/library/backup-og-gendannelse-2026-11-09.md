@@ -68,7 +68,42 @@ dump, gendannelse, paritet og oprydning alle er rene — og et gennemløb uden p
 
 Rapporten ligger i [`reports/db-drill-2026-11-09.json`](../../reports/db-drill-2026-11-09.json).
 
-## 4. Hvad der stadig mangler
+## 4. Et engangstal ældes — derfor er øvelsen nu et månedligt værn
+
+Øvelsen er kun et værn, hvis den bliver **kørt igen**. Et tal fra 9/11 siger intet om databasen i december:
+den vokser, og gendannelsestiden følger med. Derfor er kadencen og tallene nu maskinelle:
+
+- **Historikken** `reports/db-drill-history.json` får **én række pr. kørsel** (dato, klokkeslæt, dumpstørrelse,
+  gendannelsestid, tabeller, afvigelser, rester, dom). Dagsfilen `reports/db-drill-<dato>.json` overskrives af
+  en ny kørsel samme dag — historikken gør ikke, så RTO og paritet bliver en **serie** i stedet for ét tal.
+- **Værnet** [`tools/db_drill_check.py`](../../tools/db_drill_check.py) holder to ting op: **fristen** (seneste
+  kørsel må højst være **31 dage** gammel, med **3 dages varsel** i `--due`) og **tallene** (seneste kørsel skal
+  være `ok`, med 0 rækkeafvigelser, 0 manglende tabeller, 0 rester, ikke-tomt dump og **RTO under 300 s** — målt
+  6 s, så budgettet fanger en regression, ikke en dagsform). 15 offline-fixtures dækker forfalden frist, én
+  afvigelse, rester, for langsom RTO, tomt dump, nul tabeller, korrupte kilder og trenden.
+- **Kadencen** måles hver nat: `backup-øvelse-selftest` og `backup-øvelse (frist + paritet)` kører i
+  [`tools/natlige-vaern.sh`](../../tools/natlige-vaern.sh), så fristen tælles ned dagligt og ikke årligt. Den
+  **første i hver måned** kører [`.github/workflows/backup-doelse.yml`](../../.github/workflows/backup-doelse.yml)
+  og skriver trenden i job-summaryen — et varsel før fristen løber ud, ikke efter.
+
+**Anden målte kørsel, 9/11 kl. 05:07** (samme dag, ny kørsel — historikken har nu to datapunkter):
+
+| Kørsel | Dump | Gendannelse | Tabeller | Afvigelser | Rester |
+| --- | --- | --- | --- | --- | --- |
+| 9/11 04:2x | 3 338 987 B / 5 s | 6 s | 269 | 0 | 0 |
+| 9/11 05:07 | 3 335 364 B / 4 s | 6 s | 269 | 0 | 0 |
+
+Hele anden kørsel tog **16,5 s** inklusive oprydning. Forskellen i dumpstørrelse (3 538 bytes) er indhold,
+ikke metode — derfor er det historikken og ikke et enkelt tal, der skal vurderes.
+
+**Værnet kan ikke selv udføre øvelsen.** Den kræver en databaseforbindelse gennem Novamira-MCP, og det
+access-token findes kun i keep-alive-kørslen, som **roterer** refresh-tokenet — en fornyelse mere i en anden
+workflow ville slå de to kørsler ihjel. Derfor er arbejdsdelingen: den natlige kørsel **måler** fristen og
+fejler når den er overskredet, månedskørslen **varsler** med den præcise kommando, og selve kørslen er en
+agenthandling (`python3 tools/wp_db_drill.py`) med rapporten committet. Skal den også udføres automatisk, skal
+der findes en databaseforbindelse uden om MCP — det er en ejerbeslutning, ikke en kodeopgave.
+
+## 5. Hvad der stadig mangler
 
 - **Øvelsen ført til staging.** Uden S5.1 findes der ikke et isoleret sted at gendanne til, så beviset er
   »dumpet kan afspilles i samme database«, ikke »siden kører efter en gendannelse på en anden maskine«.
@@ -77,7 +112,7 @@ Rapporten ligger i [`reports/db-drill-2026-11-09.json`](../../reports/db-drill-2
 - **Tid til at flytte dumpet.** 3,3 MB gzip kan hentes gennem MCP, men værktøjet gør det ikke — en rigtig
   gendannelse på en anden maskine skal først have filen derover.
 
-## 5. Bilag: hvordan 7.65.5 kom på sitet
+## 6. Bilag: hvordan 7.65.5 kom på sitet
 
 Samme tur blev plugin'ets fire patch-versioner lagt på sitet — det kørte 7.65.0, repoet var 7.65.4, så
 P3.7's og P3.8's besparelser var bygget og grønne i CI uden at være i drift.

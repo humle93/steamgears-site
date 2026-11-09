@@ -1,0 +1,16 @@
+[
+ {
+  "dato": "2026-11-09",
+  "database": "steamgears_eu_db",
+  "legacy_tables_excluded": 12,
+  "dump_bytes": 3335364,
+  "restore_seconds": 6,
+  "rto_seconds": 6,
+  "tables_expected": 269,
+  "row_mismatches": 0,
+  "missing_tables": 0,
+  "left_behind": 0,
+  "ok": true,
+  "tidspunkt": "05:07"
+ }
+]

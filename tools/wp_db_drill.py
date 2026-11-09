@@ -190,6 +190,31 @@ def poll(directory: str, pid: str, timeout: int = 240) -> dict:
     return {"error": "timeout", "directory": directory}
 
 
+HISTORY = ROOT / "reports" / "db-drill-history.json"
+
+
+def append_history(report: dict, path: pathlib.Path | None = None, keep: int = 120) -> None:
+    """Én række pr. kørsel, så RTO og paritet bliver en serie — også to kørsler samme dag.
+
+    Dagsfilen ``reports/db-drill-<dato>.json`` overskrives ved en ny kørsel samme dag;
+    historikken gør det ikke, og ``tools/db_drill_check.py`` læser den først.
+    """
+    path = path or HISTORY
+    rows: list = []
+    if path.exists():
+        try:
+            loaded = json.loads(path.read_text(encoding="utf-8"))
+            rows = loaded if isinstance(loaded, list) else []
+        except ValueError:
+            rows = []  # en korrupt historik må ikke koste dagens måling
+    rows.append({key: report.get(key) for key in (
+        "dato", "database", "legacy_tables_excluded", "dump_bytes", "restore_seconds", "rto_seconds",
+        "tables_expected", "row_mismatches", "missing_tables", "left_behind", "ok")})
+    rows[-1]["tidspunkt"] = time.strftime("%H:%M")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(rows[-keep:], ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="Backup- og gendannelsesøvelse (S5.8)")
     ap.add_argument("--json", action="store_true", help="kun JSON til stdout")
@@ -240,6 +265,7 @@ def main() -> int:
     out_path = ROOT / args.out
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(report, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    append_history(report)
 
     if args.json:
         print(json.dumps(report, ensure_ascii=False, indent=1))

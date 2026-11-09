@@ -124,6 +124,16 @@ Reglen over holdes automatisk, så lidt som muligt afhænger af hukommelse:
   (`setsid nohup bash tools/keepalive-loop.sh 3480 &`) — den dækker kun mens worktreen kører.
   Opsætning og fælder: [`docs/mcp-auth.md`](docs/mcp-auth.md) → Novamira.
 
+- **Månedlig backup-øvelse** (`.github/workflows/backup-doelse.yml`): øvelsen i `tools/wp_db_drill.py` blev kørt
+  9/11 og beviste at dumpet kan afspilles — men et engangstal ældes. Værnet
+  [`tools/db_drill_check.py`](tools/db_drill_check.py) kræver at seneste kørsel er højst **31 dage** gammel og grøn
+  (0 rækkeafvigelser, 0 mangler, 0 rester, RTO under **300 s**), med **3 dages varsel** i `--due` og 15
+  offline-fixtures. Det kører **hver nat** i [`tools/natlige-vaern.sh`](tools/natlige-vaern.sh), så fristen tælles
+  ned dagligt, og den **1. i hver måned** kører workflowen og skriver trenden i job-summaryen. Øvelsen skriver én
+  række pr. kørsel til `reports/db-drill-history.json`, så RTO og paritet er en serie og ikke ét tal. Kørslen
+  **udfører ikke selv øvelsen**: den kræver MCP-adgang, og keep-alive-kørslen roterer refresh-tokenet, så en ekstra
+  fornyelse ville slå begge kørsler ihjel — selve kørslen er derfor en agenthandling med rapporten committet.
+
 - **Commit-besked-værnet** ([`tools/commit_check.py`](tools/commit_check.py)): reglen i §1 bliver kontrolleret
   maskinelt på tre flader — `--message-file` er **commit-msg-hooken** (`python3 tools/commit_check.py --install`,
   som [`tools/setup-agent-tools.sh`](tools/setup-agent-tools.sh) også kører), `--range A..B` tjekker de commits

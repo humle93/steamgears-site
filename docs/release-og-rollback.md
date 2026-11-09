@@ -139,6 +139,13 @@ Tre ting skal man vide før man bruger den i en krise:
 3. **Visninger står i `information_schema` som tabeller.** `DROP TABLE` fejler på dem, så en oprydning der
    kun bruger `DROP TABLE` efterlader dem — de skal droppes med `DROP VIEW` (4 i denne database).
 
+**Kadencen holdes maskinelt.** `python3 tools/db_drill_check.py --strict` kræver at seneste kørsel er højst
+**31 dage** gammel og grøn (0 afvigelser, 0 mangler, 0 rester, RTO under **300 s**); den kører hver nat i
+`tools/natlige-vaern.sh`, og `.github/workflows/backup-doelse.yml` kører den 1. i måneden med trenden i
+job-summaryen. Øvelsen skriver én række pr. kørsel til `reports/db-drill-history.json`, så RTO og paritet kan
+ses over tid. Selve kørslen er stadig en agenthandling: den kræver MCP-adgang, og keep-alive-kørslen roterer
+refresh-tokenet, så en ekstra fornyelse i CI ville ødelægge adgangen.
+
 En gendannelse er stadig en beslutning: prefix-bytte ændrer også data (fx `{prefix}user_roles` i `options`),
 så en afspilning beviser at dumpet er komplet — ikke at siden ville virke urørt i produktion.
 

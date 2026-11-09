@@ -1,0 +1,93 @@
+name: Månedlig backup-øvelse (S5.8)
+
+# Øvelsen i tools/wp_db_drill.py beviste 9/11 2026 at dumpet kan afspilles: 269 af 269
+# tabeller identiske, RTO 6 s. Et engangstal ældes — derfor holder kørslen her fristen op
+# den 1. i hver måned, før den 31-dages frist løber ud, og skriver trenden i job-summaryen.
+#
+# Kørslen **udfører ikke selv øvelsen**: den kræver en databaseforbindelse gennem
+# Novamira-MCP, og det access-token findes kun i keep-alive-kørslen (som roterer
+# refresh-tokenet — en anden fornyelse her ville slå de to kørsler ihjel). Det daglige
+# værn `backup-øvelse (frist + paritet)` i tools/natlige-vaern.sh er derfor den daglige
+# måling, og denne kørsel er månedens varsel med den præcise kommando i annotationen.
+#
+# Kør i hånden: Actions → "Månedlig backup-øvelse (S5.8)" → Run workflow.
+
+on:
+  schedule:
+    # Den 1. i måneden, 05:00 UTC (06/07 dansk tid — sommertid rykker kun timen).
+    - cron: '0 5 1 * *'
+  workflow_dispatch:
+  push:
+    # Ændres værnens logik, prøves den med det samme i stedet for først til næste måned.
+    paths:
+      - .github/workflows/backup-doelse.yml
+      - tools/db_drill_check.py
+      - tools/wp_db_drill.py
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backup-doelse
+  cancel-in-progress: false
+
+jobs:
+  frist:
+    name: Frist, rækkeparitet og RTO
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Offline selftest af værnet
+        run: python3 tools/db_drill_check.py --selftest
+
+      - name: Mål fristen og tallene
+        id: maal
+        run: |
+          set -uo pipefail
+          python3 tools/db_drill_check.py --strict --json > drill.json
+          kode=$?
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          d = json.load(open("drill.json", encoding="utf-8"))
+          print("## Backup-øvelse (S5.8)\n")
+          if d.get("last_run"):
+              print(f"Seneste kørsel **{d['last_run']}** — {d['age_days']} dage siden · "
+                    f"næste senest **{d['next_due']}** ({d['days_left']} dage tilbage)\n")
+          print("| Kontrol | Dom | Detalje |\n| --- | --- | --- |")
+          for c in d["checks"]:
+              print(f"| {c['navn']} | {'✓' if c['ok'] else '✗'} | {c['detalje']} |")
+          for p in d["problems"]:
+              print(f"| kilden kan ikke læses | ✗ | {p} |")
+          PY
+          cat drill.json
+          if [ "$kode" -ne 0 ]; then
+            echo "::error title=Backup-øvelsen er forfalden eller ikke grøn::Kør 'python3 tools/wp_db_drill.py' (kræver Novamira-adgang) og commit reports/db-drill-<dato>.json. Se docs/release-og-rollback.md §3.3."
+            exit 1
+          fi
+          python3 tools/db_drill_check.py --due || kode=$?
+          if [ "$kode" -eq 3 ]; then
+            echo "::warning title=Backup-øvelsen forfalder snart::Næste øvelse skal være kørt senest $(python3 -c "import json;print(json.load(open('drill.json',encoding='utf-8'))['next_due'])"). Kør 'python3 tools/wp_db_drill.py' og commit rapporten."
+          fi
+          exit 0
+
+      - name: Vis trenden over kørsler
+        if: always()
+        run: |
+          {
+            echo ""
+            echo "### RTO og rækkeparitet over tid"
+            echo ""
+            python3 tools/db_drill_check.py | sed -n '/^| Kørsel/,$p'
+            echo ""
+            echo "Kilden er \`reports/db-drill-history.json\` (én række pr. kørsel) og"
+            echo "\`reports/db-drill-<dato>.json\`. Øvelsen køres med"
+            echo "\`python3 tools/wp_db_drill.py\`; hvad den gør, og de tre fælder, står i"
+            echo "[docs/release-og-rollback.md](../blob/main/docs/release-og-rollback.md) §3.3."
+          } >> "$GITHUB_STEP_SUMMARY"
