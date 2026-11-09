@@ -25,8 +25,8 @@ _Opdateret 2026-11-09 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 | Projekt | Status | Grundlag |
 | --- | --- | --- |
 | **steamgears.eu — site-optimering** | **100 %** | 20,95 af 20,95 d (S0 2,35/2,35 · S1 3,6/3,6 · S2 6,9/6,9 · S3 4,05/4,05 · S4 4,05/4,05) |
-| **steamgears.eu — miljø, server og sandbox (S5)** | **41,4 %** | 1,2 af 2,9 d (S5 1,2/2,9) |
-| **Steamgears Autopilot — plugin** | **100 %** | 29,85 af 29,85 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25 · P1E 0,25/0,25 · P1F 0,25/0,25 · P1G 0,5/0,5 · P2F 1,5/1,5) |
+| **steamgears.eu — miljø, server og sandbox (S5)** | **51,7 %** | 1,5 af 2,9 d (S5 1,5/2,9) |
+| **Steamgears Autopilot — plugin** | **100 %** | 30,45 af 30,45 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25 · P1E 0,25/0,25 · P1F 0,25/0,25 · P1G 0,5/0,5 · P2F 1,5/1,5 · P3OPT 0,6/0,6) |
 | **Dark academia-rebrand** | **69,7 %** | 11,5 af 16,5 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5 · BATCH4 0,5/0,5 · GENTILDELING 0,4/0,4 · MOBIL-OG-SAESON 2,1/2,1) |
 | **SEO-indholdsproduktion** | **100 %** | 8 af 8 guides (BATCH 3/3 · COPY 4/4 · CORSET 1/1) |
 | **Døde internlinks** | **100 %** | 39 af 39 links (FIX 39/39) |
@@ -51,12 +51,12 @@ _Opdateret 2026-11-09 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
-- `2072eda Mobilen er ryddet op: kompakt header, rigtig menu og årstidsfarver`
-- `aaa8362 S5.9: promote-gate, manuelt release-trin og skrevet rollback-rutine`
-- `5e971ab S5.3–S5.6 kodet og testet: hardning klar til upload, måling gjort kørbar`
-- `1c32fc7 Køreplanen kørt mod sitet: 13 af 27 krav opfyldt, S5 tilføjet roadmappet`
-- `03027c3 Begge roadmaps målt igen: fem forældede påstande rettet og tretten ejerpunkter navngivet`
-- `903c103 Server- og sandbox-forhold tilføjet guiden for nye WordPress-sites`
+- `45f4e1e S5.3-S5.6 er lagt på sitet og målt, og desktop er set ved 1280 px`
+- `f208619 snapshot: renoveret header/footer template-parts live-hentet 08/11 (Codebuff-rebrand)`
+- `214a6c6 docs snapshot 09/11 (competitors, vedligehold+drive-watch logs, daily brief 08/11)`
+- `4f4d6c3 chore(status): daglig projektstatus 2026-11-08`
+- `5b6462e Admin-UI: CSS og JS ud af <head>, 41,8 KB mindre pr. side og fire UI-rettelser`
+- `29715cb chore(status): daglig projektstatus 2026-11-08`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
@@ -105,6 +105,13 @@ punkt erklæres ejer-blokeret.
 
 Bevis: [library/bredt-layout-og-hardning-2026-11-09.md](library/bredt-layout-og-hardning-2026-11-09.md)
 og [reports/s5-status-2026-11-09.md](../reports/s5-status-2026-11-09.md).
+
+**S5.2 blev også lukket, og den havde samme fejl i sig:** »kan ikke afgøres udefra«. Læst gennem
+`novamira/execute-php` står `WP_DEBUG=false`, `WP_ENVIRONMENT_TYPE=production`, `DISABLE_WP_CRON=true`,
+object cache med begge drop-ins og ingen debug-log. To afvigelser: `DISALLOW_FILE_EDIT` var **ikke
+defineret**, så tema- og plugin-editoren stod åben i wp-admin — den er nu sat til `true` med atomisk
+skrivning af `wp-config.php` og læst tilbage; `WP_DEBUG_DISPLAY` er `true`, men virkningsløs mens
+`WP_DEBUG` er `false`, og er ikke rørt.
 
 ### 8/11 — mobilen var bygget til desktop, og tre ting fik siden til at ryste
 

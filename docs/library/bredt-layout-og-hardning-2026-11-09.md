@@ -86,6 +86,29 @@ række, exit 0 nu (målt to gange i træk).
 Det var fristelsen at koble den på før udrulningen, så den ikke var rød hver nat af en kendt mangel.
 Nu er rækkefølgen den rigtige: udrulning, måling, værn.
 
+### 2.3 Produktionskonfigurationen var heller ikke utilgængelig (S5.2)
+
+S5.2 stod som »ingen af dem kan afgøres udefra (0 secrets, intet token i sandkassen), så køreplanens
+baseline er i dag en antagelse«. Den var forkert på samme måde som S5.3–S5.6. Læst gennem
+`novamira/execute-php`:
+
+| Konstant | Målt 9/11 | Baseline |
+| --- | --- | --- |
+| `WP_DEBUG` | `false` | `false` ✓ |
+| `WP_DEBUG_DISPLAY` | `true` | `false` — **afvigelse**, men virkningsløs mens `WP_DEBUG` er `false` |
+| `WP_DEBUG_LOG` | `false` | ingen logfil, så intet kan ligge i webroot ✓ |
+| `DISALLOW_FILE_EDIT` | **ikke defineret** | `true` — **afvigelse**, rettet |
+| `WP_ENVIRONMENT_TYPE` | `production` | `production` ✓ |
+| `DISABLE_WP_CRON` | `true`, og cron-arrayet findes | ✓ |
+| Object cache | `wp_using_ext_object_cache() = true`, `object-cache.php` og `db.php` på plads | ✓ |
+
+Afvigelsen var ikke kosmetisk: uden `DISALLOW_FILE_EDIT` står tema- og plugin-editoren åben i wp-admin, så
+en kompromitteret admin-konto kan skrive PHP direkte i temaet. Konstanten er nu sat i `wp-config.php` med
+**atomisk skrivning** (temp-fil + `rename` i samme mappe, så filen aldrig læses halvt), backup i
+`sys_get_temp_dir()`, 4 264 → 4 398 bytes, og målt tilbage: konstanten er `true`, `/` og `/shop/` svarer 200.
+`WP_DEBUG_DISPLAY` er bevidst **ikke** rørt — den linje er hostens, og med `WP_DEBUG = false` har den ingen
+virkning; den bør sættes til `false` den dag debug slås til.
+
 ## 3. Ejerpunktet der ikke var et ejerpunkt
 
 Plugin-roadmappet §8.8 stod som ejer-blokeret: »kun ejeren kan lukke«: `alert_email` er tom, så »fejl registreres i

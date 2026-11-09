@@ -65,10 +65,10 @@
         {
           "id": "s5",
           "name": "S5 — miljø, server og sandbox",
-          "done": 1.2,
+          "done": 1.5,
           "total": 2.9,
           "unit": "d",
-          "note": "1,20 af 2,90 d — fem poster er ✅ med målt bevis, resten er ejerens. 9/11: S5.3 (0,30), S5.4 (0,20), S5.5 (0,15) og S5.6 (0,30) blev lagt på sitet som wp-content/mu-plugins/sgap-hardening.php (12 558 bytes, md5 lig repoets, 44 offline-assertions) og målt udefra: s5_measure.py gik fra 8 opfyldt · 11 mangler til 19 opfyldt · 0 mangler (users 404, ?author=→apex, forfatterarkiv noindex, XML-RPC 403, REST max-age 60, readme 404, fire headere på alle fire sider). Tre cache-fund: W3TC svarede uden om PHP så headerne manglede på cachede sider (løst i .htaccess), en slettet readme.html blev afspillet med 200 fra cachen, og pgcache.cache.404 = true fik enhver ukendt URL til at svare 200 ved andet kald (nu false, målt 404 to gange). S5.10 (0,25) er koblet på som værn: tools/s5_measure.py --strict kører i tools/natlige-vaern.sh og giver exit 0. Den tidligere note krediterede kodede men ikke-udrullede poster; tallet er derfor regnet om fra rækkernes egne estimater. Tilbage: S5.1 0,75 (sandkassen), S5.2 0,30 (MCP-læsning), S5.7 0,15, S5.8 0,25 og S5.9 0,25.",
+          "note": "1,20 af 2,90 d — fem poster er ✅ med målt bevis, resten er ejerens. 9/11: S5.3 (0,30), S5.4 (0,20), S5.5 (0,15) og S5.6 (0,30) blev lagt på sitet som wp-content/mu-plugins/sgap-hardening.php (12 558 bytes, md5 lig repoets, 44 offline-assertions) og målt udefra: s5_measure.py gik fra 8 opfyldt · 11 mangler til 19 opfyldt · 0 mangler (users 404, ?author=→apex, forfatterarkiv noindex, XML-RPC 403, REST max-age 60, readme 404, fire headere på alle fire sider). Tre cache-fund: W3TC svarede uden om PHP så headerne manglede på cachede sider (løst i .htaccess), en slettet readme.html blev afspillet med 200 fra cachen, og pgcache.cache.404 = true fik enhver ukendt URL til at svare 200 ved andet kald (nu false, målt 404 to gange). S5.10 (0,25) er koblet på som værn: tools/s5_measure.py --strict kører i tools/natlige-vaern.sh og giver exit 0. Den tidligere note krediterede kodede men ikke-udrullede poster; tallet er derfor regnet om fra rækkernes egne estimater. Tilbage: S5.1 0,75 (sandkassen), S5.2 0,30 (MCP-læsning), S5.7 0,15, S5.8 0,25 og S5.9 0,25. 9/11 (S5.2, 0,30 d): produktionskonfigurationen er læst gennem novamira/execute-php — WP_DEBUG=false, WP_ENVIRONMENT_TYPE=production, DISABLE_WP_CRON=true, ext. object cache true med object-cache.php og db.php, WP_DEBUG_LOG=false. To afvigelser: DISALLOW_FILE_EDIT var ikke defineret (editoren stod åben i wp-admin) og er nu sat til true i wp-config.php med atomisk skrivning og backup; WP_DEBUG_DISPLAY er true, men virkningsløs så længe WP_DEBUG er false, og er ikke rørt. Tilbage er kun S5.1 (0,75), S5.7 (0,15), S5.8 (0,25) og S5.9 (0,25).",
           "verified": false
         }
       ]
@@ -1780,6 +1780,15 @@
       "after": 100.0,
       "delta": 0,
       "basis": "1 af 1 d (Plan-motor: arketyper, priser, sider 0,3/0,3 · Kladde-udrulning og rollback 0,25/0,25 · Admin-side, REST og fire evner 0,2/0,2 · Tests, zip og dokumentation 0,1/0,1 · Kørsel mod rigtig WooCommerce 0,15/0,15)"
+    },
+    {
+      "date": "2026-11-09",
+      "project": "steamgears.eu — miljø, server og sandbox (S5)",
+      "module": "daglig måling",
+      "before": 41.4,
+      "after": 51.7,
+      "delta": 10.3,
+      "basis": "1,5 af 2,9 d"
     }
   ]
 }
