@@ -1,8 +1,9 @@
 # `/go/`-links og guide-copy — målt 9/11 2026
 
-> **Rettet samme dag.** Copyfilerne er nu skrevet om til den levende butiks katalog og valuta: 13 levende
-> `/go/`-id'er, DKK-priser og genberegnede totaler. `python3 tools/guide_check.py` (uden flag) melder
-> **0 døde id'er og 0 valutaafvigelser** for alle fire guides, og værnet fejler fortsat på den gamle fil — se §7.
+> **Rettet samme dag — og dækningen udvidet bagefter.** Copyfilerne er skrevet om til den levende butiks
+> katalog og valuta: **15 levende `/go/`-id'er**, DKK-priser og genberegnede totaler. `python3 tools/guide_check.py`
+> (uden flag) melder **0 døde id'er og 0 valutaafvigelser** for alle **seks copy-blokke i fem filer** — også
+> hub-copyen og outfit-siden, som ingen værn målte før. Værnet fejler fortsat på den gamle fil — se §7.
 > Tabellerne nedenfor er målingen **før** rettelsen og står som dokumentation for fejlen, ikke som status.
 
 De tre publicerede guides (1357, 1361, 1359) er rene: hvert produktlink peger på et produkt butikken
@@ -52,7 +53,8 @@ siden bærer to links, begge levende, mens `docs/library/guides-2026-11-03-corse
 
 ## 3. Repo-copyen: tolv døde id'er
 
-Målt med det nye `--live`-værn i `tools/guide_check.py` mod `docs/library/guides-*.md`:
+Målt med det nye live-værn i `tools/guide_check.py` mod de daværende `docs/library/guides-*.md` (målingen er
+fra før rettelsen og er historisk):
 
 | `/go/`-id | Butikken | Brugt i |
 | --- | --- | --- |
@@ -85,23 +87,30 @@ side der virker.
 ## 5. Det nye værn
 
 ```bash
-python3 tools/guide_check.py --live
+python3 tools/guide_check.py              # finder hver copyfil, måler mod butikken, fejler på døde id'er
+python3 tools/guide_check.py --coverage   # viser hvad der er copy, og hvad der ikke er (med grund)
+python3 tools/guide_check.py --offline    # kun de lokale regler; til miljøer uden netværk
 ```
 
-- Hvert `/go/<id>/` i `docs/library/guides-*.md` slås op i Store API.
-- **404** er en fejl, med id og hvilke guides der bruger det.
-- Et id der **ikke kan måles** (netværk, WAF, 5xx) er en **advarsel** — aldrig et «bestået».
-- Prissætter butikken i **DKK**, mens copyen regner i `$`, er det en fejl: hvert beløb og hvert total er
-  så forkert for kunden, uanset hvor rigtigt det var den dag det blev skrevet.
-- Fire fixtures i `--selftest` beviser at både det døde id, valuta-skredet og den umålelige butik fanges
-  (15/15 grønne).
+- **Dækningen følger fil-sættet.** En fil er copy, hvis den bærer husets markører (`**H1:**` eller
+  Rank Math-tabellen) — den bliver målt uanset filnavn. Det er derfor hub-copyen og outfit-siden nu er med:
+  før kiggede værnet kun på `docs/library/guides-*.md`.
+- **Ingen fil kan ligge uden for.** En fil under `docs/` med `/go/<id>/`-links eller 20+ prismålinger, som
+  hverken er copy eller står i registeret `IKKE_COPY` med en grund, får kørslen til at fejle. Registeret er
+  de dokumenter der med vilje citerer gamle tal (link-planen fra 3/11, USD-prislisterne, logfilerne).
+- Hvert `/go/<id>/` slås op i Store API. **404** er en fejl, med id og hvilken fil der bruger det. Et id der
+  **ikke kan måles** (netværk, WAF, 5xx) er en **advarsel** — aldrig et «bestået».
+- Prissætter butikken i **DKK**, mens copyen regner i `$`, er det en fejl.
+- **24 fixtures** i `--selftest` beviser at døde id'er, valuta-skred, forkerte totaler og uklassificerede
+  filer alle bliver fanget.
 
-Det kører **ikke** i den natlige kontrol, fordi det kræver netværk; det køres i hånden før en publicering.
+Netværkskaldet er **standard**, og det kører i den natlige værn-kørsel (`tools/natlige-vaern.sh`).
 
 ## 6. Konsekvens og næste skridt
-Copyen er nu publiceringsklar på butikkens egne vilkår. Fire filer er skrevet om —
-`guides-2026-11-03.md` (292, 296, 295), `guides-2026-11-03-corset.md` (1394) og hub-copyen
-`hub-steampunk-costumes-2026-11-03.md` (side 550) — med disse tal, alle læst i Store API 9/11:
+Copyen er nu publiceringsklar på butikkens egne vilkår. Fem filer er skrevet om —
+`guides-2026-11-03.md` (292, 296, 295), `guides-2026-11-03-corset.md` (1394), hub-copyen
+`hub-steampunk-costumes-2026-11-03.md` (side 550) og outfit-siden
+`steampunk-outfit-ideas-for-women.md` (post 699) — med disse tal, alle læst i Store API 9/11:
 
 | Fil | Produkter | Total |
 | --- | --- | ---: |
@@ -110,13 +119,14 @@ Copyen er nu publiceringsklar på butikkens egne vilkår. Fire filer er skrevet 
 | Women's essentials (295) | 489 · 491 · 477 · 483 · 495 · 493 · 413 · 954 · 965 · 940 | **4.160,00 kr.** |
 | Corset (1394) | 489 · 491 · 477 · 483 · 495 · 493 · 954 · 940 · 965 · 557 | **4.005,00 kr.** |
 | Hub (550) | de ti fra men's essentials | **3.370,00 kr.** |
+| Outfit (699) | tolv looks af 477 · 483 · 489 · 491 · 493 · 495 · 399 · 403 · 557 · 940 · 965 · 967 · 1282 | **500–1.300,00 kr.** |
 
 Prisgrundlaget er [`priser-live-2026-11-09.md`](priser-live-2026-11-09.md), som nu er den **eneste** kilde
 `guide_check.py` læser — de gamle USD-lister fra 2.–3/11 kan ikke længere bruges som facit.
 
 ## 7. Sådan kan fejlen ikke komme igen
 
-`tools/guide_check.py` fejler nu på fire måder, der alle er dækket af fixtures i `--selftest` (16/16):
+`tools/guide_check.py` fejler nu på disse måder, alle dækket af fixtures i `--selftest` (24/24):
 
 | Regel | Fixture |
 | --- | --- |
@@ -126,6 +136,10 @@ Prisgrundlaget er [`priser-live-2026-11-09.md`](priser-live-2026-11-09.md), som 
 | et total der ikke er summen af sine dele | «forkert total fanges» |
 | butikken svarer i en anden valuta end copyen | «valuta-skred fanges» |
 | butikken kan ikke måles (5xx/netværk) | «umålbar butik bliver advarsel, ikke bestået» |
+| en copyfil uden for `guides-*.md` (hub, outfit) | «enkeltside uden slug og hub består» |
+| en side-copy der stadig er i `$` | «enkeltside med dollar fanges» |
+| en fil med `/go/`-links som ingen værn kender | «uklassificeret fil med /go/-link fanges» |
+| en gammel prisliste der gemmer sig som dokumentation | «uklassificeret fil med mange priser fanges» |
 
 Netværkskaldet er **standard**, ikke et flag: den gamle fil blev kørt igen som kontrol og gav `FAIL` på alle
 tre guides plus `DØD /go/475/ → 404`. `--offline` findes kun til miljøer uden netværk.

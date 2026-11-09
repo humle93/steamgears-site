@@ -303,8 +303,8 @@
     {
       "id": "seo",
       "name": "SEO-indholdsproduktion",
-      "next": "Indsæt copyen i 292/296/295 og side 550 med fotos, Rank Math-felter og FAQPage-schema; kør python3 tools/guide_check.py som efterkontrol. Publiceringen kræver ejerens OAuth-godkendelse af MCP eller et WordPress application password — der findes ingen credential i sandkassen.",
-      "blocked_by": "Publicering kræver ejerens skriveadgang: post 292, 296 og 295 er kladder, og side 550 skal have den nye hub-copy. Copyen er færdig og målt — hvert /go/-id findes i butikken (13 unikke, 0 døde), og hvert beløb er i DKK efter docs/library/priser-live-2026-11-09.md. Mangler: to egne fotos pr. guide, Rank Math-felter og schema, og et MCP-token som kun ejeren kan godkende.",
+      "next": "Indsæt copyen i 292/296/295, side 550 og post 699 med fotos, Rank Math-felter og FAQPage-schema, og skift 699's dollartekst til kroner; kør derefter python3 tools/guide_check.py som efterkontrol. Publiceringen kræver ejerens OAuth-godkendelse af MCP eller et WordPress application password — der findes ingen credential i sandkassen.",
+      "blocked_by": "Publicering kræver ejerens skriveadgang: post 292, 296 og 295 er kladder, side 550 skal have hub-copyen, og post 699 skal have outfit-copyen — den publicerede side viser stadig «Prices are in USD». Copyen er færdig og målt (15 unikke /go/-id'er, 0 døde, 0 valutaafvigelser), og værnet dækker nu alle fem copyfiler. Mangler: to egne fotos pr. guide og pr. look, og et MCP-token som kun ejeren kan godkende.",
       "modules": [
         {
           "id": "batch",
@@ -344,10 +344,13 @@
         },
         {
           "id": "dkk",
-          "name": "Guide-copy i DKK mod den levende butik (292, 296, 295, 1394)",
-          "done": 4,
-          "total": 4,
-          "unit": "guides"
+          "name": "Guide-copy i DKK mod den levende butik (292, 296, 295, 1394, 699)",
+          "done": 5,
+          "total": 5,
+          "unit": "guides",
+          "label": "Guide-copy i DKK mod den levende butik (292, 296, 295, 1394, 699)",
+          "note": "fem copyfiler skrevet om til butikkens DKK-katalog og målt 9/11: guides-2026-11-03.md (3 blokke), corset, hub (550) og outfit-siden (699); 15 unikke /go/-id'er, 0 døde, 0 valutaafvigelser, 207 beløb holdt op mod priser-live-2026-11-09.md",
+          "verified": true
         }
       ],
       "verified": true

@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
-"""Værn for guide-copy: tjekker docs/library/guides-*.md mod SEO-skabelonen og den LEVENDE butik.
+"""Værn for al copy i repoet: finder hver copyfil, tjekker den mod SEO-skabelonen og den LEVENDE butik.
+
+Dækningen følger fil-sættet, ikke en håndholdt liste: en fil er copy, hvis den bærer husets copy-markører
+(`**H1:**` eller Rank Math-tabellen), og den bliver målt med det samme — uanset hvad den heder. En fil med
+`/go/<id>/`-links eller 20+ prismålinger, som hverken er copy eller står i registeret `IKKE_COPY` med en grund,
+fejler kørslen: så kan en ny copyfil ikke ligge uden for værnene, og en gammel prisliste kan ikke gemme sig som
+"bare dokumentation".
 
 Reglerne der kontrolleres, står i docs/seo.md §1 og §3:
 
@@ -94,6 +100,91 @@ def known_prices() -> set:
     return prices
 
 
+# --------------------------------------------------------------------------- dækning
+#
+# Copy findes på indhold, ikke på filnavn: husets skabelon kræver `**H1:**` og Rank Math-tabellen, og en fil der
+# har dem, er copy der skal kunne publiceres. Alt andet med /go/-links eller mange priser skal stå herunder med
+# en grund — ellers ved værnene ikke om filen er gældende copy eller et historisk dokument, og så fejler de.
+
+# Markørerne skal stå i starten af en linje: en dokumentation der *nævner* `**H1:**` indvendigt i en sætning
+# er ikke copy, men en fil der har markøren som sin egen linje er det.
+COPY_MARKERS = (r"(?m)^\*\*H1:\*\*", r"(?m)^\| \*\*Rank Math title\*\* \|")
+MONEY_HEAVY = 20   # antal prismålinger der gør en fil til noget værnene skal kende
+
+IKKE_COPY = {
+    "docs/library/guide-links-aeldre-2026-11-03.md": "link-plan fra 3/11; planens id'er er siden slettet",
+    "docs/library/guide-links-live-2026-11-05.md": "måling af planen 5/11, ikke en status nu",
+    "docs/library/priser-fra-store-api-2026-11-03.md": "prismåling 3/11 i USD, erstattet af priser-live",
+    "docs/library/valuta-og-priser-2026-11-02.md": "den gamle USD-pristabel, historisk",
+    "docs/library/w3tc-og-valuta-2026-11-08.md": "afregning af valutaen 8/11, citerer begge valutaer",
+    "docs/library/guide-udkast-27-10-promo-kit.md": "annonce-kit fra 27/10 med datidens USD-priser",
+    "docs/library/guide-udkast-27-10-research.md": "research fra 27/10, citerer datidens priser",
+    "docs/library/deploy-playbook-2026-11-08.md": "playbook med eksempel-links, ikke copy",
+    "docs/library/go-ruten-produktlinks-2026-11-03.md": "diagnose af /go/-ruten 3/11",
+    "docs/library/s15-produktlink-daekning-2026-11-08.md": "måling 8/11 med de daværende id'er",
+    "docs/library/tre-saeson-guides-2026-11-08.md": "rapport om de tre publicerede guides 8/11",
+    "docs/library/vedligehold-ugentlig-log.md": "driftslog",
+    "docs/library/vedligehold-daglig-log.md": "driftslog med dagens priser på måletidspunktet",
+    "docs/library/pinterest-analytics-2026-11-07.md": "måling af Pinterest 7/11",
+    "docs/library/seo-sporet-2026-11-08.md": "spor/procesdokument",
+    "docs/library/go-links-og-guide-copy-2026-11-09.md": "målingen 9/11; citerer den fil der blev rettet",
+    "docs/library/guide-vaern-daekning-2026-11-09.md": "målingen af værnsdækningen; citerer filer og beløb",
+    "docs/library/go-links-verifikation-2026-11-07.md": "verifikation 7/11",
+    "docs/library/seo-dashboard-fakta-26-10.md": "faktasamling fra 26/10 med datidens priser",
+    "docs/library/seo-regler-geo-optimering-log.md": "log",
+    "docs/library/README.md": "bibliotekets indeks",
+    "docs/roadmap.md": "roadmap, citerer historik",
+    "docs/samtalepunkter.md": "hukommelse om hvorfor; citerer historik",
+    "docs/competitors.md": "konkurrent-research",
+}
+
+
+def documents() -> list:
+    """Alle markdown-filer under docs/ — undtagen arkiv, backup og skabeloner."""
+    out = []
+    for base, dirs, files in os.walk(os.path.join(ROOT, "docs")):
+        dirs[:] = sorted(d for d in dirs if d not in {"arkiv", "_deps", "node_modules"} and not d.startswith("."))
+        for name in sorted(files):
+            if name.endswith(".md"):
+                out.append(os.path.join(base, name))
+    return out
+
+
+def is_copy(text: str) -> bool:
+    """Copy = husets skabelon. En fil uden markørerne er ikke copy, og det er en påstand værnene kontrollerer."""
+    return any(re.search(marker, text) for marker in COPY_MARKERS)
+
+
+def copy_files() -> list:
+    """De filer værnene måler som copy. Rækkefølgen er stabil så udskriften kan sammenlignes."""
+    return [path for path in documents() if is_copy(open(path, encoding="utf-8").read())]
+
+
+def unclassified_file(rel: str, text: str) -> str:
+    """Grunden til at en fil er uklassificeret, eller '' hvis den er i orden. Ren funktion, så den kan testes."""
+    if is_copy(text) or rel in IKKE_COPY:
+        return ""
+    links = len(re.findall(r"/go/\d+/", text))
+    money = len(re.findall(r"\$\s?\d|" + AMOUNT + r"\s*kr\.", text))
+    if not links and money < MONEY_HEAVY:
+        return ""
+    return (
+        f"{rel}: {links} /go/-links og {money} prismålinger, men filen er hverken copy "
+        "(mangler `**H1:**`/Rank Math-tabellen) eller registreret i IKKE_COPY — klassificér den"
+    )
+
+
+def unclassified() -> list:
+    """Filer med /go/-links eller mange priser, som hverken er copy eller registreret i IKKE_COPY."""
+    problems = []
+    for path in documents():
+        rel = os.path.relpath(path, ROOT).replace(os.sep, "/")
+        problem = unclassified_file(rel, open(path, encoding="utf-8").read())
+        if problem:
+            problems.append(problem)
+    return problems
+
+
 def price_document() -> str:
     """Den nyeste målte prisliste. Der må kun være én, ellers ved værnene ikke hvad der gælder."""
     paths = sorted(glob.glob(os.path.join(LIB, "priser-live-*.md")))
@@ -167,11 +258,19 @@ def check_cluster(block: str, slugs: set) -> list:
 
 
 def blocks(text: str) -> list:
-    """Deler dokumentet i guides på '## Guide …' og returnerer (navn, blok)."""
+    """Deler dokumentet i guides på '## Guide …' og returnerer (navn, blok).
+
+    En copyfil der er én side (hub, outfitside) har ingen guide-blokke; så er hele dokumentet blokken, og
+    den bliver målt med de samme regler. Det er dét der gør hub-copyen målbar — før lå den uden for værnene,
+    fordi den hverken heder `guides-*` eller har `## Guide`-blokke.
+    """
     parts = re.split(r"(?m)^## (Guide \d+[^\n]*)$", text)
     out = []
     for i in range(1, len(parts), 2):
         out.append((parts[i].strip(), parts[i + 1]))
+    if not out:
+        m = re.search(r"(?m)^#\s+(.+)$", text)
+        out.append(((m.group(1).strip() if m else "enkeltside"), text))
     return out
 
 
@@ -180,10 +279,19 @@ def field(block: str, label: str) -> str:
     return m.group(1).strip() if m else ""
 
 
+NOTES_HEADING = r"(?=^#{2,3} (?:Publishing notes|Hvad der stadig|Verifikation|Sådan publiceres)|\Z)"
+
+
 def copy_section(block: str) -> str:
-    """Brødteksten: fra '### Copy' til '### Publishing notes' — de øvrige '### ' er H2'er i copy."""
-    m = re.search(r"(?ms)^### Copy\s*$\n(.*?)(?=^### Publishing notes)", block)
-    return m.group(1).strip() if m else ""
+    """Brødteksten: fra '### Copy' til '### Publishing notes' — de øvrige '### ' er H2'er i copy.
+
+    En enkeltside-copy har ikke `### Copy`, men `**H1:**`; der løber brødteksten fra H1 til noterne.
+    """
+    m = re.search(r"(?ms)^### Copy\s*$\n(.*?)" + NOTES_HEADING, block)
+    if m:
+        return m.group(1).strip()
+    m = re.search(r"(?ms)^\*\*H1:\*\*.*?" + NOTES_HEADING, block)
+    return m.group(0).strip() if m else ""
 
 
 def totals(block: str, known: dict) -> tuple:
@@ -219,7 +327,7 @@ def totals(block: str, known: dict) -> tuple:
     return accepted, problems
 
 
-def check_guide(name: str, block: str, known: dict, slugs: set | None = None) -> list:
+def check_guide(name: str, block: str, known: dict, slugs: set | None = None, page: bool = False) -> list:
     """Returnerer listen af fejl. Tom liste = guiden er i orden (bortset fra netværkskaldet)."""
     problems = []
     title = field(block, "Rank Math title")
@@ -227,7 +335,7 @@ def check_guide(name: str, block: str, known: dict, slugs: set | None = None) ->
     slug = field(block, "Slug")
     body = copy_section(block)
 
-    if not slug:
+    if not slug and not page:
         problems.append("slug mangler")
     if not title:
         problems.append("Rank Math title mangler")
@@ -273,9 +381,9 @@ def check_guide(name: str, block: str, known: dict, slugs: set | None = None) ->
     guides.discard("go")
     if len(guides) < GUIDES_MIN:
         problems.append(f"{len(guides)} egne guides linket (min {GUIDES_MIN})")
-    if HUB not in guides and "start-here" not in guides:
+    if not page and HUB not in guides and "start-here" not in guides:
         problems.append(f"hub mangler ({HUB} eller start-here)")
-    if slugs is not None:
+    if slugs is not None and not page:
         problems.extend(check_cluster(block, slugs))
 
     derived, total_problems = totals(block, known)
@@ -356,18 +464,17 @@ def run(paths: list, offline: bool = False) -> int:
         with open(path, encoding="utf-8") as fh:
             text = fh.read()
         guides = blocks(text)
-        if not guides:
-            print(f"FAIL {os.path.basename(path)}: ingen '## Guide …'-blokke")
-            failures += 1
-            continue
+        label = os.path.relpath(path, ROOT)
+        print(f"== {label} ({len(guides)} blok{'ke' if len(guides) != 1 else ''})")
+        single = not re.search(r"(?m)^## Guide \d", text)
         for name, block in guides:
-            parsed.append((path, name, block))
+            parsed.append((path, name, block, single))
 
-    slugs = {field(block, "Slug") for _, _, block in parsed} - {""}
+    slugs = {field(block, "Slug") for _, _, block, _ in parsed} - {""}
     used: dict = {}
-    for path, name, block in parsed:
+    for path, name, block, single in parsed:
         total += 1
-        problems = check_guide(name, block, known, slugs)
+        problems = check_guide(name, block, known, slugs, page=single)
         label = f"{os.path.basename(path)} · {name.split('—')[0].strip()}"
         if problems:
             failures += 1
@@ -379,6 +486,11 @@ def run(paths: list, offline: bool = False) -> int:
             print(f"PASS {label} ({words} ord)")
         for pid in re.findall(r"/go/(\d+)/", copy_section(block)):
             used.setdefault(pid, []).append(name.split("—")[0].strip())
+
+    uncovered = unclassified()
+    for problem in uncovered:
+        print(f"FAIL  ukendt fil: {problem}")
+    failures += len(uncovered)
 
     if offline:
         print("\n[--offline] butikken blev ikke spurgt; kør uden flaget før en publicering")
@@ -399,7 +511,7 @@ def run(paths: list, offline: bool = False) -> int:
             print(f"ADVARSEL {warning}")
         failures += len(problems)
 
-    print(f"\n{total - (failures if total >= failures else 0)} af {total} guides bestod"
+    print(f"\n{total - (failures if total >= failures else 0)} af {total} copy-blokke bestod"
           f"{'' if not failures else f' — {failures} fund'}")
     return 1 if failures else 0
 
@@ -500,18 +612,66 @@ Hele sættet koster 560,00 kr.
         failed += 0 if ok else 1
         print(f"{'PASS' if ok else 'FAIL'} {label}" + ("" if ok else f" (forventede {expect}, fik {got})"))
 
-    total_fixtures = len(cases) + 2 + len(export)
+    # Dækningen: en ny copyfil kan ikke ligge uden for værnene, og en gammel prisliste kan ikke gemme sig.
+    page_src = good.replace("| **Slug** | `test-guide` |\n", "").replace(
+        " og [hub](https://steamgears.eu/steampunk-costumes/)",
+        " og [en anden guide](https://steamgears.eu/steampunk-goggles-guide/)")
+    page_block = blocks(page_src)[0]
+    raw_page = "# En rå side uden husets skabelon\n\nKoster 165,00 kr. og 335,00 kr.\n"
+    coverage = [
+        ("enkeltside uden slug og hub består", bool(check_guide(*page_block, known, None, page=True)), 0),
+        ("enkeltside med dollar fanges",
+         bool(check_guide(page_block[0], page_block[1].replace("165,00 kr.", "$24.95"),
+                          known, None, page=True)), 1),
+        ("husets skabelon registreres som copy", is_copy(good), 1),
+        ("rå side-copy uden skabelon er ikke copy", is_copy(raw_page), 0),
+        ("uklassificeret fil med /go/-link fanges",
+         bool(unclassified_file("docs/library/ny-side.md", "Se /go/477/ og 165,00 kr.\n")), 1),
+        ("uklassificeret fil med mange priser fanges",
+         bool(unclassified_file("docs/library/gammel-liste.md", "165,00 kr.\n" * 25)), 1),
+        ("få priser uden links kræver ingen klassifikation",
+         bool(unclassified_file("docs/library/lille-note.md", "165,00 kr.\n" * 3)), 0),
+        ("registreret dokument er ikke uklassificeret",
+         bool(unclassified_file("docs/roadmap.md", "Se /go/477/ og 165,00 kr.\n")), 0),
+    ]
+    for label, found, expect in coverage:
+        got = 1 if found else 0
+        ok = got == expect
+        failed += 0 if ok else 1
+        print(f"{'PASS' if ok else 'FAIL'} {label}" + ("" if ok else f" (forventede {expect}, fik {got})"))
+
+    total_fixtures = len(cases) + 2 + len(export) + len(coverage)
     print(f"\n{total_fixtures - failed} af {total_fixtures} selftest-fixtures bestod")
     return 1 if failed else 0
+
+
+def coverage_report(paths: list) -> int:
+    """Skriver hvad der er copy, og hvilke dokumenter der med vilje ikke er — så dækningen kan læses."""
+    print("COPY (måles mod butikken og prislisten):")
+    for path in paths:
+        print(f"  {os.path.relpath(path, ROOT)}")
+    print(f"\nIKKE COPY, registreret med grund ({len(IKKE_COPY)}):")
+    for rel in sorted(IKKE_COPY):
+        print(f"  {rel} — {IKKE_COPY[rel]}")
+    problems = unclassified()
+    print("\nUKLASSIFICERET:")
+    if problems:
+        for problem in problems:
+            print(f"  {problem}")
+    else:
+        print("  ingen — hver fil med /go/-links eller mange priser er klassificeret")
+    return 1 if problems else 0
 
 
 def main() -> int:
     if "--selftest" in sys.argv:
         return selftest()
-    paths = sorted(glob.glob(os.path.join(LIB, "guides-*.md")))
+    paths = copy_files()
     if not paths:
-        print("FAIL ingen docs/library/guides-*.md fundet")
+        print("FAIL ingen copyfiler fundet — forventede mindst én fil med `**H1:**`/Rank Math-tabellen")
         return 1
+    if "--coverage" in sys.argv:
+        return coverage_report(paths)
     return run(paths, offline="--offline" in sys.argv)
 
 
