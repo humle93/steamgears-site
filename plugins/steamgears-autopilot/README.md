@@ -27,7 +27,7 @@ The whole social autopilot runs inside WordPress (Command Center is retired):
 4. **Measure** – every post links via `/go/<id>/`, so clicks (and WooCommerce
    orders) are counted per channel.
 
-Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.68.0.zip` → Activate. On an existing
+Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.69.0.zip` → Activate. On an existing
 install the same zip arrives through the self-updater (see *Updates*), so an upload is only needed for the
 first install or a recovery.
 
@@ -117,6 +117,26 @@ On the dashboard, *Campaign agent* asks for the page, the goal, the campaign nam
 same run is available as the ability `steamgears-autopilot/campaign-drafts` (so Claude can write the
 drafts), and a channel that already has a pending draft for the same campaign is skipped — one run writes
 at most 10 drafts.
+
+## Feed health (7.69)
+
+In RSS mode the plugin sends no token — Publer polls one feed per channel and posts what it finds — so the
+question "can this channel send?" has a different answer than in API mode. *Feed health* is that answer:
+for every configured channel it reads the same rows the feed renders and reports one state.
+
+| State | What it means |
+| --- | --- |
+| `ok` | The feed carries posts with a title, text and (where the channel demands it) a photo |
+| `empty` | Nothing to post — Publer sees no new item, and the channel goes quiet |
+| `stale` | The newest post is older than the limit (7 days, filter `sgap_feed_stale_days`) |
+| `invalid` | A post the feed carries cannot be posted as it stands: no title, no text, or no photo on Instagram/Pinterest |
+| `off` | API mode is on, so no feed is in use and there is nothing to check |
+
+Each row also carries the post count, the age of the newest post and the feed address Publer is given, so the
+same answer says *why*. A summary counts the states and names the channels that need attention. It is part of
+`steamgears-autopilot/channel-health` and `GET /sgap/v1/channel-health` (`feeds` and `feeds_summary`), so one
+read-only call answers both halves: whether the channel *can* send, and whether its feed has anything usable
+to send.
 
 ## Run it from Claude
 
@@ -623,7 +643,7 @@ before it, because the MCP surface can read plugins but cannot install or activa
 1. Bump `Version:` in `steamgears-autopilot.php` and `SGAP_VERSION` — they must agree, CI fails otherwise.
 2. Rebuild the zip from the folder so the name and the contents match:
    `cd plugins && rm -f steamgears-autopilot-*.zip && zip -qr steamgears-autopilot-v<version>.zip steamgears-autopilot`
-3. `php plugins/tests/smoke.php` (1358 checks) and `diff -r` the zipped copy against the source. CI repeats
+3. `php plugins/tests/smoke.php` (1383 checks) and `diff -r` the zipped copy against the source. CI repeats
    both, plus `php -l` on PHP 8.0–8.5 and WordPress 6.4 / 7.1 / latest. The plugin is also exercised inside
    a real WordPress: `bash plugins/tests/integration.sh` (needs `php` with `mysqli`, `wp-cli`, `curl` and a
    reachable MySQL; 249 checks, including the four model rules, the Anthropic/custom-provider key checks and evergreen recycling) — it installs

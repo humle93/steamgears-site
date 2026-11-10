@@ -307,12 +307,16 @@ class SGAP_Abilities {
         $days = max(SGAP_Channel_Health::MIN_DAYS,
             min(SGAP_Channel_Health::MAX_DAYS, (int) ($input['days'] ?? SGAP_Channel_Health::WINDOW_DAYS)));
         $analytics = SGAP_Channel_Health::analytics($days);
+        // P7: in RSS mode there is no token to test, so the feed itself is the health reading.
+        $feeds = SGAP_RSS::health();
         return [
             'window_days' => $days,
             'channels' => SGAP_Channel_Health::report(),
             'summary' => SGAP_Channel_Health::summary(),
             'analytics' => $analytics,
             'analytics_summary' => SGAP_Channel_Health::analytics_summary($analytics),
+            'feeds' => $feeds,
+            'feeds_summary' => SGAP_RSS::health_summary($feeds),
         ];
     }
 

@@ -27,7 +27,7 @@ _Opdateret 2026-11-10 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 | **Forum + Reddit — trafikaccelerator (P5)** | **96,7 %** | 2,9 af 3 d (F1 1,2/1,2 · F2 0,8/0,8 · F3 0,3/0,3 · F4 0,3/0,3 · F5 0,3/0,3 · F6 0/0,1) |
 | **steamgears.eu — site-optimering** | **100 %** | 20,95 af 20,95 d (S0 2,35/2,35 · S1 3,6/3,6 · S2 6,9/6,9 · S3 4,05/4,05 · S4 4,05/4,05) |
 | **steamgears.eu — miljø, server og sandbox (S5)** | **60 %** | 1,8 af 3 d (S5 1,8/3) |
-| **Steamgears Autopilot — plugin** | **100 %** | 32,5 af 32,5 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25 · P1E 0,25/0,25 · P1F 0,25/0,25 · P1G 0,5/0,5 · P2F 1,5/1,5 · P3OPT 0,6/0,6 · P3JS 0,3/0,3 · P3LIVE 0,25/0,25 · P1FALLBACK 0,35/0,35 · P1OR 0,25/0,25 · P6 0,9/0,9) |
+| **Steamgears Autopilot — plugin** | **100 %** | 32,8 af 32,8 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25 · P1E 0,25/0,25 · P1F 0,25/0,25 · P1G 0,5/0,5 · P2F 1,5/1,5 · P3OPT 0,6/0,6 · P3JS 0,3/0,3 · P3LIVE 0,25/0,25 · P1FALLBACK 0,35/0,35 · P1OR 0,25/0,25 · P6 0,9/0,9 · P7 0,3/0,3) |
 | **Dark academia-rebrand** | **71,3 %** | 12,4 af 17,4 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5 · BATCH4 0,5/0,5 · GENTILDELING 0,4/0,4 · MOBIL-OG-SAESON 3/3) |
 | **SEO-indholdsproduktion** | **100 %** | 14 af 14 guides (BATCH 3/3 · COPY 4/4 · CORSET 1/1 · DKK 6/6) |
 | **Døde internlinks** | **100 %** | 39 af 39 links (FIX 39/39) |
@@ -58,15 +58,33 @@ _Opdateret 2026-11-10 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
-- `0d6623d Modul: KABINE b12 — hele fladen målt, annoncer, mails og kontakter skrevet Før: 56,1 %  →  Efter: 57,4 %  (Δ +1,3) Grundlag: 19,5 af 34 t (Niche-valg, brand og produktstige 2/2 · ROI-model og enhedsøkonomi 2/2 · 30-dages plan og KPI-gates 2/2 · Kreativt: ti hooks som manuskript 2/2 · Kravliste: butik, betaling, tracking og jura 1,5/1,5 · Butiksopsætning: Shopify, MobilePay, CAPI, sider 0/6 · Leverandørvalg, GPSR-dokumentation og prøver 0/4 · Juridiske sider: handelsbetingelser, retur, privatliv 2/2,5 · Første annoncerunde uge 1-2 0/4 · Niche-portefølje: roadmap og færdig butikstekst 6/6 · Jura og måltabel: de tre øvrige butikker 1/1 · Flademåling: annoncer, mails, kontakter og værn 1/1)`
-- `efd3d3b Modul: KABINE b11 — jura-teksterne dækker nu alle fire butikker Før: 54,7 %  →  Efter: 56,1 %  (Δ +1,4) Grundlag: 18,5 af 33 t (Niche-valg, brand og produktstige 2/2 · ROI-model og enhedsøkonomi 2/2 · 30-dages plan og KPI-gates 2/2 · Kreativt: ti hooks som manuskript 2/2 · Kravliste: butik, betaling, tracking og jura 1,5/1,5 · Butiksopsætning: Shopify, MobilePay, CAPI, sider 0/6 · Leverandørvalg, GPSR-dokumentation og prøver 0/4 · Juridiske sider: handelsbetingelser, retur, privatliv 2/2,5 · Første annoncerunde uge 1-2 0/4 · Niche-portefølje: roadmap og færdig butikstekst 6/6 · Jura og måltabel: de tre øvrige butikker 1/1)`
-- `336de82 chore(status): daglig projektstatus 2026-11-10`
-- `80f3e61 Modul: KABINE b8 — de juridiske sider er skrevet færdige Før: 48,4 %  →  Efter: 54,7 %  (Δ +6,3) Grundlag: 17,5 af 32 t (Niche-valg, brand og produktstige 2/2 · ROI-model og enhedsøkonomi 2/2 · 30-dages plan og KPI-gates 2/2 · Kreativt: ti hooks som manuskript 2/2 · Kravliste: butik, betaling, tracking og jura 1,5/1,5 · Butiksopsætning: Shopify, MobilePay, CAPI, sider 0/6 · Leverandørvalg, GPSR-dokumentation og prøver 0/4 · Juridiske sider: handelsbetingelser, retur, privatliv 2/2,5 · Første annoncerunde uge 1-2 0/4 · Niche-portefølje: roadmap og færdig butikstekst 6/6)`
-- `4943f93 chore(status): daglig projektstatus 2026-11-10`
-- `b24114f Modul: SEO — outfit-copy til post 699: DKK, tolv looks og værnsdækning Før: 100 %  →  Efter: 100 %  (Δ 0) Grundlag: 14 af 14 guides (Publicerede guides (1357, 1361, 1359) 3/3 · Guide-copy klar til publicering (1357, 1361, 1359 + corset) 4/4 · Corset-guiden publiceret (/steampunk-corset-guide/, 1394) 1/1 · Guide-copy i DKK mod den levende butik (292, 296, 295, 1394, 550, 699) 6/6)`
+- `fa2124a Modul: Research — hurtigst mulig organisk trafik Før: 100 % → Efter: 100 % (Δ 0) Grundlag: ingen ændring`
+- `b96033e chore(status): daglig projektstatus 2026-11-10`
+- `d012f5b Modul: KABINE b12 — hele fladen målt, annoncer, mails og kontakter skrevet Før: 56,1 %  →  Efter: 57,4 %  (Δ +1,3) Grundlag: 19,5 af 34 t (Niche-valg, brand og produktstige 2/2 · ROI-model og enhedsøkonomi 2/2 · 30-dages plan og KPI-gates 2/2 · Kreativt: ti hooks som manuskript 2/2 · Kravliste: butik, betaling, tracking og jura 1,5/1,5 · Butiksopsætning: Shopify, MobilePay, CAPI, sider 0/6 · Leverandørvalg, GPSR-dokumentation og prøver 0/4 · Juridiske sider: handelsbetingelser, retur, privatliv 2/2,5 · Første annoncerunde uge 1-2 0/4 · Niche-portefølje: roadmap og færdig butikstekst 6/6 · Jura og måltabel: de tre øvrige butikker 1/1 · Flademåling: annoncer, mails, kontakter og værn 1/1)`
+- `5b1ed9b P6: kampagne-agenten skriver kladder, men publicerer aldrig`
+- `5dfb3e0 chore(status): daglig projektstatus 2026-11-10`
+- `aed68ab Modul: P1.24 — OpenRouter som automatisk backup for AIMLAPI Før: 100 % → Efter: 100 % (Δ 0) Grundlag: 31,6 af 31,6 d`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 10/11 — P7: feed health lukkede det sidste hul roadmap'en selv havde navngivet
+
+Efter P6 blev roadmappet gennemgået for åbne punkter: alle P0–P5-trin er lukkede, og det der står tilbage
+(P1.5's tokens, F6's Reddit-app, S5.1/S5.7/S5.9) kræver ejeren. Det eneste **ubyggede** punkt var §4.1 pkt. 2
+fra 1/11: *»We hold no tokens in RSS mode (Publer does), so the equivalent for us is feed health — and there is
+none.«* Det blev P7.
+
+Beslutningen var at måle på det feed pluginnet selv udstiller, ikke at bygge en ny side: `SGAP_RSS::health()`
+bruger samme `items()` som `xml()`, så den ikke kan bestå på data feedet ikke indeholder. Tilstandene er `ok`,
+`empty`, `stale` (7 dage, filter `sgap_feed_stale_days`), `invalid` (titel/tekst/foto hvor kanalen kræver det)
+og `off` (API-tilstand). Felterne blev lagt i de flader der allerede findes — abilityen `channel-health` og
+`/sgap/v1/channel-health` — så ét read-only kald nu svarer på begge halvdele.
+
+Målt: **1 383 PASS / 0 FAIL** (25 nye), `php -l` rent, zip 439 251 bytes byte-identisk, `fejlscan` uden fund.
+Fælde undervejs: smoke-stubben svarer på **alle** tabeller med `$GLOBALS['rows']`, så `channel-health`'s
+`ARRAY_A`-forespørgsel fik feed-rækker som `stdClass` og døde — testen tømmer nu `rows` før den kalder
+abilityen. Dokument: [`library/feed-health-2026-11-10.md`](library/feed-health-2026-11-10.md).
 
 ### 10/11 — hele fladen målt: annoncer, mails og kontakter skrevet, værnene strammet (b12, 1/1 t)
 

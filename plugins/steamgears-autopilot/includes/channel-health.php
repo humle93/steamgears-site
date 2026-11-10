@@ -261,12 +261,16 @@ class SGAP_Channel_Health {
 
     public static function rest_report() {
         $analytics = self::analytics();
+        $feeds = SGAP_RSS::health();
         return new WP_REST_Response([
             'channels' => self::report(),
             'summary' => self::summary(),
             'window_days' => self::WINDOW_DAYS,
             'analytics' => $analytics,
             'analytics_summary' => self::analytics_summary($analytics),
+            // P7: RSS mode sends no token, so the feed is what can be measured.
+            'feeds' => $feeds,
+            'feeds_summary' => SGAP_RSS::health_summary($feeds),
         ], 200);
     }
 }

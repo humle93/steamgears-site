@@ -273,9 +273,17 @@
           "total": 0.9,
           "unit": "d",
           "note": "7.68.0: SGAP_Campaign_Agent (includes/campaign-agent.php) tager en publiceret side, et skrevet mål (8-160 tegn) og de konfigurerede kanaler og skriver ét udkast pr. kanal gennem samme AI-kald som den daglige forfatter. Alt gemmes som pending i sgap_ai_drafts — også med Full Auto slået til; agenten kalder hverken SGAP_Queue eller SGAP_Publer. To nye kolonner (campaign, gate_report): kampagnenavnet følger kladden gennem SGAP_Queue::from_draft() til utm_campaign, og kanal-/kvalitetsgatens bemærkninger vises på AI Drafts. Ny ability campaign-drafts, dashboardkort med formular, kampagnemål i prompten (kun når agenten sætter det), skip når en kladde allerede venter, max 10 kladder pr. kørsel. 42 nye smoke-checks, php -l rent på alle plugin-filer, zip byte-identisk med kilden (diff -r). IKKE verificeret i WordPress: formular, DDL-opgradering af en kørende installation og et rigtigt AI-kald (AIMLAPI-nøglen svarer out of funds), så tests bruger stubbet HTTP; zip kræver ejerens Plugins -> Tilføj nyt fordi repoet er privat."
+        },
+        {
+          "id": "p7",
+          "name": "P7 — feed health for RSS-tilstanden",
+          "done": 0.3,
+          "total": 0.3,
+          "unit": "d",
+          "note": "7.69.0: SGAP_RSS::health() giver hver konfigureret kanal én tilstand (ok/empty/stale/invalid/off) ud fra præcis de rækker xml() renderer: antal poster, alder på nyeste, og manglende titel, tekst eller foto hvor Instagram/Pinterest kræver det. health_summary() tæller tilstandene og navngiver kanalerne. Begge felter går ind i abilityen channel-health og /sgap/v1/channel-health (feeds, feeds_summary), så ét read-only kald både svarer på om kanalen kan sende og om feedet har noget brugbart. Stale-grænsen er 7 dage og kan ændres med filteret sgap_feed_stale_days. Ingen ny tabel, indstilling eller side. Lukker ROADMAP §4.1 pkt. 2, som har stået åbent siden 1/11. 25 nye smoke-checks (1358 -> 1383 PASS / 0 FAIL), php -l rent, zip 439 251 bytes byte-identisk. Ikke målt mod Publer: feedet er verificeret som værende det Publer får, men ingen konto har hentet det endnu."
         }
       ],
-      "total": 32.5,
+      "total": 32.8,
       "verified": true
     },
     {
@@ -2184,6 +2192,15 @@
       "after": 57.4,
       "delta": 1.3,
       "basis": "19,5 af 34 t (Niche-valg, brand og produktstige 2/2 · ROI-model og enhedsøkonomi 2/2 · 30-dages plan og KPI-gates 2/2 · Kreativt: ti hooks som manuskript 2/2 · Kravliste: butik, betaling, tracking og jura 1,5/1,5 · Butiksopsætning: Shopify, MobilePay, CAPI, sider 0/6 · Leverandørvalg, GPSR-dokumentation og prøver 0/4 · Juridiske sider: handelsbetingelser, retur, privatliv 2/2,5 · Første annoncerunde uge 1-2 0/4 · Niche-portefølje: roadmap og færdig butikstekst 6/6 · Jura og måltabel: de tre øvrige butikker 1/1 · Flademåling: annoncer, mails, kontakter og værn 1/1)"
+    },
+    {
+      "date": "2026-11-10",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "P7 — feed health for RSS-tilstanden",
+      "before": 100.0,
+      "after": 100.0,
+      "delta": 0,
+      "basis": "32,8 af 32,8 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2,0/2,0 · P0.7 1,0/1,0 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5 · P3.7 0,6/0,6 · P3.8 0,3/0,3 · P3.9 0,25/0,25 · P1.24 0,35/0,35 · P1.23 0,25/0,25 · P6 0,9/0,9 · P7 0,3/0,3)"
     }
   ]
 }

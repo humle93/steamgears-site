@@ -13,6 +13,8 @@ class SGAP_RSS {
     const QUERY_VAR = 'sgap_feed';
     const MARKER = 'rss'; // external_id of posts released into a feed
     const ITEMS = 20;
+    /** A configured feed that has not carried a post for this long is reported as stale. */
+    const STALE_DAYS = 7;
 
     public static function init(): void {
         add_action('init', [__CLASS__, 'add_rewrite_rule']);
@@ -94,6 +96,89 @@ class SGAP_RSS {
             $report['sent'][] = ['id' => $id, 'channel' => $channel, 'feed' => self::url($channel)];
         }
         return $report;
+    }
+
+    /**
+     * P7: is each configured channel's feed actually usable by Publer?
+     *
+     * In RSS mode there is no token to test, so the observable equivalent is the feed itself: does it
+     * carry posts, are they recent, and does every one of them have what Publer needs to post it
+     * (title, text, and a photo where the channel demands one)? The check reads the exact rows
+     * `xml()` renders, so it cannot pass on data the feed would not contain.
+     *
+     * States: `off` (API mode, no feed in use), `ok`, `empty`, `stale`, `invalid`. One row per
+     * configured channel; a channel that is not switched on has no feed to judge.
+     *
+     * @return array<string,array> channel => [state, posts, newest, age_days, url, problems]
+     */
+    public static function health(): array {
+        $out = [];
+        $enabled = self::enabled();
+        // Same clock the queue writes with, so a post cannot look a day older than it is.
+        $now = (int) strtotime((string) current_time('mysql'));
+        $stale_days = max(1, (int) apply_filters('sgap_feed_stale_days', self::STALE_DAYS));
+        foreach (SGAP_Publer::channels() as $channel) {
+            $row = ['state' => 'ok', 'posts' => 0, 'newest' => '', 'age_days' => null, 'url' => self::url($channel), 'problems' => []];
+            if (!$enabled) {
+                $row['state'] = 'off';
+                $out[$channel] = $row;
+                continue;
+            }
+            $items = self::items($channel);
+            $row['posts'] = count($items);
+            if ($row['posts'] === 0) {
+                $row['state'] = 'empty';
+                $row['problems'][] = ucfirst($channel) . ' has nothing to post: its feed is empty, so Publer sees no new item.';
+                $out[$channel] = $row;
+                continue;
+            }
+            $row['newest'] = (string) $items[0]->published_at;
+            $published = (int) strtotime($row['newest']);
+            $row['age_days'] = $published > 0 && $now > 0 ? (int) floor(($now - $published) / DAY_IN_SECONDS) : null;
+            foreach ($items as $item) {
+                $id = (int) $item->id;
+                if (trim((string) $item->title) === '') {
+                    $row['problems'][] = 'Post #' . $id . ' has no title.';
+                }
+                if (trim((string) $item->body) === '') {
+                    $row['problems'][] = 'Post #' . $id . ' has no text.';
+                }
+                if (in_array($channel, SGAP_Publer::NEEDS_PHOTO, true) && empty($item->image_url)) {
+                    $row['problems'][] = 'Post #' . $id . ' has no photo, and ' . $channel . ' needs one.';
+                }
+            }
+            if ($row['problems'] !== []) {
+                $row['state'] = 'invalid';
+            } elseif ($row['age_days'] !== null && $row['age_days'] > $stale_days) {
+                $row['state'] = 'stale';
+                $row['problems'][] = ucfirst($channel) . ' last carried a post ' . $row['age_days'] . ' days ago (limit ' . $stale_days . ').';
+            }
+            $out[$channel] = $row;
+        }
+        return $out;
+    }
+
+    /** Counts per state plus one sentence, for the channel-health answer and the nightly run. */
+    public static function health_summary(array $health): array {
+        $counts = ['ok' => 0, 'empty' => 0, 'stale' => 0, 'invalid' => 0, 'off' => 0];
+        $attention = [];
+        foreach ($health as $channel => $row) {
+            $state = (string) ($row['state'] ?? 'invalid');
+            $counts[$state] = ($counts[$state] ?? 0) + 1;
+            if (in_array($state, ['empty', 'stale', 'invalid'], true)) {
+                $attention[] = $channel;
+            }
+        }
+        if ($counts['off'] > 0 && array_sum($counts) === $counts['off']) {
+            $note = 'API mode is on, so no feed is used and there is nothing to check.';
+        } elseif ($attention !== []) {
+            $note = count($attention) . ' of ' . count($health) . ' feed(s) need attention: ' . implode(', ', $attention) . '.';
+        } elseif ($health === []) {
+            $note = 'No channel is switched on, so no feed exists yet (Settings → Publer → Channels).';
+        } else {
+            $note = 'All ' . count($health) . ' feed(s) carry posts Publer can use.';
+        }
+        return $counts + ['total' => count($health), 'note' => $note];
     }
 
     /** Drops a copy of the feed a page cache stored before DONOTCACHEPAGE was in place. */

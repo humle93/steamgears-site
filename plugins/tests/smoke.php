@@ -1786,5 +1786,6 @@ require __DIR__.'/niche-shop.php';
 require __DIR__.'/queue-page.php';
 require __DIR__.'/forum.php';
 require __DIR__.'/campaign-agent.php';
+require __DIR__.'/feed-health.php';
 // P3.2/P3.5-slut
 exit(empty($GLOBALS['fail'])?0:1);

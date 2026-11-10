@@ -173,7 +173,8 @@ SmarterQueue and Hootsuite — the tools a shop owner would otherwise buy.
    stops there — you only find out by opening wp-admin.
 2. **Connection / token expiry alerts.** Buffer notifies when a channel disconnects or permissions expire;
    Publer badges the account and links to re-auth. We hold no tokens in RSS mode (Publer does), so the
-   equivalent for us is *feed health* — and there is none.
+   equivalent for us is *feed health* — **closed in 7.69.0 (P7)**: empty, stale and unusable feeds are reported
+   per channel next to the token status.
 3. **Retry with backoff.** Publer's "Auto Reschedule" pushes a failed post to the next free slot. Ours
    re-queues immediately and gives up after 3 attempts inside the same day, so a 20-minute API hiccup at
    09:00 can burn all three attempts before 09:05.
@@ -412,6 +413,33 @@ sitet (kræver en Reddit-app til OAuth og giver en konto vi ikke kan moderere).
 
 ---
 
+### P7 — feed health: RSS-tilstanden kan måles (7.69.0)
+
+**Hullet står i §4.1 pkt. 2, skrevet 1/11 og aldrig lukket:** »We hold no tokens in RSS mode (Publer does), so
+the equivalent for us is *feed health* — and there is none.« I API-tilstand findes token-status i
+`SGAP_Channel_Health`; i RSS-tilstand, som er standarden, findes intet tilsvarende. Et tomt feed betyder at
+Publer ikke har noget at poste, og et feed hvis poster mangler titel, tekst eller billede bliver afvist eller
+postet halvfærdigt — og i dag kan ingen af delene ses uden at åbne feedet i en browser.
+
+**Målet er at gøre tilstanden læsbar, ikke at bygge endnu en måling udenfor.** Feed-sundheden lægges ved siden
+af kanalstatus i de to flader der allerede findes — abilityen `channel-health` og `/sgap/v1/channel-health` — så
+et MCP-kald og den natlige kørsel kan svare på begge spørgsmål: *kan kanalen sende?* og *har dens feed noget at
+sende, og kan Publer bruge det?*
+
+| Trin | Indhold | Estimat | Akkumuleret |
+| --- | --- | --- | --- |
+| A | `SGAP_RSS::health()` + `health_summary()`: pr. konfigureret kanal antal poster, alder på nyeste, og de fire fejlklasser `empty`/`stale`/`invalid`/`no_photo`; `off` i API-tilstand | 0,12 d | **40,0 %** |
+| B | Fladerne: `feeds` + `feeds_summary` i abilityen `channel-health` og i REST-ruten, så én kørsel dækker begge tilstande | 0,08 d | **66,7 %** |
+| C | Tests for alle fem tilstande og grænsen for `stale`; README, changelog, zip | 0,10 d | **100 %** |
+
+**Filstruktur (komplet):** `includes/rss.php` ændr (`health()`, `health_summary()`, `STALE_DAYS`); `includes/abilities.php` ændr (to felter i `channel-health`); `includes/channel-health.php` ændr (REST-svaret får `feeds`); `plugins/tests/feed-health.php` ny + `plugins/tests/smoke.php` ændr (load); plugin-README ændr (feed health-afsnit); `steamgears-autopilot.php` ændr (version 7.69.0); zip erstattes; `projektstatus.json`, `docs/samtalepunkter.md` og et biblioteksdokument opdateres.
+
+**Afgrænsning:** ingen nye indstillinger, ingen ny tabel og ingen egen side. Der måles kun på det feed
+pluginnet selv udstiller (samme `items()` som `xml()` bruger), ikke på Publers kvittering — den kan først ses når
+en kanal har en konto, og det er F6/P1.5.
+
+---
+
 ## 6. Completion estimates (1/11 2026 — historical)
 
 **Kept to show how the scope grew, not as a forecast.** The milestones were computed against the 7.15.0
@@ -521,6 +549,16 @@ Platform limits: [Instagram content publishing](https://developers.facebook.com/
 
 ## 9. Change log for this document
 
+- **7.69.0 (10/11) — P7: feed health lukker §4.1 pkt. 2, som har stået åbent siden 1/11.** I RSS-tilstand — som
+  er standarden — findes der ingen token at teste, så svaret på »kan kanalen sende?« er feedet selv.
+  `SGAP_RSS::health()` læser præcis de rækker `xml()` renderer og giver hver konfigureret kanal én tilstand:
+  `ok`, `empty` (Publer ser intet nyt), `stale` (nyeste post ældre end 7 dage, kan hæves/sænkes med filteret
+  `sgap_feed_stale_days`), `invalid` (en post uden titel, uden tekst, eller uden foto hvor Instagram/Pinterest
+  kræver det) eller `off` (API-tilstand). Rækken bærer antal poster, alder og feed-adressen, så svaret også
+  siger hvorfor, og `health_summary()` tæller tilstandene og navngiver de kanaler der kræver handling. Det hele
+  går ind i de to flader der allerede findes — abilityen `channel-health` og `/sgap/v1/channel-health` — så ét
+  read-only kald dækker begge halvdele: kan kanalen sende, og har dens feed noget brugbart. Ingen ny tabel,
+  indstilling eller side. 25 nye smoke-checks (**1 358 → 1 383 PASS / 0 FAIL**).
 - **7.68.0 (10/11) — P6: kampagne-agenten skriver kladder, men publicerer aldrig.** Efter P5 var der stadig ingen
   arbejdsgang mellem »skriv noget for den her side« og »kør den i dag«. `SGAP_Campaign_Agent` tager nu en
   publiceret side, et skrevet mål på 8–160 tegn og de kanaler der er sat op, og skriver ét kladdeudkast pr.
