@@ -434,7 +434,7 @@
       "id": "bilinterioer",
       "name": "KABINE — bil-interiør som ny butik",
       "note": "Forberedelse frem mod første annonce. Model, tal og plan står i docs/library/bilinterioer-launch-2026-11-09.md (+ PDF); porteføljerækkefølgen og deploymentplanen for alle fire nicher står i docs/library/niche-roadmap-2026-11-09.md (+ PDF). Aritmetikken er kørt gennem de fire formler i roi-model-dropshipping-2026-11-09.md §2 og verificeret med Python 9/11.",
-      "next": "Følg docs/publiceringskoersel-2026-11-09.md §7. Seks forberedelsesmoduler er færdige (15,5 af 32 t, 48,4 %): niche og brand valgt, enhedsøkonomi regnet, 30-dages plan med KPI-gates skrevet, ti hooks som manuskript, kravlisten for butik, betaling, tracking og jura, og roadmap plus færdig tekst til alle fire nicher. Resten er butiksopsætning (6 t), leverandør og prøver (4 t), juridiske sider (2,5 t) og første annoncerunde (4 t) — alle fire starter først når ejeren har leveret E1-E6. Domænemåling 9/11: alle fire ønskede .dk-domæner er taget, så E4 kræver en købs-/leje- eller rename-beslutning.",
+      "next": "Følg docs/publiceringskoersel-2026-11-09.md §7. Seks forberedelsesmoduler er færdige (15,5 af 32 t, 48,4 %): niche og brand valgt, enhedsøkonomi regnet, 30-dages plan med KPI-gates skrevet, ti hooks som manuskript, kravlisten for butik, betaling, tracking og jura, og roadmap plus færdig tekst til alle fire nicher. Resten er butiksopsætning (6 t), leverandør og prøver (4 t), de sidste 0,5 t jura (ejerens værdier, rådgiverlæsning, publicering) og første annoncerunde (4 t) — alle fire starter først når ejeren har leveret E1-E6. Jurateksterne er skrevet 10/11, se docs/library/kabine-jura-2026-11-10.md. Domænemåling 9/11: alle fire ønskede .dk-domæner er taget, så E4 kræver en købs-/leje- eller rename-beslutning.",
       "blocked_by": "Seks ejerhandlinger, målt 9/11: E1 CVR, telefon, adresse og bankaftale til butikken (uden dem ingen faktura, ingen MobilePay, ingen lovlig handel); E2 leverandørvalg med GPSR-dokumentation og to prøver (ellers er indkøbspris, kvalitet og leveringstid gæt); E3 registrering i producentregistret for emballage (markedsføring må ikke starte før); E4 navn og domæne plus Shopify-konto — kabine.dk, oploft.dk, stille.dk og immer.dk er alle registreret (DNS, 9/11), så der skal købes, lejes eller renames; E5 beslutning om start 9/11 i Q4-priser eller 5/1 til lavere CPA; E6 annoncekonto med betalingsmetode og 10.000 kr. Ingen af de seks kan lukkes af agenten — hver kræver en konto, et panel eller en underskrift.",
       "modules": [
         {
@@ -496,10 +496,10 @@
         {
           "id": "b8",
           "name": "Juridiske sider: handelsbetingelser, retur, privatliv",
-          "done": 0,
+          "done": 2.0,
           "total": 2.5,
           "unit": "t",
-          "note": "Ikke startet: kræver E1 (CVR, adresse, telefon) og E3."
+          "note": "Skrevet 10/11: handelsbetingelser (3.756 tegn), privatlivspolitik (3.772), fortrydelse (2.388) og levering/retur (2.072) står færdige i deploy/nicher/indhold/kabine.json med standardfortrydelsesformular, 6-måneders-formodningsregel, 14-dages-tilbagebetaling, GPSR-afsnit, emballageregistrering, cookie-tabel og formål/grundlag pr. behandling; preflight grøn (4 nicher, ingen fejl, ingen drift). Tilbage 0,5 t: ejerens 29 unikke felter (E1/E3), rådgiverlæsning og publicering."
         },
         {
           "id": "b9",
@@ -2115,6 +2115,15 @@
       "after": 48.4,
       "delta": 0,
       "basis": "15,5 af 32 t (Niche-valg, brand og produktstige 2/2 · ROI-model og enhedsøkonomi 2/2 · 30-dages plan og KPI-gates 2/2 · Kreativt: ti hooks som manuskript 2/2 · Kravliste: butik, betaling, tracking og jura 1,5/1,5 · Butiksopsætning: Shopify, MobilePay, CAPI, sider 0/6 · Leverandørvalg, GPSR-dokumentation og prøver 0/4 · Juridiske sider: handelsbetingelser, retur, privatliv 0/2,5 · Første annoncerunde uge 1-2 0/4 · Niche-portefølje: roadmap og færdig butikstekst 6/6)"
+    },
+    {
+      "date": "2026-11-10",
+      "project": "KABINE — bil-interiør som ny butik",
+      "module": "daglig måling",
+      "before": 48.4,
+      "after": 54.7,
+      "delta": 6.3,
+      "basis": "17,5 af 32 t (Niche-valg, brand og produktstige 2/2 · ROI-model og enhedsøkonomi 2/2 · 30-dages plan og KPI-gates 2/2 · Kreativt: ti hooks som manuskript 2/2 · Kravliste: butik, betaling, tracking og jura 1,5/1,5 · Butiksopsætning: Shopify, MobilePay, CAPI, sider 0/6 · Leverandørvalg, GPSR-dokumentation og prøver 0/4 · Juridiske sider: handelsbetingelser, retur, privatliv 2/2,5 · Første annoncerunde uge 1-2 0/4 · Niche-portefølje: roadmap og færdig butikstekst 6/6)"
     }
   ]
 }

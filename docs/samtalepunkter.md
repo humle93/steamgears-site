@@ -32,7 +32,7 @@ _Opdateret 2026-11-10 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 | **SEO-indholdsproduktion** | **100 %** | 14 af 14 guides (BATCH 3/3 · COPY 4/4 · CORSET 1/1 · DKK 6/6) |
 | **Døde internlinks** | **100 %** | 39 af 39 links (FIX 39/39) |
 | **Niche-butik — plugin P4** | **100 %** | 1 af 1 d (P4PLAN 0,3/0,3 · P4APPLY 0,25/0,25 · P4UI 0,2/0,2 · P4SHIP 0,1/0,1 · P4LIVE 0,15/0,15) |
-| **KABINE — bil-interiør som ny butik** | **48,4 %** | 15,5 af 32 t (B1 2/2 · B2 2/2 · B3 2/2 · B4 2/2 · B5 1,5/1,5 · B6 0/6 · B7 0/4 · B8 0/2,5 · B9 0/4 · B10 6/6) |
+| **KABINE — bil-interiør som ny butik** | **54,7 %** | 17,5 af 32 t (B1 2/2 · B2 2/2 · B3 2/2 · B4 2/2 · B5 1,5/1,5 · B6 0/6 · B7 0/4 · B8 2/2,5 · B9 0/4 · B10 6/6) |
 
 ### Åbne blokeringer
 
@@ -54,19 +54,37 @@ _Opdateret 2026-11-10 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 - **SEO-indholdsproduktion** — Følg docs/publiceringskoersel-2026-11-09.md §2.1 og §3. Indsæt copyen i 292/296/295, side 550 og post 699 med fotos, Rank Math-felter og FAQPage-schema, og skift 699's dollartekst til kroner; kør derefter python3 tools/guide_check.py som efterkontrol. Publiceringen kræver ejerens OAuth-godkendelse af MCP eller et WordPress application password — der findes ingen credential i sandkassen.
 - **Døde internlinks** — Vedligehold: tjek nye indlæg mod live-URL'er
 - **Niche-butik — plugin P4** — Færdig som roadmap-punkt P4: modulet er kørt mod det levende site (WordPress 7.1.4, WooCommerce 11.2.2) med 8 produktkladder, 5 kollektioner, en sideskits og en navigation, og rullet tilbage til præcis udgangstilstanden. Næste skridt er ejerens: Printful-adgang, publicering og de øvrige punkter i readiness-listen. Målt 8/11 om aftenen er `alert_email` tom, så fejl registreres uden at nogen får mail — det er et ejerpunkt i plugin-roadmappens §8.
-- **KABINE — bil-interiør som ny butik** — Følg docs/publiceringskoersel-2026-11-09.md §7. Seks forberedelsesmoduler er færdige (15,5 af 32 t, 48,4 %): niche og brand valgt, enhedsøkonomi regnet, 30-dages plan med KPI-gates skrevet, ti hooks som manuskript, kravlisten for butik, betaling, tracking og jura, og roadmap plus færdig tekst til alle fire nicher. Resten er butiksopsætning (6 t), leverandør og prøver (4 t), juridiske sider (2,5 t) og første annoncerunde (4 t) — alle fire starter først når ejeren har leveret E1-E6. Domænemåling 9/11: alle fire ønskede .dk-domæner er taget, så E4 kræver en købs-/leje- eller rename-beslutning.
+- **KABINE — bil-interiør som ny butik** — Følg docs/publiceringskoersel-2026-11-09.md §7. Seks forberedelsesmoduler er færdige (15,5 af 32 t, 48,4 %): niche og brand valgt, enhedsøkonomi regnet, 30-dages plan med KPI-gates skrevet, ti hooks som manuskript, kravlisten for butik, betaling, tracking og jura, og roadmap plus færdig tekst til alle fire nicher. Resten er butiksopsætning (6 t), leverandør og prøver (4 t), de sidste 0,5 t jura (ejerens værdier, rådgiverlæsning, publicering) og første annoncerunde (4 t) — alle fire starter først når ejeren har leveret E1-E6. Jurateksterne er skrevet 10/11, se docs/library/kabine-jura-2026-11-10.md. Domænemåling 9/11: alle fire ønskede .dk-domæner er taget, så E4 kræver en købs-/leje- eller rename-beslutning.
 
 ### Seneste commits
 
+- `b24114f Modul: SEO — outfit-copy til post 699: DKK, tolv looks og værnsdækning Før: 100 %  →  Efter: 100 %  (Δ 0) Grundlag: 14 af 14 guides (Publicerede guides (1357, 1361, 1359) 3/3 · Guide-copy klar til publicering (1357, 1361, 1359 + corset) 4/4 · Corset-guiden publiceret (/steampunk-corset-guide/, 1394) 1/1 · Guide-copy i DKK mod den levende butik (292, 296, 295, 1394, 550, 699) 6/6)`
+- `dfa2481 chore(status): daglig projektstatus 2026-11-09`
 - `14fdcac Modul: P1.5 — Pinterest-kanalen: app-id-jagt og et klar-til-brug vekslingsværktøj Før: 0 %  →  Efter: 0 %  (Δ 0) Grundlag: ingen ændring`
 - `8a19609 Modul: P1.24 OpenRouter-failover bag AIMLAPI (plan) Før: 100 % → Efter: 100 % (Δ 0) Grundlag: ingen ændring`
 - `39e117f docs snapshot 09/11 (competitors, brief 09/11, vedligehold-log, research-log, postcheck, weekly-perf, outfit-copy revert-check)`
 - `9254b99 Modul: P1.23 — genereringen kører på en nøgle fundet i WordPress' connector-lager Før: 100 %  →  Efter: 100 %  (Δ 0) Grundlag: ingen ændring`
-- `7a9c80a Modul: P1.23 — 7.67.0 installeret på det levende site, provider og model sat Før: 100 %  →  Efter: 100 %  (Δ 0) Grundlag: ingen ændring`
-- `41e27e6 Modul: Plugin-status — næste skridt kræver installation af 7.67.0 først Før: 100 %  →  Efter: 100 %  (Δ 0) Grundlag: ingen ændring`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 10/11 — KABINEs jura skrevet færdig (b8, 0 → 2,0 af 2,5 t)
+
+- **Hvorfor det var det rigtige punkt:** alle fire lave moduler så ejer-blokerede ud, men kun *publiceringen*
+  af jura-siderne er blokeret — teksten var ikke skrevet. De tre kladder på 1.339–1.780 tegn manglede
+  standardfortrydelsesformularen, 6-måneders-formodningsreglen, 14-dages-fristen for tilbagebetaling,
+  GPSR-afsnittet, emballageregistreringen, cookie-tabellen og formål/grundlag pr. behandling.
+- **Skrevet:** handelsbetingelser (3.756 tegn), privatlivspolitik (3.772), fortrydelse (2.388) og
+  levering/retur (2.072) i **kilden** `deploy/nicher/indhold/kabine.json`; `kabine-sider.md` og
+  `shopify-kabine.csv` er genereret igen.
+- **Fælden:** `kabine-sider.md` er genereret og drift-kontrolleret — en håndrettelse forsvinder, og `--check`
+  svarer »ude af drift — kør --build«. Rækkefølgen er `niche_preflight.py --build` → `deploy_nicher.py` →
+  `--check`; preflighten nægter desuden at fjerne `[EJER: …]` for at få en grøn kørsel.
+- **Målt:** `--check` → »OK: 4 nicher klar, ingen fejl, ingen drift«; KABINE 5 varer · 5 kollektioner ·
+  9 sider · **57 ejerfelter i 29 unikke felter** (efter at `firmanavn`/`CVR` er normaliseret). KABINE går
+  **48,4 % → 54,7 %** (+6,3; 17,5 af 32 t).
+- **Tilbage til ejeren:** 0,5 t — de 29 værdier (E1/E3, betaling, leverandører, cookie-levetider, GPSR-person,
+  emballagereg.nr.), rådgiverlæsning og publicering. Dokument: `docs/library/kabine-jura-2026-11-10.md` + PDF.
 
 ### 10/11 — natteværnet fandt outfit-copyen: post 699's tekst er nu DKK og målt
 
