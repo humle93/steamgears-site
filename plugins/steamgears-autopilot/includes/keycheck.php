@@ -10,7 +10,7 @@ if (!defined('ABSPATH')) exit;
 
 class SGAP_KeyCheck {
     /** Saving any of these settings triggers a check. */
-    const WATCH = ['publer_api_key', 'publer_workspace_id', 'channels', 'ai_api_key', 'ai_provider', 'ai_model', 'ai_base_url', 'printful_api_key', 'printful_store_id'];
+    const WATCH = ['publer_api_key', 'publer_workspace_id', 'channels', 'ai_api_key', 'ai_provider', 'ai_model', 'ai_base_url', 'printful_api_key', 'printful_store_id', 'openrouter_api_key', 'openrouter_model'];
     const PENDING = 'sgap_keycheck_pending';
     const RESULT = 'sgap_key_status';
 
@@ -36,7 +36,7 @@ class SGAP_KeyCheck {
             return;
         }
         $result = self::run();
-        foreach (['publer' => 'Publer', 'ai' => 'AI', 'printful' => 'Printful'] as $part => $label) {
+        foreach (['publer' => 'Publer', 'ai' => 'AI', 'printful' => 'Printful', 'fallback' => 'OpenRouter backup'] as $part => $label) {
             $check = $result[$part];
             if ($check['ok'] === null) {
                 continue; // no key saved: nothing to report
@@ -56,6 +56,7 @@ class SGAP_KeyCheck {
             'publer' => self::check_publer(),
             'ai' => self::check_ai(),
             'printful' => self::check_printful(),
+            'fallback' => self::check_fallback(),
             'checked_at' => current_time('mysql')
         ];
         update_option(self::RESULT, $result, false);
@@ -239,12 +240,12 @@ class SGAP_KeyCheck {
      * key is therefore proven with a one-token chat request to the chosen model — and when no
      * model is chosen the answer says that instead of spending a request on a guess.
      */
-    private static function check_openrouter(string $key): array {
-        $model = SGAP_AI::model();
+    private static function check_openrouter(string $key, string $model = '', string $who = 'OpenRouter'): array {
+        $model = $model !== '' ? $model : SGAP_AI::model();
         if ($model === '') {
-            return ['ok' => false, 'message' => 'OpenRouter key saved, but pick an AI model under Settings → AI & images — OpenRouter has no default model.'];
+            return ['ok' => false, 'message' => $who . ' key saved, but pick an AI model under Settings → AI & images — OpenRouter has no default model.'];
         }
-        $response = wp_remote_post(SGAP_AI::base_url() . '/chat/completions', [
+        $response = wp_remote_post(SGAP_AI::OPENROUTER_URL . '/chat/completions', [
             'timeout' => 30,
             'headers' => ['Authorization' => 'Bearer ' . $key, 'Content-Type' => 'application/json'],
             'body' => wp_json_encode(['model' => $model, 'max_tokens' => 1, 'messages' => [['role' => 'user', 'content' => 'ping']]])
@@ -256,21 +257,38 @@ class SGAP_KeyCheck {
         $body = json_decode((string) wp_remote_retrieve_body($response), true);
         $detail = is_array($body) ? (string) ($body['error']['message'] ?? $body['message'] ?? '') : '';
         if ($code >= 200 && $code < 300) {
-            return ['ok' => true, 'message' => "OpenRouter key works, model {$model} answers."];
+            return ['ok' => true, 'message' => "{$who} key works, model {$model} answers."];
         }
         if ($code === 401 || $code === 403) {
-            return ['ok' => false, 'message' => 'OpenRouter refused the key' . ($detail !== '' ? ": {$detail}" : '.')];
+            return ['ok' => false, 'message' => $who . ' refused the key' . ($detail !== '' ? ": {$detail}" : '.')];
         }
         if ($code === 402) {
-            return ['ok' => false, 'message' => 'OpenRouter key works, but the account has no credit left. Add credits at openrouter.ai/credits.'];
+            return ['ok' => false, 'message' => "{$who} key works, but the account has no credit left. Add credits at openrouter.ai/credits."];
         }
         if ($code === 404 || ($code === 400 && stripos($detail, 'model') !== false)) {
-            return ['ok' => false, 'message' => "OpenRouter does not offer the model \"{$model}\". Pick one from the list under Settings → AI & images."];
+            return ['ok' => false, 'message' => "{$who} does not offer the model \"{$model}\". Pick one from the list under Settings → AI & images."];
         }
         if ($code === 429) {
-            return ['ok' => false, 'message' => 'OpenRouter key works, but it is rate limited right now (HTTP 429); try again in a minute.'];
+            return ['ok' => false, 'message' => "{$who} key works, but it is rate limited right now (HTTP 429); try again in a minute."];
         }
-        return ['ok' => false, 'message' => "OpenRouter answered HTTP {$code}" . ($detail !== '' ? ": {$detail}" : '; try again later.')];
+        return ['ok' => false, 'message' => "{$who} answered HTTP {$code}" . ($detail !== '' ? ": {$detail}" : '; try again later.')];
+    }
+
+    /**
+     * The backup pair, tested as a pair: the backup key against the backup model. Testing it with
+     * the primary model would be testing a combination the plugin never sends.
+     * @return array{ok: ?bool, message: string} ok is null when no backup key is saved.
+     */
+    public static function check_fallback(): array {
+        $key = SGAP_AI::fallback_key();
+        if ($key === '') {
+            return ['ok' => null, 'message' => 'No OpenRouter backup key saved.'];
+        }
+        $model = SGAP_AI::fallback_model();
+        if ($model === '') {
+            return ['ok' => false, 'message' => 'OpenRouter backup key saved, but no backup model is chosen — the backup is off until one is picked from the list.'];
+        }
+        return self::check_openrouter($key, $model, 'OpenRouter backup');
     }
 
     private static function check_openai_compatible(string $key): array {

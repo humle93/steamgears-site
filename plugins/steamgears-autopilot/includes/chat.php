@@ -503,10 +503,12 @@ class SGAP_Chat {
     /** Says so when a stored model name was rejected and the answer came from the default. */
     private static function healed_note(string $from): string {
         if ($from === '') {
-            return '';
+            // Nothing was repaired — but the answer may still have come from the backup, and the
+            // owner must not be told the primary worked when it did not.
+            return SGAP_AI::fallback_note();
         }
         return "\n\nAIMLAPI did not know the model `{$from}`, so this answer came from `" . SGAP_AI::model()
-            . '` and Settings has been reset to it — the next command works too.';
+            . '` and Settings has been reset to it — the next command works too.' . SGAP_AI::fallback_note();
     }
 
     /** Anthropic Messages API with tool use. */

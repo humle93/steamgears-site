@@ -23,7 +23,7 @@ The whole social autopilot runs inside WordPress (Command Center is retired):
 4. **Measure** – every post links via `/go/<id>/`, so clicks (and WooCommerce
    orders) are counted per channel.
 
-Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.64.7.zip` → Activate. On an existing
+Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.67.1.zip` → Activate. On an existing
 install the same zip arrives through the self-updater (see *Updates*), so an upload is only needed for the
 first install or a recovery.
 
@@ -47,6 +47,34 @@ The screen is built the way WordPress 7.x builds *Settings → Connectors*: a gr
 icon, a purpose, its source and a status pill; the tab bar and the save bar are sticky, focus rings follow
 `:focus-visible`, and the layout collapses to one column below 782 px. The plugin still ships its own
 stylesheet — no build step, no `@wordpress/ui` — and picks up the WordPress design tokens where they exist.
+
+## A backup provider, so one dead account cannot stop everything (7.67.1)
+
+The primary provider is whatever *AI provider* says — AIMLAPI by default. This is the second one:
+*Settings → Keys → **OpenRouter (backup)*** takes an OpenRouter key **and** a model, and both are
+needed before the backup exists. An empty model means off, on purpose: OpenRouter has no default,
+and a guessed slug only fails on the day it is needed.
+
+It is called **only when the primary provider fails**: a transport error, `401`/`403` (dead or
+revoked key), `402` (no credit), `429` (rate limit) or a `5xx`. A `2xx` answer never starts it, even
+an empty or cut-off one — the provider *did* answer, and a second call would be billed twice. A
+`400`/`404`/`422` is our own bad request and is reported, not retried elsewhere. A model name the
+primary rejects is still retried once on the primary's own default first.
+
+The backup request is the same body on `https://openrouter.ai/api/v1/chat/completions` with the
+backup key, the backup model, and `reasoning_effort` removed (that parameter is AIMLAPI's; OpenRouter
+may refuse a request carrying it). Every surface that speaks `/chat/completions` uses the same path —
+the generator, the Content Studio and the AI Chat — so a failover in one is a failover in all three.
+It is **not** used while OpenRouter is the provider itself: that would be a backup to the same
+service. The Anthropic wire format and AI images are out of scope.
+
+Nothing is silent. A failover writes one row to the error log (`Fejlsøgning`, source `ai-fallback`)
+with the primary's status and the model that answered — never the key and never the request — and the
+AI Chat answer ends with a sentence saying the primary failed and the backup answered. Neither the
+provider nor the model is changed: the next call tries the primary again. *Test connections* tests the
+backup **pair** (that key, that model), because testing it with the primary's model would be testing a
+combination the plugin never sends. As with every key here, it can live in `wp-config.php` as
+`SGAP_OPENROUTER_API_KEY`.
 
 ## AI profiles (7.41.2)
 

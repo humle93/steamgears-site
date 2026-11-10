@@ -21,7 +21,7 @@ design/CSS, backup-data, dokumentation og status.
 | [`AGENTS.md`](AGENTS.md) | Arbejdsregler: hvert pass melder % før → efter med grundlag, og §7 dækker plugin-arbejdet |
 | [`docs/agent-profil.md`](docs/agent-profil.md) | **Agentprofil** — alt en bot skal vide: fakta, adgang, opskrifter, fælder. Kan også hentes over MCP |
 | [`docs/steamgears-autopilot-projektbeskrivelse-2026-11-06.md`](docs/steamgears-autopilot-projektbeskrivelse-2026-11-06.md) | **Projektbeskrivelse af Autopilot-pluginnet** (7.38.2): filstruktur, roadmap, AIMLAPI- og nøglehåndtering — copy-paste-klar til et eksternt AI-værktøj |
-| [`docs/plan-openrouter-backup-2026-11-09.md`](docs/plan-openrouter-backup-2026-11-09.md) | **Plan (ikke bygget): OpenRouter som automatisk backup for AIMLAPI** — bygger oven på 7.67.0's `openrouter`-udbyder, med trigger-matrix, filomfang, testkrav og regnskab (0,35 d). Kræver ejerens godkendelse før kode (AGENTS.md §7.1) |
+| [`docs/plan-openrouter-backup-2026-11-09.md`](docs/plan-openrouter-backup-2026-11-09.md) | **Bygget 10/11 som 7.67.1: OpenRouter som automatisk backup for AIMLAPI** — bygger oven på 7.67.0's `openrouter`-udbyder: egen nøgle og eget model-felt, failover kun ved udbyderfejl (transport, 401/403, 402, 429, 5xx), fælles request-vej for generator, Studio og chat, 30 nye smoke-checks (0,35 d) |
 
 Nye audits og research lægges i `docs/library/` og skrives ind i [dokumentindekset](docs/library/README.md),
 så de ikke bliver forældreløse (`AGENTS.md` §5).

@@ -15,7 +15,7 @@ class SGAP_Setup {
     const LABELS = [
         'autopilot_enabled' => 'Autopilot', 'full_auto_enabled' => 'Full auto (skip approval)', 'channels' => 'Channels',
         'posts_per_day' => 'Pages to promote per day', 'ai_provider' => 'AI provider', 'ai_api_key' => 'AI API key', 'ai_model' => 'AI model',
-        'ai_base_url' => 'API base URL', 'content_language' => 'Article language', 'image_model' => 'Image model', 'image_api_key' => 'AIMLAPI key for images',
+        'ai_base_url' => 'API base URL', 'openrouter_api_key' => 'OpenRouter backup key', 'openrouter_model' => 'OpenRouter backup model', 'content_language' => 'Article language', 'image_model' => 'Image model', 'image_api_key' => 'AIMLAPI key for images',
         'serpapi_key' => 'SerpApi key (keyword research)', 'publish_mode' => 'How posts reach Publer', 'publer_api_key' => 'Publer API key',
         'publer_workspace_id' => 'Publer workspace', 'publer_pinterest_board' => 'Pinterest board ID', 'daily_cap' => 'Max posts per day',
         'batch_size' => 'Posts per 15-minute run', 'quiet_start' => 'Quiet from', 'quiet_end' => 'Quiet until', 'labor_rate' => 'Your hourly rate',
@@ -49,7 +49,7 @@ class SGAP_Setup {
      * key added to the wrong tab later still shows up in exactly one place.
      */
     const TABS = [
-        'keys' => ['Keys', 'lock', ['publer_api_key', 'ai_api_key', 'image_api_key', 'serpapi_key', 'telegram_bot_token', 'merchant_feed_secret', 'bluesky_app_password', 'mastodon_token', 'mcp_refresh_token', 'printful_api_key', 'pinterest_access_token', 'pinterest_refresh_token', 'pinterest_client_secret', 'instagram_access_token', 'facebook_access_token', 'reddit_client_secret', 'reddit_password', 'reddit_refresh_token']],
+        'keys' => ['Keys', 'lock', ['publer_api_key', 'ai_api_key', 'image_api_key', 'serpapi_key', 'telegram_bot_token', 'merchant_feed_secret', 'bluesky_app_password', 'mastodon_token', 'mcp_refresh_token', 'printful_api_key', 'pinterest_access_token', 'pinterest_refresh_token', 'pinterest_client_secret', 'instagram_access_token', 'facebook_access_token', 'reddit_client_secret', 'reddit_password', 'reddit_refresh_token', 'openrouter_api_key']],
         'basics' => ['Basics', 'admin-home', ['autopilot_enabled', 'full_auto_enabled', 'channels', 'posts_per_day']],
         'ai' => ['AI & images', 'superhero-alt', ['ai_profile', 'ai_provider', 'ai_model', 'ai_base_url', 'content_language', 'image_model']],
         'publishing' => ['Publishing', 'megaphone', ['publish_mode', 'publer_workspace_id', 'publer_pinterest_board', 'pinterest_client_id', 'instagram_user_id', 'instagram_graph_host', 'facebook_page_id', 'facebook_graph_version', 'facebook_direct', 'bluesky_handle', 'mastodon_instance', 'mastodon_limit', 'telegram_chat_id', 'quality_gate', 'banned_words', 'dupe_days']],
@@ -255,6 +255,37 @@ class SGAP_Setup {
             . ' offers right now. The list is refreshed every 12 hours, so a retired model cannot be picked, and saving checks it again.</p>';
     }
 
+    /**
+     * The backup model: the same rule as model_field(), except that empty is a real choice here —
+     * it is what switches the backup off. The list comes from OpenRouter itself, never from the
+     * chosen provider, and without a list the field stays free text so the rest of the form works.
+     */
+    public static function backup_model_field(string $name): string {
+        $id = 'sgap_openrouter_model';
+        $current = trim((string) SGAP_Settings::get('openrouter_model'));
+        $models = SGAP_AI::catalog(false, 'openrouter_backup');
+        if ($models === []) {
+            return '<input type="text" id="' . esc_attr($id) . '" name="' . esc_attr($name) . '" value="' . esc_attr($current)
+                . '" class="sgap-text" spellcheck="false" placeholder="model id — empty = no backup">'
+                . '<p class="sgap-hint">Could not read the model list from OpenRouter right now, so the name is free text. Empty = the backup is off.</p>';
+        }
+        $html = '<select id="' . esc_attr($id) . '" name="' . esc_attr($name) . '" class="sgap-model">'
+            . '<option value=""' . selected($current, '', false) . '>Off — the primary provider only</option>';
+        if ($current !== '' && !in_array($current, $models, true)) {
+            // Never hide what is saved: a retired backup model has to be visible to be replaced.
+            $html .= '<option value="' . esc_attr($current) . '" selected>' . esc_html($current) . ' (not offered any more)</option>';
+        }
+        foreach (self::group_models($models) as $vendor => $ids) {
+            $html .= '<optgroup label="' . esc_attr($vendor) . '">';
+            foreach ($ids as $model) {
+                $html .= '<option value="' . esc_attr($model) . '"' . selected($current, $model, false) . '>' . esc_html($model) . '</option>';
+            }
+            $html .= '</optgroup>';
+        }
+        return $html . '</select><p class="sgap-hint">' . count($models) . ' model(s) OpenRouter offers right now. Empty = no backup. '
+            . 'The backup is only called when the primary provider fails, never when it answers.</p>';
+    }
+
     /** Model ids by their vendor prefix, so hundreds of ids stay navigable in one dropdown. */
     public static function group_models(array $models): array {
         $groups = [];
@@ -301,6 +332,9 @@ class SGAP_Setup {
         }
         if ($key === 'ai_model') {
             return self::model_field($name);
+        }
+        if ($key === 'openrouter_model') {
+            return self::backup_model_field($name);
         }
         if (in_array($key, SGAP_Settings::TEXTAREA_KEYS, true)) {
             return '<textarea id="' . esc_attr($id) . '" name="' . esc_attr($name) . '" rows="4" class="sgap-text" spellcheck="false">' . esc_textarea((string) SGAP_Settings::get($key)) . '</textarea>';

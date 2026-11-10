@@ -249,6 +249,15 @@
           "note": "udført og målt 9/11: sitet kørte 7.65.0 mens repoet var 7.65.4, så P3.7 og P3.8 var bygget men ikke i drift. Zip 398 668 bytes (sha256 `e399813b…`) uploadet gennem MCP i to base64-dele, installeret med `Plugin_Upgrader::install(..., overwrite_package)` — 7.65.0 → 7.65.4 → **7.65.5**, stadig aktiv. `steamgears-autopilot.php`, `ROADMAP.md`, `includes/assets.php` og `assets/pages/dashboard.js` er målt **byte-identiske** mellem site og repo. Live: `SGAP_Admin::dashboard()` giver **17 566 bytes HTML med 0 inline `<script>` og 0 inline `<style>`**, syv side-scripts, to CSS-filer; `/`, `/shop/`, produktside og `/cart/` svarer 200 (75 124 / 269 514 / 282 839 / 378 718 bytes), og `/wp-json/sgap/v1/tick` 200. 7.65.5 er en bogføringsrelease (kun ROADMAP.md), hævet fordi filen er en del af zip'en."
         },
         {
+          "id": "p1fallback",
+          "name": "P1.24 — OpenRouter som automatisk backup for AIMLAPI",
+          "done": 0.35,
+          "total": 0.35,
+          "unit": "d",
+          "verified": true,
+          "note": "7.67.1 (10/11): backuppen har sin egen nøgle (openrouter_api_key) og sit eget model-felt (openrouter_model, valgt fra OpenRouter's live katalog under sgap_ai_catalog_openrouter_backup), fordi ai_api_key hører til den valgte udbyder. Kun udbyderfejl starter den — transport, 401/403, 402, 429 og 5xx — mens et 2xx-svar (også tomt eller afkortet) aldrig gør, og 400/404/422 rapporteres som vores egen fejl; et modelnavn primæren afviser prøves først på primærens standardmodel. SGAP_AI::chat_completions() er nu den eneste vej til /chat/completions, så generatoren, Content Studio og AI Chat deler failover; backup-bodyen er den samme minus reasoning_effort, og nøgletesten prøver backup-parret. Hver failover giver én række i fejlloggen (ai-fallback) og en sætning i chat-svaret, aldrig nøglen. Slået fra mens OpenRouter selv er provideren. 30 nye smoke-checks (1286 -> 1316 PASS, 0 FAIL). Forbehold: intet kald er gået til den rigtige OpenRouter — der findes ingen nøgle i sandkassen."
+        },
+        {
           "id": "p1or",
           "name": "P1.23 — OpenRouter som egen tekst-provider",
           "done": 0.25,

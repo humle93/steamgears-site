@@ -390,12 +390,15 @@ class SGAP_Settings {
         'pinterest_access_token','pinterest_refresh_token','pinterest_client_secret',
         'instagram_access_token',
         'facebook_access_token',
-        'reddit_client_secret','reddit_password','reddit_refresh_token'
+        'reddit_client_secret','reddit_password','reddit_refresh_token',
+        // The backup's own key: ai_api_key belongs to the chosen provider, so sharing it would
+        // either overwrite the primary's key or send the wrong credential to OpenRouter.
+        'openrouter_api_key'
     ];
     /** Multi-line text settings, shown as a textarea. */
     const TEXTAREA_KEYS = ['blackout_ranges', 'banned_words', 'forum_intro'];
     const TEXT_KEYS = [
-        'publer_workspace_id','publer_pinterest_board','channels','ai_model','ai_base_url','image_model','content_language','rescue_hosts',
+        'publer_workspace_id','publer_pinterest_board','channels','ai_model','ai_base_url','openrouter_model','image_model','content_language','rescue_hosts',
         'telegram_chat_id',
         'alert_email','channel_caps',
         'blackout_ranges','banned_words','utm_campaign','bluesky_handle','mastodon_instance',
@@ -420,7 +423,7 @@ class SGAP_Settings {
     const SECTIONS = [
         'General' => ['autopilot_enabled','full_auto_enabled','daily_cap','batch_size','quiet_start','quiet_end','blackout_ranges','quality_gate','banned_words','dupe_days','utm_campaign','command_center_url'],
         'Publer' => ['publish_mode','publer_api_key','publer_workspace_id','publer_pinterest_board','pinterest_client_id','instagram_user_id','instagram_graph_host','facebook_page_id','facebook_access_token','facebook_graph_version','facebook_direct','channels','bluesky_handle','bluesky_app_password','mastodon_instance','mastodon_token','mastodon_limit','telegram_bot_token','telegram_chat_id'],
-        'AI content' => ['ai_profile','ai_provider','ai_api_key','ai_model','ai_base_url','posts_per_day','content_language','locale_source','locales','image_model','image_api_key','serpapi_key'],
+        'AI content' => ['ai_profile','ai_provider','ai_api_key','ai_model','ai_base_url','openrouter_model','posts_per_day','content_language','locale_source','locales','image_model','image_api_key','serpapi_key'],
         'Economics' => ['labor_rate','monthly_budget','target_roi','winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max'],
         'Evergreen' => ['evergreen_enabled','evergreen_after_days','evergreen_max_shares','evergreen_batch'],
         'Alerts and log' => ['alert_mode','alert_email','alert_dry_days','channel_caps','audit_keep_days'],
@@ -455,6 +458,8 @@ class SGAP_Settings {
         'image_model' => 'AIMLAPI image model. Empty = bytedance/seedream-5-0-pro (about $0.045 per image). Cheaper: flux/schnell.',
         'image_api_key' => 'Only needed when the AI provider is not AIMLAPI: an AIMLAPI key for images.',
         'serpapi_key' => 'serpapi.com → Manage API key. Gives the article writer live Google data: People also ask, related searches, top results.',
+        'openrouter_api_key' => 'A second key, for the backup only: openrouter.ai/keys. It is not the AIMLAPI or Anthropic key, so rotating one never points the backup at the wrong account. Used only when the primary provider fails: a transport error, 401/403, no credit (402), rate limit (429) or a 5xx. A 2xx answer never starts it.',
+        'openrouter_model' => 'The model the backup asks, picked from OpenRouter\'s live list. Empty = the backup is off, because OpenRouter has no default model and a guessed slug would only fail on the day it is needed. Ignored while OpenRouter is the provider itself, where the backup would be the same service.',
         'ai_api_key' => 'AIMLAPI: aimlapi.com → Dashboard → API Keys. Anthropic: console.anthropic.com → API keys. OpenRouter: openrouter.ai/keys. One key at a time: switching provider asks for that provider\'s key.',
         'channels' => 'Instagram and Pinterest posts need a photo; the Content Studio can create one. Comma-separated. Add bluesky to post there directly, without Publer — it needs the handle and an app password below, and is skipped (through Publer) until both are filled in.',
         'bluesky_handle' => 'Your Bluesky handle, e.g. steamgears.bsky.social. The @ is optional. Used together with an app password to post directly; an email address works too but the handle is what readers see.',
@@ -581,6 +586,7 @@ class SGAP_Settings {
                     // A model the provider does not offer is what broke the chat once: refuse it
                     // at the door, and let the owner pick one from the dropdown instead.
                     $key === 'ai_model' => [__CLASS__, 'sanitize_model'],
+                    $key === 'openrouter_model' => [__CLASS__, 'sanitize_backup_model'],
                     // sanitize_text_field would flatten the newlines that separate the
                     // blackout ranges, leaving only the first range saved.
                     in_array($key, self::TEXTAREA_KEYS, true) => 'sanitize_textarea_field',
@@ -625,6 +631,30 @@ class SGAP_Settings {
         foreach (['anthropic', 'aimlapi', 'openai_compatible'] as $provider) {
             delete_site_transient('sgap_ai_catalog_' . $provider);
         }
+    }
+
+    /**
+     * The backup model. Unlike ai_model, empty is a real value here: it means "the backup is off",
+     * so it is stored empty instead of being resolved to a default that does not exist. A name
+     * OpenRouter does not list is refused and the stored one kept, the same rule as ai_model.
+     */
+    public static function sanitize_backup_model($value): string {
+        $value = trim(sanitize_text_field((string) $value));
+        if ($value === '') {
+            return '';
+        }
+        $models = SGAP_AI::catalog(false, 'openrouter_backup');
+        if ($models === [] || in_array($value, $models, true)) {
+            return $value;
+        }
+        $previous = trim((string) get_option('sgap_openrouter_model', ''));
+        if (function_exists('add_settings_error')) {
+            add_settings_error('sgap_openrouter_model', 'sgap_backup_model_unknown', sprintf(
+                'OpenRouter does not offer "%s", so the backup model was left unchanged. Pick one from the list.',
+                $value
+            ));
+        }
+        return $previous;
     }
 
     /**

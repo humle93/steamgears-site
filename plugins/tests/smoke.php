@@ -1588,6 +1588,188 @@ $failed=SGAP_Engagement::refresh();
 check('engagement: a 500 is reported and stores nothing', $failed['updated']===0 && count($failed['errors'])===1 && str_contains($failed['errors'][0],'500'));
 SGAP_Engagement::$transport=null; $GLOBALS['rows']=[];
 
+
+/* ---------------- P1.24: OpenRouter as an automatic backup for AIMLAPI ---------------- */
+// Only a provider failure may start the backup: a 2xx answer — even an empty one — means the
+// provider answered, and a second call would pay twice for the same request. Every call here is
+// stubbed through http_queue, so nothing leaves the machine and no key is real.
+$fb_keep = [];
+foreach (['sgap_ai_provider','sgap_ai_model','sgap_ai_api_key','sgap_openrouter_api_key','sgap_openrouter_model'] as $k) {
+    $fb_keep[$k] = $GLOBALS['opts'][$k] ?? null;
+}
+$fb_log_before = get_option('sgap_error_log', []);
+update_option('sgap_ai_provider','aimlapi');
+update_option('sgap_ai_model','anthropic/claude-opus-5.5');
+update_option('sgap_ai_api_key','PRIMARY-KEY');
+update_option('sgap_openrouter_api_key','sk-or-backup');
+update_option('sgap_openrouter_model','anthropic/claude-sonnet-4.5');
+
+check('fallback: ready only with a key, a model and a primary that is not OpenRouter',
+    SGAP_AI::fallback_ready() && SGAP_AI::fallback_key()==='sk-or-backup' && SGAP_AI::fallback_model()==='anthropic/claude-sonnet-4.5');
+update_option('sgap_openrouter_model','');
+check('fallback: a key without a model is off, not guessed', !SGAP_AI::fallback_ready());
+update_option('sgap_openrouter_model','anthropic/claude-sonnet-4.5');
+$fb_provider = SGAP_AI::provider(); update_option('sgap_ai_provider','openrouter'); update_option('sgap_ai_model','anthropic/claude-sonnet-4.5');
+check('fallback: OpenRouter as the provider never backs up to itself', !SGAP_AI::fallback_ready());
+update_option('sgap_ai_provider','aimlapi'); update_option('sgap_ai_model','anthropic/claude-opus-5.5');
+check('fallback: provider failures count, our own mistakes do not',
+    SGAP_AI::should_fallback(new WP_Error('x','y',['status'=>401]))
+    && SGAP_AI::should_fallback(new WP_Error('x','y',['status'=>403]))
+    && SGAP_AI::should_fallback(new WP_Error('x','y',['status'=>402]))
+    && SGAP_AI::should_fallback(new WP_Error('x','y',['status'=>429]))
+    && SGAP_AI::should_fallback(new WP_Error('x','y',['status'=>503]))
+    && SGAP_AI::should_fallback(new WP_Error('offline','offline'))
+    && !SGAP_AI::should_fallback(new WP_Error('x','y',['status'=>400]))
+    && !SGAP_AI::should_fallback(new WP_Error('x','y',['status'=>422]))
+    && !SGAP_AI::should_fallback(new WP_Error('x','y',['status'=>200])));
+
+// A working primary is never doubled.
+$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[sgap_http(200,['choices'=>[['message'=>['content'=>'{"posts":[]}'],'finish_reason'=>'stop']]])];
+$fb_json=SGAP_AI::json_call('sys','prompt',['type'=>'object']);
+check('fallback: a working primary makes exactly one call and no backup',
+    !is_wp_error($fb_json) && count($GLOBALS['http_calls'])===1 && SGAP_AI::last_fallback()===[] && SGAP_AI::fallback_note()==='');
+
+// 402 — the case that actually happened on the live site: the account ran out of credit.
+$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[
+    sgap_http(402,['error'=>['message'=>'Insufficient credits']]),
+    sgap_http(200,['choices'=>[['message'=>['content'=>'{"posts":[]}'],'finish_reason'=>'stop']]])
+];
+$fb_json=SGAP_AI::json_call('sys','prompt',['type'=>'object'],1200,'low');
+$fb_backup=$GLOBALS['http_calls'][1]??[];
+$fb_sent=json_decode((string)($fb_backup[1]['body']??''),true);
+check('fallback: no credit starts the backup', !is_wp_error($fb_json) && count($GLOBALS['http_calls'])===2
+    && ($fb_backup[0]??'')==='https://openrouter.ai/api/v1/chat/completions');
+check('fallback: the backup sends its own key and its own model',
+    ($fb_backup[1]['headers']['Authorization']??'')==='Bearer sk-or-backup' && ($fb_sent['model']??'')==='anthropic/claude-sonnet-4.5');
+check('fallback: OpenRouter gets no reasoning_effort but the same request',
+    !isset($fb_sent['reasoning_effort']) && isset($fb_sent['messages'][0]['content'],$fb_sent['response_format'])
+    && ($fb_backup[1]['headers']['HTTP-Referer']??'')==='https://steamgears.eu/');
+check('fallback: the result is recorded without the key',
+    (SGAP_AI::last_fallback()['model']??'')==='anthropic/claude-sonnet-4.5'
+    && (SGAP_AI::last_fallback()['status']??0)===402
+    && !str_contains(wp_json_encode(SGAP_AI::last_fallback()),'sk-or-backup'));
+$fb_note=SGAP_AI::fallback_note();
+check('fallback: the owner is told the answer came from the backup',
+    str_contains($fb_note,'OpenRouter backup') && str_contains($fb_note,'anthropic/claude-sonnet-4.5')
+    && str_contains($fb_note,'Insufficient credits') && !str_contains($fb_note,'sk-or-backup'));
+$fb_entries=SGAP_Diagnostics::entries();
+check('fallback: the diagnostics log keeps one row, with the status and no key',
+    ($fb_entries[0]['source']??'')==='ai-fallback' && (int)($fb_entries[0]['context']['status']??0)===402
+    && !str_contains(wp_json_encode($fb_entries[0]),'sk-or-backup'));
+
+foreach ([401,429,503] as $fb_code) {
+    $GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[
+        sgap_http($fb_code,['error'=>['message'=>'HTTP '.$fb_code]]),
+        sgap_http(200,['choices'=>[['message'=>['content'=>'svar'],'finish_reason'=>'stop']]])
+    ];
+    $fb_out=SGAP_AI::chat_call('PRIMARY-KEY',['model'=>'anthropic/claude-opus-5.5','messages'=>[]]);
+    check("fallback: HTTP {$fb_code} starts the backup", !is_wp_error($fb_out) && count($GLOBALS['http_calls'])===2);
+}
+$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[
+    new WP_Error('http_request_failed','cURL error 28: timed out'),
+    sgap_http(200,['choices'=>[['message'=>['content'=>'svar'],'finish_reason'=>'stop']]])
+];
+$fb_out=SGAP_AI::chat_call('PRIMARY-KEY',['model'=>'anthropic/claude-opus-5.5','messages'=>[]]);
+check('fallback: a transport error starts the backup', !is_wp_error($fb_out) && count($GLOBALS['http_calls'])===2);
+
+// A rejected model name is the provider's own advice, not an outage: retry on its default first.
+$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[
+    sgap_http(400,['error'=>['message'=>'Model x/y not found']]),
+    sgap_http(200,['choices'=>[['message'=>['content'=>'svar'],'finish_reason'=>'stop']]])
+];
+$fb_out=SGAP_AI::chat_call('PRIMARY-KEY',['model'=>'x/y','messages'=>[]]);
+check('fallback: a rejected model is retried on the provider default, not backed up',
+    !is_wp_error($fb_out) && count($GLOBALS['http_calls'])===2
+    && (json_decode((string)($GLOBALS['http_calls'][1][1]['body']??''),true)['model']??'')==='anthropic/claude-opus-5.5'
+    && SGAP_AI::last_fallback()===[]);
+$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[sgap_http(400,['error'=>['message'=>'Bad request']])];
+$fb_out=SGAP_AI::chat_call('PRIMARY-KEY',['model'=>'anthropic/claude-opus-5.5','messages'=>[]]);
+check('fallback: a 400 without a model error is reported, not backed up',
+    is_wp_error($fb_out) && count($GLOBALS['http_calls'])===1);
+
+// An empty or cut-off 200 answer is a real answer: no second call.
+$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[sgap_http(200,['choices'=>[['message'=>['content'=>''],'finish_reason'=>'length']]])];
+$fb_gen=SGAP_AI::generate(['title'=>'T','type'=>'post','summary'=>'S'],['facebook']);
+check('fallback: an empty 200 answer is an error, not a reason to call the backup',
+    is_wp_error($fb_gen) && count($GLOBALS['http_calls'])===1);
+
+// Both fail: the error names both providers and keeps the primary's status code.
+$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[
+    sgap_http(402,['error'=>['message'=>'Insufficient credits']]),
+    sgap_http(401,['error'=>['message'=>'No auth credentials found']])
+];
+$fb_out=SGAP_AI::chat_call('PRIMARY-KEY',['model'=>'anthropic/claude-opus-5.5','messages'=>[]]);
+check('fallback: a second failure names both providers and keeps the primary code',
+    is_wp_error($fb_out) && str_contains($fb_out->get_error_message(),'Insufficient credits')
+    && str_contains($fb_out->get_error_message(),'OpenRouter')
+    && ($fb_out->get_error_data()['status']??0)===402);
+check('fallback: nothing is recorded when the backup failed too', SGAP_AI::last_fallback()===[]);
+
+// Without a model the backup is off — one attempt, the original error unchanged.
+update_option('sgap_openrouter_model','');
+$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[sgap_http(402,['error'=>['message'=>'Insufficient credits']])];
+$fb_out=SGAP_AI::chat_call('PRIMARY-KEY',['model'=>'anthropic/claude-opus-5.5','messages'=>[]]);
+check('fallback: switched off is one attempt and the original error',
+    is_wp_error($fb_out) && count($GLOBALS['http_calls'])===1 && !str_contains($fb_out->get_error_message(),'backup'));
+update_option('sgap_openrouter_model','anthropic/claude-sonnet-4.5');
+
+// The key test proves the backup pair, never the primary's model.
+$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[sgap_http(200,['choices'=>[['message'=>['content'=>''],'finish_reason'=>'length']]])];
+$fb_check=SGAP_KeyCheck::check_fallback();
+$fb_call=$GLOBALS['http_calls'][0]??[];
+$fb_body=json_decode((string)($fb_call[1]['body']??''),true);
+check('fallback: the key test asks OpenRouter with the backup key and the backup model',
+    ($fb_check['ok']??null)===true && ($fb_call[0]??'')==='https://openrouter.ai/api/v1/chat/completions'
+    && ($fb_call[1]['headers']['Authorization']??'')==='Bearer sk-or-backup'
+    && ($fb_body['model']??'')==='anthropic/claude-sonnet-4.5');
+check('fallback: the key test says the backup is off when the model is empty',
+    (function () { update_option('sgap_openrouter_model',''); $r=SGAP_KeyCheck::check_fallback();
+        update_option('sgap_openrouter_model','anthropic/claude-sonnet-4.5');
+        return ($r['ok']??null)===false && str_contains($r['message'],'backup is off'); })());
+check('fallback: the key test is silent when no backup key is saved',
+    (function () { $k=get_option('sgap_openrouter_api_key'); update_option('sgap_openrouter_api_key','');
+        $r=SGAP_KeyCheck::check_fallback(); update_option('sgap_openrouter_api_key',$k);
+        return ($r['ok']??null)===null && $GLOBALS['http_calls']!==[]; })());
+
+// Settings, list and save path.
+check('fallback: the key is a secret and the model a plain setting',
+    in_array('openrouter_api_key',SGAP_Settings::SECRET_KEYS,true)
+    && in_array('openrouter_model',SGAP_Settings::TEXT_KEYS,true)
+    && isset(SGAP_Settings::HELP['openrouter_api_key'],SGAP_Settings::HELP['openrouter_model'])
+    && in_array('openrouter_model',SGAP_Settings::SECTIONS['AI content'],true));
+check('fallback: the backup key has its own card, with the model beside it',
+    (SGAP_Keys::PROVIDERS['openrouter_backup']['keys']??[])===['openrouter_api_key']
+    && in_array('openrouter_model',SGAP_Keys::PROVIDERS['openrouter_backup']['extra']??[],true)
+    && in_array('sgap_ai_catalog_openrouter_backup',SGAP_Keys::CACHE_MAP['openrouter_api_key']??[],true));
+$GLOBALS['filters']['sgap_ai_model_catalog']=function($list,$provider){
+    return $provider==='openrouter_backup'
+        ? ['anthropic/claude-sonnet-4.5','openai/gpt-5','anthropic/claude-sonnet-4.5']
+        : ['anthropic/claude-opus-5.5'];
+};
+check('fallback: the model list comes from OpenRouter, not from the chosen provider',
+    SGAP_AI::catalog(false,'openrouter_backup')===['anthropic/claude-sonnet-4.5','openai/gpt-5']
+    && SGAP_AI::catalog()===['anthropic/claude-opus-5.5']);
+$fb_field=SGAP_Setup::backup_model_field('sgap_openrouter_model');
+check('fallback: the field offers "off" first and groups the rest',
+    str_contains($fb_field,'<select id="sgap_openrouter_model"') && str_contains($fb_field,'>Off —')
+    && str_contains($fb_field,'<optgroup label="anthropic">'));
+$fb_san=$GLOBALS['settings']['sgap_openrouter_model']['sanitize_callback']??null;
+check('fallback: the save path keeps empty as off and refuses an unlisted model',
+    is_callable($fb_san) && $fb_san('')==='' && $fb_san('openai/gpt-5')==='openai/gpt-5'
+    && $fb_san('nope/nope')==='anthropic/claude-sonnet-4.5'
+    && ($GLOBALS['settings_errors'][count($GLOBALS['settings_errors'])-1][1]??'')==='sgap_backup_model_unknown');
+unset($GLOBALS['filters']['sgap_ai_model_catalog']);
+ob_start(); do_action('page_sgap-settings'); $fb_html=ob_get_clean();
+check('fallback: the keys tab renders the backup key and its model once each',
+    substr_count($fb_html,'name="sgap_openrouter_api_key"')===1
+    && substr_count($fb_html,'name="sgap_openrouter_model"')===1
+    && str_contains($fb_html,'OpenRouter (backup)'));
+
+// Put the settings back the way the rest of the suite expects them.
+foreach ($fb_keep as $k=>$v) { if ($v===null) { unset($GLOBALS['opts'][$k]); } else { $GLOBALS['opts'][$k]=$v; } }
+if ($fb_log_before === []) { delete_option('sgap_error_log'); } else { update_option('sgap_error_log',$fb_log_before,false); }
+$GLOBALS['http_queue']=[]; $GLOBALS['http_calls']=[];
+
 require __DIR__.'/roi.php';
 require __DIR__.'/pinterest.php';
 require __DIR__.'/instagram.php';

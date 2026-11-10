@@ -25,6 +25,20 @@ class SGAP_AI {
      */
     const OPENROUTER_URL = 'https://openrouter.ai/api/v1';
 
+    /**
+     * The backup: its own key and its own model. `ai_api_key` is "one key at a time" for whichever
+     * provider is chosen, so reusing it here would either overwrite the primary's key or send the
+     * wrong credential to OpenRouter. The model has no default for the same reason P1.23 has none —
+     * OpenRouter's catalogue changes, so a guessed slug ages into a 404.
+     */
+    const FALLBACK_KEY = 'openrouter_api_key';
+    const FALLBACK_MODEL = 'openrouter_model';
+    /** Its own catalogue cache, so a backup list and a provider list cannot overwrite each other. */
+    const FALLBACK_CATALOG = 'sgap_ai_catalog_openrouter_backup';
+
+    /** What the last call did. Set only when the backup answered; reset on every new call. */
+    private static array $fallback = [];
+
     public static function provider(): string {
         $provider = (string) SGAP_Settings::get('ai_provider', 'anthropic');
         return in_array($provider, ['anthropic', 'aimlapi', 'openai_compatible', 'openrouter'], true) ? $provider : 'anthropic';
@@ -98,22 +112,26 @@ class SGAP_AI {
     }
 
     /**
-     * The model ids the provider lists right now, cached for 12 hours: the Settings dropdown
-     * and the save-time check then cost at most one request per half-day. A site whose provider
-     * is reached through a proxy can replace the list with the `sgap_ai_model_catalog` filter.
+     * The model ids an endpoint lists right now, cached for 12 hours: the Settings dropdown and
+     * the save-time check then cost at most one request per half-day. A site whose provider is
+     * reached through a proxy can replace the list with the `sgap_ai_model_catalog` filter.
+     *
+     * $provider is empty for the configured provider and 'openrouter_backup' for the backup's own
+     * list, which is why the cache name is per provider rather than per service.
      * @return string[]
      */
-    public static function catalog(bool $fresh = false): array {
-        $supplied = apply_filters('sgap_ai_model_catalog', null, self::provider());
+    public static function catalog(bool $fresh = false, string $provider = ''): array {
+        $provider = $provider !== '' ? $provider : self::provider();
+        $supplied = apply_filters('sgap_ai_model_catalog', null, $provider);
         if (is_array($supplied)) {
             return self::catalog_ids($supplied);
         }
-        $cache = 'sgap_ai_catalog_' . self::provider();
+        $cache = $provider === 'openrouter_backup' ? self::FALLBACK_CATALOG : 'sgap_ai_catalog_' . $provider;
         $cached = get_site_transient($cache);
         if (!$fresh && is_array($cached)) {
             return $cached;
         }
-        $ids = self::fetch_catalog();
+        $ids = self::fetch_catalog($provider);
         // A failure is cached briefly too, so an unreachable provider never slows the settings page.
         set_site_transient($cache, $ids, $ids !== [] ? 12 * HOUR_IN_SECONDS : 30 * MINUTE_IN_SECONDS);
         return $ids;
@@ -140,16 +158,20 @@ class SGAP_AI {
     }
 
     /** @return string[] Empty when the provider cannot be asked (no key yet, or offline). */
-    private static function fetch_catalog(): array {
-        if (self::provider() === 'aimlapi') {
+    private static function fetch_catalog(string $provider): array {
+        if ($provider === 'aimlapi') {
             // AIMLAPI lists its catalogue without a key. The URL is fixed, never ai_base_url.
             $response = wp_remote_get(self::DEFAULT_BASE_URL . '/models', ['timeout' => 20]);
+        } elseif ($provider === 'openrouter' || $provider === 'openrouter_backup') {
+            // OpenRouter lists its catalogue without a key too, so the backup model can be picked
+            // before the backup key exists — the list is not the credential.
+            $response = wp_remote_get(self::OPENROUTER_URL . '/models', ['timeout' => 20]);
         } else {
             $key = (string) SGAP_Settings::get('ai_api_key');
             if ($key === '') {
                 return [];
             }
-            $response = self::provider() === 'anthropic'
+            $response = $provider === 'anthropic'
                 ? wp_remote_get('https://api.anthropic.com/v1/models?limit=100', [
                     'timeout' => 20,
                     'headers' => ['x-api-key' => $key, 'anthropic-version' => self::ANTHROPIC_VERSION]
@@ -163,36 +185,134 @@ class SGAP_AI {
         return is_array($body) ? self::catalog_ids($body) : [];
     }
 
+    /** The OpenRouter backup key, or '' when none is saved. */
+    public static function fallback_key(): string {
+        return trim((string) SGAP_Settings::get(self::FALLBACK_KEY));
+    }
+
+    /** The model the backup asks, or '' when the backup is switched off. */
+    public static function fallback_model(): string {
+        return trim((string) SGAP_Settings::get(self::FALLBACK_MODEL));
+    }
+
     /**
-     * POST /chat/completions and decode it. A model name the provider does not know is
-     * retried once on the provider default, and Settings is repaired so the next call works
-     * too; every other error is returned unchanged, so nothing loops and nothing hides.
+     * Ready means a key, a model, a primary that speaks /chat/completions — and a primary that is
+     * not OpenRouter itself, because a backup to the same service is not a backup.
+     */
+    public static function fallback_ready(): bool {
+        return self::uses_chat_completions() && self::provider() !== 'openrouter'
+            && self::fallback_key() !== '' && self::fallback_model() !== '';
+    }
+
+    /**
+     * Only a provider failure may start the backup. A 2xx answer — even an empty or truncated one —
+     * means the provider *did* answer, so calling a second service would pay twice for the same
+     * request. 400/404/422 are our own mistakes and are never retried on another service either.
+     */
+    public static function should_fallback(WP_Error $error): bool {
+        $status = (int) ($error->get_error_data()['status'] ?? 0);
+        if ($status === 0) {
+            return true; // transport: DNS, timeout, TLS, or wp_remote_post refusing the call
+        }
+        return in_array($status, [401, 403, 402, 429], true) || $status >= 500;
+    }
+
+    /** What the last call did: empty unless the backup answered. */
+    public static function last_fallback(): array {
+        return self::$fallback;
+    }
+
+    /** One sentence for the owner — or '' when the primary provider answered. */
+    public static function fallback_note(): string {
+        if (self::$fallback === []) {
+            return '';
+        }
+        return "\n\nThe primary provider failed (" . self::$fallback['reason'] . '), so this answer came from the OpenRouter backup on `'
+            . self::$fallback['model'] . '`. Nothing was switched: the next call tries the primary again.';
+    }
+
+    /**
+     * The one path to /chat/completions. A model name the provider does not know is retried once
+     * on the provider default and Settings is repaired; if that also fails at the provider level,
+     * or any other provider failure occurs, the OpenRouter backup answers instead. Every other
+     * error is returned unchanged, so nothing loops and nothing hides.
      * @return array|WP_Error
      */
-    public static function chat_call(string $key, array $body, int $timeout = 120, string $who = '') {
+    public static function chat_completions(string $key, array $body, int $timeout = 120, string $who = '') {
+        self::$fallback = [];
         $who = $who !== '' ? $who : self::provider_name();
-        $send = static function (array $payload) use ($key, $timeout, $who) {
-            return self::decode(wp_remote_post(self::base_url() . '/chat/completions', [
-                'timeout' => $timeout,
-                'headers' => ['Authorization' => 'Bearer ' . $key, 'Content-Type' => 'application/json'],
-                'body' => wp_json_encode($payload)
-            ]), $who);
-        };
         $asked = (string) ($body['model'] ?? '');
-        $decoded = $send($body);
+        $decoded = self::post_chat(self::base_url(), $key, $body, $timeout, $who);
         if (!is_wp_error($decoded)) {
             return $decoded;
         }
-        $fallback = self::model_fallback($asked, $decoded);
-        if ($fallback === '') {
+        $retry = self::model_fallback($asked, $decoded);
+        if ($retry !== '') {
+            $body['model'] = $retry;
+            $decoded = self::post_chat(self::base_url(), $key, $body, $timeout, $who);
+            if (!is_wp_error($decoded)) {
+                self::repair_model($asked);
+                return $decoded;
+            }
+        }
+        if (!self::fallback_ready() || !self::should_fallback($decoded)) {
             return $decoded;
         }
-        $body['model'] = $fallback;
-        $decoded = $send($body);
+        return self::post_backup($body, $timeout, $decoded);
+    }
+
+    /** Kept as the name the chat loop and the tests already use. */
+    public static function chat_call(string $key, array $body, int $timeout = 120, string $who = '') {
+        return self::chat_completions($key, $body, $timeout, $who);
+    }
+
+    /** @return array|WP_Error One POST to a /chat/completions endpoint, decoded. */
+    private static function post_chat(string $base, string $key, array $body, int $timeout, string $who) {
+        return self::decode(wp_remote_post($base . '/chat/completions', [
+            'timeout' => $timeout,
+            'headers' => ['Authorization' => 'Bearer ' . $key, 'Content-Type' => 'application/json'],
+            'body' => wp_json_encode($body)
+        ]), $who);
+    }
+
+    /**
+     * The backup request: the same body on OpenRouter, with the backup's key and model and without
+     * `reasoning_effort`, which only AIMLAPI knows. Both failures are named in the error, primary
+     * first, so the owner reads what actually happened instead of a single vague message.
+     * @return array|WP_Error
+     */
+    private static function post_backup(array $body, int $timeout, WP_Error $primary) {
+        $model = self::fallback_model();
+        $body['model'] = $model;
+        unset($body['reasoning_effort']);
+        $decoded = self::decode(wp_remote_post(self::OPENROUTER_URL . '/chat/completions', [
+            'timeout' => $timeout,
+            'headers' => [
+                'Authorization' => 'Bearer ' . self::fallback_key(),
+                'Content-Type' => 'application/json',
+                'HTTP-Referer' => home_url('/'),
+                'X-OpenRouter-Title' => 'Steamgears Autopilot'
+            ],
+            'body' => wp_json_encode($body)
+        ]), 'OpenRouter backup');
+        $status = (int) ($primary->get_error_data()['status'] ?? 0);
         if (is_wp_error($decoded)) {
-            return $decoded;
+            return new WP_Error(
+                $primary->get_error_code(),
+                $primary->get_error_message() . ' The OpenRouter backup did not answer either: ' . $decoded->get_error_message(),
+                ['status' => $status, 'backup_status' => (int) ($decoded->get_error_data()['status'] ?? 0)]
+            );
         }
-        self::repair_model($asked);
+        self::$fallback = [
+            'at' => current_time('mysql'),
+            'model' => $model,
+            'status' => $status,
+            'reason' => $primary->get_error_message()
+        ];
+        if (class_exists('SGAP_Diagnostics')) {
+            // The status and the model only: never the key, never the request body.
+            SGAP_Diagnostics::log('ai-fallback', 'The backup answered (' . $model . '): ' . $primary->get_error_message(), ['status' => $status]);
+        }
         return $decoded;
     }
 
@@ -369,13 +489,7 @@ class SGAP_AI {
         if ($model === '') {
             return new WP_Error('sgap_ai_model', 'Set an AI model in Settings for ' . self::provider_name() . '.');
         }
-        $base = self::base_url();
-        $response = wp_remote_post($base . '/chat/completions', [
-            'timeout' => 120,
-            'headers' => ['Authorization' => 'Bearer ' . $key, 'Content-Type' => 'application/json'],
-            'body' => wp_json_encode(self::chat_body($model, $prompt))
-        ]);
-        $decoded = self::decode($response, self::provider_name());
+        $decoded = self::chat_completions($key, self::chat_body($model, $prompt), 120);
         if (is_wp_error($decoded)) {
             return $decoded;
         }
@@ -436,12 +550,7 @@ class SGAP_AI {
             if (self::provider() === 'aimlapi') {
                 $body['reasoning_effort'] = $effort;
             }
-            $response = wp_remote_post(self::base_url() . '/chat/completions', [
-                'timeout' => 280,
-                'headers' => ['Authorization' => 'Bearer ' . $key, 'Content-Type' => 'application/json'],
-                'body' => wp_json_encode($body)
-            ]);
-            $decoded = self::decode($response, self::provider_name());
+            $decoded = self::chat_completions($key, $body, 280);
             if (is_wp_error($decoded)) {
                 return $decoded;
             }

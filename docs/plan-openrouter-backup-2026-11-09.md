@@ -3,7 +3,7 @@
 **Mål:** når AIMLAPI ikke kan svare (tom konto, død nøgle, rate limit, nedbrud), skal autopiloten,
 Content Studio og AI Chat fortsætte på OpenRouter i stedet for at fejle — med AIMLAPI som valgt udbyder hele tiden.
 
-**Status:** plan, ikke bygget. Kræver ejerens godkendelse før kode (AGENTS.md §7.1).
+**Status:** bygget og udgivet som **7.67.1** (10/11 2026) efter ejerens godkendelse. Smoke 1286 → **1316 PASS / 0 FAIL**. Live-failover er **ikke** målt: der findes ingen OpenRouter-nøgle i sandkassen, og nøglen er ejerens.
 
 **Forudsætning målt 9/11 2026:** `main` står på **7.67.0**, hvor **P1.23** allerede gjorde OpenRouter til et
 eget valg i *AI provider* (`SGAP_AI::OPENROUTER_URL`, `provider_name()`, `check_openrouter()`, katalog under
@@ -80,48 +80,48 @@ Ude af planen:
 
 ### Opgave 1 — backup-nøgle og backup-model (0,08 d)
 
-- [ ] `SECRET_KEYS`/`TEXT_KEYS`/`SECTIONS`/`HELP`, `LABELS`, Keys-kort med model-dropdown.
-- [ ] Dropdownet læser **OpenRouter's** katalog (ny `catalog($fresh, 'openrouter')` med cache-nøgle
+- [x] `SECRET_KEYS`/`TEXT_KEYS`/`SECTIONS`/`HELP`, `LABELS`, Keys-kort med model-dropdown.
+- [x] Dropdownet læser **OpenRouter's** katalog (ny `catalog($fresh, 'openrouter')` med cache-nøgle
       `sgap_ai_catalog_openrouter_backup`), ikke den valgte udbyders; uden katalog bliver feltet fritekst med
       en advarsel, som `model_field()` allerede gør.
-- [ ] Test: nøglen er ikke autoloadet; tomt felt beholder værdien; værdien står aldrig i HTML; kortet dækker
+- [x] Test: nøglen er ikke autoloadet; tomt felt beholder værdien; værdien står aldrig i HTML; kortet dækker
       nøglen præcis én gang mod `SECRET_KEYS`; en gemt nøgle uden model siger "backup slået fra: vælg model".
 
 ### Opgave 2 — nøgletest for backuppen (0,03 d)
 
-- [ ] `check_openrouter($key, $model = '')` bruger `$model !== '' ? $model : SGAP_AI::model()`; eksisterende
+- [x] `check_openrouter($key, $model = '')` bruger `$model !== '' ? $model : SGAP_AI::model()`; eksisterende
       kaldssite er uændret. `check_fallback()` returnerer `ok => null` når intet er gemt, ellers testen af
       backup-parret.
-- [ ] Test med stubbet HTTP: ét token til `OPENROUTER_URL/chat/completions` med backup-nøgle og backup-model;
+- [x] Test med stubbet HTTP: ét token til `OPENROUTER_URL/chat/completions` med backup-nøgle og backup-model;
       200/401/402/404 mappes som i dag; resultatet lander i `sgap_key_status['openrouter_backup']`.
 
 ### Opgave 3 — den fælles request-vej med backup (0,08 d)
 
-- [ ] `chat_completions()` sender til `base_url()`, laver model-genforsøget og kalder backuppen pr. §3.
+- [x] `chat_completions()` sender til `base_url()`, laver model-genforsøget og kalder backuppen pr. §3.
       Ved succes sætter den `last_fallback()`; ved dobbeltfejl returneres den primære fejl med backup-grunden.
-- [ ] Backup-headere: Bearer, `Content-Type`, `HTTP-Referer: home_url('/')`, `X-OpenRouter-Title: Steamgears Autopilot`.
-- [ ] Test: 402 → to kald; det andet går til `https://openrouter.ai/api/v1/chat/completions` med Bearer,
+- [x] Backup-headere: Bearer, `Content-Type`, `HTTP-Referer: home_url('/')`, `X-OpenRouter-Title: Steamgears Autopilot`.
+- [x] Test: 402 → to kald; det andet går til `https://openrouter.ai/api/v1/chat/completions` med Bearer,
       `model = openrouter_model`, uden `reasoning_effort`, og med `messages`/`tools`/`response_format` identisk
       med det primære kald.
 
 ### Opgave 4 — de tre flader på samme vej (0,05 d)
 
-- [ ] `generate()`/`openai_compatible()`, `json_call()` og `chat_call()` kalder `chat_completions()`; ingen
+- [x] `generate()`/`openai_compatible()`, `json_call()` og `chat_call()` kalder `chat_completions()`; ingen
       `wp_remote_post` til `chat/completions` tilbage uden for den ene metode.
-- [ ] Test pr. flade: primær 500 → backup 200 giver et rigtigt svar (poster parset, JSON parset, chat-loopet
+- [x] Test pr. flade: primær 500 → backup 200 giver et rigtigt svar (poster parset, JSON parset, chat-loopet
       kører sin værktøjsrunde). Primær 200 → **nul** kald til OpenRouter.
 
 ### Opgave 5 — ærlig besked (0,02 d)
 
-- [ ] `SGAP_Diagnostics::log('ai-fallback', …)` med primærens kode og den brugte backupmodel — ingen nøgle, ingen body.
-- [ ] Chat-noten: at svaret kom fra backuppen, fordi den primære udbyder fejlede, og med hvilken fejl.
-- [ ] Test: log-optionen får én række; noten indeholder ikke nøglen; noten udebliver når primæren svarede.
+- [x] `SGAP_Diagnostics::log('ai-fallback', …)` med primærens kode og den brugte backupmodel — ingen nøgle, ingen body.
+- [x] Chat-noten: at svaret kom fra backuppen, fordi den primære udbyder fejlede, og med hvilken fejl.
+- [x] Test: log-optionen får én række; noten indeholder ikke nøglen; noten udebliver når primæren svarede.
 
 ### Opgave 6 — release og regnskab (0,02 d)
 
-- [ ] Version 7.67.1 i header og `SGAP_VERSION`; zip genopbygget, gammel zip slettet; `diff -r` mod kilden tom.
-- [ ] README (nøglevejledning + hvad der sker når AIMLAPI svigter) og `ROADMAP.md` (P1.24-række + changelog).
-- [ ] `projektstatus.json`: modul `p1fallback` 0,35/0,35 d, `verified: true`; `python3 projektstatus.py --update`.
+- [x] Version 7.67.1 i header og `SGAP_VERSION`; zip genopbygget, gammel zip slettet; `diff -r` mod kilden tom.
+- [x] README (nøglevejledning + hvad der sker når AIMLAPI svigter) og `ROADMAP.md` (P1.24-række + changelog).
+- [x] `projektstatus.json`: modul `p1fallback` 0,35/0,35 d, `verified: true`; `python3 projektstatus.py --update`.
 
 ## 6. Verifikation
 

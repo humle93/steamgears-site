@@ -25,6 +25,8 @@ class SGAP_Keys {
      */
     const CACHE_MAP = [
         'ai_api_key' => ['sgap_ai_catalog_aimlapi', 'sgap_ai_catalog_anthropic', 'sgap_ai_catalog_openai_compatible', 'sgap_ai_catalog_openrouter'],
+        // Its own catalogue: a backup list and a provider list must not overwrite each other.
+        'openrouter_api_key' => ['sgap_ai_catalog_openrouter_backup'],
         'image_api_key' => ['sgap_ai_catalog_aimlapi'],
         'publer_api_key' => ['sgap_publer_accounts'],
         'publer_workspace_id' => ['sgap_publer_accounts'],
@@ -51,6 +53,19 @@ class SGAP_Keys {
             'links' => [['AIMLAPI', 'https://aimlapi.com/'], ['Anthropic', 'https://console.anthropic.com/settings/keys'], ['OpenRouter', 'https://openrouter.ai/keys']],
             'hint' => 'AIMLAPI: Dashboard → API keys. Anthropic: console.anthropic.com → API keys. OpenRouter: openrouter.ai/keys, then pick a model under AI & images.',
             'test' => 'ai'
+        ],
+        'openrouter_backup' => [
+            'title' => 'OpenRouter (backup)',
+            'icon' => 'shield',
+            'keys' => ['openrouter_api_key'],
+            'extra' => ['openrouter_model'],
+            'owner' => 'You — your own OpenRouter account, with a second key on purpose: the AI text key belongs to whichever provider is chosen, so a rotation of one must never point the backup at the wrong account.',
+            'why' => 'Keeps the autopilot writing when the primary provider runs out of credit, loses its key or is down. Without it a dead primary stops every post, article and chat answer.',
+            'body' => 'Used only when the primary provider fails: transport error, 401/403, no credit (402), rate limit (429) or a 5xx. A 2xx answer — even an empty one — never starts it, so a working primary is never billed twice.',
+            'links' => [['OpenRouter keys', 'https://openrouter.ai/keys']],
+            'hint' => 'openrouter.ai/keys → create a key, paste it here, then pick the backup model in this same card. An empty model means the backup is off, because OpenRouter has no default. While OpenRouter is the provider itself the card is ignored: the backup would be the same service.',
+            'test' => 'openrouter_backup',
+            'optional' => true
         ],
         'images' => [
             'title' => 'AI images',
@@ -477,6 +492,7 @@ class SGAP_Keys {
             . (isset($result['ai']['message']) ? esc_html('AI: ' . $result['ai']['message']) : '')
             . (isset($result['publer']['message']) ? ' ' . esc_html('Publer: ' . $result['publer']['message']) : '')
             . (isset($result['printful']['message']) ? ' ' . esc_html('Printful: ' . $result['printful']['message']) : '')
+            . (isset($result['fallback']['message']) ? ' ' . esc_html('OpenRouter backup: ' . $result['fallback']['message']) : '')
             . '</span></div>';
         $cfg = ['ajax' => admin_url('admin-ajax.php'), 'nonce' => wp_create_nonce('sgap_setup')];
         // "Test connections" ligger i assets/pages/setup.js sammen med resten af siden.
