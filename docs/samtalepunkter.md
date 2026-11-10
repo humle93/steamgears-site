@@ -32,7 +32,7 @@ _Opdateret 2026-11-10 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 | **SEO-indholdsproduktion** | **100 %** | 14 af 14 guides (BATCH 3/3 · COPY 4/4 · CORSET 1/1 · DKK 6/6) |
 | **Døde internlinks** | **100 %** | 39 af 39 links (FIX 39/39) |
 | **Niche-butik — plugin P4** | **100 %** | 1 af 1 d (P4PLAN 0,3/0,3 · P4APPLY 0,25/0,25 · P4UI 0,2/0,2 · P4SHIP 0,1/0,1 · P4LIVE 0,15/0,15) |
-| **KABINE — bil-interiør som ny butik** | **54,7 %** | 17,5 af 32 t (B1 2/2 · B2 2/2 · B3 2/2 · B4 2/2 · B5 1,5/1,5 · B6 0/6 · B7 0/4 · B8 2/2,5 · B9 0/4 · B10 6/6) |
+| **KABINE — bil-interiør som ny butik** | **56,1 %** | 18,5 af 33 t (B1 2/2 · B2 2/2 · B3 2/2 · B4 2/2 · B5 1,5/1,5 · B6 0/6 · B7 0/4 · B8 2/2,5 · B9 0/4 · B10 6/6 · B11 1/1) |
 
 ### Åbne blokeringer
 
@@ -54,19 +54,41 @@ _Opdateret 2026-11-10 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 - **SEO-indholdsproduktion** — Følg docs/publiceringskoersel-2026-11-09.md §2.1 og §3. Indsæt copyen i 292/296/295, side 550 og post 699 med fotos, Rank Math-felter og FAQPage-schema, og skift 699's dollartekst til kroner; kør derefter python3 tools/guide_check.py som efterkontrol. Publiceringen kræver ejerens OAuth-godkendelse af MCP eller et WordPress application password — der findes ingen credential i sandkassen.
 - **Døde internlinks** — Vedligehold: tjek nye indlæg mod live-URL'er
 - **Niche-butik — plugin P4** — Færdig som roadmap-punkt P4: modulet er kørt mod det levende site (WordPress 7.1.4, WooCommerce 11.2.2) med 8 produktkladder, 5 kollektioner, en sideskits og en navigation, og rullet tilbage til præcis udgangstilstanden. Næste skridt er ejerens: Printful-adgang, publicering og de øvrige punkter i readiness-listen. Målt 8/11 om aftenen er `alert_email` tom, så fejl registreres uden at nogen får mail — det er et ejerpunkt i plugin-roadmappens §8.
-- **KABINE — bil-interiør som ny butik** — Følg docs/publiceringskoersel-2026-11-09.md §7. Seks forberedelsesmoduler er færdige (15,5 af 32 t, 48,4 %): niche og brand valgt, enhedsøkonomi regnet, 30-dages plan med KPI-gates skrevet, ti hooks som manuskript, kravlisten for butik, betaling, tracking og jura, og roadmap plus færdig tekst til alle fire nicher. Resten er butiksopsætning (6 t), leverandør og prøver (4 t), de sidste 0,5 t jura (ejerens værdier, rådgiverlæsning, publicering) og første annoncerunde (4 t) — alle fire starter først når ejeren har leveret E1-E6. Jurateksterne er skrevet 10/11, se docs/library/kabine-jura-2026-11-10.md. Domænemåling 9/11: alle fire ønskede .dk-domæner er taget, så E4 kræver en købs-/leje- eller rename-beslutning.
+- **KABINE — bil-interiør som ny butik** — Følg docs/publiceringskoersel-2026-11-09.md §7. Seks forberedelsesmoduler er færdige (15,5 af 32 t, 48,4 %): niche og brand valgt, enhedsøkonomi regnet, 30-dages plan med KPI-gates skrevet, ti hooks som manuskript, kravlisten for butik, betaling, tracking og jura, og roadmap plus færdig tekst til alle fire nicher. Resten er butiksopsætning (6 t), leverandør og prøver (4 t), de sidste 0,5 t jura (ejerens værdier, rådgiverlæsning, publicering) og første annoncerunde (4 t) — alle fire starter først når ejeren har leveret E1-E6. Jurateksterne er skrevet 10/11 for alle fire butikker, se docs/library/kabine-jura-2026-11-10.md og docs/library/niche-jura-portefolje-2026-11-10.md. Domænemåling 9/11: alle fire ønskede .dk-domæner er taget, så E4 kræver en købs-/leje- eller rename-beslutning.
 
 ### Seneste commits
 
+- `80f3e61 Modul: KABINE b8 — de juridiske sider er skrevet færdige Før: 48,4 %  →  Efter: 54,7 %  (Δ +6,3) Grundlag: 17,5 af 32 t (Niche-valg, brand og produktstige 2/2 · ROI-model og enhedsøkonomi 2/2 · 30-dages plan og KPI-gates 2/2 · Kreativt: ti hooks som manuskript 2/2 · Kravliste: butik, betaling, tracking og jura 1,5/1,5 · Butiksopsætning: Shopify, MobilePay, CAPI, sider 0/6 · Leverandørvalg, GPSR-dokumentation og prøver 0/4 · Juridiske sider: handelsbetingelser, retur, privatliv 2/2,5 · Første annoncerunde uge 1-2 0/4 · Niche-portefølje: roadmap og færdig butikstekst 6/6)`
+- `4943f93 chore(status): daglig projektstatus 2026-11-10`
 - `b24114f Modul: SEO — outfit-copy til post 699: DKK, tolv looks og værnsdækning Før: 100 %  →  Efter: 100 %  (Δ 0) Grundlag: 14 af 14 guides (Publicerede guides (1357, 1361, 1359) 3/3 · Guide-copy klar til publicering (1357, 1361, 1359 + corset) 4/4 · Corset-guiden publiceret (/steampunk-corset-guide/, 1394) 1/1 · Guide-copy i DKK mod den levende butik (292, 296, 295, 1394, 550, 699) 6/6)`
 - `dfa2481 chore(status): daglig projektstatus 2026-11-09`
 - `14fdcac Modul: P1.5 — Pinterest-kanalen: app-id-jagt og et klar-til-brug vekslingsværktøj Før: 0 %  →  Efter: 0 %  (Δ 0) Grundlag: ingen ændring`
 - `8a19609 Modul: P1.24 OpenRouter-failover bag AIMLAPI (plan) Før: 100 % → Efter: 100 % (Δ 0) Grundlag: ingen ændring`
-- `39e117f docs snapshot 09/11 (competitors, brief 09/11, vedligehold-log, research-log, postcheck, weekly-perf, outfit-copy revert-check)`
-- `9254b99 Modul: P1.23 — genereringen kører på en nøgle fundet i WordPress' connector-lager Før: 100 %  →  Efter: 100 %  (Δ 0) Grundlag: ingen ændring`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 10/11 — jura-teksterne dækker nu alle fire butikker (b11, 1/1 t)
+
+- **Fundet ved at måle i stedet for at tro:** OPLOFT, STILLE og IMMER stod stadig med de tynde kladder, som
+  KABINE netop var kommet ud af — handelsbetingelser 1,6k · privatliv 1,8k · fortrydelse 1,3k · levering 1,2k
+  tegn, uden standardfortrydelsesformular, 6-måneders-formodningsregel, GPSR, emballageregistrering og
+  cookie-tabel. Indholdspakken var beskrevet som komplet, og det var den ikke.
+- **Skrevet:** 12 sider på samme standard som KABINE, men tilpasset hver butik — OPLOFT: montering, belastning
+  gælder underlaget, udlejerens tilladelse, reolen i sektioner; STILLE: hygiejneundtagelse for forseglede
+  ørepropper, vægt er ikke behandling, vægtede varer er ikke til søvn; IMMER: WEEE-registrering, batteri, og at
+  dynen skal kunne løftes af den, der sover under den.
+- **En tabel, der ikke sagde hvad den manglede:** STILLEs størrelsestabel havde **12 felter, der kun stod
+  `[EJER]`** — preflighten tæller felter og kræver ikke et navn. De hedder nu brystmål/længde/ærmelængde pr.
+  størrelse, og tabellen er markeret som hættetrøjens. Samtidig var »vælg omkring 10 % af din kropsvægt« et valg,
+  der ikke findes: tæppet er 7 kg i én vægt. Rettet i FAQ og på produktsiden.
+- **Værnet strammet:** `BARE_OWNER_RE` gør et `[EJER]` uden navn til en fejl. Negativt testet: indsat felt gav
+  **exit 1** med beskeden, filen blev lagt tilbage, og `--check` er grøn igen.
+- **Målt:** `niche_preflight --check` → »4 nicher, ingen fejl, 0 advarsler, ingen drift«; 36 sider med
+  **246 ejerfelter i 134 unikke** (57/29 KABINE · 59/31 OPLOFT · 71/43 STILLE · 59/31 IMMER). KABINE
+  **54,7 % → 56,1 %** (+1,4; 18,5 af 33 t).
+- **Tilbage til ejeren:** de samme værdier som før, nu for fire butikker (E1/E2/E3) plus rådgiverlæsning og
+  publicering. Dokument: `docs/library/niche-jura-portefolje-2026-11-10.md` + PDF.
 
 ### 10/11 — KABINEs jura skrevet færdig (b8, 0 → 2,0 af 2,5 t)
 

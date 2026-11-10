@@ -42,6 +42,7 @@ SOURCE = os.path.join(ROOT, "deploy", "nicher", "nicher.json")
 OUT_DIR = os.path.join(ROOT, "deploy", "nicher")
 DEFAULT_FIXED_MONTHLY = 1400.0
 OWNER_RE = re.compile(r"\[EJER[^\]]*\]")
+BARE_OWNER_RE = re.compile(r"\[EJER\s*\]")
 CPA_FLOOR = 120.0
 CONTENT_DIR = os.path.join(OUT_DIR, "indhold")
 REQUIRED_PAGES = [
@@ -254,6 +255,11 @@ def check_copy(niche_slug: str, content: dict, problems: Problems) -> None:
             problems.error(f"{niche_slug}: {label} uden dokumentation: {', '.join(hits)}")
     if collected.count("[EJER") != len(OWNER_RE.findall(collected)):
         problems.error(f"{niche_slug}: et ejerfelt er skrevet uden afsluttende ]")
+    # Et felt uden navn ("[EJER]") tælles med som et felt, men siger ikke hvad ejeren skal
+    # indsætte — den slags tomme felter slap igennem, indtil STILLEs størrelsestabel blev læst.
+    if BARE_OWNER_RE.search(collected):
+        problems.error(f"{niche_slug}: ejerfelt uden navn — skriv hvad ejeren skal indsætte, fx "
+                       "[EJER: brystmål S] i stedet for [EJER]")
 
 
 def merge_content(niche: dict, payload: dict, content: dict, problems: Problems) -> dict:
