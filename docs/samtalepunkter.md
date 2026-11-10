@@ -18,7 +18,7 @@ konteksten komprimeres. Filen er repoets hukommelse om **hvorfor** tingene blev 
   hvad blev målt, og hvad var fælden.
 
 <!-- AUTO:SAMTALEPUNKTER:START -->
-_Opdateret 2026-11-09 af `tools/samtalepunkter.py`. Blokken er maskinelt genereret — ret i `projektstatus.json`, ikke her._
+_Opdateret 2026-11-10 af `tools/samtalepunkter.py`. Blokken er maskinelt genereret — ret i `projektstatus.json`, ikke her._
 
 ### Status
 
@@ -29,7 +29,7 @@ _Opdateret 2026-11-09 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 | **steamgears.eu — miljø, server og sandbox (S5)** | **60 %** | 1,8 af 3 d (S5 1,8/3) |
 | **Steamgears Autopilot — plugin** | **100 %** | 31,25 af 31,25 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25 · P1E 0,25/0,25 · P1F 0,25/0,25 · P1G 0,5/0,5 · P2F 1,5/1,5 · P3OPT 0,6/0,6 · P3JS 0,3/0,3 · P3LIVE 0,25/0,25 · P1OR 0,25/0,25) |
 | **Dark academia-rebrand** | **71,3 %** | 12,4 af 17,4 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5 · BATCH4 0,5/0,5 · GENTILDELING 0,4/0,4 · MOBIL-OG-SAESON 3/3) |
-| **SEO-indholdsproduktion** | **100 %** | 13 af 13 guides (BATCH 3/3 · COPY 4/4 · CORSET 1/1 · DKK 5/5) |
+| **SEO-indholdsproduktion** | **100 %** | 14 af 14 guides (BATCH 3/3 · COPY 4/4 · CORSET 1/1 · DKK 6/6) |
 | **Døde internlinks** | **100 %** | 39 af 39 links (FIX 39/39) |
 | **Niche-butik — plugin P4** | **100 %** | 1 af 1 d (P4PLAN 0,3/0,3 · P4APPLY 0,25/0,25 · P4UI 0,2/0,2 · P4SHIP 0,1/0,1 · P4LIVE 0,15/0,15) |
 | **KABINE — bil-interiør som ny butik** | **48,4 %** | 15,5 af 32 t (B1 2/2 · B2 2/2 · B3 2/2 · B4 2/2 · B5 1,5/1,5 · B6 0/6 · B7 0/4 · B8 0/2,5 · B9 0/4 · B10 6/6) |
@@ -58,15 +58,36 @@ _Opdateret 2026-11-09 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `14fdcac Modul: P1.5 — Pinterest-kanalen: app-id-jagt og et klar-til-brug vekslingsværktøj Før: 0 %  →  Efter: 0 %  (Δ 0) Grundlag: ingen ændring`
+- `8a19609 Modul: P1.24 OpenRouter-failover bag AIMLAPI (plan) Før: 100 % → Efter: 100 % (Δ 0) Grundlag: ingen ændring`
+- `39e117f docs snapshot 09/11 (competitors, brief 09/11, vedligehold-log, research-log, postcheck, weekly-perf, outfit-copy revert-check)`
 - `9254b99 Modul: P1.23 — genereringen kører på en nøgle fundet i WordPress' connector-lager Før: 100 %  →  Efter: 100 %  (Δ 0) Grundlag: ingen ændring`
 - `7a9c80a Modul: P1.23 — 7.67.0 installeret på det levende site, provider og model sat Før: 100 %  →  Efter: 100 %  (Δ 0) Grundlag: ingen ændring`
 - `41e27e6 Modul: Plugin-status — næste skridt kræver installation af 7.67.0 først Før: 100 %  →  Efter: 100 %  (Δ 0) Grundlag: ingen ændring`
-- `ba7e542 Modul: Samtalepunkter — AUTO-blokken efter den målte version-gap Før: — Efter: — Δ: — Grundlag: ingen ændring`
-- `0f9ab38 Modul: MCP-adgang — sitets plugin-version målt gennem AI Engine-fladen Før: — Efter: — Δ: — Grundlag: ingen ændring`
-- `3b9fcb1 chore(status): daglig projektstatus 2026-11-09`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 10/11 — natteværnet fandt outfit-copyen: post 699's tekst er nu DKK og målt
+
+- **Det røde værn var ægte:** `guide-copy` fejlede i nattekørslen med »4 af 5 copy-blokke bestod«.
+  `docs/library/steampunk-outfit-ideas-for-women.md` stod med **61 `$`-beløb, nul `/go/`-links**, og fordi
+  filen manglede `**H1:**` og Rank Math-tabellen, var den ikke copy for værnene — altså usynlig for
+  pris-, valuta-, død-link- og klyngekontrollen. Klassificeringsreglen fra 9/11 fangede den.
+- **Fælden:** README-rækken påstod allerede 9/11 at filen var »omskrevet til DKK« med »tretten levende
+  produkter«. Filen på disk indeholdt den gamle USD-tekst — omskrivningen var rullet tilbage, men
+  dokumentationen blev ikke. Kun fordi værnene måler **filen** og ikke README-rækken, blev det set.
+- **Omskrevet:** tolv komplette looks bygget af butikkens **tyve** produkter (fire hoodies, fire tees, to
+  corsets, to tailcoats, goggles, top hat, tre prints, phone case, to lommeure), DKK i dansk format, hver
+  look-total regnet efter og dokumenteret i `**Totals**`, fem FAQ, klyngelinks til hub + de fire
+  søsterguides, 2.247 ord.
+- **Målt 10/11:** `guide_check.py` → **6 af 6 copyblokke består**, **18 unikke `/go/`-id'er, 0 døde**,
+  0 valutaafvigelser, `unclassified()` tom. `dkk`-modulet i `projektstatus.json` går fra 5/5 til **6/6**
+  (procenten bliver 100 %, fordi siden allerede var talt med som »copy« — nu er den også målbar).
+- **PDF:** `reports/steampunk-outfit-ideas-for-women.pdf` (5 sider) renderet igen og set efter; `####`
+  renderer ikke i husets renderer og blev rettet til `###`. `guide-vaern-daekning-2026-11-09.md` har fået
+  et »Lukket 10/11«-afsnit, og dens PDF er renderet igen.
+- **Stadig ejerens:** at indsætte copyen i 699 (ingen skriveadgang), og Pinterest-appens client id.
 
 ### 10/11 (nat) — Pinterest: app-id'et findes ikke, og integrationen ejer tokenet
 

@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "updated": "2026-11-09",
+  "updated": "2026-11-10",
   "projects": [
     {
       "id": "forum",
@@ -353,12 +353,12 @@
         },
         {
           "id": "dkk",
-          "name": "Guide-copy i DKK mod den levende butik (292, 296, 295, 1394, 699)",
-          "done": 5,
-          "total": 5,
+          "name": "Guide-copy i DKK mod den levende butik (292, 296, 295, 1394, 550, 699)",
+          "done": 6,
+          "total": 6,
           "unit": "guides",
-          "label": "Guide-copy i DKK mod den levende butik (292, 296, 295, 1394, 699)",
-          "note": "fem copyfiler skrevet om til butikkens DKK-katalog og målt 9/11: guides-2026-11-03.md (3 blokke), corset, hub (550) og outfit-siden (699); 15 unikke /go/-id'er, 0 døde, 0 valutaafvigelser, 207 beløb holdt op mod priser-live-2026-11-09.md",
+          "label": "Guide-copy i DKK mod den levende butik (292, 296, 295, 1394, 550, 699)",
+          "note": "seks copyblokke i DKK mod butikkens tyve produkter, målt 10/11: guides-2026-11-03.md (3 blokke), corset (1394), hub (550) og outfit-siden (699) omskrevet til tolv looks med egne /go/-links; 18 unikke /go/-id'er, 0 døde, 0 valutaafvigelser, og guide_check.py melder 6 af 6 blokke bestået",
           "verified": true
         }
       ],
@@ -2034,6 +2034,87 @@
       "after": 96.7,
       "delta": null,
       "basis": "2,9 af 3 d (F1 1,2/1,2 · F2 0,8/0,8 · F3 0,3/0,3 · F4 0,3/0,3 · F5 0,3/0,3 · F6 0/0,1)"
+    },
+    {
+      "date": "2026-11-10",
+      "project": "Forum + Reddit — trafikaccelerator (P5)",
+      "module": "ingen ændring",
+      "before": 96.7,
+      "after": 96.7,
+      "delta": 0,
+      "basis": "2,9 af 3 d (F1 1,2/1,2 · F2 0,8/0,8 · F3 0,3/0,3 · F4 0,3/0,3 · F5 0,3/0,3 · F6 0/0,1)"
+    },
+    {
+      "date": "2026-11-10",
+      "project": "steamgears.eu — site-optimering",
+      "module": "ingen ændring",
+      "before": 100.0,
+      "after": 100.0,
+      "delta": 0,
+      "basis": "20,95 af 20,95 d (S0 2,35/2,35 · S1 3,6/3,6 · S2 6,9/6,9 · S3 4,05/4,05 · S4 4,05/4,05)"
+    },
+    {
+      "date": "2026-11-10",
+      "project": "steamgears.eu — miljø, server og sandbox (S5)",
+      "module": "ingen ændring",
+      "before": 60.0,
+      "after": 60.0,
+      "delta": 0,
+      "basis": "1,8 af 3 d"
+    },
+    {
+      "date": "2026-11-10",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "ingen ændring",
+      "before": 100.0,
+      "after": 100.0,
+      "delta": 0,
+      "basis": "31,25 af 31,25 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5 · P3.7 0,6/0,6 · P3.8 0,3/0,3 · P3.9 0,25/0,25 · P1.23 0,25/0,25)"
+    },
+    {
+      "date": "2026-11-10",
+      "project": "Dark academia-rebrand",
+      "module": "ingen ændring",
+      "before": 71.3,
+      "after": 71.3,
+      "delta": 0,
+      "basis": "12,4 af 17,4 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5 · Batch 4-forberedelse: arbejdsordre, filnavne, alt-tekster, rækkefølge 0,5/0,5 · Batch 2-gentildeling: de seks kollektioner skal tildeles igen 0,4/0,4 · Mobil-CSS, menu og årstidsfarver 3/3)"
+    },
+    {
+      "date": "2026-11-10",
+      "project": "SEO-indholdsproduktion",
+      "module": "ingen ændring",
+      "before": 100.0,
+      "after": 100.0,
+      "delta": 0,
+      "basis": "14 af 14 guides (Publicerede guides (1357, 1361, 1359) 3/3 · Guide-copy klar til publicering (1357, 1361, 1359 + corset) 4/4 · Corset-guiden publiceret (/steampunk-corset-guide/, 1394) 1/1 · Guide-copy i DKK mod den levende butik (292, 296, 295, 1394, 550, 699) 6/6)"
+    },
+    {
+      "date": "2026-11-10",
+      "project": "Døde internlinks",
+      "module": "ingen ændring",
+      "before": 100.0,
+      "after": 100.0,
+      "delta": 0,
+      "basis": "39 af 39 links"
+    },
+    {
+      "date": "2026-11-10",
+      "project": "Niche-butik — plugin P4",
+      "module": "ingen ændring",
+      "before": 100.0,
+      "after": 100.0,
+      "delta": 0,
+      "basis": "1 af 1 d (Plan-motor: arketyper, priser, sider 0,3/0,3 · Kladde-udrulning og rollback 0,25/0,25 · Admin-side, REST og fire evner 0,2/0,2 · Tests, zip og dokumentation 0,1/0,1 · Kørsel mod rigtig WooCommerce 0,15/0,15)"
+    },
+    {
+      "date": "2026-11-10",
+      "project": "KABINE — bil-interiør som ny butik",
+      "module": "ingen ændring",
+      "before": 48.4,
+      "after": 48.4,
+      "delta": 0,
+      "basis": "15,5 af 32 t (Niche-valg, brand og produktstige 2/2 · ROI-model og enhedsøkonomi 2/2 · 30-dages plan og KPI-gates 2/2 · Kreativt: ti hooks som manuskript 2/2 · Kravliste: butik, betaling, tracking og jura 1,5/1,5 · Butiksopsætning: Shopify, MobilePay, CAPI, sider 0/6 · Leverandørvalg, GPSR-dokumentation og prøver 0/4 · Juridiske sider: handelsbetingelser, retur, privatliv 0/2,5 · Første annoncerunde uge 1-2 0/4 · Niche-portefølje: roadmap og færdig butikstekst 6/6)"
     }
   ]
 }

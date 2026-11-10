@@ -90,3 +90,21 @@ outfit-copyen — det kræver skriveadgang til WordPress, som agenten ikke har. 
 færdige og verificerede, men **siden 699 viser stadig dollar**, og det er en fejl på sitet, ikke i repoet.
 
 Der mangler også to egne fotos pr. guide og pr. look, og en *Request indexing* i GSC bagefter.
+
+## Lukket 10/11: outfit-copyen er nu en målt copyblok
+
+Klassificeringsværnet gjorde præcis det arbejde det blev bygget til: `docs/library/steampunk-outfit-ideas-for-women.md`
+stod med **61 `$`-beløb, nul `/go/`-links og 0 kronebeløb**, og fordi filen hverken havde `**H1:**` eller
+Rank Math-tabellen, kunne den ikke måles som copy — den var usynlig for alle de øvrige værn og rød i nattekørslen
+(10/11: `guide-copy` exit 1, »4 af 5 copy-blokke bestod«).
+
+Den er nu skrevet om i husets skabelon mod butikkens **tyve levende produkter**: tolv komplette looks med hvert
+sit `/go/`-link og en total der er regnet efter, DKK i dansk format, fem FAQ, klyngelinks til hub og de fire
+søsterguides, 2.247 ord. Målt 10/11: `guide_check.py` → **6 af 6 copyblokke består**, **18 unikke `/go/`-id'er**,
+**0 døde**, **0 valutaafvigelser**, og `unclassified()` er tom.
+
+**Fælden der er værd at gemme:** README-rækken for filen påstod allerede 9/11 at copyen var »omskrevet til DKK«
+med »tretten levende produkter« — men filen på disk indeholdt den gamle USD-tekst. En dokumentation der
+beskriver et arbejde, som blev rullet tilbage, er ikke bare ubrugelig, den holder værnene i ro: kun fordi
+klassificeringen måler **filen** og ikke **README-rækken**, blev forskellen fundet. Rækken er nu rettet til det
+målte (500,00–1.465,00 kr.), og `dkk`-modulet tæller seks sider i stedet for fem.
