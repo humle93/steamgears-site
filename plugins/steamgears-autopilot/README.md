@@ -1,5 +1,9 @@
 # Steamgears Autopilot (WordPress plugin)
 
+Source, roadmap and releases: [github.com/humle93/steamgears-site](https://github.com/humle93/steamgears-site)
+— the repository is private, so the link opens for the GitHub accounts the owner has given access. The plugin
+itself reads its updates from the same repository (`plugins/steamgears-autopilot` on `main`).
+
 The whole social autopilot runs inside WordPress (Command Center is retired):
 
 1. **Write** – once a day an AI model (Claude by default) writes one post per
@@ -23,7 +27,7 @@ The whole social autopilot runs inside WordPress (Command Center is retired):
 4. **Measure** – every post links via `/go/<id>/`, so clicks (and WooCommerce
    orders) are counted per channel.
 
-Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.67.1.zip` → Activate. On an existing
+Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.68.0.zip` → Activate. On an existing
 install the same zip arrives through the self-updater (see *Updates*), so an upload is only needed for the
 first install or a recovery.
 
@@ -91,6 +95,29 @@ tool, `set-ai-profile`, so the assistant can switch when it is asked to:
 cannot quietly change its own access level. Switching away from *Site administration* leaves full REST access as
 it is — turn it off on the same page if you want it off.
 
+## Campaign agent (7.68)
+
+The autopilot promotes whatever is next in line. The campaign agent starts from something you chose: a
+published post, page or product, and a written goal — *"sell the brass goggles to cosplayers before
+Halloween"*. It writes one post per configured channel for that page, runs each one through the channel
+pre-flight and the quality gate, and saves them **as drafts under AI Drafts**. That is the whole of it:
+
+- **It never queues and never publishes.** Full Auto does not change that. The agent calls neither
+  `SGAP_Queue` nor `SGAP_Publer`; approving a draft is still a person pressing *Approve & Queue*.
+- **The findings stay with the draft.** Whatever the channel rules and the quality gate said is stored on
+  the row (`gate_report`) and printed on AI Drafts, so the warning does not vanish between writing and
+  approving.
+- **The campaign name travels.** The name you type (or the page slug, if you leave it empty) is stored on
+  every draft and carried into the queue as `utm_campaign`, so GA4 can tell this campaign from the
+  evergreen stream.
+- **The goal shapes the angle, not the facts.** It goes into the prompt as a direction, with an explicit
+  instruction not to state it as news or promise what the page does not say.
+
+On the dashboard, *Campaign agent* asks for the page, the goal, the campaign name and the channels. The
+same run is available as the ability `steamgears-autopilot/campaign-drafts` (so Claude can write the
+drafts), and a channel that already has a pending draft for the same campaign is skipped — one run writes
+at most 10 drafts.
+
 ## Run it from Claude
 
 The plugin registers WordPress *abilities* (WordPress 6.9+), exposed to MCP. A
@@ -106,6 +133,7 @@ all admin-only, none of them deleting anything:
 | `steamgears-autopilot/list-queue` | Queue items with status, attempts, errors, tracking links |
 | `steamgears-autopilot/queue-post` | Queue a post Claude (or you) wrote. Takes `angle`, `content_type`, `format` and `campaign`, so a hand-written campaign post lands in the queue with the same dimensions the AI posts get (7.25) |
 | `steamgears-autopilot/generate` | Run the AI writer now |
+| `steamgears-autopilot/campaign-drafts` | One page + a written goal → one drafted post per channel, gated and **saved for review** (never queued or published). Takes `post_id`, `goal`, `channels` and an optional `campaign` (7.68) |
 | `steamgears-autopilot/publish` | Run the Publer publisher now |
 | `steamgears-autopilot/set-mode` | Autopilot / Full Auto on or off |
 | `steamgears-autopilot/update` | Install the newest version from GitHub |
@@ -595,7 +623,7 @@ before it, because the MCP surface can read plugins but cannot install or activa
 1. Bump `Version:` in `steamgears-autopilot.php` and `SGAP_VERSION` — they must agree, CI fails otherwise.
 2. Rebuild the zip from the folder so the name and the contents match:
    `cd plugins && rm -f steamgears-autopilot-*.zip && zip -qr steamgears-autopilot-v<version>.zip steamgears-autopilot`
-3. `php plugins/tests/smoke.php` (1192 checks) and `diff -r` the zipped copy against the source. CI repeats
+3. `php plugins/tests/smoke.php` (1358 checks) and `diff -r` the zipped copy against the source. CI repeats
    both, plus `php -l` on PHP 8.0–8.5 and WordPress 6.4 / 7.1 / latest. The plugin is also exercised inside
    a real WordPress: `bash plugins/tests/integration.sh` (needs `php` with `mysqli`, `wp-cli`, `curl` and a
    reachable MySQL; 249 checks, including the four model rules, the Anthropic/custom-provider key checks and evergreen recycling) — it installs

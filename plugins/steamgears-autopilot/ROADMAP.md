@@ -2,8 +2,9 @@
 
 _Last audited: 2026-11-09 · the audit further down was of **7.15.0** (`ab676db` on `main`); the site runs
 **7.65.5** (measured 9/11 2026 through Novamira: the zip was installed with `Plugin_Upgrader` and the installed
-version reads back as 7.65.5). The repo, and the zip in `plugins/`, is **7.67.1** (7.66.0 shipped P5: forum and
-Reddit; 7.67.0 makes OpenRouter its own text provider; 7.67.1 makes it the automatic backup), so the
+version reads back as 7.65.5). The repo, and the zip in `plugins/`, is **7.68.0** (7.66.0 shipped P5: forum and
+Reddit; 7.67.0 makes OpenRouter its own text provider; 7.67.1 makes it the automatic backup; 7.68.0 is P6: the
+campaign agent), so the
 next *Plugins → Update* is a real upgrade and not a no-op · update this file in the same commit as any release._
 
 **The 7.64.9 upgrade has no agent path, measured 8/11 2026:** there is no MCP credential anywhere — 0
@@ -393,6 +394,24 @@ sitet (kræver en Reddit-app til OAuth og giver en konto vi ikke kan moderere).
 
 ---
 
+### P6 — kampagne-agent med review-gate (7.68.0)
+
+**Formålet er en flertrins-agent, ikke en ekstra chatprofil.** Ejeren vælger et publiceret produkt/indlæg, skriver kampagnens mål og vælger kanaler. Agenten læser kildesiden, laver kanaltilpassede opslag, kører hvert forslag gennem kvalitetstjek + kanal-preflight og gemmer dem **altid som `pending` AI-kl adder**. `Full Auto` ignoreres med vilje. Agenten skriver aldrig direkte i publiceringskøen og kalder aldrig publisheren; et menneske kan læse hvert forslag på *Steamgears → AI Drafts* og vælge *Approve & Queue*, *Approve Only* eller *Reject*. Gate-advarsler gemmes med kladden, vises ved review og kvalitetsgaten køres igen ved godkendelse.
+
+| Trin | Indhold | Estimat | Akkumuleret |
+| --- | --- | --- | --- |
+| A | Kampagnebrief i AI-prompten; kildens fakta forbliver eneste faktakilde | 0,10 d | **11,1 %** |
+| B | Agent: valider kilde/brief/kanaler, stop gentagne pending drafts, generér, gate-test pr. kanal, gem kun pending; tests for stopklodser | 0,35 d | **50,0 %** |
+| C | Admin-handler + dashboard-formular, nonce/capability, tydelig review-status; GitHub-link på dashboardet | 0,15 d | **66,7 %** |
+| D | Admin-only WordPress ability til MCP/AI Chat; returnerer draft-id'er og gate-advarsler, aldrig queue-id | 0,10 d | **77,8 %** |
+| E | README/changelog, 30+ smoke-checks, PHP lint og installationszip byte-identisk med kildefilerne | 0,20 d | **100 %** |
+
+**Filstruktur (komplet):** `includes/campaign-agent.php` ny (kørsel, validering, pending-save, per-channel gates, admin form/handler); `includes/generator.php` ændr (valgfrit kampagnebrief); `includes/core.php` ændr (DB-kolonne til gate-advarsler, dashboardkort, review-visning); `includes/abilities.php` ændr (MCP ability); `includes/updater.php` ændr (repository-link); `steamgears-autopilot.php` ændr (require/init, version 7.68.0); plugin-README ændr (scope, review gate, GitHub); ROADMAP ændr (P6/changelog); `plugins/tests/campaign-agent.php` ny + `plugins/tests/smoke.php` ændr (stubs/load); erstat den ene zip `plugins/steamgears-autopilot-v7.67.0.zip`; opdater `projektstatus.json` og `docs/samtalepunkter.md`.
+
+**Afgrænsning:** ingen auto-publicering, schedule/cron-agent, live-produktredigering, ny provider/credential eller gæt uden publiceret kilde; eksisterende Full Auto ændres ikke. Én agent, ét reviewbart kampagne-run.
+
+---
+
 ## 6. Completion estimates (1/11 2026 — historical)
 
 **Kept to show how the scope grew, not as a forecast.** The milestones were computed against the 7.15.0
@@ -502,6 +521,18 @@ Platform limits: [Instagram content publishing](https://developers.facebook.com/
 
 ## 9. Change log for this document
 
+- **7.68.0 (10/11) — P6: kampagne-agenten skriver kladder, men publicerer aldrig.** Efter P5 var der stadig ingen
+  arbejdsgang mellem »skriv noget for den her side« og »kør den i dag«. `SGAP_Campaign_Agent` tager nu en
+  publiceret side, et skrevet mål på 8–160 tegn og de kanaler der er sat op, og skriver ét kladdeudkast pr.
+  kanal gennem det samme AI-kald som den daglige forfatter — men gemmer **altid** `pending` i `sgap_ai_drafts`,
+  også når Full Auto er slået til. Den rører hverken `SGAP_Queue` eller `SGAP_Publer`; godkendelsen er stadig et
+  menneske på *AI Drafts*. Hver kladde får kanalens og kvalitetsgaten's bemærkninger med (`gate_report`), fordi
+  en advarsel ellers forsvinder mellem generering og godkendelse, og kampagnenavnet (`campaign`) følger kladden
+  hele vejen gennem `SGAP_Queue::from_draft()` til `utm_campaign`, så GA4 kan skelne kampagnen fra det
+  sædvanlige flow. To nye kolonner i DDL'en (`campaign`, `gate_report`), en ny ability `campaign-drafts`, et
+  kort på dashboardet og et kampagnemål i prompten (kun når agenten sætter det; den daglige forfatter er
+  uændret). Agenten springer en kanal over hvis der allerede venter en kladde for samme kampagne, og skriver
+  højst 10. 42 nye smoke-checks (**1 316 → 1 358 PASS / 0 FAIL**).
 - **7.65.5 (9/11) — 7.65.4 er nu faktisk på sitet, og filens øverste påstand er rettet.** Sitet kørte 7.65.0, mens repoet var 7.65.4, så P3.7's og P3.8's besparelser var bygget uden at være i drift; zip'en blev derfor uploadet gennem MCP i to base64-dele og installeret med `Plugin_Upgrader::install(…, overwrite_package)`. Målt live efter: version **7.65.5**, dashboard **17 566 bytes HTML med 0 inline `<script>` og 0 inline `<style>`**, syv side-scripts og to CSS-filer; `/`, `/shop/`, produktside og `/cart/` svarer 200. Filens indledning sagde stadig »7.64.6 is what steamgears.eu runs« — den er rettet til det målte. Denne patch ændrer kun dokumentation, men versionen hæves fordi denne fil er en del af zip'en.
 - **7.65.4 (9/11) — de sidste inline side-scripts er blevet filer.** P3.7 flyttede CSS'en, men der laa stadig femten `<script>`-blokke i ni includes — hver side byggede sin egen JS som PHP-strenge med `wp_json_encode($cfg)` indeni. Nu ligger syv filer i `assets/pages/`: `dashboard.js` (generering, kopiér-knapper, redningskortet), `studio.js`, `seo.js` (hele-sitet-kortet var en nowdoc i `site-seo.php`), `chat.js`, `tools.js`, `niche.js` og `setup.js` (indstillinger, noegletest og wizard). `SGAP_Assets::page_script()` enqueuer filen i footeren med filens mtime som version og sender konfigurationen med `wp_localize_script` — nonces, chat-historikken og vaerktoejskataloget bliver stadig beregnet pr. request, men som ét objekt i stedet for indeni JS'en. Teksten er udtrukket mekanisk fra PHP-literalene og er byte-identisk med det der blev printet foer (sammenlignet mod HEAD for alle syv filer) og `node --check`-ren; det ene `<script>` tilbage i `includes/` er JSON-LD. Loftet paa 12 inline side-scripts er fjernet og erstattet af et krav om nul. 20 nye smoke-checks (1172 -> **1192 PASS / 0 FAIL**).
 - **7.65.3 (9/11) — §8 pkt. 8 lukket, og hardningen ligger nu på sitet.** `SGAP_Alerts::recipient()` falder

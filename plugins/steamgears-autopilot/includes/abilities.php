@@ -111,6 +111,16 @@ class SGAP_Abilities {
                 ['posts' => ['type' => 'integer', 'minimum' => 1, 'maximum' => 5, 'description' => 'How many site pages to write for. Default: the posts-per-day setting.']],
                 [], [__CLASS__, 'generate'], false, false
             ],
+            'campaign-drafts' => [
+                'Write a campaign\'s drafts',
+                'Runs the campaign agent for one published post, page or product: it writes one post per chosen channel, checks each one against that channel\'s rules and the quality gate, and saves them as drafts waiting for review. It never queues and never publishes — a person approves each draft. Returns the draft ids, the notes from the channel checks and the review URL.',
+                [
+                    'post_id' => ['type' => 'integer', 'minimum' => 1, 'description' => 'The published post, page or product the campaign promotes.'],
+                    'goal' => ['type' => 'string', 'minLength' => 8, 'maxLength' => 160, 'description' => 'Why this page is promoted now, e.g. "sell the goggles to cosplayers before Halloween".'],
+                    'channels' => ['type' => 'array', 'items' => ['type' => 'string', 'enum' => SGAP_Publer::CHANNELS], 'minItems' => 1, 'description' => 'Channels to write for. Only configured channels are used.'],
+                    'campaign' => ['type' => 'string', 'maxLength' => 60, 'description' => 'utm_campaign for this run, e.g. halloween_2026. Empty = the page slug.']
+                ], ['post_id', 'goal', 'channels'], [__CLASS__, 'campaign_drafts'], false, false
+            ],
             'publish' => [
                 'Publish queue now',
                 'Runs the publisher now (normally every 15 minutes). RSS mode: releases due posts into the per-channel RSS feeds that Publer auto-posts from. API mode: records the outcome of posts already sent to Publer, then sends due posts. Quiet hours, daily cap and batch size apply.',
@@ -417,6 +427,17 @@ class SGAP_Abilities {
 
     public static function publish($input = null): array {
         return SGAP_Publer::tick();
+    }
+
+    /** P6: the campaign agent. Drafts only — approving and queueing stays a human step. */
+    public static function campaign_drafts($input = null) {
+        $input = (array) $input;
+        return SGAP_Campaign_Agent::run([
+            'post_id' => $input['post_id'] ?? 0,
+            'goal' => $input['goal'] ?? '',
+            'channels' => (array) ($input['channels'] ?? []),
+            'campaign' => $input['campaign'] ?? ''
+        ]);
     }
 
     public static function set_mode($input = null): array {

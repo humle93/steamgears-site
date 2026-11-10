@@ -241,7 +241,9 @@ class SGAP_Updater {
             . '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '">'
             . '<input type="hidden" name="action" value="sgap_self_update">'
             . wp_nonce_field('sgap_self_update', '_wpnonce', true, false)
-            . '<button class="button' . ($newer ? ' button-primary' : '') . '"><span class="dashicons dashicons-update"></span>' . ($newer ? 'Update now' : 'Check again and update') . '</button></form>';
+            . '<button class="button' . ($newer ? ' button-primary' : '') . '"><span class="dashicons dashicons-update"></span>' . ($newer ? 'Update now' : 'Check again and update') . '</button></form>'
+            . '<p class="description">Source, roadmap and release notes: <a href="' . esc_url(self::REPO) . '" target="_blank" rel="noopener">github.com/humle93/steamgears-site</a>'
+            . ' — the repository is private, so the link opens for the GitHub accounts you have given access.</p>';
         SGAP_UI::card_close();
     }
 }

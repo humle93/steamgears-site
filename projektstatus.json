@@ -265,9 +265,17 @@
           "unit": "d",
           "verified": true,
           "note": "7.67.0 (9/11): openrouter er et eget provider-valg med fast adresse (https://openrouter.ai/api/v1), så det håndskrevne base-URL-felt ikke kan omdirigere nøglen; SGAP_KeyCheck::check_openrouter() beviser nøglen med ét token i stedet for at spørge /models, som OpenRouter svarer uden nøgle (enhver nøgle blev før kaldt gyldig), og oversætter 401/403, 402, 404/400 og 429 til hver sin rettelse. Ingen standardmodel: kataloget læses fra /models og caches under sgap_ai_catalog_openrouter. 9 smoke-checks (1277 → 1286 PASS, 0 FAIL). Nøglen er ejerens og sættes under Settings → Keys; AIMLAPI-kontoen står stadig som »out of funds«."
+        },
+        {
+          "id": "p6",
+          "name": "P6 — kampagne-agent med review-gate",
+          "done": 0.9,
+          "total": 0.9,
+          "unit": "d",
+          "note": "7.68.0: SGAP_Campaign_Agent (includes/campaign-agent.php) tager en publiceret side, et skrevet mål (8-160 tegn) og de konfigurerede kanaler og skriver ét udkast pr. kanal gennem samme AI-kald som den daglige forfatter. Alt gemmes som pending i sgap_ai_drafts — også med Full Auto slået til; agenten kalder hverken SGAP_Queue eller SGAP_Publer. To nye kolonner (campaign, gate_report): kampagnenavnet følger kladden gennem SGAP_Queue::from_draft() til utm_campaign, og kanal-/kvalitetsgatens bemærkninger vises på AI Drafts. Ny ability campaign-drafts, dashboardkort med formular, kampagnemål i prompten (kun når agenten sætter det), skip når en kladde allerede venter, max 10 kladder pr. kørsel. 42 nye smoke-checks, php -l rent på alle plugin-filer, zip byte-identisk med kilden (diff -r). IKKE verificeret i WordPress: formular, DDL-opgradering af en kørende installation og et rigtigt AI-kald (AIMLAPI-nøglen svarer out of funds), så tests bruger stubbet HTTP; zip kræver ejerens Plugins -> Tilføj nyt fordi repoet er privat."
         }
       ],
-      "total": 31.0,
+      "total": 32.5,
       "verified": true
     },
     {
@@ -2150,6 +2158,15 @@
       "after": 56.1,
       "delta": 1.4,
       "basis": "18,5 af 33 t (Niche-valg, brand og produktstige 2/2 · ROI-model og enhedsøkonomi 2/2 · 30-dages plan og KPI-gates 2/2 · Kreativt: ti hooks som manuskript 2/2 · Kravliste: butik, betaling, tracking og jura 1,5/1,5 · Butiksopsætning: Shopify, MobilePay, CAPI, sider 0/6 · Leverandørvalg, GPSR-dokumentation og prøver 0/4 · Juridiske sider: handelsbetingelser, retur, privatliv 2/2,5 · Første annoncerunde uge 1-2 0/4 · Niche-portefølje: roadmap og færdig butikstekst 6/6 · Jura og måltabel: de tre øvrige butikker 1/1)"
+    },
+    {
+      "date": "2026-11-10",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "P6 — kampagne-agent med review-gate",
+      "before": 100.0,
+      "after": 100.0,
+      "delta": 0,
+      "basis": "32,5 af 32,5 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2,0/2,0 · P0.7 1,0/1,0 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5 · P3.7 0,6/0,6 · P3.8 0,3/0,3 · P3.9 0,25/0,25 · P1.24 0,35/0,35 · P1.23 0,25/0,25 · P6 0,9/0,9)"
     }
   ]
 }

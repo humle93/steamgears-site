@@ -381,10 +381,15 @@ class SGAP_AI {
         foreach ($channels as $channel) {
             $rules .= "- {$channel}: " . (self::CHANNEL_RULES[$channel] ?? 'Short and engaging.') . "\n";
         }
+        // P6: a campaign run states why this page is being promoted now. The goal shapes the
+        // angle only — the SYSTEM rule against inventing facts still applies to it.
+        $goal = trim((string) ($source['campaign_goal'] ?? ''));
         return "Write one post per channel for this page on steamgears.eu.\n\n"
             . "Title: {$source['title']}\n"
             . "Type: {$source['type']}\n"
-            . "Summary: {$source['summary']}\n\n"
+            . "Summary: {$source['summary']}\n"
+            . ($goal !== '' ? "Campaign goal (shapes the angle; do not state it as a new fact or promise anything the page does not say): {$goal}\n" : '')
+            . "\n"
             . "Channels and their rules:\n{$rules}\n"
             . 'Return exactly one item per channel. "title" is a short headline (used as the Pinterest pin title), '
             . '"text" is the post itself without hashtags, "hashtags" are separate (each starting with #), '

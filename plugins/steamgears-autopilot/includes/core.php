@@ -247,6 +247,8 @@ class SGAP_Install {
         etsy_tags TEXT NULL,
         email_subject TEXT NULL,
         cta TEXT NULL,
+        campaign VARCHAR(60) NULL,
+        gate_report TEXT NULL,
         status VARCHAR(20) NOT NULL DEFAULT 'pending',
         ai_model VARCHAR(40) NULL,
         created_at DATETIME NOT NULL,
@@ -1261,6 +1263,9 @@ class SGAP_Queue {
             'destination_url' => $post_id ? get_permalink($post_id) : home_url('/'),
             'title' => $draft->title,
             'body' => $body,
+            // P6: a campaign draft keeps the name it was written under, so GA4 can tell the
+            // campaign from the evergreen stream. An ordinary AI draft has an empty name.
+            'campaign' => (string) ($draft->campaign ?? ''),
             'image_url' => $post_id ? (string) get_the_post_thumbnail_url($post_id, 'large') : ''
         ]);
         if (!is_wp_error($result)) {
@@ -1928,6 +1933,7 @@ class SGAP_Admin {
         SGAP_UI::section('Now', 'Run a step by hand, ask the assistant, and check the job arrived on time.');
         echo '<div class="sgap-grid"><div>';
         self::run_panel();
+        SGAP_Campaign_Agent::card();
         echo '</div><div>';
         self::chat_card();
         SGAP_Auto::health_card();
@@ -2333,7 +2339,7 @@ class SGAP_Admin {
         self::open('AI Drafts', 'Posts the AI wrote for your pages. Approve & Queue sends them to the publishing queue.');
         $table = $wpdb->prefix . 'sgap_ai_drafts';
         $rows = self::table_exists($table)
-            ? $wpdb->get_results("SELECT d.id, d.post_id, d.channel, d.title, d.body, d.hashtags, d.created_at, p.post_title AS source
+            ? $wpdb->get_results("SELECT d.id, d.post_id, d.channel, d.title, d.body, d.hashtags, d.campaign, d.gate_report, d.created_at, p.post_title AS source
                 FROM {$table} d LEFT JOIN {$wpdb->posts} p ON p.ID = d.post_id WHERE d.status = 'pending' ORDER BY d.id DESC LIMIT 60")
             : [];
         if (!$rows) {
@@ -2365,6 +2371,10 @@ class SGAP_Admin {
                     . '<h3>' . esc_html($row->title) . '</h3>'
                     . '<div class="sgap-text">' . esc_html($row->body) . '</div>'
                     . ($row->hashtags !== '' ? '<div class="sgap-tags">' . esc_html($row->hashtags) . '</div>' : '')
+                    . (!empty($row->campaign) ? '<div class="sgap-meta"><span>' . SGAP_UI::pill('campaign: ' . $row->campaign, 'brass') . '</span></div>' : '')
+                    // P6: the channel checks are shown again here, because a draft the agent
+                    // wrote must not reach "Approve & Queue" without its own notes visible.
+                    . (!empty($row->gate_report) ? '<div class="sgap-caveat"><strong>Checks:</strong> ' . nl2br(esc_html((string) $row->gate_report)) . '</div>' : '')
                     . '<div class="sgap-meta"><span>' . esc_html(mysql2date('j M H:i', $row->created_at)) . '</span></div>'
                     . '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '" class="sgap-actions">'
                     . '<input type="hidden" name="action" value="sgap_approve_ai">'

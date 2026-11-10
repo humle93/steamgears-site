@@ -27,7 +27,7 @@ _Opdateret 2026-11-10 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 | **Forum + Reddit — trafikaccelerator (P5)** | **96,7 %** | 2,9 af 3 d (F1 1,2/1,2 · F2 0,8/0,8 · F3 0,3/0,3 · F4 0,3/0,3 · F5 0,3/0,3 · F6 0/0,1) |
 | **steamgears.eu — site-optimering** | **100 %** | 20,95 af 20,95 d (S0 2,35/2,35 · S1 3,6/3,6 · S2 6,9/6,9 · S3 4,05/4,05 · S4 4,05/4,05) |
 | **steamgears.eu — miljø, server og sandbox (S5)** | **60 %** | 1,8 af 3 d (S5 1,8/3) |
-| **Steamgears Autopilot — plugin** | **100 %** | 31,25 af 31,25 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25 · P1E 0,25/0,25 · P1F 0,25/0,25 · P1G 0,5/0,5 · P2F 1,5/1,5 · P3OPT 0,6/0,6 · P3JS 0,3/0,3 · P3LIVE 0,25/0,25 · P1OR 0,25/0,25) |
+| **Steamgears Autopilot — plugin** | **100 %** | 32,5 af 32,5 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25 · P1E 0,25/0,25 · P1F 0,25/0,25 · P1G 0,5/0,5 · P2F 1,5/1,5 · P3OPT 0,6/0,6 · P3JS 0,3/0,3 · P3LIVE 0,25/0,25 · P1FALLBACK 0,35/0,35 · P1OR 0,25/0,25 · P6 0,9/0,9) |
 | **Dark academia-rebrand** | **71,3 %** | 12,4 af 17,4 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5 · BATCH4 0,5/0,5 · GENTILDELING 0,4/0,4 · MOBIL-OG-SAESON 3/3) |
 | **SEO-indholdsproduktion** | **100 %** | 14 af 14 guides (BATCH 3/3 · COPY 4/4 · CORSET 1/1 · DKK 6/6) |
 | **Døde internlinks** | **100 %** | 39 af 39 links (FIX 39/39) |
@@ -58,15 +58,39 @@ _Opdateret 2026-11-10 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `5dfb3e0 chore(status): daglig projektstatus 2026-11-10`
+- `aed68ab Modul: P1.24 — OpenRouter som automatisk backup for AIMLAPI Før: 100 % → Efter: 100 % (Δ 0) Grundlag: 31,6 af 31,6 d`
+- `be6ac2b chore(status): daglig projektstatus 2026-11-10`
+- `efd3d3b Modul: KABINE b11 — jura-teksterne dækker nu alle fire butikker Før: 54,7 %  →  Efter: 56,1 %  (Δ +1,4) Grundlag: 18,5 af 33 t (Niche-valg, brand og produktstige 2/2 · ROI-model og enhedsøkonomi 2/2 · 30-dages plan og KPI-gates 2/2 · Kreativt: ti hooks som manuskript 2/2 · Kravliste: butik, betaling, tracking og jura 1,5/1,5 · Butiksopsætning: Shopify, MobilePay, CAPI, sider 0/6 · Leverandørvalg, GPSR-dokumentation og prøver 0/4 · Juridiske sider: handelsbetingelser, retur, privatliv 2/2,5 · Første annoncerunde uge 1-2 0/4 · Niche-portefølje: roadmap og færdig butikstekst 6/6 · Jura og måltabel: de tre øvrige butikker 1/1)`
+- `336de82 chore(status): daglig projektstatus 2026-11-10`
 - `80f3e61 Modul: KABINE b8 — de juridiske sider er skrevet færdige Før: 48,4 %  →  Efter: 54,7 %  (Δ +6,3) Grundlag: 17,5 af 32 t (Niche-valg, brand og produktstige 2/2 · ROI-model og enhedsøkonomi 2/2 · 30-dages plan og KPI-gates 2/2 · Kreativt: ti hooks som manuskript 2/2 · Kravliste: butik, betaling, tracking og jura 1,5/1,5 · Butiksopsætning: Shopify, MobilePay, CAPI, sider 0/6 · Leverandørvalg, GPSR-dokumentation og prøver 0/4 · Juridiske sider: handelsbetingelser, retur, privatliv 2/2,5 · Første annoncerunde uge 1-2 0/4 · Niche-portefølje: roadmap og færdig butikstekst 6/6)`
-- `4943f93 chore(status): daglig projektstatus 2026-11-10`
-- `b24114f Modul: SEO — outfit-copy til post 699: DKK, tolv looks og værnsdækning Før: 100 %  →  Efter: 100 %  (Δ 0) Grundlag: 14 af 14 guides (Publicerede guides (1357, 1361, 1359) 3/3 · Guide-copy klar til publicering (1357, 1361, 1359 + corset) 4/4 · Corset-guiden publiceret (/steampunk-corset-guide/, 1394) 1/1 · Guide-copy i DKK mod den levende butik (292, 296, 295, 1394, 550, 699) 6/6)`
-- `dfa2481 chore(status): daglig projektstatus 2026-11-09`
-- `14fdcac Modul: P1.5 — Pinterest-kanalen: app-id-jagt og et klar-til-brug vekslingsværktøj Før: 0 %  →  Efter: 0 %  (Δ 0) Grundlag: ingen ændring`
-- `8a19609 Modul: P1.24 OpenRouter-failover bag AIMLAPI (plan) Før: 100 % → Efter: 100 % (Δ 0) Grundlag: ingen ændring`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 10/11 — P6: agenten skriver kladder, men må ikke publicere
+
+Ejeren bad om agent-funktionalitet i pluginnet og valgte i spørgerunden **autonome arbejdsgange**,
+første agent = **kampagnekladder**, og GitHub-linket skulle stå **både på dashboardet og i README**.
+Afgrænsningen blev besluttet før koden: agenten må undersøge, skrive og gate-teste, men den gemmer
+**altid** `pending` kladder — også når Full Auto er slået til — og kalder hverken `SGAP_Queue` eller
+`SGAP_Publer`. Det er kontrakten, ikke en manglende funktion: et fejlskrevet opslag skal koste et
+afvisningsklik, ikke et opslag på Facebook.
+
+To ting blev tilføjet fordi de ellers ville forsvinde i flowet: `gate_report` (preflightens og
+kvalitetsgatens fund gemmes på kladden og vises på AI Drafts — i det daglige flow bruges fundene kun til
+at afgøre om noget må køes, ikke til at forklare hvorfor) og `campaign` (navnet gemmes på kladden og
+sendes gennem `from_draft()` til `utm_campaign`, så GA4 kan skelne kampagnen fra den sædvanlige strøm).
+`SGAP_AI::prompt()` får kampagnemålet som en retning med en linje om ikke at stå som nyhed; den daglige
+forfatter sætter det aldrig, så dens prompt er uændret.
+
+Målt: **1 358 PASS / 0 FAIL** (1 316 før, altså 42 nye), `php -l` rent på alle filer, zip 436 184 bytes byte-identisk.
+**Ikke verificeret:** formularen og DDL-opgraderingen i en kørende WordPress, og et rigtigt AI-kald —
+AIMLAPI-nøglen svarer »out of funds«, så testene bruger stubbet HTTP. Fælde undervejs:
+`get_the_post_thumbnail_url()` skal have **postens** ID, ikke attachment-ID'et, og AI Drafts-testen
+kræver `$wpdb->next` sat, ellers måler den tom-tilstand. Dokument:
+[`library/kampagne-agent-2026-11-10.md`](library/kampagne-agent-2026-11-10.md).
+
 
 ### 10/11 — jura-teksterne dækker nu alle fire butikker (b11, 1/1 t)
 
@@ -355,7 +379,9 @@ _Opdateret 2026-11-10 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 - **Om-mappingen** (nærmeste levende erstatning og DKK-totaler: 3.370,00 · 560/1.075/2.010,00 · 4.160,00) står i
   `docs/library/go-links-og-guide-copy-2026-11-09.md` §6. Teksten skal skrives om, ikke søg-erstattes.
 
-### 7/11 — opdateringsfælden: “Update” havde intet at installere### 9/11 — tilbudsbeslutningen: forhandlingsrummet er regnet, ikke gættet
+### 7/11 — opdateringsfælden: “Update” havde intet at installere
+
+### 9/11 — tilbudsbeslutningen: forhandlingsrummet er regnet, ikke gættet
 
 De tre tilbud blev kørt gennem `tools/tilbuds_sammenligning.py` ved **begge** CPA-niveauer — 200 som
 driftsmål og 281 som modellens break-even — fordi dommen vender mellem dem: ved 281 kan ingen af de tre
