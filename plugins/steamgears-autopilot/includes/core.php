@@ -1934,6 +1934,7 @@ class SGAP_Admin {
         echo '<div class="sgap-grid"><div>';
         self::run_panel();
         SGAP_Campaign_Agent::card();
+        SGAP_Coach::card();
         echo '</div><div>';
         self::chat_card();
         SGAP_Auto::health_card();

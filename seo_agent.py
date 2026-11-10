@@ -51,12 +51,33 @@ def get_wp_headers():
         headers["Authorization"] = f"Basic {b64}"
     return headers
 
+def load_site_brief():
+    """P8: butikkens målte tilstand, skrevet af tools/agent_brief.py.
+
+    Uden den planlægger agenten ud fra docs/seo.md og et snapshot, der ældes — kataloget gik
+    fra 39 til 20 produkter og valutaen fra USD til DKK, mens planen blev ved med at gentage
+    de gamle tal. Mangler filen, siges det med en annotation i stedet for at gætte.
+    """
+    path = "docs/agent-brief.md"
+    if not os.path.exists(path):
+        print("::warning title=Ingen agent-brief::docs/agent-brief.md findes ikke — planen bygger på "
+              "vidensbasen alene. Kør python3 tools/agent_brief.py før auditten.")
+        return ""
+    with open(path, "r", encoding="utf-8") as f:
+        return f"--- KILDE: docs/agent-brief.md (målt butikstilstand) ---\n{f.read()[:6000]}"
+
+
 def load_seo_knowledge():
     kb_texts = []
     # docs/seo.md er den eneste kilde til vores egne regler; den læses først.
     if os.path.exists("docs/seo.md"):
         with open("docs/seo.md", "r", encoding="utf-8") as f:
             kb_texts.append(f"--- KILDE: docs/seo.md (site-regler) ---\n{f.read()[:8000]}")
+    # P8: den målte butikstilstand læses som en selvstændig kilde, så planen ikke gentager
+    # katalogtal og en valuta der ikke findes længere.
+    brief = load_site_brief()
+    if brief:
+        kb_texts.append(brief)
     for path in sorted(glob.glob("knowledge_base/*.*")):
         with open(path, "r", encoding="utf-8") as f:
             kb_texts.append(f"--- KILDE: {os.path.basename(path)} ---\n{f.read()[:8000]}")

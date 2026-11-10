@@ -1,0 +1,25 @@
+{
+  "products": [
+    {
+      "id": 940,
+      "name": "Brass Goggles",
+      "prices": {"price": "69900", "regular_price": "69900", "currency_code": "DKK", "currency_minor_unit": 2},
+      "categories": [{"id": 210, "name": "Steampunk goggles", "slug": "steampunk-goggles"}]
+    },
+    {
+      "id": 941,
+      "name": "Clockwork Corset",
+      "prices": {"price": "149500", "regular_price": "149500", "currency_code": "DKK", "currency_minor_unit": 2},
+      "categories": [{"id": 211, "name": "Corsets", "slug": "corsets"}, {"id": 210, "name": "Steampunk goggles", "slug": "steampunk-goggles"}]
+    },
+    {
+      "id": 942,
+      "name": "Blueprints",
+      "prices": {"price": "6900", "regular_price": "6900", "currency_code": "DKK", "currency_minor_unit": 2},
+      "categories": [{"id": 212, "name": "Digital", "slug": "digital"}]
+    }
+  ],
+  "posts_total": 33,
+  "pages_total": 29,
+  "newest_post": {"date": "2026-11-08T21:14:00", "link": "https://steamgears.eu/steampunk-corset-guide/"}
+}

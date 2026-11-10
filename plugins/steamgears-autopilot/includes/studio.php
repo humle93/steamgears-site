@@ -230,7 +230,10 @@ class SGAP_Studio {
             . "- faq: 3-5 real questions people ask, concise answers.\n"
             . "- tags: 3-6 short tags. excerpt: 1-2 sentences.\n"
             . "- image_prompt: a detailed, photographic description of the ideal featured image (no text in the image, no logos); image_alt: a descriptive alt text with the keyword.\n"
-            . "\nPages on the site you may link to:\n" . ($list !== '' ? $list : '(none)');
+            . "\nPages on the site you may link to:\n" . ($list !== '' ? $list : '(none)')
+            // P8: the same measured brief the social writer gets, so a guide is planned on what
+            // the shop has measured — not on the catalogue as it looked when this prompt was written.
+            . (class_exists('SGAP_Coach') ? SGAP_Coach::block() : '');
     }
 
     /** FAQ as HTML plus FAQPage JSON-LD (Rank Math/Yoast may add their own; this works without them). */
@@ -355,6 +358,19 @@ class SGAP_Studio {
     }
 
     /**
+     * The prompt for one page's SEO rewrite. P8: the measured brief is appended, so the editor
+     * plans on what the shop has measured rather than on a fixed picture of the catalogue.
+     */
+    public static function optimize_prompt($post): string {
+        $text = wp_trim_words(wp_strip_all_tags(strip_shortcodes((string) $post->post_content)), 900, '…');
+        return "Improve the SEO of this {$post->post_type} on steamgears.eu. Keep the language of the page.\n"
+            . "Return: focus_keyword (what people search for), meta_title (max 60 characters, keyword first), meta_description (140-155 characters, keyword, reason to click), "
+            . "and 3-6 concrete suggestions to improve the content itself (headings, missing sections, internal links, images, alt texts).\n\n"
+            . 'Title: ' . get_the_title($post) . "\nURL: " . get_permalink((int) $post->ID) . "\nCurrent text:\n" . $text
+            . (class_exists('SGAP_Coach') ? SGAP_Coach::block() : '');
+    }
+
+    /**
      * New SEO title/description/focus keyword for an existing post, page or product.
      * @return array|WP_Error
      */
@@ -367,11 +383,7 @@ class SGAP_Studio {
             'focus_keyword' => ['type' => 'string'], 'meta_title' => ['type' => 'string'], 'meta_description' => ['type' => 'string'],
             'suggestions' => ['type' => 'array', 'items' => ['type' => 'string']]
         ]];
-        $text = wp_trim_words(wp_strip_all_tags(strip_shortcodes($post->post_content)), 900, '…');
-        $prompt = "Improve the SEO of this {$post->post_type} on steamgears.eu. Keep the language of the page.\n"
-            . "Return: focus_keyword (what people search for), meta_title (max 60 characters, keyword first), meta_description (140-155 characters, keyword, reason to click), "
-            . "and 3-6 concrete suggestions to improve the content itself (headings, missing sections, internal links, images, alt texts).\n\n"
-            . 'Title: ' . get_the_title($post) . "\nURL: " . get_permalink($post) . "\nCurrent text:\n" . $text;
+        $prompt = self::optimize_prompt($post);
         $data = SGAP_AI::json_call(SGAP_AI::SYSTEM . ' You are an expert SEO editor.', $prompt, $schema, 8000, 'low');
         if (is_wp_error($data)) {
             return $data;

@@ -2,9 +2,9 @@
 
 _Last audited: 2026-11-09 · the audit further down was of **7.15.0** (`ab676db` on `main`); the site runs
 **7.65.5** (measured 9/11 2026 through Novamira: the zip was installed with `Plugin_Upgrader` and the installed
-version reads back as 7.65.5). The repo, and the zip in `plugins/`, is **7.68.0** (7.66.0 shipped P5: forum and
+version reads back as 7.65.5). The repo, and the zip in `plugins/`, is **7.70.0** (7.66.0 shipped P5: forum and
 Reddit; 7.67.0 makes OpenRouter its own text provider; 7.67.1 makes it the automatic backup; 7.68.0 is P6: the
-campaign agent), so the
+campaign agent; 7.69.0 is P7: feed health; 7.70.0 is P8: the agents read the site's measured brief), so the
 next *Plugins → Update* is a real upgrade and not a no-op · update this file in the same commit as any release._
 
 **The 7.64.9 upgrade has no agent path, measured 8/11 2026:** there is no MCP credential anywhere — 0
@@ -46,7 +46,7 @@ and how long each missing piece takes.
   WooCommerce supplies it, and analytics ingestion for all six channels are built and covered by tests (P0.1–P0.7c,
   P1.5a–c). What still stands between "works" and "set and forget" is **live verification of the analytics**:
   the code runs, but the numbers only arrive when each channel has a token the owner owns.
-- **Effort: 30,10 developer-days of agent work, all of it done and verified** (`projektstatus.json` books 31,00,
+- **Effort: 31,20 developer-days of agent work, all of it done and verified** (`projektstatus.json` books 33,70,
   fordi P4 og P3.7–P3.9 er egne moduler der; P4 er projektet `niche`), plus
   **0,6 d of live verification that is owner-blocked** and therefore sits *outside* the estimate — P1.5's last
   step. Full parity with hosted schedulers is **18–21 developer-days**, before external API approvals that take
@@ -441,6 +441,49 @@ en kanal har en konto, og det er F6/P1.5.
 
 ---
 
+### P8 — agenternes feedback-loop: de læser sidens målte tilstand (7.70.0)
+
+**Problemet er ikke manglende agenter men manglende hukommelse.** Hver skribent får en fast prompt
+(`SGAP_AI::SYSTEM`, `CHANNEL_RULES`, `SGAP_Studio::prompt`) og ét snapshot af den side den skriver for.
+Intet i prompten afspejler det siden har målt siden: hvilken kanal der konverterer, hvilken vinkel der har
+brændt 120 klik af uden en ordre, hvornår en kanal sidst udgav noget, eller hvor mange kladder der venter.
+Resultatet er at den samme svage vinkel vælges igen, og den ugentlige SEO-agent planlægger stadig ud fra
+`docs/seo.md` plus et 20-siders snapshot, selv om kataloget er gået fra 39 til 20 produkter og valutaen fra
+USD til DKK. Agenten udvikler sig altså ikke sammen med siden — den gentager sin første antagelse.
+
+**Målet er én målt brief, som alle skrivende agenter læser, plus en lesson-store der genberegnes dagligt.**
+Briefen bygges af `SGAP_Coach` udelukkende fra `sgap_events`/`sgap_learning`, `sgap_ai_drafts` og WordPress'
+egen tælling — ingen nye tabeller, ingen indstillinger — og den lægges i prompten som *fakta agenten må
+bruge*, med en regel om at tal uden for briefen ikke må citeres. Lesson-storen er de samme tal oversat til
+korte regler (»angle_c: 120 klik, 0 ordrer — skriv en anden hook«), så en ny kørsel starter klogere end den
+forrige. Repo-siden får samme princip: `tools/agent_brief.py` måler den levende butik og skriver
+`docs/agent-brief.md`, som `seo_agent.py` læser før den planlægger.
+
+| Trin | Indhold | Estimat | Akkumuleret |
+| --- | --- | --- | --- |
+| A | `includes/coach.php` ny: `facts()`, `outcomes()`, `learn()`, `lessons()`, `brief()`, `summary()`, `card()`; filtrene `sgap_agent_brief` og `sgap_agent_facts`; briefen caches i en time | 0,25 d | **31,3 %** |
+| B | Briefen ind i de tre skrivende prompts: `SGAP_AI::prompt()` (daglig forfatter + P6-kampagnen), `SGAP_Studio::prompt()` (artikel/guide) og `SGAP_Studio::optimize()` (SEO-redaktøren) | 0,20 d | **56,3 %** |
+| C | Fladerne: daglig cron `sgap_coach_learn` via `SGAP_Scheduler`, read-only ability `agent-brief` og et dashboardkort der viser de lærte regler med deres tal | 0,20 d | **81,3 %** |
+| D | Repo-siden: `tools/agent_brief.py` + `tools/test_agent_brief.py`, `seo_agent.py` læser briefen, workflow-trin, 25+ smoke-checks, README/changelog, zip | 0,15 d | **100 %** |
+
+**Filstruktur (komplet):** `includes/coach.php` ny (facts, outcomes, lessons, brief, kort);
+`includes/generator.php` ændr (brief i prompten); `includes/studio.php` ændr (brief i artikel- og
+optimeringsprompten); `includes/abilities.php` ændr (ability `agent-brief`); `includes/core.php` ændr
+(dashboardkort); `steamgears-autopilot.php` ændr (require/init, version 7.70.0); `plugins/tests/coach.php` ny +
+`plugins/tests/smoke.php` ændr (load); `tools/agent_brief.py` ny, `tools/test_agent_brief.py` ny,
+`seo_agent.py` ændr, `.github/workflows/seo_audit.yml` ændr (brief før audit), `tools/natlige-vaern.sh` ændr
+(Python-testen); plugin-README ændr (feedback-loop-afsnit); ROADMAP ændr (P8/changelog); biblioteksdokument +
+PDF; erstat den ene zip `plugins/steamgears-autopilot-v7.69.0.zip`; opdater `projektstatus.json` og
+`docs/samtalepunkter.md`.
+
+**Afgrænsning:** ingen ny tabel (lesson-storen er én option), ingen ny indstilling, ingen publicering og ingen
+ny provider. Briefen citerer kun tal den selv har regnet ud; mangler der data, siger den det i stedet for at
+gætte. Niche-scanneren er urørt, fordi den allerede læser det levende katalog ved hver kørsel, og
+`seo_harvester.py` er urørt, fordi dens kilder er eksterne guider — ingen af dem kan blive klogere af sidens
+egne tal. Chatten er urørt: den læser allerede sitet live gennem MCP-værktøjerne.
+
+---
+
 ## 6. Completion estimates (1/11 2026 — historical)
 
 **Kept to show how the scope grew, not as a forecast.** The milestones were computed against the 7.15.0
@@ -550,6 +593,21 @@ Platform limits: [Instagram content publishing](https://developers.facebook.com/
 
 ## 9. Change log for this document
 
+- **7.70.0 (10/11) — P8: agenterne læser sidens målte tilstand i stedet for en fast antagelse.** Hver skribent
+  startede fra den samme prompt og ét snapshot af den side den skrev for, så en vinkel med 120 klik og nul
+  ordrer blev valgt igen, og en kanal der var gået i stå blev ved med at få flere poster. `SGAP_Coach` læser nu
+  `sgap_events` (klik, ordrer, omsætning og seneste publicering pr. kanal og vinkel, 30 dage),
+  `sgap_ai_drafts` og WordPress' egne tællinger og lægger et kort, målt brief i prompten hos den daglige
+  forfatter, kampagne-agenten (samme prompt), Studio-artiklen og Studio-SEO-redaktøren — med en regel om at
+  kun briefens tal må citeres. En daglig cron omsætter tallene til højst 12 daterede regler (fx »angle_c: 120
+  klik, 0 ordrer« eller »bluesky har ikke udgivet noget i 20 dage«), og de vises på dashboardet under *What the
+  agents have learned* og kan læses af en agent gennem den read-only ability `agent-brief`. Ingen ny tabel,
+  indstilling eller publiceringsvej; en måling der ikke findes, udelades og siges højt. Repo-siden fik samme
+  princip: `tools/agent_brief.py` måler det levende katalog (20 produkter, DKK, 165–1 000, 9 kategorier, 33
+  indlæg, 32 sider) og skriver `docs/agent-brief.md`, som `seo_agent.py` nu læser — derfor gentager den
+  ugentlige plan ikke længere 39 produkter i USD. 44 nye coach-checks (**1 383 → 1 427 PASS / 0 FAIL**; efter
+  rebase over 7.69.1 er totalen **1 432 PASS / 0 FAIL**) og 13
+  Python-tests.
 - **7.69.0 (10/11) — P7: feed health lukker §4.1 pkt. 2, som har stået åbent siden 1/11.** I RSS-tilstand — som
   er standarden — findes der ingen token at teste, så svaret på »kan kanalen sende?« er feedet selv.
   `SGAP_RSS::health()` læser præcis de rækker `xml()` renderer og giver hver konfigureret kanal én tilstand:

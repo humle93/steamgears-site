@@ -52,6 +52,7 @@ så de ikke bliver forældreløse (`AGENTS.md` §5).
 | `tools/md_to_pdf.py` | Renderer en Markdown-fil fra `docs/library` som A4-PDF i husstilen |
 | `tools/mcp_project_profile.py` | Lokal MCP-server (stdio) der serverer profilen, status og roadmap'erne — registreret som `steamgears-profil` |
 | `tools/niche_scanner.py` | Niche-produkt-scanner: Pinterest Trends + TikTok Creative Center-eksport × vores katalog |
+| `tools/agent_brief.py` | Måler butikkens offentlige katalog og skriver `docs/agent-brief.md`, som den ugentlige SEO-agent læser |
 | `tools/waf_check.sh` | WAF/UA-check: neutral klient skal give 200; spoofede bot-UA'er giver 455 (forventet) |
 | `tools/setup-agent-tools.sh` | Genskaber PHP og PDF-bibliotekerne i `tools/_deps` (gitignored) — ingen root nødvendig |
 
@@ -63,7 +64,7 @@ frisk miljø.
 - `.github/workflows/projektstatus.yml` — dagligt: selftest → check → update → efterkontrol, committer kun ved ændring.
 - `.github/workflows/natlig-push.yml` — natligt kl. 02 dansk tid: opdaterer daglig status + brief, committer alt i
   træet, pusher til `main` og kører derefter alle værn via `tools/natlige-vaern.sh`.
-- `.github/workflows/seo_audit.yml` — ugentligt: høster kilder, kører `seo_agent.py`, committer planen. Kræver
+- `.github/workflows/seo_audit.yml` — ugentligt: måler butikken (`tools/agent_brief.py`), høster kilder, kører `seo_agent.py`, committer planen. Kræver
   `GEMINI_API_KEY`, `WP_USER` og `WP_APP_PASS` som repo-secrets.
 - `.github/workflows/niche-scan.yml` — natligt kl. 02:30: scanner de 11 søgeord mod Pinterest Trends. Kræver
   `PINTEREST_ACCESS_TOKEN`; mangler det, springes scanningen over med en `::notice`.

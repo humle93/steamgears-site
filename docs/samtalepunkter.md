@@ -27,7 +27,7 @@ _Opdateret 2026-11-10 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 | **Forum + Reddit — trafikaccelerator (P5)** | **96,7 %** | 2,9 af 3 d (F1 1,2/1,2 · F2 0,8/0,8 · F3 0,3/0,3 · F4 0,3/0,3 · F5 0,3/0,3 · F6 0/0,1) |
 | **steamgears.eu — site-optimering** | **100 %** | 20,95 af 20,95 d (S0 2,35/2,35 · S1 3,6/3,6 · S2 6,9/6,9 · S3 4,05/4,05 · S4 4,05/4,05) |
 | **steamgears.eu — miljø, server og sandbox (S5)** | **60 %** | 1,8 af 3 d (S5 1,8/3) |
-| **Steamgears Autopilot — plugin** | **100 %** | 32,8 af 32,8 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25 · P1E 0,25/0,25 · P1F 0,25/0,25 · P1G 0,5/0,5 · P2F 1,5/1,5 · P3OPT 0,6/0,6 · P3JS 0,3/0,3 · P3LIVE 0,25/0,25 · P1FALLBACK 0,35/0,35 · P1OR 0,25/0,25 · P6 0,9/0,9 · P7 0,3/0,3) |
+| **Steamgears Autopilot — plugin** | **100 %** | 33,7 af 33,7 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25 · P1E 0,25/0,25 · P1F 0,25/0,25 · P1G 0,5/0,5 · P2F 1,5/1,5 · P3OPT 0,6/0,6 · P3JS 0,3/0,3 · P3LIVE 0,25/0,25 · P1KEYDIAGNOSE 0,1/0,1 · P1FALLBACK 0,35/0,35 · P1OR 0,25/0,25 · P6 0,9/0,9 · P7 0,3/0,3 · P8 0,8/0,8) |
 | **Dark academia-rebrand** | **71,3 %** | 12,4 af 17,4 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5 · BATCH4 0,5/0,5 · GENTILDELING 0,4/0,4 · MOBIL-OG-SAESON 3/3) |
 | **SEO-indholdsproduktion** | **100 %** | 14 af 14 guides (BATCH 3/3 · COPY 4/4 · CORSET 1/1 · DKK 6/6) |
 | **Døde internlinks** | **100 %** | 39 af 39 links (FIX 39/39) |
@@ -58,15 +58,39 @@ _Opdateret 2026-11-10 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
-- `fa2124a Modul: Research — hurtigst mulig organisk trafik Før: 100 % → Efter: 100 % (Δ 0) Grundlag: ingen ændring`
-- `b96033e chore(status): daglig projektstatus 2026-11-10`
-- `d012f5b Modul: KABINE b12 — hele fladen målt, annoncer, mails og kontakter skrevet Før: 56,1 %  →  Efter: 57,4 %  (Δ +1,3) Grundlag: 19,5 af 34 t (Niche-valg, brand og produktstige 2/2 · ROI-model og enhedsøkonomi 2/2 · 30-dages plan og KPI-gates 2/2 · Kreativt: ti hooks som manuskript 2/2 · Kravliste: butik, betaling, tracking og jura 1,5/1,5 · Butiksopsætning: Shopify, MobilePay, CAPI, sider 0/6 · Leverandørvalg, GPSR-dokumentation og prøver 0/4 · Juridiske sider: handelsbetingelser, retur, privatliv 2/2,5 · Første annoncerunde uge 1-2 0/4 · Niche-portefølje: roadmap og færdig butikstekst 6/6 · Jura og måltabel: de tre øvrige butikker 1/1 · Flademåling: annoncer, mails, kontakter og værn 1/1)`
-- `5b1ed9b P6: kampagne-agenten skriver kladder, men publicerer aldrig`
-- `5dfb3e0 chore(status): daglig projektstatus 2026-11-10`
-- `aed68ab Modul: P1.24 — OpenRouter som automatisk backup for AIMLAPI Før: 100 % → Efter: 100 % (Δ 0) Grundlag: 31,6 af 31,6 d`
+- `8d46825 Fjerner blokstile for blokke der ikke findes på siden`
+- `47d592b Modul: kanal 1 — refresh af de 66 sider med visninger Før: 100 % → Efter: 100 % (Δ 0) Grundlag: ingen ændring`
+- `ca44d8d chore(status): daglig projektstatus 2026-11-10`
+- `b1d4569 Modul: P1.25 — nøgletesten siger hvad der er galt med nøglen Før: 100 % → Efter: 100 % (Δ 0) Grundlag: 32,8 af 32,8 d`
+- `1210a4f Fjerner udokumenterede løfter fra nichehooks`
+- `9182c6a P7: feed health — RSS-tilstanden kan nu måles`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+### 10/11 — P8: agenterne læser nu sidens egne tal, ikke en fast antagelse
+
+Spørgsmålet var «optimer alle agenterne, så de også udvikler sig samtidig med siden». Gennemgangen viste at
+det ikke var modellen eller kaldet der manglede: **hukommelsen** gjorde. Hver skribent startede fra den samme
+faste prompt og ét snapshot, så en vinkel med 120 klik og nul ordrer blev valgt igen, en kanal der var gået i
+stå fik flere poster, og den ugentlige SEO-plan talte om 39 produkter i USD længe efter butikken havde 20 i
+DKK. «Alle agenterne» blev afgrænset til de fire skrivende flader — daglig forfatter, kampagne-agent (samme
+prompt), Studio-artiklen og Studio-SEO-redaktøren — plus repoets `seo_agent.py`; niche-scanneren, harvesteren
+og chatten blev bevidst **ikke** rørt, fordi de allerede læser levende kilder.
+
+Løsningen er ét modul, `SGAP_Coach`: `outcomes()` er én grupperet forespørgsel på `sgap_events` pr. kanal og
+vinkel, `learn()` gør dem til højst 12 daterede regler (kun ved 25+ klik, 14+ dage uden publicering eller 20+
+ventende kladder, så en stille dag ikke lærer agenten noget forkert), og `brief()` lægger et kort, målt brief
+i alle fire prompts med reglen at kun dens tal må citeres. Ingen ny tabel, indstilling eller publiceringsvej;
+`agent-brief` er read-only, og dashboardkortet viser reglerne med deres bevis. Repo-siden fik samme princip:
+`tools/agent_brief.py` måler det levende katalog (**20 produkter, DKK, 165–1 000, 9 kategorier, 33 indlæg, 32
+sider**) og skriver `docs/agent-brief.md`, som `seo_agent.py` nu læser før den planlægger.
+
+Fælden undervejs var teststubben, ikke logikken: `number_format_i18n()` fandtes ikke, `get_permalink()` tog et
+id og ikke et objekt, og `table_exists()` deler `get_var`-stub med alt andet — så rækkefølgen af tabelnavne og
+`COUNT(*)` skal sættes rigtigt, ellers læser `outcomes()` en tom tabel. 44 nye coach-checks (**1 427 PASS / 0
+FAIL**; efter rebase over 7.69.1 er totalen **1 432 PASS / 0 FAIL**) og 13 Python-tests. Ikke verificeret: intet rigtigt AI-kald herfra, og 7.70.0 er ikke installeret på
+sitet, så lesson-storen er tom indtil første cron-kørsel.
 
 ### 10/11 — P7: feed health lukkede det sidste hul roadmap'en selv havde navngivet
 

@@ -27,7 +27,7 @@ The whole social autopilot runs inside WordPress (Command Center is retired):
 4. **Measure** – every post links via `/go/<id>/`, so clicks (and WooCommerce
    orders) are counted per channel.
 
-Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.69.0.zip` → Activate. On an existing
+Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.70.0.zip` → Activate. On an existing
 install the same zip arrives through the self-updater (see *Updates*), so an upload is only needed for the
 first install or a recovery.
 
@@ -103,6 +103,31 @@ tool, `set-ai-profile`, so the assistant can switch when it is asked to:
 `enable-full-access` itself stays out of the chat in every profile: the profile is the switch, so the assistant
 cannot quietly change its own access level. Switching away from *Site administration* leaves full REST access as
 it is — turn it off on the same page if you want it off.
+
+## Agent feedback loop (7.70)
+
+Every writer used to start from the same fixed prompt and one page's snapshot. A channel that had burned
+120 clicks without an order was still picked the next day, and a channel that had gone quiet stayed quiet.
+`SGAP_Coach` closes that gap: it reads what the site has already measured and puts it in the prompt.
+
+- **One measured brief.** `SGAP_Coach::brief()` builds a short block from `sgap_events` (clicks, orders,
+  revenue and the last publish per channel and angle, 30 days), the pending drafts and WordPress' own post
+  counts. It is appended to the daily writer, the campaign agent (same prompt), the Studio article writer
+  and the Studio SEO editor. The block ends with the rule that only its numbers may be cited.
+- **Lessons, rebuilt daily.** A cron (`sgap_coach_learn`) turns the numbers into at most 12 dated rules: an
+  angle with 25+ clicks and no order, a channel that sells, a channel silent past 14 days, a draft backlog
+  of 20+. They are stored in one non-autoloaded option. A rule is only drawn when the data supports it, and
+  the day it was first drawn is kept.
+- **Readable from outside.** The read-only ability `steamgears-autopilot/agent-brief` returns the facts, the
+  outcomes, the lessons and the brief itself, and the dashboard card *What the agents have learned* shows
+  the same list with its evidence.
+- **Nothing is published, and nothing is guessed.** No new table, no setting and no publishing call; a
+  measurement that could not be read is left out, and the brief says so.
+
+The repo's weekly SEO agent gets the same idea from the other side: `tools/agent_brief.py` measures the live
+catalogue (products, currency, price range, categories, posts, pages, newest post) and writes
+`docs/agent-brief.md`, which `seo_agent.py` reads as its own source. That is why the plan no longer describes
+39 products in USD.
 
 ## Campaign agent (7.68)
 
@@ -652,7 +677,7 @@ before it, because the MCP surface can read plugins but cannot install or activa
 1. Bump `Version:` in `steamgears-autopilot.php` and `SGAP_VERSION` — they must agree, CI fails otherwise.
 2. Rebuild the zip from the folder so the name and the contents match:
    `cd plugins && rm -f steamgears-autopilot-*.zip && zip -qr steamgears-autopilot-v<version>.zip steamgears-autopilot`
-3. `php plugins/tests/smoke.php` (1383 checks) and `diff -r` the zipped copy against the source. CI repeats
+3. `php plugins/tests/smoke.php` (1432 checks) and `diff -r` the zipped copy against the source. CI repeats
    both, plus `php -l` on PHP 8.0–8.5 and WordPress 6.4 / 7.1 / latest. The plugin is also exercised inside
    a real WordPress: `bash plugins/tests/integration.sh` (needs `php` with `mysqli`, `wp-cli`, `curl` and a
    reachable MySQL; 249 checks, including the four model rules, the Anthropic/custom-provider key checks and evergreen recycling) — it installs

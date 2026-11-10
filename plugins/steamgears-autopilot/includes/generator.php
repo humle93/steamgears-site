@@ -402,7 +402,10 @@ class SGAP_AI {
             . "Channels and their rules:\n{$rules}\n"
             . 'Return exactly one item per channel. "title" is a short headline (used as the Pinterest pin title), '
             . '"text" is the post itself without hashtags, "hashtags" are separate (each starting with #), '
-            . '"alt_text" describes the page\'s main image for screen readers.';
+            . '"alt_text" describes the page\'s main image for screen readers.'
+            // P8: the measured brief. The writer may only use these numbers, and the block
+            // already says so — a fixed prompt plus one page's snapshot was the old blind spot.
+            . (class_exists('SGAP_Coach') ? SGAP_Coach::block() : '');
     }
 
     /** Keeps only well-formed posts for the requested channels, one per channel. */

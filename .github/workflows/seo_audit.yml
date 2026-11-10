@@ -49,6 +49,11 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python seo_harvester.py --list seo_sources.txt
 
+      - name: Mål butikkens tilstand (agent-brief)
+        # P8: den ugentlige plan skal bygge på kataloget som det er nu — ikke på 2/11-tallene.
+        # Ingen secrets: kun offentlige endpoints (Store API og WP REST).
+        run: python3 tools/agent_brief.py
+
       - name: Kør SEO Audit & Generer Optimeringsplan
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
@@ -61,7 +66,7 @@ jobs:
           git config user.name "Steamgears SEO Bot"
           git config user.email "bot@steamgears.eu"
           mkdir -p reports
-          git add -A knowledge_base reports
+          git add -A knowledge_base reports docs/agent-brief.md
           if git diff --staged --quiet; then
             echo "Ingen ændringer — intet at committe."
             exit 0

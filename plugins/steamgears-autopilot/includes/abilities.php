@@ -63,6 +63,13 @@ class SGAP_Abilities {
                     'days' => ['type' => 'integer', 'minimum' => 1, 'maximum' => 365, 'default' => 90]
                 ], [], [__CLASS__, 'channel_health'], true, true
             ],
+            'agent-brief' => [
+                'What the agents know',
+                'The measured brief every writing agent receives: site facts, clicks/orders/revenue per channel and angle in the window, and the lessons rebuilt from those numbers. Read-only, and the same text is injected into the daily writer, the campaign agent and the Content Studio prompts.',
+                [
+                    'days' => ['type' => 'integer', 'minimum' => 1, 'maximum' => 365, 'default' => 30]
+                ], [], [__CLASS__, 'agent_brief'], true, true
+            ],
             'list-drafts' => [
                 'List AI drafts',
                 'Lists AI-written social posts. Default: those waiting for approval. Each has id, channel, title, text, hashtags and the page it promotes.',
@@ -317,6 +324,21 @@ class SGAP_Abilities {
             'analytics_summary' => SGAP_Channel_Health::analytics_summary($analytics),
             'feeds' => $feeds,
             'feeds_summary' => SGAP_RSS::health_summary($feeds),
+        ];
+    }
+
+    /** P8: what the agents have measured and learned — the same brief their prompts carry. */
+    public static function agent_brief($input = null): array {
+        $input = (array) $input;
+        $days = max(1, min(365, (int) ($input['days'] ?? SGAP_Coach::WINDOW)));
+        $outcomes = SGAP_Coach::outcomes($days);
+        return [
+            'window_days' => $outcomes['window_days'],
+            'facts' => SGAP_Coach::facts(),
+            'channels' => $outcomes['channels'],
+            'angles' => $outcomes['angles'],
+            'lessons' => SGAP_Coach::lessons(),
+            'brief' => SGAP_Coach::brief()
         ];
     }
 

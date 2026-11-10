@@ -26,7 +26,8 @@ function sanitize_text_field($s){return trim(strip_tags((string)$s));} function 
 function sanitize_key($s){return preg_replace('/[^a-z0-9_\-]/','',strtolower((string)$s));} function absint($v){return abs((int)$v);}
 function esc_url_raw($u,$p=null){return preg_match('#^https?://#',$u)?$u:'';} function wp_parse_url($u,$c=-1){return parse_url($u,$c);}
 function wp_parse_args($a,$d){return array_merge($d,$a);} function add_query_arg($a,$u=null,$b=null){ if($b!==null){ $a=[(string)$a=>(string)$u]; $u=$b; } if(!is_array($a)){ $a=[(string)$a=>'']; } return $u.(str_contains((string)$u,'?')?'&':'?').http_build_query($a,'','&',PHP_QUERY_RFC3986); }
-function current_time($t){return '2026-10-30 12:00:00';} function wp_date($f,$t=null){return date($f,$t??time());} function mysql2date($f,$d,$t=null){return $d?date($f,strtotime((string)$d)):'';}
+function current_time($t){return '2026-10-30 12:00:00';}
+if (!function_exists('number_format_i18n')) { function number_format_i18n($n, $d = 0) { return number_format((float) $n, (int) $d); } } function wp_date($f,$t=null){return date($f,$t??time());} function mysql2date($f,$d,$t=null){return $d?date($f,strtotime((string)$d)):'';}
 function plugins_url($p='',$f=''){ return 'https://steamgears.eu/wp-content/plugins/steamgears-autopilot/'.ltrim((string)$p,'/'); }
 function wp_enqueue_script($h,$src='',$d=[],$v=false,$f=false){ $GLOBALS['enqueued_scripts'][$h]=$src; }
 function wp_enqueue_style($h,$src='',$d=[],$v=false,$m='all'){ $GLOBALS['enqueued_styles'][$h]=$src; }
@@ -1822,5 +1823,6 @@ require __DIR__.'/queue-page.php';
 require __DIR__.'/forum.php';
 require __DIR__.'/campaign-agent.php';
 require __DIR__.'/feed-health.php';
+require __DIR__.'/coach.php';
 // P3.2/P3.5-slut
 exit(empty($GLOBALS['fail'])?0:1);
