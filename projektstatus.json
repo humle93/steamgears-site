@@ -251,11 +251,11 @@
         {
           "id": "p1keydiagnose",
           "name": "P1.25 — Nøgletesten siger hvad der er galt med nøglen",
-          "done": 0.1,
-          "total": 0.1,
+          "done": 0.15,
+          "total": 0.15,
           "unit": "d",
           "verified": true,
-          "note": "7.69.1 (10/11): OpenRouter svarede 401 Missing Authentication header, og beskeden blev vist som »refused the key«, når den gemte værdi ikke var en OpenRouter-nøgle. Formen tjekkes nu før der bruges en request (sk-or-v1-), en forkert værdi navngives med sin længde og henvisning til openrouter.ai/keys, og et svar om en manglende header oversættes til det det betyder: linjeskift i feltet eller en vært/proxy der fjerner Authorization. SGAP_AI::api_key() trimmer nøglen for generator, Studio, AI Chat og nøgletest. 5 nye smoke-checks (1353 -> 1358 PASS, 0 FAIL)."
+          "note": "7.69.1 (10/11): OpenRouter svarede 401 Missing Authentication header, og beskeden blev vist som »refused the key«, når den gemte værdi ikke var en OpenRouter-nøgle. Formen tjekkes nu før der bruges en request (sk-or-v1-), en forkert værdi navngives med sin længde og henvisning til openrouter.ai/keys, og et svar om en manglende header oversættes til det det betyder: linjeskift i feltet eller en vært/proxy der fjerner Authorization. SGAP_AI::api_key() trimmer nøglen for generator, Studio, AI Chat og nøgletest. 5 nye smoke-checks (1353 -> 1358 PASS, 0 FAIL). 7.70.1 (10/11): diagnosen forklarede svaret, men fik ikke headeren frem. Requesten bygges nu ét sted (SGAP_AI::openrouter_headers/openrouter_post) for nøgletest, failover og generator, og tokenet renses i SGAP_AI::bearer() for mellemrum, linjeskift og usynlige tegn (U+200B, U+00A0, U+FEFF), som transporten ellers kasserer headeren på. Svarer OpenRouter stadig missing header, kører SGAP_AI::stripped_by() sitets eget http_request_args-filter på en kopi af requesten og navngiver den funktion der fjerner headeren. 11 nye smoke-checks ser på den udgående request (Bearer-header, én linje, ingen nøgle i beskeden); med bearer() sat tilbage til trim() fejler 4 af dem, så regressionen er bevist. 1 443 PASS / 0 FAIL. Intet live-kald: nøglen er ejerens, og værtens proxy kan ikke testes indefra."
         },
         {
           "id": "p1fallback",
@@ -300,7 +300,7 @@
           "note": "7.70.0: SGAP_Coach (includes/coach.php) læser sidens egne tal og lægger et målt brief i prompten hos den daglige forfatter, kampagne-agenten (samme prompt), Studio-artiklen og Studio-SEO-redaktøren, med reglen at kun briefens tal må citeres. facts() læser wp_count_posts, WooCommerce-valutaen, kataloget og sgap_ai_drafts; outcomes() er én grupperet forespørgsel på sgap_events pr. kanal og vinkel (klik, ordrer, omsætning, seneste publicering, dage siden); learn() omsætter dem til højst 12 daterede regler (MIN_CLICKS 25, SILENT_DAYS 14, backlog 20) i én option uden autoload og beholder første dato. Ny cron sgap_coach_learn (dagligt), filter sgap_agent_brief, transient-cache 1 t, read-only ability agent-brief og dashboardkortet 'What the agents have learned'. Ingen ny tabel, indstilling eller publiceringsvej. Repo-siden: tools/agent_brief.py måler det levende katalog (20 produkter, DKK, 165-1 000, 9 kategorier, 33 indlæg, 32 sider) og skriver docs/agent-brief.md, som seo_agent.py læser, og workflowen måler før auditten. 44 nye coach-checks (1 383 -> 1 427 PASS / 0 FAIL; efter rebase over 7.69.1 er totalen 1 432 PASS / 0 FAIL), 13 Python-tests, php -l rent, fejlscan uden fund, zip byte-identisk. IKKE verificeret: intet rigtigt AI-kald fra sandkassen, 7.70.0 er ikke installeret på sitet, så lesson-storen er tom indtil første cron-kørsel; tærsklerne er vurderinger, ikke målinger."
         }
       ],
-      "total": 33.7,
+      "total": 33.75,
       "verified": true
     },
     {
@@ -2227,6 +2227,15 @@
       "after": 100.0,
       "delta": 0,
       "basis": "33,7 af 33,7 d (P0 4.65/4.65 · P1 14.45/14.45 · P2 4.75/4.75 · P3 2/2 · P0.7 1/1 · P0.7c 0.25/0.25 · P1.19 0.25/0.25 · P1.20 0.25/0.25 · P1.21 0.25/0.25 · P1.22 0.5/0.5 · P2.6 1.5/1.5 · P3.7 0.6/0.6 · P3.8 0.3/0.3 · P3.9 0.25/0.25 · P1.25 0.1/0.1 · P1.24 0.35/0.35 · P1.23 0.25/0.25 · P6 0.9/0.9 · P7 0.3/0.3 · P8 0.8/0.8)"
+    },
+    {
+      "date": "2026-11-10",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "P1.25 — OpenRouter-headeren sendes fra én bygger",
+      "before": 100.0,
+      "after": 100.0,
+      "delta": 0.0,
+      "basis": "33,75 af 33,75 d (P0 4.65/4.65 · P1 14.45/14.45 · P2 4.75/4.75 · P3 2/2 · P0.7 1/1 · P0.7c 0.25/0.25 · P1.19 0.25/0.25 · P1.20 0.25/0.25 · P1.21 0.25/0.25 · P1.22 0.5/0.5 · P2.6 1.5/1.5 · P3.7 0.6/0.6 · P3.8 0.3/0.3 · P3.9 0.25/0.25 · P1.25 0.15/0.15 · P1.24 0.35/0.35 · P1.23 0.25/0.25 · P6 0.9/0.9 · P7 0.3/0.3 · P8 0.8/0.8)"
     }
   ]
 }

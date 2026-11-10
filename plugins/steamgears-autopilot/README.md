@@ -27,7 +27,7 @@ The whole social autopilot runs inside WordPress (Command Center is retired):
 4. **Measure** – every post links via `/go/<id>/`, so clicks (and WooCommerce
    orders) are counted per channel.
 
-Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.70.0.zip` → Activate. On an existing
+Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.70.1.zip` → Activate. On an existing
 install the same zip arrives through the self-updater (see *Updates*), so an upload is only needed for the
 first install or a recovery.
 
@@ -88,6 +88,17 @@ being sent and answered with a 401 about a missing header — that is the answer
 header, the message says so and points at a line break in the field or a host/proxy that strips the header.
 Every key is also trimmed before it becomes a header, so a trailing newline from a paste can no longer turn
 `Bearer sk-or-…` into something no gateway parses.
+
+**7.70.1 sends the header from one place.** The test and the failover each built their own `Authorization`
+header, so a test could prove a header the real call never sent. `SGAP_AI::openrouter_headers()` is now the
+only builder and `SGAP_AI::openrouter_post()` the only request, used by the key test, the failover and the
+generator. The token is cleaned by `SGAP_AI::bearer()`: whitespace, line breaks and invisible characters
+(U+200B, U+00A0, U+FEFF) are removed, because a header value holding one is dropped by the transport and the
+gateway then answers *Missing Authentication header* — the same answer a wrong key gets. And when OpenRouter
+still reports no header, `SGAP_AI::stripped_by()` runs the site's own `http_request_args` filter on a copy of
+the request: if a plugin removes `Authorization` from outgoing calls, the message names that filter instead of
+sending you to openrouter.ai/keys. Eleven new smoke checks observe the outgoing request itself — the exact
+`Bearer` header, one line, no key in any message — and four of them fail if the cleaning is removed.
 
 ## AI profiles (7.41.2)
 
@@ -677,7 +688,7 @@ before it, because the MCP surface can read plugins but cannot install or activa
 1. Bump `Version:` in `steamgears-autopilot.php` and `SGAP_VERSION` — they must agree, CI fails otherwise.
 2. Rebuild the zip from the folder so the name and the contents match:
    `cd plugins && rm -f steamgears-autopilot-*.zip && zip -qr steamgears-autopilot-v<version>.zip steamgears-autopilot`
-3. `php plugins/tests/smoke.php` (1432 checks) and `diff -r` the zipped copy against the source. CI repeats
+3. `php plugins/tests/smoke.php` (1443 checks) and `diff -r` the zipped copy against the source. CI repeats
    both, plus `php -l` on PHP 8.0–8.5 and WordPress 6.4 / 7.1 / latest. The plugin is also exercised inside
    a real WordPress: `bash plugins/tests/integration.sh` (needs `php` with `mysqli`, `wp-cli`, `curl` and a
    reachable MySQL; 249 checks, including the four model rules, the Anthropic/custom-provider key checks and evergreen recycling) — it installs

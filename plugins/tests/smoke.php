@@ -1806,6 +1806,71 @@ update_option('sgap_ai_provider','aimlapi');
 update_option('sgap_ai_api_key','PRIMARY-KEY');
 update_option('sgap_openrouter_api_key','sk-or-backup');
 
+// 7.70.1 — the outgoing request itself, not a sentence about it. `http_calls` holds the arguments
+// the plugin hands to WordPress' HTTP layer, so this is the request that leaves the site. A key
+// is never printed: each check looks at a header or a length, and the message is searched for the
+// fixture value to prove it does not leak.
+$auth_of = static function (array $args): string {
+    foreach ((array) ($args['headers'] ?? []) as $name => $value) {
+        if (strcasecmp((string) $name, 'Authorization') === 0) {
+            return (string) $value;
+        }
+    }
+    return '';
+};
+check('key request: whitespace, a line break and invisible characters are removed from the token',
+    SGAP_AI::bearer(" sk-or-v1-a\tb\r\nc\u{00A0}d\u{200B}e ") === 'sk-or-v1-abcde');
+update_option('sgap_ai_provider', 'openrouter');
+update_option('sgap_ai_model', 'anthropic/claude-sonnet-4.5');
+update_option('sgap_ai_api_key', "sk-or-v1-abc\u{200B}123");
+$GLOBALS['http_calls'] = []; $GLOBALS['http_queue'] = [sgap_http(200, ['choices' => [['message' => ['content' => 'pong']]]])];
+$kd = SGAP_KeyCheck::check_ai();
+$sent = $GLOBALS['http_calls'][0][1] ?? [];
+check('key request: one POST to the fixed OpenRouter endpoint', count($GLOBALS['http_calls']) === 1
+    && ($GLOBALS['http_calls'][0][0] ?? '') === 'https://openrouter.ai/api/v1/chat/completions');
+check('key request: the request carries Authorization: Bearer with the saved key',
+    $auth_of($sent) === 'Bearer sk-or-v1-abc123');
+check('key request: the header value is one line of token characters only',
+    (bool) preg_match('/^Bearer [A-Za-z0-9._\-]+$/', $auth_of($sent)));
+check('key request: the test passes on that request and never echoes the key',
+    ($kd['ok'] ?? null) === true && !str_contains((string) $kd['message'], 'sk-or-v1-abc123'));
+check('key request: nothing filters the header away on a healthy site',
+    SGAP_AI::stripped_by('sk-or-v1-x') === ['stripped' => false, 'filters' => []]);
+// The production writers go through the same builder: a test that proves a header the real call
+// never sends would prove nothing.
+$GLOBALS['http_calls'] = []; $GLOBALS['http_queue'] = [sgap_http(200, ['choices' => [['message' => ['content' => 'ok']]]])];
+SGAP_AI::chat_completions('sk-or-v1 gen', ['model' => 'x'], 5);
+check('key request: the generator sends the same cleaned header',
+    $auth_of($GLOBALS['http_calls'][0][1] ?? []) === 'Bearer sk-or-v1gen');
+$GLOBALS['http_calls'] = []; $GLOBALS['http_queue'] = [sgap_http(200, ['choices' => [['message' => ['content' => 'ok']]]])];
+SGAP_AI::openrouter_post('sk-or-v1-parity', ['model' => 'x'], 5);
+check('key request: the tested request is byte-for-byte the production one',
+    $auth_of($GLOBALS['http_calls'][0][1] ?? []) === SGAP_AI::openrouter_headers('sk-or-v1-parity')['Authorization']
+    && ($GLOBALS['http_calls'][0][1]['headers']['X-OpenRouter-Title'] ?? '') === 'Steamgears Autopilot');
+// A security plugin that strips Authorization from every outgoing call is the other way the header
+// disappears after it was built. The check must name that filter, not blame the key.
+$GLOBALS['filters']['http_request_args'] = static function ($args, $url) {
+    $args['headers'] = array_diff_key((array) ($args['headers'] ?? []), ['Authorization' => 1]);
+    return $args;
+};
+check('key request: the stripping filter is detected', SGAP_AI::stripped_by('sk-or-v1-x')['stripped'] === true);
+$GLOBALS['http_queue'] = [sgap_http(401, ['error' => ['message' => 'Missing Authentication header']])];
+$kd = SGAP_KeyCheck::check_ai();
+check('key diagnosis: a filter that removes Authorization is named as the cause',
+    ($kd['ok'] ?? null) === false && str_contains((string) $kd['message'], 'http_request_args')
+    && str_contains((string) $kd['message'], 'not the problem')
+    && !str_contains((string) $kd['message'], 'sk-or-v1-abc123'));
+unset($GLOBALS['filters']['http_request_args']);
+// With no filter on the site the header is built and survives it, so the loss is outside the site.
+$GLOBALS['http_queue'] = [sgap_http(401, ['error' => ['message' => 'Missing Authentication header']])];
+$kd = SGAP_KeyCheck::check_ai();
+check('key diagnosis: without a stripping filter the message points outside the site',
+    ($kd['ok'] ?? null) === false && str_contains((string) $kd['message'], 'survived this site')
+    && !str_contains((string) $kd['message'], 'sk-or-v1-abc123'));
+update_option('sgap_ai_provider', 'aimlapi');
+update_option('sgap_ai_api_key', 'PRIMARY-KEY');
+update_option('sgap_openrouter_api_key', 'sk-or-backup');
+
 require __DIR__.'/roi.php';
 require __DIR__.'/pinterest.php';
 require __DIR__.'/instagram.php';

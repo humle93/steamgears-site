@@ -241,7 +241,9 @@ class SGAP_KeyCheck {
      * model is chosen the answer says that instead of spending a request on a guess.
      */
     private static function check_openrouter(string $key, string $model = '', string $who = 'OpenRouter'): array {
-        $key = trim($key);
+        // The same cleaning the real call gets: a header value with a line break or a zero-width
+        // character is dropped by the transport, and the gateway then answers "no Authorization".
+        $key = SGAP_AI::bearer($key);
         $model = $model !== '' ? $model : SGAP_AI::model();
         if ($key === '') {
             return ['ok' => false, 'message' => $who . ': no key saved.'];
@@ -256,11 +258,11 @@ class SGAP_KeyCheck {
         if ($model === '') {
             return ['ok' => false, 'message' => $who . ' key saved, but pick an AI model under Settings → AI & images — OpenRouter has no default model.'];
         }
-        $response = wp_remote_post(SGAP_AI::OPENROUTER_URL . '/chat/completions', [
-            'timeout' => 30,
-            'headers' => ['Authorization' => 'Bearer ' . $key, 'Content-Type' => 'application/json'],
-            'body' => wp_json_encode(['model' => $model, 'max_tokens' => 1, 'messages' => [['role' => 'user', 'content' => 'ping']]])
-        ]);
+        $response = SGAP_AI::openrouter_post($key, [
+            'model' => $model,
+            'max_tokens' => 1,
+            'messages' => [['role' => 'user', 'content' => 'ping']]
+        ], 30);
         if (is_wp_error($response)) {
             return ['ok' => false, 'message' => 'Could not reach OpenRouter: ' . $response->get_error_message()];
         }
@@ -272,7 +274,16 @@ class SGAP_KeyCheck {
         }
         if ($code === 401 || $code === 403) {
             if (stripos($detail, 'missing authentication header') !== false) {
-                return ['ok' => false, 'message' => $who . ' saw no usable Authorization header, and the saved key has the right shape (' . strlen($key) . ' characters, sk-or-). Check for a line break or space in the field, re-save the key as one line, and if it repeats the host or a proxy is stripping the header.'];
+                // The request was built with `Authorization: Bearer …`, so the header either left
+                // without it or never arrived. WordPress runs every outgoing request through
+                // `http_request_args`; if that filter removes the header, name it instead of
+                // sending the owner back to openrouter.ai/keys for a key that is not the problem.
+                $strip = SGAP_AI::stripped_by($key);
+                if ($strip['stripped']) {
+                    $culprit = $strip['filters'] !== [] ? implode(', ', $strip['filters']) : 'a filter on http_request_args';
+                    return ['ok' => false, 'message' => $who . ' saw no Authorization header, and the request did carry one: ' . $culprit . ' removes it from every outgoing request before it leaves the site. Turn that filter (or its plugin) off and test again. The key was not the problem and was never sent.'];
+                }
+                return ['ok' => false, 'message' => $who . ' saw no usable Authorization header, and the saved key has the right shape (' . strlen($key) . ' characters, sk-or-). The header was built and survived this site\'s filters, so it is removed between the server and OpenRouter: ask the host whether an outgoing proxy strips Authorization, or test again from another network.'];
             }
             return ['ok' => false, 'message' => $who . ' refused the key' . ($detail !== '' ? ": {$detail}" : '.')];
         }

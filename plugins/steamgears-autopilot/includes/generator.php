@@ -36,6 +36,97 @@ class SGAP_AI {
     /** Its own catalogue cache, so a backup list and a provider list cannot overwrite each other. */
     const FALLBACK_CATALOG = 'sgap_ai_catalog_openrouter_backup';
 
+    /**
+     * A key as it has to look inside an `Authorization` header. A paste from a browser can carry
+     * a line break, a non-breaking space or a zero-width character, and a header value holding one
+     * is refused or truncated by cURL — the gateway then answers as if no header had been sent at
+     * all, which is exactly the 401 `Missing Authentication header` measured 10/11. Trimming the
+     * ends is not enough (`trim()` leaves an inner newline), so every invisible and control
+     * character is removed once, here, for every caller.
+     */
+    public static function bearer(string $key): string {
+        $clean = preg_replace('/[\x{00A0}\x{200B}-\x{200D}\x{2060}\x{FEFF}\x{2028}\x{2029}]/u', '', $key);
+        if (!is_string($clean)) {
+            $clean = $key; // invalid UTF-8: the byte-wise strip below still applies
+        }
+        return (string) preg_replace('/[\x00-\x20\x7F]/', '', $clean);
+    }
+
+    /**
+     * The headers of every OpenRouter call. One function, because the key test and the failover
+     * must send the same request: a test that proves a header the real call never sends proves
+     * nothing, and that is how the two drifted apart before 7.70.1.
+     */
+    public static function openrouter_headers(string $key): array {
+        return [
+            'Authorization' => 'Bearer ' . self::bearer($key),
+            'Content-Type' => 'application/json',
+            'HTTP-Referer' => home_url('/'),
+            'X-OpenRouter-Title' => 'Steamgears Autopilot'
+        ];
+    }
+
+    /** One POST to OpenRouter's /chat/completions with the shared headers, undecoded. */
+    public static function openrouter_post(string $key, array $body, int $timeout = 30) {
+        return wp_remote_post(self::OPENROUTER_URL . '/chat/completions', [
+            'timeout' => $timeout,
+            'headers' => self::openrouter_headers($key),
+            'body' => wp_json_encode($body)
+        ]);
+    }
+
+    /**
+     * Did anything on this site take the Authorization header out before the request left?
+     * WordPress passes the final arguments through `http_request_args`; applying that filter to a
+     * copy of the request we just built shows what would actually be sent, and names the callbacks
+     * that removed it — so the owner is told which filter to turn off instead of being sent to
+     * openrouter.ai/keys for a key that was never the problem.
+     *
+     * @return array{stripped: bool, filters: string[]}
+     */
+    public static function stripped_by(string $key): array {
+        $args = ['timeout' => 30, 'headers' => self::openrouter_headers($key), 'body' => '{}'];
+        $final = apply_filters('http_request_args', $args, self::OPENROUTER_URL . '/chat/completions');
+        if (!is_array($final)) {
+            // A filter replaced the arguments wholesale: not ours to judge, and not a header strip.
+            return ['stripped' => false, 'filters' => []];
+        }
+        foreach ((array) ($final['headers'] ?? []) as $name => $value) {
+            if (strcasecmp((string) $name, 'Authorization') === 0 && trim((string) $value) !== '') {
+                return ['stripped' => false, 'filters' => []];
+            }
+        }
+        return ['stripped' => true, 'filters' => self::http_filter_names('http_request_args')];
+    }
+
+    /**
+     * Callback names registered on an HTTP filter, for a message only. Never a stored value:
+     * a key cannot end up in an error the owner pastes somewhere.
+     *
+     * @return string[]
+     */
+    public static function http_filter_names(string $tag): array {
+        $hooks = $GLOBALS['wp_filter'][$tag]->callbacks ?? null;
+        if (!is_array($hooks)) {
+            return [];
+        }
+        $names = [];
+        foreach ($hooks as $priority) {
+            foreach ((array) $priority as $entry) {
+                $fn = $entry['function'] ?? null;
+                if (is_string($fn)) {
+                    $names[] = $fn;
+                } elseif (is_array($fn) && count($fn) === 2) {
+                    $names[] = (is_object($fn[0]) ? get_class($fn[0]) : (string) $fn[0]) . '::' . (string) $fn[1];
+                } elseif ($fn instanceof Closure) {
+                    $ref = new ReflectionFunction($fn);
+                    $names[] = 'a closure in ' . basename((string) $ref->getFileName()) . ':' . $ref->getStartLine();
+                }
+            }
+        }
+        return array_values(array_unique(array_filter($names)));
+    }
+
     /** What the last call did. Set only when the backup answered; reset on every new call. */
     private static array $fallback = [];
 
@@ -191,12 +282,12 @@ class SGAP_AI {
      * missing header instead of a rejected key (measured 10/11 against OpenRouter).
      */
     public static function api_key(): string {
-        return trim((string) SGAP_Settings::get('ai_api_key'));
+        return self::bearer((string) SGAP_Settings::get('ai_api_key'));
     }
 
     /** The OpenRouter backup key, or '' when none is saved. */
     public static function fallback_key(): string {
-        return trim((string) SGAP_Settings::get(self::FALLBACK_KEY));
+        return self::bearer((string) SGAP_Settings::get(self::FALLBACK_KEY));
     }
 
     /** The model the backup asks, or '' when the backup is switched off. */
@@ -279,7 +370,7 @@ class SGAP_AI {
     private static function post_chat(string $base, string $key, array $body, int $timeout, string $who) {
         return self::decode(wp_remote_post($base . '/chat/completions', [
             'timeout' => $timeout,
-            'headers' => ['Authorization' => 'Bearer ' . $key, 'Content-Type' => 'application/json'],
+            'headers' => ['Authorization' => 'Bearer ' . self::bearer($key), 'Content-Type' => 'application/json'],
             'body' => wp_json_encode($body)
         ]), $who);
     }
@@ -294,16 +385,7 @@ class SGAP_AI {
         $model = self::fallback_model();
         $body['model'] = $model;
         unset($body['reasoning_effort']);
-        $decoded = self::decode(wp_remote_post(self::OPENROUTER_URL . '/chat/completions', [
-            'timeout' => $timeout,
-            'headers' => [
-                'Authorization' => 'Bearer ' . self::fallback_key(),
-                'Content-Type' => 'application/json',
-                'HTTP-Referer' => home_url('/'),
-                'X-OpenRouter-Title' => 'Steamgears Autopilot'
-            ],
-            'body' => wp_json_encode($body)
-        ]), 'OpenRouter backup');
+        $decoded = self::decode(self::openrouter_post(self::fallback_key(), $body, $timeout), 'OpenRouter backup');
         $status = (int) ($primary->get_error_data()['status'] ?? 0);
         if (is_wp_error($decoded)) {
             return new WP_Error(
