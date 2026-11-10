@@ -80,7 +80,7 @@ SEO-titel: Kontakt IMMER | IMMER
 
 Meta-beskrivelse: Skriv til IMMER om en ordre, et produkt eller en retur. Se e-mail, telefon, adresse og svartid.
 
-<p>Spørgsmål om en ordre, et produkt eller en retur? Skriv til os.</p><ul><li>E-mail: [EJER: butikkens e-mail]</li><li>Telefon: [EJER: telefon]</li><li>Adresse: [EJER: adresse]</li><li>Svartid: [EJER: timer] på hverdage</li></ul><h2>Før du skriver</h2><p>Vægt, mål og sikkerhed står under <a href='/brug-og-sikkerhed/'>Brug og sikkerhed</a>. Levering og retur står under <a href='/levering-og-retur/'>Levering og retur</a>. Måske står svaret allerede der.</p><h2>Erhverv</h2><p>[EJER: registreret firmanavn], CVR [EJER: CVR-nummer], [EJER: adresse].</p>
+<p>Spørgsmål om en ordre, et produkt eller en retur? Skriv til os — vi svarer hellere grundigt end hurtigt.</p><ul><li>E-mail: [EJER: butikkens e-mail]</li><li>Telefon: [EJER: telefon]</li><li>Adresse: [EJER: adresse]</li><li>Svartid: [EJER: timer] på hverdage</li></ul><h2>Sådan får du et hurtigt svar</h2><p>Skriv ordrenummeret i emnefeltet, og beskriv hvad der er galt. Er varen beskadiget, eller mangler der en del, så læg et billede ved — så slipper vi for at spørge om det samme to gange.</p><h2>Retur og fortrydelse</h2><p>Vil du fortryde, skal du kun give os besked inden 14 dage; du behøver ikke at have sendt varen endnu. Fremgangsmåde, standardformular og returadresse står på <a href='/fortrydelse/'>Fortrydelse</a>.</p><h2>Før du skriver</h2><p>Brug og sikkerhed står under <a href='/brug-og-sikkerhed/'>Brug og sikkerhed</a>, og målene står på produktsiderne. Levering, fragt og reklamation står under <a href='/levering-og-retur/'>Levering og retur</a>, og vilkårene står i <a href='/handelsbetingelser/'>handelsbetingelserne</a>.</p><h2>Erhverv og oplysninger</h2><p>[EJER: registreret firmanavn], CVR [EJER: CVR-nummer], [EJER: adresse]. Vi bruger din henvendelse til at svare dig og gemmer den, så længe sagen er åben — se <a href='/privatlivspolitik/'>privatlivspolitikken</a>.</p>
 
 ## Ofte stillede spørgsmål
 
@@ -143,6 +143,109 @@ SEO-titel: Natpakker med dyne, maske og hvid støj | IMMER
 Meta-beskrivelse: Søvnpakken med tyngdedyne, søvnmaske og hvid støj. 999 kr. i stedet for 1.647 kr. Se hvad der følger med.
 
 <p>De tre ting sammen: vægt, mørke og lyd. Pakken er til dig, der hellere vil ændre hele rummet end at gætte på én ting.</p>
+
+## Annoncer
+
+### Mørke — Lyset ved kinden
+
+**Primær tekst:** Lyset kommer ind ved kinden, ikke over næsen. Masken er formet med udsparing til næsen, remmen kan justeres, og stoffet kan vaskes i hånden. Ingen lysrevner, ingen tryk over øjnene.
+
+**Overskrift:** Mørke, der bliver
+
+**Beskrivelse:** Søvnmaske med udsparing til næsen. 349 kr.
+
+**Kreativt:** Hånd-only: masken lægges på et hovedpude i et mørkt soveværelse, og en hånd justerer remmen. Ingen ansigt, intet andet brand, ingen tekst i billedet.
+
+**Landingsside:** `/produkter/soevnmaska/`
+
+### Lyden — Ingen app, ingen konto
+
+**Primær tekst:** Fem toner, en timer og et batteri, der holder hele natten. Der er ingen app, der skal opdateres, og ingen konto, der skal oprettes — lyden bliver i soveværelset.
+
+**Overskrift:** Lyd uden app
+
+**Beskrivelse:** Hvid støj med fem toner og timer. 499 kr.
+
+**Kreativt:** Enheden står på et natbord ved siden af en lampe, og en hånd drejer på knappen. Roligt billede, intet ansigt, ingen telefon i billedet.
+
+**Landingsside:** `/produkter/hvid-stoej/`
+
+### Vægten — Seks kilo over kroppen
+
+**Primær tekst:** Seks kilo glasperler fordeler sig efter kroppen i stedet for at ligge som et tungt punkt. Dynen skal kunne løftes af den, der sover under den, og vægten vælges som udgangspunkt omkring 10 % af kropsvægten.
+
+**Overskrift:** Vægt, der fordeler sig
+
+**Beskrivelse:** Tyngdedyne, 6 kg. 799 kr.
+
+**Kreativt:** Dynen lægges over en seng, og en hånd glatter den ud, så kanalerne ses. Ingen ansigt, intet andet brand, dæmpet lys.
+
+**Landingsside:** `/produkter/tyngdedyne/`
+
+## E-mails
+
+### Velkomst
+
+**Emne:** Tre ting i soveværelset — og hvad de ikke kan
+
+**Preheader:** Vægt, mørke og lyd. Ingen løfter om at løse noget.
+
+```
+Hej,
+
+Tak for din ordre. Her er den korte version:
+
+1. Dynen skal kunne løftes af den, der sover under den. Læg den over kroppen, ikke over hovedet.
+2. Masken skal slutte tæt ved kinden uden at trykke på øjnene. Justér remmen, til den sidder.
+3. Hvid støj skal stå lavt nok til, at du ikke skærper ørerne for at høre den.
+
+De er ikke medicinsk udstyr og ikke et hjælpemiddel. Virker søvnproblemerne ved, skal de afklares med en læge — det kan et produkt ikke.
+
+Venlig hilsen
+IMMER
+```
+
+### Brug
+
+**Emne:** Dynen: vægt, luft og vask
+
+**Preheader:** Seks kilo glasperler skal have plads til at fordele sig.
+
+```
+Hej,
+
+En tyngdedyne virker kun, hvis vægten bliver, hvor den skal:
+
+• Vægten vælges som udgangspunkt omkring 10 % af kropsvægten.
+• Ryst dynen let, så kanalerne fordeler glasset, når du har redt seng.
+• Betrækket kan tages af og vaskes; selve dynen vaskes ikke i maskine.
+
+Dynen er ikke til børn under 2 år og ikke til personer, der ikke selv kan flytte den. Skal den bruges af et barn, så skriv til os først.
+
+Venlig hilsen
+IMMER
+```
+
+### Elektronik
+
+**Emne:** Batteriet i hvid støj
+
+**Preheader:** Ingen konto, ingen app — men et batteri, der skal lades.
+
+```
+Hej,
+
+Hvid støj har ingen konto og ingen app. Til gengæld har den et batteri:
+
+• Lad den op om dagen, så den er klar om aftenen.
+• Oplad den ikke i et lukket rum, og lad den ikke ligge under en pude.
+• Bliver lyden svagere, eller holder batteriet ikke natten, så skriv til os.
+
+Når enheden en dag er udtjent, må den ikke i husholdningsaffaldet. Aflevér den på den kommunale genbrugsplads — vi er registreret i producentregistret for elektronik.
+
+Venlig hilsen
+IMMER
+```
 
 ## Produkter — titel og SEO (resten ligger i CSV'en)
 

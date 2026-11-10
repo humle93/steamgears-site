@@ -80,7 +80,7 @@ SEO-titel: Kontakt STILLE | STILLE
 
 Meta-beskrivelse: Skriv til STILLE om en ordre, et produkt eller en retur. Se e-mail, telefon, adresse og svartid.
 
-<p>Spørgsmål om en ordre, et produkt eller en retur? Skriv til os.</p><ul><li>E-mail: [EJER: butikkens e-mail]</li><li>Telefon: [EJER: telefon]</li><li>Adresse: [EJER: adresse]</li><li>Svartid: [EJER: timer] på hverdage</li></ul><h2>Før du skriver</h2><p>Størrelser og pasform står under <a href='/storrelse-og-pasform/'>Størrelse og pasform</a>. Levering og retur står under <a href='/levering-og-retur/'>Levering og retur</a>. Måske står svaret allerede der.</p><h2>Erhverv</h2><p>[EJER: registreret firmanavn], CVR [EJER: CVR-nummer], [EJER: adresse].</p>
+<p>Spørgsmål om en ordre, et produkt eller en retur? Skriv til os — vi svarer hellere grundigt end hurtigt.</p><ul><li>E-mail: [EJER: butikkens e-mail]</li><li>Telefon: [EJER: telefon]</li><li>Adresse: [EJER: adresse]</li><li>Svartid: [EJER: timer] på hverdage</li></ul><h2>Sådan får du et hurtigt svar</h2><p>Skriv ordrenummeret i emnefeltet, og beskriv hvad der er galt. Er varen beskadiget, eller mangler der en del, så læg et billede ved — så slipper vi for at spørge om det samme to gange.</p><h2>Retur og fortrydelse</h2><p>Vil du fortryde, skal du kun give os besked inden 14 dage; du behøver ikke at have sendt varen endnu. Fremgangsmåde, standardformular og returadresse står på <a href='/fortrydelse/'>Fortrydelse</a>.</p><h2>Før du skriver</h2><p>Størrelser og pasform står under <a href='/storrelse-og-pasform/'>Størrelse og pasform</a>, og sikkerhedsgrænserne står på hver produktside. Levering, fragt og reklamation står under <a href='/levering-og-retur/'>Levering og retur</a>, og vilkårene står i <a href='/handelsbetingelser/'>handelsbetingelserne</a>.</p><h2>Erhverv og oplysninger</h2><p>[EJER: registreret firmanavn], CVR [EJER: CVR-nummer], [EJER: adresse]. Vi bruger din henvendelse til at svare dig og gemmer den, så længe sagen er åben — se <a href='/privatlivspolitik/'>privatlivspolitikken</a>.</p>
 
 ## Ofte stillede spørgsmål
 
@@ -143,6 +143,107 @@ SEO-titel: Pakker med tæppe og vægtet tøj | STILLE
 Meta-beskrivelse: Sansero-pakken med sansetæppe og vægtet hættetrøje. 1.099 kr. i stedet for 1.248 kr. Se hvad der følger med.
 
 <p>To produkter, ét valg. Pakken er til dig, der vil prøve både tæppet og trøjen uden at købe dem hver for sig.</p>
+
+## Annoncer
+
+### To kilo — Vægt, du selv styrer
+
+**Primær tekst:** To kilo jævnt fordelt over skuldre og ryg. Trøjen sidder tæt uden at stramme, og du tager den selv af igen. Størrelsen vælges efter brystmål, ikke efter den størrelse du plejer at købe.
+
+**Overskrift:** To kilo, du kan tage af
+
+**Beskrivelse:** Vægtet hættetrøje, 2 kg. 549 kr.
+
+**Kreativt:** Hånd-only: en hånd lægger trøjen over skuldrene, og en anden tager den af igen. Ingen ansigt, ingen tekst i billedet, roligt dagslys.
+
+**Landingsside:** `/produkter/vaegtet-haettetroej/`
+
+### Syv kanaler — Vægten, der bliver liggende
+
+**Primær tekst:** Syv kanaler holder glasperlerne på plads, så vægten bliver over ben, mave og bryst i stedet for at samle sig i den ene side, når du flytter dig. Betrækket kan tages af og vaskes.
+
+**Overskrift:** Syv kilo, syv kanaler
+
+**Beskrivelse:** Sansetæppe, 7 kg. 699 kr.
+
+**Kreativt:** Tæppet lægges over et par ben i en sofa, og kameraet følger en hånd, der glatter det ud. Ingen ansigt, intet andet brand, ingen tekst i billedet.
+
+**Landingsside:** `/produkter/sansetaeppe/`
+
+### Pasformen — Mål før du vælger
+
+**Primær tekst:** Vægtet tøj sidder anderledes end almindeligt tøj. Mål brystmålet, og vælg efter tabellen — er du mellem to størrelser, så vælg den større. Vesten kan strammes i siden, så den stadig sidder tæt.
+
+**Overskrift:** Mål, før du vælger
+
+**Beskrivelse:** Trykvest, justerbar i siden. 449 kr.
+
+**Kreativt:** Hånd-only: et målebånd rundt om brystet, og et klip til vesten, der strammes i siden. Ingen ansigt, intet andet brand.
+
+**Landingsside:** `/produkter/trykvest/`
+
+## E-mails
+
+### Velkomst
+
+**Emne:** Vælg størrelse efter mål, ikke efter vanen
+
+**Preheader:** Vægtet tøj sidder anderledes end almindeligt tøj.
+
+```
+Hej,
+
+Tak for din ordre. En kort ting, der gør en forskel: mål brystmålet med et målebånd tæt på kroppen, og vælg efter tabellen i stedet for den størrelse, du plejer at købe.
+
+Er du mellem to størrelser, så vælg den større. Vægten gør stoffet mindre eftergivende, og et for stramt tryk er ikke behageligt i længden.
+
+Tabellen og målene står på /storrelse-og-pasform/. Er du stadig i tvivl, så skriv til os — det er hurtigere end en retur.
+
+Venlig hilsen
+STILLE
+```
+
+### Brug
+
+**Emne:** Sådan vasker du tøj med vægt i
+
+**Preheader:** Betrækket kan vaskes. Selve vægten kan ikke.
+
+```
+Hej,
+
+Vægtet tøj skal behandles lidt anderledes end almindeligt tøj:
+
+• Tag betrækket af, og vask det efter vaskeanvisningen.
+• Selve vægten — kanalerne med glasperler — kommer ikke i maskinen.
+• Undgå skyllemiddel. Det lægger en film på stoffet.
+
+Luft gerne tøjet i stedet for at vaske det, hvis det ikke er pletteret. Det holder både stof og vægt i form i længere tid.
+
+Venlig hilsen
+STILLE
+```
+
+### Sikkerhed
+
+**Emne:** Tre ting, der skal passe, før du bruger det
+
+**Preheader:** Vægt, vejrtrækning og hvem der har det på.
+
+```
+Hej,
+
+Vægtet tøj er ikke medicinsk udstyr, og der er tre ting, der skal passe:
+
+• Du skal selv kunne tage det af.
+• Det er til voksne — ikke til at sove i og ikke til børn.
+• Føles vægten for tung, eller bliver du svimmel eller utilpas, så tag det af med det samme.
+
+Skal varen bruges af en person, der ikke selv kan tage den af, skal der være en voksen til stede. Er du i tvivl, så skriv til os, før du tager det i brug.
+
+Venlig hilsen
+STILLE
+```
 
 ## Produkter — titel og SEO (resten ligger i CSV'en)
 
@@ -212,7 +313,7 @@ Meta-beskrivelse: Sansero-pakken med sansetæppe og vægtet hættetrøje. 1.099 
 ## Annoncehooks og KPI-gates
 
 - Hook: Jeg kan ikke holde ud at have tøj på. Nu har jeg det her.
-- Hook: Ro behøver ikke være et lukket værelse.
+- Hook: Ro behøver ikke være et lukket værelse — det kan være to kilo.
 - Hook: To kilo, fordelt rigtigt, gør en forskel.
 - Hook: Det er ikke behandling. Det er vægt, du kan tage af.
 - Hook rate: >= 25 %

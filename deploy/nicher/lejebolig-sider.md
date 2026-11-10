@@ -80,7 +80,7 @@ SEO-titel: Kontakt OPLOFT | OPLOFT
 
 Meta-beskrivelse: Skriv til OPLOFT om en ordre, et produkt eller en retur. Se e-mail, telefon, adresse og svartid.
 
-<p>Spørgsmål om en ordre, et produkt eller en retur? Skriv til os.</p><ul><li>E-mail: [EJER: butikkens e-mail]</li><li>Telefon: [EJER: telefon]</li><li>Adresse: [EJER: adresse]</li><li>Svartid: [EJER: timer] på hverdage</li></ul><h2>Før du skriver</h2><p>Mål og montering står under <a href='/maal-og-montering/'>Mål og montering</a>. Levering og retur står under <a href='/levering-og-retur/'>Levering og retur</a>. Måske står svaret allerede der.</p><h2>Erhverv</h2><p>[EJER: registreret firmanavn], CVR [EJER: CVR-nummer], [EJER: adresse].</p>
+<p>Spørgsmål om en ordre, et produkt eller en retur? Skriv til os — vi svarer hellere grundigt end hurtigt.</p><ul><li>E-mail: [EJER: butikkens e-mail]</li><li>Telefon: [EJER: telefon]</li><li>Adresse: [EJER: adresse]</li><li>Svartid: [EJER: timer] på hverdage</li></ul><h2>Sådan får du et hurtigt svar</h2><p>Skriv ordrenummeret i emnefeltet, og beskriv hvad der er galt. Er varen beskadiget, eller mangler der en del, så læg et billede ved — så slipper vi for at spørge om det samme to gange.</p><h2>Retur og fortrydelse</h2><p>Vil du fortryde, skal du kun give os besked inden 14 dage; du behøver ikke at have sendt varen endnu. Fremgangsmåde, standardformular og returadresse står på <a href='/fortrydelse/'>Fortrydelse</a>.</p><h2>Før du skriver</h2><p>Mål og montering står under <a href='/maal-og-montering/'>Mål og montering</a> — inklusive hvilke underlag hylden kan sidde på. Levering, fragt og reklamation står under <a href='/levering-og-retur/'>Levering og retur</a>, og vilkårene står i <a href='/handelsbetingelser/'>handelsbetingelserne</a>.</p><h2>Erhverv og oplysninger</h2><p>[EJER: registreret firmanavn], CVR [EJER: CVR-nummer], [EJER: adresse]. Vi bruger din henvendelse til at svare dig og gemmer den, så længe sagen er åben — se <a href='/privatlivspolitik/'>privatlivspolitikken</a>.</p>
 
 ## Ofte stillede spørgsmål
 
@@ -144,6 +144,107 @@ Meta-beskrivelse: Entrepakken samler reol, hængereol og tre kasser. 899 kr. i s
 
 <p>Hele entreen i ét køb: reol, dørsystem og kasser. Til dig, der hellere vil have det hele på én gang end at vælge del for del.</p>
 
+## Annoncer
+
+### Hullet — Problemet, ingen vil betale for
+
+**Primær tekst:** Du må ikke bore i en væg, du skal aflevere. Teleskopreolen spændes mellem gulv og loft og justeres fra 240 til 290 cm — uden skruer og uden huller. Fire hylder, der kan flyttes med, når du flytter.
+
+**Overskrift:** Plads uden huller
+
+**Beskrivelse:** Teleskopreol, gulv til loft. 749 kr.
+
+**Kreativt:** Hånd-only: et målebånd måler afstanden fra gulv til loft, og en hånd spænder reolen på plads uden værktøj i billedet. Ingen ansigt, intet andet brand.
+
+**Landingsside:** `/produkter/teleskopreol-gulv-til-loft/`
+
+### Depositum — Lejeboligens regnestykke
+
+**Primær tekst:** Reol, dørsystem og tre kasser til entréen: 899 kr. samlet i stedet for 1.497 kr. købt hver for sig. Intet er boret fast, så det hele kan tages ned igen den dag, du flytter.
+
+**Overskrift:** Entréen uden huller
+
+**Beskrivelse:** Entrepakke: reol, dør og kasser. 899 kr.
+
+**Kreativt:** Entré med reol, dørryg og tre kasser i samme billede. Kameraet går tæt på dørkanten, hvor der ikke er et eneste hul. Roligt lys, ingen tekst i billedet.
+
+**Landingsside:** `/produkter/entrepakke/`
+
+### Målet — Underlaget før belastningen
+
+**Primær tekst:** Den klæbende hylde bærer op til 10 kg på glatte, rene fliser — ikke på tapet eller en ru væg. Vi skriver underlaget, før vi skriver belastningen, så du kan måle efter, før du bestiller.
+
+**Overskrift:** Ti kilo, rigtigt underlag
+
+**Beskrivelse:** Klæbende væghylde til fliser og glas. 299 kr.
+
+**Kreativt:** Hånd-only: en hånd presser hylden på en flise, og en anden lægger en kurv på den. Klip til flisen, der stadig er uden hul. Ingen ansigt, intet andet brand.
+
+**Landingsside:** `/produkter/klaebende-vaaghylde/`
+
+## E-mails
+
+### Velkomst
+
+**Emne:** Sådan sætter du reolen op uden at bore
+
+**Preheader:** Mål først, spænd bagefter. Det tager ti minutter.
+
+```
+Hej,
+
+Tak for din ordre. Her er den korte version, så du ikke skal lede efter den på siden.
+
+1. Mål højden mellem gulv og loft tre steder — den kan svinge i en gammel lejlighed.
+2. Spænd reolen mod loftet, til den sidder fast, og lås den.
+3. Læg de tunge ting nederst og de lette øverst.
+
+Målene og de præcise trin står på /maal-og-montering/. Er loftet skråt, eller er du i tvivl om underlaget, så skriv til os, før du spænder noget fast.
+
+Venlig hilsen
+OPLOFT
+```
+
+### Brug
+
+**Emne:** Belastningen gælder underlaget — ikke ønsket
+
+**Preheader:** Ti kilo på fliser er ikke ti kilo på tapet.
+
+```
+Hej,
+
+En ting, der er værd at vide, før du hænger noget op: den belastning, vi skriver, gælder det rigtige underlag. Den klæbende hylde bærer op til 10 kg på glatte, rene fliser, glas og laminat — ikke på tapet, ru puds eller en fugtig flise.
+
+Vask og tør underlaget af, og lad det tørre helt, før du sætter hylden på. Så holder den, som den skal.
+
+Er du i tvivl om din væg, så send et billede, før du bestiller. Vi siger hellere nej end at sende noget, der ikke kan bære.
+
+Venlig hilsen
+OPLOFT
+```
+
+### Flytning
+
+**Emne:** Tag det med, når du flytter
+
+**Preheader:** Ingen huller at spartle, ingen depositum at diskutere.
+
+```
+Hej,
+
+Skal du flytte? Systemet er lavet til at komme med.
+
+• Løsn reolen, og tag den ned i de samme sektioner, som den kom i.
+• Gem skruer og smådele i en pose, der er tapet fast på den ene sektion.
+• Vikl hylderne ind, så de ikke skrammer i flyttekassen.
+
+Der er ingen huller at spartle efter — men tjek din lejekontrakt, hvis du er i tvivl om, hvad udlejer kræver ved fraflytning.
+
+Venlig hilsen
+OPLOFT
+```
+
 ## Produkter — titel og SEO (resten ligger i CSV'en)
 
 | Vare | SEO-titel | Meta-beskrivelse |
@@ -203,7 +304,7 @@ Meta-beskrivelse: Entrepakken samler reol, hængereol og tre kasser. 899 kr. i s
 - Hook: Du må ikke bore. Du har stadig brug for plads.
 - Hook: Sådan får du plads uden at miste depositummet.
 - Hook: Tre kvadratmeter du ikke vidste du havde.
-- Hook: Reolen kan flytte med, når du gør.
+- Hook: Reolen kan tages ned og flytte med, når du flytter.
 - Konvertering ved 300 besøg: >= 2,0 % - ellers er prisen eller siden problemet
 - CPA: <= break-even pr. vare
 - Retur: <= 10 %

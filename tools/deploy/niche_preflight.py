@@ -24,6 +24,13 @@ Tre ting scriptet nægter at overse, fordi de var dyre at finde på live:
     slug på to forskellige værter kun er en advarsel.
   * **Ejerfelter må ikke fjernes for at få en grøn kørsel.** `[EJER: …]` tælles, listes og
     kræves: en side uden dem er en side, hvor nogen har gættet en juridisk oplysning.
+  * **Et ejerfelt uden navn er en fejl.** `[EJER]` tæller som et felt, men siger ikke hvad
+    ejeren skal indsætte — det slap igennem, indtil STILLEs størrelsestabel blev læst.
+  * **En stub er ikke en side.** `TODO`, `lorem ipsum`, »kommer snart« og »skal udfyldes« er
+    fejl, og hver sidetype har et gulv for, hvor kort den må være: en juridisk side på 1.200
+    tegn er en kladde, ikke en betingelsestekst.
+  * **Tomme sektioner er fejl.** Hver niche skal have mindst tre annoncer, tre mails og fire
+    hooks med rigtigt indhold — ellers ser en halvfærdig indholdspakke færdig ud.
 
 Exit 1 ved enhver fejl. `--check` fejler også ved drift, så en håndredigeret payload fanges.
 """
@@ -43,6 +50,25 @@ OUT_DIR = os.path.join(ROOT, "deploy", "nicher")
 DEFAULT_FIXED_MONTHLY = 1400.0
 OWNER_RE = re.compile(r"\[EJER[^\]]*\]")
 BARE_OWNER_RE = re.compile(r"\[EJER\s*\]")
+# Ord der afslører en kladde. De stod i de sider, der blev skrevet færdige 10/11.
+STUB_RE = re.compile(
+    r"(\bTBD\b|\bTODO\b|\bFIXME\b|\bXXX\b|lorem ipsum|kommer snart|under opbygning|"
+    r"skal udfyldes|skal være udfyldt|indsættes senere|fyldes ud senere|placeholder)",
+    re.I,
+)
+# Mindste længde pr. sidetype. En juridisk side under 3.000 tegn mangler typisk det, en kunde
+# kan klage over (formular, formodningsregel, GPSR); en kontaktside under 900 er en stub.
+PAGE_FLOOR = {
+    "handelsbetingelser": 3000,
+    "privatlivspolitik": 3000,
+    "fortrydelse": 2000,
+    "levering-og-retur": 1800,
+    "start-here": 1000,
+    "om-os": 900,
+    "kontakt": 900,
+    "ofte-stillede-spoergsmaal": 2500,
+}
+EXTRA_PAGE_FLOOR = 900
 CPA_FLOOR = 120.0
 CONTENT_DIR = os.path.join(OUT_DIR, "indhold")
 REQUIRED_PAGES = [
@@ -225,12 +251,45 @@ def check_copy(niche_slug: str, content: dict, problems: Problems) -> None:
             value = page.get(field, "")
             if not low <= len(value) <= high:
                 problems.error(f"{where}: {field} er {len(value)} tegn (krav {low}-{high})")
-        if len(page.get("body", "")) < 300:
-            problems.error(f"{where}: sideteksten er under 300 tegn")
+        body_len = len(page.get("body", ""))
+        floor = PAGE_FLOOR.get(page.get("slug"), EXTRA_PAGE_FLOOR)
+        if body_len < floor:
+            problems.error(f"{where}: sideteksten er {body_len} tegn — gulvet for denne sidetype "
+                           f"er {floor}; en kortere side er en kladde")
 
     faq = content.get("faq") or []
     if len(faq) < 6:
         problems.error(f"{niche_slug}: færre end seks FAQ-poster")
+
+    hooks = content.get("hooks") or []
+    if len(hooks) < 4:
+        problems.error(f"{niche_slug}: færre end fire hooks")
+    for index, hook in enumerate(hooks, 1):
+        if len(str(hook).strip()) < 25:
+            problems.error(f"{niche_slug}/hook {index}: under 25 tegn — en stub, ikke en hook")
+
+    ads = content.get("ads") or []
+    if len(ads) < 3:
+        problems.error(f"{niche_slug}: færre end tre annoncer — en tom annoncesektion ser færdig ud")
+    for index, ad in enumerate(ads, 1):
+        where = f"{niche_slug}/annonce {index}"
+        for field, low in (("name", 3), ("angle", 8), ("primary", 150), ("headline", 8),
+                           ("description", 20), ("creative", 80)):
+            value = str(ad.get(field, "")).strip()
+            if len(value) < low:
+                problems.error(f"{where}: {field} er {len(value)} tegn (kræver mindst {low})")
+        if not str(ad.get("landing", "")).startswith("/"):
+            problems.error(f"{where}: landing er ikke en sti på sitet")
+
+    mails = content.get("emails") or []
+    if len(mails) < 3:
+        problems.error(f"{niche_slug}: færre end tre mails")
+    for index, mail in enumerate(mails, 1):
+        where = f"{niche_slug}/mail {index}"
+        for field, low in (("name", 3), ("subject", 10), ("preheader", 15), ("body", 250)):
+            value = str(mail.get(field, "")).strip()
+            if len(value) < low:
+                problems.error(f"{where}: {field} er {len(value)} tegn (kræver mindst {low})")
     collected = "\n".join(_strings(content))
     # Jura-siderne taler om at "behandle personoplysninger"; markedsføringen må ikke tale om at
     # behandle noget som helst. Derfor scannes de to ting hver for sig.
@@ -260,6 +319,9 @@ def check_copy(niche_slug: str, content: dict, problems: Problems) -> None:
     if BARE_OWNER_RE.search(collected):
         problems.error(f"{niche_slug}: ejerfelt uden navn — skriv hvad ejeren skal indsætte, fx "
                        "[EJER: brystmål S] i stedet for [EJER]")
+    stubs = sorted({match.group(0).lower() for match in STUB_RE.finditer(collected)})
+    if stubs:
+        problems.error(f"{niche_slug}: kladde-tekst i indholdet: {', '.join(stubs)}")
 
 
 def merge_content(niche: dict, payload: dict, content: dict, problems: Problems) -> dict:

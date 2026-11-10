@@ -225,7 +225,7 @@
       "title": "Kontakt",
       "seo_title": "Kontakt OPLOFT | OPLOFT",
       "seo_description": "Skriv til OPLOFT om en ordre, et produkt eller en retur. Se e-mail, telefon, adresse og svartid.",
-      "body": "<p>Spørgsmål om en ordre, et produkt eller en retur? Skriv til os.</p><ul><li>E-mail: [EJER: butikkens e-mail]</li><li>Telefon: [EJER: telefon]</li><li>Adresse: [EJER: adresse]</li><li>Svartid: [EJER: timer] på hverdage</li></ul><h2>Før du skriver</h2><p>Mål og montering står under <a href='/maal-og-montering/'>Mål og montering</a>. Levering og retur står under <a href='/levering-og-retur/'>Levering og retur</a>. Måske står svaret allerede der.</p><h2>Erhverv</h2><p>[EJER: registreret firmanavn], CVR [EJER: CVR-nummer], [EJER: adresse].</p>"
+      "body": "<p>Spørgsmål om en ordre, et produkt eller en retur? Skriv til os — vi svarer hellere grundigt end hurtigt.</p><ul><li>E-mail: [EJER: butikkens e-mail]</li><li>Telefon: [EJER: telefon]</li><li>Adresse: [EJER: adresse]</li><li>Svartid: [EJER: timer] på hverdage</li></ul><h2>Sådan får du et hurtigt svar</h2><p>Skriv ordrenummeret i emnefeltet, og beskriv hvad der er galt. Er varen beskadiget, eller mangler der en del, så læg et billede ved — så slipper vi for at spørge om det samme to gange.</p><h2>Retur og fortrydelse</h2><p>Vil du fortryde, skal du kun give os besked inden 14 dage; du behøver ikke at have sendt varen endnu. Fremgangsmåde, standardformular og returadresse står på <a href='/fortrydelse/'>Fortrydelse</a>.</p><h2>Før du skriver</h2><p>Mål og montering står under <a href='/maal-og-montering/'>Mål og montering</a> — inklusive hvilke underlag hylden kan sidde på. Levering, fragt og reklamation står under <a href='/levering-og-retur/'>Levering og retur</a>, og vilkårene står i <a href='/handelsbetingelser/'>handelsbetingelserne</a>.</p><h2>Erhverv og oplysninger</h2><p>[EJER: registreret firmanavn], CVR [EJER: CVR-nummer], [EJER: adresse]. Vi bruger din henvendelse til at svare dig og gemmer den, så længe sagen er åben — se <a href='/privatlivspolitik/'>privatlivspolitikken</a>.</p>"
     }
   ],
   "faq": [
@@ -266,6 +266,55 @@
     "Du må ikke bore. Du har stadig brug for plads.",
     "Sådan får du plads uden at miste depositummet.",
     "Tre kvadratmeter du ikke vidste du havde.",
-    "Reolen kan flytte med, når du gør."
+    "Reolen kan tages ned og flytte med, når du flytter."
+  ],
+  "ads": [
+    {
+      "name": "Hullet",
+      "angle": "Problemet, ingen vil betale for",
+      "primary": "Du må ikke bore i en væg, du skal aflevere. Teleskopreolen spændes mellem gulv og loft og justeres fra 240 til 290 cm — uden skruer og uden huller. Fire hylder, der kan flyttes med, når du flytter.",
+      "headline": "Plads uden huller",
+      "description": "Teleskopreol, gulv til loft. 749 kr.",
+      "creative": "Hånd-only: et målebånd måler afstanden fra gulv til loft, og en hånd spænder reolen på plads uden værktøj i billedet. Ingen ansigt, intet andet brand.",
+      "landing": "/produkter/teleskopreol-gulv-til-loft/"
+    },
+    {
+      "name": "Depositum",
+      "angle": "Lejeboligens regnestykke",
+      "primary": "Reol, dørsystem og tre kasser til entréen: 899 kr. samlet i stedet for 1.497 kr. købt hver for sig. Intet er boret fast, så det hele kan tages ned igen den dag, du flytter.",
+      "headline": "Entréen uden huller",
+      "description": "Entrepakke: reol, dør og kasser. 899 kr.",
+      "creative": "Entré med reol, dørryg og tre kasser i samme billede. Kameraet går tæt på dørkanten, hvor der ikke er et eneste hul. Roligt lys, ingen tekst i billedet.",
+      "landing": "/produkter/entrepakke/"
+    },
+    {
+      "name": "Målet",
+      "angle": "Underlaget før belastningen",
+      "primary": "Den klæbende hylde bærer op til 10 kg på glatte, rene fliser — ikke på tapet eller en ru væg. Vi skriver underlaget, før vi skriver belastningen, så du kan måle efter, før du bestiller.",
+      "headline": "Ti kilo, rigtigt underlag",
+      "description": "Klæbende væghylde til fliser og glas. 299 kr.",
+      "creative": "Hånd-only: en hånd presser hylden på en flise, og en anden lægger en kurv på den. Klip til flisen, der stadig er uden hul. Ingen ansigt, intet andet brand.",
+      "landing": "/produkter/klaebende-vaaghylde/"
+    }
+  ],
+  "emails": [
+    {
+      "name": "Velkomst",
+      "subject": "Sådan sætter du reolen op uden at bore",
+      "preheader": "Mål først, spænd bagefter. Det tager ti minutter.",
+      "body": "Hej,\n\nTak for din ordre. Her er den korte version, så du ikke skal lede efter den på siden.\n\n1. Mål højden mellem gulv og loft tre steder — den kan svinge i en gammel lejlighed.\n2. Spænd reolen mod loftet, til den sidder fast, og lås den.\n3. Læg de tunge ting nederst og de lette øverst.\n\nMålene og de præcise trin står på /maal-og-montering/. Er loftet skråt, eller er du i tvivl om underlaget, så skriv til os, før du spænder noget fast.\n\nVenlig hilsen\nOPLOFT"
+    },
+    {
+      "name": "Brug",
+      "subject": "Belastningen gælder underlaget — ikke ønsket",
+      "preheader": "Ti kilo på fliser er ikke ti kilo på tapet.",
+      "body": "Hej,\n\nEn ting, der er værd at vide, før du hænger noget op: den belastning, vi skriver, gælder det rigtige underlag. Den klæbende hylde bærer op til 10 kg på glatte, rene fliser, glas og laminat — ikke på tapet, ru puds eller en fugtig flise.\n\nVask og tør underlaget af, og lad det tørre helt, før du sætter hylden på. Så holder den, som den skal.\n\nEr du i tvivl om din væg, så send et billede, før du bestiller. Vi siger hellere nej end at sende noget, der ikke kan bære.\n\nVenlig hilsen\nOPLOFT"
+    },
+    {
+      "name": "Flytning",
+      "subject": "Tag det med, når du flytter",
+      "preheader": "Ingen huller at spartle, ingen depositum at diskutere.",
+      "body": "Hej,\n\nSkal du flytte? Systemet er lavet til at komme med.\n\n• Løsn reolen, og tag den ned i de samme sektioner, som den kom i.\n• Gem skruer og smådele i en pose, der er tapet fast på den ene sektion.\n• Vikl hylderne ind, så de ikke skrammer i flyttekassen.\n\nDer er ingen huller at spartle efter — men tjek din lejekontrakt, hvis du er i tvivl om, hvad udlejer kræver ved fraflytning.\n\nVenlig hilsen\nOPLOFT"
+    }
   ]
 }

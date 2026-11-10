@@ -205,7 +205,7 @@
       "title": "Kontakt",
       "seo_title": "Kontakt IMMER | IMMER",
       "seo_description": "Skriv til IMMER om en ordre, et produkt eller en retur. Se e-mail, telefon, adresse og svartid.",
-      "body": "<p>Spørgsmål om en ordre, et produkt eller en retur? Skriv til os.</p><ul><li>E-mail: [EJER: butikkens e-mail]</li><li>Telefon: [EJER: telefon]</li><li>Adresse: [EJER: adresse]</li><li>Svartid: [EJER: timer] på hverdage</li></ul><h2>Før du skriver</h2><p>Vægt, mål og sikkerhed står under <a href='/brug-og-sikkerhed/'>Brug og sikkerhed</a>. Levering og retur står under <a href='/levering-og-retur/'>Levering og retur</a>. Måske står svaret allerede der.</p><h2>Erhverv</h2><p>[EJER: registreret firmanavn], CVR [EJER: CVR-nummer], [EJER: adresse].</p>"
+      "body": "<p>Spørgsmål om en ordre, et produkt eller en retur? Skriv til os — vi svarer hellere grundigt end hurtigt.</p><ul><li>E-mail: [EJER: butikkens e-mail]</li><li>Telefon: [EJER: telefon]</li><li>Adresse: [EJER: adresse]</li><li>Svartid: [EJER: timer] på hverdage</li></ul><h2>Sådan får du et hurtigt svar</h2><p>Skriv ordrenummeret i emnefeltet, og beskriv hvad der er galt. Er varen beskadiget, eller mangler der en del, så læg et billede ved — så slipper vi for at spørge om det samme to gange.</p><h2>Retur og fortrydelse</h2><p>Vil du fortryde, skal du kun give os besked inden 14 dage; du behøver ikke at have sendt varen endnu. Fremgangsmåde, standardformular og returadresse står på <a href='/fortrydelse/'>Fortrydelse</a>.</p><h2>Før du skriver</h2><p>Brug og sikkerhed står under <a href='/brug-og-sikkerhed/'>Brug og sikkerhed</a>, og målene står på produktsiderne. Levering, fragt og reklamation står under <a href='/levering-og-retur/'>Levering og retur</a>, og vilkårene står i <a href='/handelsbetingelser/'>handelsbetingelserne</a>.</p><h2>Erhverv og oplysninger</h2><p>[EJER: registreret firmanavn], CVR [EJER: CVR-nummer], [EJER: adresse]. Vi bruger din henvendelse til at svare dig og gemmer den, så længe sagen er åben — se <a href='/privatlivspolitik/'>privatlivspolitikken</a>.</p>"
     }
   ],
   "faq": [
@@ -247,5 +247,54 @@
     "Seks kilo fordelt rigtigt gør ikke kroppen træt. Den holder den.",
     "Mørke, vægt og lyd. Tre ting du kan ændre i aften.",
     "Har du prøvet alt det sædvanlige? Prøv at ændre rummet først."
+  ],
+  "ads": [
+    {
+      "name": "Mørke",
+      "angle": "Lyset ved kinden",
+      "primary": "Lyset kommer ind ved kinden, ikke over næsen. Masken er formet med udsparing til næsen, remmen kan justeres, og stoffet kan vaskes i hånden. Ingen lysrevner, ingen tryk over øjnene.",
+      "headline": "Mørke, der bliver",
+      "description": "Søvnmaske med udsparing til næsen. 349 kr.",
+      "creative": "Hånd-only: masken lægges på et hovedpude i et mørkt soveværelse, og en hånd justerer remmen. Ingen ansigt, intet andet brand, ingen tekst i billedet.",
+      "landing": "/produkter/soevnmaska/"
+    },
+    {
+      "name": "Lyden",
+      "angle": "Ingen app, ingen konto",
+      "primary": "Fem toner, en timer og et batteri, der holder hele natten. Der er ingen app, der skal opdateres, og ingen konto, der skal oprettes — lyden bliver i soveværelset.",
+      "headline": "Lyd uden app",
+      "description": "Hvid støj med fem toner og timer. 499 kr.",
+      "creative": "Enheden står på et natbord ved siden af en lampe, og en hånd drejer på knappen. Roligt billede, intet ansigt, ingen telefon i billedet.",
+      "landing": "/produkter/hvid-stoej/"
+    },
+    {
+      "name": "Vægten",
+      "angle": "Seks kilo over kroppen",
+      "primary": "Seks kilo glasperler fordeler sig efter kroppen i stedet for at ligge som et tungt punkt. Dynen skal kunne løftes af den, der sover under den, og vægten vælges som udgangspunkt omkring 10 % af kropsvægten.",
+      "headline": "Vægt, der fordeler sig",
+      "description": "Tyngdedyne, 6 kg. 799 kr.",
+      "creative": "Dynen lægges over en seng, og en hånd glatter den ud, så kanalerne ses. Ingen ansigt, intet andet brand, dæmpet lys.",
+      "landing": "/produkter/tyngdedyne/"
+    }
+  ],
+  "emails": [
+    {
+      "name": "Velkomst",
+      "subject": "Tre ting i soveværelset — og hvad de ikke kan",
+      "preheader": "Vægt, mørke og lyd. Ingen løfter om at løse noget.",
+      "body": "Hej,\n\nTak for din ordre. Her er den korte version:\n\n1. Dynen skal kunne løftes af den, der sover under den. Læg den over kroppen, ikke over hovedet.\n2. Masken skal slutte tæt ved kinden uden at trykke på øjnene. Justér remmen, til den sidder.\n3. Hvid støj skal stå lavt nok til, at du ikke skærper ørerne for at høre den.\n\nDe er ikke medicinsk udstyr og ikke et hjælpemiddel. Virker søvnproblemerne ved, skal de afklares med en læge — det kan et produkt ikke.\n\nVenlig hilsen\nIMMER"
+    },
+    {
+      "name": "Brug",
+      "subject": "Dynen: vægt, luft og vask",
+      "preheader": "Seks kilo glasperler skal have plads til at fordele sig.",
+      "body": "Hej,\n\nEn tyngdedyne virker kun, hvis vægten bliver, hvor den skal:\n\n• Vægten vælges som udgangspunkt omkring 10 % af kropsvægten.\n• Ryst dynen let, så kanalerne fordeler glasset, når du har redt seng.\n• Betrækket kan tages af og vaskes; selve dynen vaskes ikke i maskine.\n\nDynen er ikke til børn under 2 år og ikke til personer, der ikke selv kan flytte den. Skal den bruges af et barn, så skriv til os først.\n\nVenlig hilsen\nIMMER"
+    },
+    {
+      "name": "Elektronik",
+      "subject": "Batteriet i hvid støj",
+      "preheader": "Ingen konto, ingen app — men et batteri, der skal lades.",
+      "body": "Hej,\n\nHvid støj har ingen konto og ingen app. Til gengæld har den et batteri:\n\n• Lad den op om dagen, så den er klar om aftenen.\n• Oplad den ikke i et lukket rum, og lad den ikke ligge under en pude.\n• Bliver lyden svagere, eller holder batteriet ikke natten, så skriv til os.\n\nNår enheden en dag er udtjent, må den ikke i husholdningsaffaldet. Aflevér den på den kommunale genbrugsplads — vi er registreret i producentregistret for elektronik.\n\nVenlig hilsen\nIMMER"
+    }
   ]
 }
