@@ -1,5 +1,7 @@
 # Hurtigst mulig organisk trafik — hvad der virker i november 2026
 
+> **Rettelse 10/11 2026 — læs [`organisk-trafik-live-prioritering-2026-11-10.md`](organisk-trafik-live-prioritering-2026-11-10.md) først.** En live-kontrol af de fem watchlist-sider har afkræftet tre af diagnoserne nedenfor: (1) `/how-to-make-a-steampunk-costume/` har **20 unikke interne links** og et HowTo-schema med 6 trin — påstanden om nul links og intet schema gælder ikke længere; (2) `/steampunk-accessories/` har en Rank Math-titel på **59 tegn**, ikke 70; (3) alle 20 produktsider har nu **komplet** Product-JSON-LD med returpolitik og leveringstid (`schema_check` 20/20), så merchant-schema er ikke en åben opgave. Tallene i §2 er **eksterne branchetal**, ikke målinger på steamgears.eu, og de skal ikke læses som effekt på dette site. Resten af dokumentet står uændret som historik.
+
 **Spørgsmålet:** hvordan øger vi hurtigst muligt den organiske trafik til steamgears.eu?
 
 **Kort svar:** den hurtigste trafik ligger ikke i nye sider. Den ligger i de **66 sider Google allerede viser** (193 visninger, 2 klik, position 23,6), i **gratis produktlister** gennem Merchant Center — produktfeedet er stadig den eneste kanal der kan give købsklar trafik inden for dage — og i **Pinterest**, der er en søgemaskine med 60–90 dages modningstid i stedet for 6–12 måneder. AI-citater er endnu ikke trafik (0,1–0,3 % af alle besøg), og `llms.txt` er spildt arbejde: 97 % af alle filer i verden bliver aldrig læst.
