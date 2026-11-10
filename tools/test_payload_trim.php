@@ -33,8 +33,13 @@ function remove_action(string $hook, string $cb, int $prio = 10): void
 function remove_filter(string $hook, string $cb, int $prio = 10): void
 {
 }
-function apply_filters(string $hook, $value)
+function apply_filters(string $hook, $value, ...$args)
 {
+    // Samme kontrakt som WordPress: et filter kan slaa et enkelt indgreb fra.
+    if ($hook === 'sga_payload_trim_enabled' && !empty($GLOBALS['trim_disable_block_css']) && ($args[0] ?? '') === 'block_css') {
+        return false;
+    }
+
     return $value;
 }
 function wp_dequeue_script(string $handle): void
@@ -126,6 +131,45 @@ check_trim('på en tekstside fjernes alle seks Woo-handles', count($touched) ===
 // 3) Butiksside: scriptene skal blive stående.
 $shop = woo_handles_touched(run_with_woo(true));
 check_trim('på en butiksside bliver Woo-handles stående', $shop === [], implode(',', $shop));
+
+// 4) Blokstile for blokke der ikke findes paa siden (trin 3, maalt 10/11 2026).
+//
+// Stilen fjernes kun naar blokkens klassemarkoer mangler i body. Hvert fixture er en
+// hel side, saa head/body-graensen proeves som den virker i produktion.
+function trim_page(string $head_extra, string $body): string
+{
+    return '<!DOCTYPE html><html><head>' . $head_extra . '</head><body>' . $body . '</body></html>';
+}
+
+$dead_style = '<style id="ai_summarization-inline-css" type="text/css">.ai-summarization-summary{--ai-summary-border-color:#1d2327}</style>';
+$translation_style = '<style id="ai_content_translation-inline-css" type="text/css">@keyframes ai-content-translation-text-shimmer{0%{mask-position:300%}}</style>';
+$table_style = '<style id="wp-block-table-inline-css" type="text/css">.wp-block-table{overflow-x:auto}</style>';
+
+$out = sga_payload_trim_html(trim_page($dead_style . $translation_style . $table_style, '<p>Ingen blokke her</p>'));
+check_trim('doed blok-CSS fjernes naar blokken ikke findes', strpos($out, 'ai_summarization-inline-css') === false && strpos($out, 'ai_content_translation-inline-css') === false, $out);
+check_trim('fjernelsen rammer ikke andre blokstile', strpos($out, 'wp-block-table-inline-css') !== false, $out);
+check_trim('body og afsluttende tags er intakte', strpos($out, '<p>Ingen blokke her</p></body></html>') !== false, $out);
+
+$out = sga_payload_trim_html(trim_page($dead_style . $translation_style, '<div class="ai-summarization">Kort version</div>'));
+check_trim('blokstilen bliver staaende naar blokken er paa siden', strpos($out, 'ai_summarization-inline-css') !== false, $out);
+check_trim('den anden doede stil fjernes stadig', strpos($out, 'ai_content_translation-inline-css') === false, $out);
+
+// Markoeret inde i CSS-teksten er ikke bevis paa at blokken findes i indholdet.
+$out = sga_payload_trim_html(trim_page($dead_style, '<p>Tekst uden blok</p>'));
+check_trim('klassenavn i CSS-teksten taeller ikke som blok paa siden', strpos($out, 'ai_summarization-inline-css') === false, $out);
+
+// En side uden head/body-graense skal staa urørt, saa et spa-brudstykke ikke bliver klippet.
+$fragment = $dead_style . '<p>Brudstykke</p>';
+check_trim('side uden </head> er uaendret', sga_payload_trim_html($fragment) === $fragment, sga_payload_trim_html($fragment));
+
+// Rollback: filteret slukker kun dette ene indgreb.
+$GLOBALS['trim_disable_block_css'] = true;
+$out = sga_payload_trim_html(trim_page($dead_style, '<p>Tekst</p>'));
+check_trim('filteret kan slaa blok-CSS fra uden at roere de andre indgreb', strpos($out, 'ai_summarization-inline-css') !== false, $out);
+$GLOBALS['trim_disable_block_css'] = false;
+
+// Kortet er en allowlist, saa en ny blokstil ikke bliver fjernet uden en maaling.
+check_trim('kun de maalte ids staar i kortet', array_keys(sga_payload_trim_dead_css_map()) === ['ai_summarization-inline-css', 'ai_content_translation-inline-css'], implode(',', array_keys(sga_payload_trim_dead_css_map())));
 
 echo "\n" . ($fail === 0 ? "OK   {$pass} checks bestået" : "FEJL {$fail} af " . ($pass + $fail) . " checks") . "\n";
 exit($fail === 0 ? 0 : 1);

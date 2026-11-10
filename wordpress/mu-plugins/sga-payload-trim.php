@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Steamgears payload — trin 0–1 (S2.7)
  * Description: Fjerner emoji-scriptet og de to annoncepixels der ikke bruges (TikTok for Business' browser-pixel og Kliken), saa hver side slipper for scripts den ikke har brug for. Kilde: wordpress/mu-plugins/sga-payload-trim.php i repoet.
- * Version: 1.3.1
+ * Version: 1.4.0
  * Author: Steamgears
  *
  * Baggrund (S2.7, maalt 7/11 2026): forsiden var 117,7 KB med 51 <script>-tags, og
@@ -32,6 +32,13 @@
  * dequeue-kaldene bliver staaende som foerste forsoeg, saa de kan virke paa sider hvor
  * timingen passer.
  *
+ *   block_css  2 inline <style>-blokke pr. side, som hoerer til blokke der ikke findes paa
+ *           siden: AI Engines oversaettelses- og opsummeringsstile. Maalt 10/11 2026 paa
+ *           forside, /shop/, produktside, indlaeg og /cart/: begge stile er udskrevet paa
+ *           alle fem, og ingen af de to blokke findes i markupen — 1 624 B doed CSS pr.
+ *           visning. Fjernelsen er betinget: findes blokkens klassemarkoer i body, bliver
+ *           stilen staaende, saa en side der faktisk bruger blokken er uaendret.
+ *
  * Rollback pr. indgreb (uden at slette filen):
  *   add_filter( 'sga_payload_trim_enabled', fn( $on, $part ) => 'tiktok' === $part ? false : $on, 10, 2 );
  * eller slet filen: saa printes alt som foer.
@@ -44,7 +51,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Er et indgreb slået til? Filtrerbart, så et enkelt indgreb kan rulles tilbage.
  *
- * @param string $part 'emoji', 'tiktok' eller 'kliken'.
+ * @param string $part 'emoji', 'tiktok', 'kliken', 'mini_cart', 'woo' eller 'block_css'.
  * @return bool
  */
 function sga_payload_trim_enabled( string $part ): bool {
@@ -174,6 +181,10 @@ add_action(
  * @return string
  */
 function sga_payload_trim_html( string $html ): string {
+	if ( sga_payload_trim_enabled( 'block_css' ) ) {
+		$html = sga_payload_trim_dead_css( $html );
+	}
+
 	$patterns = array();
 
 	if ( sga_payload_trim_enabled( 'tiktok' ) ) {
@@ -194,6 +205,71 @@ function sga_payload_trim_html( string $html ): string {
 
 	$result = preg_replace( $patterns, '', $html );
 	return is_string( $result ) ? $result : $html;
+}
+
+/**
+ * Hvilke blokstile maa fjernes, og hvad der beviser at blokken er paa siden.
+ *
+ * Kortet er bevidst en allowlist: kun de to ids der 10/11 2026 blev maalt udskrevet
+ * uden at blokken fandtes, staar her. En ny post kraever en maaling foerst.
+ *
+ * @return array<string, string> Stil-id => klassemarkoer der skal findes i body.
+ */
+function sga_payload_trim_dead_css_map(): array {
+	$map = apply_filters(
+		'sga_payload_trim_dead_css_map',
+		array(
+			'ai_summarization-inline-css'      => 'ai-summarization',
+			'ai_content_translation-inline-css' => 'ai-content-translation',
+		)
+	);
+
+	return is_array( $map ) ? $map : array();
+}
+
+/**
+ * Fjerner blokstile hvis blok ikke findes paa siden.
+ *
+ * WordPress printer blokstile som inline `<style id="<blok>-inline-css">`. Nogle plugins
+ * registrerer deres blokstil globalt, saa den foelger med paa sider hvor blokken aldrig
+ * bliver rendered. Her fjernes praecis de ids der staar i kortet ovenfor, og kun naar
+ * blokkens klassemarkoer ikke findes i body — en side der bruger blokken beholder stilen.
+ *
+ * Der ledes kun i head: markoeret i selve CSS-teksten (fx `.ai-summarization-summary`)
+ * maa ikke taelle som bevis paa at blokken findes i indholdet.
+ *
+ * @param string $html Hele sidens HTML.
+ * @return string
+ */
+function sga_payload_trim_dead_css( string $html ): string {
+	$map = sga_payload_trim_dead_css_map();
+	if ( array() === $map || false === stripos( $html, '-inline-css' ) ) {
+		return $html;
+	}
+
+	$parts = preg_split( '#</head>#i', $html, 2 );
+	if ( ! is_array( $parts ) || 2 !== count( $parts ) ) {
+		return $html; // ingen entydig head/body-graense: roer intet.
+	}
+	list( $head, $body ) = $parts;
+
+	foreach ( $map as $style_id => $marker ) {
+		$style_id = (string) $style_id;
+		$marker   = (string) $marker;
+		if ( '' === $style_id || '' === $marker ) {
+			continue;
+		}
+		if ( false !== strpos( $body, $marker ) ) {
+			continue; // blokken er paa siden: stilen skal blive.
+		}
+		$pattern = '#<style\b[^>]*\bid\s*=\s*(["\'])' . preg_quote( $style_id, '#' ) . '\1[^>]*>.*?</style>\s*#is';
+		$stripped = preg_replace( $pattern, '', $head );
+		if ( is_string( $stripped ) ) {
+			$head = $stripped;
+		}
+	}
+
+	return $head . '</head>' . $body;
 }
 
 add_action(

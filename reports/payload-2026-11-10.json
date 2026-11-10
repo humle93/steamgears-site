@@ -1,0 +1,197 @@
+{
+  "measured": "2026-11-10",
+  "base": "https://steamgears.eu",
+  "budget": {
+    "klasser": {
+      "1": {
+        "label": "1 — tekst",
+        "html_bytes": 133120,
+        "scripts": 31
+      },
+      "2": {
+        "label": "2 — lister",
+        "html_bytes": 276480,
+        "scripts": 46
+      },
+      "3": {
+        "label": "3 — transaktion",
+        "html_bytes": 409600,
+        "scripts": 96
+      }
+    },
+    "transaction_scripts": {
+      "kurv": 115
+    },
+    "inline_block": 4096
+  },
+  "rows": [
+    {
+      "template": "forside",
+      "path": "/?sga=1794275794",
+      "klasse": 1,
+      "status": 200,
+      "html_bytes": 75040,
+      "scripts": 27,
+      "scripts_src": 11,
+      "scripts_inline": 16,
+      "styles": 20,
+      "css_inline_bytes": 9894,
+      "js_inline_bytes": 0,
+      "largest_inline_block": 1666,
+      "stylesheets": 8,
+      "budget": {
+        "html": true,
+        "scripts": true,
+        "inline_block": true
+      },
+      "meets_budget": true
+    },
+    {
+      "template": "arkiv shop",
+      "path": "/shop/?sga=1794275794",
+      "klasse": 2,
+      "status": 200,
+      "html_bytes": 269439,
+      "scripts": 38,
+      "scripts_src": 16,
+      "scripts_inline": 22,
+      "styles": 28,
+      "css_inline_bytes": 24980,
+      "js_inline_bytes": 0,
+      "largest_inline_block": 4064,
+      "stylesheets": 10,
+      "budget": {
+        "html": true,
+        "scripts": true,
+        "inline_block": true
+      },
+      "meets_budget": true
+    },
+    {
+      "template": "produkt",
+      "path": "/product/astrolabe-planisphere-tee/?sga=1794275794",
+      "klasse": 3,
+      "status": 200,
+      "html_bytes": 301813,
+      "scripts": 69,
+      "scripts_src": 33,
+      "scripts_inline": 36,
+      "styles": 35,
+      "css_inline_bytes": 38403,
+      "js_inline_bytes": 0,
+      "largest_inline_block": 4064,
+      "stylesheets": 12,
+      "budget": {
+        "html": true,
+        "scripts": true,
+        "inline_block": true
+      },
+      "meets_budget": true
+    },
+    {
+      "template": "indlæg",
+      "path": "/steampunk-corset-guide/?sga=1794275794",
+      "klasse": 1,
+      "status": 200,
+      "html_bytes": 100095,
+      "scripts": 25,
+      "scripts_src": 8,
+      "scripts_inline": 17,
+      "styles": 30,
+      "css_inline_bytes": 24028,
+      "js_inline_bytes": 0,
+      "largest_inline_block": 3841,
+      "stylesheets": 8,
+      "budget": {
+        "html": true,
+        "scripts": true,
+        "inline_block": true
+      },
+      "meets_budget": true
+    },
+    {
+      "template": "side",
+      "path": "/faq/?sga=1794275794",
+      "klasse": 1,
+      "status": 200,
+      "html_bytes": 67751,
+      "scripts": 26,
+      "scripts_src": 10,
+      "scripts_inline": 16,
+      "styles": 20,
+      "css_inline_bytes": 9894,
+      "js_inline_bytes": 0,
+      "largest_inline_block": 1666,
+      "stylesheets": 8,
+      "budget": {
+        "html": true,
+        "scripts": true,
+        "inline_block": true
+      },
+      "meets_budget": true
+    },
+    {
+      "template": "kategori",
+      "path": "/product-category/atelier/?sga=1794275794",
+      "klasse": 2,
+      "status": 200,
+      "html_bytes": 131556,
+      "scripts": 38,
+      "scripts_src": 16,
+      "scripts_inline": 22,
+      "styles": 28,
+      "css_inline_bytes": 24333,
+      "js_inline_bytes": 0,
+      "largest_inline_block": 4064,
+      "stylesheets": 10,
+      "budget": {
+        "html": true,
+        "scripts": true,
+        "inline_block": true
+      },
+      "meets_budget": true
+    },
+    {
+      "template": "søgning",
+      "path": "/?s=steampunk&sga=1794275794",
+      "klasse": 1,
+      "status": 200,
+      "html_bytes": 94023,
+      "scripts": 23,
+      "scripts_src": 8,
+      "scripts_inline": 15,
+      "styles": 29,
+      "css_inline_bytes": 18382,
+      "js_inline_bytes": 0,
+      "largest_inline_block": 2521,
+      "stylesheets": 8,
+      "budget": {
+        "html": true,
+        "scripts": true,
+        "inline_block": true
+      },
+      "meets_budget": true
+    },
+    {
+      "template": "kurv",
+      "path": "/cart/?sga=1794275794",
+      "klasse": 3,
+      "status": 200,
+      "html_bytes": 378724,
+      "scripts": 65,
+      "scripts_src": 30,
+      "scripts_inline": 35,
+      "styles": 29,
+      "css_inline_bytes": 27834,
+      "js_inline_bytes": 0,
+      "largest_inline_block": 4064,
+      "stylesheets": 12,
+      "budget": {
+        "html": true,
+        "scripts": true,
+        "inline_block": true
+      },
+      "meets_budget": true
+    }
+  ]
+}
