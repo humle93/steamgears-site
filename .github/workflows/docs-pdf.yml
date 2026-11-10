@@ -1,0 +1,120 @@
+name: PDF fra dokumentbiblioteket
+
+# AGENTS.md §5: hver note i docs/library skal også findes som PDF i reports/.
+# PDF'er er binære, og de skal derfor ikke uploades i hånden: denne kørsel renderer
+# de noter der ændrede sig i pushet — og fylder huller op, hvor PDF'en mangler.
+# Kør den manuelt ("Run workflow") for at fylde manglende PDF'er op med det samme.
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/library/*.md'
+      - '!docs/library/README.md'
+      - 'tools/md_to_pdf.py'
+      - '.github/workflows/docs-pdf.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: docs-pdf
+  cancel-in-progress: false
+
+jobs:
+  pdf:
+    name: Render noter til PDF
+    runs-on: ubuntu-26.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: DejaVu-skrifttype (æ, ø, å og tankestreger)
+        run: |
+          if [ ! -f /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf ]; then
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq fonts-dejavu-core
+          fi
+
+      - name: Installer fpdf2
+        run: python3 -m pip install --quiet --disable-pip-version-check "fpdf2>=2.7,<3"
+
+      - name: Render de noter der mangler eller er ændret
+        env:
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.event.after }}
+          EVENT: ${{ github.event_name }}
+        run: |
+          set -euo pipefail
+          zero="0000000000000000000000000000000000000000"
+          changed=()
+          if [ "$EVENT" = "push" ] && [ -n "${BEFORE:-}" ] && [ "$BEFORE" != "$zero" ]; then
+            while IFS= read -r f; do
+              [ -n "$f" ] && [ -f "$f" ] && changed+=("$f")
+            done < <(git diff --name-only --diff-filter=ACMR "$BEFORE" "${AFTER:-HEAD}" -- 'docs/library/*.md' ':(exclude)docs/library/README.md')
+          fi
+
+          render=()
+          for f in docs/library/*.md; do
+            [ -f "$f" ] || continue
+            case "$(basename "$f")" in README.md) continue ;; esac
+            out="reports/$(basename "${f%.md}").pdf"
+            if [ ! -f "$out" ]; then
+              render+=("$f")
+              continue
+            fi
+            for c in ${changed[@]+"${changed[@]}"}; do
+              if [ "$c" = "$f" ]; then
+                render+=("$f")
+                break
+              fi
+            done
+          done
+
+          if [ "${#render[@]}" -eq 0 ]; then
+            echo "Alle noter har en PDF — intet at rendere."
+            exit 0
+          fi
+
+          echo "Renderer ${#render[@]} note(r):"
+          for f in "${render[@]}"; do
+            out="reports/$(basename "${f%.md}").pdf"
+            echo "  $f -> $out"
+            python3 tools/md_to_pdf.py "$f" "$out"
+            if [ ! -s "$out" ]; then
+              echo "::error title=Tom PDF::$out blev ikke skrevet."
+              exit 1
+            fi
+          done
+
+      - name: Commit og push hvis PDF'erne ændrede sig
+        run: |
+          set -euo pipefail
+          git config user.name "Steamgears PDF Bot"
+          git config user.email "bot@steamgears.eu"
+          git add reports/
+          if git diff --staged --quiet; then
+            echo "Ingen ændringer — intet at committe."
+            exit 0
+          fi
+          n=$(git diff --staged --name-only | wc -l | tr -d ' ')
+          msg=$(printf 'Modul: docs-pdf — PDF fra dokumentbiblioteket\nFør: —  →  Efter: —  (Δ —)\nGrundlag: %s PDF-filer i reports/ renderet med tools/md_to_pdf.py — ingen ændring i projektstatus\n' "$n")
+          git commit -m "$msg"
+          for attempt in 1 2 3; do
+            if git push; then
+              exit 0
+            fi
+            echo "Push afvist (forsøg $attempt) — henter og prøver igen."
+            git pull --rebase --autostash
+          done
+          echo "::error title=Push fejlede::Kunne ikke pushe PDF'erne efter 3 forsøg."
+          exit 1
