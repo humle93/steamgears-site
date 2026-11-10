@@ -485,6 +485,19 @@ egne tal. Chatten er urørt: den læser allerede sitet live gennem MCP-værktøj
 
 ---
 
+### P9 — Cirla som til/fra-modul (7.71.0)
+
+Cirla er nu et modul, der kan slås til og fra, og som er **slukket som standard** — efter
+[`../docs/library/cirla-teknisk-dokumentation-2026-11-06.md`](../docs/library/cirla-teknisk-dokumentation-2026-11-06.md)
+§9.4. Filer: `modules/cirla/class-cirla.php` (ny), `steamgears-autopilot.php` (betinget require + init, version),
+`includes/core.php` (fyra indstillinger, sektion, hjælpetekster), `plugins/tests/cirla.php` (ny) og
+`plugins/tests/smoke.php` (require). Fire handlinger bag capabilityen `sgap_cirla_run`: status, én kladde, SEO-tjek
+og forslag. En kladde gemmes som `pending` med `angle = cirla` og køes eller publiceres aldrig; kvalitetsgaten
+stopper et dødt link; samme opgave to gange giver ingen dublet; dagligt AI-loft på 5 og filteret
+`sgap_cirla_generate`. **28 nye checks (1 443 → 1 471 PASS, 0 FAIL)**, inklusive at modulfilen ikke indlæses
+mens modulet er slukket, at alle fire handlinger forsvinder når det slås fra, og at kladderne bliver liggende.
+Bevis: [`../docs/library/cirla-modul-2026-11-10.md`](../docs/library/cirla-modul-2026-11-10.md). 0,35 d.
+
 ## 6. Completion estimates (1/11 2026 — historical)
 
 **Kept to show how the scope grew, not as a forecast.** The milestones were computed against the 7.15.0
@@ -593,6 +606,8 @@ Platform limits: [Instagram content publishing](https://developers.facebook.com/
 ---
 
 ## 9. Change log for this document
+
+- **7.71.0 (10/11) — P9: Cirla er et modul, der kan slås til og fra, og som er slukket som standard.** Modulfilen `modules/cirla/class-cirla.php` indlæses kun, når `sgap_cirla_enabled` er `yes`, så et modul der er slået fra ikke kan registrere én ability eller ét cron-job. Fire handlinger bag capabilityen `sgap_cirla_run` (status, én kladde, SEO-tjek, forslag); kladden gemmes som `pending` med `angle = cirla` og køes eller publiceres aldrig, kvalitetsgaten stopper et dødt link, samme opgave to gange giver ingen dublet, og et dagligt loft på 5 AI-kald plus filteret `sgap_cirla_generate` holder omkostningen nede. 28 nye checks (1 443 → 1 471 PASS). Bevis: `docs/library/cirla-modul-2026-11-10.md`.
 
 - **7.70.0 (10/11) — P8: agenterne læser sidens målte tilstand i stedet for en fast antagelse.** Hver skribent
   startede fra den samme prompt og ét snapshot af den side den skrev for, så en vinkel med 120 klik og nul

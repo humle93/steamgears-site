@@ -100,7 +100,12 @@ class SGAP_Install {
         'sgap_reddit_keywords' => 'steampunk,cosplay,goggles,top hat,brass',
         'sgap_reddit_daily_cap' => 2,
         'sgap_reddit_min_words' => 120,
-        'sgap_reddit_min_interval' => 90
+        'sgap_reddit_min_interval' => 90,
+        // Cirla is off until the owner says otherwise; modules/cirla loads only when this is 'yes'.
+        'sgap_cirla_enabled' => 'no',
+        'sgap_cirla_actions' => 'status,draft,seo,social',
+        'sgap_cirla_daily_calls' => 5,
+        'sgap_cirla_log_level' => 'actions'
     ];
 
     public static function activate(): void {
@@ -115,6 +120,7 @@ class SGAP_Install {
         if (class_exists('SGAP_Auto')) {
             SGAP_Auto::clear();
         }
+        wp_clear_scheduled_hook('sgap_cirla_daily'); // the Cirla module's job, when it was on
         delete_option('rewrite_rules'); // drop the /go/ rule; WP rebuilds on next request
     }
 
@@ -375,13 +381,13 @@ register_deactivation_hook(SGAP_FILE, ['SGAP_Install', 'deactivate']);
 
 /* ---------------- SETTINGS ---------------- */
 class SGAP_Settings {
-    const BOOL_KEYS = ['autopilot_enabled', 'full_auto_enabled', 'auto_images', 'auto_seo', 'auto_publish_articles', 'weekly_report', 'evergreen_enabled', 'forum_enabled', 'reddit_enabled', 'reddit_auto_share'];
+    const BOOL_KEYS = ['autopilot_enabled', 'full_auto_enabled', 'auto_images', 'auto_seo', 'auto_publish_articles', 'weekly_report', 'evergreen_enabled', 'forum_enabled', 'reddit_enabled', 'reddit_auto_share', 'cirla_enabled'];
     const HOUR_KEYS = ['quiet_start', 'quiet_end'];
     const INT_KEYS = [
         'daily_cap','batch_size','labor_rate','monthly_budget','target_roi',
         'winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max','posts_per_day','articles_per_week','alert_dry_days','audit_keep_days','dupe_days','mastodon_limit',
         'evergreen_after_days','evergreen_max_shares','evergreen_batch',
-        'woo_min_margin','forum_topics_per_page','reddit_daily_cap','reddit_min_words','reddit_min_interval'
+        'woo_min_margin','forum_topics_per_page','reddit_daily_cap','reddit_min_words','reddit_min_interval','cirla_daily_calls'
     ];
     /** Never echoed back to the browser; can be overridden by SGAP_<KEY> constants in wp-config.php. */
     const SECRET_KEYS = [
@@ -407,12 +413,13 @@ class SGAP_Settings {
         'pinterest_client_id','instagram_user_id','facebook_page_id',
         'locale_source','locales','command_center_url','mcp_client_id',
         'printful_store_id','forum_slug','forum_intro','reddit_client_id','reddit_username',
-        'reddit_default_sub','reddit_radar_subs','reddit_keywords'
+        'reddit_default_sub','reddit_radar_subs','reddit_keywords','cirla_actions'
     ];
     /** Settings with a fixed list of values, shown as a select. */
     const CHOICE_KEYS = [
         'publish_mode' => ['rss' => 'RSS feeds (Publer Professional)', 'api' => 'Publer API (Publer Business)'],
         'ai_provider' => ['anthropic' => 'Anthropic (Claude)', 'aimlapi' => 'AIMLAPI (Claude and 300+ other models)', 'openrouter' => 'OpenRouter (one key, hundreds of models from many providers)', 'openai_compatible' => 'Other OpenAI-compatible API (OpenAI, ...)'],
+        'cirla_log_level' => ['actions' => 'Every action — time and result', 'errors' => 'Errors only', 'off' => 'Off — no Cirla log entries'],
         'quality_gate' => ['block' => 'Block — keep the post out of the queue until it is fixed', 'warn' => 'Warn — queue it and report what is wrong', 'off' => 'Off — do not check'],
         'instagram_graph_host' => ['graph.instagram.com' => 'Instagram Login (graph.instagram.com) — scopes instagram_business_basic and instagram_business_manage_insights', 'graph.facebook.com' => 'Facebook Login (graph.facebook.com) — scopes instagram_basic and instagram_manage_insights; the token cannot renew itself'],
         'facebook_graph_version' => ['v21.0' => 'v21.0 (current)', 'v20.0' => 'v20.0', 'v19.0' => 'v19.0'],
@@ -430,6 +437,7 @@ class SGAP_Settings {
         'Evergreen' => ['evergreen_enabled','evergreen_after_days','evergreen_max_shares','evergreen_batch'],
         'Alerts and log' => ['alert_mode','alert_email','alert_dry_days','channel_caps','audit_keep_days'],
         'Shop & feeds' => ['merchant_feed_secret','printful_api_key','printful_store_id','woo_min_margin'],
+        'Cirla' => ['cirla_enabled','cirla_actions','cirla_daily_calls','cirla_log_level'],
         'MCP access' => ['mcp_client_id','mcp_refresh_token'],
         'Forum & Reddit' => ['forum_enabled','forum_slug','forum_topics_per_page','forum_intro',
             'reddit_enabled','reddit_auto_share','reddit_default_sub','reddit_radar_subs','reddit_keywords',
@@ -437,6 +445,19 @@ class SGAP_Settings {
     ];
 
     const HELP = [
+        'cirla_enabled' => 'The Cirla module: four safe actions over MCP (read the status, write one draft, run'
+            . ' the SEO check, suggest social posts) and a daily job. Off by default. While it is off the module'
+            . ' file is not loaded at all, so it cannot register an ability or a cron job; switching it on takes'
+            . ' effect on the next request. Nothing it does publishes, queues or deletes anything, and a draft'
+            . ' lands under AI Drafts like any other.',
+        'cirla_actions' => 'Which of the four Cirla actions are allowed, comma-separated: status, draft, seo,'
+            . ' social. Remove one to switch just that action off; an empty field allows none.',
+        'cirla_daily_calls' => 'How many AI calls Cirla may spend per day, shared by the draft and the'
+            . ' suggestions. 0 means none, so a module that is on cannot spend anything by accident. The count'
+            . ' resets after midnight, site time.',
+        'cirla_log_level' => 'What Cirla writes to its own log: every action with time and result, only errors,'
+            . ' or nothing. Errors also go to Fejlsøgning, because a refusal nobody reads is a refusal nobody'
+            . ' fixes.',
         'evergreen_enabled' => 'Keep promoting pages that keep earning: once a page is marked, it is recycled with a freshly written caption after the waiting period, until it has used its share budget or reached its expiry date.',
         'evergreen_after_days' => 'How long a page waits between two shares. The same clock the normal generator uses, so a recycled page is not also promoted as new the same week.',
         'evergreen_max_shares' => 'Default budget per page: how many recycled posts it may produce. A page can override it in the editor, and 0 there means this number.',

@@ -27,7 +27,7 @@ The whole social autopilot runs inside WordPress (Command Center is retired):
 4. **Measure** – every post links via `/go/<id>/`, so clicks (and WooCommerce
    orders) are counted per channel.
 
-Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.70.1.zip` → Activate. On an existing
+Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.71.0.zip` → Activate. On an existing
 install the same zip arrives through the self-updater (see *Updates*), so an upload is only needed for the
 first install or a recovery.
 
@@ -99,6 +99,29 @@ still reports no header, `SGAP_AI::stripped_by()` runs the site's own `http_requ
 the request: if a plugin removes `Authorization` from outgoing calls, the message names that filter instead of
 sending you to openrouter.ai/keys. Eleven new smoke checks observe the outgoing request itself — the exact
 `Bearer` header, one line, no key in any message — and four of them fail if the cleaning is removed.
+
+## A module you can switch on: Cirla (7.71)
+
+Cirla is the first part of the plugin that is **a module of its own**. It is off by default, and while it is
+off its file is not even loaded from `steamgears-autopilot.php` — so a module that is off cannot register an
+ability or a cron job. Switching it on under *Settings & keys → Cirla* takes effect on the next request.
+
+It exposes four actions over the same MCP connection as everything else, all guarded by its own capability
+`sgap_cirla_run` (administrators have it through `manage_options`):
+
+| Action | What it does |
+|---|---|
+| `cirla-status` | The module's state: on/off, allowed actions, next daily job, AI calls spent today, drafts it wrote, last log rows |
+| `cirla-draft` | One social post for a topic or a page, through the same AI path as the daily writer, saved as `pending` under AI Drafts with `angle = cirla` |
+| `cirla-seo-check` | One page against the plugin's own meta limits (title 60, description 70–155) — reads only |
+| `cirla-social-suggestions` | Up to five suggestions, one per channel, saved nowhere |
+
+Nothing it does queues, publishes or deletes: a draft waits for approval exactly like an AI draft, and it
+passes the quality gate first — a dead or unpublished link stops it. Three settings keep it small: which
+actions are allowed, a **daily AI budget** (5 calls by default, `0` = none), and what its log keeps. The
+daily job records that it ran and spends nothing; writing posts stays a called action, because a module that
+is on must not spend the owner's credits on its own. The AI call sits behind the `sgap_cirla_generate`
+filter, so a human editor or another model can replace it — the same seam as `sgap_evergreen_variation`.
 
 ## AI profiles (7.41.2)
 

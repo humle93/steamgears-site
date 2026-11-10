@@ -27,7 +27,7 @@ _Opdateret 2026-11-10 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 | **Forum + Reddit — trafikaccelerator (P5)** | **96,7 %** | 2,9 af 3 d (F1 1,2/1,2 · F2 0,8/0,8 · F3 0,3/0,3 · F4 0,3/0,3 · F5 0,3/0,3 · F6 0/0,1) |
 | **steamgears.eu — site-optimering** | **100 %** | 20,95 af 20,95 d (S0 2,35/2,35 · S1 3,6/3,6 · S2 6,9/6,9 · S3 4,05/4,05 · S4 4,05/4,05) |
 | **steamgears.eu — miljø, server og sandbox (S5)** | **60 %** | 1,8 af 3 d (S5 1,8/3) |
-| **Steamgears Autopilot — plugin** | **100 %** | 33,75 af 33,75 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25 · P1E 0,25/0,25 · P1F 0,25/0,25 · P1G 0,5/0,5 · P2F 1,5/1,5 · P3OPT 0,6/0,6 · P3JS 0,3/0,3 · P3LIVE 0,25/0,25 · P1KEYDIAGNOSE 0,15/0,15 · P1FALLBACK 0,35/0,35 · P1OR 0,25/0,25 · P6 0,9/0,9 · P7 0,3/0,3 · P8 0,8/0,8) |
+| **Steamgears Autopilot — plugin** | **100 %** | 34,1 af 34,1 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25 · P1E 0,25/0,25 · P1F 0,25/0,25 · P1G 0,5/0,5 · P2F 1,5/1,5 · P3OPT 0,6/0,6 · P3JS 0,3/0,3 · P3LIVE 0,25/0,25 · P1KEYDIAGNOSE 0,15/0,15 · P1FALLBACK 0,35/0,35 · P1OR 0,25/0,25 · P6 0,9/0,9 · P7 0,3/0,3 · P8 0,8/0,8 · P9 0,35/0,35) |
 | **Dark academia-rebrand** | **71,3 %** | 12,4 af 17,4 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5 · BATCH4 0,5/0,5 · GENTILDELING 0,4/0,4 · MOBIL-OG-SAESON 3/3) |
 | **SEO-indholdsproduktion** | **100 %** | 14 af 14 guides (BATCH 3/3 · COPY 4/4 · CORSET 1/1 · DKK 6/6) |
 | **Døde internlinks** | **100 %** | 39 af 39 links (FIX 39/39) |
@@ -58,12 +58,12 @@ _Opdateret 2026-11-10 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `03a6298 chore(status): daglig projektstatus 2026-11-10`
+- `9aa6655 Modul: P1.25 — OpenRouter-headeren sendes fra én bygger Før: 100 %  →  Efter: 100 %  (Δ 0) Grundlag: 33,75 af 33,75 d (P0 4.65/4.65 · P1 14.45/14.45 · P2 4.75/4.75 · P3 2/2 · P0.7 1/1 · P0.7c 0.25/0.25 · P1.19 0.25/0.25 · P1.20 0.25/0.25 · P1.21 0.25/0.25 · P1.22 0.5/0.5 · P2.6 1.5/1.5 · P3.7 0.6/0.6 · P3.8 0.3/0.3 · P3.9 0.25/0.25 · P1.25 0.15/0.15 · P1.24 0.35/0.35 · P1.23 0.25/0.25 · P6 0.9/0.9 · P7 0.3/0.3 · P8 0.8/0.8)`
+- `5f9bfe0 SEO-research: de hurtigste organiske gevinster målt mod det levende site`
+- `53f4183 chore(status): daglig projektstatus 2026-11-10`
 - `4364759 Modul: P8 — agenterne læser sidens målte tal, ikke en fast antagelse Før: 100 %  →  Efter: 100 %  (Δ 0) Grundlag: 33,7 af 33,7 d (P0 4.65/4.65 · P1 14.45/14.45 · P2 4.75/4.75 · P3 2/2 · P0.7 1/1 · P0.7c 0.25/0.25 · P1.19 0.25/0.25 · P1.20 0.25/0.25 · P1.21 0.25/0.25 · P1.22 0.5/0.5 · P2.6 1.5/1.5 · P3.7 0.6/0.6 · P3.8 0.3/0.3 · P3.9 0.25/0.25 · P1.25 0.1/0.1 · P1.24 0.35/0.35 · P1.23 0.25/0.25 · P6 0.9/0.9 · P7 0.3/0.3 · P8 0.8/0.8)`
 - `8d46825 Fjerner blokstile for blokke der ikke findes på siden`
-- `47d592b Modul: kanal 1 — refresh af de 66 sider med visninger Før: 100 % → Efter: 100 % (Δ 0) Grundlag: ingen ændring`
-- `ca44d8d chore(status): daglig projektstatus 2026-11-10`
-- `b1d4569 Modul: P1.25 — nøgletesten siger hvad der er galt med nøglen Før: 100 % → Efter: 100 % (Δ 0) Grundlag: 32,8 af 32,8 d`
-- `1210a4f Fjerner udokumenterede løfter fra nichehooks`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
@@ -1750,7 +1750,7 @@ statiske blokke; målrettede rettelser i eksisterende markup kan skrives direkte
    [`library/guides-2026-11-03.md`](library/guides-2026-11-03.md).
 2. ✅ MCP-fornyelsen er bygget ind i pluginnet (7.44.0). Det der mangler, er ejerens godkendelse og de to
    værdier under *Settings → MCP access* — derefter holder adgangen i 30 dage uden secrets.
-3. Cirla som til/fra-modul i pluginnet efter dokumentets §9.4 — start med trin 1, modulet slukket som standard.
+3. ✅ **Cirla er nu et til/fra-modul (7.71.0, P9)** efter dokumentets §9.4: `modules/cirla/class-cirla.php` indlæses kun når `sgap_cirla_enabled` er `yes`, fire handlinger bag `sgap_cirla_run`, dagligt AI-loft og filteret `sgap_cirla_generate`. Røgtesten i §9.5 er målt (1 471 PASS / 0 FAIL). Tilbage er kun ejerens: installer `plugins/steamgears-autopilot-v7.71.0.zip` og slå modulet til under *Settings & keys → Cirla*. Bevis: `docs/library/cirla-modul-2026-11-10.md`.
 4. **Plugin-sporet har præcis ét åbent punkt: P1.5's live-verifikation (0,85 d).** Alt andet er lukket og
    afstemt; det der mangler, er ejerens Pinterest-nøgle (access- eller app-credentials + refresh) og
    Instagram-nøgle (professionelt konto-id + long-lived user-token) under *Settings → Keys*. Derefter er

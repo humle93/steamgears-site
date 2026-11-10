@@ -298,6 +298,15 @@
           "total": 0.8,
           "unit": "d",
           "note": "7.70.0: SGAP_Coach (includes/coach.php) læser sidens egne tal og lægger et målt brief i prompten hos den daglige forfatter, kampagne-agenten (samme prompt), Studio-artiklen og Studio-SEO-redaktøren, med reglen at kun briefens tal må citeres. facts() læser wp_count_posts, WooCommerce-valutaen, kataloget og sgap_ai_drafts; outcomes() er én grupperet forespørgsel på sgap_events pr. kanal og vinkel (klik, ordrer, omsætning, seneste publicering, dage siden); learn() omsætter dem til højst 12 daterede regler (MIN_CLICKS 25, SILENT_DAYS 14, backlog 20) i én option uden autoload og beholder første dato. Ny cron sgap_coach_learn (dagligt), filter sgap_agent_brief, transient-cache 1 t, read-only ability agent-brief og dashboardkortet 'What the agents have learned'. Ingen ny tabel, indstilling eller publiceringsvej. Repo-siden: tools/agent_brief.py måler det levende katalog (20 produkter, DKK, 165-1 000, 9 kategorier, 33 indlæg, 32 sider) og skriver docs/agent-brief.md, som seo_agent.py læser, og workflowen måler før auditten. 44 nye coach-checks (1 383 -> 1 427 PASS / 0 FAIL; efter rebase over 7.69.1 er totalen 1 432 PASS / 0 FAIL), 13 Python-tests, php -l rent, fejlscan uden fund, zip byte-identisk. IKKE verificeret: intet rigtigt AI-kald fra sandkassen, 7.70.0 er ikke installeret på sitet, så lesson-storen er tom indtil første cron-kørsel; tærsklerne er vurderinger, ikke målinger."
+        },
+        {
+          "id": "p9",
+          "name": "P9 — Cirla som til/fra-modul",
+          "done": 0.35,
+          "total": 0.35,
+          "unit": "d",
+          "note": "`modules/cirla/class-cirla.php` indlæses kun når `sgap_cirla_enabled` er `yes` (standard `no`), så et slukket modul ikke kan registrere en ability eller et cron-job. Fire handlinger bag `sgap_cirla_run`: cirla-status, cirla-draft (pending, `angle = cirla`, aldrig kø/publiceret), cirla-seo-check og cirla-social-suggestions; kvalitetsgaten stopper døde links, samme opgave to gange giver ingen dublet, dagligt AI-loft 5 og filteret `sgap_cirla_generate`. 28 nye checks, 1 443 → 1 471 PASS, 0 FAIL. Bevis: docs/library/cirla-modul-2026-11-10.md.",
+          "verified": true
         }
       ],
       "total": 33.75,
@@ -2236,6 +2245,15 @@
       "after": 100.0,
       "delta": 0.0,
       "basis": "33,75 af 33,75 d (P0 4.65/4.65 · P1 14.45/14.45 · P2 4.75/4.75 · P3 2/2 · P0.7 1/1 · P0.7c 0.25/0.25 · P1.19 0.25/0.25 · P1.20 0.25/0.25 · P1.21 0.25/0.25 · P1.22 0.5/0.5 · P2.6 1.5/1.5 · P3.7 0.6/0.6 · P3.8 0.3/0.3 · P3.9 0.25/0.25 · P1.25 0.15/0.15 · P1.24 0.35/0.35 · P1.23 0.25/0.25 · P6 0.9/0.9 · P7 0.3/0.3 · P8 0.8/0.8)"
+    },
+    {
+      "date": "2026-11-10",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "P9 — Cirla som til/fra-modul",
+      "before": 100.0,
+      "after": 100.0,
+      "delta": 0.0,
+      "basis": "34,1 af 34,1 d (P0 4.65/4.65 · P1 14.45/14.45 · P2 4.75/4.75 · P3 2/2 · P0.7 1/1 · P0.7c 0.25/0.25 · P1.19 0.25/0.25 · P1.20 0.25/0.25 · P1.21 0.25/0.25 · P1.22 0.5/0.5 · P2.6 1.5/1.5 · P3.7 0.6/0.6 · P3.8 0.3/0.3 · P3.9 0.25/0.25 · P1.25 0.15/0.15 · P1.24 0.35/0.35 · P1.23 0.25/0.25 · P6 0.9/0.9 · P7 0.3/0.3 · P8 0.8/0.8 · P9 0.35/0.35)"
     }
   ]
 }
