@@ -257,7 +257,7 @@ check('openai-compatible: own base url and model, no reasoning_effort', SGAP_AI:
 // der beviser nøglen med ét token — OpenRouter svarer /models uden nøgle, så den vej ville
 // kalde enhver nøgle gyldig.
 update_option('sgap_ai_provider','openrouter'); update_option('sgap_ai_model','');
-update_option('sgap_ai_base_url','https://wrong.example/v1'); update_option('sgap_ai_api_key','or-key');
+update_option('sgap_ai_base_url','https://wrong.example/v1'); update_option('sgap_ai_api_key','sk-or-v1-fixture');
 check('openrouter: the provider is accepted and named', SGAP_AI::provider()==='openrouter' && SGAP_AI::provider_name()==='OpenRouter');
 check('openrouter: the address is fixed, so a typed base url cannot redirect the key', SGAP_AI::base_url()==='https://openrouter.ai/api/v1' && SGAP_AI::uses_chat_completions());
 check('openrouter: there is no invented default model', SGAP_AI::default_model()==='' && SGAP_AI::model()==='');
@@ -1769,6 +1769,41 @@ check('fallback: the keys tab renders the backup key and its model once each',
 foreach ($fb_keep as $k=>$v) { if ($v===null) { unset($GLOBALS['opts'][$k]); } else { $GLOBALS['opts'][$k]=$v; } }
 if ($fb_log_before === []) { delete_option('sgap_error_log'); } else { update_option('sgap_error_log',$fb_log_before,false); }
 $GLOBALS['http_queue']=[]; $GLOBALS['http_calls']=[];
+
+
+/* ---------------- P1.25: the key test names the real problem ---------------- */
+// Measured 10/11: OpenRouter answered 401 "Missing Authentication header" for a value that was not
+// an OpenRouter key at all. Both cases are pinned here, so the message can never again say
+// "refused" when the truth is "that is not the key" or "the header never arrived".
+update_option('sgap_ai_provider','openrouter');
+update_option('sgap_ai_api_key',"  sk-or-v1-abcdef\n");
+check('key diagnosis: a pasted key is trimmed before it becomes a header',
+    SGAP_AI::api_key()==='sk-or-v1-abcdef' && SGAP_AI::api_key()===trim((string) get_option('sgap_ai_api_key')));
+update_option('sgap_ai_api_key','badb337-aimlapi-lookalike');
+$GLOBALS['http_calls']=[];
+$kd=SGAP_KeyCheck::check_ai();
+check('key diagnosis: a value without sk-or- is named before any request is spent',
+    $kd['ok']===false && str_contains($kd['message'],'not an OpenRouter key')
+    && str_contains($kd['message'],'characters') && count($GLOBALS['http_calls'])===0);
+update_option('sgap_ai_api_key','sk-or-v1-abc123');
+update_option('sgap_ai_model','anthropic/claude-sonnet-4.5');
+$GLOBALS['http_queue'][]=sgap_http(401,['error'=>['message'=>'Missing Authentication header']]);
+$kd=SGAP_KeyCheck::check_ai();
+check('key diagnosis: "missing authentication header" is reported as a header problem, not a refusal',
+    $kd['ok']===false && str_contains($kd['message'],'Authorization header')
+    && !str_contains($kd['message'],'refused the key'));
+$GLOBALS['http_queue'][]=sgap_http(200,['choices'=>[['message'=>['content'=>'pong']]]]);
+$kd=SGAP_KeyCheck::check_ai();
+check('key diagnosis: a well-shaped key still proves itself with one token', $kd['ok']===true
+    && str_contains($kd['message'],'OpenRouter key works'));
+update_option('sgap_openrouter_api_key','not-a-key-either');
+update_option('sgap_openrouter_model','anthropic/claude-sonnet-4.5');
+$kd=SGAP_KeyCheck::check_fallback();
+check('key diagnosis: the backup key is shape-checked the same way',
+    $kd['ok']===false && str_contains($kd['message'],'not an OpenRouter key'));
+update_option('sgap_ai_provider','aimlapi');
+update_option('sgap_ai_api_key','PRIMARY-KEY');
+update_option('sgap_openrouter_api_key','sk-or-backup');
 
 require __DIR__.'/roi.php';
 require __DIR__.'/pinterest.php';

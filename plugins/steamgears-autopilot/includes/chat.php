@@ -419,7 +419,7 @@ class SGAP_Chat {
      * @return array{text: string, tools: string[]}|WP_Error
      */
     public static function reply(array $history, string $message) {
-        $key = (string) SGAP_Settings::get('ai_api_key');
+        $key = SGAP_AI::api_key();
         if ($key === '') {
             return new WP_Error('sgap_ai_key', 'Set an AI API key in Steamgears → Settings → AI content first.');
         }

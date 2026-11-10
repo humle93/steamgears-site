@@ -80,6 +80,15 @@ backup **pair** (that key, that model), because testing it with the primary's mo
 combination the plugin never sends. As with every key here, it can live in `wp-config.php` as
 `SGAP_OPENROUTER_API_KEY`.
 
+Since 7.69.1 the test also says *which* of the two problems it found. OpenRouter keys start with
+`sk-or-v1-`; a saved value that does not is named as **not an OpenRouter key** (with its length) instead of
+being sent and answered with a 401 about a missing header — that is the answer an AIMLAPI key, a pasted
+`curl` command or a masked value gets, and on 10/11 it read as “the key was rejected” when the truth was
+“that is not the key”. If the value does start with `sk-or-` and OpenRouter still reports no Authorization
+header, the message says so and points at a line break in the field or a host/proxy that strips the header.
+Every key is also trimmed before it becomes a header, so a trailing newline from a paste can no longer turn
+`Bearer sk-or-…` into something no gateway parses.
+
 ## AI profiles (7.41.2)
 
 The chat's persona and what it may touch are one setting — *Settings → AI content → AI profile* — and one

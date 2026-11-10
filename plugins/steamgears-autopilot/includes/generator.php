@@ -167,7 +167,7 @@ class SGAP_AI {
             // before the backup key exists — the list is not the credential.
             $response = wp_remote_get(self::OPENROUTER_URL . '/models', ['timeout' => 20]);
         } else {
-            $key = (string) SGAP_Settings::get('ai_api_key');
+            $key = self::api_key();
             if ($key === '') {
                 return [];
             }
@@ -183,6 +183,15 @@ class SGAP_AI {
         }
         $body = json_decode((string) wp_remote_retrieve_body($response), true);
         return is_array($body) ? self::catalog_ids($body) : [];
+    }
+
+    /**
+     * The primary key, trimmed. A key copied out of a browser can carry a leading space or a line
+     * break, and "Bearer sk-or-…\n" is not a bearer token to any gateway: the answer reads like a
+     * missing header instead of a rejected key (measured 10/11 against OpenRouter).
+     */
+    public static function api_key(): string {
+        return trim((string) SGAP_Settings::get('ai_api_key'));
     }
 
     /** The OpenRouter backup key, or '' when none is saved. */
@@ -442,7 +451,7 @@ class SGAP_AI {
 
     /** Generates posts for one source page. @return array|WP_Error List of posts (see parse_posts). */
     public static function generate(array $source, array $channels) {
-        $key = (string) SGAP_Settings::get('ai_api_key');
+        $key = self::api_key();
         if ($key === '') {
             return new WP_Error('sgap_ai_key', 'Set an AI API key in Settings.');
         }
@@ -531,7 +540,7 @@ class SGAP_AI {
      * @return array|WP_Error
      */
     public static function json_call(string $system, string $prompt, array $schema, int $max_tokens = 16000, string $effort = 'medium') {
-        $key = (string) SGAP_Settings::get('ai_api_key');
+        $key = self::api_key();
         if ($key === '') {
             return new WP_Error('sgap_ai_key', 'Set an AI API key in Settings → AI content.');
         }

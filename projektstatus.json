@@ -249,6 +249,15 @@
           "note": "udført og målt 9/11: sitet kørte 7.65.0 mens repoet var 7.65.4, så P3.7 og P3.8 var bygget men ikke i drift. Zip 398 668 bytes (sha256 `e399813b…`) uploadet gennem MCP i to base64-dele, installeret med `Plugin_Upgrader::install(..., overwrite_package)` — 7.65.0 → 7.65.4 → **7.65.5**, stadig aktiv. `steamgears-autopilot.php`, `ROADMAP.md`, `includes/assets.php` og `assets/pages/dashboard.js` er målt **byte-identiske** mellem site og repo. Live: `SGAP_Admin::dashboard()` giver **17 566 bytes HTML med 0 inline `<script>` og 0 inline `<style>`**, syv side-scripts, to CSS-filer; `/`, `/shop/`, produktside og `/cart/` svarer 200 (75 124 / 269 514 / 282 839 / 378 718 bytes), og `/wp-json/sgap/v1/tick` 200. 7.65.5 er en bogføringsrelease (kun ROADMAP.md), hævet fordi filen er en del af zip'en."
         },
         {
+          "id": "p1keydiagnose",
+          "name": "P1.25 — Nøgletesten siger hvad der er galt med nøglen",
+          "done": 0.1,
+          "total": 0.1,
+          "unit": "d",
+          "verified": true,
+          "note": "7.69.1 (10/11): OpenRouter svarede 401 Missing Authentication header, og beskeden blev vist som »refused the key«, når den gemte værdi ikke var en OpenRouter-nøgle. Formen tjekkes nu før der bruges en request (sk-or-v1-), en forkert værdi navngives med sin længde og henvisning til openrouter.ai/keys, og et svar om en manglende header oversættes til det det betyder: linjeskift i feltet eller en vært/proxy der fjerner Authorization. SGAP_AI::api_key() trimmer nøglen for generator, Studio, AI Chat og nøgletest. 5 nye smoke-checks (1353 -> 1358 PASS, 0 FAIL)."
+        },
+        {
           "id": "p1fallback",
           "name": "P1.24 — OpenRouter som automatisk backup for AIMLAPI",
           "done": 0.35,
@@ -283,7 +292,7 @@
           "note": "7.69.0: SGAP_RSS::health() giver hver konfigureret kanal én tilstand (ok/empty/stale/invalid/off) ud fra præcis de rækker xml() renderer: antal poster, alder på nyeste, og manglende titel, tekst eller foto hvor Instagram/Pinterest kræver det. health_summary() tæller tilstandene og navngiver kanalerne. Begge felter går ind i abilityen channel-health og /sgap/v1/channel-health (feeds, feeds_summary), så ét read-only kald både svarer på om kanalen kan sende og om feedet har noget brugbart. Stale-grænsen er 7 dage og kan ændres med filteret sgap_feed_stale_days. Ingen ny tabel, indstilling eller side. Lukker ROADMAP §4.1 pkt. 2, som har stået åbent siden 1/11. 25 nye smoke-checks (1358 -> 1383 PASS / 0 FAIL), php -l rent, zip 439 251 bytes byte-identisk. Ikke målt mod Publer: feedet er verificeret som værende det Publer får, men ingen konto har hentet det endnu."
         }
       ],
-      "total": 32.8,
+      "total": 32.9,
       "verified": true
     },
     {

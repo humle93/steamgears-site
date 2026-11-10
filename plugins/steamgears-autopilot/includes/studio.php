@@ -15,9 +15,9 @@ class SGAP_Images {
 
     /** AIMLAPI key: the image key if set, else the AI key when the AI provider is AIMLAPI. */
     public static function key(): string {
-        $key = (string) SGAP_Settings::get('image_api_key');
+        $key = trim((string) SGAP_Settings::get('image_api_key'));
         if ($key === '' && SGAP_AI::provider() === 'aimlapi') {
-            $key = (string) SGAP_Settings::get('ai_api_key');
+            $key = SGAP_AI::api_key();
         }
         return $key;
     }

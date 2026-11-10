@@ -168,7 +168,7 @@ class SGAP_KeyCheck {
 
     /** @return array{ok: ?bool, message: string} ok is null when no key is saved. */
     public static function check_ai(): array {
-        $key = (string) SGAP_Settings::get('ai_api_key');
+        $key = SGAP_AI::api_key();
         if ($key === '') {
             return ['ok' => null, 'message' => 'No AI API key saved.'];
         }
@@ -241,7 +241,18 @@ class SGAP_KeyCheck {
      * model is chosen the answer says that instead of spending a request on a guess.
      */
     private static function check_openrouter(string $key, string $model = '', string $who = 'OpenRouter'): array {
+        $key = trim($key);
         $model = $model !== '' ? $model : SGAP_AI::model();
+        if ($key === '') {
+            return ['ok' => false, 'message' => $who . ': no key saved.'];
+        }
+        // Shape before request. OpenRouter keys start with sk-or-. Anything else — the AIMLAPI key,
+        // a pasted curl command, a masked value — comes back as 401 "Missing Authentication header",
+        // which reads as "your key was rejected" when the truth is "that is not the key".
+        if (!str_starts_with($key, 'sk-or-')) {
+            $odd = preg_match('/[\s$"\'`]/', $key) === 1 ? ' and it contains a space, a quote or a command character' : '';
+            return ['ok' => false, 'message' => $who . ': the saved value is not an OpenRouter key. OpenRouter keys start with sk-or-v1-; this value is ' . strlen($key) . ' characters' . $odd . '. Save the key alone from openrouter.ai/keys.'];
+        }
         if ($model === '') {
             return ['ok' => false, 'message' => $who . ' key saved, but pick an AI model under Settings → AI & images — OpenRouter has no default model.'];
         }
@@ -260,6 +271,9 @@ class SGAP_KeyCheck {
             return ['ok' => true, 'message' => "{$who} key works, model {$model} answers."];
         }
         if ($code === 401 || $code === 403) {
+            if (stripos($detail, 'missing authentication header') !== false) {
+                return ['ok' => false, 'message' => $who . ' saw no usable Authorization header, and the saved key has the right shape (' . strlen($key) . ' characters, sk-or-). Check for a line break or space in the field, re-save the key as one line, and if it repeats the host or a proxy is stripping the header.'];
+            }
             return ['ok' => false, 'message' => $who . ' refused the key' . ($detail !== '' ? ": {$detail}" : '.')];
         }
         if ($code === 402) {
