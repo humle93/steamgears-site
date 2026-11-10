@@ -302,10 +302,10 @@ IMMER
 
 ## Annoncehooks og KPI-gates
 
-- Hook: Søvn starter ikke, når du lægger hovedet på puden. Den starter i rummet.
-- Hook: Seks kilo fordelt rigtigt gør ikke kroppen træt. Den holder den.
-- Hook: Mørke, vægt og lyd. Tre ting du kan ændre i aften.
-- Hook: Har du prøvet alt det sædvanlige? Prøv at ændre rummet først.
+- Hook: Tyngdedyne, maske og hvid støj — se hvad der følger med.
+- Hook: Seks kilo med glasperler fordelt i kanaler.
+- Hook: Tre ting til soveværelset: maske, dyne og lyd.
+- Hook: Se mål, materialer og sikkerhedsråd før du vælger.
 - Hook rate: >= 25 %
 - Konvertering: >= 1,0 %
 - CPA: <= break-even pr. vare

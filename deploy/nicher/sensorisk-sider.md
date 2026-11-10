@@ -312,9 +312,9 @@ STILLE
 
 ## Annoncehooks og KPI-gates
 
-- Hook: Jeg kan ikke holde ud at have tøj på. Nu har jeg det her.
-- Hook: Ro behøver ikke være et lukket værelse — det kan være to kilo.
-- Hook: To kilo, fordelt rigtigt, gør en forskel.
+- Hook: Vægt fordelt over skuldre og ryg — se hvordan den sidder.
+- Hook: En vægtet vest uden ærmer. Se mål og vægt.
+- Hook: To kilo fordelt over skuldre og ryg.
 - Hook: Det er ikke behandling. Det er vægt, du kan tage af.
 - Hook rate: >= 25 %
 - Konvertering: >= 1,0 %

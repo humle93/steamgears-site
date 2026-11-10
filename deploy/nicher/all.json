@@ -923,8 +923,8 @@
       ],
       "hooks": [
         "Du må ikke bore. Du har stadig brug for plads.",
-        "Sådan får du plads uden at miste depositummet.",
-        "Tre kvadratmeter du ikke vidste du havde.",
+        "Sådan udnytter du pladsen uden at bore — mål først.",
+        "Mål gulv til loft tre steder, før du vælger reol.",
         "Reolen kan tages ned og flytte med, når du flytter."
       ],
       "kpi": [
@@ -1473,9 +1473,9 @@
         "Kontakt"
       ],
       "hooks": [
-        "Jeg kan ikke holde ud at have tøj på. Nu har jeg det her.",
-        "Ro behøver ikke være et lukket værelse — det kan være to kilo.",
-        "To kilo, fordelt rigtigt, gør en forskel.",
+        "Vægt fordelt over skuldre og ryg — se hvordan den sidder.",
+        "En vægtet vest uden ærmer. Se mål og vægt.",
+        "To kilo fordelt over skuldre og ryg.",
         "Det er ikke behandling. Det er vægt, du kan tage af."
       ],
       "kpi": [
@@ -2035,10 +2035,10 @@
         "Kontakt"
       ],
       "hooks": [
-        "Søvn starter ikke, når du lægger hovedet på puden. Den starter i rummet.",
-        "Seks kilo fordelt rigtigt gør ikke kroppen træt. Den holder den.",
-        "Mørke, vægt og lyd. Tre ting du kan ændre i aften.",
-        "Har du prøvet alt det sædvanlige? Prøv at ændre rummet først."
+        "Tyngdedyne, maske og hvid støj — se hvad der følger med.",
+        "Seks kilo med glasperler fordelt i kanaler.",
+        "Tre ting til soveværelset: maske, dyne og lyd.",
+        "Se mål, materialer og sikkerhedsråd før du vælger."
       ],
       "kpi": [
         {

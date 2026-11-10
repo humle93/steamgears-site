@@ -269,8 +269,9 @@ def check_copy(niche_slug: str, content: dict, problems: Problems) -> None:
             problems.error(f"{niche_slug}/hook {index}: under 25 tegn — en stub, ikke en hook")
 
     ads = content.get("ads") or []
-    if len(ads) < 3:
-        problems.error(f"{niche_slug}: færre end tre annoncer — en tom annoncesektion ser færdig ud")
+    if len(ads) != 3:
+        problems.error(f"{niche_slug}: præcis tre annoncer kræves, fandt {len(ads)}")
+    known_handles = {f"/produkter/{slug}/" for slug in (content.get("products") or {})}
     for index, ad in enumerate(ads, 1):
         where = f"{niche_slug}/annonce {index}"
         for field, low in (("name", 3), ("angle", 8), ("primary", 150), ("headline", 8),
@@ -278,18 +279,24 @@ def check_copy(niche_slug: str, content: dict, problems: Problems) -> None:
             value = str(ad.get(field, "")).strip()
             if len(value) < low:
                 problems.error(f"{where}: {field} er {len(value)} tegn (kræver mindst {low})")
-        if not str(ad.get("landing", "")).startswith("/"):
+        landing = str(ad.get("landing", ""))
+        if not landing.startswith("/"):
             problems.error(f"{where}: landing er ikke en sti på sitet")
+        if landing not in known_handles:
+            problems.error(f"{where}: landing {landing!r} matcher ikke en kendt produkt-slug")
 
     mails = content.get("emails") or []
-    if len(mails) < 3:
-        problems.error(f"{niche_slug}: færre end tre mails")
+    if len(mails) != 3:
+        problems.error(f"{niche_slug}: præcis tre e-mails kræves, fandt {len(mails)}")
     for index, mail in enumerate(mails, 1):
         where = f"{niche_slug}/mail {index}"
         for field, low in (("name", 3), ("subject", 10), ("preheader", 15), ("body", 250)):
             value = str(mail.get(field, "")).strip()
             if len(value) < low:
                 problems.error(f"{where}: {field} er {len(value)} tegn (kræver mindst {low})")
+    if not str(content.get("positioning", "")).strip():
+        problems.error(f"{niche_slug}: positionering mangler")
+
     collected = "\n".join(_strings(content))
     # Jura-siderne taler om at "behandle personoplysninger"; markedsføringen må ikke tale om at
     # behandle noget som helst. Derfor scannes de to ting hver for sig.

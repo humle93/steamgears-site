@@ -302,8 +302,8 @@ OPLOFT
 ## Annoncehooks og KPI-gates
 
 - Hook: Du må ikke bore. Du har stadig brug for plads.
-- Hook: Sådan får du plads uden at miste depositummet.
-- Hook: Tre kvadratmeter du ikke vidste du havde.
+- Hook: Sådan udnytter du pladsen uden at bore — mål først.
+- Hook: Mål gulv til loft tre steder, før du vælger reol.
 - Hook: Reolen kan tages ned og flytte med, når du flytter.
 - Konvertering ved 300 besøg: >= 2,0 % - ellers er prisen eller siden problemet
 - CPA: <= break-even pr. vare
