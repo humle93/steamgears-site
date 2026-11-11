@@ -1,0 +1,136 @@
+{
+  "measured": "2026-11-11",
+  "base": "https://steamgears.eu",
+  "budget": {
+    "klasser": {
+      "1": {
+        "label": "1 — tekst",
+        "html_bytes": 133120,
+        "scripts": 31
+      },
+      "2": {
+        "label": "2 — lister",
+        "html_bytes": 276480,
+        "scripts": 46
+      },
+      "3": {
+        "label": "3 — transaktion",
+        "html_bytes": 409600,
+        "scripts": 96
+      }
+    },
+    "transaction_scripts": {
+      "kurv": 115
+    },
+    "inline_block": 4096
+  },
+  "rows": [
+    {
+      "template": "forside",
+      "path": "/?sga=1794424512",
+      "klasse": 1,
+      "status": 200,
+      "html_bytes": 75168,
+      "scripts": 27,
+      "scripts_src": 11,
+      "scripts_inline": 16,
+      "styles": 20,
+      "css_inline_bytes": 9894,
+      "js_inline_bytes": 0,
+      "largest_inline_block": 1666,
+      "stylesheets": 8,
+      "budget": {
+        "html": true,
+        "scripts": true,
+        "inline_block": true
+      },
+      "meets_budget": true
+    },
+    {
+      "template": "arkiv shop",
+      "path": "/shop/?sga=1794424512",
+      "klasse": 2,
+      "status": 200,
+      "html_bytes": 269568,
+      "scripts": 38,
+      "scripts_src": 16,
+      "scripts_inline": 22,
+      "styles": 28,
+      "css_inline_bytes": 24980,
+      "js_inline_bytes": 0,
+      "largest_inline_block": 4064,
+      "stylesheets": 10,
+      "budget": {
+        "html": true,
+        "scripts": true,
+        "inline_block": true
+      },
+      "meets_budget": true
+    },
+    {
+      "template": "produkt",
+      "path": "/product/astrolabe-planisphere-tee/?sga=1794424512",
+      "klasse": 3,
+      "status": 200,
+      "html_bytes": 301941,
+      "scripts": 69,
+      "scripts_src": 33,
+      "scripts_inline": 36,
+      "styles": 35,
+      "css_inline_bytes": 38403,
+      "js_inline_bytes": 0,
+      "largest_inline_block": 4064,
+      "stylesheets": 12,
+      "budget": {
+        "html": true,
+        "scripts": true,
+        "inline_block": true
+      },
+      "meets_budget": true
+    },
+    {
+      "template": "indlæg",
+      "path": "/steampunk-corset-guide/?sga=1794424512",
+      "klasse": 1,
+      "status": 200,
+      "html_bytes": 100137,
+      "scripts": 25,
+      "scripts_src": 8,
+      "scripts_inline": 17,
+      "styles": 30,
+      "css_inline_bytes": 24028,
+      "js_inline_bytes": 0,
+      "largest_inline_block": 3841,
+      "stylesheets": 8,
+      "budget": {
+        "html": true,
+        "scripts": true,
+        "inline_block": true
+      },
+      "meets_budget": true
+    },
+    {
+      "template": "kurv",
+      "path": "/cart/?sga=1794424512",
+      "klasse": 3,
+      "status": 200,
+      "html_bytes": 378721,
+      "scripts": 65,
+      "scripts_src": 30,
+      "scripts_inline": 35,
+      "styles": 29,
+      "css_inline_bytes": 27834,
+      "js_inline_bytes": 0,
+      "largest_inline_block": 4064,
+      "stylesheets": 12,
+      "budget": {
+        "html": true,
+        "scripts": true,
+        "inline_block": true
+      },
+      "meets_budget": true
+    }
+  ],
+  "phase": "before",
+  "note": "Maalt foer udrulning af block_css (mu-plugin 1.4.0). Begge AI Engines-stile er stadig udskrevet."
+}
