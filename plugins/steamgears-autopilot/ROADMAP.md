@@ -607,6 +607,7 @@ Platform limits: [Instagram content publishing](https://developers.facebook.com/
 
 ## 9. Change log for this document
 
+- **7.74.0 (11/11) — log-rækkerne peger på det de handler om.** `SGAP_Cirla::log($action, $result, $meta)` gemmer målets id; draft-rækker linker til kladden på AI Drafts (`#sgap-draft-<id>`, anker tilføjet i `core.php`) og seo/social-rækker til sidens editor. Der linkes kun når målet stadig findes — ellers ren tekst, så ingen døde links. 8 nye checks (1 496 → 1 504 PASS).
 - **7.73.0 (11/11) — loggen på Cirla-siden kan filtreres pr. handling.** `SGAP_Cirla::entries($limit, $action)` læser én handling; siden har faner med antal for All/status/draft/seo/social, viser kun den valgte handlings rækker og beholder to tomme tilstande (tom log, tomt filter med »Show all N rows«). 6 nye checks (1 490 → 1 496 PASS).
 - **7.72.0 (11/11) — Cirla fik sin egen side i Steamgears-menuen.** `modules/cirla/class-cirla-admin.php` indlæses sammen med modulet og kun i wp-admin: tilstand, de fire handlinger som knapper gennem `admin-post.php` med nonce og `manage_options`, resultatet som tabel og modulets log. 15 nye checks (1 475 → 1 490 PASS).
 - **7.71.1 (11/11) — patch notes er nu en fast del af hver udgivelse.** `CHANGELOG.md` i pluginnet med noter fra 7.65.0 og frem, `tools/patch_notes.py --check` som værn i `tools/natlige-vaern.sh` og i release-gaten, og reglen i AGENTS.md §7.4 om at noten også skal med i svaret til ejeren. Ingen PHP-adfærd ændret.

@@ -90,4 +90,38 @@ SGAP_Cirla_Admin::page();
 $html = ob_get_clean();
 check('cirla-admin: an empty log keeps the original empty state', str_contains($html, 'Nothing yet.'));
 
+
+// ---- log rows that point at something ----
+SGAP_Cirla::log('draft', 'draft #7 for facebook: Brass', ['id' => 7]);
+$newest = SGAP_Cirla::entries(1)[0] ?? [];
+check('cirla-admin: the log keeps the id of the draft or page it is about', (int) ($newest['id'] ?? -1) === 7);
+SGAP_Cirla::log('status', 'read the status');
+$newest = SGAP_Cirla::entries(1)[0] ?? [];
+check('cirla-admin: a row without a target stores 0, not a stale id', (int) ($newest['id'] ?? -1) === 0);
+$GLOBALS['post_by_id'][5] = (object) ['ID' => 5, 'post_title' => 'A page', 'post_excerpt' => ''];
+$GLOBALS['wpdb']->next = [1];
+check('cirla-admin: a draft row links to the draft on AI Drafts',
+    SGAP_Cirla_Admin::row_url(['action' => 'draft', 'id' => 42]) === '/wp-admin/admin.php?page=sgap-ai#sgap-draft-42');
+$GLOBALS['wpdb']->next = [0];
+check('cirla-admin: a draft that is gone has no link', SGAP_Cirla_Admin::row_url(['action' => 'draft', 'id' => 42]) === '');
+check('cirla-admin: SEO and suggestion rows link to the page editor',
+    SGAP_Cirla_Admin::row_url(['action' => 'seo', 'id' => 5]) === '/edit/5'
+    && SGAP_Cirla_Admin::row_url(['action' => 'social', 'id' => 5]) === '/edit/5');
+check('cirla-admin: a page that is gone has no link', SGAP_Cirla_Admin::row_url(['action' => 'seo', 'id' => 999]) === '');
+check('cirla-admin: rows with no natural target and old rows without an id stay plain text',
+    SGAP_Cirla_Admin::row_url(['action' => 'status', 'id' => 5]) === ''
+    && SGAP_Cirla_Admin::row_url(['action' => 'draft', 'result' => 'draft #42 for facebook']) === '');
+// The page reads the status first, so the mock must answer every question on it.
+$GLOBALS['wpdb']->next = array_fill(0, 40, 1);
+update_option('sgap_cirla_log', [
+    ['at' => '2026-11-11 12:00:00', 'action' => 'draft', 'result' => 'Kladde A', 'id' => 42],
+    ['at' => '2026-11-11 12:01:00', 'action' => 'status', 'result' => 'status ok', 'id' => 0]
+]);
+ob_start();
+SGAP_Cirla_Admin::page();
+$html = ob_get_clean();
+check('cirla-admin: the log links the draft row and leaves the status row as text',
+    str_contains($html, 'page=sgap-ai#sgap-draft-42') && !str_contains($html, '>status ok</a>'));
+update_option('sgap_cirla_log', []);
+
 $_POST = [];

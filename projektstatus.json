@@ -325,6 +325,15 @@
           "unit": "d",
           "note": "7.73.0: SGAP_Cirla::entries($limit, $action) kan læse én handling; siden har faner med antal for All/status/draft/seo/social og viser kun den valgte handlings rækker. To tomme tilstande: den oprindelige når loggen er tom, og »No <handling> rows in the last 20« med »Show all N rows« når filteret ikke matcher. Ukendte filtre falder tilbage til All. Målt på WordPress 7.1.4 med fire seedede log-rækker: fanerne viste All (4) / status (1) / draft (2) / seo (1) / social (0), ?cirla_log=draft viste kun de to kladde-rækker, ?cirla_log=social gav tom-tilstanden med »Show all 4 rows«, og ?cirla_log=nonsense faldt tilbage til All (4). 6 nye checks (1 490 → 1 496 PASS, 0 FAIL).",
           "verified": true
+        },
+        {
+          "id": "p93",
+          "name": "P9.3 — Handlingsrettede log-rækker på Cirla-siden",
+          "done": 0.25,
+          "total": 0.25,
+          "unit": "d",
+          "note": "7.74.0: SGAP_Cirla::log($action,$result,$meta) gemmer målets id; draft-rækker linker til kladden på AI Drafts via ankeret #sgap-draft-<id> (tilføjet i includes/core.php), og seo/social-rækker til sidens editor. SGAP_Cirla::draft_exists() er offentlig og svarer kun ja for kladder der stadig venter, så godkendte, afviste og slettede kladder samt slettede sider giver ren tekst i stedet for et dødt link; gamle rækker uden id er også ren tekst. Målt på WordPress 7.1.4: en ægte draft gennem sidens formular gav en log-række med id, et link til page=sgap-ai#sgap-draft-<id> og et matchende anker på AI Drafts-siden; ægte seo- og social-kald gav post.php?post=5-links; seedede rækker med id 999999 gav 0 links og stod som tekst; filteret cirla_log=draft beholdt linket og skjulte seo-rækken; tomt filter og tom log viste de to tomme tilstande. 8 nye checks (1 496 → 1 504 PASS, 0 FAIL).",
+          "verified": true
         }
       ],
       "total": 33.75,

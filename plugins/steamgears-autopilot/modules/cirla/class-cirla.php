@@ -253,7 +253,7 @@ class SGAP_Cirla {
         $key = self::key($channel, $post_id, $topic);
         $seen = self::seen();
         if (isset($seen[$key]) && self::draft_exists((int) $seen[$key])) {
-            self::log('draft', sprintf('the same task is already waiting as draft #%d', (int) $seen[$key]));
+            self::log('draft', sprintf('the same task is already waiting as draft #%d', (int) $seen[$key]), ['id' => (int) $seen[$key]]);
             return [
                 'id' => (int) $seen[$key],
                 'duplicate' => true,
@@ -288,7 +288,7 @@ class SGAP_Cirla {
         $id = (int) $wpdb->insert_id;
         $seen[$key] = $id;
         self::remember($seen);
-        self::log('draft', sprintf('draft #%d for %s: %s', $id, $channel, $title));
+        self::log('draft', sprintf('draft #%d for %s: %s', $id, $channel, $title), ['id' => (int) $id]);
         return [
             'id' => $id,
             'duplicate' => false,
@@ -330,7 +330,7 @@ class SGAP_Cirla {
         } elseif ($description_length > $limits['description_max']) {
             $problems[] = sprintf('the meta description is %d characters, over the %d limit', $description_length, $limits['description_max']);
         }
-        self::log('seo', sprintf('checked post #%d: %s', $post_id, $problems ? implode('; ', $problems) : 'no problems'));
+        self::log('seo', sprintf('checked post #%d: %s', $post_id, $problems ? implode('; ', $problems) : 'no problems'), ['id' => (int) $post_id]);
         return [
             'post_id' => $post_id,
             'title' => $title,
@@ -377,7 +377,7 @@ class SGAP_Cirla {
                 'hashtags' => (string) ($item['hashtags'] ?? '')
             ];
         }
-        self::log('social', sprintf('suggested %d posts for post #%d', count($suggestions), $post_id));
+        self::log('social', sprintf('suggested %d posts for post #%d', count($suggestions), $post_id), ['id' => (int) $post_id]);
         return [
             'post_id' => $post_id,
             'suggestions' => $suggestions,
@@ -485,7 +485,14 @@ class SGAP_Cirla {
         update_option(self::SEEN, array_slice($seen, -50, 50, true), false);
     }
 
-    private static function draft_exists(int $id): bool {
+    /**
+     * Whether a draft is still waiting under AI Drafts.
+     *
+     * Used by the Cirla page: a log row may only link to a draft that is still there to be read —
+     * once it is approved, rejected or deleted the row stays plain text instead of pointing at a
+     * page that no longer shows it.
+     */
+    public static function draft_exists(int $id): bool {
         if ($id <= 0) {
             return false;
         }
@@ -498,12 +505,23 @@ class SGAP_Cirla {
     }
 
     /** The module's own log: time, action and result, one row per action. */
-    public static function log(string $action, string $result): void {
+    /**
+     * One row in the module's own log.
+     *
+     * @param array{id?: int} $meta The draft or page the row is about, so the Cirla page can link
+     *                              to it instead of only naming it. Absent or 0 = no target.
+     */
+    public static function log(string $action, string $result, array $meta = []): void {
         if ((string) get_option('sgap_cirla_log_level', 'actions') === 'off') {
             return;
         }
         $entries = self::entries(20);
-        array_unshift($entries, ['at' => current_time('mysql'), 'action' => $action, 'result' => $result]);
+        array_unshift($entries, [
+            'at' => current_time('mysql'),
+            'action' => $action,
+            'result' => $result,
+            'id' => (int) ($meta['id'] ?? 0)
+        ]);
         update_option(self::LOG, array_slice($entries, 0, 20), false);
     }
 

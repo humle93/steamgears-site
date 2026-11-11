@@ -10,6 +10,28 @@ Noterne er skrevet ud fra commit-historikken og de dokumenter der hører til hve
 
 <!-- patch-notes: baseline 7.65.0 -->
 
+## 7.74.0 — 2026-11-11
+
+**Log-rækkerne på Cirla-siden peger nu på det de handler om.**
+
+### Tilføjet
+- `SGAP_Cirla::log($action, $result, $meta)` gemmer id'et på den kladde eller side rækken handler om,
+  så loggen kan bruges som indgang og ikke kun som historik.
+- En *draft*-række linker til kladden på **AI Drafts** (`admin.php?page=sgap-ai#sgap-draft-<id>`); hver
+  kladde har fået et anker i `includes/core.php`.
+- En *seo*- eller *social*-række linker til sidens editor.
+- `SGAP_Cirla::draft_exists()` er nu offentlig og dokumenteret; den svarer kun ja for kladder der stadig
+  venter under AI Drafts.
+
+### Sikkerhed mod døde links
+- Der linkes kun når målet stadig findes: en kladde der er godkendt, afvist eller slettet, og en side der
+  er slettet, giver **ingen** link — rækken står som ren tekst. Gamle rækker uden id og rækker uden
+  naturligt mål (status, cron, toggle) er også ren tekst.
+- Filteret fra 7.73.0 og begge tomme tilstande er uændrede.
+
+### Målt
+- 8 nye smoke-checks (1 496 → 1 504 PASS, 0 FAIL), `php -l` rent, fejlscan uden fund.
+
 ## 7.73.0 — 2026-11-11
 
 **Loggen på Cirla-siden kan ses én handling ad gangen.**

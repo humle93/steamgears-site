@@ -132,6 +132,27 @@ class SGAP_Cirla_Admin {
         ];
     }
 
+    /**
+     * Where a log row points, or '' when it has no target.
+     *
+     * A row without a target stays plain text: a draft that has since been approved, rejected or
+     * deleted must not leave a link to a page that would only say "nothing here".
+     */
+    public static function row_url(array $entry): string {
+        $id = (int) ($entry['id'] ?? 0);
+        $action = (string) ($entry['action'] ?? '');
+        if ($id <= 0) {
+            return '';
+        }
+        if ($action === 'draft') {
+            return SGAP_Cirla::draft_exists($id) ? admin_url('admin.php?page=sgap-ai') . '#sgap-draft-' . $id : '';
+        }
+        if ($action === 'seo' || $action === 'social') {
+            return get_post($id) ? (string) get_edit_post_link($id) : '';
+        }
+        return '';
+    }
+
     /** The form handler: nonce, capability, one of the four actions, then back to the page. */
     public static function handle(): void {
         if (!current_user_can('manage_options')) {
@@ -265,9 +286,12 @@ class SGAP_Cirla_Admin {
         } else {
             echo '<table class="widefat striped"><thead><tr><th>When</th><th>Action</th><th>Result</th></tr></thead><tbody>';
             foreach ($rows as $entry) {
+                $url = self::row_url($entry);
+                $result = esc_html((string) ($entry['result'] ?? ''));
                 echo '<tr><td>' . esc_html((string) ($entry['at'] ?? '')) . '</td><td>'
                     . esc_html((string) ($entry['action'] ?? '')) . '</td><td>'
-                    . esc_html((string) ($entry['result'] ?? '')) . '</td></tr>';
+                    . ($url !== '' ? '<a href="' . esc_url($url) . '">' . $result . '</a>' : $result)
+                    . '</td></tr>';
             }
             echo '</tbody></table>';
         }

@@ -2389,7 +2389,7 @@ class SGAP_Admin {
             echo '<div class="sgap-group-head"><h3>' . esc_html((string) $source) . '</h3>' . SGAP_UI::pill(count($group) . (count($group) === 1 ? ' post' : ' posts'), 'brass') . '</div>'
                 . '<div class="sgap-drafts">';
             foreach ($group as $row) {
-                echo '<div class="sgap-draft"><div class="sgap-meta">' . SGAP_UI::channel($row->channel) . '<span>#' . esc_html($row->id) . '</span></div>'
+                echo '<div class="sgap-draft" id="sgap-draft-' . (int) $row->id . '"><div class="sgap-meta">' . SGAP_UI::channel($row->channel) . '<span>#' . esc_html($row->id) . '</span></div>'
                     . '<h3>' . esc_html($row->title) . '</h3>'
                     . '<div class="sgap-text">' . esc_html($row->body) . '</div>'
                     . ($row->hashtags !== '' ? '<div class="sgap-tags">' . esc_html($row->hashtags) . '</div>' : '')
