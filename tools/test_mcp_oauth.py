@@ -74,6 +74,11 @@ class Handler(BaseHTTPRequestHandler):
         if self.path == "/oauth/token":
             grant = payload.get("grant_type")
             if grant == "authorization_code":
+                if payload.get("code") == "udloebet-kode":
+                    self._json(400, {"error": "invalid_request",
+                                     "error_description": "The request is otherwise malformed.",
+                                     "hint": "Authorization code has expired"})
+                    return
                 if payload.get("code") not in STATE["codes"] or not payload.get("code_verifier"):
                     self._json(400, {"error": "invalid_grant"})
                     return
@@ -157,7 +162,9 @@ class OAuthTest(unittest.TestCase):
 
     def test_04_finish_gemmer_tokens(self):
         self.start_client()
-        self.assertEqual(mcp_oauth.finish("http://127.0.0.1:8765/callback?code=god-kode&state=irrelevant"), 0)
+        state = json.loads(mcp_oauth.CLIENT_FILE.read_text())["state"]
+        self.assertEqual(
+            mcp_oauth.finish(f"http://127.0.0.1:8765/callback?code=god-kode&state={state}"), 0)
         tokens = json.loads(mcp_oauth.TOKEN_FILE.read_text())
         self.assertEqual(tokens["access_token"], "at-1")
         self.assertEqual(tokens["refresh_token"], "rt-1")
@@ -226,6 +233,51 @@ class OAuthTest(unittest.TestCase):
         )
         self.assertNotIn("?", urlparse(mcp_oauth.authorize_url(
             "https://site/wp-admin/admin.php?page=x", "a=1")).query)
+
+
+    def test_13_finish_afviser_state_mismatch_uden_at_braende_koden(self):
+        self.start_client()
+        import io
+        from contextlib import redirect_stdout
+
+        buffer = io.StringIO()
+        with redirect_stdout(buffer):
+            code = mcp_oauth.finish("http://127.0.0.1:8765/callback?code=god-kode&state=forkert")
+        self.assertEqual(code, 1)
+        self.assertIn("State matcher ikke", buffer.getvalue())
+        self.assertIn("god-kode", STATE["codes"], "koden må ikke være brændt af")
+        self.assertFalse(mcp_oauth.TOKEN_FILE.exists())
+        # Samme kode virker stadig med det rigtige state.
+        state = json.loads(mcp_oauth.CLIENT_FILE.read_text())["state"]
+        self.assertEqual(mcp_oauth.finish(f"?code=god-kode&state={state}"), 0)
+
+    def test_14_finish_videresender_afvist_godkendelse(self):
+        self.start_client()
+        import io
+        from contextlib import redirect_stdout
+
+        buffer = io.StringIO()
+        with redirect_stdout(buffer):
+            code = mcp_oauth.finish(
+                "http://127.0.0.1:8765/callback?error=access_denied&error_description=Brugeren afviste")
+        self.assertEqual(code, 1)
+        self.assertIn("access_denied", buffer.getvalue())
+        self.assertIn("Brugeren afviste", buffer.getvalue())
+        self.assertFalse(mcp_oauth.TOKEN_FILE.exists())
+
+    def test_15_udloebet_kode_forklares(self):
+        self.start_client()
+        import io
+        from contextlib import redirect_stdout
+
+        buffer = io.StringIO()
+        with redirect_stdout(buffer):
+            code = mcp_oauth.finish("udloebet-kode")
+        output = buffer.getvalue()
+        self.assertEqual(code, 1)
+        self.assertIn("invalid_request", output)
+        self.assertIn("Authorization code has expired", output)
+        self.assertIn("--start", output)
 
 
     def test_12_token_endepunktet_faar_form_encoding(self):

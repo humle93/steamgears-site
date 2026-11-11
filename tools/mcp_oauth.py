@@ -165,20 +165,43 @@ def start() -> int:
     return 0
 
 
-def extract_code(value: str) -> str:
+def extract_param(value: str, key: str) -> str | None:
+    """Værdien af `key` i en redirect-adresse, ellers None.
+
+    Bruges til `code`, `state` og `error`, så en hel callback-adresse kan indsættes ordret.
+    """
     value = value.strip()
-    if "code=" in value:
-        query = value.split("?", 1)[-1]
-        for part in query.split("&"):
-            if part.startswith("code="):
-                return urllib.parse.unquote(part[5:])
-    return value
+    if "?" not in value:
+        return None
+    query = value.split("?", 1)[1]
+    for part in query.split("&"):
+        if part.startswith(key + "="):
+            return urllib.parse.unquote(part[len(key) + 1:])
+    return None
+
+
+def extract_code(value: str) -> str:
+    code = extract_param(value, "code")
+    return code if code is not None else value.strip()
 
 
 def finish(raw_code: str) -> int:
     config = read_json(CLIENT_FILE)
     if not config.get("client_id") or not config.get("code_verifier"):
         print("Ingen igangværende godkendelse — kør --start først.")
+        return 1
+    error = extract_param(raw_code, "error")
+    if error:
+        description = extract_param(raw_code, "error_description") or ""
+        print(f"Godkendelsen blev afvist: {error}{' — ' + description if description else ''}")
+        print("Intet token blev gemt. Kør --start og godkend det nye link.")
+        return 1
+    state = extract_param(raw_code, "state")
+    expected_state = config.get("state")
+    if state and expected_state and state != expected_state:
+        print("State matcher ikke den igangværende godkendelse "
+              f"(linket: {state[:8]}…, client.json: {expected_state[:8]}…).")
+        print("Koden er ikke sendt til token-endepunktet. Kør --start og godkend det nye link.")
         return 1
     code = extract_code(raw_code)
     payload = {
@@ -191,6 +214,11 @@ def finish(raw_code: str) -> int:
     status, body = request(config["token_endpoint"], payload, form=True)
     if status != 200 or not isinstance(body, dict) or not body.get("access_token"):
         print(f"Token-udveksling afvist (HTTP {status}): {str(body)[:200]}")
+        hint = body.get("hint") if isinstance(body, dict) else None
+        if hint:
+            print(f"Serverens forklaring: {hint}")
+        if status == 400 or hint:
+            print("En authorization code er éngangs og kortlivet — kør --start og godkend det nye link.")
         return 1
     save_tokens(body)
     config.pop("code_verifier", None)
