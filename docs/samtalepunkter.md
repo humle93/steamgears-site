@@ -33,6 +33,7 @@ _Opdateret 2026-11-11 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 | **Døde internlinks** | **100 %** | 39 af 39 links (FIX 39/39) |
 | **Niche-butik — plugin P4** | **100 %** | 1 af 1 d (P4PLAN 0,3/0,3 · P4APPLY 0,25/0,25 · P4UI 0,2/0,2 · P4SHIP 0,1/0,1 · P4LIVE 0,15/0,15) |
 | **KABINE — bil-interiør som ny butik** | **57,4 %** | 19,5 af 34 t (B1 2/2 · B2 2/2 · B3 2/2 · B4 2/2 · B5 1,5/1,5 · B6 0/6 · B7 0/4 · B8 2/2,5 · B9 0/4 · B10 6/6 · B11 1/1 · B12 1/1) |
+| **Cirla — AI-indholdsmodul** | **56,7 %** | 1,7 af 3 d (C1 0,35/0,35 · C2 0,2/0,2 · C3 0,4/0,4 · C4 0,25/0,25 · C5 0,2/0,2 · C6 0,1/0,8 · C7 0/0,6 · C8 0,2/0,2) |
 
 ### Åbne blokeringer
 
@@ -43,6 +44,7 @@ _Opdateret 2026-11-11 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 - **Dark academia-rebrand** — To led kræver ejerhandling, målt 8/11: (1) **de 29 trash'ede designs** — herunder de tre produkter der er witchy-tarots eneste kandidater (567, 395, 411); et ja/nej til genoplivning er nok, og tildelingen kører selv bagefter; (2) **Batch 4-mockups (5 t)** — Printful-adgang eller 5–8 færdige billeder pr. produkt; målt 20 publicerede med 22 billeder, 0 med 3 eller flere, 62 billedplaceringer mangler, og repoet har 0 trykfiler og 0 tøj-skabeloner. Kollektionstildelingen er ikke længere blokeret: den blev udført 8/11 gennem Novamira-MCP og målt stabil.
 - **SEO-indholdsproduktion** — Publicering kræver ejerens skriveadgang: post 292, 296 og 295 er kladder, side 550 skal have hub-copyen, og post 699 skal have outfit-copyen — den publicerede side viser stadig «Prices are in USD». Copyen er færdig og målt (15 unikke /go/-id'er, 0 døde, 0 valutaafvigelser), og værnet dækker nu alle fem copyfiler. Mangler: to egne fotos pr. guide og pr. look, og et MCP-token som kun ejeren kan godkende.
 - **KABINE — bil-interiør som ny butik** — Seks ejerhandlinger, målt 9/11: E1 CVR, telefon, adresse og bankaftale til butikken (uden dem ingen faktura, ingen MobilePay, ingen lovlig handel); E2 leverandørvalg med GPSR-dokumentation og to prøver (ellers er indkøbspris, kvalitet og leveringstid gæt); E3 registrering i producentregistret for emballage (markedsføring må ikke starte før); E4 navn og domæne plus Shopify-konto — kabine.dk, oploft.dk, stille.dk og immer.dk er alle registreret (DNS, 9/11), så der skal købes, lejes eller renames; E5 beslutning om start 9/11 i Q4-priser eller 5/1 til lavere CPA; E6 annoncekonto med betalingsmetode og 10.000 kr. Ingen af de seks kan lukkes af agenten — hver kræver en konto, et panel eller en underskrift.
+- **Cirla — AI-indholdsmodul** — Ingen WordPress-installation har kørt modulet: indstillingsformularen, dbDelta-opgraderingen af en kørende installation og et rigtigt AI-kald er ikke målt, og sitet kører 7.70.1 (målt 10/11). Kræver ejerens adgang til Plugins → Tilføj nyt og MCP-adgang til sitet.
 
 ### Næste skridt
 
@@ -55,15 +57,16 @@ _Opdateret 2026-11-11 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 - **Døde internlinks** — Vedligehold: tjek nye indlæg mod live-URL'er
 - **Niche-butik — plugin P4** — Færdig som roadmap-punkt P4: modulet er kørt mod det levende site (WordPress 7.1.4, WooCommerce 11.2.2) med 8 produktkladder, 5 kollektioner, en sideskits og en navigation, og rullet tilbage til præcis udgangstilstanden. Næste skridt er ejerens: Printful-adgang, publicering og de øvrige punkter i readiness-listen. Målt 8/11 om aftenen er `alert_email` tom, så fejl registreres uden at nogen får mail — det er et ejerpunkt i plugin-roadmappens §8.
 - **KABINE — bil-interiør som ny butik** — Følg docs/publiceringskoersel-2026-11-09.md §7. Seks forberedelsesmoduler er færdige (15,5 af 32 t, 48,4 %): niche og brand valgt, enhedsøkonomi regnet, 30-dages plan med KPI-gates skrevet, ti hooks som manuskript, kravlisten for butik, betaling, tracking og jura, og roadmap plus færdig tekst til alle fire nicher. Resten er butiksopsætning (6 t), leverandør og prøver (4 t), de sidste 0,5 t jura (ejerens værdier, rådgiverlæsning, publicering) og første annoncerunde (4 t) — alle fire starter først når ejeren har leveret E1-E6. Jurateksterne er skrevet 10/11 for alle fire butikker (docs/library/kabine-jura-2026-11-10.md og docs/library/niche-jura-portefolje-2026-11-10.md), og hele fladen er målt uden huller (docs/library/niche-flade-audit-2026-11-10.md). Domænemåling 9/11: alle fire ønskede .dk-domæner er taget, så E4 kræver en købs-/leje- eller rename-beslutning.
+- **Cirla — AI-indholdsmodul** — Ejerens tur: installer plugins/steamgears-autopilot-v7.71.1.zip (repoet er privat, så selvopdateringen ikke kan hente den), slå modulet til under Settings & keys → Cirla, og kør cirla-status over MCP. Derefter røgtesten i §9.5 mod et rigtigt WordPress (fra → til → fra), opret Cirla-brugeren med begrænset rolle og kun sgap_cirla_run, og overvåg 24 timer efter §9.6. Bevis for det der er bygget: docs/library/cirla-modul-2026-11-10.md (+ PDF).
 
 ### Seneste commits
 
-- `6a4a1af Modul: P9.1 — patch notes ved hver version Før: —  →  Efter: —  (Δ —) Grundlag: ingen ændring — dokumentation og værktøj, plugin står stadig 34,1 af 34,1 d`
-- `68f92ed Modul: P9 — Cirla som til/fra-modul Før: 100 %  →  Efter: 100 %  (Δ 0) Grundlag: 34,1 af 34,1 d (P0 4.65/4.65 · P1 14.45/14.45 · P2 4.75/4.75 · P3 2/2 · P0.7 1/1 · P0.7c 0.25/0.25 · P1.19 0.25/0.25 · P1.20 0.25/0.25 · P1.21 0.25/0.25 · P1.22 0.5/0.5 · P2.6 1.5/1.5 · P3.7 0.6/0.6 · P3.8 0.3/0.3 · P3.9 0.25/0.25 · P1.25 0.15/0.15 · P1.24 0.35/0.35 · P1.23 0.25/0.25 · P6 0.9/0.9 · P7 0.3/0.3 · P8 0.8/0.8 · P9 0.35/0.35)`
-- `15790cf Modul: docs-pdf — PDF fra dokumentbiblioteket Før: —  →  Efter: —  (Δ —) Grundlag: 25 PDF-filer i reports/ renderet med tools/md_to_pdf.py — ingen ændring i projektstatus`
-- `9f1b8ef Modul: docs-pdf — GitHub Action der renderer noter til PDF Før: —  →  Efter: —  (Δ —) Grundlag: ingen ændring`
-- `03a6298 chore(status): daglig projektstatus 2026-11-10`
-- `9aa6655 Modul: P1.25 — OpenRouter-headeren sendes fra én bygger Før: 100 %  →  Efter: 100 %  (Δ 0) Grundlag: 33,75 af 33,75 d (P0 4.65/4.65 · P1 14.45/14.45 · P2 4.75/4.75 · P3 2/2 · P0.7 1/1 · P0.7c 0.25/0.25 · P1.19 0.25/0.25 · P1.20 0.25/0.25 · P1.21 0.25/0.25 · P1.22 0.5/0.5 · P2.6 1.5/1.5 · P3.7 0.6/0.6 · P3.8 0.3/0.3 · P3.9 0.25/0.25 · P1.25 0.15/0.15 · P1.24 0.35/0.35 · P1.23 0.25/0.25 · P6 0.9/0.9 · P7 0.3/0.3 · P8 0.8/0.8)`
+- `702c51a Modul: P9.1 — patch notes ved hver version Før: —  →  Efter: —  (Δ —) Grundlag: ingen ændring — dokumentation og værktøj, plugin står stadig 34,1 af 34,1 d`
+- `887a4aa chore(status): daglig projektstatus 2026-11-11`
+- `0f47845 Modul: docs-pdf — PDF fra dokumentbiblioteket Før: —  →  Efter: —  (Δ —) Grundlag: 4 PDF-filer i reports/ renderet med tools/md_to_pdf.py — ingen ændring i projektstatus`
+- `b63ba6f docs snapshot 10/11 (briefs, logs, manifest, plugin-index, seo-rotation)`
+- `2ec5051 chore(status): daglig projektstatus 2026-11-10`
+- `5ff7ea0 Modul: docs-pdf — PDF fra dokumentbiblioteket Før: —  →  Efter: —  (Δ —) Grundlag: 1 PDF-filer i reports/ renderet med tools/md_to_pdf.py — ingen ændring i projektstatus`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)

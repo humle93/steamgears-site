@@ -586,6 +586,85 @@
         }
       ],
       "verified": false
+    },
+    {
+      "id": "cirla",
+      "name": "Cirla — AI-indholdsmodul",
+      "note": "modulet i Autopilot (P9) er trin 1 af dokumentets §9.4; projektet her følger hele vejen fra modul til produktion",
+      "next": "Ejerens tur: installer plugins/steamgears-autopilot-v7.71.1.zip (repoet er privat, så selvopdateringen ikke kan hente den), slå modulet til under Settings & keys → Cirla, og kør cirla-status over MCP. Derefter røgtesten i §9.5 mod et rigtigt WordPress (fra → til → fra), opret Cirla-brugeren med begrænset rolle og kun sgap_cirla_run, og overvåg 24 timer efter §9.6. Bevis for det der er bygget: docs/library/cirla-modul-2026-11-10.md (+ PDF).",
+      "blocked_by": "Ingen WordPress-installation har kørt modulet: indstillingsformularen, dbDelta-opgraderingen af en kørende installation og et rigtigt AI-kald er ikke målt, og sitet kører 7.70.1 (målt 10/11). Kræver ejerens adgang til Plugins → Tilføj nyt og MCP-adgang til sitet.",
+      "modules": [
+        {
+          "id": "c1",
+          "name": "C1 — modulmappe og betinget indlæsning",
+          "done": 0.35,
+          "total": 0.35,
+          "unit": "d",
+          "note": "§9.4.1: modules/cirla/class-cirla.php kræves kun, når sgap_cirla_enabled er yes; slået fra findes klassen ikke. Målt i smoke: 0 cirla-abilities og 0 cron-job i fra-tilstand.",
+          "verified": true
+        },
+        {
+          "id": "c2",
+          "name": "C2 — til/fra-indstilling",
+          "done": 0.2,
+          "total": 0.2,
+          "unit": "d",
+          "note": "§9.4.2: sgap_cirla_enabled (standard no) i SGAP_Install::DEFAULTS, egen sektion i Settings & keys, fire nøgler i includes/core.php, og wp_clear_scheduled_hook('sgap_cirla_daily') både ved fra-tilstand og i SGAP_Install::deactivate().",
+          "verified": true
+        },
+        {
+          "id": "c3",
+          "name": "C3 — fire sikre handlinger",
+          "done": 0.4,
+          "total": 0.4,
+          "unit": "d",
+          "note": "§9.4.3: cirla-status, cirla-draft, cirla-seo-check og cirla-social-suggestions bag capabilityen sgap_cirla_run. Uden rettighed afvises med sgap_cirla_forbidden, og ingen handling publicerer eller sletter permanent.",
+          "verified": true
+        },
+        {
+          "id": "c4",
+          "name": "C4 — AI-laget med dagligt loft",
+          "done": 0.25,
+          "total": 0.25,
+          "unit": "d",
+          "note": "§9.4.4: genbrug af SGAP_AI (ingen ny nøgle), dagligt loft sgap_cirla_daily_calls (standard 5, 0 = ingen) og filteret sgap_cirla_generate. Ikke målt: et rigtigt AI-kald fra et WordPress — kaldet er stubbet gennem filteret i testen.",
+          "verified": true
+        },
+        {
+          "id": "c5",
+          "name": "C5 — kvalitetsgate og kladdekø",
+          "done": 0.2,
+          "total": 0.2,
+          "unit": "d",
+          "note": "§9.4.5: kladden gemmes som pending i sgap_ai_drafts med angle = cirla, et dødt link stoppes af sgap_cirla_gate og logges, samme opgave to gange giver ingen dublet, og intet lægges i køen eller publiceres.",
+          "verified": true
+        },
+        {
+          "id": "c6",
+          "name": "C6 — røgtesten i §9.5 mod et rigtigt WordPress",
+          "done": 0.1,
+          "total": 0.8,
+          "unit": "d",
+          "note": "De otte rækker i §9.5 er dækket af 28 checks i plugins/tests/cirla.php i sandkassen (0,1 af 0,8 d). Tilbage er den samme tabel kørt over MCP mod et WordPress, hvor abilities og cron ses udefra, og hvor indstillingsformularen og dbDelta-opgraderingen bliver prøvet."
+        },
+        {
+          "id": "c7",
+          "name": "C7 — fra test til produktion (§9.6)",
+          "done": 0.0,
+          "total": 0.6,
+          "unit": "d",
+          "note": "Installer 7.71.1 med modulet slukket, opret Cirla-brugeren med begrænset rolle og kun sgap_cirla_run, slå modulet til via update-settings, overvåg 24 timer, og luk med at slå fra som rollback. Intet er kørt på sitet endnu."
+        },
+        {
+          "id": "c8",
+          "name": "C8 — dokumentation og patch notes",
+          "done": 0.2,
+          "total": 0.2,
+          "unit": "d",
+          "note": "docs/library/cirla-modul-2026-11-10.md (+ PDF) med målt røgtest og afvigelser, patch notes i CHANGELOG.md 7.71.0/7.71.1, P9-sektionen i ROADMAP.md og punkt 3 lukket i docs/samtalepunkter.md.",
+          "verified": true
+        }
+      ]
     }
   ],
   "history": [
@@ -2335,6 +2414,15 @@
       "after": 57.4,
       "delta": 0,
       "basis": "19,5 af 34 t (Niche-valg, brand og produktstige 2/2 · ROI-model og enhedsøkonomi 2/2 · 30-dages plan og KPI-gates 2/2 · Kreativt: ti hooks som manuskript 2/2 · Kravliste: butik, betaling, tracking og jura 1,5/1,5 · Butiksopsætning: Shopify, MobilePay, CAPI, sider 0/6 · Leverandørvalg, GPSR-dokumentation og prøver 0/4 · Juridiske sider: handelsbetingelser, retur, privatliv 2/2,5 · Første annoncerunde uge 1-2 0/4 · Niche-portefølje: roadmap og færdig butikstekst 6/6 · Jura og måltabel: de tre øvrige butikker 1/1 · Flademåling: annoncer, mails, kontakter og værn 1/1)"
+    },
+    {
+      "date": "2026-11-11",
+      "project": "Cirla — AI-indholdsmodul",
+      "module": "baseline",
+      "before": null,
+      "after": 56.7,
+      "delta": null,
+      "basis": "1,7 af 3 d (C1 0,35/0,35 · C2 0,2/0,2 · C3 0,4/0,4 · C4 0,25/0,25 · C5 0,2/0,2 · C6 0,1/0,8 · C7 0/0,6 · C8 0,2/0,2)"
     }
   ]
 }
