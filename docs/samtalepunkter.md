@@ -33,7 +33,7 @@ _Opdateret 2026-11-11 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 | **Døde internlinks** | **100 %** | 39 af 39 links (FIX 39/39) |
 | **Niche-butik — plugin P4** | **100 %** | 1 af 1 d (P4PLAN 0,3/0,3 · P4APPLY 0,25/0,25 · P4UI 0,2/0,2 · P4SHIP 0,1/0,1 · P4LIVE 0,15/0,15) |
 | **KABINE — bil-interiør som ny butik** | **57,4 %** | 19,5 af 34 t (B1 2/2 · B2 2/2 · B3 2/2 · B4 2/2 · B5 1,5/1,5 · B6 0/6 · B7 0/4 · B8 2/2,5 · B9 0/4 · B10 6/6 · B11 1/1 · B12 1/1) |
-| **Cirla — AI-indholdsmodul** | **56,7 %** | 1,7 af 3 d (C1 0,35/0,35 · C2 0,2/0,2 · C3 0,4/0,4 · C4 0,25/0,25 · C5 0,2/0,2 · C6 0,1/0,8 · C7 0/0,6 · C8 0,2/0,2) |
+| **Cirla — AI-indholdsmodul** | **80 %** | 2,4 af 3 d (C1 0,35/0,35 · C2 0,2/0,2 · C3 0,4/0,4 · C4 0,25/0,25 · C5 0,2/0,2 · C6 0,8/0,8 · C7 0/0,6 · C8 0,2/0,2) |
 
 ### Åbne blokeringer
 
@@ -61,12 +61,12 @@ _Opdateret 2026-11-11 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `3fc2e21 Modul: Cirla — AI-indholdsmodul (C1-C8) Før: —  →  Efter: 56,7 %  (Δ —) Grundlag: 1,7 af 3 d (C1 0,35/0,35 · C2 0,2/0,2 · C3 0,4/0,4 · C4 0,25/0,25 · C5 0,2/0,2 · C6 0,1/0,8 · C7 0/0,6 · C8 0,2/0,2)`
 - `702c51a Modul: P9.1 — patch notes ved hver version Før: —  →  Efter: —  (Δ —) Grundlag: ingen ændring — dokumentation og værktøj, plugin står stadig 34,1 af 34,1 d`
 - `887a4aa chore(status): daglig projektstatus 2026-11-11`
 - `0f47845 Modul: docs-pdf — PDF fra dokumentbiblioteket Før: —  →  Efter: —  (Δ —) Grundlag: 4 PDF-filer i reports/ renderet med tools/md_to_pdf.py — ingen ændring i projektstatus`
 - `b63ba6f docs snapshot 10/11 (briefs, logs, manifest, plugin-index, seo-rotation)`
 - `2ec5051 chore(status): daglig projektstatus 2026-11-10`
-- `5ff7ea0 Modul: docs-pdf — PDF fra dokumentbiblioteket Før: —  →  Efter: —  (Δ —) Grundlag: 1 PDF-filer i reports/ renderet med tools/md_to_pdf.py — ingen ændring i projektstatus`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)

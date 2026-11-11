@@ -86,17 +86,17 @@ class SGAP_Cirla {
     /** Null when the action may run, otherwise the refusal to hand back. */
     public static function guard(string $action): ?WP_Error {
         if (!self::enabled()) {
-            return new WP_Error('sgap_cirla_off', 'The Cirla module is switched off. Turn it on under Steamgears → Settings & keys → Cirla.');
+            return new WP_Error('sgap_cirla_off', 'The Cirla module is switched off. Turn it on under Steamgears → Settings & keys → Cirla.', ['status' => 409]);
         }
         if (!self::allows($action)) {
             return new WP_Error('sgap_cirla_action_off', sprintf(
                 'The Cirla action "%s" is switched off. Allowed now: %s.',
                 $action,
                 self::actions() ? implode(', ', self::actions()) : 'none'
-            ));
+            ), ['status' => 409]);
         }
         if (!current_user_can(self::CAP)) {
-            return new WP_Error('sgap_cirla_forbidden', 'This account may not run Cirla actions: it needs the sgap_cirla_run capability, which administrators have.');
+            return new WP_Error('sgap_cirla_forbidden', 'This account may not run Cirla actions: it needs the sgap_cirla_run capability, which administrators have.', ['status' => 403]);
         }
         return null;
     }
@@ -204,11 +204,11 @@ class SGAP_Cirla {
         }
         $topic = sanitize_text_field((string) ($input['topic'] ?? ''));
         if ($topic === '') {
-            return new WP_Error('sgap_cirla_topic', 'Give the draft a topic, or a post_id to write about.');
+            return new WP_Error('sgap_cirla_topic', 'Give the draft a topic, or a post_id to write about.', ['status' => 400]);
         }
         $channel = (string) ($input['channel'] ?? 'facebook');
         if (!in_array($channel, SGAP_Publer::CHANNELS, true)) {
-            return new WP_Error('sgap_cirla_channel', sprintf('"%s" is not one of the plugin\'s channels.', $channel));
+            return new WP_Error('sgap_cirla_channel', sprintf('"%s" is not one of the plugin\'s channels.', $channel), ['status' => 400]);
         }
         $post_id = max(0, (int) ($input['post_id'] ?? 0));
         if ($error = self::spend()) {
@@ -218,7 +218,7 @@ class SGAP_Cirla {
         if ($post_id > 0) {
             $post = get_post($post_id);
             if (!$post) {
-                return new WP_Error('sgap_cirla_post_missing', sprintf('No post with id %d.', $post_id));
+                return new WP_Error('sgap_cirla_post_missing', sprintf('No post with id %d.', $post_id), ['status' => 404]);
             }
             $source = SGAP_Generator::source($post);
         }
@@ -229,7 +229,7 @@ class SGAP_Cirla {
         }
         $item = $generated[0] ?? null;
         if (!is_array($item) || trim((string) ($item['text'] ?? '')) === '') {
-            return new WP_Error('sgap_cirla_empty', 'The model returned no usable post, so nothing was saved.');
+            return new WP_Error('sgap_cirla_empty', 'The model returned no usable post, so nothing was saved.', ['status' => 422]);
         }
         $title = (string) ($item['title'] ?? '') !== '' ? (string) $item['title'] : $topic;
         $body = trim((string) $item['text'] . ((string) ($item['hashtags'] ?? '') !== '' ? "\n\n" . $item['hashtags'] : ''));
@@ -245,7 +245,7 @@ class SGAP_Cirla {
             $message = SGAP_Quality::message(SGAP_Quality::blocking((array) ($gate['problems'] ?? [])));
             self::log('draft', 'stopped by the quality gate: ' . $message);
             self::fail('draft', 'sgap_cirla_gate', $message);
-            return new WP_Error('sgap_cirla_gate', 'The quality gate stopped this draft: ' . $message);
+            return new WP_Error('sgap_cirla_gate', 'The quality gate stopped this draft: ' . $message, ['status' => 422]);
         }
 
         // The same task asked twice is the same draft, not a second one: the row is keyed on
@@ -283,7 +283,7 @@ class SGAP_Cirla {
             'created_at' => current_time('mysql')
         ];
         if (!$wpdb->insert($wpdb->prefix . 'sgap_ai_drafts', $row)) {
-            return new WP_Error('sgap_cirla_save', 'The draft could not be saved.');
+            return new WP_Error('sgap_cirla_save', 'The draft could not be saved.', ['status' => 500]);
         }
         $id = (int) $wpdb->insert_id;
         $seen[$key] = $id;
@@ -307,10 +307,10 @@ class SGAP_Cirla {
         }
         $post_id = (int) ($input['post_id'] ?? 0);
         if ($post_id <= 0) {
-            return new WP_Error('sgap_cirla_post', 'Give the check a post id.');
+            return new WP_Error('sgap_cirla_post', 'Give the check a post id.', ['status' => 400]);
         }
         if (!get_post($post_id)) {
-            return new WP_Error('sgap_cirla_post_missing', sprintf('No post with id %d.', $post_id));
+            return new WP_Error('sgap_cirla_post_missing', sprintf('No post with id %d.', $post_id), ['status' => 404]);
         }
         $limits = SGAP_Meta_Audit::limits();
         $title = trim(wp_strip_all_tags((string) get_the_title($post_id)));
@@ -352,11 +352,11 @@ class SGAP_Cirla {
         }
         $post_id = (int) ($input['post_id'] ?? 0);
         if ($post_id <= 0) {
-            return new WP_Error('sgap_cirla_post', 'Give the suggestions a post id.');
+            return new WP_Error('sgap_cirla_post', 'Give the suggestions a post id.', ['status' => 400]);
         }
         $post = get_post($post_id);
         if (!$post) {
-            return new WP_Error('sgap_cirla_post_missing', sprintf('No post with id %d.', $post_id));
+            return new WP_Error('sgap_cirla_post_missing', sprintf('No post with id %d.', $post_id), ['status' => 404]);
         }
         $count = min(5, max(1, (int) ($input['count'] ?? 3)));
         $channels = array_slice(['facebook', 'instagram', 'pinterest', 'threads', 'bluesky'], 0, $count);
@@ -458,7 +458,7 @@ class SGAP_Cirla {
                 'The daily Cirla budget is used up (%d of %d AI calls). It resets after midnight, site time.',
                 $spent['n'],
                 $limit
-            ));
+            ), ['status' => 429]);
         }
         update_option(self::SPEND, ['date' => $spent['date'], 'n' => $spent['n'] + 1], false);
         return null;

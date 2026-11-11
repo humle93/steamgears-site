@@ -642,10 +642,11 @@
         {
           "id": "c6",
           "name": "C6 — røgtesten i §9.5 mod et rigtigt WordPress",
-          "done": 0.1,
+          "done": 0.8,
           "total": 0.8,
           "unit": "d",
-          "note": "De otte rækker i §9.5 er dækket af 28 checks i plugins/tests/cirla.php i sandkassen (0,1 af 0,8 d). Tilbage er den samme tabel kørt over MCP mod et WordPress, hvor abilities og cron ses udefra, og hvor indstillingsformularen og dbDelta-opgraderingen bliver prøvet."
+          "note": "Målt 11/11 på et rigtigt WordPress 7.1.4 (PHP 8.3.14, SQLite-driver, php -S): modulet indlæses kun når sgap_cirla_enabled er yes (slukket: klasse væk, 0 abilities blandt 82, ingen cron), tændt via update-settings gav 4 abilities og et planlagt dagligt job, SGAP_Install::activate() kørte som dbDelta-opgradering uden fejl (wp_sgap_ai_drafts, 19 kolonner), og alle fire handlinger blev kaldt over HTTP: cirla-status 200, cirla-seo-check 200, cirla-social-suggestions 200 (2 forslag, intet gemt) og cirla-draft 200 (pending, angle = cirla). Kvalitetsgaten stoppede et link til en kladde med 422 uden at gemme en række, det daglige loft stoppede kald 6 med 429, 5 kladder stod pending med 0 i køen og 0 publiceret, en subscriber blev afvist med 403, og fra-tilstanden gav 404 på ruten uden at miste kladder. Fundet og rettet i 7.71.2: WP_Error uden status gav HTTP 500 (4 nye smoke-checks, 1 475 PASS). Bevis: docs/library/cirla-wordpress-roegtest-2026-11-11.md (+ PDF). Ikke målt: AI-svaret kom fra sgap_cirla_generate-filteret (ingen nøgle), databasen er SQLite, og kaldene gik over wp-abilities/v1, ikke gennem en MCP-klient.",
+          "verified": true
         },
         {
           "id": "c7",
@@ -2423,6 +2424,15 @@
       "after": 56.7,
       "delta": null,
       "basis": "1,7 af 3 d (C1 0,35/0,35 · C2 0,2/0,2 · C3 0,4/0,4 · C4 0,25/0,25 · C5 0,2/0,2 · C6 0,1/0,8 · C7 0/0,6 · C8 0,2/0,2)"
+    },
+    {
+      "date": "2026-11-11",
+      "project": "Cirla — AI-indholdsmodul",
+      "module": "daglig måling",
+      "before": 56.7,
+      "after": 80.0,
+      "delta": 23.3,
+      "basis": "2,4 af 3 d (C1 0,35/0,35 · C2 0,2/0,2 · C3 0,4/0,4 · C4 0,25/0,25 · C5 0,2/0,2 · C6 0,8/0,8 · C7 0/0,6 · C8 0,2/0,2)"
     }
   ]
 }

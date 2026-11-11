@@ -10,6 +10,23 @@ Noterne er skrevet ud fra commit-historikken og de dokumenter der hører til hve
 
 <!-- patch-notes: baseline 7.65.0 -->
 
+## 7.71.2 — 2026-11-11
+
+**Cirla svarer nu med de rigtige HTTP-statuskoder — målt på et rigtigt WordPress.**
+
+### Rettet
+- Alle 13 `WP_Error` i modulet bærer `['status' => …]`, som resten af plugin'et gør: dagligt loft **429**,
+  kvalitetsgate **422**, slukket modul **409**, manglende rettighed **403**, dårligt input **400**, ukendt
+  indhold **404** og gemmefejl **500**. Før blev et budgetafslag og en gate-blokering sendt som HTTP 500,
+  så en klient ikke kunne se forskel på «din kvote er brugt» og «serveren fejlede».
+- Fundet ved at køre modulet på en rigtig WordPress-installation, ikke i sandkassen.
+
+### Målt
+- WordPress 7.1.4 med SQLite-driver, plugin installeret fra zip: kvalitetsgaten blokerede linket til en kladde
+  (500 → **422**, ingen ny række), det daglige loft stoppede kald 6 (500 → **429**), en subscriber blev afvist
+  (**403**), og et slukket modul gav **404** på ability-ruten. Bevis:
+  `docs/library/cirla-wordpress-roegtest-2026-11-11.md`.
+
 ## 7.71.1 — 2026-11-11
 
 **Patch notes er nu en fast del af hver udgivelse.** Ingen PHP-adfærd er ændret.
