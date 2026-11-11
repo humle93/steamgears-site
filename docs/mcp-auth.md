@@ -136,6 +136,9 @@ OAuth-flowet i `tools/test_mcp_oauth.py` (10 fixtures, lokal authorization serve
 | `454` / `455` | Simplys WAF på HTML | åbn linket i en rigtig browser, ikke fra worktreen |
 | `404 rest_no_route` | forkert sti | ruten er `/wp-json/mcp/v1/http`, ikke `/mcp` |
 | tomt `tools/list` | forbundet, men ingen værktøjer eksponeret | tjek AI Engines MCP-indstillinger i wp-admin |
+| `401 invalid_client` på `/oauth/token` | klienten findes ikke længere hos serveren (fx efter en ryddet installation) | registrér en frisk klient med `--start`, som gør DCR forfra — gæt ikke på klienten |
+| `400 invalid_request` på `/oauth/token` med en **bevidst falsk** kode | **klienten er godkendt**; fejlen er koden, ikke klienten. Målt 11/11 2026: ukendt klient giver `401 invalid_client`, egen klient giver `400 invalid_request` | brug svaret som klienttest: ny `--start` er kun nødvendig ved `401` |
+| callbacken kan ikke fanges automatisk fra en cloud-browser | browserens `127.0.0.1` er **browserens egen maskine**, ikke agentens sandkasse. Målt 11/11 2026: en lytter på `:8765` i sandkassen svarede `200` for `curl`, mens browseren fik `ERR_CONNECTION_REFUSED` | kopiér hele adressen fra browserens adresselinje og kør `--finish '<adresse>'`; redirecten `http://127.0.0.1:8765/callback` er med vilje uden lytter på ejerens maskine |
 
 ## Novamira (`novamira`) — den anden MCP-flade (målt 6/11 2026)
 
@@ -159,6 +162,19 @@ Sitet kører **Novamira 1.12.14** ved siden af AI Engine. Den har sin egen OAuth
    til DCR (RFC 6749 §4.1.3).
 3. **`tools/list` kræver `Mcp-Session-Id`** fra `initialize`-svarets header. Uden den svarer fladen `400` med
    0 værktøjer, selv om `initialize` gik igennem.
+
+Fladen har sit **eget** token og sin egen config-mappe, så den ikke deler fil med AI Engine-stien. Målt 11/11 2026
+accepteres kun scope `full_access` her; `scope=mcp` giver en godkendelse uden brugbart token:
+
+```bash
+export MCP_CONFIG_DIR="$HOME/.config/steamgears-mcp/novamira"
+export MCP_RESOURCE="https://steamgears.eu/wp-json/mcp/novamira-oauth"
+export MCP_SCOPE=full_access
+export MCP_REST_URL="$MCP_RESOURCE"
+python3 tools/mcp_oauth.py --start          # link til ejerens browser
+python3 tools/mcp_oauth.py --finish '<hele callback-adressen>'
+python3 tools/mcp_rest.py --check
+```
 
 ### Fornyelse i pluginnet (7.44)
 
