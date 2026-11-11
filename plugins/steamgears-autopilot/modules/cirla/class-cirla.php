@@ -493,15 +493,31 @@ class SGAP_Cirla {
      * page that no longer shows it.
      */
     public static function draft_exists(int $id): bool {
+        return self::pending_draft($id) !== null;
+    }
+
+    /**
+     * The draft, while it is still waiting under AI Drafts.
+     *
+     * One query answers both questions the Cirla page asks — does it still exist, and what is it
+     * called — so a log row can never show a title without a link, or a link to a draft that is gone.
+     *
+     * @return array{id?: int, title?: string, channel?: string}|null
+     */
+    public static function pending_draft(int $id): ?array {
         if ($id <= 0) {
-            return false;
+            return null;
         }
         global $wpdb;
-        return (bool) $wpdb->get_var($wpdb->prepare(
-            "SELECT id FROM {$wpdb->prefix}sgap_ai_drafts WHERE id = %d AND status = %s",
+        $row = $wpdb->get_row($wpdb->prepare(
+            "SELECT id, title, channel FROM {$wpdb->prefix}sgap_ai_drafts WHERE id = %d AND status = %s",
             $id,
             'pending'
         ));
+        if (is_object($row)) {
+            $row = (array) $row;
+        }
+        return is_array($row) ? $row : null;
     }
 
     /** The module's own log: time, action and result, one row per action. */

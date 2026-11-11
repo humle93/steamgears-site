@@ -133,24 +133,41 @@ class SGAP_Cirla_Admin {
     }
 
     /**
-     * Where a log row points, or '' when it has no target.
+     * A log row's target: the address and the name to show for it.
      *
-     * A row without a target stays plain text: a draft that has since been approved, rejected or
-     * deleted must not leave a link to a page that would only say "nothing here".
+     * Both come from the same check, so a row can never show a title for something that is gone or
+     * a link to a page that would only say "nothing here". Empty url and label = plain text.
      */
-    public static function row_url(array $entry): string {
+    public static function row_target(array $entry): array {
         $id = (int) ($entry['id'] ?? 0);
         $action = (string) ($entry['action'] ?? '');
         if ($id <= 0) {
-            return '';
+            return ['url' => '', 'label' => ''];
         }
         if ($action === 'draft') {
-            return SGAP_Cirla::draft_exists($id) ? admin_url('admin.php?page=sgap-ai') . '#sgap-draft-' . $id : '';
+            $draft = SGAP_Cirla::pending_draft($id);
+            if ($draft === null) {
+                return ['url' => '', 'label' => ''];
+            }
+            return [
+                'url' => admin_url('admin.php?page=sgap-ai') . '#sgap-draft-' . $id,
+                'label' => sprintf('Draft #%d · %s', $id, (string) ($draft['title'] ?? ''))
+            ];
         }
         if ($action === 'seo' || $action === 'social') {
-            return get_post($id) ? (string) get_edit_post_link($id) : '';
+            if (!get_post($id)) {
+                return ['url' => '', 'label' => ''];
+            }
+            return [
+                'url' => (string) get_edit_post_link($id),
+                'label' => ($action === 'seo' ? 'SEO check' : 'Suggestions') . ' · ' . get_the_title($id)
+            ];
         }
-        return '';
+        return ['url' => '', 'label' => ''];
+    }
+
+    public static function row_url(array $entry): string {
+        return (string) (self::row_target($entry)['url'] ?? '');
     }
 
     /** The form handler: nonce, capability, one of the four actions, then back to the page. */
@@ -286,11 +303,13 @@ class SGAP_Cirla_Admin {
         } else {
             echo '<table class="widefat striped"><thead><tr><th>When</th><th>Action</th><th>Result</th></tr></thead><tbody>';
             foreach ($rows as $entry) {
-                $url = self::row_url($entry);
+                $target = self::row_target($entry);
                 $result = esc_html((string) ($entry['result'] ?? ''));
                 echo '<tr><td>' . esc_html((string) ($entry['at'] ?? '')) . '</td><td>'
                     . esc_html((string) ($entry['action'] ?? '')) . '</td><td>'
-                    . ($url !== '' ? '<a href="' . esc_url($url) . '">' . $result . '</a>' : $result)
+                    . ($target['url'] !== ''
+                        ? '<a href="' . esc_url((string) $target['url']) . '">' . esc_html((string) $target['label']) . '</a>'
+                        : $result)
                     . '</td></tr>';
             }
             echo '</tbody></table>';

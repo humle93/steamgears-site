@@ -334,6 +334,15 @@
           "unit": "d",
           "note": "7.74.0: SGAP_Cirla::log($action,$result,$meta) gemmer målets id; draft-rækker linker til kladden på AI Drafts via ankeret #sgap-draft-<id> (tilføjet i includes/core.php), og seo/social-rækker til sidens editor. SGAP_Cirla::draft_exists() er offentlig og svarer kun ja for kladder der stadig venter, så godkendte, afviste og slettede kladder samt slettede sider giver ren tekst i stedet for et dødt link; gamle rækker uden id er også ren tekst. Målt på WordPress 7.1.4: en ægte draft gennem sidens formular gav en log-række med id, et link til page=sgap-ai#sgap-draft-<id> og et matchende anker på AI Drafts-siden; ægte seo- og social-kald gav post.php?post=5-links; seedede rækker med id 999999 gav 0 links og stod som tekst; filteret cirla_log=draft beholdt linket og skjulte seo-rækken; tomt filter og tom log viste de to tomme tilstande. 8 nye checks (1 496 → 1 504 PASS, 0 FAIL).",
           "verified": true
+        },
+        {
+          "id": "p94",
+          "name": "P9.4 — Titel og link i Cirla-loggens rækker",
+          "done": 0.2,
+          "total": 0.2,
+          "unit": "d",
+          "note": "7.75.0: SGAP_Cirla::pending_draft($id) svarer i én query på både om kladden stadig venter og hvad den hedder, og draft_exists() bygger på den, så der er én eksistens-kontrol. SGAP_Cirla_Admin::row_target() giver url og titel samlet: draft-rækker læses »Draft #8 · Titel i loggen« med link til #sgap-draft-8, seo/social-rækker »SEO check · <sidens titel>« / »Suggestions · <sidens titel>« med link til editoren. Målt på WordPress 7.1.4: ægte draft gav titel+link og ankeret fandtes på AI Drafts; ægte seo/social mod post 5 gav »SEO check · Steampunk-kataloget 2026« og »Suggestions · Steampunk-kataloget 2026« med post.php?post=5-links; seedede rækker med id 999999 gav 0 links og 0 titler og stod som tekst; filteret cirla_log=draft beholdt titel-linket; tomt filter og tom log viste de to tomme tilstande. Smoke 1 505 PASS (1 504 → 1 505).",
+          "verified": true
         }
       ],
       "total": 33.75,

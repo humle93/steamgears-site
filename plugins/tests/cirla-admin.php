@@ -98,21 +98,33 @@ check('cirla-admin: the log keeps the id of the draft or page it is about', (int
 SGAP_Cirla::log('status', 'read the status');
 $newest = SGAP_Cirla::entries(1)[0] ?? [];
 check('cirla-admin: a row without a target stores 0, not a stale id', (int) ($newest['id'] ?? -1) === 0);
-$GLOBALS['post_by_id'][5] = (object) ['ID' => 5, 'post_title' => 'A page', 'post_excerpt' => ''];
-$GLOBALS['wpdb']->next = [1];
-check('cirla-admin: a draft row links to the draft on AI Drafts',
-    SGAP_Cirla_Admin::row_url(['action' => 'draft', 'id' => 42]) === '/wp-admin/admin.php?page=sgap-ai#sgap-draft-42');
-$GLOBALS['wpdb']->next = [0];
-check('cirla-admin: a draft that is gone has no link', SGAP_Cirla_Admin::row_url(['action' => 'draft', 'id' => 42]) === '');
-check('cirla-admin: SEO and suggestion rows link to the page editor',
-    SGAP_Cirla_Admin::row_url(['action' => 'seo', 'id' => 5]) === '/edit/5'
-    && SGAP_Cirla_Admin::row_url(['action' => 'social', 'id' => 5]) === '/edit/5');
-check('cirla-admin: a page that is gone has no link', SGAP_Cirla_Admin::row_url(['action' => 'seo', 'id' => 999]) === '');
+$GLOBALS['post_by_id'][5] = (object) ['ID' => 5, 'post_title' => 'Kobberbriller', 'post_excerpt' => ''];
+$GLOBALS['wpdb']->row = ['id' => 42, 'title' => 'Brass goggles', 'channel' => 'facebook'];
+$target = SGAP_Cirla_Admin::row_target(['action' => 'draft', 'id' => 42]);
+check('cirla-admin: a draft row names the draft and links to it',
+    $target['url'] === '/wp-admin/admin.php?page=sgap-ai#sgap-draft-42'
+    && $target['label'] === 'Draft #42 · Brass goggles');
+$GLOBALS['wpdb']->row = null;
+$target = SGAP_Cirla_Admin::row_target(['action' => 'draft', 'id' => 42]);
+check('cirla-admin: a draft that is gone gives neither a link nor a title',
+    $target['url'] === '' && $target['label'] === ''
+    && SGAP_Cirla_Admin::row_url(['action' => 'draft', 'id' => 42]) === '');
+$target = SGAP_Cirla_Admin::row_target(['action' => 'seo', 'id' => 5]);
+check('cirla-admin: an SEO row names the page and links to its editor',
+    $target['url'] === '/edit/5' && $target['label'] === 'SEO check · Kobberbriller');
+$target = SGAP_Cirla_Admin::row_target(['action' => 'social', 'id' => 5]);
+check('cirla-admin: a suggestion row names the page too',
+    $target['url'] === '/edit/5' && $target['label'] === 'Suggestions · Kobberbriller');
+$target = SGAP_Cirla_Admin::row_target(['action' => 'seo', 'id' => 999]);
+check('cirla-admin: a page that is gone gives neither a link nor a title',
+    $target['url'] === '' && $target['label'] === '');
+$target = SGAP_Cirla_Admin::row_target(['action' => 'status', 'id' => 5]);
 check('cirla-admin: rows with no natural target and old rows without an id stay plain text',
-    SGAP_Cirla_Admin::row_url(['action' => 'status', 'id' => 5]) === ''
-    && SGAP_Cirla_Admin::row_url(['action' => 'draft', 'result' => 'draft #42 for facebook']) === '');
+    $target['url'] === '' && $target['label'] === ''
+    && SGAP_Cirla_Admin::row_target(['action' => 'draft', 'result' => 'draft #42 for facebook'])['label'] === '');
 // The page reads the status first, so the mock must answer every question on it.
 $GLOBALS['wpdb']->next = array_fill(0, 40, 1);
+$GLOBALS['wpdb']->row = ['id' => 42, 'title' => 'Brass <b>goggles</b>', 'channel' => 'facebook'];
 update_option('sgap_cirla_log', [
     ['at' => '2026-11-11 12:00:00', 'action' => 'draft', 'result' => 'Kladde A', 'id' => 42],
     ['at' => '2026-11-11 12:01:00', 'action' => 'status', 'result' => 'status ok', 'id' => 0]
@@ -120,8 +132,9 @@ update_option('sgap_cirla_log', [
 ob_start();
 SGAP_Cirla_Admin::page();
 $html = ob_get_clean();
-check('cirla-admin: the log links the draft row and leaves the status row as text',
-    str_contains($html, 'page=sgap-ai#sgap-draft-42') && !str_contains($html, '>status ok</a>'));
+check('cirla-admin: the log shows the draft title inside its link and leaves the status row as text',
+    str_contains($html, 'page=sgap-ai#sgap-draft-42') && str_contains($html, 'Draft #42 · Brass')
+    && !str_contains($html, '<b>goggles') && !str_contains($html, '>status ok</a>'));
 update_option('sgap_cirla_log', []);
 
 $_POST = [];

@@ -10,6 +10,30 @@ Noterne er skrevet ud fra commit-historikken og de dokumenter der hører til hve
 
 <!-- patch-notes: baseline 7.65.0 -->
 
+## 7.75.0 — 2026-11-11
+
+**Log-rækkerne på Cirla-siden siger nu hvad målet hedder, ikke kun hvor det ligger.**
+
+### Tilføjet
+- `SGAP_Cirla::pending_draft($id)` svarer på begge spørgsmål i én query: findes kladden stadig under
+  AI Drafts, og hvad hedder den. `draft_exists()` bygger nu på den, så der er **én** eksistens-kontrol.
+- En *draft*-række læses som **»Draft #7 · Brass goggles«** med link til den konkrete kladde
+  (`#sgap-draft-7`); en *seo*- eller *social*-række læses som **»SEO check · sidens titel«** /
+  **»Suggestions · sidens titel«** med link til sidens editor.
+- `SGAP_Cirla_Admin::row_target()` giver url og titel samlet, så de to altid følges ad;
+  `row_url()` er bevaret som tynd wrapper.
+
+### Sikkerhed mod døde links
+- Titel og link kommer fra samme kontrol: en kladde der er godkendt, afvist eller slettet, en slettet
+  side, en gammel række uden id og en række uden naturligt mål giver **hverken** link **eller** titel —
+  rækken står som ren tekst med sit oprindelige resultat.
+- Titel og resultat escapes ved rendering, så en kladdetitel med markup ikke bliver HTML.
+- Filteret fra 7.73.0 og begge tomme tilstande er uændrede.
+
+### Målt
+- Smoke: **1 505 PASS, 0 FAIL** (1 504 → 1 505; link- og titel-checks omskrevet, én ny).
+  `php -l` rent, fejlscan uden fund.
+
 ## 7.74.0 — 2026-11-11
 
 **Log-rækkerne på Cirla-siden peger nu på det de handler om.**

@@ -69,12 +69,14 @@ check('cirla: nothing was written to the queue', !str_contains($log, 'sgap_queue
 
 // ---- the same task twice is one draft ----
 $GLOBALS['wpdb']->next = 42;
+$GLOBALS['wpdb']->row = ['id' => 42, 'title' => 'The brass goggles are back', 'channel' => 'facebook'];
 $before = substr_count(implode("\n", $GLOBALS['wpdb']->log), 'INSERT wp_sgap_ai_drafts');
 $again = SGAP_Cirla::draft(['topic' => 'Brass goggles', 'channel' => 'facebook']);
 $after = substr_count(implode("\n", $GLOBALS['wpdb']->log), 'INSERT wp_sgap_ai_drafts');
 check('cirla: the same task twice does not make a second draft', ($again['duplicate'] ?? false) === true
     && (int) ($again['id'] ?? 0) === 42 && $before === $after);
 $GLOBALS['wpdb']->next = null;
+$GLOBALS['wpdb']->row = null;
 
 // ---- the quality gate stops a dead link, and says so ----
 // The gate is set explicitly: the campaign-agent tests leave it off, and a gate that is
