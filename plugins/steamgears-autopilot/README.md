@@ -27,7 +27,7 @@ The whole social autopilot runs inside WordPress (Command Center is retired):
 4. **Measure** – every post links via `/go/<id>/`, so clicks (and WooCommerce
    orders) are counted per channel.
 
-Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.71.2.zip` → Activate. On an existing
+Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.72.0.zip` → Activate. On an existing
 install the same zip arrives through the self-updater (see *Updates*), so an upload is only needed for the
 first install or a recovery.
 
@@ -110,6 +110,8 @@ sending you to openrouter.ai/keys. Eleven new smoke checks observe the outgoing 
 Cirla is the first part of the plugin that is **a module of its own**. It is off by default, and while it is
 off its file is not even loaded from `steamgears-autopilot.php` — so a module that is off cannot register an
 ability or a cron job. Switching it on under *Settings & keys → Cirla* takes effect on the next request.
+It also gets a page of its own under **Steamgears → Create → Cirla**: the module's state, the four actions
+as buttons, and its log — the same code the abilities call, so the page and MCP cannot drift apart.
 
 It exposes four actions over the same MCP connection as everything else, all guarded by its own capability
 `sgap_cirla_run` (administrators have it through `manage_options`):

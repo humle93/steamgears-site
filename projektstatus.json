@@ -307,6 +307,15 @@
           "unit": "d",
           "note": "`modules/cirla/class-cirla.php` indlæses kun når `sgap_cirla_enabled` er `yes` (standard `no`), så et slukket modul ikke kan registrere en ability eller et cron-job. Fire handlinger bag `sgap_cirla_run`: cirla-status, cirla-draft (pending, `angle = cirla`, aldrig kø/publiceret), cirla-seo-check og cirla-social-suggestions; kvalitetsgaten stopper døde links, samme opgave to gange giver ingen dublet, dagligt AI-loft 5 og filteret `sgap_cirla_generate`. 28 nye checks, 1 443 → 1 471 PASS, 0 FAIL. Bevis: docs/library/cirla-modul-2026-11-10.md.",
           "verified": true
+        },
+        {
+          "id": "p91",
+          "name": "P9.1 — Cirla-siden i Steamgears-menuen",
+          "done": 0.3,
+          "total": 0.3,
+          "unit": "d",
+          "note": "7.72.0: modules/cirla/class-cirla-admin.php indlæses sammen med modulet og kun i wp-admin. Siden under Create viser modulets tilstand (til/fra, næste daglige job, AI-budget, kladder under AI Drafts), de fire handlinger som formularer gennem admin-post.php med nonce og manage_options, resultatet som tabel og modulets log. Målt på en rigtig WordPress 7.1.4: GET /wp-admin/admin.php?page=sgap-cirla gav 200 med fire formularer, og en POST gennem sidens eget flow gav 302 tilbage, én ny kladde (5 → 6, angle = cirla, status = pending) og en resultattabel; med modulet slået fra findes siden ikke. 15 nye checks (1 475 → 1 490 PASS, 0 FAIL).",
+          "verified": true
         }
       ],
       "total": 33.75,

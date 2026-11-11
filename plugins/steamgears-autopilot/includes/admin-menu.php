@@ -15,7 +15,7 @@ class SGAP_Menu {
     /** group label => [slug => new label or '' to keep]. The first slug of the first group is the dashboard. */
     const GROUPS = [
         '' => ['steamgears-autopilot' => 'Overview', 'sgap-setup' => ''],
-        'Create' => ['sgap-chat' => 'AI Chat', 'sgap-studio' => 'Content Studio', 'sgap-ai' => 'Drafts to approve'],
+        'Create' => ['sgap-chat' => 'AI Chat', 'sgap-cirla' => 'Cirla', 'sgap-studio' => 'Content Studio', 'sgap-ai' => 'Drafts to approve'],
         'Publish' => ['sgap-queue' => 'Queue', 'sgap-campaigns' => 'Campaigns', 'sgap-evergreen' => 'Evergreen', 'sgap-fullauto' => 'Full Auto', 'sgap-forum' => 'Forum & Reddit'],
         'Shop' => ['sgap-niche' => 'Niche shop', 'sgap-merchant' => 'Shop & feeds', 'sgap-etsy' => 'Etsy'],
         'Insight' => ['sgap-reports' => 'Reports'],

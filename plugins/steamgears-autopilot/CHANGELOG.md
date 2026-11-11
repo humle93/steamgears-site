@@ -10,6 +10,23 @@ Noterne er skrevet ud fra commit-historikken og de dokumenter der hører til hve
 
 <!-- patch-notes: baseline 7.65.0 -->
 
+## 7.72.0 — 2026-11-11
+
+**Cirla har fået sin egen side i Steamgears-menuen — den kan bruges uden MCP.**
+
+### Tilføjet
+- `modules/cirla/class-cirla-admin.php`: en Cirla-side under **Create** med modulets tilstand (til/fra, næste
+  daglige job, AI-budget brugt i dag, kladder under AI Drafts), de fire handlinger som knapper og modulets log.
+  Siden indlæses kun sammen med modulet, så et slukket modul ikke har en side.
+- Knapperne kalder præcis de samme funktioner som abilities (`status`, `draft`, `seo_check`,
+  `social_suggestions`) via `admin-post.php` med nonce og `manage_options`, viser resultatet som en tabel og
+  redirecter tilbage — en genindlæsning kører ikke handlingen igen.
+- Emne, kanal, side-id og antal forslag valideres og saniteres i `SGAP_Cirla_Admin::input()`, så siden ikke
+  kan sende noget abilities ikke også ville acceptere.
+
+### Målt
+- 15 nye smoke-checks (1 475 → 1 490 PASS, 0 FAIL), `php -l` rent, fejlscan uden fund, zip byte-identisk.
+
 ## 7.71.2 — 2026-11-11
 
 **Cirla svarer nu med de rigtige HTTP-statuskoder — målt på et rigtigt WordPress.**

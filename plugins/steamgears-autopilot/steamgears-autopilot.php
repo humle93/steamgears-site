@@ -2,7 +2,7 @@
 /**
 * Plugin Name: Steamgears Autopilot
 * Description: Premium multichannel growth autopilot for Steamgears.eu.
-* Version: 7.71.2
+* Version: 7.72.0
 * Requires at least: 6.4
 * Requires PHP: 8.0
 * Author: Steamgears.eu
@@ -26,7 +26,7 @@ if (defined('SGAP_VERSION')) {
     return;
 }
 
-define('SGAP_VERSION', '7.71.2');
+define('SGAP_VERSION', '7.72.0');
 define('SGAP_FILE', __FILE__);
 define('SGAP_PATH', __DIR__ . '/');
 
@@ -84,6 +84,9 @@ require_once __DIR__ . '/includes/admin-menu.php';
 // register one ability or one cron job. Switching it on takes effect on the next request.
 if (get_option('sgap_cirla_enabled', 'no') === 'yes') {
     require_once __DIR__ . '/modules/cirla/class-cirla.php';
+    if (is_admin()) {
+        require_once __DIR__ . '/modules/cirla/class-cirla-admin.php';
+    }
 }
 
 SGAP_Publer::init();
@@ -119,4 +122,7 @@ SGAP_MCP_Auth::init();
 SGAP_Menu::init();
 if (class_exists('SGAP_Cirla')) {
     SGAP_Cirla::init();
+}
+if (class_exists('SGAP_Cirla_Admin')) {
+    SGAP_Cirla_Admin::init();
 }
