@@ -507,10 +507,24 @@ class SGAP_Cirla {
         update_option(self::LOG, array_slice($entries, 0, 20), false);
     }
 
-    /** @return array<int, array{at: string, action: string, result: string}> */
-    public static function entries(int $limit = 20): array {
+    /**
+     * The newest rows, optionally for one action only.
+     *
+     * @param string $action '' for every action, or one of the keys in ACTIONS.
+     * @return array<int, array{at: string, action: string, result: string}>
+     */
+    public static function entries(int $limit = 20, string $action = ''): array {
         $entries = get_option(self::LOG);
-        return is_array($entries) ? array_slice($entries, 0, max(1, $limit)) : [];
+        if (!is_array($entries)) {
+            return [];
+        }
+        if ($action !== '') {
+            $entries = array_values(array_filter(
+                $entries,
+                static fn($entry) => (string) ($entry['action'] ?? '') === $action
+            ));
+        }
+        return array_slice($entries, 0, max(1, $limit));
     }
 
     /** A failure is both in the module log and in the plugin's error log, so it is not missed. */

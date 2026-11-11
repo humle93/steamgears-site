@@ -316,6 +316,15 @@
           "unit": "d",
           "note": "7.72.0: modules/cirla/class-cirla-admin.php indlæses sammen med modulet og kun i wp-admin. Siden under Create viser modulets tilstand (til/fra, næste daglige job, AI-budget, kladder under AI Drafts), de fire handlinger som formularer gennem admin-post.php med nonce og manage_options, resultatet som tabel og modulets log. Målt på en rigtig WordPress 7.1.4: GET /wp-admin/admin.php?page=sgap-cirla gav 200 med fire formularer, og en POST gennem sidens eget flow gav 302 tilbage, én ny kladde (5 → 6, angle = cirla, status = pending) og en resultattabel; med modulet slået fra findes siden ikke. 15 nye checks (1 475 → 1 490 PASS, 0 FAIL).",
           "verified": true
+        },
+        {
+          "id": "p92",
+          "name": "P9.2 — Logfilter på Cirla-siden",
+          "done": 0.2,
+          "total": 0.2,
+          "unit": "d",
+          "note": "7.73.0: SGAP_Cirla::entries($limit, $action) kan læse én handling; siden har faner med antal for All/status/draft/seo/social og viser kun den valgte handlings rækker. To tomme tilstande: den oprindelige når loggen er tom, og »No <handling> rows in the last 20« med »Show all N rows« når filteret ikke matcher. Ukendte filtre falder tilbage til All. Målt på WordPress 7.1.4 med fire seedede log-rækker: fanerne viste All (4) / status (1) / draft (2) / seo (1) / social (0), ?cirla_log=draft viste kun de to kladde-rækker, ?cirla_log=social gav tom-tilstanden med »Show all 4 rows«, og ?cirla_log=nonsense faldt tilbage til All (4). 6 nye checks (1 490 → 1 496 PASS, 0 FAIL).",
+          "verified": true
         }
       ],
       "total": 33.75,

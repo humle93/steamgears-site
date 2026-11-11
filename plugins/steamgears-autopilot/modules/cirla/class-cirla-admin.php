@@ -14,6 +14,8 @@ class SGAP_Cirla_Admin {
     const SLUG = 'sgap-cirla';
     const ACTION = 'sgap_cirla_run';
     const FLASH = 'sgap_cirla_flash_';
+    /** GET parameter that picks one action for the log. */
+    const LOG_FILTER = 'cirla_log';
 
     public static function init(): void {
         add_action('admin_menu', [__CLASS__, 'menu'], 20);
@@ -64,6 +66,27 @@ class SGAP_Cirla_Admin {
             }
         }
         return $input;
+    }
+
+    /** '' means every action; anything else must be one of the four. */
+    public static function filter(array $get): string {
+        $value = sanitize_key((string) ($get[self::LOG_FILTER] ?? ''));
+        return isset(self::forms()[$value]) ? $value : '';
+    }
+
+    /** The page's own address, optionally narrowed to one action. */
+    public static function url(string $filter): string {
+        $url = admin_url('admin.php?page=' . self::SLUG);
+        return $filter === '' ? $url : $url . '&' . self::LOG_FILTER . '=' . rawurlencode($filter);
+    }
+
+    /** One log tab: the current one is text, the others are links. */
+    private static function tab(string $filter, string $label, int $count, bool $current): string {
+        $text = $label . ' (' . $count . ')';
+        if ($current) {
+            return '<strong aria-current="page">' . esc_html($text) . '</strong>';
+        }
+        return '<a href="' . esc_url(self::url($filter)) . '">' . esc_html($text) . '</a>';
     }
 
     /** The rows the page prints for a result. Pure, so a test can read them without a browser. */
@@ -223,13 +246,25 @@ class SGAP_Cirla_Admin {
         echo '<p><a class="button" href="' . esc_url($settings) . '">Open the Cirla settings</a> '
             . '<span class="description">The AI budget, the allowed actions and the log level live under Settings &amp; keys → Cirla.</span></p></div>';
 
+        $all = SGAP_Cirla::entries(20);
+        $filter = self::filter($_GET);
+        $rows = SGAP_Cirla::entries(20, $filter);
         echo '<div class="sgap-card"><h2>Log</h2>';
-        $entries = SGAP_Cirla::entries(20);
-        if ($entries === []) {
+        echo '<p class="sgap-log-tabs">';
+        echo self::tab('', 'All', count($all), $filter === '');
+        foreach (self::forms() as $key => $form) {
+            $count = count(array_filter($all, static fn($entry) => (string) ($entry['action'] ?? '') === $key));
+            echo ' · ' . self::tab($key, $form['label'], $count, $filter === $key);
+        }
+        echo '</p>';
+        if ($all === []) {
             echo '<p>Nothing yet. The module writes one row per action, and errors also go to Troubleshooting.</p>';
+        } elseif ($rows === []) {
+            echo '<p>No <strong>' . esc_html(self::forms()[$filter]['label']) . '</strong> rows in the last 20. '
+                . '<a href="' . esc_url(self::url('')) . '">Show all ' . (int) count($all) . ' rows</a>.</p>';
         } else {
             echo '<table class="widefat striped"><thead><tr><th>When</th><th>Action</th><th>Result</th></tr></thead><tbody>';
-            foreach ($entries as $entry) {
+            foreach ($rows as $entry) {
                 echo '<tr><td>' . esc_html((string) ($entry['at'] ?? '')) . '</td><td>'
                     . esc_html((string) ($entry['action'] ?? '')) . '</td><td>'
                     . esc_html((string) ($entry['result'] ?? '')) . '</td></tr>';

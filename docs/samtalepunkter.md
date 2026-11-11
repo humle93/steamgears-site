@@ -27,7 +27,7 @@ _Opdateret 2026-11-11 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 | **Forum + Reddit — trafikaccelerator (P5)** | **96,7 %** | 2,9 af 3 d (F1 1,2/1,2 · F2 0,8/0,8 · F3 0,3/0,3 · F4 0,3/0,3 · F5 0,3/0,3 · F6 0/0,1) |
 | **steamgears.eu — site-optimering** | **100 %** | 20,95 af 20,95 d (S0 2,35/2,35 · S1 3,6/3,6 · S2 6,9/6,9 · S3 4,05/4,05 · S4 4,05/4,05) |
 | **steamgears.eu — miljø, server og sandbox (S5)** | **60 %** | 1,8 af 3 d (S5 1,8/3) |
-| **Steamgears Autopilot — plugin** | **100 %** | 34,4 af 34,4 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25 · P1E 0,25/0,25 · P1F 0,25/0,25 · P1G 0,5/0,5 · P2F 1,5/1,5 · P3OPT 0,6/0,6 · P3JS 0,3/0,3 · P3LIVE 0,25/0,25 · P1KEYDIAGNOSE 0,15/0,15 · P1FALLBACK 0,35/0,35 · P1OR 0,25/0,25 · P6 0,9/0,9 · P7 0,3/0,3 · P8 0,8/0,8 · P9 0,35/0,35 · P91 0,3/0,3) |
+| **Steamgears Autopilot — plugin** | **100 %** | 34,6 af 34,6 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0S 1/1 · P0C 0,25/0,25 · P1D 0,25/0,25 · P1E 0,25/0,25 · P1F 0,25/0,25 · P1G 0,5/0,5 · P2F 1,5/1,5 · P3OPT 0,6/0,6 · P3JS 0,3/0,3 · P3LIVE 0,25/0,25 · P1KEYDIAGNOSE 0,15/0,15 · P1FALLBACK 0,35/0,35 · P1OR 0,25/0,25 · P6 0,9/0,9 · P7 0,3/0,3 · P8 0,8/0,8 · P9 0,35/0,35 · P91 0,3/0,3 · P92 0,2/0,2) |
 | **Dark academia-rebrand** | **71,3 %** | 12,4 af 17,4 t (TEKSTER 8,5/8,5 · MOCKUPS 0/5 · BATCH4 0,5/0,5 · GENTILDELING 0,4/0,4 · MOBIL-OG-SAESON 3/3) |
 | **SEO-indholdsproduktion** | **100 %** | 14 af 14 guides (BATCH 3/3 · COPY 4/4 · CORSET 1/1 · DKK 6/6) |
 | **Døde internlinks** | **100 %** | 39 af 39 links (FIX 39/39) |
@@ -61,12 +61,12 @@ _Opdateret 2026-11-11 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `ee02c33 Modul: P9.1 — Cirla-siden i Steamgears-menuen Før: 100 %  →  Efter: 100 %  (Δ 0) Grundlag: 34,1 af 34,1 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5 · P3.7 0,6/0,6 · P3.8 0,3/0,3 · P3.9 0,25/0,25 · P1.25 0,15/0,15 · P1.24 0,35/0,35 · P1.23 0,25/0,25 · P6 0,9/0,9 · P7 0,3/0,3 · P8 0,8/0,8 · P9 0,35/0,35)`
+- `da1e6d1 Modul: docs-pdf — PDF fra dokumentbiblioteket Før: —  →  Efter: —  (Δ —) Grundlag: 1 PDF-filer i reports/ renderet med tools/md_to_pdf.py — ingen ændring i projektstatus`
+- `df8c97c chore(status): daglig projektstatus 2026-11-11`
 - `023adbe Modul: Cirla C6 — røgtesten i §9.5 målt på et rigtigt WordPress Før: 56,7 %  →  Efter: 80,0 %  (Δ +23,3) Grundlag: 2,4 af 3 d (C1 0,35/0,35 · C2 0,2/0,2 · C3 0,4/0,4 · C4 0,25/0,25 · C5 0,2/0,2 · C6 0,8/0,8 · C7 0/0,6 · C8 0,2/0,2)`
 - `863634a chore(status): daglig projektstatus 2026-11-11`
 - `3fc2e21 Modul: Cirla — AI-indholdsmodul (C1-C8) Før: —  →  Efter: 56,7 %  (Δ —) Grundlag: 1,7 af 3 d (C1 0,35/0,35 · C2 0,2/0,2 · C3 0,4/0,4 · C4 0,25/0,25 · C5 0,2/0,2 · C6 0,1/0,8 · C7 0/0,6 · C8 0,2/0,2)`
-- `702c51a Modul: P9.1 — patch notes ved hver version Før: —  →  Efter: —  (Δ —) Grundlag: ingen ændring — dokumentation og værktøj, plugin står stadig 34,1 af 34,1 d`
-- `887a4aa chore(status): daglig projektstatus 2026-11-11`
-- `0f47845 Modul: docs-pdf — PDF fra dokumentbiblioteket Før: —  →  Efter: —  (Δ —) Grundlag: 4 PDF-filer i reports/ renderet med tools/md_to_pdf.py — ingen ændring i projektstatus`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)

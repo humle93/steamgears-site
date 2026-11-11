@@ -10,6 +10,25 @@ Noterne er skrevet ud fra commit-historikken og de dokumenter der hører til hve
 
 <!-- patch-notes: baseline 7.65.0 -->
 
+## 7.73.0 — 2026-11-11
+
+**Loggen på Cirla-siden kan ses én handling ad gangen.**
+
+### Tilføjet
+- `SGAP_Cirla::entries($limit, $action)` kan nu læse én handling; uden filter er svaret som før.
+- Faner øverst i log-kortet — *All*, *Read the status*, *Write one draft*, *Run the SEO check*,
+  *Suggest social posts* — med antal rækker i hver, så det er synligt hvor loggen har noget at vise.
+  Den valgte fane er tekst med `aria-current="page"`, de andre er links (`?page=sgap-cirla&cirla_log=draft`).
+- Ukendte eller opdigtede filtre falder tilbage til *All* i stedet for at give en tom side.
+
+### Bevaret
+- Den oprindelige tomme tilstand, når loggen slet ikke har rækker.
+- En ny tom tilstand for et filter uden rækker: »No *Write one draft* rows in the last 20« med et link
+  tilbage til alle rækker.
+
+### Målt
+- 6 nye smoke-checks (1 490 → 1 496 PASS, 0 FAIL), `php -l` rent, fejlscan uden fund.
+
 ## 7.72.0 — 2026-11-11
 
 **Cirla har fået sin egen side i Steamgears-menuen — den kan bruges uden MCP.**
