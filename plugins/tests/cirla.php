@@ -69,12 +69,14 @@ check('cirla: nothing was written to the queue', !str_contains($log, 'sgap_queue
 
 // ---- the same task twice is one draft ----
 $GLOBALS['wpdb']->next = 42;
+$GLOBALS['wpdb']->row = ['id' => 42, 'title' => 'The brass goggles are back', 'channel' => 'facebook'];
 $before = substr_count(implode("\n", $GLOBALS['wpdb']->log), 'INSERT wp_sgap_ai_drafts');
 $again = SGAP_Cirla::draft(['topic' => 'Brass goggles', 'channel' => 'facebook']);
 $after = substr_count(implode("\n", $GLOBALS['wpdb']->log), 'INSERT wp_sgap_ai_drafts');
 check('cirla: the same task twice does not make a second draft', ($again['duplicate'] ?? false) === true
     && (int) ($again['id'] ?? 0) === 42 && $before === $after);
 $GLOBALS['wpdb']->next = null;
+$GLOBALS['wpdb']->row = null;
 
 // ---- the quality gate stops a dead link, and says so ----
 // The gate is set explicitly: the campaign-agent tests leave it off, and a gate that is
@@ -141,3 +143,33 @@ check('cirla: the daily job does nothing when it is called while off', (function
     SGAP_Cirla::tick();
     return get_option('sgap_cirla_last_tick') === $before;
 })());
+
+// ---- every refusal carries a status code, so a client can tell a limit from a failure ----
+// Målt på et rigtigt WordPress: før 7.71.2 blev et brugt budget og en gate-blokering sendt som HTTP 500.
+SGAP_Settings::set('cirla_enabled', 'yes');
+$GLOBALS['deny_caps'] = ['sgap_cirla_run'];
+$coded_forbidden = SGAP_Cirla::draft(['topic' => 'No capability']);
+check('cirla: a missing capability answers 403', $coded_forbidden instanceof WP_Error
+    && ($coded_forbidden->get_error_data()['status'] ?? 0) === 403);
+$GLOBALS['deny_caps'] = [];
+$today = substr((string) current_time('mysql'), 0, 10);
+$GLOBALS['opts']['sgap_cirla_spend'] = ['date' => $today, 'n' => 5];
+$coded_budget = SGAP_Cirla::draft(['topic' => 'Budget again']);
+check('cirla: a spent budget answers 429, not a server error', $coded_budget instanceof WP_Error
+    && ($coded_budget->get_error_data()['status'] ?? 0) === 429);
+$GLOBALS['opts']['sgap_cirla_spend'] = ['date' => $today, 'n' => 0];
+$GLOBALS['filters']['sgap_cirla_generate'] = fn() => [[
+    'channel' => 'facebook', 'title' => 'Read this', 'hashtags' => '', 'alt_text' => '',
+    'text' => 'A page nobody can open: https://steamgears.eu/draft-page/'
+]];
+SGAP_Settings::set('quality_gate', 'block');
+$GLOBALS['postid_for']['https://steamgears.eu/draft-page/'] = 77;
+$GLOBALS['poststatus'][77] = 'draft';
+$coded_gate = SGAP_Cirla::draft(['topic' => 'A page that is still a draft']);
+check('cirla: the gate block answers 422', $coded_gate instanceof WP_Error
+    && $coded_gate->get_error_code() === 'sgap_cirla_gate' && ($coded_gate->get_error_data()['status'] ?? 0) === 422);
+SGAP_Settings::set('quality_gate', $gate_mode_before);
+SGAP_Settings::set('cirla_enabled', 'no');
+$coded_off = SGAP_Cirla::draft(['topic' => 'while off']);
+check('cirla: a call while the module is off answers 409', $coded_off instanceof WP_Error
+    && ($coded_off->get_error_data()['status'] ?? 0) === 409);

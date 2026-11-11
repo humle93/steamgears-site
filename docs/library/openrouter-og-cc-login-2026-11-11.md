@@ -1,4 +1,4 @@
-# OpenRouter som standard og log ind i Command Center med ét klik (Autopilot 7.72.0)
+# OpenRouter som standard og log ind i Command Center med ét klik (Autopilot 7.76.0)
 
 **P10 — ejeren bad om to ting 11/11: »flyt til OpenRouter« og »lav en log ind i Command Center-knap i
 Steamgears-pluginnet«.** Dette dokument er målingen af det, der blev bygget, og af den fejl, der blev fundet
@@ -58,18 +58,18 @@ ind igen derovre.
 
 | Kontrol | Resultat |
 | --- | --- |
-| `php plugins/tests/smoke.php` | 1 471 → 1 516 PASS, 0 FAIL (45 nye i `plugins/tests/cc-login.php`) |
+| `php plugins/tests/smoke.php` | 1 505 → 1 550 PASS, 0 FAIL (45 nye i `plugins/tests/cc-login.php`) |
 | Mutationstjek | En ændret HMAC giver `FAIL p10 cc: the ticket is signed with HMAC-SHA256 over the payload` og exit 1 |
 | `php -l` på alle PHP-filer | ingen fejl |
-| Zip mod kilde (CI-trinnet *Zip matches source*) | `Zip is up to date (v7.72.0)`, 72 filer |
+| Zip mod kilde (CI-trinnet *Zip matches source*) | `Zip is up to date (v7.76.0)`, 74 filer |
 | `bash tools/natlige-vaern.sh` | 40 af 42 grønne; de to røde er miljøet: `fpdf` manglede, og S5-målingen kan ikke nå steamgears.eu fra sandkassen |
 
 **Ikke verificeret:** et rigtigt billedkald til OpenRouter, et login mod en kørende Command Center på sitet, og
-installationen på steamgears.eu. 7.72.0 ligger i repoet, ikke på sitet.
+installationen på steamgears.eu. 7.76.0 ligger i repoet, ikke på sitet.
 
 ## Sådan tages det i brug
 
-1. Installér 7.72.0 (zip'en i `plugins/`).
+1. Installér 7.76.0 (zip'en i `plugins/`).
 2. Opret en nøgle på openrouter.ai/keys. Læg den som OpenRouter-reserve under *Settings → Keys* og vælg en
    model, og tryk *Switch to OpenRouter now* — eller vælg OpenRouter direkte under *AI content*.
 3. Vælg en billedmodel under *AI content → OpenRouter image model*.

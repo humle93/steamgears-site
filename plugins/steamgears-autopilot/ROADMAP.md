@@ -498,7 +498,7 @@ stopper et dødt link; samme opgave to gange giver ingen dublet; dagligt AI-loft
 mens modulet er slukket, at alle fire handlinger forsvinder når det slås fra, og at kladderne bliver liggende.
 Bevis: [`../docs/library/cirla-modul-2026-11-10.md`](../docs/library/cirla-modul-2026-11-10.md). 0,35 d.
 
-### P10 — OpenRouter som standard + log ind i Command Center med ét klik (7.72.0)
+### P10 — OpenRouter som standard + log ind i Command Center med ét klik (7.76.0)
 
 **Hvorfor:** ejeren vil væk fra AIMLAPI og over på OpenRouter, og knappen *Log ind i Command Center* skal logge
 ind — ikke bare åbne login-siden. Fundet undervejs (11/11): Command Centers engangslink (`POST /autopilot/login-link`
@@ -516,12 +516,12 @@ plugins` er tom), så det flow har aldrig kunnet virke.
 | `includes/studio.php` | `SGAP_Images::backend()`: billeder via OpenRouter (`modalities: image`, data-URL) når nøgle + billedmodel findes, ellers AIMLAPI som før |
 | `includes/command-center.php` | `POST /sgap/v1/cc-link` (CC lægger adresse + hemmelig nøgle), `admin_post_sgap_cc_login` laver en HMAC-signeret billet (60 s, `jti`) og sender browseren til `{cc}/cc-sso` |
 | `plugins/tests/cc-login.php` (ny), `plugins/tests/smoke.php` | checks for billet, signatur, udløb, rettigheder, ruten, billed-backend og flytte-knappen |
-| `steamgears-autopilot.php`, `README.md`, zip | version 7.72.0 |
+| `steamgears-autopilot.php`, `README.md`, zip | version 7.76.0 |
 
 Command Center-siden (repoet `command-center`, v7.27.0): nøglen genereres og sendes ved hver sync, `GET /cc-sso`
 verificerer signatur, udløb og engangsbrug og kræver en CC-bruger med samme e-mail; det døde `/cc-login`-flow fjernes.
 
-**Status 11/11: færdig i repoet (0,5 af 0,5 d), 1 471 → 1 516 PASS.** Ikke installeret på sitet endnu.
+**Status 11/11: færdig i repoet (0,5 af 0,5 d), 1 505 → 1 550 PASS.** Ikke installeret på sitet endnu.
 
 **Estimat 0,5 d, fordelt:** OpenRouter som standard + flytte-knap 0 → 30 % (0,15 d) · billeder via OpenRouter
 30 → 50 % (0,1 d) · login-billet og `cc-link`-ruten 50 → 70 % (0,1 d) · tests, `php -l`, zip og dokumentation
@@ -640,8 +640,13 @@ Platform limits: [Instagram content publishing](https://developers.facebook.com/
 
 ## 9. Change log for this document
 
-- **7.72.0 (11/11) — P10: OpenRouter som standard, billeder via OpenRouter og log ind i Command Center med ét klik.** OpenRouter er standardudbyder (kun når intet er gemt) og står først i guiden og på nøglesiden; AIMLAPI er markeret *udfases*, men et gemt AIMLAPI-valg virker stadig. Ny fil `includes/openrouter.php`: advarsel mens AIMLAPI er valgt, og *Switch to OpenRouter now*, når reservenøgle og -model findes. `SGAP_Images::backend()` laver billeder via OpenRouter (`modalities: image`, data-URL) når nøgle + `openrouter_image_model` findes, ellers AIMLAPI som før. `POST /sgap/v1/cc-link` gemmer Command Centers adresse og fælles nøgle (ikke autoload); knappen laver en HMAC-billet (60 s, `jti`) til `{cc}/cc-sso`. Fund: CC's gamle engangslink sendte til `POST /sgap/v1/login-link`, en rute der aldrig har fandtes. **45 nye checks (1 471 → 1 516 PASS, 0 FAIL)** i `plugins/tests/cc-login.php`. Ikke verificeret: et rigtigt OpenRouter-billedkald og et login mod den kørende Command Center.
+- **7.76.0 (11/11) — P10: OpenRouter som standard, billeder via OpenRouter og log ind i Command Center med ét klik.** OpenRouter er standardudbyder (kun når intet er gemt) og står først i guiden og på nøglesiden; AIMLAPI er markeret *udfases*, men et gemt AIMLAPI-valg virker stadig. Ny fil `includes/openrouter.php`: advarsel mens AIMLAPI er valgt, og *Switch to OpenRouter now*, når reservenøgle og -model findes. `SGAP_Images::backend()` laver billeder via OpenRouter (`modalities: image`, data-URL) når nøgle + `openrouter_image_model` findes, ellers AIMLAPI som før. `POST /sgap/v1/cc-link` gemmer Command Centers adresse og fælles nøgle (ikke autoload); knappen laver en HMAC-billet (60 s, `jti`) til `{cc}/cc-sso`. Fund: CC's gamle engangslink sendte til `POST /sgap/v1/login-link`, en rute der aldrig har fandtes. **45 nye checks (1 505 → 1 550 PASS, 0 FAIL)** i `plugins/tests/cc-login.php`. Ikke verificeret: et rigtigt OpenRouter-billedkald og et login mod den kørende Command Center.
 
+- **7.75.0 (11/11) — log-rækkerne siger hvad målet hedder.** `SGAP_Cirla::pending_draft($id)` giver både eksistens og titel i én query, og `draft_exists()` bygger på den; `row_target()` leverer url og titel samlet, så en draft-række læses »Draft #7 · Brass goggles« og seo/social-rækker »SEO check · sidens titel«. Mål der er væk giver hverken link eller titel. Smoke: 1 505 PASS (1 504 → 1 505).
+- **7.74.0 (11/11) — log-rækkerne peger på det de handler om.** `SGAP_Cirla::log($action, $result, $meta)` gemmer målets id; draft-rækker linker til kladden på AI Drafts (`#sgap-draft-<id>`, anker tilføjet i `core.php`) og seo/social-rækker til sidens editor. Der linkes kun når målet stadig findes — ellers ren tekst, så ingen døde links. 8 nye checks (1 496 → 1 504 PASS).
+- **7.73.0 (11/11) — loggen på Cirla-siden kan filtreres pr. handling.** `SGAP_Cirla::entries($limit, $action)` læser én handling; siden har faner med antal for All/status/draft/seo/social, viser kun den valgte handlings rækker og beholder to tomme tilstande (tom log, tomt filter med »Show all N rows«). 6 nye checks (1 490 → 1 496 PASS).
+- **7.72.0 (11/11) — Cirla fik sin egen side i Steamgears-menuen.** `modules/cirla/class-cirla-admin.php` indlæses sammen med modulet og kun i wp-admin: tilstand, de fire handlinger som knapper gennem `admin-post.php` med nonce og `manage_options`, resultatet som tabel og modulets log. 15 nye checks (1 475 → 1 490 PASS).
+- **7.71.1 (11/11) — patch notes er nu en fast del af hver udgivelse.** `CHANGELOG.md` i pluginnet med noter fra 7.65.0 og frem, `tools/patch_notes.py --check` som værn i `tools/natlige-vaern.sh` og i release-gaten, og reglen i AGENTS.md §7.4 om at noten også skal med i svaret til ejeren. Ingen PHP-adfærd ændret.
 - **7.71.0 (10/11) — P9: Cirla er et modul, der kan slås til og fra, og som er slukket som standard.** Modulfilen `modules/cirla/class-cirla.php` indlæses kun, når `sgap_cirla_enabled` er `yes`, så et modul der er slået fra ikke kan registrere én ability eller ét cron-job. Fire handlinger bag capabilityen `sgap_cirla_run` (status, én kladde, SEO-tjek, forslag); kladden gemmes som `pending` med `angle = cirla` og køes eller publiceres aldrig, kvalitetsgaten stopper et dødt link, samme opgave to gange giver ingen dublet, og et dagligt loft på 5 AI-kald plus filteret `sgap_cirla_generate` holder omkostningen nede. 28 nye checks (1 443 → 1 471 PASS). Bevis: `docs/library/cirla-modul-2026-11-10.md`.
 
 - **7.70.0 (10/11) — P8: agenterne læser sidens målte tilstand i stedet for en fast antagelse.** Hver skribent

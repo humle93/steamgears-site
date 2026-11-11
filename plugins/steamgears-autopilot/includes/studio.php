@@ -15,7 +15,7 @@ class SGAP_Images {
 
     /**
      * Where images are made. OpenRouter when it has a key (main or backup) and an image model —
-     * that is the path since 7.72.0 (P10). Otherwise AIMLAPI as before, so a site keeps its images
+     * that is the path since 7.76.0 (P10). Otherwise AIMLAPI as before, so a site keeps its images
      * until OpenRouter is set up. '' when neither works.
      */
     public static function backend(): string {

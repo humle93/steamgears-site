@@ -309,12 +309,48 @@
           "verified": true
         },
         {
+          "id": "p91",
+          "name": "P9.1 — Cirla-siden i Steamgears-menuen",
+          "done": 0.3,
+          "total": 0.3,
+          "unit": "d",
+          "note": "7.72.0: modules/cirla/class-cirla-admin.php indlæses sammen med modulet og kun i wp-admin. Siden under Create viser modulets tilstand (til/fra, næste daglige job, AI-budget, kladder under AI Drafts), de fire handlinger som formularer gennem admin-post.php med nonce og manage_options, resultatet som tabel og modulets log. Målt på en rigtig WordPress 7.1.4: GET /wp-admin/admin.php?page=sgap-cirla gav 200 med fire formularer, og en POST gennem sidens eget flow gav 302 tilbage, én ny kladde (5 → 6, angle = cirla, status = pending) og en resultattabel; med modulet slået fra findes siden ikke. 15 nye checks (1 475 → 1 490 PASS, 0 FAIL).",
+          "verified": true
+        },
+        {
+          "id": "p92",
+          "name": "P9.2 — Logfilter på Cirla-siden",
+          "done": 0.2,
+          "total": 0.2,
+          "unit": "d",
+          "note": "7.73.0: SGAP_Cirla::entries($limit, $action) kan læse én handling; siden har faner med antal for All/status/draft/seo/social og viser kun den valgte handlings rækker. To tomme tilstande: den oprindelige når loggen er tom, og »No <handling> rows in the last 20« med »Show all N rows« når filteret ikke matcher. Ukendte filtre falder tilbage til All. Målt på WordPress 7.1.4 med fire seedede log-rækker: fanerne viste All (4) / status (1) / draft (2) / seo (1) / social (0), ?cirla_log=draft viste kun de to kladde-rækker, ?cirla_log=social gav tom-tilstanden med »Show all 4 rows«, og ?cirla_log=nonsense faldt tilbage til All (4). 6 nye checks (1 490 → 1 496 PASS, 0 FAIL).",
+          "verified": true
+        },
+        {
+          "id": "p93",
+          "name": "P9.3 — Handlingsrettede log-rækker på Cirla-siden",
+          "done": 0.25,
+          "total": 0.25,
+          "unit": "d",
+          "note": "7.74.0: SGAP_Cirla::log($action,$result,$meta) gemmer målets id; draft-rækker linker til kladden på AI Drafts via ankeret #sgap-draft-<id> (tilføjet i includes/core.php), og seo/social-rækker til sidens editor. SGAP_Cirla::draft_exists() er offentlig og svarer kun ja for kladder der stadig venter, så godkendte, afviste og slettede kladder samt slettede sider giver ren tekst i stedet for et dødt link; gamle rækker uden id er også ren tekst. Målt på WordPress 7.1.4: en ægte draft gennem sidens formular gav en log-række med id, et link til page=sgap-ai#sgap-draft-<id> og et matchende anker på AI Drafts-siden; ægte seo- og social-kald gav post.php?post=5-links; seedede rækker med id 999999 gav 0 links og stod som tekst; filteret cirla_log=draft beholdt linket og skjulte seo-rækken; tomt filter og tom log viste de to tomme tilstande. 8 nye checks (1 496 → 1 504 PASS, 0 FAIL).",
+          "verified": true
+        },
+        {
+          "id": "p94",
+          "name": "P9.4 — Titel og link i Cirla-loggens rækker",
+          "done": 0.2,
+          "total": 0.2,
+          "unit": "d",
+          "note": "7.75.0: SGAP_Cirla::pending_draft($id) svarer i én query på både om kladden stadig venter og hvad den hedder, og draft_exists() bygger på den, så der er én eksistens-kontrol. SGAP_Cirla_Admin::row_target() giver url og titel samlet: draft-rækker læses »Draft #8 · Titel i loggen« med link til #sgap-draft-8, seo/social-rækker »SEO check · <sidens titel>« / »Suggestions · <sidens titel>« med link til editoren. Målt på WordPress 7.1.4: ægte draft gav titel+link og ankeret fandtes på AI Drafts; ægte seo/social mod post 5 gav »SEO check · Steampunk-kataloget 2026« og »Suggestions · Steampunk-kataloget 2026« med post.php?post=5-links; seedede rækker med id 999999 gav 0 links og 0 titler og stod som tekst; filteret cirla_log=draft beholdt titel-linket; tomt filter og tom log viste de to tomme tilstande. Smoke 1 505 PASS (1 504 → 1 505).",
+          "verified": true
+        },
+        {
           "id": "p10",
           "name": "P10 — OpenRouter som standard + log ind i Command Center med ét klik",
           "done": 0.5,
           "total": 0.5,
           "unit": "d",
-          "note": "7.72.0: OpenRouter er standardudbyder (kun når intet er gemt) og står først i guide og nøgleside; AIMLAPI markeret 'being phased out', men et gemt valg virker stadig. includes/openrouter.php: advarsel + 'Switch to OpenRouter now' når reserven har nøgle og model. SGAP_Images::backend(): billeder via OpenRouter (modalities image, data-URL) med openrouter_image_model, ellers AIMLAPI. POST /sgap/v1/cc-link gemmer CC-adresse + fælles nøgle (ikke autoload); knappen laver en HMAC-SHA256-billet (60 s, 128-bit jti) til {cc}/cc-sso. Fund: CC's gamle POST /sgap/v1/login-link havde aldrig en rute i pluginnet. 45 nye checks, 1 471 → 1 516 PASS, 0 FAIL; mutationstjek af signaturen fejler som forventet; zip matcher kilden (72 filer). IKKE verificeret: rigtigt OpenRouter-billedkald, login mod kørende CC, installation på sitet. Bevis: docs/library/openrouter-og-cc-login-2026-11-11.md.",
+          "note": "7.76.0: OpenRouter er standardudbyder (kun når intet er gemt) og står først i guide og nøgleside; AIMLAPI markeret 'being phased out', men et gemt valg virker stadig. includes/openrouter.php: advarsel + 'Switch to OpenRouter now' når reserven har nøgle og model. SGAP_Images::backend(): billeder via OpenRouter (modalities image, data-URL) med openrouter_image_model, ellers AIMLAPI. POST /sgap/v1/cc-link gemmer CC-adresse + fælles nøgle (ikke autoload); knappen laver en HMAC-SHA256-billet (60 s, 128-bit jti) til {cc}/cc-sso. Fund: CC's gamle POST /sgap/v1/login-link havde aldrig en rute i pluginnet. 45 nye checks, 1 505 → 1 550 PASS, 0 FAIL; mutationstjek af signaturen fejler som forventet; zip matcher kilden (74 filer); interop: en billet fra SGAP_CC::ticket() blev godkendt af Command Center 7.27.0 og anden gang afvist som brugt. Oprindeligt bygget som 7.72.0 og flyttet oven på 7.75.0 (Cirla P9.1-P9.4). IKKE verificeret: rigtigt OpenRouter-billedkald, login mod kørende CC, installation på sitet. Bevis: docs/library/openrouter-og-cc-login-2026-11-11.md.",
           "verified": true
         }
       ],
@@ -595,6 +631,86 @@
         }
       ],
       "verified": false
+    },
+    {
+      "id": "cirla",
+      "name": "Cirla — AI-indholdsmodul",
+      "note": "modulet i Autopilot (P9) er trin 1 af dokumentets §9.4; projektet her følger hele vejen fra modul til produktion",
+      "next": "Ejerens tur: installer plugins/steamgears-autopilot-v7.71.1.zip (repoet er privat, så selvopdateringen ikke kan hente den), slå modulet til under Settings & keys → Cirla, og kør cirla-status over MCP. Derefter røgtesten i §9.5 mod et rigtigt WordPress (fra → til → fra), opret Cirla-brugeren med begrænset rolle og kun sgap_cirla_run, og overvåg 24 timer efter §9.6. Bevis for det der er bygget: docs/library/cirla-modul-2026-11-10.md (+ PDF).",
+      "blocked_by": "Ingen WordPress-installation har kørt modulet: indstillingsformularen, dbDelta-opgraderingen af en kørende installation og et rigtigt AI-kald er ikke målt, og sitet kører 7.70.1 (målt 10/11). Kræver ejerens adgang til Plugins → Tilføj nyt og MCP-adgang til sitet.",
+      "modules": [
+        {
+          "id": "c1",
+          "name": "C1 — modulmappe og betinget indlæsning",
+          "done": 0.35,
+          "total": 0.35,
+          "unit": "d",
+          "note": "§9.4.1: modules/cirla/class-cirla.php kræves kun, når sgap_cirla_enabled er yes; slået fra findes klassen ikke. Målt i smoke: 0 cirla-abilities og 0 cron-job i fra-tilstand.",
+          "verified": true
+        },
+        {
+          "id": "c2",
+          "name": "C2 — til/fra-indstilling",
+          "done": 0.2,
+          "total": 0.2,
+          "unit": "d",
+          "note": "§9.4.2: sgap_cirla_enabled (standard no) i SGAP_Install::DEFAULTS, egen sektion i Settings & keys, fire nøgler i includes/core.php, og wp_clear_scheduled_hook('sgap_cirla_daily') både ved fra-tilstand og i SGAP_Install::deactivate().",
+          "verified": true
+        },
+        {
+          "id": "c3",
+          "name": "C3 — fire sikre handlinger",
+          "done": 0.4,
+          "total": 0.4,
+          "unit": "d",
+          "note": "§9.4.3: cirla-status, cirla-draft, cirla-seo-check og cirla-social-suggestions bag capabilityen sgap_cirla_run. Uden rettighed afvises med sgap_cirla_forbidden, og ingen handling publicerer eller sletter permanent.",
+          "verified": true
+        },
+        {
+          "id": "c4",
+          "name": "C4 — AI-laget med dagligt loft",
+          "done": 0.25,
+          "total": 0.25,
+          "unit": "d",
+          "note": "§9.4.4: genbrug af SGAP_AI (ingen ny nøgle), dagligt loft sgap_cirla_daily_calls (standard 5, 0 = ingen) og filteret sgap_cirla_generate. Ikke målt: et rigtigt AI-kald fra et WordPress — kaldet er stubbet gennem filteret i testen.",
+          "verified": true
+        },
+        {
+          "id": "c5",
+          "name": "C5 — kvalitetsgate og kladdekø",
+          "done": 0.2,
+          "total": 0.2,
+          "unit": "d",
+          "note": "§9.4.5: kladden gemmes som pending i sgap_ai_drafts med angle = cirla, et dødt link stoppes af sgap_cirla_gate og logges, samme opgave to gange giver ingen dublet, og intet lægges i køen eller publiceres.",
+          "verified": true
+        },
+        {
+          "id": "c6",
+          "name": "C6 — røgtesten i §9.5 mod et rigtigt WordPress",
+          "done": 0.8,
+          "total": 0.8,
+          "unit": "d",
+          "note": "Målt 11/11 på et rigtigt WordPress 7.1.4 (PHP 8.3.14, SQLite-driver, php -S): modulet indlæses kun når sgap_cirla_enabled er yes (slukket: klasse væk, 0 abilities blandt 82, ingen cron), tændt via update-settings gav 4 abilities og et planlagt dagligt job, SGAP_Install::activate() kørte som dbDelta-opgradering uden fejl (wp_sgap_ai_drafts, 19 kolonner), og alle fire handlinger blev kaldt over HTTP: cirla-status 200, cirla-seo-check 200, cirla-social-suggestions 200 (2 forslag, intet gemt) og cirla-draft 200 (pending, angle = cirla). Kvalitetsgaten stoppede et link til en kladde med 422 uden at gemme en række, det daglige loft stoppede kald 6 med 429, 5 kladder stod pending med 0 i køen og 0 publiceret, en subscriber blev afvist med 403, og fra-tilstanden gav 404 på ruten uden at miste kladder. Fundet og rettet i 7.71.2: WP_Error uden status gav HTTP 500 (4 nye smoke-checks, 1 475 PASS). Bevis: docs/library/cirla-wordpress-roegtest-2026-11-11.md (+ PDF). Ikke målt: AI-svaret kom fra sgap_cirla_generate-filteret (ingen nøgle), databasen er SQLite, og kaldene gik over wp-abilities/v1, ikke gennem en MCP-klient.",
+          "verified": true
+        },
+        {
+          "id": "c7",
+          "name": "C7 — fra test til produktion (§9.6)",
+          "done": 0.0,
+          "total": 0.6,
+          "unit": "d",
+          "note": "Installer 7.71.1 med modulet slukket, opret Cirla-brugeren med begrænset rolle og kun sgap_cirla_run, slå modulet til via update-settings, overvåg 24 timer, og luk med at slå fra som rollback. Intet er kørt på sitet endnu."
+        },
+        {
+          "id": "c8",
+          "name": "C8 — dokumentation og patch notes",
+          "done": 0.2,
+          "total": 0.2,
+          "unit": "d",
+          "note": "docs/library/cirla-modul-2026-11-10.md (+ PDF) med målt røgtest og afvigelser, patch notes i CHANGELOG.md 7.71.0/7.71.1, P9-sektionen i ROADMAP.md og punkt 3 lukket i docs/samtalepunkter.md.",
+          "verified": true
+        }
+      ]
     }
   ],
   "history": [
@@ -2307,7 +2423,7 @@
       "before": 100.0,
       "after": 100.0,
       "delta": 0.0,
-      "basis": "34,6 af 34,6 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5 · P3.7 0,6/0,6 · P3.8 0,3/0,3 · P3.9 0,25/0,25 · P1.25 0,15/0,15 · P1.24 0,35/0,35 · P1.23 0,25/0,25 · P6 0,9/0,9 · P7 0,3/0,3 · P8 0,8/0,8 · P9 0,35/0,35 · P10 0,5/0,5)"
+      "basis": "35,55 af 35,55 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5 · P3.7 0,6/0,6 · P3.8 0,3/0,3 · P3.9 0,25/0,25 · P1.25 0,15/0,15 · P1.24 0,35/0,35 · P1.23 0,25/0,25 · P6 0,9/0,9 · P7 0,3/0,3 · P8 0,8/0,8 · P9 0,35/0,35 · P9.1 0,3/0,3 · P9.2 0,2/0,2 · P9.3 0,25/0,25 · P9.4 0,2/0,2 · P10 0,5/0,5)"
     },
     {
       "date": "2026-11-11",
@@ -2353,6 +2469,24 @@
       "after": 57.4,
       "delta": 0,
       "basis": "19,5 af 34 t (Niche-valg, brand og produktstige 2/2 · ROI-model og enhedsøkonomi 2/2 · 30-dages plan og KPI-gates 2/2 · Kreativt: ti hooks som manuskript 2/2 · Kravliste: butik, betaling, tracking og jura 1,5/1,5 · Butiksopsætning: Shopify, MobilePay, CAPI, sider 0/6 · Leverandørvalg, GPSR-dokumentation og prøver 0/4 · Juridiske sider: handelsbetingelser, retur, privatliv 2/2,5 · Første annoncerunde uge 1-2 0/4 · Niche-portefølje: roadmap og færdig butikstekst 6/6 · Jura og måltabel: de tre øvrige butikker 1/1 · Flademåling: annoncer, mails, kontakter og værn 1/1)"
+    },
+    {
+      "date": "2026-11-11",
+      "project": "Cirla — AI-indholdsmodul",
+      "module": "baseline",
+      "before": null,
+      "after": 56.7,
+      "delta": null,
+      "basis": "1,7 af 3 d (C1 0,35/0,35 · C2 0,2/0,2 · C3 0,4/0,4 · C4 0,25/0,25 · C5 0,2/0,2 · C6 0,1/0,8 · C7 0/0,6 · C8 0,2/0,2)"
+    },
+    {
+      "date": "2026-11-11",
+      "project": "Cirla — AI-indholdsmodul",
+      "module": "daglig måling",
+      "before": 56.7,
+      "after": 80.0,
+      "delta": 23.3,
+      "basis": "2,4 af 3 d (C1 0,35/0,35 · C2 0,2/0,2 · C3 0,4/0,4 · C4 0,25/0,25 · C5 0,2/0,2 · C6 0,8/0,8 · C7 0/0,6 · C8 0,2/0,2)"
     }
   ]
 }

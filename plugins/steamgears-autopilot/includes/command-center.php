@@ -6,7 +6,7 @@
  * the plugin can show "Command Center connected" and the self-check can warn
  * when a dashboard that used to call stops doing so. Nothing here calls out.
  *
- * One-click login (7.72.0, P10): Command Center puts its public address and a shared
+ * One-click login (7.76.0, P10): Command Center puts its public address and a shared
  * secret here with POST /sgap/v1/cc-link on every sync. The "Log ind i Command Center"
  * button then signs a ticket for the WordPress user who clicked (HMAC-SHA256, valid 60 s,
  * a random jti that Command Center accepts once) and sends the browser to {cc}/cc-sso.

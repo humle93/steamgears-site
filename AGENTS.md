@@ -247,6 +247,22 @@ Gælder alt arbejde i `plugins/`.
   (den manuelle vej under *Plugins → Tilføj nyt → Upload* virker stadig og står i
   [`repo-privat-2026-11-08.md`](docs/library/repo-privat-2026-11-08.md)).
 
+### 7.4 Patch notes ved hver version (obligatorisk)
+
+- Hver gang plugin'et får et nyt versionsnummer, skal `plugins/steamgears-autopilot/CHANGELOG.md` have en
+  note øverst med **versionsnummer, dato og hvad der blev tilføjet/ændret/rettet** — ikke kun »div.
+  rettelser«. Noten skrives i samme commit som versionsbumpet, så den aldrig kommer bagefter.
+- Noten skal **også med i svaret til ejeren**: versionsnummeret plus de vigtigste punkter, ikke et link
+  alene. `python3 tools/patch_notes.py --latest` printer den nyeste note klar til at klippe ind.
+- `python3 tools/patch_notes.py --check` kræver at nyeste note matcher `SGAP_VERSION`, header og
+  zip-navn, at versionerne står i faldende rækkefølge uden dubletter, at hver note har mindst ét punkt og
+  en gyldig dato, og at der ikke mangler en note for en version der findes i git-historikken efter
+  baseline. Den kører i [`tools/natlige-vaern.sh`](tools/natlige-vaern.sh) og i
+  `tools/release.py --check --guards`, så en udgivelse uden patch note bliver rød — også når det er den
+  natlige kørsel der opdager det.
+- Versioner før `<!-- patch-notes: baseline 7.65.0 -->` er ikke backfillet; deres historik står i git og i
+  README's afsnit pr. funktion. Baseline flyttes kun opad, aldrig ned.
+
 ## 8. Context-håndtering — samtalens vigtigste punkter
 
 Når klientens **context meter nærmer sig 95 %**, eller når samtalen står foran en komprimering, skal det

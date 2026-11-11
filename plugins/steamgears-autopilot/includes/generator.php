@@ -131,7 +131,7 @@ class SGAP_AI {
     private static array $fallback = [];
 
     /**
-     * The chosen provider. OpenRouter is the default since 7.72.0 (P10): a site that never saved a
+     * The chosen provider. OpenRouter is the default since 7.76.0 (P10): a site that never saved a
      * provider starts there, and so does an unknown value. A saved choice — AIMLAPI included — is
      * kept until the owner switches, so an update never cuts off a working key.
      */

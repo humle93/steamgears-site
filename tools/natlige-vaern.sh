@@ -123,6 +123,7 @@ check "rebrand-apply-selftest"               python3 tools/rebrand_apply.py --se
 # veksler koden server-side testes offline — selve vekslingen kræver ejerens app-id.
 check "pinterest-forbindelse-selftest"       python3 tools/pinterest_connect.py --selftest
 check "fejlscan-selftest"                    python3 tools/fejlscan.py --selftest
+check "Patch notes" python3 tools/patch_notes.py --check
 check "fejlscan"                             python3 tools/fejlscan.py
 # De fire niche-payloads: økonomien regnes efter på ny, ejerfelterne tælles, og
 # "ads: true" på en vare under 120 kr i break-even-CPA afvises. Driftstjekket fanger

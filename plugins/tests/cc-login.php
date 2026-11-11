@@ -1,6 +1,6 @@
 <?php
 /**
- * P10 (7.72.0): OpenRouter as the default provider, images through OpenRouter, the
+ * P10 (7.76.0): OpenRouter as the default provider, images through OpenRouter, the
  * "Switch to OpenRouter now" button and the one-click login to Command Center.
  * Required from smoke.php, so $GLOBALS['opts'], the stubs and check() are already here.
  */

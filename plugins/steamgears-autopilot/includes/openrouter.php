@@ -1,6 +1,6 @@
 <?php
 /**
- * P10 (7.72.0): moving the site from AIMLAPI to OpenRouter.
+ * P10 (7.76.0): moving the site from AIMLAPI to OpenRouter.
  *
  * AIMLAPI is being phased out, but a saved AIMLAPI choice keeps working: an update must never cut off
  * the key the site is writing with. Instead every plugin screen shows a notice while AIMLAPI is the

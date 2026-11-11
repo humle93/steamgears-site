@@ -86,17 +86,17 @@ class SGAP_Cirla {
     /** Null when the action may run, otherwise the refusal to hand back. */
     public static function guard(string $action): ?WP_Error {
         if (!self::enabled()) {
-            return new WP_Error('sgap_cirla_off', 'The Cirla module is switched off. Turn it on under Steamgears → Settings & keys → Cirla.');
+            return new WP_Error('sgap_cirla_off', 'The Cirla module is switched off. Turn it on under Steamgears → Settings & keys → Cirla.', ['status' => 409]);
         }
         if (!self::allows($action)) {
             return new WP_Error('sgap_cirla_action_off', sprintf(
                 'The Cirla action "%s" is switched off. Allowed now: %s.',
                 $action,
                 self::actions() ? implode(', ', self::actions()) : 'none'
-            ));
+            ), ['status' => 409]);
         }
         if (!current_user_can(self::CAP)) {
-            return new WP_Error('sgap_cirla_forbidden', 'This account may not run Cirla actions: it needs the sgap_cirla_run capability, which administrators have.');
+            return new WP_Error('sgap_cirla_forbidden', 'This account may not run Cirla actions: it needs the sgap_cirla_run capability, which administrators have.', ['status' => 403]);
         }
         return null;
     }
@@ -204,11 +204,11 @@ class SGAP_Cirla {
         }
         $topic = sanitize_text_field((string) ($input['topic'] ?? ''));
         if ($topic === '') {
-            return new WP_Error('sgap_cirla_topic', 'Give the draft a topic, or a post_id to write about.');
+            return new WP_Error('sgap_cirla_topic', 'Give the draft a topic, or a post_id to write about.', ['status' => 400]);
         }
         $channel = (string) ($input['channel'] ?? 'facebook');
         if (!in_array($channel, SGAP_Publer::CHANNELS, true)) {
-            return new WP_Error('sgap_cirla_channel', sprintf('"%s" is not one of the plugin\'s channels.', $channel));
+            return new WP_Error('sgap_cirla_channel', sprintf('"%s" is not one of the plugin\'s channels.', $channel), ['status' => 400]);
         }
         $post_id = max(0, (int) ($input['post_id'] ?? 0));
         if ($error = self::spend()) {
@@ -218,7 +218,7 @@ class SGAP_Cirla {
         if ($post_id > 0) {
             $post = get_post($post_id);
             if (!$post) {
-                return new WP_Error('sgap_cirla_post_missing', sprintf('No post with id %d.', $post_id));
+                return new WP_Error('sgap_cirla_post_missing', sprintf('No post with id %d.', $post_id), ['status' => 404]);
             }
             $source = SGAP_Generator::source($post);
         }
@@ -229,7 +229,7 @@ class SGAP_Cirla {
         }
         $item = $generated[0] ?? null;
         if (!is_array($item) || trim((string) ($item['text'] ?? '')) === '') {
-            return new WP_Error('sgap_cirla_empty', 'The model returned no usable post, so nothing was saved.');
+            return new WP_Error('sgap_cirla_empty', 'The model returned no usable post, so nothing was saved.', ['status' => 422]);
         }
         $title = (string) ($item['title'] ?? '') !== '' ? (string) $item['title'] : $topic;
         $body = trim((string) $item['text'] . ((string) ($item['hashtags'] ?? '') !== '' ? "\n\n" . $item['hashtags'] : ''));
@@ -245,7 +245,7 @@ class SGAP_Cirla {
             $message = SGAP_Quality::message(SGAP_Quality::blocking((array) ($gate['problems'] ?? [])));
             self::log('draft', 'stopped by the quality gate: ' . $message);
             self::fail('draft', 'sgap_cirla_gate', $message);
-            return new WP_Error('sgap_cirla_gate', 'The quality gate stopped this draft: ' . $message);
+            return new WP_Error('sgap_cirla_gate', 'The quality gate stopped this draft: ' . $message, ['status' => 422]);
         }
 
         // The same task asked twice is the same draft, not a second one: the row is keyed on
@@ -253,7 +253,7 @@ class SGAP_Cirla {
         $key = self::key($channel, $post_id, $topic);
         $seen = self::seen();
         if (isset($seen[$key]) && self::draft_exists((int) $seen[$key])) {
-            self::log('draft', sprintf('the same task is already waiting as draft #%d', (int) $seen[$key]));
+            self::log('draft', sprintf('the same task is already waiting as draft #%d', (int) $seen[$key]), ['id' => (int) $seen[$key]]);
             return [
                 'id' => (int) $seen[$key],
                 'duplicate' => true,
@@ -283,12 +283,12 @@ class SGAP_Cirla {
             'created_at' => current_time('mysql')
         ];
         if (!$wpdb->insert($wpdb->prefix . 'sgap_ai_drafts', $row)) {
-            return new WP_Error('sgap_cirla_save', 'The draft could not be saved.');
+            return new WP_Error('sgap_cirla_save', 'The draft could not be saved.', ['status' => 500]);
         }
         $id = (int) $wpdb->insert_id;
         $seen[$key] = $id;
         self::remember($seen);
-        self::log('draft', sprintf('draft #%d for %s: %s', $id, $channel, $title));
+        self::log('draft', sprintf('draft #%d for %s: %s', $id, $channel, $title), ['id' => (int) $id]);
         return [
             'id' => $id,
             'duplicate' => false,
@@ -307,10 +307,10 @@ class SGAP_Cirla {
         }
         $post_id = (int) ($input['post_id'] ?? 0);
         if ($post_id <= 0) {
-            return new WP_Error('sgap_cirla_post', 'Give the check a post id.');
+            return new WP_Error('sgap_cirla_post', 'Give the check a post id.', ['status' => 400]);
         }
         if (!get_post($post_id)) {
-            return new WP_Error('sgap_cirla_post_missing', sprintf('No post with id %d.', $post_id));
+            return new WP_Error('sgap_cirla_post_missing', sprintf('No post with id %d.', $post_id), ['status' => 404]);
         }
         $limits = SGAP_Meta_Audit::limits();
         $title = trim(wp_strip_all_tags((string) get_the_title($post_id)));
@@ -330,7 +330,7 @@ class SGAP_Cirla {
         } elseif ($description_length > $limits['description_max']) {
             $problems[] = sprintf('the meta description is %d characters, over the %d limit', $description_length, $limits['description_max']);
         }
-        self::log('seo', sprintf('checked post #%d: %s', $post_id, $problems ? implode('; ', $problems) : 'no problems'));
+        self::log('seo', sprintf('checked post #%d: %s', $post_id, $problems ? implode('; ', $problems) : 'no problems'), ['id' => (int) $post_id]);
         return [
             'post_id' => $post_id,
             'title' => $title,
@@ -352,11 +352,11 @@ class SGAP_Cirla {
         }
         $post_id = (int) ($input['post_id'] ?? 0);
         if ($post_id <= 0) {
-            return new WP_Error('sgap_cirla_post', 'Give the suggestions a post id.');
+            return new WP_Error('sgap_cirla_post', 'Give the suggestions a post id.', ['status' => 400]);
         }
         $post = get_post($post_id);
         if (!$post) {
-            return new WP_Error('sgap_cirla_post_missing', sprintf('No post with id %d.', $post_id));
+            return new WP_Error('sgap_cirla_post_missing', sprintf('No post with id %d.', $post_id), ['status' => 404]);
         }
         $count = min(5, max(1, (int) ($input['count'] ?? 3)));
         $channels = array_slice(['facebook', 'instagram', 'pinterest', 'threads', 'bluesky'], 0, $count);
@@ -377,7 +377,7 @@ class SGAP_Cirla {
                 'hashtags' => (string) ($item['hashtags'] ?? '')
             ];
         }
-        self::log('social', sprintf('suggested %d posts for post #%d', count($suggestions), $post_id));
+        self::log('social', sprintf('suggested %d posts for post #%d', count($suggestions), $post_id), ['id' => (int) $post_id]);
         return [
             'post_id' => $post_id,
             'suggestions' => $suggestions,
@@ -458,7 +458,7 @@ class SGAP_Cirla {
                 'The daily Cirla budget is used up (%d of %d AI calls). It resets after midnight, site time.',
                 $spent['n'],
                 $limit
-            ));
+            ), ['status' => 429]);
         }
         update_option(self::SPEND, ['date' => $spent['date'], 'n' => $spent['n'] + 1], false);
         return null;
@@ -485,32 +485,80 @@ class SGAP_Cirla {
         update_option(self::SEEN, array_slice($seen, -50, 50, true), false);
     }
 
-    private static function draft_exists(int $id): bool {
+    /**
+     * Whether a draft is still waiting under AI Drafts.
+     *
+     * Used by the Cirla page: a log row may only link to a draft that is still there to be read —
+     * once it is approved, rejected or deleted the row stays plain text instead of pointing at a
+     * page that no longer shows it.
+     */
+    public static function draft_exists(int $id): bool {
+        return self::pending_draft($id) !== null;
+    }
+
+    /**
+     * The draft, while it is still waiting under AI Drafts.
+     *
+     * One query answers both questions the Cirla page asks — does it still exist, and what is it
+     * called — so a log row can never show a title without a link, or a link to a draft that is gone.
+     *
+     * @return array{id?: int, title?: string, channel?: string}|null
+     */
+    public static function pending_draft(int $id): ?array {
         if ($id <= 0) {
-            return false;
+            return null;
         }
         global $wpdb;
-        return (bool) $wpdb->get_var($wpdb->prepare(
-            "SELECT id FROM {$wpdb->prefix}sgap_ai_drafts WHERE id = %d AND status = %s",
+        $row = $wpdb->get_row($wpdb->prepare(
+            "SELECT id, title, channel FROM {$wpdb->prefix}sgap_ai_drafts WHERE id = %d AND status = %s",
             $id,
             'pending'
         ));
+        if (is_object($row)) {
+            $row = (array) $row;
+        }
+        return is_array($row) ? $row : null;
     }
 
     /** The module's own log: time, action and result, one row per action. */
-    public static function log(string $action, string $result): void {
+    /**
+     * One row in the module's own log.
+     *
+     * @param array{id?: int} $meta The draft or page the row is about, so the Cirla page can link
+     *                              to it instead of only naming it. Absent or 0 = no target.
+     */
+    public static function log(string $action, string $result, array $meta = []): void {
         if ((string) get_option('sgap_cirla_log_level', 'actions') === 'off') {
             return;
         }
         $entries = self::entries(20);
-        array_unshift($entries, ['at' => current_time('mysql'), 'action' => $action, 'result' => $result]);
+        array_unshift($entries, [
+            'at' => current_time('mysql'),
+            'action' => $action,
+            'result' => $result,
+            'id' => (int) ($meta['id'] ?? 0)
+        ]);
         update_option(self::LOG, array_slice($entries, 0, 20), false);
     }
 
-    /** @return array<int, array{at: string, action: string, result: string}> */
-    public static function entries(int $limit = 20): array {
+    /**
+     * The newest rows, optionally for one action only.
+     *
+     * @param string $action '' for every action, or one of the keys in ACTIONS.
+     * @return array<int, array{at: string, action: string, result: string}>
+     */
+    public static function entries(int $limit = 20, string $action = ''): array {
         $entries = get_option(self::LOG);
-        return is_array($entries) ? array_slice($entries, 0, max(1, $limit)) : [];
+        if (!is_array($entries)) {
+            return [];
+        }
+        if ($action !== '') {
+            $entries = array_values(array_filter(
+                $entries,
+                static fn($entry) => (string) ($entry['action'] ?? '') === $action
+            ));
+        }
+        return array_slice($entries, 0, max(1, $limit));
     }
 
     /** A failure is both in the module log and in the plugin's error log, so it is not missed. */
