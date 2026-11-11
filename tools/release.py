@@ -224,7 +224,9 @@ def cmd_check(args: argparse.Namespace) -> int:
     report = check_state(collect_state(confirm=args.confirm), require_main=args.require_main)
 
     if args.guards:
-        for command in (("python3", "projektstatus.py", "--check"), ("python3", "tools/fejlscan.py")):
+        for command in (("python3", "projektstatus.py", "--check"),
+                        ("python3", "tools/fejlscan.py"),
+                        ("python3", "tools/patch_notes.py", "--check")):
             problem = run_guard(*command)
             if problem:
                 report.problems.append(problem)

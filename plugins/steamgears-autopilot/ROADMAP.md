@@ -607,6 +607,7 @@ Platform limits: [Instagram content publishing](https://developers.facebook.com/
 
 ## 9. Change log for this document
 
+- **7.71.1 (11/11) — patch notes er nu en fast del af hver udgivelse.** `CHANGELOG.md` i pluginnet med noter fra 7.65.0 og frem, `tools/patch_notes.py --check` som værn i `tools/natlige-vaern.sh` og i release-gaten, og reglen i AGENTS.md §7.4 om at noten også skal med i svaret til ejeren. Ingen PHP-adfærd ændret.
 - **7.71.0 (10/11) — P9: Cirla er et modul, der kan slås til og fra, og som er slukket som standard.** Modulfilen `modules/cirla/class-cirla.php` indlæses kun, når `sgap_cirla_enabled` er `yes`, så et modul der er slået fra ikke kan registrere én ability eller ét cron-job. Fire handlinger bag capabilityen `sgap_cirla_run` (status, én kladde, SEO-tjek, forslag); kladden gemmes som `pending` med `angle = cirla` og køes eller publiceres aldrig, kvalitetsgaten stopper et dødt link, samme opgave to gange giver ingen dublet, og et dagligt loft på 5 AI-kald plus filteret `sgap_cirla_generate` holder omkostningen nede. 28 nye checks (1 443 → 1 471 PASS). Bevis: `docs/library/cirla-modul-2026-11-10.md`.
 
 - **7.70.0 (10/11) — P8: agenterne læser sidens målte tilstand i stedet for en fast antagelse.** Hver skribent

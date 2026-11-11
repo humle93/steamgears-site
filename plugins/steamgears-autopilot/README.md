@@ -27,9 +27,14 @@ The whole social autopilot runs inside WordPress (Command Center is retired):
 4. **Measure** – every post links via `/go/<id>/`, so clicks (and WooCommerce
    orders) are counted per channel.
 
-Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.71.0.zip` → Activate. On an existing
+Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.71.1.zip` → Activate. On an existing
 install the same zip arrives through the self-updater (see *Updates*), so an upload is only needed for the
 first install or a recovery.
+
+Patch notes: [`CHANGELOG.md`](CHANGELOG.md) says what was added, changed or fixed in every
+release from 7.65.0 onwards, newest first. The top entry always matches the version in the plugin
+header and the zip name, and `python3 tools/patch_notes.py --check` fails the check when a version
+ships without notes.
 
 ## Keys in one place (7.47)
 

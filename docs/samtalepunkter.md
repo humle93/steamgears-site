@@ -18,7 +18,7 @@ konteksten komprimeres. Filen er repoets hukommelse om **hvorfor** tingene blev 
   hvad blev målt, og hvad var fælden.
 
 <!-- AUTO:SAMTALEPUNKTER:START -->
-_Opdateret 2026-11-10 af `tools/samtalepunkter.py`. Blokken er maskinelt genereret — ret i `projektstatus.json`, ikke her._
+_Opdateret 2026-11-11 af `tools/samtalepunkter.py`. Blokken er maskinelt genereret — ret i `projektstatus.json`, ikke her._
 
 ### Status
 
@@ -58,12 +58,12 @@ _Opdateret 2026-11-10 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `6a4a1af Modul: P9.1 — patch notes ved hver version Før: —  →  Efter: —  (Δ —) Grundlag: ingen ændring — dokumentation og værktøj, plugin står stadig 34,1 af 34,1 d`
+- `68f92ed Modul: P9 — Cirla som til/fra-modul Før: 100 %  →  Efter: 100 %  (Δ 0) Grundlag: 34,1 af 34,1 d (P0 4.65/4.65 · P1 14.45/14.45 · P2 4.75/4.75 · P3 2/2 · P0.7 1/1 · P0.7c 0.25/0.25 · P1.19 0.25/0.25 · P1.20 0.25/0.25 · P1.21 0.25/0.25 · P1.22 0.5/0.5 · P2.6 1.5/1.5 · P3.7 0.6/0.6 · P3.8 0.3/0.3 · P3.9 0.25/0.25 · P1.25 0.15/0.15 · P1.24 0.35/0.35 · P1.23 0.25/0.25 · P6 0.9/0.9 · P7 0.3/0.3 · P8 0.8/0.8 · P9 0.35/0.35)`
+- `15790cf Modul: docs-pdf — PDF fra dokumentbiblioteket Før: —  →  Efter: —  (Δ —) Grundlag: 25 PDF-filer i reports/ renderet med tools/md_to_pdf.py — ingen ændring i projektstatus`
+- `9f1b8ef Modul: docs-pdf — GitHub Action der renderer noter til PDF Før: —  →  Efter: —  (Δ —) Grundlag: ingen ændring`
 - `03a6298 chore(status): daglig projektstatus 2026-11-10`
 - `9aa6655 Modul: P1.25 — OpenRouter-headeren sendes fra én bygger Før: 100 %  →  Efter: 100 %  (Δ 0) Grundlag: 33,75 af 33,75 d (P0 4.65/4.65 · P1 14.45/14.45 · P2 4.75/4.75 · P3 2/2 · P0.7 1/1 · P0.7c 0.25/0.25 · P1.19 0.25/0.25 · P1.20 0.25/0.25 · P1.21 0.25/0.25 · P1.22 0.5/0.5 · P2.6 1.5/1.5 · P3.7 0.6/0.6 · P3.8 0.3/0.3 · P3.9 0.25/0.25 · P1.25 0.15/0.15 · P1.24 0.35/0.35 · P1.23 0.25/0.25 · P6 0.9/0.9 · P7 0.3/0.3 · P8 0.8/0.8)`
-- `5f9bfe0 SEO-research: de hurtigste organiske gevinster målt mod det levende site`
-- `53f4183 chore(status): daglig projektstatus 2026-11-10`
-- `4364759 Modul: P8 — agenterne læser sidens målte tal, ikke en fast antagelse Før: 100 %  →  Efter: 100 %  (Δ 0) Grundlag: 33,7 af 33,7 d (P0 4.65/4.65 · P1 14.45/14.45 · P2 4.75/4.75 · P3 2/2 · P0.7 1/1 · P0.7c 0.25/0.25 · P1.19 0.25/0.25 · P1.20 0.25/0.25 · P1.21 0.25/0.25 · P1.22 0.5/0.5 · P2.6 1.5/1.5 · P3.7 0.6/0.6 · P3.8 0.3/0.3 · P3.9 0.25/0.25 · P1.25 0.1/0.1 · P1.24 0.35/0.35 · P1.23 0.25/0.25 · P6 0.9/0.9 · P7 0.3/0.3 · P8 0.8/0.8)`
-- `8d46825 Fjerner blokstile for blokke der ikke findes på siden`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
