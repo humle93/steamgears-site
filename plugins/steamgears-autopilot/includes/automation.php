@@ -311,7 +311,7 @@ class SGAP_Auto {
 
     /** Filter: returns an image URL for a queued post that has none ('' when not possible). */
     public static function photo_for_queue_item(string $url, array $row): string {
-        if ($url !== '' || !SGAP_Settings::enabled('auto_images') || SGAP_Images::key() === '') {
+        if ($url !== '' || !SGAP_Settings::enabled('auto_images') || SGAP_Images::backend() === '') {
             return $url;
         }
         $post_id = (int) ($row['post_id'] ?? 0);
@@ -410,7 +410,7 @@ class SGAP_Auto {
         $problems = [];
         $q = $wpdb->prefix . 'sgap_queue';
         // Posts that failed only for want of a photo get another go once AI photos are on.
-        $retry = SGAP_Settings::enabled('auto_images') && SGAP_Images::key() !== ''
+        $retry = SGAP_Settings::enabled('auto_images') && SGAP_Images::backend() !== ''
             ? (int) $wpdb->query("UPDATE {$q} SET status = 'queued', attempts = 0, error = NULL WHERE status = 'failed' AND error LIKE '%needs a photo%'")
             : 0;
         $failed = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$q} WHERE status = 'failed'");

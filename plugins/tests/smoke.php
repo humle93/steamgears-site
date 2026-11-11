@@ -1891,5 +1891,6 @@ require __DIR__.'/feed-health.php';
 require __DIR__.'/coach.php';
 require __DIR__.'/cirla.php';
 require __DIR__.'/cirla-admin.php';
+require __DIR__.'/cc-login.php';
 // P3.2/P3.5-slut
 exit(empty($GLOBALS['fail'])?0:1);

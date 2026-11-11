@@ -81,6 +81,11 @@ VERIFIED_LEGACY: dict[str, dict] = {
         "relax": ("history",),
         "reason": "P1.5c-arbejdet ligger på main, men beskedens statuslinje (91,0 → 96,2 %, 27,8 af 28,9 d) "
                   "blev udregnet før det merge der satte række 110 (91,2 → 96,3 %, 28,3 af 29,4 d)",
+    },    "45a11e00": {
+        "relax": ("basis",),
+        "reason": "P10 (Autopilot 7.72.0) blev skrevet mod 34,1 d og meldte 34,6 af 34,6 d; da grenen blev "
+                  "flettet med main (7.75.0, Cirla P9.1-P9.4 = +0,95 d) blev P10-rækken 189 skrevet som "
+                  "35,55 af 35,55 d. Før/Efter/Δ (100 → 100, 0) er rækkens egne; force-push var ikke tilladt",
     },
 }
 

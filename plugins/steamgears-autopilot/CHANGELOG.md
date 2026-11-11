@@ -10,6 +10,35 @@ Noterne er skrevet ud fra commit-historikken og de dokumenter der hører til hve
 
 <!-- patch-notes: baseline 7.65.0 -->
 
+## 7.76.0 — 2026-11-11
+
+**OpenRouter er standard, billeder kan laves via OpenRouter, og »Log ind i Command Center« logger ind med ét klik (P10).**
+
+### Tilføjet
+- `includes/openrouter.php`: en advarsel på pluginnets sider, mens AIMLAPI er valgt, og knappen
+  **Switch to OpenRouter now**, når OpenRouter-reserven har nøgle og model. Den gør OpenRouter til
+  hovedudbyder med præcis den nøgle og model; AIMLAPI-nøglen røres ikke.
+- Indstillingen **OpenRouter image model** (*Settings → AI content*). Med en OpenRouter-nøgle (hoved eller
+  reserve) laves billeder via OpenRouter (`chat/completions`, `modalities: image`, data-URL); uden den bruges
+  AIMLAPI som før. Ingen standardmodel, fordi OpenRouters katalog skifter.
+- `POST /sgap/v1/cc-link` (kræver `manage_options`): Command Center 7.27+ lægger sin adresse og en fælles
+  nøgle her (option `sgap_cc_link`, ikke autoload). Knappen **Log ind i Command Center** laver en
+  HMAC-SHA256-billet (60 s, 128-bit `jti`) og sender browseren til `{Command Center}/cc-sso`.
+
+### Ændret
+- OpenRouter er standardudbyder, når intet er gemt, og står først og anbefalet i guiden, indstillingerne og
+  nøglesiden. AIMLAPI er markeret *being phased out*; et gemt AIMLAPI-valg virker stadig.
+- Uden forbindelse fra Command Center hedder knappen **Open Command Center** og åbner adressen fra
+  indstillingerne som før.
+
+### Rettet
+- Command Centers gamle engangslink sendte til `POST /sgap/v1/login-link`, en rute pluginnet aldrig har haft,
+  så knappen i Command Center kunne ikke virke. Den nye vej erstatter den.
+
+### Målt
+- `plugins/tests/cc-login.php`: 45 nye checks (billet, signatur, udløb, rettigheder, ruten, billed-backend og
+  flytte-knappen). Nøglen står hverken i status, snapshot, knappens HTML eller billetten.
+
 ## 7.75.0 — 2026-11-11
 
 **Log-rækkerne på Cirla-siden siger nu hvad målet hedder, ikke kun hvor det ligger.**

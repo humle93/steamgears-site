@@ -343,6 +343,15 @@
           "unit": "d",
           "note": "7.75.0: SGAP_Cirla::pending_draft($id) svarer i én query på både om kladden stadig venter og hvad den hedder, og draft_exists() bygger på den, så der er én eksistens-kontrol. SGAP_Cirla_Admin::row_target() giver url og titel samlet: draft-rækker læses »Draft #8 · Titel i loggen« med link til #sgap-draft-8, seo/social-rækker »SEO check · <sidens titel>« / »Suggestions · <sidens titel>« med link til editoren. Målt på WordPress 7.1.4: ægte draft gav titel+link og ankeret fandtes på AI Drafts; ægte seo/social mod post 5 gav »SEO check · Steampunk-kataloget 2026« og »Suggestions · Steampunk-kataloget 2026« med post.php?post=5-links; seedede rækker med id 999999 gav 0 links og 0 titler og stod som tekst; filteret cirla_log=draft beholdt titel-linket; tomt filter og tom log viste de to tomme tilstande. Smoke 1 505 PASS (1 504 → 1 505).",
           "verified": true
+        },
+        {
+          "id": "p10",
+          "name": "P10 — OpenRouter som standard + log ind i Command Center med ét klik",
+          "done": 0.5,
+          "total": 0.5,
+          "unit": "d",
+          "note": "7.76.0: OpenRouter er standardudbyder (kun når intet er gemt) og står først i guide og nøgleside; AIMLAPI markeret 'being phased out', men et gemt valg virker stadig. includes/openrouter.php: advarsel + 'Switch to OpenRouter now' når reserven har nøgle og model. SGAP_Images::backend(): billeder via OpenRouter (modalities image, data-URL) med openrouter_image_model, ellers AIMLAPI. POST /sgap/v1/cc-link gemmer CC-adresse + fælles nøgle (ikke autoload); knappen laver en HMAC-SHA256-billet (60 s, 128-bit jti) til {cc}/cc-sso. Fund: CC's gamle POST /sgap/v1/login-link havde aldrig en rute i pluginnet. 45 nye checks, 1 505 → 1 550 PASS, 0 FAIL; mutationstjek af signaturen fejler som forventet; zip matcher kilden (74 filer); interop: en billet fra SGAP_CC::ticket() blev godkendt af Command Center 7.27.0 og anden gang afvist som brugt. Oprindeligt bygget som 7.72.0 og flyttet oven på 7.75.0 (Cirla P9.1-P9.4). IKKE verificeret: rigtigt OpenRouter-billedkald, login mod kørende CC, installation på sitet. Bevis: docs/library/openrouter-og-cc-login-2026-11-11.md.",
+          "verified": true
         }
       ],
       "total": 33.75,
@@ -2406,6 +2415,15 @@
       "after": 100.0,
       "delta": 0,
       "basis": "34,1 af 34,1 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5 · P3.7 0,6/0,6 · P3.8 0,3/0,3 · P3.9 0,25/0,25 · P1.25 0,15/0,15 · P1.24 0,35/0,35 · P1.23 0,25/0,25 · P6 0,9/0,9 · P7 0,3/0,3 · P8 0,8/0,8 · P9 0,35/0,35)"
+    },
+    {
+      "date": "2026-11-11",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "P10 — OpenRouter som standard + log ind i Command Center med ét klik",
+      "before": 100.0,
+      "after": 100.0,
+      "delta": 0.0,
+      "basis": "35,55 af 35,55 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5 · P3.7 0,6/0,6 · P3.8 0,3/0,3 · P3.9 0,25/0,25 · P1.25 0,15/0,15 · P1.24 0,35/0,35 · P1.23 0,25/0,25 · P6 0,9/0,9 · P7 0,3/0,3 · P8 0,8/0,8 · P9 0,35/0,35 · P9.1 0,3/0,3 · P9.2 0,2/0,2 · P9.3 0,25/0,25 · P9.4 0,2/0,2 · P10 0,5/0,5)"
     },
     {
       "date": "2026-11-11",
