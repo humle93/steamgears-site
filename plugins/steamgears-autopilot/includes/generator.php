@@ -130,9 +130,23 @@ class SGAP_AI {
     /** What the last call did. Set only when the backup answered; reset on every new call. */
     private static array $fallback = [];
 
+    /**
+     * The chosen provider. OpenRouter is the default since 7.72.0 (P10): a site that never saved a
+     * provider starts there, and so does an unknown value. A saved choice — AIMLAPI included — is
+     * kept until the owner switches, so an update never cuts off a working key.
+     */
     public static function provider(): string {
-        $provider = (string) SGAP_Settings::get('ai_provider', 'anthropic');
-        return in_array($provider, ['anthropic', 'aimlapi', 'openai_compatible', 'openrouter'], true) ? $provider : 'anthropic';
+        $provider = (string) SGAP_Settings::get('ai_provider', 'openrouter');
+        return in_array($provider, ['anthropic', 'aimlapi', 'openai_compatible', 'openrouter'], true) ? $provider : 'openrouter';
+    }
+
+    /**
+     * The key that reaches OpenRouter: the main key when OpenRouter is the provider, else the
+     * backup's own key. '' when neither is saved. Used by the images, which have no key of their own
+     * on OpenRouter.
+     */
+    public static function openrouter_key(): string {
+        return self::provider() === 'openrouter' ? self::api_key() : self::fallback_key();
     }
 
     /** AIMLAPI and other OpenAI-compatible providers use /chat/completions. */

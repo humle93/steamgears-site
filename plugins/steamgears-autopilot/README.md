@@ -27,9 +27,31 @@ The whole social autopilot runs inside WordPress (Command Center is retired):
 4. **Measure** – every post links via `/go/<id>/`, so clicks (and WooCommerce
    orders) are counted per channel.
 
-Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.71.0.zip` → Activate. On an existing
+Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.72.0.zip` → Activate. On an existing
 install the same zip arrives through the self-updater (see *Updates*), so an upload is only needed for the
 first install or a recovery.
+
+## OpenRouter and the Command Center login (7.72)
+
+**OpenRouter is the recommended AI provider.** A new install starts on OpenRouter, the setup wizard and the
+Keys screen list it first, and AIMLAPI is marked *being phased out*. A saved AIMLAPI choice keeps working —
+an update never cuts off a working key — but every plugin screen then shows a notice. When the OpenRouter
+*backup* already has a key and a model, the notice has one button, **Switch to OpenRouter now**, that makes
+OpenRouter the provider with exactly that key and model (the AIMLAPI key is left alone, so switching back is
+one setting).
+
+**Images through OpenRouter.** Set *Settings → AI content → OpenRouter image model* to a model with image
+output, and images (Content Studio, auto-images for Instagram/Pinterest) are made through OpenRouter with the
+OpenRouter key — the main key when OpenRouter is the provider, else the backup key. Without that setting the
+old AIMLAPI path is used as before. OpenRouter has no default image model on purpose: its catalogue changes.
+
+**Log ind i Command Center — one click.** Command Center 7.27+ (with `CC_PUBLIC_URL` set) sends its address and
+a shared secret to `POST /sgap/v1/cc-link` on every sync. The dashboard button then signs a ticket for the
+administrator who clicked — HMAC-SHA256, valid 60 seconds, a random `jti` Command Center accepts once — and
+opens `{Command Center}/cc-sso`. Command Center logs in only a user with the same e-mail address. The secret is
+stored without autoload and never appears in the snapshot, the abilities or the HTML; `status.command_center.sso`
+only says whether the button works. Without the link the button falls back to *Open Command Center* (the address
+in *Settings → General*).
 
 ## Keys in one place (7.47)
 

@@ -406,7 +406,7 @@ class SGAP_Settings {
     /** Multi-line text settings, shown as a textarea. */
     const TEXTAREA_KEYS = ['blackout_ranges', 'banned_words', 'forum_intro'];
     const TEXT_KEYS = [
-        'publer_workspace_id','publer_pinterest_board','channels','ai_model','ai_base_url','openrouter_model','image_model','content_language','rescue_hosts',
+        'publer_workspace_id','publer_pinterest_board','channels','ai_model','ai_base_url','openrouter_model','image_model','openrouter_image_model','content_language','rescue_hosts',
         'telegram_chat_id',
         'alert_email','channel_caps',
         'blackout_ranges','banned_words','utm_campaign','bluesky_handle','mastodon_instance',
@@ -418,7 +418,7 @@ class SGAP_Settings {
     /** Settings with a fixed list of values, shown as a select. */
     const CHOICE_KEYS = [
         'publish_mode' => ['rss' => 'RSS feeds (Publer Professional)', 'api' => 'Publer API (Publer Business)'],
-        'ai_provider' => ['anthropic' => 'Anthropic (Claude)', 'aimlapi' => 'AIMLAPI (Claude and 300+ other models)', 'openrouter' => 'OpenRouter (one key, hundreds of models from many providers)', 'openai_compatible' => 'Other OpenAI-compatible API (OpenAI, ...)'],
+        'ai_provider' => ['openrouter' => 'OpenRouter (recommended: one key, hundreds of models from many providers)', 'anthropic' => 'Anthropic (Claude)', 'openai_compatible' => 'Other OpenAI-compatible API (OpenAI, ...)', 'aimlapi' => 'AIMLAPI (being phased out — switch to OpenRouter)'],
         'cirla_log_level' => ['actions' => 'Every action — time and result', 'errors' => 'Errors only', 'off' => 'Off — no Cirla log entries'],
         'quality_gate' => ['block' => 'Block — keep the post out of the queue until it is fixed', 'warn' => 'Warn — queue it and report what is wrong', 'off' => 'Off — do not check'],
         'instagram_graph_host' => ['graph.instagram.com' => 'Instagram Login (graph.instagram.com) — scopes instagram_business_basic and instagram_business_manage_insights', 'graph.facebook.com' => 'Facebook Login (graph.facebook.com) — scopes instagram_basic and instagram_manage_insights; the token cannot renew itself'],
@@ -432,7 +432,7 @@ class SGAP_Settings {
     const SECTIONS = [
         'General' => ['autopilot_enabled','full_auto_enabled','daily_cap','batch_size','quiet_start','quiet_end','blackout_ranges','quality_gate','banned_words','dupe_days','utm_campaign','command_center_url'],
         'Publer' => ['publish_mode','publer_api_key','publer_workspace_id','publer_pinterest_board','pinterest_client_id','instagram_user_id','instagram_graph_host','facebook_page_id','facebook_access_token','facebook_graph_version','facebook_direct','channels','bluesky_handle','bluesky_app_password','mastodon_instance','mastodon_token','mastodon_limit','telegram_bot_token','telegram_chat_id'],
-        'AI content' => ['ai_profile','ai_provider','ai_api_key','ai_model','ai_base_url','openrouter_model','posts_per_day','content_language','locale_source','locales','image_model','image_api_key','serpapi_key'],
+        'AI content' => ['ai_profile','ai_provider','ai_api_key','ai_model','ai_base_url','openrouter_model','posts_per_day','content_language','locale_source','locales','openrouter_image_model','image_model','image_api_key','serpapi_key'],
         'Economics' => ['labor_rate','monthly_budget','target_roi','winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max'],
         'Evergreen' => ['evergreen_enabled','evergreen_after_days','evergreen_max_shares','evergreen_batch'],
         'Alerts and log' => ['alert_mode','alert_email','alert_dry_days','channel_caps','audit_keep_days'],
@@ -473,17 +473,18 @@ class SGAP_Settings {
         'publer_api_key' => 'API mode only. Publer → Settings → Access & Login → API Keys (Business plan). Scopes: posts, media, accounts.',
         'publer_workspace_id' => 'Shown by "Test Publer" on the dashboard once the API key is saved.',
         'publer_pinterest_board' => 'API mode: Pinterest board ID the pins go to. RSS mode: set a default board in Publer instead.',
-        'ai_provider' => 'Where the text comes from. AIMLAPI: key from aimlapi.com → Dashboard → API Keys. Anthropic: console.anthropic.com → API keys. OpenRouter: openrouter.ai/keys, one key for hundreds of models — pick the model below.',
-        'ai_model' => 'Empty = claude-opus-5-5 for Anthropic, anthropic/claude-opus-5.5 for AIMLAPI. Required for OpenRouter and for another OpenAI-compatible API.',
+        'ai_provider' => 'Where the text comes from. OpenRouter (recommended): openrouter.ai/keys, one key for hundreds of models — pick the model below. Anthropic: console.anthropic.com → API keys. AIMLAPI is being phased out: a saved AIMLAPI choice keeps working until you switch.',
+        'ai_model' => 'Required for OpenRouter (pick it from the live list) and for another OpenAI-compatible API. Empty = claude-opus-5-5 for Anthropic, anthropic/claude-opus-5.5 for AIMLAPI.',
         'ai_base_url' => 'Other OpenAI-compatible API only, e.g. https://api.openai.com/v1. AIMLAPI and OpenRouter use their own fixed address and ignore this.',
         'posts_per_day' => 'How many site posts/products the AI writes social posts for each day.',
         'content_language' => 'Language of articles and guides from the Content Studio. Empty = English.',
-        'image_model' => 'AIMLAPI image model. Empty = bytedance/seedream-5-0-pro (about $0.045 per image). Cheaper: flux/schnell.',
-        'image_api_key' => 'Only needed when the AI provider is not AIMLAPI: an AIMLAPI key for images.',
+        'openrouter_image_model' => 'Image model on OpenRouter, e.g. one listed under openrouter.ai/models with image output. With this and an OpenRouter key (the main key or the backup key) images are made through OpenRouter, and no AIMLAPI key is needed. Empty = images still use AIMLAPI.',
+        'image_model' => 'AIMLAPI image model (legacy, used only while OpenRouter images are not set up). Empty = bytedance/seedream-5-0-pro (about $0.045 per image). Cheaper: flux/schnell.',
+        'image_api_key' => 'Legacy: an AIMLAPI key for images. Not needed once an OpenRouter image model is set above.',
         'serpapi_key' => 'serpapi.com → Manage API key. Gives the article writer live Google data: People also ask, related searches, top results.',
         'openrouter_api_key' => 'A second key, for the backup only: openrouter.ai/keys. It is not the AIMLAPI or Anthropic key, so rotating one never points the backup at the wrong account. Used only when the primary provider fails: a transport error, 401/403, no credit (402), rate limit (429) or a 5xx. A 2xx answer never starts it.',
         'openrouter_model' => 'The model the backup asks, picked from OpenRouter\'s live list. Empty = the backup is off, because OpenRouter has no default model and a guessed slug would only fail on the day it is needed. Ignored while OpenRouter is the provider itself, where the backup would be the same service.',
-        'ai_api_key' => 'AIMLAPI: aimlapi.com → Dashboard → API Keys. Anthropic: console.anthropic.com → API keys. OpenRouter: openrouter.ai/keys. One key at a time: switching provider asks for that provider\'s key.',
+        'ai_api_key' => 'OpenRouter: openrouter.ai/keys (recommended). Anthropic: console.anthropic.com → API keys. AIMLAPI (being phased out): aimlapi.com → Dashboard → API Keys. One key at a time: switching provider asks for that provider\'s key.',
         'channels' => 'Instagram and Pinterest posts need a photo; the Content Studio can create one. Comma-separated. Add bluesky to post there directly, without Publer — it needs the handle and an app password below, and is skipped (through Publer) until both are filled in.',
         'bluesky_handle' => 'Your Bluesky handle, e.g. steamgears.bsky.social. The @ is optional. Used together with an app password to post directly; an email address works too but the handle is what readers see.',
         'bluesky_app_password' => 'Bluesky → Settings → Privacy and security → App passwords (not the account password). Stays on this server: it is never shown again after saving, and an empty field keeps the stored value.',

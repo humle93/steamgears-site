@@ -307,6 +307,15 @@
           "unit": "d",
           "note": "`modules/cirla/class-cirla.php` indlæses kun når `sgap_cirla_enabled` er `yes` (standard `no`), så et slukket modul ikke kan registrere en ability eller et cron-job. Fire handlinger bag `sgap_cirla_run`: cirla-status, cirla-draft (pending, `angle = cirla`, aldrig kø/publiceret), cirla-seo-check og cirla-social-suggestions; kvalitetsgaten stopper døde links, samme opgave to gange giver ingen dublet, dagligt AI-loft 5 og filteret `sgap_cirla_generate`. 28 nye checks, 1 443 → 1 471 PASS, 0 FAIL. Bevis: docs/library/cirla-modul-2026-11-10.md.",
           "verified": true
+        },
+        {
+          "id": "p10",
+          "name": "P10 — OpenRouter som standard + log ind i Command Center med ét klik",
+          "done": 0.5,
+          "total": 0.5,
+          "unit": "d",
+          "note": "7.72.0: OpenRouter er standardudbyder (kun når intet er gemt) og står først i guide og nøgleside; AIMLAPI markeret 'being phased out', men et gemt valg virker stadig. includes/openrouter.php: advarsel + 'Switch to OpenRouter now' når reserven har nøgle og model. SGAP_Images::backend(): billeder via OpenRouter (modalities image, data-URL) med openrouter_image_model, ellers AIMLAPI. POST /sgap/v1/cc-link gemmer CC-adresse + fælles nøgle (ikke autoload); knappen laver en HMAC-SHA256-billet (60 s, 128-bit jti) til {cc}/cc-sso. Fund: CC's gamle POST /sgap/v1/login-link havde aldrig en rute i pluginnet. 45 nye checks, 1 471 → 1 516 PASS, 0 FAIL; mutationstjek af signaturen fejler som forventet; zip matcher kilden (72 filer). IKKE verificeret: rigtigt OpenRouter-billedkald, login mod kørende CC, installation på sitet. Bevis: docs/library/openrouter-og-cc-login-2026-11-11.md.",
+          "verified": true
         }
       ],
       "total": 33.75,
@@ -2290,6 +2299,15 @@
       "after": 100.0,
       "delta": 0,
       "basis": "34,1 af 34,1 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5 · P3.7 0,6/0,6 · P3.8 0,3/0,3 · P3.9 0,25/0,25 · P1.25 0,15/0,15 · P1.24 0,35/0,35 · P1.23 0,25/0,25 · P6 0,9/0,9 · P7 0,3/0,3 · P8 0,8/0,8 · P9 0,35/0,35)"
+    },
+    {
+      "date": "2026-11-11",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "P10 — OpenRouter som standard + log ind i Command Center med ét klik",
+      "before": 100.0,
+      "after": 100.0,
+      "delta": 0.0,
+      "basis": "34,6 af 34,6 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5 · P3.7 0,6/0,6 · P3.8 0,3/0,3 · P3.9 0,25/0,25 · P1.25 0,15/0,15 · P1.24 0,35/0,35 · P1.23 0,25/0,25 · P6 0,9/0,9 · P7 0,3/0,3 · P8 0,8/0,8 · P9 0,35/0,35 · P10 0,5/0,5)"
     },
     {
       "date": "2026-11-11",

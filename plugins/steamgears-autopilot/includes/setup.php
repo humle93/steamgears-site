@@ -115,7 +115,7 @@ class SGAP_Setup {
         $published = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}sgap_queue WHERE status = 'published'");
         $setup = admin_url('admin.php?page=sgap-setup');
         return [
-            'ai' => [$ai_ok, 'Connect the AI', 'Add your AIMLAPI or Claude key and test it.', $setup . '#step-ai'],
+            'ai' => [$ai_ok, 'Connect the AI', 'Add your OpenRouter key, pick a model and test it.', $setup . '#step-ai'],
             'channels' => [(bool) $channels, 'Choose your channels', 'Where should posts go?', $setup . '#step-channels'],
             'publer' => [$feeds_ok, SGAP_RSS::enabled() ? 'Add the feeds in Publer' : 'Connect Publer', SGAP_RSS::enabled() ? 'One RSS feed per channel, set to Auto-post.' : 'Publer API key and workspace.', $setup . '#step-publer'],
             'autopilot' => [SGAP_Settings::enabled('autopilot_enabled'), 'Switch the autopilot on', 'Daily writing and publishing.', $setup . '#step-schedule'],
@@ -418,7 +418,7 @@ class SGAP_Setup {
         // 1 AI
         $provider = SGAP_AI::provider();
         echo '<form class="sgap-card sgap-step" data-step="ai"><h2>Which AI should write for you?</h2><p class="sgap-sub">The AI writes your social posts, articles and answers in the chat.</p><div class="sgap-choice-row sgap-big">';
-        foreach (['aimlapi' => ['AIMLAPI', 'Recommended. Claude and 300+ models plus images with one key. Pay as you go.'], 'anthropic' => ['Anthropic (Claude)', 'Directly from Anthropic. Text only – images need an AIMLAPI key.'], 'openrouter' => ['OpenRouter', 'One key in front of hundreds of models from many providers. Pick a model after saving.'], 'openai_compatible' => ['Other', 'OpenAI or any OpenAI-compatible API with your own address.']] as $value => [$title, $text]) {
+        foreach (['openrouter' => ['OpenRouter', 'Recommended. One key in front of hundreds of models — text and images. Pick the models after saving.'], 'anthropic' => ['Anthropic (Claude)', 'Directly from Anthropic. Text only – images need an OpenRouter key.'], 'openai_compatible' => ['Other', 'OpenAI or any OpenAI-compatible API with your own address.'], 'aimlapi' => ['AIMLAPI', 'Being phased out. A saved AIMLAPI key keeps working until you switch to OpenRouter.']] as $value => [$title, $text]) {
             echo '<label class="sgap-choice' . ($provider === $value ? ' on' : '') . '"><input type="radio" name="settings[ai_provider]" value="' . esc_attr($value) . '"' . checked($provider, $value, false) . '><span><strong>' . esc_html($title) . '</strong><small>' . esc_html($text) . '</small></span></label>';
         }
         $ai_saved = trim((string) SGAP_Settings::get('ai_api_key', '')) !== '' || SGAP_Settings::constant_name('ai_api_key');

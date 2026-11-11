@@ -2,7 +2,11 @@
 /**
  * AIMLAPI / Anthropic tool-schema sanitizer (WordPress-friendly, no dependencies).
  *
- * The Claude-style Messages API (and proxies such as aimlapi) reject a request
+ * The name is historical (11/11 2026): the site is moving from AIMLAPI to OpenRouter, but
+ * the rule below is Claude's own and applies through OpenRouter too, so the file stays —
+ * under this name, because sgap-mcp-schema-fix.php loads it by file name on the live site.
+ *
+ * The Claude-style Messages API (and proxies such as aimlapi or OpenRouter) reject a request
  * when any tool's input_schema puts oneOf / anyOf / allOf at the TOP LEVEL:
  *
  *   tools.165.custom.input_schema: input_schema does not support oneOf, allOf,

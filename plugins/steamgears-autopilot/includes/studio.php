@@ -2,7 +2,7 @@
 /**
  * Content Studio: SEO-optimised articles, guides and product texts written by the
  * configured AI and saved as WordPress drafts (with Rank Math / Yoast meta, FAQ,
- * internal links and a featured image), AI images through AIMLAPI saved to the
+ * internal links and a featured image), AI images through OpenRouter (or AIMLAPI, legacy) saved to the
  * media library, and SEO meta for existing pages. Admin page + abilities (so the
  * AI Chat and Claude over MCP can use them). Loaded from steamgears-autopilot.php.
  */
@@ -13,7 +13,66 @@ class SGAP_Images {
     const ENDPOINT = 'https://api.aimlapi.com/v1/images/generations';
     const DEFAULT_MODEL = 'bytedance/seedream-5-0-pro';
 
-    /** AIMLAPI key: the image key if set, else the AI key when the AI provider is AIMLAPI. */
+    /**
+     * Where images are made. OpenRouter when it has a key (main or backup) and an image model —
+     * that is the path since 7.72.0 (P10). Otherwise AIMLAPI as before, so a site keeps its images
+     * until OpenRouter is set up. '' when neither works.
+     */
+    public static function backend(): string {
+        if (SGAP_AI::openrouter_key() !== '' && self::openrouter_model() !== '') {
+            return 'openrouter';
+        }
+        return self::key() !== '' ? 'aimlapi' : '';
+    }
+
+    public static function openrouter_model(): string {
+        return trim((string) SGAP_Settings::get('openrouter_image_model'));
+    }
+
+    /** The model that will draw the next image, for the dashboard and the image metadata. */
+    public static function active_model(): string {
+        return self::backend() === 'openrouter' ? self::openrouter_model() : self::model();
+    }
+
+    /** OpenRouter takes the shape as an aspect ratio; the nearest common one is picked. */
+    public static function aspect_ratio(int $width, int $height): string {
+        $ratio = $height > 0 ? $width / $height : 1;
+        $best = '1:1';
+        $gap = PHP_FLOAT_MAX;
+        foreach (['1:1' => 1, '16:9' => 16 / 9, '9:16' => 9 / 16, '3:2' => 1.5, '2:3' => 2 / 3, '4:3' => 4 / 3, '3:4' => 0.75] as $name => $value) {
+            if (abs($ratio - $value) < $gap) {
+                $gap = abs($ratio - $value);
+                $best = $name;
+            }
+        }
+        return $best;
+    }
+
+    /** Request body for an OpenRouter image model: a chat completion that asks for image output. */
+    public static function openrouter_body(string $model, string $prompt, int $width, int $height): array {
+        return [
+            'model' => $model,
+            'messages' => [['role' => 'user', 'content' => $prompt]],
+            'modalities' => ['image', 'text'],
+            'image_config' => ['aspect_ratio' => self::aspect_ratio($width, $height)]
+        ];
+    }
+
+    /**
+     * The first image in an OpenRouter answer: message.images[].image_url.url, normally a
+     * base64 data URL. @return array{url: string, b64: string}
+     */
+    public static function openrouter_image(array $data): array {
+        $images = $data['choices'][0]['message']['images'] ?? [];
+        $first = is_array($images) ? ($images[0] ?? null) : null;
+        $url = is_array($first) ? (string) ($first['image_url']['url'] ?? $first['url'] ?? '') : '';
+        if (preg_match('#^data:image/[a-z0-9.+-]+;base64,(.+)$#is', $url, $m)) {
+            return ['url' => '', 'b64' => (string) $m[1]];
+        }
+        return ['url' => preg_match('#^https://#i', $url) ? $url : '', 'b64' => ''];
+    }
+
+    /** AIMLAPI key (legacy): the image key if set, else the AI key when the AI provider is AIMLAPI. */
     public static function key(): string {
         $key = trim((string) SGAP_Settings::get('image_api_key'));
         if ($key === '' && SGAP_AI::provider() === 'aimlapi') {
@@ -46,9 +105,9 @@ class SGAP_Images {
      * @return array{attachment_id: int, url: string}|WP_Error
      */
     public static function create(string $prompt, string $alt = '', int $width = 1600, int $height = 1024, int $parent = 0) {
-        $key = self::key();
-        if ($key === '') {
-            return new WP_Error('sgap_image_key', 'Images need an AIMLAPI key: choose AIMLAPI as AI provider, or set "Image api key" in Settings → AI content.');
+        $backend = self::backend();
+        if ($backend === '') {
+            return new WP_Error('sgap_image_key', 'Images need OpenRouter: an OpenRouter key (as provider or as backup) and an image model under Settings → AI content.');
         }
         $prompt = trim($prompt);
         if ($prompt === '') {
@@ -57,6 +116,10 @@ class SGAP_Images {
         if (function_exists('set_time_limit')) {
             @set_time_limit(300);
         }
+        if ($backend === 'openrouter') {
+            return self::create_openrouter($prompt, $alt, $width, $height, $parent);
+        }
+        $key = self::key();
         $model = self::model();
         $response = wp_remote_post(self::ENDPOINT, [
             'timeout' => 180,
@@ -79,6 +142,27 @@ class SGAP_Images {
             return new WP_Error('sgap_image_empty', 'AIMLAPI returned no image.');
         }
         return self::save($url, $b64, $prompt, $alt, $parent);
+    }
+
+    /** @return array{attachment_id: int, url: string}|WP_Error */
+    public static function create_openrouter(string $prompt, string $alt, int $width, int $height, int $parent) {
+        $model = self::openrouter_model();
+        $response = SGAP_AI::openrouter_post(SGAP_AI::openrouter_key(), self::openrouter_body($model, $prompt, $width, $height), 180);
+        if (is_wp_error($response)) {
+            return $response;
+        }
+        $code = (int) wp_remote_retrieve_response_code($response);
+        $data = json_decode((string) wp_remote_retrieve_body($response), true);
+        // OpenRouter can answer 200 with an error object when the provider behind the model fails.
+        $message = is_array($data) ? (string) ($data['error']['message'] ?? '') : '';
+        if ($code < 200 || $code >= 300 || !is_array($data) || $message !== '') {
+            return new WP_Error('sgap_image_http', "OpenRouter image ({$model}): " . ($message !== '' ? $message : "HTTP {$code}"));
+        }
+        $image = self::openrouter_image($data);
+        if ($image['url'] === '' && $image['b64'] === '') {
+            return new WP_Error('sgap_image_empty', "OpenRouter returned no image — is {$model} a model with image output?");
+        }
+        return self::save($image['url'], $image['b64'], $prompt, $alt, $parent);
     }
 
     /** @return array{attachment_id: int, url: string}|WP_Error */
@@ -105,7 +189,7 @@ class SGAP_Images {
             return $id;
         }
         update_post_meta($id, '_wp_attachment_image_alt', sanitize_text_field($alt !== '' ? $alt : wp_trim_words($prompt, 16, '')));
-        update_post_meta($id, '_sgap_ai_image', ['model' => self::model(), 'prompt' => $prompt]);
+        update_post_meta($id, '_sgap_ai_image', ['model' => self::active_model(), 'prompt' => $prompt]);
         return ['attachment_id' => (int) $id, 'url' => (string) wp_get_attachment_url($id)];
     }
 }
@@ -429,7 +513,7 @@ class SGAP_Studio {
             $wpdb->update($wpdb->prefix . 'sgap_queue', ['image_url' => $image['url']], ['id' => $queue_id]);
             $image['queue_post'] = $queue_id;
         }
-        $image['model'] = SGAP_Images::model();
+        $image['model'] = SGAP_Images::active_model();
         return $image;
     }
 
@@ -447,7 +531,7 @@ class SGAP_Studio {
                  'notes' => ['type' => 'string'], 'image' => ['type' => 'boolean', 'default' => true]],
                 ['topic'], fn($i) => self::write((array) $i)],
             'generate-image' => ['Generate an AI image',
-                'Creates an image with AIMLAPI (default model Seedream 5.0 Pro) and saves it to the media library. With post_id it becomes that post\'s featured image (prompt optional then); with queue_id it becomes the image of a queued social post (needed for Instagram/Pinterest).',
+                'Creates an image with the configured image model (OpenRouter, or AIMLAPI on older setups) and saves it to the media library. With post_id it becomes that post\'s featured image (prompt optional then); with queue_id it becomes the image of a queued social post (needed for Instagram/Pinterest).',
                 ['prompt' => ['type' => 'string'], 'alt' => ['type' => 'string'], 'post_id' => ['type' => 'integer', 'minimum' => 1], 'queue_id' => ['type' => 'integer', 'minimum' => 1],
                  'shape' => ['type' => 'string', 'enum' => ['landscape', 'square', 'portrait', 'pin'], 'default' => 'landscape']],
                 [], fn($i) => self::image((array) $i)],
@@ -498,9 +582,9 @@ class SGAP_Studio {
     public static function page(): void {
         SGAP_Admin::open('Content Studio', 'SEO articles, guides and product texts as drafts, AI images, and SEO fixes for existing pages.');
         $ai_ok = SGAP_Settings::get('ai_api_key') !== '';
-        $img_ok = SGAP_Images::key() !== '';
+        $img_ok = SGAP_Images::backend() !== '';
         echo '<div class="sgap-pills">' . SGAP_UI::pill('Writer: ' . SGAP_AI::provider_name() . ' · ' . (SGAP_AI::model() ?: '?'), $ai_ok ? 'ok' : 'bad')
-            . SGAP_UI::pill('Images: ' . ($img_ok ? SGAP_Images::model() : 'needs an AIMLAPI key'), $img_ok ? 'ok' : 'warn')
+            . SGAP_UI::pill('Images: ' . ($img_ok ? SGAP_Images::active_model() : 'needs an OpenRouter image model'), $img_ok ? 'ok' : 'warn')
             . SGAP_UI::pill('Keyword research: ' . (SGAP_Settings::get('serpapi_key') !== '' ? 'SerpApi on' : 'off – add a SerpApi key'), SGAP_Settings::get('serpapi_key') !== '' ? 'ok' : 'warn') . '</div>';
         $recent = get_posts(['post_type' => array_values(array_filter(['post', 'page', 'product'], 'post_type_exists')), 'post_status' => ['publish', 'draft'], 'posts_per_page' => 60, 'orderby' => 'modified', 'no_found_rows' => true]);
         $options = '';

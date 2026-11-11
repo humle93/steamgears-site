@@ -47,11 +47,11 @@ class SGAP_Keys {
             'title' => 'AI text',
             'icon' => 'superhero-alt',
             'keys' => ['ai_api_key'],
-            'owner' => 'You — your own AIMLAPI, Anthropic or OpenRouter account, paid by you.',
+            'owner' => 'You — your own OpenRouter or Anthropic account (AIMLAPI is being phased out), paid by you.',
             'why' => 'Without it nothing writes: no posts, no articles, no chat answers and no AI photos.',
-            'body' => 'Writes the posts, the articles and the answers in the chat. One AIMLAPI key covers Claude and 300+ models; an Anthropic key works directly too; an OpenRouter key puts hundreds of models from many providers behind one bill.',
-            'links' => [['AIMLAPI', 'https://aimlapi.com/'], ['Anthropic', 'https://console.anthropic.com/settings/keys'], ['OpenRouter', 'https://openrouter.ai/keys']],
-            'hint' => 'AIMLAPI: Dashboard → API keys. Anthropic: console.anthropic.com → API keys. OpenRouter: openrouter.ai/keys, then pick a model under AI & images.',
+            'body' => 'Writes the posts, the articles and the answers in the chat. An OpenRouter key (recommended) puts hundreds of models from many providers — text and images — behind one bill; an Anthropic key works directly too. A saved AIMLAPI key keeps working until you switch.',
+            'links' => [['OpenRouter', 'https://openrouter.ai/keys'], ['Anthropic', 'https://console.anthropic.com/settings/keys']],
+            'hint' => 'OpenRouter: openrouter.ai/keys, then pick a model under AI & images. Anthropic: console.anthropic.com → API keys.',
             'test' => 'ai'
         ],
         'openrouter_backup' => [
@@ -71,11 +71,11 @@ class SGAP_Keys {
             'title' => 'AI images',
             'icon' => 'format-image',
             'keys' => ['image_api_key'],
-            'owner' => 'You — normally the same AIMLAPI account as the text; a second one only if image spend should sit on its own bill.',
+            'owner' => 'You — an AIMLAPI account (legacy). With an OpenRouter image model set under AI & images, images go through OpenRouter and this key is not needed.',
             'why' => 'Instagram and Pinterest posts need a photo. It exists so image cost can be separated from text cost, not because a second account is required.',
-            'body' => 'Instagram and Pinterest need a photo on every post. Leave the field empty and the AI text key is used instead.',
+            'body' => 'Instagram and Pinterest need a photo on every post. Set an OpenRouter image model and images use your OpenRouter key instead; this AIMLAPI key is only the old path.',
             'links' => [['AIMLAPI', 'https://aimlapi.com/']],
-            'hint' => 'Only needed when images should be billed to a different key than the text.',
+            'hint' => 'Being phased out: leave it empty once OpenRouter images work.',
             'optional' => true
         ],
         'publer' => [
