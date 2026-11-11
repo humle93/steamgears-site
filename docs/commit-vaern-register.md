@@ -23,6 +23,7 @@ Et nyt værn gælder også de gamle commits, medmindre det udtrykkeligt står i 
 | --- | --- | --- | --- | --- | --- |
 | `1c15f939` | 76,3 % → 76,7 % (Δ +0,4), `P1.18 0,5 d af 29,65 d` | Række **96**: 76,3 → 76,7 %, `22,75 af 29,65 d (P0 4,35/4,7 · P1 11,2/15,2 · …)` | Ingen i tallene. `Grundlag` citerer **modul-deltaet** (P1 10,7 → 11,2 = 0,5 d) i stedet for totalen | `basis` | **Godkendt.** Procenterne er rækkens egne; kun formuleringen falder uden for det værnet kan genberegne |
 | `c747a47a` | 91,0 % → 96,2 % (Δ +5,2), `27,8 af 28,9 d` | Række **110**: 91,2 → 96,3 % (Δ +5,1), `28,3 af 29,4 d` | Statuslinjen blev udregnet **før** det merge der satte række 110 (samme dag, samme arbejde) | `history` | **Godkendt med note.** Arbejdet er på `main` (`includes/instagram.php`, `SGAP_Instagram`), og den gældende status er række 110's. Beskedens tal er en overhalet mellemregning, ikke en påstand om mere arbejde |
+| `45a11e00` | 100 % → 100 % (Δ 0), `34,6 af 34,6 d (… · P9 0,35/0,35 · P10 0,5/0,5)` | Række **189**: 100 → 100 % (Δ 0), `35,55 af 35,55 d (… · P9.4 0,2/0,2 · P10 0,5/0,5)` | Ingen i tallene. Commit'en blev skrevet på en gren, før main fik Cirla P9.1–P9.4 (+0,95 d); efter fletningen (merge `beaffa1`) er P10-rækken skrevet med den nye total. Force-push var ikke tilladt, så commit'en ligger fast | `basis` | **Godkendt.** Samme arbejde, samme procent; kun nævneren i `Grundlag` voksede med main's moduler |
 
 ## Sådan tilføjes en post
 
