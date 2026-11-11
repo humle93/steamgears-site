@@ -131,6 +131,7 @@ OAuth-flowet i `tools/test_mcp_oauth.py` (10 fixtures, lokal authorization serve
 | --- | --- | --- |
 | `401 rest_forbidden` | intet gyldigt token | kør `--start`/`--finish`, eller `--ask` |
 | `400 invalid_grant` | koden er brugt, udløbet eller hører til en anden klient | kør `--start` igen og godkend på nyt |
+| `401 invalid_client` | klient-id'et kender serveren ikke — en DCR-klient kan blive ryddet hos serveren, selv om `client.json` står urørt | slet `client.json` i config-mappen og kør `--start`, så registreres en ny klient |
 | `400 invalid_request` ved `/register` | redirect-URI eller grant-type afvist | brug `http://127.0.0.1:8765/callback` præcis som klienten registrerer |
 | `454` / `455` | Simplys WAF på HTML | åbn linket i en rigtig browser, ikke fra worktreen |
 | `404 rest_no_route` | forkert sti | ruten er `/wp-json/mcp/v1/http`, ikke `/mcp` |
