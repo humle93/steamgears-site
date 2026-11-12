@@ -8,6 +8,10 @@ latest); 6.4 giver 184 PASS, fordi ability-grupperne springes over. Opskriften n
 nyeste matrix-kørsler brugte MySQL 8.0.36, men scriptet og resultaterne er de samme. Se
 [`wordpress-matrix-lokalt-2026-11-06.md`](wordpress-matrix-lokalt-2026-11-06.md).
 
+**Opdateret 12/11 2026:** kørt igen på plugin **7.79.0** med WordPress latest, PHP **8.5.8**, MariaDB
+**11.4.5** og wp-cli som phar: **267 PASS / 0 FAIL**. Den statiske PHP i `tools/_deps/bin/php` har nu
+`mysqli`, så bulk-PHP-downloadet er ikke længere nødvendigt; se §6.
+
 ## 1. Hvorfor Docker ikke kunne bruges
 
 | Forsøg | Resultat |
@@ -118,3 +122,47 @@ De fire modelpunkter bevises nu **inde i det rigtige WordPress**, ikke kun i smo
 «not offered any more», dropdownen er grupperet med standarden øverst og kun udbudte id'er, et afvist navn
 gensendes på standarden med en sætning om hvad der blev skiftet væk fra, og *Provider default* gemmes som
 den model der reelt bruges.
+
+
+## 6. Kørslen 12/11 2026 — 7.79.0 og de nye sager
+
+Samme opskrift, men med den PHP der allerede ligger i worktreen. `tools/_deps/bin/php` er 8.5.8 og har
+`mysqli`, `mysqlnd` og `pdo_mysql`, så kun MariaDB-bintaren og wp-cli skulle hentes:
+
+```bash
+# MariaDB 11.4.5 som i §2; wp-cli som phar i stedet for Composer
+curl -sSL -o /tmp/wp-cli.phar https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+mkdir -p /tmp/bin
+printf '#!/bin/sh\nexec /workspace/.../tools/_deps/bin/php -d memory_limit=-1 "$@"\n' > /tmp/bin/php
+printf '#!/bin/sh\nexec /workspace/.../tools/_deps/bin/php -d memory_limit=-1 /tmp/wp-cli.phar "$@"\n' > /tmp/bin/wp
+for n in mariadb mysql mariadb-dump mysqldump mariadb-admin mysqladmin; do
+    printf '#!/bin/sh\nexec /tmp/mariadb/bin/%s "$@"\n' "$n" > "/tmp/bin/$n"
+done
+chmod +x /tmp/bin/*
+PATH=/tmp/bin:$PATH WP_DIR=/tmp/wordpress bash plugins/tests/integration.sh
+```
+
+Resultat: **267 PASS / 0 FAIL**, exit 0, og smoke **1 568 PASS / 0 FAIL**. De nye sager der nu er dækket
+mod rigtig database og WordPress:
+
+| Område | Check | Målt |
+| --- | --- | --- |
+| REST/kø | `scheduled_at` er site-wall-clock med `timezone_string=Europe/Copenhagen` | `2026-12-25 10:00` gemmes som `2026-12-25 10:00:00` |
+| REST/kø | umulig dato `2026-02-31 10:00` | 400, ikke normaliseret til marts |
+| REST/kø | `force` kommer som strengen `"false"` | 422 mod bandet ord; `"true"` giver 201 |
+| REST/drafts | ukendt draft-id | 404 |
+| REST/kø | `status=queued` på et fejlet element | 200, `attempts=0`, `error=null`, `remind=0`; ukendt id 404 |
+| Kvalitetsgate | query-keys på en indlægs-URL | `?utm_source` er ikke arkiv; `?paged=2` er; `?p=1` er et enkelt indlæg |
+| Uninstall | `_sgap_evergreen` + `_sgap_ci_check` på en rigtig post og `sgap_coach_learn` i cron | begge dele væk efter uninstall; 0 rækker og 0 events |
+
+To fejl blev fundet undervejs:
+
+1. **Testens arkiv-forventning var forkert, ikke koden.** `home_url('/?utm_source=ci')` er forsiden og
+   dermed et arkiv; det er først et enkeltindlæg, når queryen hænger på en indlægs-permalink. Testen bruger nu
+   `/ci-brass-goggles-guide/?utm_source=ci`.
+2. **`admin-tools.php` havde et forældet ability-tal.** Den krævede 41, men 7.79.0 registrerer 43; testen er
+   opdateret til 43. Tallet skal hæves i samme commit som en ny ability, ellers fanger integrationen det.
+
+PHP 8.5 giver deprecation-linjer fra wp-cli's egne React- og php-cli-tools-filer. De er ikke pluginfejl;
+wp-shimmen kører med `-d error_reporting=8191` for at holde loggen læsbar. `debug.log`-kontrollen er stadig
+slået til og fandt ingen plugin-notices.

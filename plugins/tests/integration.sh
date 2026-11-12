@@ -122,12 +122,21 @@ else
 fi
 
 echo "== Uninstall"
+# Prove the delete path on a real database, not only in the stubbed smoke test:
+# the plugin's own post meta and a module cron event must disappear with it.
+META_POST="$(wpc post create --post_title='CI cleanup meta' --post_status=publish --porcelain)"
+wpc eval "update_post_meta($META_POST, '_sgap_evergreen', '1'); update_post_meta($META_POST, '_sgap_ci_check', '1'); wp_schedule_single_event(time() + 3600, 'sgap_coach_learn');" >/dev/null
+META_BEFORE="$(sql "SELECT COUNT(*) FROM {\$wpdb->postmeta} WHERE meta_key LIKE '_sgap\\_%'")"
+check "setup: plugin meta exists" "$([ "$META_BEFORE" -ge 2 ] && echo yes)" "yes"
+check "setup: coach cron exists" "$(wpc cron event list --hook=sgap_coach_learn --format=count)" "1"
 wpc plugin deactivate steamgears-autopilot --quiet
 check "deactivate clears cleanup cron" "$(wpc cron event list --hook=sgap_daily_cleanup --format=count)" "0"
 check "deactivate clears evergreen cron" "$(wpc cron event list --hook=sgap_evergreen --format=count)" "0"
 wpc plugin uninstall steamgears-autopilot --quiet
 check "uninstall drops tables" "$(sql "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name LIKE '{\$wpdb->prefix}sgap\\\\_%'")" "0"
 check "uninstall removes options" "$(sql "SELECT COUNT(*) FROM {\$wpdb->options} WHERE option_name LIKE 'sgap\\\\_%'")" "0"
+check "uninstall removes every _sgap_ postmeta key" "$(sql "SELECT COUNT(*) FROM {\$wpdb->postmeta} WHERE meta_key LIKE '_sgap\\_%'")" "0"
+check "uninstall clears the coach cron" "$(wpc cron event list --hook=sgap_coach_learn --format=count)" "0"
 
 if [ "$FAILED" -ne 0 ]; then
     echo "Integration checks FAILED"; exit 1

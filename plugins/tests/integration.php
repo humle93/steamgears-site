@@ -66,6 +66,60 @@ sgci_check('utm: setting names the campaign', str_contains(SGAP_UTM::build(['cha
 sgci_check('utm: per-post campaign wins', str_contains(SGAP_UTM::build(['channel' => 'pinterest', 'campaign' => 'Clockwork Punk', 'destination_url' => home_url('/x/')]), 'utm_campaign=clockworkpunk'));
 update_option('sgap_utm_campaign', 'steamgears_premium_evergreen');
 sgci_check('queue: duplicate 409', sgci_rest('POST', '/queue', $item)->get_status() === 409);
+
+// scheduled_at is site wall-clock time: a Danish 10:00 must still read 10:00 in MySQL,
+// and February 31 must be refused instead of being normalised to March.
+update_option('timezone_string', 'Europe/Copenhagen');
+$clock = sgci_rest('POST', '/queue', [
+    'channel' => 'pinterest',
+    'title' => 'CI wall clock',
+    'destination_url' => home_url('/ci-wall-clock/'),
+    'scheduled_at' => '2026-12-25 10:00'
+]);
+$clock_row = $wpdb->get_row($wpdb->prepare("SELECT id, scheduled_at FROM {$wpdb->prefix}sgap_queue WHERE title = %s", 'CI wall clock'));
+sgci_check('queue: scheduled_at keeps site wall-clock', $clock->get_status() === 201
+    && $clock_row && $clock_row->scheduled_at === '2026-12-25 10:00:00', $clock_row);
+sgci_check('queue: impossible scheduled_at 400', sgci_rest('POST', '/queue', [
+    'channel' => 'pinterest',
+    'title' => 'CI impossible date',
+    'destination_url' => home_url('/ci-impossible-date/'),
+    'scheduled_at' => '2026-02-31 10:00'
+])->get_status() === 400);
+if ($clock_row) {
+    $wpdb->delete($wpdb->prefix . 'sgap_queue', ['id' => (int) $clock_row->id]);
+}
+update_option('timezone_string', '');
+
+// A form field is a string: "false" must not become true and bypass the quality gate.
+update_option('sgap_quality_gate', 'block');
+update_option('sgap_banned_words', 'scam');
+$false_force = sgci_rest('POST', '/queue', [
+    'channel' => 'facebook',
+    'title' => 'CI false force',
+    'destination_url' => home_url('/ci-false-force/'),
+    'body' => 'This is a scam',
+    'force' => 'false'
+]);
+sgci_check('queue: force=false does not bypass the gate', $false_force->get_status() === 422);
+$true_force = sgci_rest('POST', '/queue', [
+    'channel' => 'facebook',
+    'title' => 'CI true force',
+    'destination_url' => home_url('/ci-true-force/'),
+    'body' => 'This is a scam',
+    'force' => 'true'
+]);
+sgci_check('queue: force=true still queues with a warning', $true_force->get_status() === 201);
+if ($true_force->get_status() === 201) {
+    $wpdb->delete($wpdb->prefix . 'sgap_queue', ['id' => (int) ($true_force->get_data()['id'] ?? 0)]);
+}
+update_option('sgap_quality_gate', 'block');
+update_option('sgap_banned_words', '');
+
+// Archive detection must look at the query keys, not merely at the presence of a query.
+sgci_check('quality: utm query on a post is not an archive', !SGAP_Quality::is_archive(home_url('/ci-brass-goggles-guide/?utm_source=ci')));
+sgci_check('quality: paged query is an archive', SGAP_Quality::is_archive(home_url('/?paged=2')));
+sgci_check('quality: p is one post, not an archive', !SGAP_Quality::is_archive(home_url('/?p=1')));
+
 update_option('sgap_ci_queue_id', $qid);
 $status = fn() => $wpdb->get_var($wpdb->prepare("SELECT status FROM {$wpdb->prefix}sgap_queue WHERE id = %d", $qid));
 
@@ -82,6 +136,13 @@ sgci_check('due: item claimed as sending', $status() === 'sending', $status());
 sgci_check('due: second poll empty', count(sgci_rest('GET', '/queue/due')->get_data()['items'] ?? [1]) === 0);
 
 sgci_check('status: failed is retried', sgci_rest('POST', "/queue/{$qid}/status", ['status' => 'failed', 'error' => 'CI'])->get_data()['status'] === 'queued');
+$queued = sgci_rest('POST', "/queue/{$qid}/status", ['status' => 'queued']);
+$reset_row = $wpdb->get_row($wpdb->prepare("SELECT status, attempts, error, remind FROM {$wpdb->prefix}sgap_queue WHERE id = %d", $qid));
+sgci_check('status: queued retries and resets the row', $queued->get_status() === 200
+    && ($queued->get_data()['status'] ?? '') === 'queued' && $reset_row
+    && $reset_row->status === 'queued' && (int) $reset_row->attempts === 0
+    && $reset_row->error === null && (int) $reset_row->remind === 0, $reset_row);
+sgci_check('status: queued unknown id 404', sgci_rest('POST', '/queue/999999/status', ['status' => 'queued'])->get_status() === 404);
 // A failure is retried after a back-off (5, 15, 45 min); pretend the wait is over.
 $wpdb->update($wpdb->prefix . 'sgap_queue', ['scheduled_at' => wp_date('Y-m-d H:i:s', time() - 60)], ['id' => $qid]);
 sgci_check('due: retried item comes back', count(sgci_rest('GET', '/queue/due')->get_data()['items'] ?? []) === 1);
@@ -101,6 +162,7 @@ sgci_check('drafts: approve', sgci_rest('POST', "/drafts/{$did}/status", ['statu
 $approved = sgci_rest('GET', '/drafts', ['status' => 'approved'])->get_data();
 sgci_check('drafts: listed as approved', count($approved) === 1 && $approved[0]['hashtags'] === '#steampunk #cosplay', $approved);
 sgci_check('drafts: bad status 400', sgci_rest('POST', "/drafts/{$did}/status", ['status' => 'x'])->get_status() === 400);
+sgci_check('drafts: unknown id 404', sgci_rest('POST', '/drafts/999999/status', ['status' => 'approved'])->get_status() === 404);
 
 $stats = sgci_rest('GET', '/stats', ['days' => 7]);
 sgci_check('stats: 200 with publish event', $stats->get_status() === 200
