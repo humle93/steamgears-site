@@ -210,6 +210,8 @@ def finish(raw_code: str) -> int:
         "redirect_uri": config["redirect_uri"],
         "client_id": config["client_id"],
         "code_verifier": config["code_verifier"],
+        "resource": RESOURCE,
+        "scope": SCOPE,
     }
     status, body = request(config["token_endpoint"], payload, form=True)
     if status != 200 or not isinstance(body, dict) or not body.get("access_token"):
@@ -244,7 +246,7 @@ def refresh() -> str | None:
     if not tokens.get("refresh_token") or not config.get("client_id"):
         return None
     payload = {"grant_type": "refresh_token", "refresh_token": tokens["refresh_token"],
-               "client_id": config["client_id"]}
+               "client_id": config["client_id"], "resource": RESOURCE, "scope": SCOPE}
     status, body = request(config.get("token_endpoint") or f"{API}/oauth/token", payload, form=True)
     if status != 200 or not isinstance(body, dict) or not body.get("access_token"):
         return None
