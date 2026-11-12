@@ -55,12 +55,25 @@ class SGAP_Cirla {
         }
     }
 
-    /** Administrators get sgap_cirla_run from the capability they already have. */
+    /**
+     * Administrators get sgap_cirla_run from the capability they already have.
+     *
+     * A role may hold sgap_cirla_run directly instead — the production case: a redaktør
+     * with the Cirla module and nothing else. That grant decides then, so the role does
+     * not need manage_options (which would be the whole site). Without it the capability
+     * still belongs to administrators.
+     */
     public static function map_cap($caps, $cap, $user_id = 0, $args = []) {
-        if ((string) $cap === self::CAP) {
-            return ['manage_options'];
+        if ((string) $cap !== self::CAP) {
+            return $caps;
         }
-        return $caps;
+        if ($user_id && function_exists('get_userdata')) {
+            $user = get_userdata($user_id);
+            if ($user && method_exists($user, 'get_role_caps') && !empty($user->get_role_caps()[self::CAP])) {
+                return ['exist'];
+            }
+        }
+        return ['manage_options'];
     }
 
     /** The actions the owner has left switched on. Empty list = nothing may run. */
@@ -300,7 +313,8 @@ class SGAP_Cirla {
         ];
     }
 
-    public static function seo_check($input = null): array {
+    /** @return array|WP_Error */
+    public static function seo_check($input = null): array|WP_Error {
         $input = is_array($input) ? $input : [];
         if ($error = self::guard('seo')) {
             return $error;
@@ -345,7 +359,8 @@ class SGAP_Cirla {
         ];
     }
 
-    public static function social_suggestions($input = null): array {
+    /** @return array|WP_Error */
+    public static function social_suggestions($input = null): array|WP_Error {
         $input = is_array($input) ? $input : [];
         if ($error = self::guard('social')) {
             return $error;

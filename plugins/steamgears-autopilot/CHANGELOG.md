@@ -10,6 +10,24 @@ Noterne er skrevet ud fra commit-historikken og de dokumenter der hører til hve
 
 <!-- patch-notes: baseline 7.65.0 -->
 
+## 7.79.0 — 2026-11-12
+
+**Cirla kan nu gives til en rolle der kun har Cirla — uden at give rollen hele sitet — og en afvist handling svarer med en fejlkode i stedet for en exception.**
+
+### Rettet
+- `SGAP_Cirla::map_cap()` sendte `sgap_cirla_run` videre til `manage_options` uanset hvad, så en
+  begrænset rolle (fx redaktør med kun `read` + `sgap_cirla_run`) blev afvist med 403, selv om rollen
+  havde capabilityen. Målt på steamgears.eu 11/11: `current_user_can('sgap_cirla_run')` var `false` for
+  en rolle med kun de to rettigheder, mens administrator var `true`. Nu vinder en direkte tildeling
+  (`['exist']`), og uden den går capabilityen stadig gennem `manage_options`, så administratorer er
+  uændrede. Det er forudsætningen for C7 i `projektstatus.json` (Cirla-bruger med begrænset rolle).
+- `SGAP_Cirla::seo_check()` og `social_suggestions()` var deklareret `: array`, men returnerer
+  `WP_Error` når modulet er slukket, rettigheden mangler eller det daglige loft er brugt. Målt på
+  steamgears.eu 11/11 gav et social-kald med brugt budget **»Return value must be of type array,
+  WP_Error returned«** i stedet for 429. Begge er nu `array|WP_Error`, så 403/409/429 når klienten
+  som tilsigtet.
+- 6 nye smoke-checks i `plugins/tests/cirla.php` (1 550 → 1 556 PASS, 0 FAIL).
+
 ## 7.76.1 — 2026-11-12
 
 **REST-datoer, falske boolske felter og oprydningen efter pluginnet er rettet.**

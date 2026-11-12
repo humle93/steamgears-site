@@ -352,6 +352,15 @@
           "unit": "d",
           "note": "7.76.0: OpenRouter er standardudbyder (kun når intet er gemt) og står først i guide og nøgleside; AIMLAPI markeret 'being phased out', men et gemt valg virker stadig. includes/openrouter.php: advarsel + 'Switch to OpenRouter now' når reserven har nøgle og model. SGAP_Images::backend(): billeder via OpenRouter (modalities image, data-URL) med openrouter_image_model, ellers AIMLAPI. POST /sgap/v1/cc-link gemmer CC-adresse + fælles nøgle (ikke autoload); knappen laver en HMAC-SHA256-billet (60 s, 128-bit jti) til {cc}/cc-sso. Fund: CC's gamle POST /sgap/v1/login-link havde aldrig en rute i pluginnet. 45 nye checks, 1 505 → 1 550 PASS, 0 FAIL; mutationstjek af signaturen fejler som forventet; zip matcher kilden (74 filer); interop: en billet fra SGAP_CC::ticket() blev godkendt af Command Center 7.27.0 og anden gang afvist som brugt. Oprindeligt bygget som 7.72.0 og flyttet oven på 7.75.0 (Cirla P9.1-P9.4). IKKE verificeret: rigtigt OpenRouter-billedkald, login mod kørende CC, installation på sitet. Bevis: docs/library/openrouter-og-cc-login-2026-11-11.md.",
           "verified": true
+        },
+        {
+          "id": "p95",
+          "name": "P9.5 — Cirla kan tildeles en begrænset rolle",
+          "done": 0.25,
+          "total": 0.25,
+          "unit": "d",
+          "note": "7.79.0: SGAP_Cirla::map_cap() sendte sgap_cirla_run videre til manage_options uanset hvad, så en rolle med kun read + sgap_cirla_run blev afvist med 403, selv om den havde capabilityen (målt live 11/11: false for den begrænsede rolle, true for administrator). En direkte tildeling vinder nu (['exist']), og uden den går capabilityen stadig gennem manage_options. Samme pas: seo_check() og social_suggestions() var deklareret ': array', så 403/409/429 blev kastet som 'Return value must be of type array, WP_Error returned'; begge er nu array|WP_Error, og et social-kald med brugt loft svarer ren 429. 6 nye checks, 1 562 → 1 568 PASS, 0 FAIL. Genbygget oven på 7.76.1 og installeret på sitet over MCP som 7.79.0 (7.78.0 var samme rettelse oven på 7.76.0 og blev afløst, så 7.76.1 ikke gik tabt). Bevis: docs/library/cirla-c7-produktion-2026-11-11.md (+ PDF).",
+          "verified": true
         }
       ],
       "total": 33.75,
@@ -696,10 +705,10 @@
         {
           "id": "c7",
           "name": "C7 — fra test til produktion (§9.6)",
-          "done": 0.0,
+          "done": 0.45,
           "total": 0.6,
           "unit": "d",
-          "note": "Installer 7.71.1 med modulet slukket, opret Cirla-brugeren med begrænset rolle og kun sgap_cirla_run, slå modulet til via update-settings, overvåg 24 timer, og luk med at slå fra som rollback. Intet er kørt på sitet endnu."
+          "note": "Kørt på det levende steamgears.eu over MCP 11/11 med 7.79.0: modul slukket = 0 abilities og ingen cron; rolle cirla_operator (read + sgap_cirla_run) og bruger cirla oprettet; modulet tændt via update-settings; cirla-status, cirla-seo-check (post 1361, ok), skema-afvisning for draft uden topic og social uden post_id, og 429 for både draft og social ved brugt dagligt loft; fire abilities synlige i discover-abilities; begrænset bruger kan køre Cirla men ikke manage_options, install_plugins, edit_users eller edit_posts; rullet tilbage med update-settings (0 abilities, cron væk, log og indstillinger bevaret). To fejl fundet på live og rettet i 7.79.0 (map_cap tvang manage_options; ': array' gjorde 403/409/429 til en exception). IKKE målt: 24 timers overvågning (kan ikke observeres i én session, og modulet er slukket igen), et rigtigt AI-svar (0 kreditter brugt), og et MCP-kald med brugerens eget token. Bevis: docs/library/cirla-c7-produktion-2026-11-11.md (+ PDF)."
         },
         {
           "id": "c8",
@@ -2577,6 +2586,15 @@
       "after": 80.0,
       "delta": 0,
       "basis": "2,4 af 3 d (C1 0,35/0,35 · C2 0,2/0,2 · C3 0,4/0,4 · C4 0,25/0,25 · C5 0,2/0,2 · C6 0,8/0,8 · C7 0/0,6 · C8 0,2/0,2)"
+    },
+    {
+      "date": "2026-11-12",
+      "project": "Cirla — AI-indholdsmodul",
+      "module": "daglig måling",
+      "before": 80.0,
+      "after": 95.0,
+      "delta": 15.0,
+      "basis": "2,85 af 3 d (C1 0,35/0,35 · C2 0,2/0,2 · C3 0,4/0,4 · C4 0,25/0,25 · C5 0,2/0,2 · C6 0,8/0,8 · C7 0,45/0,6 · C8 0,2/0,2)"
     }
   ]
 }

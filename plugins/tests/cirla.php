@@ -170,6 +170,41 @@ check('cirla: the gate block answers 422', $coded_gate instanceof WP_Error
     && $coded_gate->get_error_code() === 'sgap_cirla_gate' && ($coded_gate->get_error_data()['status'] ?? 0) === 422);
 SGAP_Settings::set('quality_gate', $gate_mode_before);
 SGAP_Settings::set('cirla_enabled', 'no');
+// Målt på steamgears.eu 11/11: seo/tjek og social-forslag var deklareret `: array`, så en afvisning
+// gav en TypeError i stedet for 403/409/429. En afvisning skal kunne returneres som WP_Error.
+SGAP_Settings::set('cirla_enabled', 'yes');
+$GLOBALS['deny_caps'] = ['sgap_cirla_run'];
+$seo_denied = SGAP_Cirla::seo_check(['post_id' => 1]);
+check('cirla: an SEO check without the capability answers 403, not a TypeError',
+    $seo_denied instanceof WP_Error && ($seo_denied->get_error_data()['status'] ?? 0) === 403);
+$social_denied = SGAP_Cirla::social_suggestions(['post_id' => 1]);
+check('cirla: social suggestions without the capability answer 403, not a TypeError',
+    $social_denied instanceof WP_Error && ($social_denied->get_error_data()['status'] ?? 0) === 403);
+$GLOBALS['deny_caps'] = [];
+SGAP_Settings::set('cirla_enabled', 'no');
+$seo_off = SGAP_Cirla::seo_check(['post_id' => 1]);
+check('cirla: an SEO check while the module is off answers 409',
+    $seo_off instanceof WP_Error && ($seo_off->get_error_data()['status'] ?? 0) === 409);
 $coded_off = SGAP_Cirla::draft(['topic' => 'while off']);
 check('cirla: a call while the module is off answers 409', $coded_off instanceof WP_Error
     && ($coded_off->get_error_data()['status'] ?? 0) === 409);
+
+// ---- the production case: a role that holds sgap_cirla_run itself, without manage_options ----
+// Målt på steamgears.eu 11/11: en rolle med kun read + sgap_cirla_run blev afvist, fordi
+// map_cap altid sendte capabilityen videre til manage_options. En direkte tildeling skal vinde.
+if (!function_exists('get_userdata')) {
+    function get_userdata($id) { return $GLOBALS['cirla_test_user'] ?? false; }
+}
+$GLOBALS['cirla_test_user'] = new class {
+    public function get_role_caps(): array { return ['read' => true, 'sgap_cirla_run' => true]; }
+};
+check('cirla: a role that holds the capability directly keeps it',
+    SGAP_Cirla::map_cap(['do_not_allow'], 'sgap_cirla_run', 5) === ['exist']);
+$GLOBALS['cirla_test_user'] = new class {
+    public function get_role_caps(): array { return ['read' => true]; }
+};
+check('cirla: a role without it still goes through administrators',
+    SGAP_Cirla::map_cap(['do_not_allow'], 'sgap_cirla_run', 5) === ['manage_options']);
+check('cirla: another capability is untouched by the mapping',
+    SGAP_Cirla::map_cap(['edit_posts'], 'edit_posts', 5) === ['edit_posts']);
+unset($GLOBALS['cirla_test_user']);
