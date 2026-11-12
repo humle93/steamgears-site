@@ -645,7 +645,7 @@ class SGAP_AI {
     /** @return string[] */
     public static function free_models(): array {
         $list = (array) apply_filters('sgap_free_models', self::FREE_MODELS);
-        return array_values(array_filter(array_map('strval', $list), fn($m) => $m !== ''));
+        return array_slice(array_values(array_filter(array_map('strval', $list), fn($m) => $m !== '')), 0, 3); // OpenRouter: max 3
     }
 
     /** A credit refusal on OpenRouter for a model that is not already free. */

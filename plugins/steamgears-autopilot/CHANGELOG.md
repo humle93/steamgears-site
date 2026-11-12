@@ -10,6 +10,20 @@ Noterne er skrevet ud fra commit-historikken og de dokumenter der hører til hve
 
 <!-- patch-notes: baseline 7.65.0 -->
 
+## 7.83.1 — 2026-11-12
+
+**Rettet: AI-redaktøren og den gratis reserve sendte for mange modeller til OpenRouter.**
+
+### Rettet
+- OpenRouter afviser mere end 3 modeller i `models`. Målt live med 7.83.0: »'models' array must have 3
+  items or fewer«.
+  - `SGAP_Editor::MODELS` er nu `nemotron-3-ultra:free`, `nemotron-3.5-super-vl:free` og
+    `openrouter/free`.
+  - Både `SGAP_Editor::models()` og `SGAP_AI::free_models()` skærer en filtreret liste ned til 3.
+- Fejlen var sikker. Uden et svar holdt redaktøren alle opslag tilbage som `pending`, og intet kom i
+  køen.
+- 1 nyt smoke-check (1 612 → 1 613 PASS, 0 FAIL).
+
 ## 7.83.0 — 2026-11-12
 
 **En AI-redaktør læser hvert socialt opslag, før det må komme i køen. Svage opslag afvises med grunden, og når ingen redaktør svarer, venter opslagene på dig, også i Full auto.**

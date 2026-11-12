@@ -15,8 +15,12 @@ if (!defined('ABSPATH')) {
 
 class SGAP_Editor {
     const MIN_SCORE = 7;
-    /** Free text models, in order; OpenRouter walks the list itself when one is busy. */
-    const MODELS = ['nvidia/nemotron-3-ultra-550b-a55b:free', 'nvidia/nemotron-3.5-super-vl:free', 'google/gemma-4-31b-it:free', 'openrouter/free'];
+    /**
+     * Free text models, in order; OpenRouter walks the list itself when one is busy. OpenRouter
+     * refuses more than 3 (measured live 12/11: "'models' array must have 3 items or fewer").
+     */
+    const MODELS = ['nvidia/nemotron-3-ultra-550b-a55b:free', 'nvidia/nemotron-3.5-super-vl:free', 'openrouter/free'];
+    const MAX_MODELS = 3;
 
     public static function min_score(): int {
         return max(0, min(10, (int) apply_filters('sgap_editor_min_score', self::MIN_SCORE)));
@@ -24,7 +28,7 @@ class SGAP_Editor {
 
     /** @return string[] */
     public static function models(): array {
-        return array_values(array_filter(array_map('strval', (array) apply_filters('sgap_editor_models', self::MODELS))));
+        return array_slice(array_values(array_filter(array_map('strval', (array) apply_filters('sgap_editor_models', self::MODELS)))), 0, self::MAX_MODELS);
     }
 
     /** On when an OpenRouter key exists (main or backup) and the model list is not emptied by the filter. */

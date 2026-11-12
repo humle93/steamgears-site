@@ -2049,6 +2049,9 @@ check('7.83 health: rejected and waiting posts are named in the self-check', str
 delete_option('sgap_last_generate'); unset($GLOBALS['postmeta'][777]);
 update_option('sgap_ai_provider','anthropic'); update_option('sgap_ai_api_key',''); update_option('sgap_ai_model',''); $GLOBALS['http_queue']=[]; $GLOBALS['http_calls']=[];
 $ed_bk=get_option('sgap_openrouter_api_key'); update_option('sgap_openrouter_api_key','');
+$GLOBALS['filters']['sgap_editor_models']=fn($v)=>['a:free','b:free','c:free','d:free']; $GLOBALS['filters']['sgap_free_models']=fn($v)=>['a:free','b:free','c:free','d:free'];
+check('7.83.1: never more than 3 models in a request (OpenRouter refuses more)', count(SGAP_Editor::models())===3 && count(SGAP_AI::free_models())===3);
+unset($GLOBALS['filters']['sgap_editor_models'],$GLOBALS['filters']['sgap_free_models']);
 check('7.83 editor: off without an OpenRouter key (Anthropic users keep the old flow)', !SGAP_Editor::enabled());
 update_option('sgap_openrouter_api_key',$ed_bk);
 // P3.2/P3.5-slut
