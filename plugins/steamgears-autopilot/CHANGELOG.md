@@ -10,6 +10,21 @@ Noterne er skrevet ud fra commit-historikken og de dokumenter der hører til hve
 
 <!-- patch-notes: baseline 7.65.0 -->
 
+## 7.84.1 — 2026-11-12
+
+**Rettet: et Pinterest-token til at oprette pins skal have begge board-scopes.**
+
+### Rettet
+- Målt live mod Pinterest: `POST /v5/pins` med *Pinterest for WooCommerce*-tokenet, som har `pins:write`,
+  svarer 401 `Missing: ['boards:read', 'boards:write']`. Tokenet fra WooCommerce kan derfor ikke poste.
+- Indstillingshjælpen og fejlbeskeden siger nu `pins:write, boards:read og boards:write`.
+- `tools/pinterest_connect.py` beder om `boards:read,boards:write,pins:read,pins:write,user_accounts:read`.
+- Guiden `docs/library/publer-udfasning-2026-11-12.md` er rettet efter målingen:
+  - App ID mangler på sitet.
+  - Det gamle eget token er udløbet.
+  - Der ligger et kandidat-board i `sg_pinterest_board`.
+  - TikTok-nøglerne fra WooCommerce (`tt4b_*`) er til annoncer, ikke til at poste opslag.
+
 ## 7.84.0 — 2026-11-12
 
 **Publer kan udfases kanal for kanal: pluginnet poster nu selv til Instagram og Pinterest, og direkte kanaler virker også i RSS-tilstand og uden Publer-nøgle.**

@@ -39,6 +39,11 @@ fornyes næste måned, uden et eneste døgn hvor intet bliver postet.
 
 ### 3.2 Instagram
 
+*(Om TikTok: på sitet ligger kun *TikTok for WooCommerce*-nøgler (`tt4b_*`). De er til annoncer, pixel og
+katalog og ikke til at poste opslag. TikTok-udgivelse kræver et token fra jeres godkendte TikTok-app med
+udgivelses-scope. Det er næste trin efter Publer.)*
+
+
 1. Kontoen skal være en **professionel konto** (Business eller Creator).
 2. Tilføj *Instagram API with Instagram Login* til samme Meta-app. Giv tokenet scopes
    `instagram_business_basic` og `instagram_business_content_publish`. `..._manage_insights` beholdes, så
@@ -50,11 +55,20 @@ fornyes næste måned, uden et eneste døgn hvor intet bliver postet.
 
 ### 3.3 Pinterest
 
-1. Sitet bruger i dag tokenet fra *Pinterest for WooCommerce*, og det mangler `boards:read`. Til at poste
-   skal der bruges et token fra **din egen** Pinterest-app med `pins:write`, `boards:read` og `pins:read`.
-   Fremgangsmåden står i [`pinterest-genforbindelse-2026-11-09.md`](pinterest-genforbindelse-2026-11-09.md)
-   (`tools/pinterest_connect.py`).
-2. Find boardets tal-id (`GET /v5/boards`) og gem det som `pinterest_board_id`. Sæt `pinterest_direct = yes`.
+1. **Tokenet fra *Pinterest for WooCommerce* kan ikke poste** (målt 12/11). Det har `pins:write`, men
+   Pinterest svarer 401 `Missing: ['boards:read', 'boards:write']` på `POST /v5/pins`, og WooCommerce-appen
+   beder ikke om board-scopes. Til at poste skal der bruges et token fra **din egen** Pinterest-app med
+   `boards:read`, `boards:write`, `pins:read` og `pins:write` (`tools/pinterest_connect.py` beder om dem
+   fra 7.84.1).
+   - På sitet ligger en client secret på 40 tegn fra din app, men **App ID (client id) mangler**. Indsæt
+     det under *Settings → Keys*, og kør `--authorize` / `--finish` som i
+     [`pinterest-genforbindelse-2026-11-09.md`](pinterest-genforbindelse-2026-11-09.md).
+   - Det gamle eget token på sitet er udløbet (401) og kan ikke fornyes uden App ID.
+   - Pluginnet bruger WooCommerce-tokenet før sit eget. Derfor skal integrationens token enten afbrydes,
+     eller også skal det egne token sættes som konstant. Det står i samme dokument.
+2. Find boardets tal-id (`GET /v5/boards`) og gem det som `pinterest_board_id`. På sitet ligger et 18-cifret
+   id fra en ældre opsætning (`sg_pinterest_board`). Det er sandsynligvis boardet, men det kan ikke
+   bekræftes uden `boards:read`. Sæt derefter `pinterest_direct = yes`.
 3. **Ikke verificeret herfra:** nye Pinterest-apps starter på *Trial access*. Efter vores viden kan pins, der
    oprettes på trial, være begrænsede, indtil appen får *Standard access*. Søg om Standard samtidig, så
    ventetiden løber.

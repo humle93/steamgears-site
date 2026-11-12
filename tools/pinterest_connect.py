@@ -30,7 +30,8 @@ import urllib.parse
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-SCOPE = "boards:read,pins:read,user_accounts:read"
+# boards:write + pins:write: at oprette pins kræver begge board-scopes (målt 12/11: "Missing: ['boards:read', 'boards:write']").
+SCOPE = "boards:read,boards:write,pins:read,pins:write,user_accounts:read"
 DEFAULT_REDIRECT = "http://127.0.0.1:8765/callback"
 AUTH_URL = "https://www.pinterest.com/oauth/"
 TOKEN_URL = "https://api.pinterest.com/v5/oauth/token"

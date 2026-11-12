@@ -969,7 +969,7 @@ class SGAP_Pinterest {
     }
 
     /**
-     * Creates one pin. Returns the pin id or a WP_Error. The token needs pins:write and boards:read;
+     * Creates one pin. Returns the pin id or a WP_Error. The token needs pins:write, boards:read and boards:write;
      * the link is the queue's tracking URL, so clicks are counted like every other channel.
      *
      * @return string|WP_Error
@@ -1022,7 +1022,7 @@ class SGAP_Pinterest {
         }
         $denied = self::scope_denial($response);
         if ($denied !== '') {
-            return new WP_Error('sgap_pinterest_scope', 'Pinterest refused the pin: ' . $denied . ' The token needs pins:write and boards:read.', ['status' => $code]);
+            return new WP_Error('sgap_pinterest_scope', 'Pinterest refused the pin: ' . $denied . ' The token needs pins:write, boards:read and boards:write.', ['status' => $code]);
         }
         $message = is_array($body) ? (string) ($body['message'] ?? '') : '';
         return new WP_Error('sgap_pinterest_http', 'Pinterest answered HTTP ' . $code . ' when creating the pin' . ($message !== '' ? ': ' . $message : '') . '.', ['status' => $code]);
