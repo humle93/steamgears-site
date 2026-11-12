@@ -1,0 +1,23 @@
+[
+ {
+  "at": "2026-11-12T17:58:37Z",
+  "enabled": true,
+  "actions": [
+   "status",
+   "draft",
+   "seo",
+   "social"
+  ],
+  "cron_next": "2026-11-12T18:56:49+00:00",
+  "cron_scheduled": true,
+  "ai_calls_used": 0,
+  "ai_calls_limit": 5,
+  "pending_drafts": 0,
+  "log_rows": 4,
+  "log_newest": {
+   "at": "2026-11-11 22:32:16",
+   "action": "toggle"
+  },
+  "version": "7.79.0"
+ }
+]

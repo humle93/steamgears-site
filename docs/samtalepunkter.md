@@ -61,15 +61,25 @@ _Opdateret 2026-11-12 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `7a6cd2b Modul: tools — live_state læser Novamira-svaret og sender parameters`
+- `4df0365 chore(status): daglig projektstatus 2026-11-12`
+- `44ec0f3 Modul: docs-pdf — PDF fra dokumentbiblioteket Før: —  →  Efter: —  (Δ —) Grundlag: 1 PDF-filer i reports/ renderet med tools/md_to_pdf.py — ingen ændring i projektstatus`
+- `6f1e061 Modul: P9.5 — Cirla kan tildeles en begrænset rolle (C7 kørt på det levende site)`
 - `e9ffca2 Modul: Plugin 7.76.1 — admin Re-queue på fælles retry-vej Før: 100 % Efter: 100 % Δ: 0 Grundlag: ingen ændring`
 - `e478f13 Modul: MCP-OAuth — resource og scope i token-kald Før: — Efter: — Δ: — Grundlag: ingen ændring`
-- `e7b1fe8 Modul: docs-pdf — PDF fra dokumentbiblioteket Før: —  →  Efter: —  (Δ —) Grundlag: 1 PDF-filer i reports/ renderet med tools/md_to_pdf.py — ingen ændring i projektstatus`
-- `34c9ebf Modul: Plugin 7.76.1 — REST- og oprydningsfejl Før: 100 % Efter: 100 % Δ: 0 Grundlag: ingen ændring`
-- `493a4a0 chore(status): daglig projektstatus 2026-11-12`
-- `a2a509f docs snapshot 11/11 (drive-watch-log)`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
+
+- **C7-overvågningen er sat i drift 12/11.** Modulet blev tændt igen, og 24-timers-vinduet måles nu af den
+  natlige `novamira-keepalive.yml` i stedet for af en agent-sandkasse, der ikke kan holde et ur: `tools/cirla_watch.py`
+  kalder `cirla-status` med det samme fornyede token og tilføjer én række pr. dag til
+  `reports/cirla-c7-observationer.json` (tændt/slukket, handlinger, cron, AI-forbrug, kladder, log-rækker,
+  plugin-version). `--summary` svarer om vinduet er dækket og navngiver et tilbagefald; 12 offline-fixtures i
+  `tools/test_cirla_watch.py`. Første måling 12/11 kl. 17:58 UTC: tændt, cron planlagt, `AI 0/5`, 0 kladder,
+  `v7.79.0`. **Vinduet er ikke dækket endnu** — det kræver en måling mindst 24 timer senere uden tilbagefald, så C7
+  står stadig på 0,45 af 0,6 d. Ingen procenter flyttet: overvågningens opsætning er ikke overvågningen selv.
+  Bevis: `docs/library/cirla-c7-produktion-2026-11-11.md` §8 (+ PDF).
 
 - **C7 kørt på det levende site 11/11 (Cirla 80 → 95 %).** Med Novamira-MCP-adgang blev rækkefølgen i §9.6
   gennemført mod steamgears.eu: modul slukket (0 abilities, ingen cron) → rolle `cirla_operator` (`read` +

@@ -109,14 +109,39 @@ den nye, og filens header på disken stemmer.
 ## 7. Hvad der ikke er målt
 
 - **24 timers overvågning.** Cron-jobbet blev planlagt og verificeret, men vinduet kan ikke
-  observeres i én session. Modulet blev slået fra igen som C7 foreskriver, så der er intet at
-  overvåge nu. Skal overvågningen gennemføres, skal modulet tændes igen og stå tændt i 24 timer.
+  observeres i én session. Modulet blev slået fra igen som C7 foreskriver. Overvågningen er sat i
+  drift 12/11 — se afsnit 9.
 - **Et rigtigt AI-svar.** Ingen kreditter brugt; se afsnit 4.
 - **Et MCP-kald som Cirla-brugeren selv.** Rettighederne blev målt i WordPress med brugeren sat som
   aktuel bruger (`wp_set_current_user`), ikke med et separat OAuth-token for den bruger. Det er den
   samme gate (`current_user_can` i `permission_callback`), men ikke den samme transport.
 
-## 8. Efterladt på sitet
+## 8. Overvågningen, sat i drift 12/11
+
+Modulet blev tændt igen 12/11 kl. 17:58 UTC, og overvågningen blev lagt der hvor der allerede
+kører en natlig kørsel — en agent-sandkasse kan ikke holde et ur kørende et døgn.
+
+- [`tools/cirla_watch.py`](../../tools/cirla_watch.py) kalder `cirla-status` gennem Novamira og
+  tilføjer **én** række pr. dag til `reports/cirla-c7-observationer.json`: tændt/slukket, tilladte
+  handlinger, om cron er planlagt og hvornår, forbrug mod det daglige loft, antal kladder, antal
+  log-rækker og plugin-version. `--summary` svarer om vinduet er dækket, og navngiver det hvis
+  modulet faldt tilbage, loftet blev brugt eller cron forsvandt.
+- `novamira-keepalive.yml` kalder den efter fornyelsen (kl. 03 dansk tid) med det samme fornyede
+  token, skriver serien i job-summaryen og committer observationsfilen. Et rødt C7-trin giver en
+  annotation, men kører **efter** at det roterede token er gemt, så en målefejl aldrig koster
+  adgangen.
+- Første måling 12/11 kl. 17:58 UTC: **tændt**, fire handlinger tilladte, cron planlagt, `AI 0/5`,
+  `0` kladder, 4 log-rækker, `v7.79.0`. Vinduet er dermed **ikke** dækket endnu — det kræver en
+  måling mindst 24 timer senere uden tilbagefald.
+- 12 offline-fixtures i [`tools/test_cirla_watch.py`](../../tools/test_cirla_watch.py) dækker
+  rækkens felter, en måling pr. dag, kronologi, vinduet før/efter 24 timer, et slukket modul, et
+  brugt loft, en ødelagt fil og de tre tidsformater.
+
+**Hvad der stadig mangler for C7:** den natlige kørsel 13/11 skal give en måling mindst 24 timer
+ efter den første, og `--summary` skal svare `covered` uden en `reason`. Indtil da står C7 på
+ 0,45 af 0,6 d.
+
+## 9. Efterladt på sitet
 
 - Rollen `cirla_operator` (`read`, `sgap_cirla_run`) og brugeren `cirla` findes stadig. Brugeren har
   en tilfældig adgangskode, som ikke er vist eller gemt nogen steder.

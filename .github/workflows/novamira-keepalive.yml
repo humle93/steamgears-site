@@ -36,6 +36,7 @@ on:
       - .github/workflows/novamira-keepalive.yml
       - tools/live_state.py
       - tools/live_channels.py
+      - tools/cirla_watch.py
       - tools/mcp_keepalive.py
 
 permissions:
@@ -86,6 +87,7 @@ jobs:
         run: |
           python3 tools/test_mcp_keepalive.py
           python3 tools/test_live_state.py
+          python3 tools/test_cirla_watch.py
 
       - name: Kan det roterede token gemmes? (tjek FØR fornyelsen)
         if: steps.gate.outputs.run == 'true' && steps.token.outputs.have == 'true'
@@ -175,12 +177,50 @@ jobs:
           sys.exit(1 if bad else 0)
           PY
 
+      # C7: Cirla-overvågningen. Modulet er tændt på sitet, og hver kørsel tilføjer én
+      # række til reports/cirla-c7-observationer.json — så 24-timers-vinduet bliver målt
+      # af de natlige kørsler i stedet for af en agent-sandkasse der ikke kan holde et ur.
+      # Et slukket modul, et forbrugt AI-loft eller en manglende cron giver en annotation,
+      # men må ikke koste det roterede token: det er allerede gemt ovenfor.
+      - name: C7 — Cirla-overvågning
+        if: always() && steps.gate.outputs.run == 'true' && steps.token.outputs.have == 'true'
+        run: |
+          set -uo pipefail
+          kode=0
+          python3 tools/cirla_watch.py --observe || kode=$?
+          if [ "$kode" -eq 2 ]; then
+            echo "::notice title=C7 blev ikke målt::Der var intet access-token efter fornyelsen."
+          elif [ "$kode" -eq 1 ]; then
+            echo "::error title=C7: Cirla kunne ikke måles::Se trinets log — modulet kan være slukket eller fladen kan mangle cirla-status."
+          fi
+          # Vinduet er kun 'dækket' når der er mindst 24 timer mellem to målinger og ingen
+          # af dem viser et slukket modul eller et brugt loft. Uden dækning er det en notice.
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json, sys
+          sys.path.insert(0, "tools")
+          import cirla_watch
+
+          rows = cirla_watch.load_series()
+          state = cirla_watch.window(rows)
+          print("## C7 — Cirla-overvågning")
+          print("")
+          print(f"{state['observations']} målinger · {state['hours']} af {state['needed']} timer")
+          print("")
+          for row in rows:
+              print(f"- {cirla_watch.render_row(row)}")
+          print("")
+          if state["covered"] and not state["reason"]:
+              print("Vinduet er dækket: modulet har kørt 24 timer uden at falde tilbage.")
+          else:
+              print(f"Vinduet er ikke dækket endnu: {state['reason']}")
+          PY
+
       - name: Commit og push målingen
         if: always() && steps.gate.outputs.run == 'true' && steps.token.outputs.have == 'true'
         run: |
           git config user.name "Steamgears Keep-alive Bot"
           git config user.email "bot@steamgears.eu"
-          git add reports/live-tilstand-*.md reports/live-tilstand-*.json reports/live-kanaler-*.md
+          git add reports/live-tilstand-*.md reports/live-tilstand-*.json reports/live-kanaler-*.md reports/cirla-c7-observationer.json
           if git diff --staged --quiet; then
             echo "Ingen ny måling at gemme."
             exit 0
