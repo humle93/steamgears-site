@@ -10,6 +10,17 @@ Noterne er skrevet ud fra commit-historikken og de dokumenter der hører til hve
 
 <!-- patch-notes: baseline 7.65.0 -->
 
+## 7.81.1 — 2026-11-12
+
+**Den gratis reserve prøver nu Nemotron Ultra først.**
+
+### Ændret
+- `SGAP_AI::FREE_MODELS` er nu `nvidia/nemotron-3-ultra-550b-a55b:free` → `google/gemma-4-31b-it:free` →
+  `openrouter/free` (ejerens valg 12/11). Nemotron Ultra (550B) skrev det bedste gratis svar i testen
+  fra sitet, mens Gemma ikke svarede, og `openrouter/free` valgte en model på 2,6B. Er Nemotron optaget,
+  går OpenRouter selv videre ned ad listen.
+- Smoke-checket for rækkefølgen er rettet (1 587 PASS, 0 FAIL).
+
 ## 7.81.0 — 2026-11-12
 
 **Løber OpenRouter-kreditten tør, skriver autopiloten videre med en gratis model i stedet for at stå stille.**

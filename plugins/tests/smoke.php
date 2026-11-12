@@ -1952,7 +1952,7 @@ $paidbody=SGAP_AI::chat_body('anthropic/claude-haiku-5.5','x',1);
 $got=SGAP_AI::chat_completions('sk-or-v1-fixture',$paidbody,5);
 $got=is_wp_error($got)&&SGAP_AI::wants_free_retry('anthropic/claude-haiku-5.5',$got)?SGAP_AI::free_retry('sk-or-v1-fixture',$paidbody,$got):$got;
 $second=json_decode((string)($GLOBALS['http_calls'][1][1]['body']??'{}'),true);
-check('7.81 free: the retry asks the free list in order and keeps the token budget', is_array($got) && ($second['model']??'')==='google/gemma-4-31b-it:free' && ($second['models']??[])===SGAP_AI::FREE_MODELS && ($second['max_tokens']??0)===2500);
+check('7.81 free: the retry asks the free list in order and keeps the token budget', is_array($got) && ($second['model']??'')==='nvidia/nemotron-3-ultra-550b-a55b:free' && ($second['models']??[])===SGAP_AI::FREE_MODELS && ($second['max_tokens']??0)===2500);
 check('7.81 free: the switch is recorded with the model that answered', (SGAP_AI::last_fallback()['model']??'')==='nvidia/nemotron-3-ultra-550b-a55b:free' && str_starts_with((string)(SGAP_AI::last_fallback()['reason']??''),'no credit'));
 $GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[sgap_http(429,['error'=>['message'=>'Rate limit exceeded: free-models-per-day']])];
 $both=SGAP_AI::free_retry('sk-or-v1-fixture',$paidbody,$credit);

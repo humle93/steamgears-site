@@ -632,12 +632,13 @@ class SGAP_AI {
 
     /**
      * Free models on OpenRouter, tried in order when the paid model is refused for want of
-     * credit. `openrouter/free` is OpenRouter's own router over its free models and is the
+     * credit. Nemotron Ultra (550B) first: it wrote the best free answer in the 12/11 test.
+     * `openrouter/free` is OpenRouter's own router over its free models and is the
      * last resort. Measured 12/11 from steamgears.eu: both answered with cost 0 while the
      * paid model was refused ("can only afford 405 tokens"). Filter `sgap_free_models`
      * changes the list; an empty list switches the retry off.
      */
-    const FREE_MODELS = ['google/gemma-4-31b-it:free', 'openrouter/free'];
+    const FREE_MODELS = ['nvidia/nemotron-3-ultra-550b-a55b:free', 'google/gemma-4-31b-it:free', 'openrouter/free'];
 
     /** @return string[] */
     public static function free_models(): array {
