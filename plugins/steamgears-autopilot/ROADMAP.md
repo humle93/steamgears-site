@@ -1,6 +1,6 @@
 # Steamgears Autopilot — audit, roadmap and effort estimates
 
-_Last audited: 2026-11-12 (7.80.0) · the audit further down was of **7.15.0** (`ab676db` on `main`); the site runs
+_Last audited: 2026-11-12 (7.81.0) · the audit further down was of **7.15.0** (`ab676db` on `main`); the site runs
 **7.65.5** (measured 9/11 2026 through Novamira: the zip was installed with `Plugin_Upgrader` and the installed
 version reads back as 7.65.5). The repo, and the zip in `plugins/`, is **7.76.1** (7.76.0 made OpenRouter the
 standard provider and added one-click Command Center login; 7.76.1 fixes the REST date/permission edges and the
@@ -33,6 +33,8 @@ and how long each missing piece takes.
 ---
 
 ## 0. Short version
+
+**P9.7 (7.81.0, 12/11 2026) — gratis reserve-model, 0,15 d.** Ved kreditfejl hos OpenRouter prøves `google/gemma-4-31b-it:free` → `openrouter/free` (målt: cost 0). Ændringer: `includes/generator.php` (`free_models`, `wants_free_retry`, `free_retry`, optælling i `write_for`) 60 %, `includes/automation.php` (selvtjek) 15 %, `plugins/tests/smoke.php` (9 checks) 25 %.
 
 **P9.6 (7.80.0, 12/11 2026) — output-værn, 0,25 d, 0,2 done.** Målt live 12/11 på 7.79.0: 22 opslag stod som
 udgivet på 7 kanaler der er slukket, fordi `claim()` frigav hele køen; OpenRouter-kreditten blev opbrugt

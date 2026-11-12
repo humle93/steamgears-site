@@ -602,7 +602,11 @@ class SGAP_AI {
         if ($model === '') {
             return new WP_Error('sgap_ai_model', 'Set an AI model in Settings for ' . self::provider_name() . '.');
         }
-        $decoded = self::chat_completions($key, self::chat_body($model, $prompt, $channels), 120);
+        $body = self::chat_body($model, $prompt, $channels);
+        $decoded = self::chat_completions($key, $body, 120);
+        if (is_wp_error($decoded) && self::wants_free_retry($model, $decoded)) {
+            $decoded = self::free_retry($key, $body, $decoded);
+        }
         if (is_wp_error($decoded)) {
             return $decoded;
         }
@@ -624,6 +628,51 @@ class SGAP_AI {
             return 8000;
         }
         return max(2500, min(8000, 1500 + 700 * $channels));
+    }
+
+    /**
+     * Free models on OpenRouter, tried in order when the paid model is refused for want of
+     * credit. `openrouter/free` is OpenRouter's own router over its free models and is the
+     * last resort. Measured 12/11 from steamgears.eu: both answered with cost 0 while the
+     * paid model was refused ("can only afford 405 tokens"). Filter `sgap_free_models`
+     * changes the list; an empty list switches the retry off.
+     */
+    const FREE_MODELS = ['google/gemma-4-31b-it:free', 'openrouter/free'];
+
+    /** @return string[] */
+    public static function free_models(): array {
+        $list = (array) apply_filters('sgap_free_models', self::FREE_MODELS);
+        return array_values(array_filter(array_map('strval', $list), fn($m) => $m !== ''));
+    }
+
+    /** A credit refusal on OpenRouter for a model that is not already free. */
+    public static function wants_free_retry(string $model, WP_Error $error): bool {
+        if (self::provider() !== 'openrouter' || !self::free_models()) {
+            return false;
+        }
+        if (str_ends_with($model, ':free') || in_array($model, self::free_models(), true)) {
+            return false;
+        }
+        $status = (int) ($error->get_error_data()['status'] ?? 0);
+        return $status === 402 || (bool) preg_match('/more credits|insufficient credits|can only afford|out of credits/i', $error->get_error_message());
+    }
+
+    /**
+     * One more request with OpenRouter's `models` list (it walks the list itself when a model
+     * is busy or rate-limited). The quality gate still judges the answer like any other.
+     * @return array|WP_Error
+     */
+    public static function free_retry(string $key, array $body, WP_Error $paid) {
+        $free = self::free_models();
+        $body['model'] = $free[0];
+        $body['models'] = $free;
+        unset($body['reasoning_effort']);
+        $decoded = self::chat_completions($key, $body, 120);
+        if (is_wp_error($decoded)) {
+            return new WP_Error('sgap_ai_http', $paid->get_error_message() . ' — the free models failed too: ' . $decoded->get_error_message(), $paid->get_error_data());
+        }
+        self::$fallback = ['reason' => 'no credit for ' . (string) ($paid->get_error_data()['status'] ?? '?'), 'model' => (string) ($decoded['model'] ?? $free[0])];
+        return $decoded;
     }
 
     /** Request body for /chat/completions. */
@@ -853,6 +902,13 @@ class SGAP_Generator {
         global $wpdb;
         $report['sources']++;
         $posts = SGAP_AI::generate(self::source($post), $channels);
+        // Written by a free OpenRouter model because the paid one had no credit: counted, so the
+        // run report and the self-check can say so instead of hiding the switch.
+        $used = SGAP_AI::last_fallback();
+        if (!is_wp_error($posts) && str_starts_with((string) ($used['reason'] ?? ''), 'no credit')) {
+            $report['free'] = (int) ($report['free'] ?? 0) + 1;
+            $report['free_model'] = (string) ($used['model'] ?? '');
+        }
         if (is_wp_error($posts)) {
             $report['errors'][] = get_the_title($post) . ': ' . $posts->get_error_message();
             return;

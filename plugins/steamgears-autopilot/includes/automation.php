@@ -419,6 +419,11 @@ class SGAP_Auto {
             $first = (string) (is_array($last['errors']) ? reset($last['errors']) : $last['errors']);
             $out[] = 'The latest AI run (' . (string) ($last['at'] ?? '?') . ') wrote no drafts: ' . mb_substr($first, 0, 160);
         }
+        if (is_array($last) && (int) ($last['free'] ?? 0) > 0) {
+            $out[] = 'The latest AI run (' . (string) ($last['at'] ?? '?') . ') had no credit for the paid model: '
+                . (int) $last['free'] . ' pages were written by the free model ' . (string) ($last['free_model'] ?? 'openrouter/free')
+                . '. Top up OpenRouter to get the paid model back.';
+        }
         $parked = SGAP_Queue::parked();
         if ($parked) {
             $parts = [];

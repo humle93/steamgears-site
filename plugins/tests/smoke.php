@@ -1940,5 +1940,32 @@ update_option('sgap_last_generate',['at'=>'2026-11-12 06:00:00','sources'=>2,'dr
 $hp=implode("\n",SGAP_Auto::output_problems());
 check('7.80 health: a run that wrote drafts is not flagged, nothing parked', !str_contains($hp,'latest AI run') && !str_contains($hp,'switched off'));
 delete_option('sgap_last_generate'); $GLOBALS['rows']=[]; $wpdb->log=[];
+// --- 7.81.0: gratis OpenRouter-model når kreditten slipper op ---
+update_option('sgap_ai_provider','openrouter'); update_option('sgap_ai_model','anthropic/claude-haiku-5.5'); update_option('sgap_ai_api_key','sk-or-v1-fixture');
+$credit=new WP_Error('sgap_ai_http','OpenRouter: This request requires more credits, or fewer max_tokens. You requested up to 3600 tokens, but can only afford 405.',['status'=>402]);
+check('7.81 free: a credit refusal on a paid model asks for the free retry', SGAP_AI::wants_free_retry('anthropic/claude-haiku-5.5',$credit));
+check('7.81 free: a free model is never retried on itself', !SGAP_AI::wants_free_retry('openrouter/free',$credit) && !SGAP_AI::wants_free_retry('x/y:free',$credit));
+check('7.81 free: other errors (401, 404) do not switch model', !SGAP_AI::wants_free_retry('a/b',new WP_Error('sgap_ai_http','OpenRouter: User not found.',['status'=>401])) && !SGAP_AI::wants_free_retry('a/b',new WP_Error('sgap_ai_http','OpenRouter: No endpoints',['status'=>404])));
+$ok_posts=['choices'=>[['message'=>['content'=>json_encode(['posts'=>[['channel'=>'facebook','title'=>'Brass','text'=>'Brass goggles for every costume.','hashtags'=>['steampunk'],'alt_text'=>'goggles']]])]]],'model'=>'nvidia/nemotron-3-ultra-550b-a55b:free'];
+$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[sgap_http(402,['error'=>['message'=>'This request requires more credits, or fewer max_tokens.']]), sgap_http(200,$ok_posts)];
+$paidbody=SGAP_AI::chat_body('anthropic/claude-haiku-5.5','x',1);
+$got=SGAP_AI::chat_completions('sk-or-v1-fixture',$paidbody,5);
+$got=is_wp_error($got)&&SGAP_AI::wants_free_retry('anthropic/claude-haiku-5.5',$got)?SGAP_AI::free_retry('sk-or-v1-fixture',$paidbody,$got):$got;
+$second=json_decode((string)($GLOBALS['http_calls'][1][1]['body']??'{}'),true);
+check('7.81 free: the retry asks the free list in order and keeps the token budget', is_array($got) && ($second['model']??'')==='google/gemma-4-31b-it:free' && ($second['models']??[])===SGAP_AI::FREE_MODELS && ($second['max_tokens']??0)===2500);
+check('7.81 free: the switch is recorded with the model that answered', (SGAP_AI::last_fallback()['model']??'')==='nvidia/nemotron-3-ultra-550b-a55b:free' && str_starts_with((string)(SGAP_AI::last_fallback()['reason']??''),'no credit'));
+$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[sgap_http(429,['error'=>['message'=>'Rate limit exceeded: free-models-per-day']])];
+$both=SGAP_AI::free_retry('sk-or-v1-fixture',$paidbody,$credit);
+check('7.81 free: when the free models fail too, both reasons are named', is_wp_error($both) && str_contains($both->get_error_message(),'can only afford 405') && str_contains($both->get_error_message(),'free-models-per-day'));
+$GLOBALS['filters']['sgap_free_models']=fn($v)=>[];
+check('7.81 free: an empty filter list switches the retry off', !SGAP_AI::wants_free_retry('a/b',$credit));
+unset($GLOBALS['filters']['sgap_free_models']);
+update_option('sgap_ai_provider','anthropic');
+check('7.81 free: only on OpenRouter', !SGAP_AI::wants_free_retry('a/b',$credit));
+$GLOBALS['opts']['sgap_channels']='facebook,bluesky'; $GLOBALS['rows']=[];
+update_option('sgap_last_generate',['at'=>'2026-11-13 06:00:00','sources'=>2,'drafts'=>4,'queued'=>4,'errors'=>[],'free'=>2,'free_model'=>'nvidia/nemotron-3-ultra-550b-a55b:free']);
+check('7.81 health: pages written by the free model are named', str_contains(implode("\n",SGAP_Auto::output_problems()),'2 pages were written by the free model nvidia/nemotron-3-ultra-550b-a55b:free'));
+delete_option('sgap_last_generate'); $GLOBALS['http_queue']=[]; $GLOBALS['http_calls']=[];
+update_option('sgap_ai_provider','anthropic'); update_option('sgap_ai_model',''); update_option('sgap_ai_api_key','');
 // P3.2/P3.5-slut
 exit(empty($GLOBALS['fail'])?0:1);

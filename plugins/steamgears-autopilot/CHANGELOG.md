@@ -10,6 +10,26 @@ Noterne er skrevet ud fra commit-historikken og de dokumenter der hører til hve
 
 <!-- patch-notes: baseline 7.65.0 -->
 
+## 7.81.0 — 2026-11-12
+
+**Løber OpenRouter-kreditten tør, skriver autopiloten videre med en gratis model i stedet for at stå stille.**
+
+### Tilføjet
+- `SGAP_AI::free_retry()`: afviser OpenRouter den betalte model for manglende kredit (402, eller
+  »requires more credits« / »can only afford«), prøver genereringen én gang til på gratis modeller med
+  OpenRouters `models`-liste: `google/gemma-4-31b-it:free` og derefter `openrouter/free`, som er
+  OpenRouters egen router over de gratis modeller. Målt fra steamgears.eu 12/11, mens den betalte model
+  blev afvist (»can only afford 405 tokens«): `openrouter/free` svarede med `cost: 0`, og listen faldt
+  videre til `nvidia/nemotron-3-ultra-550b-a55b:free` med brugbar tekst.
+- Kvalitetsgaten bedømmer de gratis svar ligesom alle andre.
+- Kører kun ved kreditfejl hos OpenRouter. 401, 404 og andre udbydere er uændrede. Nøgletestet og
+  Content Studio er ikke berørt.
+- Filteret `sgap_free_models` ændrer listen, og en tom liste slår reserven fra.
+- Kørselsrapporten tæller `free` og `free_model`. Selvtjekket melder, når sider blev skrevet af den gratis
+  model, så skiftet ikke er skjult.
+- Fejler de gratis modeller også (fx dagsgrænsen for gratis kald), står begge grunde i fejlen.
+- 9 nye smoke-checks (1 578 → 1 587 PASS, 0 FAIL).
+
 ## 7.80.0 — 2026-11-12
 
 **Opslag til slukkede kanaler venter i køen i stedet for at blive "udgivet" ud i ingenting, AI-kaldet beder kun om de tokens det skal bruge, og selvtjekket siger til, når den seneste AI-kørsel ikke skrev noget.**

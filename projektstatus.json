@@ -370,6 +370,15 @@
      "unit": "d",
      "note": "7.80.0: SGAP_Queue::claim() frigiver kun opslag til kanaler i Settings → Publer → Channels (påmindelser går stadig ud); før blev opslag til slukkede kanaler markeret 'published' i et feed ingen læser (målt live 12/11: 22 opslag på 7 slukkede kanaler). SGAP_Queue::parked() tæller de ventende, og selvtjekket nævner dem. SGAP_AI::token_budget() = 1500 + 700 pr. kanal (2 500-8 000) i stedet for fast 8 000/16 000, fordi OpenRouter reserverer kredit for hele max_tokens. Selvtjekket melder, når seneste AI-kørsel skrev 0 kladder med fejl (SGAP_Auto::output_problems()). 10 nye smoke-checks, 1 568 → 1 578 PASS, 0 FAIL. Installeret på steamgears.eu over MCP 12/11 (download fra main + Plugin_Upgrader, aktiv, REST 200, version 7.80.0). Målt live: channels = facebook, instagram, pinterest; parked() = 0 (de 22 gamle opslag var allerede markeret published før rettelsen); output_problems() melder den seneste kørsel 18:44 med 0 kladder: 'OpenRouter: requires more credits, or fewer max_tokens … requested 8000, can only afford 405'; token_budget(3) = 3 600.",
      "verified": true
+    },
+    {
+     "id": "p97",
+     "name": "P9.7 — gratis OpenRouter-model ved opbrugt kredit",
+     "done": 0.1,
+     "total": 0.15,
+     "unit": "d",
+     "note": "7.81.0: SGAP_AI::free_retry() prøver google/gemma-4-31b-it:free → openrouter/free (OpenRouters models-liste) når den betalte model afvises for kredit (402 / 'can only afford'). Målt fra sitet 12/11: openrouter/free svarede cost 0, listen faldt til nvidia/nemotron-3-ultra-550b-a55b:free. Rapporten tæller free/free_model, selvtjekket nævner det. 9 smoke-checks, 1 578 → 1 587 PASS. Mangler: installation og en live-generering gennem reserven.",
+     "verified": false
     }
    ],
    "total": 33.75,
@@ -2623,6 +2632,16 @@
    "after": 100.0,
    "delta": 0.1,
    "basis": "36,05 af 36,05 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5 · P3.7 0,6/0,6 · P3.8 0,3/0,3 · P3.9 0,25/0,25 · P1.25 0,15/0,15 · P1.24 0,35/0,35 · P1.23 0,25/0,25 · P6 0,9/0,9 · P7 0,3/0,3 · P8 0,8/0,8 · P9 0,35/0,35 · P9.1 0,3/0,3 · P9.2 0,2/0,2 · P9.3 0,25/0,25 · P9.4 0,2/0,2 · P10 0,5/0,5 · P9.5 0,25/0,25 · P9.6 0,25/0,25)"
+  },
+  {
+   "date": "2026-11-12",
+   "project": "Steamgears Autopilot — plugin",
+   "module": "P9.7 gratis reserve-model (0,15 d) lagt til efter ejerens ønske 12/11 om OpenRouters auto/free-modeller",
+   "before": 100.0,
+   "after": 99.9,
+   "delta": -0.1,
+   "basis": "36,15 af 36,2 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5 · P3.7 0,6/0,6 · P3.8 0,3/0,3 · P3.9 0,25/0,25 · P1.25 0,15/0,15 · P1.24 0,35/0,35 · P1.23 0,25/0,25 · P6 0,9/0,9 · P7 0,3/0,3 · P8 0,8/0,8 · P9 0,35/0,35 · P9.1 0,3/0,3 · P9.2 0,2/0,2 · P9.3 0,25/0,25 · P9.4 0,2/0,2 · P10 0,5/0,5 · P9.5 0,25/0,25 · P9.6 0,25/0,25 · P9.7 0,1/0,15)",
+   "scope_change": true
   }
  ]
 }
