@@ -10,5 +10,17 @@
   "trigger": "push",
   "outcome": "sprunget-over",
   "reason": "NOVAMIRA_REFRESH_TOKEN mangler i repository-secrets"
+ },
+ {
+  "at": "2026-11-12T18:42:03Z",
+  "event": "workflow_dispatch",
+  "outcome": "startet",
+  "reason": ""
+ },
+ {
+  "at": "2026-11-12T18:42:04Z",
+  "trigger": "workflow_dispatch",
+  "outcome": "sprunget-over",
+  "reason": "NOVAMIRA_REFRESH_TOKEN mangler i repository-secrets"
  }
 ]
