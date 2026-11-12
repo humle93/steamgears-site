@@ -1172,6 +1172,32 @@ class SGAP_Queue {
      * Channels with their own cap (channel_caps) that have used it up today, counting posts
      * published or still sending. Only the publisher checks this; the queue is untouched.
      */
+    /**
+     * Queued posts for channels that are switched off in Settings → Publer → Channels.
+     * claim() leaves them alone, so they wait until the channel is on again.
+     * @return array<string,int> channel => number of posts
+     */
+    public static function parked(): array {
+        global $wpdb;
+        $enabled = class_exists('SGAP_Publer') ? SGAP_Publer::channels() : [];
+        if (!$enabled) {
+            return [];
+        }
+        $rows = (array) $wpdb->get_results($wpdb->prepare(
+            'SELECT channel, COUNT(*) AS n FROM ' . self::table() . " WHERE status = 'queued' AND remind = 0 AND channel NOT IN ("
+            . implode(',', array_fill(0, count($enabled), '%s')) . ') GROUP BY channel',
+            $enabled
+        ), ARRAY_A);
+        $out = [];
+        foreach ($rows as $row) {
+            $n = (int) ($row['n'] ?? 0);
+            if ($n > 0) {
+                $out[sanitize_key((string) ($row['channel'] ?? ''))] = $n;
+            }
+        }
+        return $out;
+    }
+
     public static function full_channels(): array {
         global $wpdb;
         if (!class_exists('SGAP_Alerts')) {
@@ -1213,6 +1239,13 @@ class SGAP_Queue {
             if ($full) {
                 $where = ' AND channel NOT IN (' . implode(',', array_fill(0, count($full), '%s')) . ')';
                 $where = $wpdb->prepare($where, $full);
+            }
+            // A post for a channel that is switched off waits in the queue. Releasing it
+            // would mark it "published" in a feed nobody reads. Reminders are mail, so
+            // they still go out.
+            $enabled = class_exists('SGAP_Publer') ? SGAP_Publer::channels() : [];
+            if ($enabled) {
+                $where .= $wpdb->prepare(' AND (remind = 1 OR channel IN (' . implode(',', array_fill(0, count($enabled), '%s')) . '))', $enabled);
             }
         }
         $items = $wpdb->get_results($wpdb->prepare(

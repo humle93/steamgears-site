@@ -361,6 +361,15 @@
      "unit": "d",
      "note": "7.79.0: SGAP_Cirla::map_cap() sendte sgap_cirla_run videre til manage_options uanset hvad, så en rolle med kun read + sgap_cirla_run blev afvist med 403, selv om den havde capabilityen (målt live 11/11: false for den begrænsede rolle, true for administrator). En direkte tildeling vinder nu (['exist']), og uden den går capabilityen stadig gennem manage_options. Samme pas: seo_check() og social_suggestions() var deklareret ': array', så 403/409/429 blev kastet som 'Return value must be of type array, WP_Error returned'; begge er nu array|WP_Error, og et social-kald med brugt loft svarer ren 429. 6 nye checks, 1 562 → 1 568 PASS, 0 FAIL. Genbygget oven på 7.76.1 og installeret på sitet over MCP som 7.79.0 (7.78.0 var samme rettelse oven på 7.76.0 og blev afløst, så 7.76.1 ikke gik tabt). Bevis: docs/library/cirla-c7-produktion-2026-11-11.md (+ PDF).",
      "verified": true
+    },
+    {
+     "id": "p96",
+     "name": "P9.6 — output-værn: slukkede kanaler, token-loft, tom AI-kørsel",
+     "done": 0.2,
+     "total": 0.25,
+     "unit": "d",
+     "note": "7.80.0: SGAP_Queue::claim() frigiver kun opslag til kanaler i Settings → Publer → Channels (påmindelser går stadig ud); før blev opslag til slukkede kanaler markeret 'published' i et feed ingen læser (målt live 12/11: 22 opslag på 7 slukkede kanaler). SGAP_Queue::parked() tæller de ventende, og selvtjekket nævner dem. SGAP_AI::token_budget() = 1500 + 700 pr. kanal (2 500-8 000) i stedet for fast 8 000/16 000, fordi OpenRouter reserverer kredit for hele max_tokens. Selvtjekket melder, når seneste AI-kørsel skrev 0 kladder med fejl (SGAP_Auto::output_problems()). 10 nye smoke-checks, 1 568 → 1 578 PASS, 0 FAIL. Mangler til 100 %: installation på sitet og en måling af selvtjekket live.",
+     "verified": false
     }
    ],
    "total": 33.75,
@@ -2595,6 +2604,16 @@
    "after": 95.0,
    "delta": 15.0,
    "basis": "2,85 af 3 d (C1 0,35/0,35 · C2 0,2/0,2 · C3 0,4/0,4 · C4 0,25/0,25 · C5 0,2/0,2 · C6 0,8/0,8 · C7 0,45/0,6 · C8 0,2/0,2)"
+  },
+  {
+   "date": "2026-11-12",
+   "project": "Steamgears Autopilot — plugin",
+   "module": "P9.6 output-værn (0,25 d) lagt til efter live-målingen 12/11: opslag til slukkede kanaler, token-loft pr. kanal og selvtjek ved tom AI-kørsel",
+   "before": 100.0,
+   "after": 99.9,
+   "delta": -0.1,
+   "basis": "36 af 36,05 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5 · P3.7 0,6/0,6 · P3.8 0,3/0,3 · P3.9 0,25/0,25 · P1.25 0,15/0,15 · P1.24 0,35/0,35 · P1.23 0,25/0,25 · P6 0,9/0,9 · P7 0,3/0,3 · P8 0,8/0,8 · P9 0,35/0,35 · P9.1 0,3/0,3 · P9.2 0,2/0,2 · P9.3 0,25/0,25 · P9.4 0,2/0,2 · P10 0,5/0,5 · P9.5 0,25/0,25 · P9.6 0,2/0,25)",
+   "scope_change": true
   }
  ]
 }

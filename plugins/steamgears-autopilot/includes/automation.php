@@ -405,6 +405,31 @@ class SGAP_Auto {
     /* ---- self-check and report ---- */
 
     /** Daily: retries failed posts once, checks the feed and the AI key, records problems. */
+    /**
+     * Problems with what the autopilot puts out: the latest AI run wrote nothing, or
+     * queued posts wait for channels that are switched off. Part of health().
+     * @return string[]
+     */
+    public static function output_problems(): array {
+        $out = [];
+        // A run that wrote nothing (no AI credit, a refused model) used to show up only as
+        // an emptying queue days later.
+        $last = get_option('sgap_last_generate');
+        if (is_array($last) && (int) ($last['drafts'] ?? 0) === 0 && !empty($last['errors'])) {
+            $first = (string) (is_array($last['errors']) ? reset($last['errors']) : $last['errors']);
+            $out[] = 'The latest AI run (' . (string) ($last['at'] ?? '?') . ') wrote no drafts: ' . mb_substr($first, 0, 160);
+        }
+        $parked = SGAP_Queue::parked();
+        if ($parked) {
+            $parts = [];
+            foreach ($parked as $channel => $n) {
+                $parts[] = "{$channel} {$n}";
+            }
+            $out[] = array_sum($parked) . ' queued posts wait for channels that are switched off (' . implode(', ', $parts) . '). Switch the channel on in Settings → Publer, or clear them on the Queue page.';
+        }
+        return $out;
+    }
+
     public static function health(): array {
         global $wpdb;
         $problems = [];
@@ -436,6 +461,7 @@ class SGAP_Auto {
         if (!SGAP_Settings::enabled('autopilot_enabled')) {
             $problems[] = 'The autopilot is off.';
         }
+        $problems = array_merge($problems, self::output_problems());
         $lag = self::cron_lag();
         if ($lag >= 30) {
             $problems[] = self::cron_advice($lag);

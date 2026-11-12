@@ -10,6 +10,31 @@ Noterne er skrevet ud fra commit-historikken og de dokumenter der hører til hve
 
 <!-- patch-notes: baseline 7.65.0 -->
 
+## 7.80.0 — 2026-11-12
+
+**Opslag til slukkede kanaler venter i køen i stedet for at blive "udgivet" ud i ingenting, AI-kaldet beder kun om de tokens det skal bruge, og selvtjekket siger til, når den seneste AI-kørsel ikke skrev noget.**
+
+### Rettet
+- `SGAP_Queue::claim()` frigav alle køens opslag, også til kanaler der er slukket under
+  *Settings → Publer → Channels*. I RSS-tilstand blev de markeret `published` i et feed som Publer ikke
+  læser. Målt på steamgears.eu 12/11: 22 opslag stod som udgivet på 7 slukkede kanaler. Nu frigives kun
+  opslag til tændte kanaler. Påmindelser (`remind = 1`) er mail og går stadig ud. Uden nogen kanal i
+  indstillingen filtreres der ikke, så intet fryses ved en fejl, og et REST-træk med en bestemt kanal
+  er uændret.
+
+### Ændret
+- `SGAP_AI::token_budget()` sætter `max_tokens` til 1 500 + 700 pr. kanal (mindst 2 500, højst 8 000).
+  Før var den fast 8 000 (chat completions) og 16 000 (Anthropic). OpenRouter reserverer kredit for hele
+  `max_tokens` på forhånd, så en lav saldo afviste kald, der kun brugte en tiendedel. Med 3 kanaler er
+  loftet nu 3 600.
+
+### Tilføjet
+- Selvtjekket (`SGAP_Auto::output_problems()`, en del af `health()`) melder to nye problemer:
+  - Når den seneste AI-kørsel skrev 0 kladder og havde fejl, vises tidspunktet og den første fejl,
+    fx manglende kredit. Før så man det først, når køen løb tør dage senere.
+  - Når der står opslag i kø til slukkede kanaler, vises antallet pr. kanal (`SGAP_Queue::parked()`).
+- 10 nye smoke-checks i `plugins/tests/smoke.php` (1 568 → 1 578 PASS, 0 FAIL).
+
 ## 7.79.0 — 2026-11-12
 
 **Cirla kan nu gives til en rolle der kun har Cirla — uden at give rollen hele sitet — og en afvist handling svarer med en fejlkode i stedet for en exception.**

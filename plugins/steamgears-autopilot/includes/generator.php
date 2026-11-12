@@ -556,7 +556,7 @@ class SGAP_AI {
         }
         $prompt = self::prompt($source, $channels);
         if (self::uses_chat_completions()) {
-            $text = self::openai_compatible($key, $prompt);
+            $text = self::openai_compatible($key, $prompt, count($channels));
         } else {
             $text = self::anthropic($key, $prompt, $channels);
         }
@@ -572,7 +572,7 @@ class SGAP_AI {
         $model = self::model();
         $body = [
             'model' => $model,
-            'max_tokens' => 16000,
+            'max_tokens' => self::token_budget(count($channels)),
             'system' => self::SYSTEM,
             'messages' => [['role' => 'user', 'content' => $prompt]],
             // Short marketing copy: low effort is plenty and keeps cost down.
@@ -597,12 +597,12 @@ class SGAP_AI {
     }
 
     /** For AIMLAPI, OpenAI or any other /chat/completions endpoint. @return string|WP_Error */
-    private static function openai_compatible(string $key, string $prompt) {
+    private static function openai_compatible(string $key, string $prompt, int $channels = 0) {
         $model = self::model();
         if ($model === '') {
             return new WP_Error('sgap_ai_model', 'Set an AI model in Settings for ' . self::provider_name() . '.');
         }
-        $decoded = self::chat_completions($key, self::chat_body($model, $prompt), 120);
+        $decoded = self::chat_completions($key, self::chat_body($model, $prompt, $channels), 120);
         if (is_wp_error($decoded)) {
             return $decoded;
         }
@@ -613,11 +613,24 @@ class SGAP_AI {
         return is_string($text) && $text !== '' ? $text : new WP_Error('sgap_ai_empty', 'The model returned no text.');
     }
 
+    /**
+     * Output tokens for one page: one short post per channel plus room for the JSON and
+     * a little thinking. OpenRouter reserves credit for the whole max_tokens up front, so
+     * a fixed 8000/16000 made a low balance refuse calls that needed a tenth of it.
+     * 0 channels = the old ceiling (callers that do not know the count).
+     */
+    public static function token_budget(int $channels): int {
+        if ($channels <= 0) {
+            return 8000;
+        }
+        return max(2500, min(8000, 1500 + 700 * $channels));
+    }
+
     /** Request body for /chat/completions. */
-    public static function chat_body(string $model, string $prompt): array {
+    public static function chat_body(string $model, string $prompt, int $channels = 0): array {
         $body = [
             'model' => $model,
-            'max_tokens' => 8000,
+            'max_tokens' => self::token_budget($channels),
             'response_format' => ['type' => 'json_object'],
             'messages' => [
                 ['role' => 'system', 'content' => self::SYSTEM . ' Answer with JSON only: {"posts": [{"channel", "title", "text", "hashtags": [], "alt_text"}]}.'],

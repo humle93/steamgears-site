@@ -1,6 +1,6 @@
 # Steamgears Autopilot — audit, roadmap and effort estimates
 
-_Last audited: 2026-11-12 · the audit further down was of **7.15.0** (`ab676db` on `main`); the site runs
+_Last audited: 2026-11-12 (7.80.0) · the audit further down was of **7.15.0** (`ab676db` on `main`); the site runs
 **7.65.5** (measured 9/11 2026 through Novamira: the zip was installed with `Plugin_Upgrader` and the installed
 version reads back as 7.65.5). The repo, and the zip in `plugins/`, is **7.76.1** (7.76.0 made OpenRouter the
 standard provider and added one-click Command Center login; 7.76.1 fixes the REST date/permission edges and the
@@ -33,6 +33,24 @@ and how long each missing piece takes.
 ---
 
 ## 0. Short version
+
+**P9.6 (7.80.0, 12/11 2026) — output-værn, 0,25 d, 0,2 done.** Målt live 12/11 på 7.79.0: 22 opslag stod som
+udgivet på 7 kanaler der er slukket, fordi `claim()` frigav hele køen; OpenRouter-kreditten blev opbrugt
+og genereringen fejlede uden at selvtjekket sagde noget; `max_tokens` var fast 8 000/16 000.
+
+| Fil | Ændring | Andel |
+| --- | --- | --- |
+| `includes/core.php` | `claim()` frigiver kun tændte kanaler (+ påmindelser); `parked()` tæller resten | 35 % |
+| `includes/generator.php` | `token_budget()` = 1 500 + 700 pr. kanal (2 500-8 000) for begge udbydere | 20 % |
+| `includes/automation.php` | `output_problems()` i `health()`: tom AI-kørsel og ventende opslag | 25 % |
+| `plugins/tests/smoke.php` | 10 checks (1 578 PASS) | 20 % |
+
+Mangler til 100 %: installation på sitet og en live-måling af selvtjekket.
+
+**Grænsen mod Command Center (besluttet 12/11):** pluginnet ejer sociale opslag (kø, feeds, kanaler,
+evergreen og klik). Command Center ejer analyse, SEO og artikler. Artikler når kun WordPress som kladder,
+og CC læser `/snapshot` uden at skrive i pluginnets kø. Sådan undgår man to motorer, der skriver opslag til
+de samme kanaler.
 
 - **58 classes. 45 PHP files. 20.424 lines** (measured 8/11 2026 on 7.64.9). Every subsystem is reachable
   from a real entry point (cron, REST, admin page, ability or AJAX); the last dead method,
