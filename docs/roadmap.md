@@ -389,7 +389,7 @@ ikke giver nye kladder (målt 8/11, 45 kladder i kø). P2.1–P2.3 står ikke p�
 live-publiceringen deler P1.5's tokens. Resten er lukket og målt. Ingen af de femten kan lukkes af
 agenten uden at gætte ejerens tal, aftaler eller juridiske valg.
 
-## 4d. De tolv ejerpunkter — alt andet er lukket og målt (9/11 2026)
+## 4d. De elleve ejerpunkter — alt andet er lukket og målt (opdateret 12/11 2026)
 
 Efter målingen 9/11 er der **ingen poster tilbage som agenten kan udføre**: hvert punkt i §4c er
 enten ✅ lukket med kørt bevis eller ⛔ blokeret af noget ejeren ejer. **K blev lukket 9/11**, fordi det var
@@ -401,7 +401,7 @@ grupperet efter **hvad ejeren skal levere**, fordi flere rækker deler samme man
 |---|---|---|---|
 | A | `telephone_company: ""`, intet CVR-felt | S4.2 · S4.9 · `seo.md` #5 | Complianz → Wizard → Organization: indsæt **telefon** og **CVR** |
 | B | Zone 0 har 0 fragtmetoder; kun DK har fri fragt | S4.6 | Beslut **lande**, **pris pr. zone**, **fri fragt-grænse** — agenten konfigurerer og måler |
-| C | 3 Stripe-metoder er slået til men utilgængelige (`amazon_pay`, `klarna`, `link`) | S4.5 | Slå dem til i **Stripe Dashboard**, eller fra i WooCommerce |
+| ~~C~~ | ✅ **Lukket 12/11 — formuleringen var forkert i begge halvdele.** Målt: butikken kører Stripes nye kasse (`WC_Stripe_OCS_Payment_Gateway`), hvor `stripe_amazon_pay`, `stripe_klarna` og `stripe_link` er **skygger** — deres `enabled` arves fra Stripe-kassen, så de kan ikke slås fra i Woo (en skrivning til deres indstilling er virkningsløs; prøvet og rullet tilbage, kassen er uændret: 5 tændt · `stripe`+`bacs` tilgængelige), og Stripes konto har alle tre evner `active` med DKK understøttet, så der mangler ingen aftale. Målingen holdes op af `tools/payment_methods.py` (8 PASS · 0 WARN · 0 FAIL) — se [library/betalingsmetoder-2026-11-12.md](library/betalingsmetoder-2026-11-12.md) | S4.5 | — |
 | D | MobilePay og PayPal findes ikke | S4.5 | Opret aftalen og læg nøglerne ind som secret |
 | E | 22 billeder på 20 produkter, 0 med 3+; intet Printful-token | S4.7 · Rebrand batch 4 | **Printful-token** i Settings → Keys, eller 5–8 fotos pr. produkt |
 | F | Fire kladder med pris og SKU (942, 765, 766, 767) | S1.2 | Svar **ja/nej** pr. produkt |
@@ -433,7 +433,7 @@ fremgang — derfor står procenten stille, selv om rækkerne her er gjort så k
 
 **Regnestykket:** miljø bliver `1,80 + (0,75 + 0,15 + 0,05 + 0,25) = 3,00 d` → **100 %** (60,0 + 40,0);
 rebrand bliver `12,4 + 5,0 = 17,4 t` → **100 %** (71,3 + 28,7). Så er alle projekter 100 %, og der er
-ingen åben post tilbage uden for §4d's tretten ejerpunkter for site-optimeringen.
+ingen åben post tilbage uden for §4d's elleve åbne ejerpunkter for site-optimeringen.
 
 **Rækkefølge:** S5.8 og S5.7 er de billigste (én indstilling og to DNS-poster) og kan gøres på under en time;
 S5.9 koster et abonnement; S5.1 tager længst tid hos Simply, men er den eneste der gør de øvrige ændringer

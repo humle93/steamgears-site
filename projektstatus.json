@@ -107,7 +107,7 @@
      "done": 4.05,
      "total": 4.05,
      "unit": "d",
-     "note": "S4.4 0,45 + S4.8 0,5 + S4.10 0,4 + S4.11 0,4 + S4.12 0,2 + S4.13 0,25 + S4.9 (ikke-GPSR) 0,25 + S4.6 0,1 (cache-delen målt: kurv/kasse/konto er private/no-cache; DK har fri fragt uden minimum, EU/UK/RoW mangler zone) = 3,95 + 0,1 (S4.4-udvidelse: ItemList-strukturdata på /shop/ og produktkategorier, målt 0 → 20 elementer på /shop/ og 0 → 5/4 på to kategorier) = 4,05. De 1,2 d der står tilbage (S4.1/S4.2/S4.3/S4.5/S4.6/S4.7) kræver ejerens tal, aftaler og valg, er målt 8/11 og er ude af estimatet."
+     "note": "S4.4 0,45 + S4.8 0,5 + S4.10 0,4 + S4.11 0,4 + S4.12 0,2 + S4.13 0,25 + S4.9 (ikke-GPSR) 0,25 + S4.6 0,1 (cache-delen målt: kurv/kasse/konto er private/no-cache; DK har fri fragt uden minimum, EU/UK/RoW mangler zone) = 3,95 + 0,1 (S4.4-udvidelse: ItemList-strukturdata på /shop/ og produktkategorier, målt 0 → 20 elementer på /shop/ og 0 → 5/4 på to kategorier) = 4,05. De 1,2 d der står tilbage (S4.1/S4.2/S4.3/S4.5/S4.6/S4.7) kræver ejerens tal, aftaler og valg, er målt 8/11 og er ude af estimatet. 12/11: §4d C lukket som rettelse, ikke som arbejde — butikken kører Stripe-OCS, hvor amazon_pay/klarna/link er skygger, der ikke kan slås fra i Woo, og Stripes konto har alle tre evner active; ny måling tools/payment_methods.py (8 PASS · 0 WARN · 0 FAIL, 13 offline-fixtures). Ingen procenter flyttet (S4 står 4,05/4,05). Se docs/library/betalingsmetoder-2026-11-12.md."
     }
    ],
    "verified": true

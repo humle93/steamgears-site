@@ -61,12 +61,12 @@ _Opdateret 2026-11-12 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `c3da066 Modul: C7 — overvågningen sat i drift (Cirla tændt igen)`
+- `d492c66 Modul: docs-pdf — PDF fra dokumentbiblioteket Før: —  →  Efter: —  (Δ —) Grundlag: 1 PDF-filer i reports/ renderet med tools/md_to_pdf.py — ingen ændring i projektstatus`
+- `5a6abb1 Integrationstest 7.79.0 mod rigtig WordPress og MariaDB`
 - `7a6cd2b Modul: tools — live_state læser Novamira-svaret og sender parameters`
 - `4df0365 chore(status): daglig projektstatus 2026-11-12`
 - `44ec0f3 Modul: docs-pdf — PDF fra dokumentbiblioteket Før: —  →  Efter: —  (Δ —) Grundlag: 1 PDF-filer i reports/ renderet med tools/md_to_pdf.py — ingen ændring i projektstatus`
-- `6f1e061 Modul: P9.5 — Cirla kan tildeles en begrænset rolle (C7 kørt på det levende site)`
-- `e9ffca2 Modul: Plugin 7.76.1 — admin Re-queue på fælles retry-vej Før: 100 % Efter: 100 % Δ: 0 Grundlag: ingen ændring`
-- `e478f13 Modul: MCP-OAuth — resource og scope i token-kald Før: — Efter: — Δ: — Grundlag: ingen ændring`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
@@ -1754,6 +1754,18 @@ statiske blokke; målrettede rettelser i eksisterende markup kan skrives direkte
 - Det der allerede findes i pluginnet og rører ved planen: kvalitetsgaten (P1.6), dublet-værnet (P0.6, anden
   nøgle end `_cc_sync_id`), `/go/`-tracking, og en Pinterest-kanal der er **blokeret** af et manglende token —
   ikke af manglende kode.
+
+### 12/11 — §4d C var en forkert formulering, ikke en manglende aftale
+
+- Roadmap'ens ejerpunkt C bad ejeren enten slå `amazon_pay`, `klarna` og `link` til i **Stripe Dashboard**
+  eller slå dem fra i WooCommerce. Målt 12/11 er ingen af delene den rigtige handling: butikken kører
+  Stripes nye kasse (`WC_Stripe_OCS_Payment_Gateway`), og de tre er **skygger** — deres `enabled` arves,
+  så en skrivning til deres indstilling er virkningsløs (prøvet, målt, rullet tilbage), og Stripes konto
+  har alle tre evner `active` med DKK understøttet.
+- Det betyder at ejeren **ikke** skal gøre noget for punkt C. Vil han have metoderne *synlige* i kassen,
+  ligger svaret i Stripes egen metodekonfiguration — det er en anden handling, og den er ikke målt her.
+- `tools/payment_methods.py` holder målingen op og skelner skygger fra ægte fejl (13 offline-fixtures,
+  8 PASS · 0 WARN · 0 FAIL live). Ingen projektprocent flyttede sig: S4 står 4,05 af 4,05 d.
 
 ## Åbne beslutninger til ejeren
 

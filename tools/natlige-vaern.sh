@@ -87,6 +87,9 @@ check "designsystem-selftest"                python3 tools/design_check.py --sel
 check "designsystem"                         python3 tools/design_check.py
 check "designsystem-loader"                  "$PHP_BIN" wordpress/tests/test-design-system.php
 check "produkt-schema"                       "$PHP_BIN" tools/schema_filter_test.php
+# §4d C: betalingsmetoderne blev lukket som en rettelse, ikke som arbejde. Klassificeringen
+# (skygge under Stripe-OCS vs. ægte uvalgbar gateway) er det der gjorde udslaget, så den holdes op.
+check "betalingsmetoder (selftest)"         python3 tools/test_payment_methods.py
 # S2.7: payload-trimmen kostede forsiden 7/11 2026, fordi is_woocommerce() blev kaldt
 # uden at WooCommerce var indlaest. Vaernet kraever at fravaeret af Woo er en no-op.
 check "payload-trim"                         "$PHP_BIN" tools/test_payload_trim.php
