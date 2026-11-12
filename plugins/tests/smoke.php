@@ -2019,7 +2019,7 @@ $ans=fn($reviews)=>sgap_http(200,['model'=>'nvidia/nemotron-3-ultra-550b-a55b:fr
 $GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[$ans([['channel'=>'facebook','score'=>8,'problems'=>[]],['channel'=>'instagram','score'=>3,'problems'=>['invented 50% discount']],['channel'=>'x','score'=>99]])];
 $rv=SGAP_Editor::review($ed_posts,$ed_src);
 $sent=json_decode((string)($GLOBALS['http_calls'][0][1]['body']??'{}'),true);
-check('7.83 editor: one request for all posts, to the free model list', count($GLOBALS['http_calls'])===1 && ($sent['models']??[])===SGAP_Editor::models() && str_contains($GLOBALS['http_calls'][0][0],'openrouter.ai'));
+check('7.83 editor: one request for all posts, to the free model list', count($GLOBALS['http_calls'])===1 && ($sent['models']??[])===SGAP_Editor::models() && ($sent['max_tokens']??0)===4000 && str_contains($GLOBALS['http_calls'][0][0],'openrouter.ai'));
 check('7.83 editor: scores are read (also inside ```), out-of-range ones dropped', $rv['ok'] && $rv['by_channel']['facebook']['score']===8.0 && !isset($rv['by_channel']['x']));
 $v1=SGAP_Editor::verdict($rv,'facebook'); $v2=SGAP_Editor::verdict($rv,'instagram'); $v3=SGAP_Editor::verdict($rv,'pinterest');
 check('7.83 editor: 8/10 approves, 3/10 rejects with the reason, a missing channel waits', $v1['action']==='approve' && $v2['action']==='reject' && str_contains($v2['note'],'invented 50% discount') && $v3['action']==='hold');

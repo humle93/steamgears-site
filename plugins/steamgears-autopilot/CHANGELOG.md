@@ -10,6 +10,21 @@ Noterne er skrevet ud fra commit-historikken og de dokumenter der hører til hve
 
 <!-- patch-notes: baseline 7.65.0 -->
 
+## 7.83.2 — 2026-11-12
+
+**Rettet: redaktørens svar blev skåret af, før det kom.**
+
+### Rettet
+- De gratis modeller ræsonnerer, før de svarer. Med `max_tokens` 1 200 gik alt til ræsonnementet
+  (`finish_reason=length`, tomt svar, målt live). Redaktøren holdt derfor sikkert alle opslag
+  tilbage. Loftet er nu 4 000, hvilket er gratis på `:free`-modeller.
+- Målt live efter rettelsen med `nemotron-3-ultra:free` (ca. 10 s):
+  - Rigtige opslag: Facebook 8/10 (godkendt), Instagram 5/10 (afvist for 15 hashtags og for mange
+    emoji), Pinterest 9/10 (godkendt).
+  - Et bevidst dårligt opslag med opdigtet »70% OFF«, »free worldwide shipping«, klichéer og
+    gentagne hashtags: 1/10, med alle fire grunde.
+- Smoke-checket kræver nu loftet (1 613 PASS, 0 FAIL).
+
 ## 7.83.1 — 2026-11-12
 
 **Rettet: AI-redaktøren og den gratis reserve sendte for mange modeller til OpenRouter.**

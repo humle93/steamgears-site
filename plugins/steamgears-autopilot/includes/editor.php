@@ -60,7 +60,9 @@ class SGAP_Editor {
             return ['ok' => false, 'error' => 'no OpenRouter key for the editor'];
         }
         $models = self::models();
-        $body = ['model' => $models[0], 'models' => $models, 'max_tokens' => 1200,
+        // The free models reason first: 1 200 tokens were all spent thinking (finish_reason=length,
+        // measured live 12/11); 4 000 leaves room for the answer. Free models cost nothing per token.
+        $body = ['model' => $models[0], 'models' => $models, 'max_tokens' => 4000,
             'messages' => [['role' => 'user', 'content' => self::prompt($posts, $source)]]];
         $response = SGAP_AI::openrouter_post(SGAP_AI::openrouter_key(), $body, 90);
         $decoded = SGAP_AI::decode($response, 'Editor');
