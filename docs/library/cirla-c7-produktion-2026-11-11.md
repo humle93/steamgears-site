@@ -145,5 +145,42 @@ kører en natlig kørsel — en agent-sandkasse kan ikke holde et ur kørende et
 
 - Rollen `cirla_operator` (`read`, `sgap_cirla_run`) og brugeren `cirla` findes stadig. Brugeren har
   en tilfældig adgangskode, som ikke er vist eller gemt nogen steder.
-- Modulet er **slukket**; `sgap_cirla_actions`, `sgap_cirla_daily_calls` og loggen er bevaret.
+- Modulet er **tændt igen 12/11** (se §8); `sgap_cirla_actions`, `sgap_cirla_daily_calls` og loggen er bevaret.
 - Plugin på sitet: **7.79.0**, aktiv.
+
+## 10. CI-kørslen, bevist 12/11
+
+Overvågningen skulle ikke bare findes i repoet, men virke i GitHub Actions. Det blev prøvet ved at
+pushe til de filer workflowen lytter på, og resultatet var først nedslående: **ingen commit, ingen
+række, ingen lyd.** Årsagen var ikke ét men tre lag, og alle tre er nu rettet:
+
+| Lag | Målt | Rettet |
+|---|---|---|
+| Kørslen startede slet ikke i sporet | Jobbet kørte faktisk (runs 16–18, `ubuntu-26.04`), men sprang målingen over og efterlod intet | Der skrives nu en `startet`-række **før** gaten, og udfaldet skrives bagefter |
+| Commit-trinnet fejlede | `git add reports/live-tilstand-*.md …` afbryder trinnet under `bash -e`, når globen ikke matcher noget — og det gør den netop de kørsler hvor målingen blev sprunget over | `git add -A reports/` |
+| Årsagen var usynlig | Et spring var kun en `::notice`, der forsvinder med jobbet | `reports/novamira-keepalive-status.json` committes med `outcome` og `reason` |
+
+**Beviset på at det virker:** commit `db20910` fra *Steamgears Keep-alive Bot* 12/11 18:20 UTC,
+skrevet af workflowen selv, med rækkerne
+
+```
+{"at": "2026-11-12T18:20:07Z", "event": "push", "outcome": "startet"}
+{"at": "2026-11-12T18:20:08Z", "trigger": "push", "outcome": "sprunget-over",
+ "reason": "NOVAMIRA_REFRESH_TOKEN mangler i repository-secrets"}
+```
+
+**Hvad der stadig blokerer C7-målingen, og hvorfor det er ejerens:** runnerens log viser
+`NOVAMIRA_REFRESH_TOKEN:` **tom**, så trinnet »Er der et refresh-token?« sætter `have=false`, og
+både fornyelsen, live-målingen og C7-trinnet springes over (`if: … steps.token.outputs.have == 'true'`).
+Der kræves to repository-secrets, som kun ejeren kan lægge ind:
+
+1. **`NOVAMIRA_REFRESH_TOKEN`** — refresh-tokenet fra den lokale godkendelse.
+2. **`NOVAMIRA_SECRETS_TOKEN`** — fine-grained PAT med *Secrets: write*, så det roterede token kan
+   gemmes igen (ellers dør adgangen ved første fornyelse).
+
+Det er **ikke** gjort herfra med vilje: en fornyelse roterer refresh-tokenet, og et token fra denne
+sandkasses lokale lager ville enten være dødt eller gøre ejerens lokale adgang død bagefter. Det er
+en credential-handling, ikke en kodeændring.
+
+Konsekvensen er status quo: `reports/cirla-c7-observationer.json` har **én** række, og
+24-timersvinduet er **ikke** dækket. Det hævdes ikke.

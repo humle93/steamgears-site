@@ -61,12 +61,12 @@ _Opdateret 2026-11-12 af `tools/samtalepunkter.py`. Blokken er maskinelt generer
 
 ### Seneste commits
 
+- `c258819 Modul: CI — git add må ikke dræbe kørslen når der intet er at måle`
+- `4ab1f0c Modul: CI — keep-alive skriver nu selv at den startede`
+- `ddfc808 Modul: docs-pdf — PDF fra dokumentbiblioteket Før: —  →  Efter: —  (Δ —) Grundlag: 1 PDF-filer i reports/ renderet med tools/md_to_pdf.py — ingen ændring i projektstatus`
+- `8f815e0 Modul: docs — §4d C lukket som rettelse, og CI-kørslen gør sit udfald synligt`
+- `60ed3d4 Modul: docs-pdf — PDF fra dokumentbiblioteket Før: —  →  Efter: —  (Δ —) Grundlag: 1 PDF-filer i reports/ renderet med tools/md_to_pdf.py — ingen ændring i projektstatus`
 - `c3da066 Modul: C7 — overvågningen sat i drift (Cirla tændt igen)`
-- `d492c66 Modul: docs-pdf — PDF fra dokumentbiblioteket Før: —  →  Efter: —  (Δ —) Grundlag: 1 PDF-filer i reports/ renderet med tools/md_to_pdf.py — ingen ændring i projektstatus`
-- `5a6abb1 Integrationstest 7.79.0 mod rigtig WordPress og MariaDB`
-- `7a6cd2b Modul: tools — live_state læser Novamira-svaret og sender parameters`
-- `4df0365 chore(status): daglig projektstatus 2026-11-12`
-- `44ec0f3 Modul: docs-pdf — PDF fra dokumentbiblioteket Før: —  →  Efter: —  (Δ —) Grundlag: 1 PDF-filer i reports/ renderet med tools/md_to_pdf.py — ingen ændring i projektstatus`
 <!-- AUTO:SAMTALEPUNKTER:END -->
 
 ## Beslutninger og fund (nyeste først)
