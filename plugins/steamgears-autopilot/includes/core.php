@@ -1751,6 +1751,7 @@ class SGAP_REST {
                 'last_self_check' => is_array($health) ? $health : null,
                 'cron_lag_minutes' => SGAP_Auto::cron_lag(),
                 'command_center' => SGAP_CC::status(),
+                'cc_priorities' => class_exists('SGAP_Priorities') ? SGAP_Priorities::status() : null,
                 'last_generation' => get_option('sgap_last_generate') ?: null,
                 'last_promote_new' => get_option('sgap_last_promote_new') ?: null,
                 'last_articles' => get_option('sgap_last_articles') ?: null

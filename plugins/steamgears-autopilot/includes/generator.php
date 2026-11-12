@@ -489,10 +489,12 @@ class SGAP_AI {
         // P6: a campaign run states why this page is being promoted now. The goal shapes the
         // angle only — the SYSTEM rule against inventing facts still applies to it.
         $goal = trim((string) ($source['campaign_goal'] ?? ''));
+        $keyword = trim((string) ($source['keyword'] ?? ''));
         return "Write one post per channel for this page on steamgears.eu.\n\n"
             . "Title: {$source['title']}\n"
             . "Type: {$source['type']}\n"
             . "Summary: {$source['summary']}\n"
+            . ($keyword !== '' ? "Search phrase people use to find this page (measured by Command Center): \"{$keyword}\". Use it naturally once in the text, and as a hashtag if it reads well; do not stuff it.\n" : '')
             . ($goal !== '' ? "Campaign goal (shapes the angle; do not state it as a new fact or promise anything the page does not say): {$goal}\n" : '')
             . "\n"
             . "Channels and their rules:\n{$rules}\n"
@@ -864,17 +866,27 @@ class SGAP_Generator {
         $candidates = array_filter($posts, fn($post) => (int) get_post_meta($post->ID, self::META, true) < $cutoff);
         // Never promoted first, then the longest ago; newest posts win ties.
         usort($candidates, fn($a, $b) => (int) get_post_meta($a->ID, self::META, true) <=> (int) get_post_meta($b->ID, self::META, true));
-        return array_slice($candidates, 0, max(0, $count));
+        // 7.82.0: pages Command Center measured as worth a push (position 4-20, new articles) go
+        // first, in its order; the rest of the day's slots follow the old rule.
+        $first = class_exists('SGAP_Priorities') ? SGAP_Priorities::due() : [];
+        $ids = array_map(fn($p) => $p->ID, $first);
+        $rest = array_values(array_filter($candidates, fn($p) => !in_array($p->ID, $ids, true)));
+        return array_slice(array_merge($first, $rest), 0, max(0, $count));
     }
 
     public static function source(WP_Post $post): array {
         $summary = has_excerpt($post) ? $post->post_excerpt : $post->post_content;
         $summary = wp_trim_words(wp_strip_all_tags(strip_shortcodes($summary)), 120, '…');
-        return [
+        $source = [
             'title' => get_the_title($post),
             'type' => $post->post_type === 'product' ? 'product' : 'guide/blog post',
             'summary' => $summary
         ];
+        $keyword = class_exists('SGAP_Priorities') ? SGAP_Priorities::keyword_for((int) $post->ID) : '';
+        if ($keyword !== '') {
+            $source['keyword'] = $keyword;
+        }
+        return $source;
     }
 
     /**

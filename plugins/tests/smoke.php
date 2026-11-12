@@ -1967,5 +1967,45 @@ update_option('sgap_last_generate',['at'=>'2026-11-13 06:00:00','sources'=>2,'dr
 check('7.81 health: pages written by the free model are named', str_contains(implode("\n",SGAP_Auto::output_problems()),'2 pages were written by the free model nvidia/nemotron-3-ultra-550b-a55b:free'));
 delete_option('sgap_last_generate'); $GLOBALS['http_queue']=[]; $GLOBALS['http_calls']=[];
 update_option('sgap_ai_provider','anthropic'); update_option('sgap_ai_model',''); update_option('sgap_ai_api_key','');
+// --- 7.82.0: prioriteter fra Command Center ---
+if (!function_exists('rest_ensure_response')) { function rest_ensure_response($d){ return new WP_REST_Response($d); } }
+$GLOBALS['postid_for']=['https://steamgears.eu/goggles/'=>501,'https://steamgears.eu/draft/'=>502,'https://steamgears.eu/hat/'=>503];
+$GLOBALS['poststatus'][502]='draft';
+$pg=fn($id,$t)=>new WP_Post(['ID'=>$id,'post_title'=>$t,'post_content'=>"About $t.",'post_status'=>'publish']);
+$GLOBALS['post_by_id'][501]=$pg(501,'Brass goggles'); $GLOBALS['post_by_id'][503]=$pg(503,'Top hat'); $GLOBALS['post_by_id'][504]=$pg(504,'Old guide');
+delete_option('sgap_cc_priorities'); unset($GLOBALS['postmeta'][501],$GLOBALS['postmeta'][503],$GLOBALS['postmeta'][504]);
+$sv=SGAP_Priorities::save([
+  ['url'=>'https://steamgears.eu/goggles/','keyword'=>'steampunk goggles','position'=>7,'reason'=>'striking'],
+  ['url'=>'https://steamgears.eu/draft/','keyword'=>'x'],
+  ['url'=>'https://steamgears.eu/nope/','keyword'=>'y'],
+  ['url'=>'https://steamgears.eu/goggles/','keyword'=>'dup'],
+  ['post_id'=>503,'keyword'=>'<b>victorian top hat</b>','position'=>500,'reason'=>'New Article!'],
+  'garbage']);
+check('7.82 priorities: published pages are saved, the rest skipped with a reason', $sv['saved']===2
+  && array_column($sv['skipped'],'reason')===['not a published post, page or product','unknown page','duplicate']);
+$it=SGAP_Priorities::items();
+check('7.82 priorities: fields are cleaned (tags, out-of-range position, reason key)', $it[1]['keyword']==='victorian top hat' && $it[1]['position']===0 && $it[1]['reason']==='newarticle' && $it[0]['position']===7);
+check('7.82 priorities: keyword_for finds the phrase', SGAP_Priorities::keyword_for(501)==='steampunk goggles' && SGAP_Priorities::keyword_for(999)==='');
+$GLOBALS['posts_result']=[$GLOBALS['post_by_id'][504],$GLOBALS['post_by_id'][503],$GLOBALS['post_by_id'][501]];
+$picked=array_map(fn($p)=>$p->ID,SGAP_Generator::pick(3));
+check('7.82 pick: priority pages come first in Command Center order, then the rest, no duplicates', $picked===[501,503,504]);
+check('7.82 pick: the count still caps the day', array_map(fn($p)=>$p->ID,SGAP_Generator::pick(1))===[501]);
+$GLOBALS['postmeta'][501][SGAP_Generator::META]=time()-2*86400;
+check('7.82 pick: a priority page promoted 2 days ago waits (7-day cooldown)', !in_array(501,array_map(fn($p)=>$p->ID,SGAP_Priorities::due()),true));
+unset($GLOBALS['postmeta'][501]);
+$src=SGAP_Generator::source($GLOBALS['post_by_id'][501]);
+check('7.82 source: the measured search phrase travels with the page', ($src['keyword']??'')==='steampunk goggles' && !isset(SGAP_Generator::source($GLOBALS['post_by_id'][504])['keyword']));
+$pr=SGAP_AI::prompt($src,['facebook']);
+check('7.82 prompt: the phrase is in the prompt with a no-stuffing rule', str_contains($pr,'"steampunk goggles"') && str_contains($pr,'do not stuff it'));
+check('7.82 prompt: no phrase line for a page without one', !str_contains(SGAP_AI::prompt(SGAP_Generator::source($GLOBALS['post_by_id'][504]),['facebook']),'Search phrase'));
+$st=SGAP_Priorities::status();
+check('7.82 status: snapshot shows active and due', $st['active']===2 && $st['due']===2 && $st['received_at']!==null);
+update_option('sgap_cc_priorities',['at'=>time()-15*86400,'items'=>$it]);
+check('7.82 priorities: a list older than 14 days is ignored', SGAP_Priorities::items()===[] && SGAP_Priorities::due()===[]);
+$bad=SGAP_Priorities::rest_save(new WP_REST_Request(['items'=>'x']));
+check('7.82 rest: a body without items is a 400', $bad instanceof WP_Error && ($bad->get_error_data()['status']??0)===400);
+$ok=SGAP_Priorities::rest_save(new WP_REST_Request(['items'=>[['url'=>'https://steamgears.eu/hat/','keyword'=>'top hat']]]));
+check('7.82 rest: saving answers with counts and status', $ok instanceof WP_REST_Response && $ok->data['saved']===1 && $ok->data['status']['active']===1);
+delete_option('sgap_cc_priorities'); $GLOBALS['posts_result']=[]; unset($GLOBALS['postid_for'],$GLOBALS['poststatus'][502]);
 // P3.2/P3.5-slut
 exit(empty($GLOBALS['fail'])?0:1);

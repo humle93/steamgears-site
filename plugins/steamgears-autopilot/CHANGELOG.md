@@ -10,6 +10,27 @@ Noterne er skrevet ud fra commit-historikken og de dokumenter der hører til hve
 
 <!-- patch-notes: baseline 7.65.0 -->
 
+## 7.82.0 — 2026-11-12
+
+**Command Center fortæller nu autopiloten, hvilke sider der er tæt på toppen af Google, og for hvilket søgeord. De sider får sociale opslag først, og søgeordet bruges i opslaget.**
+
+### Tilføjet
+- `includes/priorities.php` (`SGAP_Priorities`) og ruten `POST/GET /sgap/v1/priorities` (kræver
+  `manage_options`, som resten af API'et). Command Center sender op til 30 sider: `url`, `keyword`,
+  `position` og `reason`.
+  - Kun publicerede indlæg, sider og produkter gemmes. Ukendte sider, kladder og dubletter afvises
+    med en grund i svaret.
+  - Listen gælder i 14 dage.
+- `SGAP_Generator::pick()` tager de prioriterede sider først, i Command Centers rækkefølge. Derefter
+  følger den gamle regel: aldrig promoveret først, ellers længst siden.
+  - En prioriteret side kan komme igen efter 7 dage. Den normale pause er `repost_cooldown_days`.
+  - Dagens antal, køen, kanalerne, lofterne og kvalitetsgaten er uændrede.
+- `source()` og `prompt()` tager søgeordet med. AI'en bruger det naturligt én gang og som hashtag,
+  hvis det passer, uden at proppe det ind.
+- `/snapshot` har `cc_priorities` (`received_at`, `active`, `due`), så Command Center kan se, hvad der
+  kom frem.
+- 13 nye smoke-checks (1 587 → 1 600 PASS, 0 FAIL).
+
 ## 7.81.1 — 2026-11-12
 
 **Den gratis reserve prøver nu Nemotron Ultra først.**
