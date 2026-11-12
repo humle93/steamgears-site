@@ -173,16 +173,23 @@ def measure(access_token: str, session: str | None = None,
 
     def call(ability: str) -> tuple[dict | None, str]:
         args = {out["argument_navne"]["ability"]: ability}
+        if out["argument_navne"].get("input"):
+            # Novamira kræver både ability_name og parameters (begge required);
+            # et tomt objekt er nok, fordi evnerne her ikke tager input.
+            args[out["argument_navne"]["input"]] = {}
         payload, error = _call(post, access_token, session, tool_name, args)
         if payload is None and not properties:
             # Intet skema at læse: prøv den anden kendte form, før vi giver op.
-            args = {ABILITY_KEYS[1]: ability}
+            args = {ABILITY_KEYS[1]: ability, INPUT_KEYS[1]: {}}
             payload, error = _call(post, access_token, session, tool_name, args)
             if payload is not None:
                 out["argument_navne"]["ability"] = ABILITY_KEYS[1]
         return payload, error
 
     health, error = call(health_ability)
+    # Novamira svarer {"success": true, "data": {...}}; felterne ligger i data.
+    if isinstance(health, dict) and isinstance(health.get("data"), dict):
+        health = health["data"]
     if health is None:
         out["errors"][health_ability] = error
     else:
@@ -197,6 +204,8 @@ def measure(access_token: str, session: str | None = None,
         out["php"] = health.get("php")
 
     settings, error = call(settings_ability)
+    if isinstance(settings, dict) and isinstance(settings.get("data"), dict):
+        settings = settings["data"]
     if settings is None:
         out["errors"][settings_ability] = error
         out["ai_profile"] = None

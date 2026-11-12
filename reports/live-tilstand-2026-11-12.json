@@ -1,0 +1,57 @@
+{
+ "measured_at": "2026-11-12T14:44:20Z",
+ "verdict": "bestået",
+ "failed": 0,
+ "checks": [
+  {
+   "navn": "AI Engine Dynamic REST",
+   "krav": "true",
+   "maalt": "true",
+   "status": "ok"
+  },
+  {
+   "navn": "AI Engine Abilities",
+   "krav": "true",
+   "maalt": "true",
+   "status": "ok"
+  },
+  {
+   "navn": "MCP-rolle",
+   "krav": "dokumentation: admin",
+   "maalt": "admin",
+   "status": "ok"
+  },
+  {
+   "navn": "Plugin-version på sitet",
+   "krav": "7.79.0 (repoet)",
+   "maalt": "7.79.0",
+   "status": "ok"
+  },
+  {
+   "navn": "AI-profil",
+   "krav": "oplyses (ikke et krav)",
+   "maalt": "site_admin",
+   "status": "ok"
+  }
+ ],
+ "measured": {
+  "resource": "https://steamgears.eu/wp-json/mcp/novamira-oauth",
+  "measured_at": "2026-11-12T14:44:20Z",
+  "errors": {},
+  "tools": 3,
+  "argument_navne": {
+   "ability": "ability_name",
+   "input": "parameters"
+  },
+  "ai_engine_mcp": {
+   "dynamic_rest": true,
+   "abilities": true,
+   "role": "admin"
+  },
+  "autopilot_version": "7.79.0",
+  "wordpress": "7.1.4",
+  "php": "8.5.12",
+  "ai_profile": "site_admin",
+  "session": true
+ }
+}
