@@ -374,11 +374,11 @@
     {
      "id": "p97",
      "name": "P9.7 — gratis OpenRouter-model ved opbrugt kredit",
-     "done": 0.1,
+     "done": 0.15,
      "total": 0.15,
      "unit": "d",
-     "note": "7.81.0: SGAP_AI::free_retry() prøver google/gemma-4-31b-it:free → openrouter/free (OpenRouters models-liste) når den betalte model afvises for kredit (402 / 'can only afford'). Målt fra sitet 12/11: openrouter/free svarede cost 0, listen faldt til nvidia/nemotron-3-ultra-550b-a55b:free. Rapporten tæller free/free_model, selvtjekket nævner det. 9 smoke-checks, 1 578 → 1 587 PASS. Mangler: installation og en live-generering gennem reserven.",
-     "verified": false
+     "note": "7.81.0: SGAP_AI::free_retry() prøver google/gemma-4-31b-it:free → openrouter/free (OpenRouters models-liste) når den betalte model afvises for kredit (402 / 'can only afford'). Målt fra sitet 12/11: openrouter/free svarede cost 0, listen faldt til nvidia/nemotron-3-ultra-550b-a55b:free. Rapporten tæller free/free_model, selvtjekket nævner det. 9 smoke-checks, 1 578 → 1 587 PASS. Installeret 12/11 over MCP (aktiv, REST 200). Live: den betalte Haiku svarede selv med 3 opslag (token-loftet fra 7.80.0 var nok). Reserven målt med én simuleret 402 via pre_http_request på første kald: andet kald gik til det rigtige OpenRouter og gav 3 opslag fra nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free på 28 s, last_fallback = 'no credit for 402'. Intet blev gemt eller sat i kø.",
+     "verified": true
     }
    ],
    "total": 33.75,
@@ -2642,6 +2642,15 @@
    "delta": -0.1,
    "basis": "36,15 af 36,2 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5 · P3.7 0,6/0,6 · P3.8 0,3/0,3 · P3.9 0,25/0,25 · P1.25 0,15/0,15 · P1.24 0,35/0,35 · P1.23 0,25/0,25 · P6 0,9/0,9 · P7 0,3/0,3 · P8 0,8/0,8 · P9 0,35/0,35 · P9.1 0,3/0,3 · P9.2 0,2/0,2 · P9.3 0,25/0,25 · P9.4 0,2/0,2 · P10 0,5/0,5 · P9.5 0,25/0,25 · P9.6 0,25/0,25 · P9.7 0,1/0,15)",
    "scope_change": true
+  },
+  {
+   "date": "2026-11-12",
+   "project": "Steamgears Autopilot — plugin",
+   "module": "daglig måling",
+   "before": 99.9,
+   "after": 100.0,
+   "delta": 0.1,
+   "basis": "36,2 af 36,2 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5 · P3.7 0,6/0,6 · P3.8 0,3/0,3 · P3.9 0,25/0,25 · P1.25 0,15/0,15 · P1.24 0,35/0,35 · P1.23 0,25/0,25 · P6 0,9/0,9 · P7 0,3/0,3 · P8 0,8/0,8 · P9 0,35/0,35 · P9.1 0,3/0,3 · P9.2 0,2/0,2 · P9.3 0,25/0,25 · P9.4 0,2/0,2 · P10 0,5/0,5 · P9.5 0,25/0,25 · P9.6 0,25/0,25 · P9.7 0,15/0,15)"
   }
  ]
 }
