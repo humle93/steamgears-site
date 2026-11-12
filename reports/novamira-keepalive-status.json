@@ -1,1 +1,14 @@
-[]
+[
+ {
+  "at": "2026-11-12T18:20:07Z",
+  "event": "push",
+  "outcome": "startet",
+  "reason": ""
+ },
+ {
+  "at": "2026-11-12T18:20:08Z",
+  "trigger": "push",
+  "outcome": "sprunget-over",
+  "reason": "NOVAMIRA_REFRESH_TOKEN mangler i repository-secrets"
+ }
+]
