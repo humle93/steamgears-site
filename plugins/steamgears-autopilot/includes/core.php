@@ -2435,10 +2435,14 @@ class SGAP_Admin {
         $table = $wpdb->prefix . 'sgap_queue';
         $message = 'Nothing changed.';
         if ($id && $cmd === 'retry') {
-            // Re-queue means "let the autopilot try again", so a reminder flag is cleared too.
-            $wpdb->update($table, ['status' => 'queued', 'attempts' => 0, 'error' => null, 'external_id' => '', 'remind' => 0], ['id' => $id]);
-            $blocked = SGAP_Queue::blocked_reason();
-            $message = "Post #{$id} is queued again." . ($blocked !== '' ? ' It waits: ' . SGAP_Queue::blocked_message($blocked) . '.' : '');
+            // Re-queue means "let the autopilot try again": one shared path with the
+            // REST endpoint, so the admin button and an outside tool reset the same fields.
+            if (!SGAP_Queue::retry($id)) {
+                $message = "Post #{$id} was not found.";
+            } else {
+                $blocked = SGAP_Queue::blocked_reason();
+                $message = "Post #{$id} is queued again." . ($blocked !== '' ? ' It waits: ' . SGAP_Queue::blocked_message($blocked) . '.' : '');
+            }
         } elseif ($id && $cmd === 'remind') {
             // P1.2: hand it to the owner. The next tick mails it instead of posting it.
             $wpdb->update($table, ['status' => 'queued', 'remind' => 1, 'error' => null, 'external_id' => ''], ['id' => $id]);
