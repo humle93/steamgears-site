@@ -119,6 +119,8 @@ markedsføringsloven kræver mærkningen.
 | 19 | Guide | Rens din kaffekværn | kaffekværn rens (30) | Nej |
 | 20 | Guide | Mokkakande: sådan bruger du den | mokkakande (390) | Nej |
 
+**Status 12/11:** nr. 1, 3 og 12-20 er skrevet som udkast (`kaffeguiden-artikel-*.md`), sammen med siderne Om, Sådan tester vi og Affiliate (`kaffeguiden-side-*.md`). `tools/kaffeguiden_setup.sh` lægger dem alle ind som kladder, se [`kaffeguiden-opsaetning-2026-11-12.md`](kaffeguiden-opsaetning-2026-11-12.md).
+
 **Rækkefølge:** guides og søjle 1 + 3 først (nr. 1, 3, 12-20). De kræver ikke udstyr og kan skrives ærligt nu. Sammenligninger
 med »vores valg« venter, til der er prøvet mindst én kværn og én vægt (planen §6, punkt 4). Indtil da står de som
 *købsguides*: hvad man skal se efter, uden at påstå en test.
