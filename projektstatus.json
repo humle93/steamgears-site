@@ -392,11 +392,11 @@
     {
      "id": "p99",
      "name": "P9.9 — AI-redaktør på sociale opslag",
-     "done": 0.25,
+     "done": 0.3,
      "total": 0.3,
      "unit": "d",
-     "note": "7.83.0: SGAP_Editor scorer hver sides opslag 0-10 med gratis OpenRouter-modeller; under 7 = rejected med grund, intet svar = pending uden kø (også Full auto). 12 smoke-checks, 1 600 → 1 612 PASS. Mangler: installation og en live-bedømmelse.",
-     "verified": false
+     "note": "7.83.0: SGAP_Editor scorer hver sides opslag 0-10 med gratis OpenRouter-modeller; under 7 = rejected med grund, intet svar = pending uden kø (også Full auto). 12 smoke-checks, 1 600 → 1 612 PASS. Installeret som 7.83.2 over MCP (aktiv, REST 200). Målt live: to fejl fundet og rettet undervejs (7.83.1: OpenRouter afviser > 3 modeller; 7.83.2: 1 200 tokens gik til ræsonnement, nu 4 000). Rigtige opslag fra Haiku på post 1361: Facebook 8/10 godkendt, Instagram 5/10 afvist (15 hashtags, emoji), Pinterest 9/10 godkendt. Et bevidst dårligt opslag (opdigtet 70% OFF, gratis fragt, klichéer, gentagne hashtags) fik 1/10 og 2/10 i to kørsler, med alle grunde. Intet blev gemt eller sat i kø.",
+     "verified": true
     }
    ],
    "total": 33.75,
@@ -2698,6 +2698,15 @@
    "delta": -0.2,
    "basis": "36,8 af 36,9 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5 · P3.7 0,6/0,6 · P3.8 0,3/0,3 · P3.9 0,25/0,25 · P1.25 0,15/0,15 · P1.24 0,35/0,35 · P1.23 0,25/0,25 · P6 0,9/0,9 · P7 0,3/0,3 · P8 0,8/0,8 · P9 0,35/0,35 · P9.1 0,3/0,3 · P9.2 0,2/0,2 · P9.3 0,25/0,25 · P9.4 0,2/0,2 · P10 0,5/0,5 · P9.5 0,25/0,25 · P9.6 0,25/0,25 · P9.7 0,15/0,15 · P9.8 0,35/0,4 · P9.9 0,25/0,3)",
    "scope_change": true
+  },
+  {
+   "date": "2026-11-12",
+   "project": "Steamgears Autopilot — plugin",
+   "module": "daglig måling",
+   "before": 99.7,
+   "after": 99.9,
+   "delta": 0.2,
+   "basis": "36,85 af 36,9 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5 · P3.7 0,6/0,6 · P3.8 0,3/0,3 · P3.9 0,25/0,25 · P1.25 0,15/0,15 · P1.24 0,35/0,35 · P1.23 0,25/0,25 · P6 0,9/0,9 · P7 0,3/0,3 · P8 0,8/0,8 · P9 0,35/0,35 · P9.1 0,3/0,3 · P9.2 0,2/0,2 · P9.3 0,25/0,25 · P9.4 0,2/0,2 · P10 0,5/0,5 · P9.5 0,25/0,25 · P9.6 0,25/0,25 · P9.7 0,15/0,15 · P9.8 0,35/0,4 · P9.9 0,3/0,3)"
   }
  ]
 }
