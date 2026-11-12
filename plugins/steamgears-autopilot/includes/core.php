@@ -29,7 +29,8 @@ class SGAP_Install {
 
     const TABLES = [
         'sgap_queue', 'sgap_events', 'sgap_cro', 'sgap_learning',
-        'sgap_ai_drafts', 'sgap_reposts', 'sgap_suppression', 'sgap_etsy_orders'
+        'sgap_ai_drafts', 'sgap_reposts', 'sgap_suppression', 'sgap_etsy_orders',
+        'sgap_publish_log', 'sgap_reddit_posts'
     ];
 
     const DEFAULTS = [
@@ -1036,8 +1037,13 @@ class SGAP_Queue {
             ]);
         }
         // A blackout moves the post instead of refusing it: the owner asked for "not
-        // on these days", not "not at all".
-        $scheduled = (string) (($item['scheduled_at'] ?? '') ?: current_time('mysql'));
+        // on these days", not "not at all". Validate the wall-clock value before it
+        // reaches MySQL: an invalid date used to fall back to "now" in the REST layer.
+        $raw_scheduled = trim((string) ($item['scheduled_at'] ?? ''));
+        $scheduled = $raw_scheduled === '' ? current_time('mysql') : self::schedule($raw_scheduled);
+        if ($scheduled === null) {
+            return new WP_Error('sgap_invalid', 'scheduled_at must be a valid date and time.', ['status' => 400]);
+        }
         if (SGAP_Blackout::hits($scheduled)) {
             $scheduled = SGAP_Blackout::next_free($scheduled);
         }
@@ -1226,6 +1232,64 @@ class SGAP_Queue {
      * Records the outcome of a send. A failure goes back in the queue until it has
      * been tried MAX_ATTEMPTS times. Returns the new status, or null for an unknown id.
      */
+    /**
+     * A queue timestamp is site wall-clock time, not an instant: sending it through
+     * strtotime()/wp_date() moved an owner's 10:00 by the site's UTC offset. Keep a
+     * plain MySQL/ISO local value as written, validate impossible dates, and convert
+     * only values that actually carry another format (including a timezone).
+     */
+    public static function schedule(string $value): ?string {
+        $value = trim($value);
+        if ($value === '') {
+            return null;
+        }
+        if (preg_match('/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?$/', $value, $m)) {
+            $year = (int) $m[1];
+            $month = (int) $m[2];
+            $day = (int) $m[3];
+            if (!checkdate($month, $day, $year)) {
+                return null;
+            }
+            if (!isset($m[4]) || $m[4] === '') {
+                return sprintf('%04d-%02d-%02d 00:00:00', $year, $month, $day);
+            }
+            $hour = (int) $m[4];
+            $minute = (int) $m[5];
+            $second = isset($m[6]) ? (int) $m[6] : 0;
+            if ($hour > 23 || $minute > 59 || $second > 59) {
+                return null;
+            }
+            return sprintf('%04d-%02d-%02d %02d:%02d:%02d', $year, $month, $day, $hour, $minute, $second);
+        }
+        $ts = strtotime($value);
+        return $ts === false ? null : wp_date('Y-m-d H:i:s', $ts);
+    }
+
+    /** Puts a failed or stuck item back in the queue without spending a manual SQL edit. */
+    public static function retry(int $id): bool {
+        global $wpdb;
+        if ($id <= 0) {
+            return false;
+        }
+        $table = self::table();
+        $exists = $wpdb->get_var($wpdb->prepare("SELECT id FROM {$table} WHERE id = %d", $id));
+        if ((int) $exists !== $id) {
+            return false;
+        }
+        $updated = $wpdb->update($table, [
+            'status' => 'queued',
+            'attempts' => 0,
+            'error' => null,
+            'external_id' => '',
+            'remind' => 0
+        ], ['id' => $id]);
+        if ($updated === false) {
+            return false;
+        }
+        delete_transient('sgap_dashboard_stats');
+        return true;
+    }
+
     /** Delay before the next attempt of a failed item: 5, then 15, then 45 minutes. */
     public static function retry_delay_minutes(int $attempts): int {
         $steps = self::BACKOFF_MINUTES;
@@ -1371,14 +1435,31 @@ class SGAP_REST {
     }
 
     private static function datetime($value): ?string {
-        if (!$value) {
+        $value = trim((string) ($value ?? ''));
+        if ($value === '') {
             return null;
         }
-        $ts = strtotime((string) $value);
-        return $ts ? wp_date('Y-m-d H:i:s', $ts) : null;
+        return SGAP_Queue::schedule($value);
+    }
+
+    /** Form fields arrive as strings: (bool) "false" is true, which silently forced the gate. */
+    private static function flag($value): bool {
+        if (is_bool($value)) {
+            return $value;
+        }
+        if (is_int($value) || is_float($value)) {
+            return $value == 1;
+        }
+        return in_array(strtolower(trim((string) $value)), ['1', 'true', 'yes', 'on'], true);
     }
 
     public static function create_queue(WP_REST_Request $r) {
+        $raw_schedule = trim((string) ($r->get_param('scheduled_at') ?? ''));
+        $scheduled = self::datetime($raw_schedule);
+        if ($raw_schedule !== '' && $scheduled === null) {
+            return new WP_Error('sgap_invalid', 'scheduled_at must be a valid date and time.', ['status' => 400]);
+        }
+
         $result = SGAP_Queue::add([
             'post_id' => $r->get_param('post_id'),
             'channel' => $r->get_param('channel'),
@@ -1390,10 +1471,10 @@ class SGAP_REST {
             'body' => self::text($r->get_param('body')),
             'image_url' => $r->get_param('image_url'),
             'status' => $r->get_param('status'),
-            'scheduled_at' => self::datetime($r->get_param('scheduled_at')),
+            'scheduled_at' => $scheduled,
             'campaign' => $r->get_param('campaign'),
-            'force' => (bool) $r->get_param('force'),
-            'remind' => (bool) $r->get_param('remind')
+            'force' => self::flag($r->get_param('force')),
+            'remind' => self::flag($r->get_param('remind'))
         ]);
         if (is_wp_error($result)) {
             return $result;
@@ -1418,10 +1499,16 @@ class SGAP_REST {
 
     public static function queue_status(WP_REST_Request $r) {
         $status = (string) $r->get_param('status');
-        if (!in_array($status, ['published', 'failed'], true)) {
-            return new WP_Error('sgap_invalid', 'status must be published or failed.', ['status' => 400]);
+        if (!in_array($status, ['published', 'failed', 'queued'], true)) {
+            return new WP_Error('sgap_invalid', 'status must be published, failed or queued.', ['status' => 400]);
         }
         $id = absint($r['id']);
+        if ($status === 'queued') {
+            if (!SGAP_Queue::retry($id)) {
+                return new WP_Error('sgap_not_found', 'Unknown queue id.', ['status' => 404]);
+            }
+            return ['id' => $id, 'status' => 'queued'];
+        }
         $new = SGAP_Queue::mark($id, $status, (string) $r->get_param('error'));
         if ($new === null) {
             return new WP_Error('sgap_not_found', 'Unknown queue id.', ['status' => 404]);
@@ -1473,12 +1560,17 @@ class SGAP_REST {
         if (!in_array($status, ['pending', 'approved', 'rejected', 'used'], true)) {
             return new WP_Error('sgap_invalid', 'status must be pending, approved, rejected or used.', ['status' => 400]);
         }
-        $updated = $wpdb->update($wpdb->prefix . 'sgap_ai_drafts', ['status' => $status], ['id' => absint($r['id'])]);
+        $id = absint($r['id']);
+        $exists = $wpdb->get_var($wpdb->prepare("SELECT id FROM {$wpdb->prefix}sgap_ai_drafts WHERE id = %d", $id));
+        if ((int) $exists !== $id) {
+            return new WP_Error('sgap_not_found', 'Unknown draft id.', ['status' => 404]);
+        }
+        $updated = $wpdb->update($wpdb->prefix . 'sgap_ai_drafts', ['status' => $status], ['id' => $id]);
         if ($updated === false) {
             return new WP_Error('sgap_db', 'Could not save.', ['status' => 500]);
         }
         delete_transient('sgap_dashboard_stats');
-        return ['id' => absint($r['id']), 'status' => $status];
+        return ['id' => $id, 'status' => $status];
     }
 
     public static function stats(WP_REST_Request $r) {
@@ -1521,7 +1613,8 @@ class SGAP_REST {
         $tables = [
             'queue' => 'sgap_queue', 'drafts' => 'sgap_ai_drafts', 'events' => 'sgap_events',
             'cro' => 'sgap_cro', 'learning' => 'sgap_learning', 'suppression' => 'sgap_suppression',
-            'reposts' => 'sgap_reposts', 'etsy_orders' => 'sgap_etsy_orders'
+            'reposts' => 'sgap_reposts', 'etsy_orders' => 'sgap_etsy_orders',
+            'publish_log' => 'sgap_publish_log', 'reddit_posts' => 'sgap_reddit_posts'
         ];
         $missing = [];
         foreach ($tables as $name => $table) {

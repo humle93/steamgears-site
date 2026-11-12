@@ -92,7 +92,7 @@ class WP_Query {
 require __DIR__.'/../steamgears-autopilot/steamgears-autopilot.php';
 function check($name,$ok){ echo ($ok?'PASS ':'FAIL ')."$name\n"; if(!$ok) $GLOBALS['fail']=1; }
 do_action('init'); do_action('admin_init'); do_action('admin_menu');
-check('install: 10 tables', count($GLOBALS['ddl']??[])===10); check('install: publish log table', str_contains(implode("\n",$GLOBALS['ddl']??[]),'sgap_publish_log')); check('install: cleanup cron', in_array('sgap_daily_cleanup',$GLOBALS['cron']??[])); check('install: /go/ rule + flush', ($GLOBALS['rules'][0]??'')==='^go/([0-9]+)/?$' && !empty($GLOBALS['flushed'])); check('install: secrets not autoloaded', isset($GLOBALS['noauto']['sgap_ai_api_key'])); check('version stored', $opts['sgap_version']===SGAP_VERSION);
+check('install: 10 tables', count($GLOBALS['ddl']??[])===10); check('install: publish log table', str_contains(implode("\n",$GLOBALS['ddl']??[]),'sgap_publish_log')); check('install: table list covers all ten', count(SGAP_Install::TABLES)===10 && in_array('sgap_publish_log',SGAP_Install::TABLES,true) && in_array('sgap_reddit_posts',SGAP_Install::TABLES,true)); check('install: cleanup cron', in_array('sgap_daily_cleanup',$GLOBALS['cron']??[])); check('install: /go/ rule + flush', ($GLOBALS['rules'][0]??'')==='^go/([0-9]+)/?$' && !empty($GLOBALS['flushed'])); check('install: secrets not autoloaded', isset($GLOBALS['noauto']['sgap_ai_api_key'])); check('version stored', $opts['sgap_version']===SGAP_VERSION);
 // P3.3 — AI-profiler: persona, værktøjsadgang og access all
 check('profiles: three profiles', count(SGAP_Profiles::all())===3 && isset(SGAP_Profiles::all()['site_admin'], SGAP_Profiles::all()['wp_seo_expert']));
 check('profiles: default is the limited assistant', SGAP_Profiles::id()==='assistant' && !SGAP_Profiles::is_full());
@@ -157,6 +157,20 @@ check('queue missing title 400', $r instanceof WP_Error && $r->data['status']===
 $wpdb->next=null; $r=SGAP_REST::create_queue(new WP_REST_Request(['channel'=>'Pinterest','title'=>'Goggles','destination_url'=>'https://steamgears.eu/g/','angle'=>'angle_b']));
 check('queue created 201', $r instanceof WP_REST_Response && $r->status===201 && $r->data['tracking_url']==='https://steamgears.eu/go/42/');
 check('utm built', str_contains($r->data['utm_url'],'utm_source=pinterest') && str_contains($r->data['utm_url'],'utm_content=angle_b_product_pin'));
+// scheduled_at is site wall-clock time; an impossible date is a 400, not "now".
+check('schedule: a local date keeps its wall-clock value', SGAP_Queue::schedule('2026-12-25 10:00')==='2026-12-25 10:00:00' && SGAP_Queue::schedule('2026-12-25')==='2026-12-25 00:00:00');
+check('schedule: an impossible date is refused', SGAP_Queue::schedule('2026-02-31')===null && SGAP_Queue::schedule('2026-13-01 10:00')===null);
+$wpdb->next=null; $wpdb->row=null;
+$r=SGAP_REST::create_queue(new WP_REST_Request(['channel'=>'pinterest','title'=>'Bad date','destination_url'=>'https://steamgears.eu/bad-date/','scheduled_at'=>'2026-02-31 10:00']));
+check('queue: an impossible scheduled_at is 400', $r instanceof WP_Error && $r->data['status']===400);
+$r=SGAP_REST::create_queue(new WP_REST_Request(['channel'=>'pinterest','title'=>'Good date','destination_url'=>'https://steamgears.eu/good-date/','scheduled_at'=>'2026-12-25 10:00']));
+check('queue: a valid scheduled_at is returned without a timezone shift', $r instanceof WP_REST_Response && ($r->data['scheduled_at']??'')==='2026-12-25 10:00:00');
+$opts['sgap_quality_gate']='block'; $opts['sgap_banned_words']='scam'; $wpdb->next=null; $wpdb->row=null;
+$r=SGAP_REST::create_queue(new WP_REST_Request(['channel'=>'pinterest','title'=>'False force','destination_url'=>'https://steamgears.eu/false-force/','body'=>'This is a scam','force'=>'false']));
+check('queue: force=false is false, not a truthy string', $r instanceof WP_Error && $r->code==='sgap_quality');
+$r=SGAP_REST::create_queue(new WP_REST_Request(['channel'=>'pinterest','title'=>'False remind','destination_url'=>'https://steamgears.eu/false-remind/','body'=>'Fresh titanium gears in the shop','remind'=>'false']));
+check('queue: remind=false is false', $r instanceof WP_REST_Response && ($r->data['remind']??1)===0);
+unset($opts['sgap_quality_gate'],$opts['sgap_banned_words']); $wpdb->next=null; $wpdb->row=null;
 // utm_campaign: one setting for the everyday stream, one optional field for a named campaign.
 $utm=fn(array $a)=>SGAP_UTM::build($a+['destination_url'=>'https://steamgears.eu/x/']);
 check('utm campaign default', str_contains($utm(['channel'=>'pinterest']),'utm_campaign=steamgears_premium_evergreen'));
@@ -210,7 +224,13 @@ $opts['sgap_autopilot_enabled']='yes'; $opts['sgap_quiet_start']=0; $opts['sgap_
 $r=SGAP_REST::due(new WP_REST_Request([])); check('due cap reached', $r['reason']==='daily_cap_reached');
 $wpdb->next=2; $r=SGAP_REST::due(new WP_REST_Request([])); check('due limit = min(batch5, 8-2)', str_contains(end($wpdb->log),'LIMIT 5'));
 $r=SGAP_REST::draft_status(new WP_REST_Request(['id'=>3,'status'=>'bogus'])); check('draft bad status 400', $r instanceof WP_Error);
-$r=SGAP_REST::queue_status(new WP_REST_Request(['id'=>3,'status'=>'published'])); check('queue status unknown id 404', $r instanceof WP_Error && $r->data['status']===404);
+$wpdb->next=0; $r=SGAP_REST::draft_status(new WP_REST_Request(['id'=>999,'status'=>'approved'])); check('draft unknown id 404', $r instanceof WP_Error && $r->data['status']===404);
+$wpdb->row=null; $r=SGAP_REST::queue_status(new WP_REST_Request(['id'=>3,'status'=>'published'])); check('queue status unknown id 404', $r instanceof WP_Error && $r->data['status']===404);
+$wpdb->next=3; $wpdb->log=[]; $r=SGAP_REST::queue_status(new WP_REST_Request(['id'=>3,'status'=>'queued']));
+$qlog=implode("\n",$wpdb->log);
+check('queue status queued retries and resets the row', is_array($r) && ($r['status']??'')==='queued' && str_contains($qlog, '"status":"queued"') && str_contains($qlog, '"attempts":0'));
+$wpdb->next=0; $r=SGAP_REST::queue_status(new WP_REST_Request(['id'=>999,'status'=>'queued'])); check('queue status queued unknown id 404', $r instanceof WP_Error && $r->data['status']===404);
+$wpdb->next=null;
 // Dashboard snapshot: one read-only call for an outside app (Command Center).
 update_option('sgap_ai_api_key','TOPSECRET');
 $snap=SGAP_REST::snapshot(new WP_REST_Request(['days'=>30,'limit'=>5]));
@@ -573,6 +593,7 @@ check('quality: a link to a live page passes', SGAP_Quality::link_problem('https
 $GLOBALS['poststatus'][7]='draft';
 check('quality: a link to a draft is blocked', (SGAP_Quality::link_problem('https://steamgears.eu/gear/')['severity']??'')==='block');
 check('quality: an archive or a search is not a dead link', SGAP_Quality::link_problem('https://steamgears.eu/category/guides/')===null && SGAP_Quality::link_problem('https://steamgears.eu/?s=gear')===null);
+check('quality: only real archive parameters count as an archive', SGAP_Quality::is_archive('https://steamgears.eu/?paged=2') && !SGAP_Quality::is_archive('https://steamgears.eu/gear/?utm_source=pinterest') && !SGAP_Quality::is_archive('https://steamgears.eu/?p=123'));
 check('quality: an internal address nobody can open is a warning', (SGAP_Quality::link_problem('https://steamgears.eu/no-such-page/')['severity']??'')==='warn');
 check('quality: an external host is not probed', SGAP_Quality::link_problem('https://www.pinterest.com/pin/1')===null);
 $GLOBALS['attachment_for']['https://steamgears.eu/i.jpg']=55;
@@ -953,14 +974,15 @@ preg_match_all("/'(sgap_[a-z_]+)'/", $uninstall, $m2);
 $declared=array_values(array_unique($m2[1]));
 check('uninstall: install creates 10 tables ('.count($created).')', count($created)===10);
 check('uninstall: declares every table install creates', array_diff($created,$declared)===[]);
-$wpdb->log=[]; $GLOBALS['deleted_meta_keys']=[];
+$wpdb->log=[]; $GLOBALS['deleted_meta_keys']=[]; $GLOBALS['cleared']=[];
 if (!defined('WP_UNINSTALL_PLUGIN')) define('WP_UNINSTALL_PLUGIN', true);
 include __DIR__.'/../steamgears-autopilot/uninstall.php';
 $ulog=implode("\n",$wpdb->log);
 $dropped=count(array_filter($created, fn($t)=>str_contains($ulog,"DROP TABLE IF EXISTS wp_$t")));
 check('uninstall: drops every table install creates ('.$dropped.'/'.count($created).')', $dropped===count($created) && $dropped>0);
 check('uninstall: deletes options and transients', str_contains($ulog,'DELETE FROM wp_options') && str_contains($ulog,"sgap\\_%"));
-check('uninstall: removes the promoted-post meta', in_array('_sgap_promoted_at',$GLOBALS['deleted_meta_keys']??[],true));
+check('uninstall: removes every _sgap_ postmeta key', str_contains($ulog,'DELETE FROM wp_postmeta') && str_contains($ulog,"_sgap_%"));
+check('uninstall: clears the module cron hooks', in_array('sgap_evergreen',$GLOBALS['cleared']??[],true) && in_array('sgap_coach_learn',$GLOBALS['cleared']??[],true) && in_array('sgap_rescue',$GLOBALS['cleared']??[],true) && in_array('sgap_cirla_daily',$GLOBALS['cleared']??[],true));
 
 // P2.1 — Bluesky som direkte kanal. HTTP går gennem WordPress' eget API, så det kan stubbes:
 // hvert kald lægger sig i http_calls, og svarene kommer fra http_queue i den rækkefølge

@@ -22,16 +22,19 @@ $wpdb->query(
         OR option_name LIKE '\\_transient\\_timeout\\_sgap\\_%'"
 );
 
-delete_post_meta_by_key('_sgap_promoted_at');
-delete_post_meta_by_key('_sgap_reddit_url');
-delete_post_meta_by_key('_sgap_reddit_sub');
-delete_post_meta_by_key('_sgap_reddit_state');
+// Every post meta key the plugin owns starts with _sgap_ (evergreen marks, AI
+// images, studio data, niche markers and Reddit links). One LIKE removes them all,
+// including keys added by a later version.
+$wpdb->query($wpdb->prepare(
+    "DELETE FROM {$wpdb->postmeta} WHERE meta_key LIKE %s",
+    $wpdb->esc_like('_sgap_') . '%'
+));
 
 foreach ([
     'sgap_daily_cleanup', 'sgap_publish_tick', 'sgap_generate', 'sgap_process_queue', 'sgap_etsy_sync', 'sgap_etsy_inventory',
     'sgap_weekly_report', 'sgap_repost_check', 'sgap_suppression_check', 'sgap_mcp_refresh',
     'sgap_engagement_refresh', 'sgap_pinterest_refresh', 'sgap_instagram_refresh', 'sgap_facebook_refresh',
-    'sgap_reddit_tick'
+    'sgap_reddit_tick', 'sgap_coach_learn', 'sgap_rescue', 'sgap_evergreen', 'sgap_cirla_daily'
 ] as $hook) {
     wp_clear_scheduled_hook($hook);
 }

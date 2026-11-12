@@ -115,8 +115,20 @@ class SGAP_Quality {
     public static function is_archive(string $url): bool {
         $path = (string) wp_parse_url($url, PHP_URL_PATH);
         $query = (string) wp_parse_url($url, PHP_URL_QUERY);
-        if ($query !== '' || $path === '' || $path === '/') {
+        if ($query !== '') {
+            parse_str($query, $args);
+            $archive_keys = ['s', 'paged', 'page', 'orderby', 'cat', 'tag', 'author', 'post_type', 'feed', 'preview', 'replytocom', 'embed'];
+            if (array_intersect(array_keys($args), $archive_keys) !== []) {
+                return true;
+            }
+        }
+        if ($path === '') {
             return true;
+        }
+        if ($path === '/') {
+            // The front page is an archive, unless the query names one post or page.
+            parse_str($query, $single);
+            return array_intersect(array_keys($single), ['p', 'page_id', 'attachment_id', 'name', 'preview']) === [];
         }
         foreach (self::ARCHIVE_PARTS as $part) {
             if (str_contains($path, $part)) {

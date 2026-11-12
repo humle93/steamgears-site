@@ -1,12 +1,11 @@
 # Steamgears Autopilot — audit, roadmap and effort estimates
 
-_Last audited: 2026-11-09 · the audit further down was of **7.15.0** (`ab676db` on `main`); the site runs
+_Last audited: 2026-11-12 · the audit further down was of **7.15.0** (`ab676db` on `main`); the site runs
 **7.65.5** (measured 9/11 2026 through Novamira: the zip was installed with `Plugin_Upgrader` and the installed
-version reads back as 7.65.5). The repo, and the zip in `plugins/`, is **7.70.1** (7.66.0 shipped P5: forum and
-Reddit; 7.67.0 makes OpenRouter its own text provider; 7.67.1 makes it the automatic backup; 7.68.0 is P6: the
-campaign agent; 7.69.0 is P7: feed health; 7.70.0 is P8: the agents read the site's measured brief; 7.70.1
-sends the OpenRouter header from one builder and cleans the token), so the
-next *Plugins → Update* is a real upgrade and not a no-op · update this file in the same commit as any release._
+version reads back as 7.65.5). The repo, and the zip in `plugins/`, is **7.76.1** (7.76.0 made OpenRouter the
+standard provider and added one-click Command Center login; 7.76.1 fixes the REST date/permission edges and the
+uninstall cleanup), so the next *Plugins → Update* is a real upgrade and not a no-op · update this file in the
+same commit as any release._
 
 **The 7.64.9 upgrade has no agent path, measured 8/11 2026:** there is no MCP credential anywhere — 0
 repository secrets, no token file in the sandbox, and the public routes that exist answer `401` — so the

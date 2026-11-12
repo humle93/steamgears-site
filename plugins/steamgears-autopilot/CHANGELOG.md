@@ -10,6 +10,31 @@ Noterne er skrevet ud fra commit-historikken og de dokumenter der hører til hve
 
 <!-- patch-notes: baseline 7.65.0 -->
 
+## 7.76.1 — 2026-11-12
+
+**REST-datoer, falske boolske felter og oprydningen efter pluginnet er rettet.**
+
+### Rettet
+- `scheduled_at` er site-wall-clock, ikke et tidspunkt: en lokal `2026-12-25 10:00` blev sendt gennem
+  `strtotime()`/`wp_date()` og flyttet med sitets UTC-offset; `2026-02-31` blev normaliseret til en anden dag.
+  `SGAP_Queue::schedule()` validerer nu dato og tid og bevarer værdien; en umulig dato giver **400** i REST i
+  stedet for at falde tilbage til “nu”.
+- `force=false` og `remind=false` blev læst som sande, fordi `(bool) "false"` er true. `SGAP_REST::flag()`
+  accepterer kun `true`, `1`, `yes` og `on`; et form-request kan ikke længere omgå quality-gaten eller sende en
+  reminder som en almindelig post.
+- `POST /drafts/<id>/status` svarede **200** på et ukendt id. Den slår id op først og svarer **404**.
+- `POST /queue/<id>/status` accepterer nu `status=queued`; det genbruger `SGAP_Queue::retry()` og nulstiller
+  attempts, error, external id og reminder. Admin-knappen bruger samme metode.
+- Kvalitetsgaten behandlede **enhver** query-streng som et arkiv. Nu er kun rigtige arkiv-parametre (`s`,
+  `paged`, `page`, `orderby`, …) arkiver; `?utm_source=…` og `?p=123` går gennem linkkontrollen.
+- Uninstall sletter nu alle `_sgap_*`-postmeta via `LIKE` og rydder også `sgap_evergreen`, `sgap_coach_learn`,
+  `sgap_rescue` og `sgap_cirla_daily`. `SGAP_Install::TABLES` og `/snapshot` kender `sgap_publish_log` og
+  `sgap_reddit_posts`.
+
+### Målt
+- 12 nye smoke-checks (1550 → **1562 PASS**, 0 FAIL); `php -l` på de ændrede filer. Ingen live- eller
+  integrationstest i denne kørsel — releasen kræver ejerens *Plugins → Update*.
+
 ## 7.76.0 — 2026-11-11
 
 **OpenRouter er standard, billeder kan laves via OpenRouter, og »Log ind i Command Center« logger ind med ét klik (P10).**
