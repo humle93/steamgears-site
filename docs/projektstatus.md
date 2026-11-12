@@ -18,7 +18,7 @@ Betjening: `python3 projektstatus.py --check` (valider + drift), `--dry-run` (vi
 ## 1. Daglig status
 
 <!-- AUTO:DAGLIG:START -->
-Status pr. **2026-11-11** · beregnet af `projektstatus.py` · kilder: [`projektstatus.json`](../projektstatus.json)
+Status pr. **2026-11-12** · beregnet af `projektstatus.py` · kilder: [`projektstatus.json`](../projektstatus.json)
 
 | Projekt | Status i dag | Grundlag |
 | --- | --- | --- |
@@ -60,6 +60,16 @@ Nyeste først. Append-only — rækker må ikke slettes eller ændres.
 
 | Dato | Projekt | Modul | Før → Efter | Δ | Grundlag |
 | --- | --- | --- | --- | --- | --- |
+| 2026-11-12 | Cirla — AI-indholdsmodul | ingen ændring | 80 % → 80 % | 0 | 2,4 af 3 d (C1 0,35/0,35 · C2 0,2/0,2 · C3 0,4/0,4 · C4 0,25/0,25 · C5 0,2/0,2 · C6 0,8/0,8 · C7 0/0,6 · C8 0,2/0,2) |
+| 2026-11-12 | KABINE — bil-interiør som ny butik | ingen ændring | 57,4 % → 57,4 % | 0 | 19,5 af 34 t (Niche-valg, brand og produktstige 2/2 · ROI-model og enhedsøkonomi 2/2 · 30-dages plan og KPI-gates 2/2 · Kreativt: ti hooks som manuskript 2/2 · Kravliste: butik, betaling, tracking og jura 1,5/1,5 · Butiksopsætning: Shopify, MobilePay, CAPI, sider 0/6 · Leverandørvalg, GPSR-dokumentation og prøver 0/4 · Juridiske sider: handelsbetingelser, retur, privatliv 2/2,5 · Første annoncerunde uge 1-2 0/4 · Niche-portefølje: roadmap og færdig butikstekst 6/6 · Jura og måltabel: de tre øvrige butikker 1/1 · Flademåling: annoncer, mails, kontakter og værn 1/1) |
+| 2026-11-12 | Niche-butik — plugin P4 | ingen ændring | 100 % → 100 % | 0 | 1 af 1 d (Plan-motor: arketyper, priser, sider 0,3/0,3 · Kladde-udrulning og rollback 0,25/0,25 · Admin-side, REST og fire evner 0,2/0,2 · Tests, zip og dokumentation 0,1/0,1 · Kørsel mod rigtig WooCommerce 0,15/0,15) |
+| 2026-11-12 | Døde internlinks | ingen ændring | 100 % → 100 % | 0 | 39 af 39 links |
+| 2026-11-12 | SEO-indholdsproduktion | ingen ændring | 100 % → 100 % | 0 | 14 af 14 guides (Publicerede guides (1357, 1361, 1359) 3/3 · Guide-copy klar til publicering (1357, 1361, 1359 + corset) 4/4 · Corset-guiden publiceret (/steampunk-corset-guide/, 1394) 1/1 · Guide-copy i DKK mod den levende butik (292, 296, 295, 1394, 550, 699) 6/6) |
+| 2026-11-12 | Dark academia-rebrand | ingen ændring | 71,3 % → 71,3 % | 0 | 12,4 af 17,4 t (Batch 1–3: kortlægning, titler/SEO/kollektioner, 39 produkttekster 8,5/8,5 · Batch 4: mockups 0/5 · Batch 4-forberedelse: arbejdsordre, filnavne, alt-tekster, rækkefølge 0,5/0,5 · Batch 2-gentildeling: de seks kollektioner skal tildeles igen 0,4/0,4 · Mobil-CSS, menu og årstidsfarver 3/3) |
+| 2026-11-12 | Steamgears Autopilot — plugin | ingen ændring | 100 % → 100 % | 0 | 35,55 af 35,55 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5 · P3.7 0,6/0,6 · P3.8 0,3/0,3 · P3.9 0,25/0,25 · P1.25 0,15/0,15 · P1.24 0,35/0,35 · P1.23 0,25/0,25 · P6 0,9/0,9 · P7 0,3/0,3 · P8 0,8/0,8 · P9 0,35/0,35 · P9.1 0,3/0,3 · P9.2 0,2/0,2 · P9.3 0,25/0,25 · P9.4 0,2/0,2 · P10 0,5/0,5) |
+| 2026-11-12 | steamgears.eu — miljø, server og sandbox (S5) | ingen ændring | 60 % → 60 % | 0 | 1,8 af 3 d |
+| 2026-11-12 | steamgears.eu — site-optimering | ingen ændring | 100 % → 100 % | 0 | 20,95 af 20,95 d (S0 2,35/2,35 · S1 3,6/3,6 · S2 6,9/6,9 · S3 4,05/4,05 · S4 4,05/4,05) |
+| 2026-11-12 | Forum + Reddit — trafikaccelerator (P5) | ingen ændring | 96,7 % → 96,7 % | 0 | 2,9 af 3 d (F1 1,2/1,2 · F2 0,8/0,8 · F3 0,3/0,3 · F4 0,3/0,3 · F5 0,3/0,3 · F6 0/0,1) |
 | 2026-11-11 | Cirla — AI-indholdsmodul | daglig måling | 56,7 % → 80 % | +23,3 | 2,4 af 3 d (C1 0,35/0,35 · C2 0,2/0,2 · C3 0,4/0,4 · C4 0,25/0,25 · C5 0,2/0,2 · C6 0,8/0,8 · C7 0/0,6 · C8 0,2/0,2) |
 | 2026-11-11 | Cirla — AI-indholdsmodul | baseline | — → 56,7 % | — | 1,7 af 3 d (C1 0,35/0,35 · C2 0,2/0,2 · C3 0,4/0,4 · C4 0,25/0,25 · C5 0,2/0,2 · C6 0,1/0,8 · C7 0/0,6 · C8 0,2/0,2) |
 | 2026-11-11 | KABINE — bil-interiør som ny butik | ingen ændring | 57,4 % → 57,4 % | 0 | 19,5 af 34 t (Niche-valg, brand og produktstige 2/2 · ROI-model og enhedsøkonomi 2/2 · 30-dages plan og KPI-gates 2/2 · Kreativt: ti hooks som manuskript 2/2 · Kravliste: butik, betaling, tracking og jura 1,5/1,5 · Butiksopsætning: Shopify, MobilePay, CAPI, sider 0/6 · Leverandørvalg, GPSR-dokumentation og prøver 0/4 · Juridiske sider: handelsbetingelser, retur, privatliv 2/2,5 · Første annoncerunde uge 1-2 0/4 · Niche-portefølje: roadmap og færdig butikstekst 6/6 · Jura og måltabel: de tre øvrige butikker 1/1 · Flademåling: annoncer, mails, kontakter og værn 1/1) |
