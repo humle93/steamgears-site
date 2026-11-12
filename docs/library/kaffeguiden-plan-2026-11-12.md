@@ -16,6 +16,8 @@ ledigt**. Det er ikke det samme som tjekket hos DK Hostmaster, så slå det op p
 cold brew) uden at låse siden til én produkttype. Nummer to er **kaffetest.dk**. Det matcher »bedst i test«-søgningerne, men
 lover tests, som siden så skal kunne leve op til. »Kaffeguiden« kan stadig være sidens *navn* i logo og titel.
 
+**Hvor domænet købes:** hos **Simply.com**, hvor steamgears.eu allerede ligger (målt 12/11: navneservere ns1-3.simply.com, mail mx.simply.com, server linux161.unoeuro.com med wp-cli). Så ligger domæne, DNS og hosting på samme konto, og `tools/kaffeguiden_setup.sh` kan køres over SSH som på steamgears. Om det nuværende abonnement har plads til et site mere, eller om det kræver et nyt webhotel, er **ikke tjekket**. Det står i kontrolpanelet.
+
 ## 2. Søgeordskort (OpenSEO / DataForSEO, Danmark, dansk, 12/11 2026)
 
 Tallene er søgninger pr. måned. KD er udeladt, fordi den er 0-6 for næsten alle danske ord (for lidt data, se planen §2).
@@ -135,8 +137,10 @@ med »vores valg« venter, til der er prøvet mindst én kværn og én vægt (pl
    til `/go/`-links, så klik kan tælles pr. side.
 4. **Kvalitet:** Command Centers kvalitetstjek og AI-redaktør (mindst 7/10) på alt. Et menneske læser hver søjle før
    udgivelse. Alt går til WordPress som **kladde**.
-5. **Billeder:** egne fotos af udstyr, der faktisk er brugt. AI-billeder kun som illustration (ikke som »vores test«), og
-   kun efter CC's billedtjek.
+5. **Billeder:** ejeren har ikke selv udstyr (12/11), så alle billeder er AI-illustrationer med »Illustration (AI)« i
+   billedteksten, uden mærker, og kun efter CC's billedtjek. Motiver og stil: [`kaffeguiden-billeder-2026-11-12.md`](kaffeguiden-billeder-2026-11-12.md).
+6. **Ingen tests uden udstyr:** alle udstyrssider er købsguides. »Vores valg« bygger på producentdata og anmeldelser og siger
+   det. Køber ejeren senere udstyr, kan en side blive en rigtig test.
 
 ## 6. Når domæne og WordPress er klar
 
