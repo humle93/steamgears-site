@@ -59,6 +59,34 @@ jobs:
         with:
           python-version: '3.12'
 
+      # Bevis på at jobbet startede. En kørsel der dør på runner, YAML eller concurrency
+      # efterlader ellers intet spor, og så kan ingen — heller ikke en agent uden
+      # Actions-adgang — se om workflowen overhovedet blev startet.
+      - name: Skriv at kørslen startede
+        env:
+          EVENT: ${{ github.event_name }}
+        run: |
+          python3 - <<'PY'
+          import datetime, json, os
+          from pathlib import Path
+
+          path = Path("reports/novamira-keepalive-status.json")
+          try:
+              rows = json.loads(path.read_text(encoding="utf-8"))
+              rows = rows if isinstance(rows, list) else []
+          except (OSError, ValueError):
+              rows = []
+          rows.append({
+              "at": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+              "event": os.environ.get("EVENT", ""),
+              "outcome": "startet",
+              "reason": "",
+          })
+          path.parent.mkdir(parents=True, exist_ok=True)
+          path.write_text(json.dumps(rows[-30:], ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+          print("Kørslen er startet.")
+          PY
+
       - name: Kun kl. 03 dansk tid (medmindre kørslen er startet i hånden)
         id: gate
         run: |
@@ -251,7 +279,7 @@ jobs:
           PY
 
       - name: Commit og push målingen
-        if: always() && steps.gate.outputs.run == 'true'
+        if: always()
         run: |
           git config user.name "Steamgears Keep-alive Bot"
           git config user.email "bot@steamgears.eu"
