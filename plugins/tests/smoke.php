@@ -2007,5 +2007,49 @@ check('7.82 rest: a body without items is a 400', $bad instanceof WP_Error && ($
 $ok=SGAP_Priorities::rest_save(new WP_REST_Request(['items'=>[['url'=>'https://steamgears.eu/hat/','keyword'=>'top hat']]]));
 check('7.82 rest: saving answers with counts and status', $ok instanceof WP_REST_Response && $ok->data['saved']===1 && $ok->data['status']['active']===1);
 delete_option('sgap_cc_priorities'); $GLOBALS['posts_result']=[]; unset($GLOBALS['postid_for'],$GLOBALS['poststatus'][502]);
+// --- 7.83.0: AI-redaktør på sociale opslag ---
+update_option('sgap_ai_provider','openrouter'); update_option('sgap_ai_api_key','sk-or-v1-editor'); update_option('sgap_ai_model','anthropic/claude-haiku-5.5');
+$GLOBALS['opts']['sgap_channels']='facebook,instagram';
+check('7.83 editor: on with an OpenRouter key, free models only', SGAP_Editor::enabled() && !array_filter(SGAP_Editor::models(), fn($m)=>!str_ends_with($m,':free') && $m!=='openrouter/free'));
+$ed_posts=[['channel'=>'facebook','title'=>'Brass','text'=>'Brass goggles for your next costume.','hashtags'=>['#steampunk']],['channel'=>'instagram','title'=>'Brass','text'=>'Get 50% off today only!','hashtags'=>[]]];
+$ed_src=['title'=>'Brass goggles','summary'=>'Handmade brass goggles with leather strap.'];
+$pr=SGAP_Editor::prompt($ed_posts,$ed_src);
+check('7.83 editor: the prompt holds the page and every post, and forbids invented offers', str_contains($pr,'Handmade brass goggles') && str_contains($pr,'50% off') && str_contains($pr,'NOT in the page'));
+$ans=fn($reviews)=>sgap_http(200,['model'=>'nvidia/nemotron-3-ultra-550b-a55b:free','choices'=>[['message'=>['content'=>"```json\n".json_encode(['reviews'=>$reviews])."\n```"]]]]);
+$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[$ans([['channel'=>'facebook','score'=>8,'problems'=>[]],['channel'=>'instagram','score'=>3,'problems'=>['invented 50% discount']],['channel'=>'x','score'=>99]])];
+$rv=SGAP_Editor::review($ed_posts,$ed_src);
+$sent=json_decode((string)($GLOBALS['http_calls'][0][1]['body']??'{}'),true);
+check('7.83 editor: one request for all posts, to the free model list', count($GLOBALS['http_calls'])===1 && ($sent['models']??[])===SGAP_Editor::models() && str_contains($GLOBALS['http_calls'][0][0],'openrouter.ai'));
+check('7.83 editor: scores are read (also inside ```), out-of-range ones dropped', $rv['ok'] && $rv['by_channel']['facebook']['score']===8.0 && !isset($rv['by_channel']['x']));
+$v1=SGAP_Editor::verdict($rv,'facebook'); $v2=SGAP_Editor::verdict($rv,'instagram'); $v3=SGAP_Editor::verdict($rv,'pinterest');
+check('7.83 editor: 8/10 approves, 3/10 rejects with the reason, a missing channel waits', $v1['action']==='approve' && $v2['action']==='reject' && str_contains($v2['note'],'invented 50% discount') && $v3['action']==='hold');
+$GLOBALS['http_queue']=[sgap_http(429,['error'=>['message'=>'Rate limit exceeded: free-models-per-day']])];
+$down=SGAP_Editor::review($ed_posts,$ed_src);
+check('7.83 editor: when no editor answers, posts wait (never approved by default)', !$down['ok'] && SGAP_Editor::verdict($down,'facebook')['action']==='hold' && str_contains(SGAP_Editor::verdict($down,'facebook')['note'],'waits for you'));
+$GLOBALS['http_queue']=[sgap_http(200,['choices'=>[['message'=>['content'=>'Looks great!']]]])];
+check('7.83 editor: an answer without JSON is not a pass', !SGAP_Editor::review($ed_posts,$ed_src)['ok']);
+// hele vejen gennem write_for i Full auto
+$gen=sgap_http(200,['choices'=>[['message'=>['content'=>json_encode(['posts'=>$ed_posts])]]]]);
+$ed_page=new WP_Post(['ID'=>777,'post_title'=>'Brass goggles','post_content'=>'Handmade brass goggles with leather strap.','post_type'=>'post']);
+$GLOBALS['http_queue']=[$gen,$ans([['channel'=>'facebook','score'=>9,'problems'=>[]],['channel'=>'instagram','score'=>4,'problems'=>['invented discount']]])];
+$wpdb->log=[]; $rep=['sources'=>0,'drafts'=>0,'queued'=>0,'errors'=>[]];
+SGAP_Generator::write_for($ed_page,['facebook','instagram'],true,$rep);
+$ins=array_values(array_filter($wpdb->log,fn($l)=>str_starts_with($l,'INSERT wp_sgap_ai_drafts')));
+check('7.83 write_for: the approved post is a pending draft headed for the queue, the rejected one is stored as rejected', count($ins)===2
+  && str_contains($ins[0],'"status":"pending"') && str_contains($ins[0],'Editor: 9\/10') && str_contains($ins[1],'"status":"rejected"') && str_contains($ins[1],'invented discount'));
+check('7.83 write_for: the report counts the rejection, and only the approved post is tried for the queue', ($rep['rejected']??0)===1 && $rep['drafts']===1
+  && count(array_filter($wpdb->log,fn($l)=>str_contains($l,'sgap_ai_drafts WHERE id')))===1);
+$GLOBALS['http_queue']=[$gen,sgap_http(503,['error'=>['message'=>'busy']])];
+$wpdb->log=[]; $rep=['sources'=>0,'drafts'=>0,'queued'=>0,'errors'=>[]];
+SGAP_Generator::write_for($ed_page,['facebook','instagram'],true,$rep);
+check('7.83 write_for: editor down = both wait as pending drafts, nothing is queued even in Full auto', ($rep['held']??0)===2 && $rep['queued']===0
+  && count(array_filter($wpdb->log,fn($l)=>str_contains($l,'sgap_ai_drafts WHERE id')))===0);
+update_option('sgap_last_generate',['at'=>'2026-11-13 06:00:00','drafts'=>1,'errors'=>[],'rejected'=>1,'held'=>2]);
+check('7.83 health: rejected and waiting posts are named in the self-check', str_contains(implode("\n",SGAP_Auto::output_problems()),'the editor rejected 1 posts and 2 wait for you'));
+delete_option('sgap_last_generate'); unset($GLOBALS['postmeta'][777]);
+update_option('sgap_ai_provider','anthropic'); update_option('sgap_ai_api_key',''); update_option('sgap_ai_model',''); $GLOBALS['http_queue']=[]; $GLOBALS['http_calls']=[];
+$ed_bk=get_option('sgap_openrouter_api_key'); update_option('sgap_openrouter_api_key','');
+check('7.83 editor: off without an OpenRouter key (Anthropic users keep the old flow)', !SGAP_Editor::enabled());
+update_option('sgap_openrouter_api_key',$ed_bk);
 // P3.2/P3.5-slut
 exit(empty($GLOBALS['fail'])?0:1);

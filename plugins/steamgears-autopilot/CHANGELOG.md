@@ -10,6 +10,32 @@ Noterne er skrevet ud fra commit-historikken og de dokumenter der hører til hve
 
 <!-- patch-notes: baseline 7.65.0 -->
 
+## 7.83.0 — 2026-11-12
+
+**En AI-redaktør læser hvert socialt opslag, før det må komme i køen. Svage opslag afvises med grunden, og når ingen redaktør svarer, venter opslagene på dig, også i Full auto.**
+
+### Tilføjet
+- `includes/editor.php` (`SGAP_Editor`). Hver side får ét gratis kald til OpenRouter (kun `:free`-modeller
+  og `openrouter/free`), der giver sidens opslag en score fra 0 til 10 ud fra selve siden.
+  - Der trækkes hårdt for priser, rabatter, fragtløfter og påstande, der ikke står på siden, og for
+    AI-klichéer, ens indledninger på tværs af kanaler, hashtag-fyld og forkert tone.
+- `write_for()` bruger dommen:
+  - **≥ 7:** kladden kan sættes i kø som før.
+  - **< 7:** kladden gemmes som `rejected` med begrundelsen i *Checks*.
+  - **Ingen svar eller ikke-læsbar JSON:** kladden bliver `pending` og sættes **ikke** i kø
+    automatisk.
+- Kørselsrapporten tæller `rejected` og `held`, og selvtjekket nævner dem.
+- Redaktøren kører kun med en OpenRouter-nøgle (hoved- eller reservenøgle). Anthropic-opsætninger
+  er uændrede.
+  - Filtrene `sgap_editor_min_score` og `sgap_editor_models` ændrer grænse og modeller.
+  - En tom modelliste slår redaktøren fra.
+- 12 nye smoke-checks (1 600 → 1 612 PASS, 0 FAIL).
+
+### Bemærk
+- Billeder til artikler laves og kvalitetssikres nu af Command Center (v7.34.0) og kommer med
+  artiklen som udvalgt billede. Pluginnets egne sociale opslag bruger sidens udvalgte billede som
+  før.
+
 ## 7.82.0 — 2026-11-12
 
 **Command Center fortæller nu autopiloten, hvilke sider der er tæt på toppen af Google, og for hvilket søgeord. De sider får sociale opslag først, og søgeordet bruges i opslaget.**

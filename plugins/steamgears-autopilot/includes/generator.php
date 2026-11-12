@@ -927,7 +927,17 @@ class SGAP_Generator {
             return;
         }
         update_post_meta($post->ID, self::META, time());
+        // 7.83.0: the AI editor reads every post before it may reach the queue. No editor answer =
+        // the posts wait for a person even in Full auto; a low score = rejected with the reason.
+        $editor = class_exists('SGAP_Editor') && SGAP_Editor::enabled() ? SGAP_Editor::review($posts, self::source($post)) : null;
         foreach ($posts as $generated) {
+            $verdict = $editor !== null ? SGAP_Editor::verdict($editor, (string) $generated['channel']) : ['action' => 'approve', 'note' => ''];
+            $status = $verdict['action'] === 'reject' ? 'rejected' : 'pending';
+            if ($verdict['action'] === 'reject') {
+                $report['rejected'] = (int) ($report['rejected'] ?? 0) + 1;
+            } elseif ($verdict['action'] === 'hold') {
+                $report['held'] = (int) ($report['held'] ?? 0) + 1;
+            }
             $wpdb->insert($wpdb->prefix . 'sgap_ai_drafts', [
                 'post_id' => $post->ID,
                 'channel' => $generated['channel'],
@@ -937,12 +947,16 @@ class SGAP_Generator {
                 'body' => $generated['text'],
                 'hashtags' => $generated['hashtags'],
                 'alt_text' => $generated['alt_text'],
-                'status' => 'pending',
+                'gate_report' => $verdict['note'],
+                'status' => $status,
                 'ai_model' => substr(SGAP_AI::model(), 0, 40),
                 'created_at' => current_time('mysql')
             ]);
+            if ($status === 'rejected') {
+                continue;
+            }
             $report['drafts']++;
-            if ($full_auto) {
+            if ($full_auto && $verdict['action'] === 'approve') {
                 $queued = SGAP_Queue::from_draft((int) $wpdb->insert_id);
                 if (is_wp_error($queued)) {
                     $report['errors'][] = $queued->get_error_message();

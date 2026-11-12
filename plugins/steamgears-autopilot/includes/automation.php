@@ -424,6 +424,10 @@ class SGAP_Auto {
                 . (int) $last['free'] . ' pages were written by the free model ' . (string) ($last['free_model'] ?? 'openrouter/free')
                 . '. Top up OpenRouter to get the paid model back.';
         }
+        if (is_array($last) && (int) ($last['rejected'] ?? 0) + (int) ($last['held'] ?? 0) > 0) {
+            $out[] = 'The latest AI run (' . (string) ($last['at'] ?? '?') . '): the editor rejected ' . (int) ($last['rejected'] ?? 0)
+                . ' posts and ' . (int) ($last['held'] ?? 0) . ' wait for you under AI Drafts because no editor answered.';
+        }
         $parked = SGAP_Queue::parked();
         if ($parked) {
             $parts = [];

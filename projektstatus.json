@@ -388,6 +388,15 @@
      "unit": "d",
      "note": "7.82.0: SGAP_Priorities + POST/GET /sgap/v1/priorities; pick() tager CC's sider på plads 4-20 først (7 dages pause), og søgeordet går med i prompten; /snapshot viser cc_priorities. 13 smoke-checks, 1 587 → 1 600 PASS. CC-siden: flow-blokken 'prioriteter' (Command Center v7.33.0). Installeret 12/11 over MCP (aktiv). Målt live med rest_do_request: POST /priorities = 200, en ukendt side afvist som 'unknown page', keyword_for() på 1361 virker, /snapshot viser cc_priorities, GET uden login = 401; post 1361 blev korrekt ikke valgt (promoveret under 7 dage siden). Testlisten slettet bagefter. CC-siden er Command Center v7.33.0 (flow-blok 'prioriteter'). Mangler (0,05 d): et rigtigt kald fra CC på serveren, som kræver WP-oplysningerne i CC's .env.",
      "verified": false
+    },
+    {
+     "id": "p99",
+     "name": "P9.9 — AI-redaktør på sociale opslag",
+     "done": 0.25,
+     "total": 0.3,
+     "unit": "d",
+     "note": "7.83.0: SGAP_Editor scorer hver sides opslag 0-10 med gratis OpenRouter-modeller; under 7 = rejected med grund, intet svar = pending uden kø (også Full auto). 12 smoke-checks, 1 600 → 1 612 PASS. Mangler: installation og en live-bedømmelse.",
+     "verified": false
     }
    ],
    "total": 33.75,
@@ -2679,6 +2688,16 @@
    "after": 99.9,
    "delta": 0.2,
    "basis": "36,55 af 36,6 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5 · P3.7 0,6/0,6 · P3.8 0,3/0,3 · P3.9 0,25/0,25 · P1.25 0,15/0,15 · P1.24 0,35/0,35 · P1.23 0,25/0,25 · P6 0,9/0,9 · P7 0,3/0,3 · P8 0,8/0,8 · P9 0,35/0,35 · P9.1 0,3/0,3 · P9.2 0,2/0,2 · P9.3 0,25/0,25 · P9.4 0,2/0,2 · P10 0,5/0,5 · P9.5 0,25/0,25 · P9.6 0,25/0,25 · P9.7 0,15/0,15 · P9.8 0,35/0,4)"
+  },
+  {
+   "date": "2026-11-12",
+   "project": "Steamgears Autopilot — plugin",
+   "module": "P9.9 AI-redaktør (0,3 d) lagt til efter ejerens krav 12/11: kvalitetssikr materialer, så der ikke sendes lort afsted",
+   "before": 99.9,
+   "after": 99.7,
+   "delta": -0.2,
+   "basis": "36,8 af 36,9 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5 · P3.7 0,6/0,6 · P3.8 0,3/0,3 · P3.9 0,25/0,25 · P1.25 0,15/0,15 · P1.24 0,35/0,35 · P1.23 0,25/0,25 · P6 0,9/0,9 · P7 0,3/0,3 · P8 0,8/0,8 · P9 0,35/0,35 · P9.1 0,3/0,3 · P9.2 0,2/0,2 · P9.3 0,25/0,25 · P9.4 0,2/0,2 · P10 0,5/0,5 · P9.5 0,25/0,25 · P9.6 0,25/0,25 · P9.7 0,15/0,15 · P9.8 0,35/0,4 · P9.9 0,25/0,3)",
+   "scope_change": true
   }
  ]
 }

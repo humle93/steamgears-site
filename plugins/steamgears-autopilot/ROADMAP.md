@@ -1,6 +1,6 @@
 # Steamgears Autopilot — audit, roadmap and effort estimates
 
-_Last audited: 2026-11-12 (7.82.0) · the audit further down was of **7.15.0** (`ab676db` on `main`); the site runs
+_Last audited: 2026-11-12 (7.83.0) · the audit further down was of **7.15.0** (`ab676db` on `main`); the site runs
 **7.65.5** (measured 9/11 2026 through Novamira: the zip was installed with `Plugin_Upgrader` and the installed
 version reads back as 7.65.5). The repo, and the zip in `plugins/`, is **7.76.1** (7.76.0 made OpenRouter the
 standard provider and added one-click Command Center login; 7.76.1 fixes the REST date/permission edges and the
@@ -33,6 +33,8 @@ and how long each missing piece takes.
 ---
 
 ## 0. Short version
+
+**P9.9 (7.83.0, 12/11 2026) — AI-redaktør, 0,3 d.** `includes/editor.php` (ny, 50 %), `generator.php::write_for` (dom før kø, 20 %), `automation.php` (selvtjek, 5 %), smoke (12 checks, 25 %). Gratis modeller; intet svar = venter på ejeren.
 
 **P9.8 (7.82.0, 12/11 2026) — prioriteter fra Command Center, 0,4 d.** CC sender sider på plads 4-20 + søgeord (`POST /priorities`); `pick()` tager dem først og prompten bruger søgeordet. Fil: `includes/priorities.php` (ny, 45 %), `includes/generator.php` (pick/source/prompt, 25 %), `includes/core.php` (snapshot, 5 %), `plugins/tests/smoke.php` (13 checks, 25 %). Arbejdsdelingen er uændret: pluginnet ejer opslagene, CC leverer målingerne.
 
