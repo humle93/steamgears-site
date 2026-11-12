@@ -169,7 +169,8 @@ class SGAP_Preflight {
             $problems[] = self::problem('no_photo', 'image_url',
                 ucfirst($channel) . ' needs a photo: give the post a featured image, or switch on AI photos (Settings → Automation).');
         }
-        if ($channel === 'pinterest' && (string) SGAP_Settings::get('publer_pinterest_board') === '') {
+        if ($channel === 'pinterest' && (string) SGAP_Settings::get('publer_pinterest_board') === ''
+            && !(SGAP_Settings::get('pinterest_direct', 'no') === 'yes' && trim((string) SGAP_Settings::get('pinterest_board_id', '')) !== '')) {
             $problems[] = self::problem('no_board', 'publer_pinterest_board',
                 'Pinterest needs a board: set "Publer pinterest board" in Settings.');
         }

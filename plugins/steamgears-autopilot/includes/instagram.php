@@ -746,7 +746,88 @@ class SGAP_Instagram {
         if (is_callable(self::$transport)) {
             return call_user_func(self::$transport, $method, $url, $args);
         }
-        return wp_remote_get($url, $args);
+        return $method === 'POST' ? wp_remote_post($url, $args) : wp_remote_get($url, $args);
+    }
+
+    /* ------------------------------------------------------------------ *
+     * Publishing (P11, 7.84.0) — Instagram Content Publishing
+     * ------------------------------------------------------------------ */
+
+    /** Status polls before media_publish; a photo container is normally FINISHED at once. */
+    const PUBLISH_POLLS = 4;
+    /** Seconds between polls (the tests set 0). */
+    public static int $poll_wait = 2;
+
+    /** True when this module, not Publer, posts the instagram channel. Opt-in, like Facebook. */
+    public static function handles(string $channel): bool {
+        return $channel === 'instagram' && self::configured() && SGAP_Settings::get('instagram_direct', 'no') === 'yes';
+    }
+
+    /**
+     * Container → wait for FINISHED → media_publish. Returns the media id, or a WP_Error the queue
+     * shows. The caption carries no link: Instagram does not make links in captions clickable.
+     * Needs the scope instagram_business_content_publish on the token.
+     *
+     * @return string|WP_Error
+     */
+    public static function publish(array $row) {
+        if (!self::configured()) {
+            return new WP_Error('sgap_instagram_no_token', self::token_problem());
+        }
+        $preflight = SGAP_Preflight::check('instagram', $row);
+        if (!$preflight['ok']) {
+            return new WP_Error('sgap_preflight', SGAP_Preflight::message($preflight['problems']), ['status' => 422, 'problems' => $preflight['problems']]);
+        }
+        $row = $preflight['row'];
+        $token = self::token();
+        if ($token === '') {
+            return new WP_Error('sgap_instagram_no_token', self::token_problem());
+        }
+        $user = '/' . rawurlencode(self::user_id());
+        $container = self::post_form($user . '/media', ['image_url' => (string) $row['image_url'], 'caption' => trim((string) ($row['body'] ?? ''))], $token);
+        if (is_wp_error($container)) {
+            return $container;
+        }
+        $creation = (string) ($container['id'] ?? '');
+        if ($creation === '') {
+            return new WP_Error('sgap_instagram', 'Instagram created no media container.');
+        }
+        for ($i = 0; $i < self::PUBLISH_POLLS; $i++) {
+            [$status] = self::call('/' . rawurlencode($creation), ['fields' => 'status_code'], $token);
+            $code = is_wp_error($status) ? '' : (string) ($status['status_code'] ?? '');
+            if ($code === 'FINISHED') {
+                break;
+            }
+            if ($code === 'ERROR' || $code === 'EXPIRED') {
+                return new WP_Error('sgap_instagram', 'Instagram could not process the image (container status ' . $code . ').');
+            }
+            if ($i < self::PUBLISH_POLLS - 1 && self::$poll_wait > 0) {
+                sleep(self::$poll_wait);
+            }
+        }
+        $done = self::post_form($user . '/media_publish', ['creation_id' => $creation], $token);
+        if (is_wp_error($done)) {
+            return $done;
+        }
+        $media = (string) ($done['id'] ?? '');
+        return $media !== '' ? $media : new WP_Error('sgap_instagram', 'Instagram published nothing (no media id in the answer).');
+    }
+
+    /** One form POST to the Graph host, decoded like every GET. */
+    private static function post_form(string $path, array $form, string $token) {
+        $response = self::send('POST', 'https://' . self::host() . $path, [
+            'timeout' => 30,
+            'headers' => [
+                'Accept' => 'application/json',
+                'Authorization' => 'Bearer ' . $token,
+                'User-Agent' => 'steamgears-autopilot/' . (defined('SGAP_VERSION') ? SGAP_VERSION : '1')
+            ],
+            'body' => $form
+        ]);
+        if (is_wp_error($response)) {
+            return $response;
+        }
+        return self::decode($response, $path);
     }
 
     /** HTTP status and JSON body, with the API's own message on anything but 200. */

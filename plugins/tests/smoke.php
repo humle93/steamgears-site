@@ -1164,8 +1164,9 @@ $job=SGAP_Bluesky::publish($row);
 check('bluesky: an expired token is renewed once and the post retried', $job==='at://did:plc:abc/app.bsky.feed.post/new' && count($GLOBALS['http_calls'])===4);
 
 $pubsrc=file_get_contents(__DIR__.'/../steamgears-autopilot/includes/publer.php');
-check('bluesky: the publish loop routes it through the same loop', str_contains($pubsrc,'SGAP_Bluesky::handles(') && str_contains($pubsrc,'SGAP_Bluesky::publish($row)'));
-check('bluesky: a direct post is marked published instead of polled as a Publer job', str_contains($pubsrc, "SGAP_Queue::mark((int) \$row['id'], 'published')") && str_contains($pubsrc,'Bluesky post '));
+$dirsrc=file_get_contents(__DIR__.'/../steamgears-autopilot/includes/direct.php');
+check('bluesky: the publish loop routes it through the same loop (SGAP_Direct)', str_contains($pubsrc,'SGAP_Direct::handler(') && str_contains($pubsrc,'SGAP_Direct::publish($class, $row)') && isset(SGAP_Direct::MODULES['SGAP_Bluesky']));
+check('bluesky: a direct post is marked published instead of polled as a Publer job', str_contains($dirsrc, 'SGAP_Queue::mark($id, \'published\')') && SGAP_Direct::MODULES['SGAP_Bluesky']==='Bluesky post ');
 
 // P2.2/P2.3 — Mastodon og Telegram som direkte kanaler gennem samme plumbing som Bluesky.
 // HTTP stubberne fra Bluesky-afsnittet bruges igen: intet netværk, ingen rigtige nøgler.
@@ -1254,9 +1255,9 @@ $e=SGAP_Telegram::publish($row3);
 check('telegram: a non-JSON answer is an error', $e instanceof WP_Error && str_contains($e->get_error_message(),'not JSON'));
 
 $pubsrc2=file_get_contents(__DIR__.'/../steamgears-autopilot/includes/publer.php');
-check('mastodon: routed through the same publish loop', str_contains($pubsrc2,'SGAP_Mastodon::handles(') && str_contains($pubsrc2,'SGAP_Mastodon::publish($row)'));
-check('telegram: routed through the same publish loop', str_contains($pubsrc2,'SGAP_Telegram::handles(') && str_contains($pubsrc2,'SGAP_Telegram::publish($row)'));
-check('direct channels: all three are marked published at once, not polled', str_contains($pubsrc2, "'bluesky' => 'Bluesky post '") && str_contains($pubsrc2, "'mastodon' => 'Mastodon post '") && str_contains($pubsrc2, "'telegram' => 'Telegram message '"));
+check('mastodon: routed through the same publish loop', str_contains($pubsrc2,'SGAP_Direct::handler(') && isset(SGAP_Direct::MODULES['SGAP_Mastodon']));
+check('telegram: routed through the same publish loop', isset(SGAP_Direct::MODULES['SGAP_Telegram']));
+check('direct channels: all are marked published at once, not polled', SGAP_Direct::MODULES['SGAP_Bluesky']==='Bluesky post ' && SGAP_Direct::MODULES['SGAP_Mastodon']==='Mastodon post ' && SGAP_Direct::MODULES['SGAP_Telegram']==='Telegram message ');
 
 // ---------------- P2.5: multi-sprog — én kilde-post, én caption pr. locale ----------------
 $GLOBALS['opts']['sgap_locale_source']='en'; $GLOBALS['opts']['sgap_locales']='da, SV ,da,xx1';
@@ -1898,6 +1899,7 @@ require __DIR__.'/pinterest.php';
 require __DIR__.'/instagram.php';
 require __DIR__.'/diagnostics.php';
 require __DIR__.'/facebook.php';
+require __DIR__.'/direct.php';
 require __DIR__.'/mcp-woo.php';
 require __DIR__.'/mcp.php';
 require __DIR__.'/evergreen.php';

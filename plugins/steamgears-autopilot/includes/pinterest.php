@@ -953,6 +953,81 @@ class SGAP_Pinterest {
         ]);
     }
 
+    /* ------------------------------------------------------------------ *
+     * Publishing (P11, 7.84.0) — POST /v5/pins
+     * ------------------------------------------------------------------ */
+
+    /** The Pinterest board id (numbers), not Publer's board setting. */
+    public static function board_id(): string {
+        return trim((string) SGAP_Settings::get('pinterest_board_id', ''));
+    }
+
+    /** True when this module, not Publer, posts the pinterest channel. Opt-in, needs a board. */
+    public static function handles(string $channel): bool {
+        return $channel === 'pinterest' && self::configured() && self::board_id() !== ''
+            && SGAP_Settings::get('pinterest_direct', 'no') === 'yes';
+    }
+
+    /**
+     * Creates one pin. Returns the pin id or a WP_Error. The token needs pins:write and boards:read;
+     * the link is the queue's tracking URL, so clicks are counted like every other channel.
+     *
+     * @return string|WP_Error
+     */
+    public static function publish(array $row) {
+        if (self::board_id() === '') {
+            return new WP_Error('sgap_pinterest_board', 'Pinterest needs a board: set "Pinterest board id" under Settings → Publer.');
+        }
+        $preflight = SGAP_Preflight::check('pinterest', $row);
+        if (!$preflight['ok']) {
+            return new WP_Error('sgap_preflight', SGAP_Preflight::message($preflight['problems']), ['status' => 422, 'problems' => $preflight['problems']]);
+        }
+        $row = $preflight['row'];
+        $token = self::token();
+        if ($token === '') {
+            return new WP_Error('sgap_pinterest_no_token', self::token_problem());
+        }
+        $title = trim((string) ($row['title'] ?? ''));
+        $payload = [
+            'board_id' => self::board_id(),
+            'title' => mb_substr($title, 0, 100),
+            'description' => mb_substr(trim((string) ($row['body'] ?? '')), 0, 500),
+            'alt_text' => mb_substr($title, 0, 500),
+            'media_source' => ['source_type' => 'image_url', 'url' => (string) $row['image_url']]
+        ];
+        $link = (string) ($row['tracking_url'] ?? '');
+        if ($link === '' && !empty($row['id'])) {
+            $link = SGAP_Tracking::url((int) $row['id']);
+        }
+        if ($link !== '') {
+            $payload['link'] = $link;
+        }
+        $response = self::send('POST', self::API . '/pins', [
+            'timeout' => 30,
+            'headers' => [
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/json',
+                'Authorization' => 'Bearer ' . $token,
+                'User-Agent' => 'steamgears-autopilot/' . (defined('SGAP_VERSION') ? SGAP_VERSION : '1')
+            ],
+            'body' => wp_json_encode($payload)
+        ]);
+        if (is_wp_error($response)) {
+            return $response;
+        }
+        $code = (int) wp_remote_retrieve_response_code($response);
+        $body = json_decode((string) wp_remote_retrieve_body($response), true);
+        if (($code === 200 || $code === 201) && is_array($body) && !empty($body['id'])) {
+            return (string) $body['id'];
+        }
+        $denied = self::scope_denial($response);
+        if ($denied !== '') {
+            return new WP_Error('sgap_pinterest_scope', 'Pinterest refused the pin: ' . $denied . ' The token needs pins:write and boards:read.', ['status' => $code]);
+        }
+        $message = is_array($body) ? (string) ($body['message'] ?? '') : '';
+        return new WP_Error('sgap_pinterest_http', 'Pinterest answered HTTP ' . $code . ' when creating the pin' . ($message !== '' ? ': ' . $message : '') . '.', ['status' => $code]);
+    }
+
     /** The single place both GET and POST leave through, so the tests can see every call. */
     private static function send(string $method, string $url, array $args) {
         if (is_callable(self::$transport)) {

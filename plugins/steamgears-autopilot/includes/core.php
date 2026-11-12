@@ -407,7 +407,7 @@ class SGAP_Settings {
     /** Multi-line text settings, shown as a textarea. */
     const TEXTAREA_KEYS = ['blackout_ranges', 'banned_words', 'forum_intro'];
     const TEXT_KEYS = [
-        'publer_workspace_id','publer_pinterest_board','channels','ai_model','ai_base_url','openrouter_model','image_model','openrouter_image_model','content_language','rescue_hosts',
+        'publer_workspace_id','publer_pinterest_board','pinterest_board_id','channels','ai_model','ai_base_url','openrouter_model','image_model','openrouter_image_model','content_language','rescue_hosts',
         'telegram_chat_id',
         'alert_email','channel_caps',
         'blackout_ranges','banned_words','utm_campaign','bluesky_handle','mastodon_instance',
@@ -425,6 +425,8 @@ class SGAP_Settings {
         'instagram_graph_host' => ['graph.instagram.com' => 'Instagram Login (graph.instagram.com) — scopes instagram_business_basic and instagram_business_manage_insights', 'graph.facebook.com' => 'Facebook Login (graph.facebook.com) — scopes instagram_basic and instagram_manage_insights; the token cannot renew itself'],
         'facebook_graph_version' => ['v21.0' => 'v21.0 (current)', 'v20.0' => 'v20.0', 'v19.0' => 'v19.0'],
         'facebook_direct' => ['no' => 'No — keep publishing through Publer, read the page only', 'yes' => 'Yes — publish to the page directly with the Graph API'],
+        'instagram_direct' => ['no' => 'No — keep publishing through Publer, read the account only', 'yes' => 'Yes — publish to Instagram directly (content publishing)'],
+        'pinterest_direct' => ['no' => 'No — keep publishing through Publer, read pins only', 'yes' => 'Yes — create pins directly with the Pinterest API'],
         'alert_mode' => ['immediate' => 'Immediate — one mail per failed post, plus one when the queue runs dry', 'daily' => 'Daily digest — one mail a day from the self-check', 'off' => 'Off — the dashboard still shows the problems'],
         'ai_profile' => ['assistant' => 'Autopilot assistant — drafts, queue and results', 'site_admin' => 'Site administration — full access, everything on the site', 'wp_seo_expert' => 'WordPress SEO expert — content and SEO, no ops']
     ];
@@ -432,7 +434,7 @@ class SGAP_Settings {
     /** Shown in the settings page. Keys not listed here stay registered for older data but are unused. */
     const SECTIONS = [
         'General' => ['autopilot_enabled','full_auto_enabled','daily_cap','batch_size','quiet_start','quiet_end','blackout_ranges','quality_gate','banned_words','dupe_days','utm_campaign','command_center_url'],
-        'Publer' => ['publish_mode','publer_api_key','publer_workspace_id','publer_pinterest_board','pinterest_client_id','instagram_user_id','instagram_graph_host','facebook_page_id','facebook_access_token','facebook_graph_version','facebook_direct','channels','bluesky_handle','bluesky_app_password','mastodon_instance','mastodon_token','mastodon_limit','telegram_bot_token','telegram_chat_id'],
+        'Publer' => ['publish_mode','publer_api_key','publer_workspace_id','publer_pinterest_board','pinterest_client_id','instagram_user_id','instagram_graph_host','facebook_page_id','facebook_access_token','facebook_graph_version','facebook_direct','instagram_direct','pinterest_direct','pinterest_board_id','channels','bluesky_handle','bluesky_app_password','mastodon_instance','mastodon_token','mastodon_limit','telegram_bot_token','telegram_chat_id'],
         'AI content' => ['ai_profile','ai_provider','ai_api_key','ai_model','ai_base_url','openrouter_model','posts_per_day','content_language','locale_source','locales','openrouter_image_model','image_model','image_api_key','serpapi_key'],
         'Economics' => ['labor_rate','monthly_budget','target_roi','winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max'],
         'Evergreen' => ['evergreen_enabled','evergreen_after_days','evergreen_max_shares','evergreen_batch'],
@@ -497,6 +499,9 @@ class SGAP_Settings {
         'facebook_page_id' => 'The numeric id of the Facebook Page, not the @name. Found under the page\'s About → Page transparency, or with GET /me/accounts using a user token that manages the page.',
         'facebook_access_token' => 'A Page access token (Facebook Login for Business → the page). It is what writes as the page; a user token cannot. Scopes: pages_show_list, pages_read_engagement, pages_manage_posts, and pages_manage_engagement for answers and hiding. Never shown again after saving; an empty field keeps the stored value.',
         'facebook_graph_version' => 'The Graph API version the calls use. Meta retires old versions after about two years, so this is a setting and not a constant in the code.',
+        'instagram_direct' => 'Off by default, like Facebook: connecting the account to read its numbers must not move publishing out of Publer by itself. On: queue posts on the instagram channel are published directly. The token needs instagram_business_content_publish, and the image must be a public JPEG.',
+        'pinterest_direct' => 'Off by default. On (with a board id): queue posts on the pinterest channel become pins created directly. The token needs pins:write and boards:read.',
+        'pinterest_board_id' => 'The numeric id of the Pinterest board pins are created on (GET /v5/boards lists them). Not the same as Publer\'s board setting.',
         'facebook_direct' => 'Off by default on purpose: the page can be connected just to be read, and a key must not move publishing out of Publer on its own. On: queue posts on the facebook channel go straight to the page.',
         'pinterest_client_id' => 'The App ID of your Pinterest developer app (developers.pinterest.com → My apps). Not a secret — it is sent with the secret to renew the access token. Analytics need the boards:read and pins:read scopes, and only work for pins the token account owns.',
         'mastodon_limit' => 'Characters the instance accepts in one post. 500 is what every server allows; raise it only when the instance documents a higher limit. The tracking link is always kept whole.',

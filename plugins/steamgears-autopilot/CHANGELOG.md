@@ -10,6 +10,36 @@ Noterne er skrevet ud fra commit-historikken og de dokumenter der hører til hve
 
 <!-- patch-notes: baseline 7.65.0 -->
 
+## 7.84.0 — 2026-11-12
+
+**Publer kan udfases kanal for kanal: pluginnet poster nu selv til Instagram og Pinterest, og direkte kanaler virker også i RSS-tilstand og uden Publer-nøgle.**
+
+### Tilføjet
+- `includes/direct.php` (`SGAP_Direct`) bestemmer, hvilke kanaler pluginnet poster selv, og bogfører
+  udfaldet som Publer-vejen: backoff ved fejl, publiceret med platformens id ved succes.
+  - `split()` viser, hvilke kanaler der er direkte, og hvilke der stadig går til Publer.
+  - `publer_free()` er sand, når ingen tændt kanal længere behøver Publer.
+- **Instagram** (`instagram_direct`): container → statustjek til `FINISHED` → `media_publish`. Kræver
+  `instagram_business_content_publish` og en offentlig JPEG.
+- **Pinterest** (`pinterest_direct` + `pinterest_board_id`): `POST /v5/pins` med board, titel, tekst,
+  alt-tekst, billede og sporingslink. Kræver `pins:write` og `boards:read`. Preflightens board-tjek godtager
+  den direkte board, så Publers board-indstilling ikke længere er nødvendig.
+- Guide: `docs/library/publer-udfasning-2026-11-12.md` (+ PDF) med tokens hos Meta og Pinterest,
+  rækkefølgen og hvornår Publer kan opsiges.
+- 19 nye checks i `plugins/tests/direct.php` (1 613 → 1 632 PASS, 0 FAIL).
+
+### Ændret
+- RSS-tilstanden poster en direkte kanal selv i stedet for at lægge opslaget i feedet. Feed-sundheden
+  viser `direct` for den.
+- API-tilstanden kører uden Publer-nøgle, når mindst én kanal er direkte. Et opslag til en kanal, der
+  hverken er direkte eller har Publer, fejler med en forklaring.
+- De fire eksisterende direkte kanaler (Bluesky, Mastodon, Telegram, Facebook) går gennem samme
+  `SGAP_Direct`. Adfærden er uændret.
+- Instagram-modulets transport kan nu også sende POST.
+
+### Bemærk
+- Alle tre direkte kanaler er **slået fra som standard**. Uden ejerens tokens ændrer installationen intet.
+
 ## 7.83.2 — 2026-11-12
 
 **Rettet: redaktørens svar blev skåret af, før det kom.**

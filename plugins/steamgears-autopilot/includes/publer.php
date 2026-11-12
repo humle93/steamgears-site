@@ -279,10 +279,11 @@ class SGAP_Publer {
             return SGAP_RSS::release() + ['shifted' => $shifted];
         }
         $report = ['configured' => self::configured(), 'followed_up' => [], 'sent' => [], 'failed' => [], 'reminded' => [], 'blocked' => '', 'shifted' => $shifted];
-        if (!$report['configured']) {
+        // P11: without a Publer key the loop still runs when channels are posted directly.
+        if (!$report['configured'] && SGAP_Direct::split()['direct'] === []) {
             return $report;
         }
-        $report['followed_up'] = self::follow_up();
+        $report['followed_up'] = $report['configured'] ? self::follow_up() : [];
         $report['blocked'] = SGAP_Queue::blocked_reason();
         if ($report['blocked'] !== '') {
             return $report;
@@ -297,26 +298,20 @@ class SGAP_Publer {
                 $report['reminded'][] = ['id' => (int) $row['id'], 'channel' => $row['channel'], 'mailed' => $done['mailed']];
                 continue;
             }
-            // P2.1–P2.3: channels with their own API are posted directly, without Publer.
+            // P2.1–P2.3 + P11: channels with their own API are posted directly, without Publer.
             // All of them run through this same loop, so a failure gets the same backoff,
             // alert and publish log as a rejected Publer post.
-            $direct = '';
-            if (SGAP_Bluesky::handles((string) $row['channel'])) {
-                $direct = 'bluesky';
-            } elseif (SGAP_Mastodon::handles((string) $row['channel'])) {
-                $direct = 'mastodon';
-            } elseif (SGAP_Telegram::handles((string) $row['channel'])) {
-                $direct = 'telegram';
-            } elseif (SGAP_Facebook::handles((string) $row['channel'])) {
-                $direct = 'facebook';
+            $class = SGAP_Direct::handler((string) $row['channel']);
+            if ($class !== '') {
+                SGAP_Direct::finish($row, $class, SGAP_Direct::publish($class, $row), $report);
+                continue;
             }
-            $job = match ($direct) {
-                'bluesky' => SGAP_Bluesky::publish($row),
-                'mastodon' => SGAP_Mastodon::publish($row),
-                'telegram' => SGAP_Telegram::publish($row),
-                'facebook' => SGAP_Facebook::publish($row),
-                default => self::publish($row),
-            };
+            if (!$report['configured']) {
+                $error = new WP_Error('sgap_publer_setup', "Channel '{$row['channel']}' is not posted directly and Publer is not connected: switch on direct publishing for it, or turn the channel off.");
+                SGAP_Direct::finish($row, '', $error, $report);
+                continue;
+            }
+            $job = self::publish($row);
             if (is_wp_error($job)) {
                 $state = SGAP_Queue::mark((int) $row['id'], 'failed', $job->get_error_message());
                 // The queue only remembers the last error; the log keeps every attempt.
@@ -325,16 +320,6 @@ class SGAP_Publer {
                 continue;
             }
             $wpdb->update($wpdb->prefix . 'sgap_queue', ['external_id' => $job, 'sent_at' => current_time('mysql')], ['id' => (int) $row['id']]);
-            if ($direct !== '') {
-                // There is no Publer job to follow up: the AT URI, the Mastodon post URL or
-                // the Telegram message id is the receipt, so the item is published here
-                // instead of being polled as 'sending' until it times out.
-                SGAP_Queue::mark((int) $row['id'], 'published');
-                $labels = ['bluesky' => 'Bluesky post ', 'mastodon' => 'Mastodon post ', 'telegram' => 'Telegram message ', 'facebook' => 'Facebook post '];
-                SGAP_Audit::record((int) $row['id'], (string) $row['channel'], 'published', 200, ($labels[$direct] ?? '') . $job);
-                $report['sent'][] = ['id' => (int) $row['id'], 'channel' => $row['channel'], 'job_id' => $job, 'direct' => $direct];
-                continue;
-            }
             SGAP_Audit::record((int) $row['id'], (string) $row['channel'], 'sent', 200, 'Publer job ' . $job);
             $report['sent'][] = ['id' => (int) $row['id'], 'channel' => $row['channel'], 'job_id' => $job];
         }

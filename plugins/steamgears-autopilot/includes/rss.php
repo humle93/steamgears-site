@@ -89,6 +89,13 @@ class SGAP_RSS {
                 $report['failed'][] = ['id' => $id, 'channel' => $channel, 'error' => $error];
                 continue;
             }
+            // P11: a channel the plugin posts itself never goes into a feed. This is what lets
+            // Publer be phased out one channel at a time while the rest still use RSS.
+            $class = SGAP_Direct::handler($channel);
+            if ($class !== '') {
+                SGAP_Direct::finish($row, $class, SGAP_Direct::publish($class, $row), $report);
+                continue;
+            }
             $wpdb->update($wpdb->prefix . 'sgap_queue', ['external_id' => self::MARKER, 'sent_at' => current_time('mysql')], ['id' => $id]);
             SGAP_Queue::mark($id, 'published');
             SGAP_Audit::record($id, $channel, 'rss', 200, 'Released in ' . self::url($channel));
@@ -121,6 +128,12 @@ class SGAP_RSS {
             $row = ['state' => 'ok', 'posts' => 0, 'newest' => '', 'age_days' => null, 'url' => self::url($channel), 'problems' => []];
             if (!$enabled) {
                 $row['state'] = 'off';
+                $out[$channel] = $row;
+                continue;
+            }
+            // P11: posted directly, so its feed is empty on purpose and Publer is not asked.
+            if (class_exists('SGAP_Direct') && SGAP_Direct::handler($channel) !== '') {
+                $row['state'] = 'direct';
                 $out[$channel] = $row;
                 continue;
             }
@@ -160,7 +173,7 @@ class SGAP_RSS {
 
     /** Counts per state plus one sentence, for the channel-health answer and the nightly run. */
     public static function health_summary(array $health): array {
-        $counts = ['ok' => 0, 'empty' => 0, 'stale' => 0, 'invalid' => 0, 'off' => 0];
+        $counts = ['ok' => 0, 'empty' => 0, 'stale' => 0, 'invalid' => 0, 'off' => 0, 'direct' => 0];
         $attention = [];
         foreach ($health as $channel => $row) {
             $state = (string) ($row['state'] ?? 'invalid');
@@ -175,8 +188,11 @@ class SGAP_RSS {
             $note = count($attention) . ' of ' . count($health) . ' feed(s) need attention: ' . implode(', ', $attention) . '.';
         } elseif ($health === []) {
             $note = 'No channel is switched on, so no feed exists yet (Settings → Publer → Channels).';
+        } elseif ($counts['direct'] === count($health)) {
+            $note = 'Every channel is posted directly; Publer is not needed for any of them.';
         } else {
-            $note = 'All ' . count($health) . ' feed(s) carry posts Publer can use.';
+            $note = 'All ' . (count($health) - $counts['direct']) . ' feed(s) carry posts Publer can use'
+                . ($counts['direct'] > 0 ? '; ' . $counts['direct'] . ' channel(s) are posted directly.' : '.');
         }
         return $counts + ['total' => count($health), 'note' => $note];
     }

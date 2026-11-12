@@ -34,6 +34,19 @@ and how long each missing piece takes.
 
 ## 0. Short version
 
+**P11 (7.84.0, plan 12/11 2026) — Publer udfases, 0,6 d.** Facebook, Instagram og Pinterest poster direkte, kanal for kanal, mens resten stadig går via RSS til Publer. Publer opsiges først, når hver kanal er målt live (abonnementet fornyes næste måned).
+
+| Fil | Ændring | Andel |
+| --- | --- | --- |
+| `includes/direct.php` (ny) | `SGAP_Direct`: hvilken kanal postes direkte, ét publiceringskald, fælles bogføring | 15 % |
+| `includes/rss.php` | RSS-tilstand poster direkte-kanaler selv; feed-sundhed springer dem over | 15 % |
+| `includes/publer.php` | API-tilstand bruger `SGAP_Direct`; kører uden Publer-nøgle når kanalerne er direkte | 10 % |
+| `includes/instagram.php` | `publish()`: container → status → `media_publish` (Instagram Login) | 15 % |
+| `includes/pinterest.php` | `publish()`: `POST /v5/pins` med board, titel, tekst, link, alt og billede | 15 % |
+| `includes/preflight.php`, `core.php`, `setup.php` | `instagram_direct`, `pinterest_direct`, `pinterest_board_id`; board-tjek kender den direkte board | 5 % |
+| `plugins/tests/smoke.php` | checks for opdeling, de tre kanaler, fejl og RSS-blanding | 15 % |
+| `docs/library/publer-udfasning-2026-11-12.md` (+ PDF) | ejerens guide: Meta-app, Instagram-udgivelse, Pinterest-app, rækkefølge, opsigelse | 10 % |
+
 **P9.9 (7.83.0, 12/11 2026) — AI-redaktør, 0,3 d.** `includes/editor.php` (ny, 50 %), `generator.php::write_for` (dom før kø, 20 %), `automation.php` (selvtjek, 5 %), smoke (12 checks, 25 %). Gratis modeller; intet svar = venter på ejeren.
 
 **P9.8 (7.82.0, 12/11 2026) — prioriteter fra Command Center, 0,4 d.** CC sender sider på plads 4-20 + søgeord (`POST /priorities`); `pick()` tager dem først og prompten bruger søgeordet. Fil: `includes/priorities.php` (ny, 45 %), `includes/generator.php` (pick/source/prompt, 25 %), `includes/core.php` (snapshot, 5 %), `plugins/tests/smoke.php` (13 checks, 25 %). Arbejdsdelingen er uændret: pluginnet ejer opslagene, CC leverer målingerne.
