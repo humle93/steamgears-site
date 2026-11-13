@@ -308,7 +308,7 @@ class SGAP_AI {
     private static function completion(string $key, string $prompt, int $channels = 0) {
         $model = self::model();
         if ($model === '') {
-            return new WP_Error('sgap_ai_model', 'Pick an OpenRouter model under Settings → AI & images.');
+            return new WP_Error('sgap_ai_model', 'Pick an OpenRouter model under Settings → AI.');
         }
         $decoded = self::chat_completions($key, self::chat_body($model, $prompt, $channels), 120);
         if (is_wp_error($decoded)) {
@@ -374,7 +374,7 @@ class SGAP_AI {
         }
         $model = self::model();
         if ($model === '') {
-            return new WP_Error('sgap_ai_model', 'Pick an OpenRouter model under Settings → AI & images.');
+            return new WP_Error('sgap_ai_model', 'Pick an OpenRouter model under Settings → AI.');
         }
         if (function_exists('set_time_limit')) {
             @set_time_limit(300);

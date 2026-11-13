@@ -10,6 +10,27 @@ Noterne er skrevet ud fra commit-historikken og de dokumenter der hører til hve
 
 <!-- patch-notes: baseline 7.65.0 -->
 
+## 7.85.1 — 2026-11-13
+
+**Rettet: to fejlbeskeder pegede på den gamle fane — og integrationstesten er nu faktisk kørt mod et rigtigt WordPress.**
+
+### Rettet
+- `SGAP_AI::json_call()` og `SGAP_Generator::generate()` siger nu *Settings → AI* (ikke *AI & images*), når der
+  ikke er valgt en model.
+- `plugins/tests/integration.php` indeholdt fra 7.85.0-arbejdet både den nye OpenRouter-blok og en kopi af den
+  gamle keycheck-blok, og evergreen-afsnittet brugte stadig Anthropic-formatet. Dubletten er fjernet, og alle
+  mocks matcher nu OpenRouters `/models` med query-parametre samt `/chat/completions` i OpenAI-format.
+- `plugins/tests/automation.php` slår AI-redaktøren fra i dette forløb (den har sin egen suite) og rydder
+  `sgap_new_content` før testindlægget, så kun det publicerede indlæg promoveres — 2 kladder, ikke 4.
+
+### Målt
+- `plugins/tests/integration.sh` mod WordPress 7.1.4, MariaDB 10.11 og PHP 8.3: **254 PASS / 0 FAIL** —
+  in-process 155, admin-tools 45, automation 27, HTTP 18 og 9 uninstall-checks; ingen plugin-notitser i
+  `debug.log`.
+- Smoke: 1 570 PASS / 0 FAIL.
+- Opsætningen uden root (apt-get download + dpkg -x, portabel MariaDB, wp-cli-phar) står i
+  `docs/library/integrationstest-wordpress-2026-11-13.md`.
+
 ## 7.85.0 — 2026-11-13
 
 **OpenRouter er nu den eneste AI-udbyder, og AI-billedgenerering er væk.**

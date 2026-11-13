@@ -69,6 +69,9 @@ $rel = SGAP_RSS::release();
 ta('photo: a page without a featured image fails with a reason that names the fix', in_array((int) $q2['id'], array_column($rel['failed'], 'id'), true) && str_contains($rel['failed'][0]['error'], 'needs a photo'), $rel['failed'] ?? null);
 
 /* --- new content gets promoted --- */
+// Only the post published here should be promoted: the posts above were published in this run too.
+delete_option('sgap_new_content');
+add_filter('sgap_editor_models', fn() => []); // the AI editor has its own tests; keep this run to the writer
 $new = wp_insert_post(['post_title' => 'Brass compass', 'post_content' => 'A compass.', 'post_status' => 'draft']);
 wp_publish_post($new);
 ta('new content: publishing schedules promotion', in_array($new, (array) get_option('sgap_new_content'), true) && wp_next_scheduled(SGAP_Auto::NEW_CONTENT_CRON));

@@ -215,7 +215,7 @@ add_filter('pre_http_request', function ($pre, $args, $url) use ($png) {
     ];
     // The model field is a dropdown over what OpenRouter offers, so the catalogue is answered
     // before the request log, and no test run reaches the real openrouter.ai.
-    if ($url === 'https://openrouter.ai/api/v1/models') {
+    if (str_starts_with($url, 'https://openrouter.ai/api/v1/models')) {
         return $reply(200, ['data' => [['id' => 'vendor/model'], ['id' => 'vendor/other']]]);
     }
     $GLOBALS['sgci_http'][] = ['url' => $url, 'args' => $args];
@@ -406,14 +406,14 @@ add_filter('pre_http_request', function ($pre, $args, $url) {
         }
     }
     // The catalogue the settings dropdown and the save-time check read.
-    if ($url === 'https://openrouter.ai/api/v1/models') {
+    if (str_starts_with($url, 'https://openrouter.ai/api/v1/models')) {
         $GLOBALS['sgci_models'][] = ['url' => $url, 'args' => $args];
         return $reply(200, ['data' => [['id' => 'vendor/model'], ['id' => 'vendor/other']]]);
     }
     if ($url === 'https://openrouter.ai/api/v1/chat/completions') {
         $sent_body = json_decode((string) $args['body'], true);
         $GLOBALS['sgci_or'][] = $sent_body;
-        if ($auth !== 'Bearer good-or-key') {
+        if ($auth !== 'Bearer sk-or-good') {
             return $reply(401, ['error' => ['message' => 'User not found.']]);
         }
         if (($sent_body['model'] ?? '') === 'vendor/gone') {
@@ -431,7 +431,7 @@ update_option('sgap_channels', 'facebook, instagram');
 update_option('sgap_publer_api_key', 'good-key');
 sgci_check('keycheck: saving a key flags a test', (bool) get_transient(SGAP_KeyCheck::PENDING));
 update_option('sgap_ai_model', 'vendor/model');
-update_option('sgap_ai_api_key', 'good-or-key');
+update_option('sgap_ai_api_key', 'sk-or-good');
 $GLOBALS['sgci_or'] = [];
 $r = SGAP_KeyCheck::run();
 sgci_check('keycheck: good Publer key passes', $r['publer']['ok'] === true, $r['publer']);
@@ -465,11 +465,12 @@ sgci_check('keycheck: invalid OpenRouter key is reported', $r['ai']['ok'] === fa
 update_option('sgap_ai_api_key', 'not-an-openrouter-key');
 $r = SGAP_KeyCheck::run();
 sgci_check('keycheck: a value without sk-or- is named before a request is spent', $r['ai']['ok'] === false && str_contains($r['ai']['message'], 'not an OpenRouter key'), $r['ai']);
+update_option('sgap_ai_api_key', 'sk-or-good');
 update_option('sgap_ai_model', '');
 $r = SGAP_KeyCheck::run();
 sgci_check('keycheck: a saved key without a model asks for a model', $r['ai']['ok'] === false && str_contains($r['ai']['message'], 'pick a model'), $r['ai']);
 // OpenRouter alone: a one-token test, then a real generation through /chat/completions.
-update_option('sgap_ai_api_key', 'good-or-key');
+update_option('sgap_ai_api_key', 'sk-or-good');
 update_option('sgap_ai_model', 'vendor/model');
 $GLOBALS['sgci_or'] = [];
 $posts = SGAP_AI::generate(['title' => 'Brass goggles', 'type' => 'product', 'summary' => 'Hand-polished goggles.'], ['facebook']);
@@ -486,16 +487,16 @@ $retire = function (string $name) use ($wpdb) {
     wp_cache_delete('sgap_ai_model', 'options');
     wp_cache_delete('alloptions', 'options');
 };
-update_option('sgap_ai_api_key', 'good-or-key');
+update_option('sgap_ai_api_key', 'sk-or-good');
 // (1) the stored name stays visible as retired, and (3) only offered models are pickable.
 $retire('vendor/gone');
 sgci_check('model: a stored name that is gone is marked, not hidden',
     str_contains(SGAP_Setup::field('ai_model'), 'vendor/gone (not offered any more)'));
 $html = SGAP_Setup::field('ai_model');
 sgci_check('model: dropdown groups by vendor, starts with an empty choice, only offered ids',
-    substr_count($html, '<option') === 3
+    substr_count($html, '<option') === 4
     && strpos($html, 'Pick a model') < strpos($html, '<optgroup')
-    && str_contains($html, '<optgroup label="vendor">'), $html);
+    && str_contains($html, '<optgroup label="vendor">') && str_contains($html, 'vendor/gone (not offered any more)'), $html);
 // (2) there is no default to fall back on: a rejected name is reported as it is, after one call.
 $GLOBALS['sgci_or'] = [];
 $answer = SGAP_Chat::reply([], 'Hvordan går det?');
@@ -510,233 +511,6 @@ update_option('sgap_ai_model', 'vendor/other');
 update_option('sgap_ai_model', 'vendor/gone');
 sgci_check('model: a name that is not offered cannot be saved again', get_option('sgap_ai_model') === 'vendor/other', get_option('sgap_ai_model'));
 update_option('sgap_ai_api_key', 'sk-or-wrong');
-if (function_exists('wp_get_ability')) {
-    $r = wp_get_ability('steamgears-autopilot/check-keys')->execute();
-    sgci_check('keycheck: available as Claude tool', is_array($r) && isset($r['publer'], $r['ai']), $r);
-}
-remove_all_filters('pre_http_request');
-
-/* --- v7.4 features: suppression, Etsy orders, product feed --- */
-$res = sgci_rest('POST', '/suppression', ['channel' => 'pinterest', 'angle' => 'angle_a', 'content_type' => 'product', 'format' => 'pin', 'level' => 'blocked', 'reason' => 'CI']);
-sgci_check('suppression: saved', $res->get_status() === 200 && ($res->get_data()['level'] ?? '') === 'blocked', $res->get_data());
-update_option('sgap_full_auto_enabled', 'yes');
-$blocked = SGAP_Queue::add(['channel' => 'pinterest', 'title' => 'CI suppressed', 'destination_url' => home_url('/s/')]);
-sgci_check('suppression: full auto refuses a blocked combination', is_wp_error($blocked) && $blocked->get_error_code() === 'sgap_suppressed');
-update_option('sgap_full_auto_enabled', 'no');
-$allowed = SGAP_Queue::add(['channel' => 'pinterest', 'title' => 'CI suppressed', 'destination_url' => home_url('/s/')]);
-sgci_check('suppression: manual mode still allows it', is_array($allowed));
-if (is_array($allowed)) {
-    $wpdb->delete($wpdb->prefix . 'sgap_queue', ['id' => $allowed['id']]);
-}
-$wpdb->query("DELETE FROM {$wpdb->prefix}sgap_suppression WHERE reason = 'CI'");
-$res = sgci_rest('POST', '/etsy/orders', ['etsy_order_id' => 123456, 'revenue' => 50, 'fees' => 5, 'shipping' => 7.5]);
-sgci_check('etsy: order imported with profit', $res->get_status() === 200 && (float) ($res->get_data()['profit'] ?? 0) === 37.5, $res->get_data());
-wp_set_current_user(0);
-sgci_check('feed: refused without the secret', sgci_rest('GET', '/feed')->get_status() === 403);
-wp_set_current_user((int) $admin[0]);
-
-/* --- Claude / MCP abilities (WordPress 6.9+ only) --- */
-if (function_exists('wp_get_ability')) {
-    $names = ['status', 'list-drafts', 'review-draft', 'list-queue', 'queue-post', 'generate', 'publish', 'set-mode', 'update', 'check-keys', 'check-publer'];
-    $missing = array_values(array_filter($names, fn($n) => !wp_get_ability('steamgears-autopilot/' . $n)));
-    sgci_check('abilities: all 11 registered', !$missing, $missing);
-    $status_ability = wp_get_ability('steamgears-autopilot/status');
-    $meta = $status_ability && method_exists($status_ability, 'get_meta') ? $status_ability->get_meta() : [];
-    sgci_check('abilities: exposed to MCP, read-only status', ($meta['mcp']['public'] ?? false) === true && ($meta['annotations']['readonly'] ?? null) === true, $meta);
-    $status = $status_ability ? $status_ability->execute() : null;
-    sgci_check('abilities: status runs', is_array($status) && $status['version'] === SGAP_VERSION && isset($status['queue']['published']), $status);
-    $mode = wp_get_ability('steamgears-autopilot/set-mode')->execute(['autopilot' => true, 'full_auto' => false]);
-    sgci_check('abilities: set-mode switches autopilot', is_array($mode) && $mode['autopilot'] === true && $mode['full_auto'] === false
-        && get_option('sgap_autopilot_enabled') === 'yes', $mode);
-    wp_get_ability('steamgears-autopilot/set-mode')->execute(['autopilot' => false]);
-    $queued = wp_get_ability('steamgears-autopilot/queue-post')->execute([
-        'channel' => 'facebook', 'title' => 'CI from Claude', 'text' => 'Hello from the ability', 'destination_url' => home_url('/claude/')
-    ]);
-    sgci_check('abilities: queue-post adds to the queue', is_array($queued) && !empty($queued['id']) && str_contains($queued['tracking_url'], '/go/'), $queued);
-    $listed = wp_get_ability('steamgears-autopilot/list-queue')->execute(['status' => 'queued', 'limit' => 5]);
-    sgci_check('abilities: list-queue shows it', is_array($listed) && in_array((int) $queued['id'], array_map('intval', array_column($listed['items'], 'id')), true), $listed);
-    $drafts = wp_get_ability('steamgears-autopilot/list-drafts')->execute(['status' => 'used', 'limit' => 3]);
-    sgci_check('abilities: list-drafts shows the promoted page', is_array($drafts) && count($drafts['drafts']) === 3 && !empty($drafts['drafts'][0]['promotes']['url']), $drafts);
-    sgci_check('abilities: review of unknown draft is an error', is_wp_error(wp_get_ability('steamgears-autopilot/review-draft')->execute(['draft_id' => 999999, 'decision' => 'reject'])));
-    $wpdb->delete($wpdb->prefix . 'sgap_queue', ['id' => (int) $queued['id']]);
-    wp_set_current_user(0);
-    sgci_check('abilities: anonymous users are refused', is_wp_error(wp_get_ability('steamgears-autopilot/status')->execute()));
-    wp_set_current_user((int) $admin[0]);
-} else {
-    WP_CLI::line('SKIP abilities: this WordPress has no Abilities API');
-}
-
-/* --- API key test after saving (Publer + Anthropic mocked) --- */
-add_filter('pre_http_request', function ($pre, $args, $url) {
-    $auth = (string) ($args['headers']['Authorization'] ?? '');
-    $reply = fn(int $code, $body) => ['headers' => ['content-type' => 'application/json'], 'body' => wp_json_encode($body), 'response' => ['code' => $code, 'message' => ''], 'cookies' => [], 'filename' => null];
-    if (str_starts_with($url, 'https://app.publer.com/')) {
-        if (str_contains($auth, 'bad-key')) {
-            return $reply(401, ['errors' => ['Invalid API key']]);
-        }
-        if (str_ends_with($url, '/workspaces')) {
-            return $reply(200, [['id' => 'ws_only', 'name' => 'Steamgears']]);
-        }
-        if (str_ends_with($url, '/accounts')) {
-            return $reply(200, [['id' => 'a1', 'provider' => 'facebook', 'name' => 'FB'], ['id' => 'a2', 'provider' => 'instagram', 'name' => 'IG']]);
-        }
-    }
-    // The catalogue the settings dropdown and the save-time check read: /v1/models?limit=100.
-    // It is a different URL from the single-model probe below, and the check that a retired
-    // name cannot be saved is meaningless unless this list answers.
-    if ($url === 'https://api.anthropic.com/v1/models?limit=100') {
-        return $reply(200, ['data' => [['id' => 'claude-opus-5-5', 'type' => 'model']], 'has_more' => false]);
-    }
-    if (str_starts_with($url, 'https://api.anthropic.com/v1/models/')) {
-        $GLOBALS['sgci_anthropic_models'][] = ['url' => $url, 'args' => $args];
-        if (($args['headers']['x-api-key'] ?? '') !== 'good-ai-key') {
-            return $reply(401, ['type' => 'error', 'error' => ['type' => 'authentication_error', 'message' => 'invalid x-api-key']]);
-        }
-        return str_ends_with($url, '/claude-opus-5-5') ? $reply(200, ['id' => 'claude-opus-5-5', 'type' => 'model']) : $reply(404, ['type' => 'error']);
-    }
-    if ($url === 'https://ai.example.test/v1/models') {
-        // A custom OpenAI-compatible endpoint: the same key test as a real provider, but the
-        // list and the auth header are what prove it went to the configured address.
-        $GLOBALS['sgci_custom_models'][] = ['url' => $url, 'auth' => $auth, 'args' => $args];
-        if ($auth !== 'Bearer good-custom-key') {
-            return $reply(401, ['error' => ['message' => 'Invalid API key']]);
-        }
-        return $reply(200, ['data' => [['id' => 'custom-model'], ['id' => 'legacy-model']]]);
-    }
-    if ($url === 'https://api.aimlapi.com/v1/models') {
-        // The dropdown asks what this provider offers; provider switching resolves ai_model
-        // against this list, so it has to answer like the real /v1/models does.
-        return $reply(200, ['data' => [['id' => 'anthropic/claude-opus-5.5'], ['id' => 'openai/gpt-5.5']]]);
-    }
-    if ($url === 'https://api.aimlapi.com/v1/chat/completions') {
-        $sent_body = json_decode((string) $args['body'], true);
-        $GLOBALS['sgci_aiml'][] = $sent_body;
-        if ($auth !== 'Bearer good-aiml-key') {
-            return $reply(401, ['error' => ['message' => 'Invalid API key']]);
-        }
-        if (($sent_body['model'] ?? '') === 'anthropic/claude-3-5-sonnet') {
-            // A name the provider retired: the retry on the default is what has to happen next.
-            return $reply(404, ['error' => ['message' => 'Model anthropic/claude-3-5-sonnet not found', 'type' => 'model_not_found']]);
-        }
-        $content = "```json\n" . wp_json_encode(['posts' => [['channel' => 'facebook', 'title' => 'Goggles', 'text' => 'Brass goggles, polished by hand.', 'hashtags' => ['#steampunk'], 'alt_text' => 'Goggles']]]) . "\n```";
-        return $reply(200, ['choices' => [['message' => ['role' => 'assistant', 'content' => $content], 'finish_reason' => 'stop']]]);
-    }
-    return $pre;
-}, 10, 3);
-SGAP_Settings::register();
-delete_transient(SGAP_KeyCheck::PENDING);
-update_option('sgap_publer_workspace_id', '');
-update_option('sgap_channels', 'facebook, instagram');
-update_option('sgap_publer_api_key', 'good-key');
-sgci_check('keycheck: saving a key flags a test', (bool) get_transient(SGAP_KeyCheck::PENDING));
-update_option('sgap_ai_provider', 'anthropic');
-update_option('sgap_ai_model', '');
-update_option('sgap_ai_api_key', 'good-ai-key');
-$GLOBALS['sgci_anthropic_models'] = [];
-$r = SGAP_KeyCheck::run();
-sgci_check('keycheck: good Publer key passes', $r['publer']['ok'] === true, $r['publer']);
-sgci_check('keycheck: single workspace filled in', get_option('sgap_publer_workspace_id') === 'ws_only');
-sgci_check('keycheck: good Claude key + default model passes', $r['ai']['ok'] === true && str_contains($r['ai']['message'], 'claude-opus-5-5'), $r['ai']);
-$anthropic_probe = $GLOBALS['sgci_anthropic_models'][0] ?? [];
-sgci_check('keycheck: Anthropic check asks the Models API with key and version',
-    str_ends_with((string) ($anthropic_probe['url'] ?? ''), '/v1/models/claude-opus-5-5')
-    && ($anthropic_probe['args']['headers']['x-api-key'] ?? '') === 'good-ai-key'
-    && ($anthropic_probe['args']['headers']['anthropic-version'] ?? '') === SGAP_AI::ANTHROPIC_VERSION,
-    $anthropic_probe);
-sgci_check('keycheck: result stored, flag cleared', is_array(get_option(SGAP_KeyCheck::RESULT)) && !get_transient(SGAP_KeyCheck::PENDING));
-update_option('sgap_channels', 'facebook, instagram, pinterest');
-$r = SGAP_KeyCheck::run();
-sgci_check('keycheck: channel without Publer account is reported', $r['publer']['ok'] === false && str_contains($r['publer']['message'], 'pinterest'), $r['publer']);
-update_option('sgap_publer_api_key', 'bad-key');
-$r = SGAP_KeyCheck::run();
-sgci_check('keycheck: invalid Publer key is reported', $r['publer']['ok'] === false && str_contains($r['publer']['message'], 'invalid'), $r['publer']);
-// A retired name cannot be saved again: the save-time check keeps the model that works.
-// The catalogue is cached for 12 hours, so clear it: a cached list from another phase would
-// decide this check instead of the stub above.
-delete_site_transient('sgap_ai_catalog_' . SGAP_AI::provider());
-update_option('sgap_ai_model', 'claude-made-up');
-sgci_check('model: a name the provider does not offer is refused at save', get_option('sgap_ai_model') === 'claude-opus-5-5', get_option('sgap_ai_model'));
-// A site can still have one stored from before the check existed: written straight into the
-// options table, the way such a site has it, because the save above now refuses it.
-$wpdb->update($wpdb->options, ['option_value' => 'claude-made-up'], ['option_name' => 'sgap_ai_model']);
-wp_cache_delete('sgap_ai_model', 'options');
-wp_cache_delete('alloptions', 'options');
-$r = SGAP_KeyCheck::run();
-sgci_check('keycheck: unknown model is reported', $r['ai']['ok'] === false && str_contains($r['ai']['message'], 'claude-made-up'), $r['ai']);
-update_option('sgap_ai_model', '');
-update_option('sgap_ai_api_key', 'wrong-ai-key');
-$r = SGAP_KeyCheck::run();
-sgci_check('keycheck: invalid Claude key is reported', $r['ai']['ok'] === false && str_contains($r['ai']['message'], 'refused'), $r['ai']);
-// Custom OpenAI-compatible provider: the key is tested with GET /models, never a chat call.
-update_option('sgap_ai_provider', 'openai_compatible');
-update_option('sgap_ai_base_url', 'https://ai.example.test/v1');
-update_option('sgap_ai_api_key', 'good-custom-key');
-update_option('sgap_ai_model', 'custom-model');
-sgci_check('keycheck: custom provider accepts a listed model', get_option('sgap_ai_model') === 'custom-model', get_option('sgap_ai_model'));
-$GLOBALS['sgci_custom_models'] = [];
-$r = SGAP_KeyCheck::run();
-sgci_check('keycheck: good custom OpenAI-compatible key and listed model pass',
-    $r['ai']['ok'] === true && str_contains($r['ai']['message'], 'custom-model'), $r['ai']);
-$custom_probe = $GLOBALS['sgci_custom_models'][0] ?? [];
-sgci_check('keycheck: custom check reads /models with Bearer auth',
-    ($custom_probe['url'] ?? '') === 'https://ai.example.test/v1/models'
-    && ($custom_probe['auth'] ?? '') === 'Bearer good-custom-key', $custom_probe);
-update_option('sgap_ai_api_key', 'wrong-custom-key');
-$r = SGAP_KeyCheck::run();
-sgci_check('keycheck: invalid custom key is reported',
-    $r['ai']['ok'] === false && str_contains($r['ai']['message'], 'refused'), $r['ai']);
-update_option('sgap_ai_model', '');
-update_option('sgap_ai_base_url', '');
-update_option('sgap_ai_provider', 'aimlapi');
-// AIMLAPI: key test with a one-token request, then a real generation through /chat/completions.
-update_option('sgap_ai_provider', 'aimlapi');
-update_option('sgap_ai_api_key', 'good-aiml-key');
-$GLOBALS['sgci_aiml'] = [];
-$r = SGAP_KeyCheck::run();
-sgci_check('aimlapi: good key passes with the default model', $r['ai']['ok'] === true && str_contains($r['ai']['message'], 'anthropic/claude-opus-5.5'), $r['ai']);
-sgci_check('aimlapi: key test asks for one token', ($GLOBALS['sgci_aiml'][0]['max_tokens'] ?? 0) === 1, $GLOBALS['sgci_aiml']);
-$posts = SGAP_AI::generate(['title' => 'Brass goggles', 'type' => 'product', 'summary' => 'Hand-polished goggles.'], ['facebook']);
-$sent = end($GLOBALS['sgci_aiml']);
-sgci_check('aimlapi: generates posts (fenced JSON parsed)', is_array($posts) && count($posts) === 1 && $posts[0]['channel'] === 'facebook', $posts);
-sgci_check('aimlapi: request uses Claude, JSON mode and low reasoning effort', ($sent['model'] ?? '') === 'anthropic/claude-opus-5.5' && ($sent['reasoning_effort'] ?? '') === 'low' && ($sent['response_format']['type'] ?? '') === 'json_object', $sent);
-update_option('sgap_ai_api_key', 'wrong-aiml-key');
-$r = SGAP_KeyCheck::run();
-sgci_check('aimlapi: invalid key is reported', $r['ai']['ok'] === false && str_contains($r['ai']['message'], 'refused'), $r['ai']);
-
-/* --- the four model rules, checked against this WordPress instead of a stub --- */
-// A site whose stored model was retired underneath it: written straight into the options table,
-// because the save-time check below refuses new writes of it.
-$retire = function (string $name) use ($wpdb) {
-    $wpdb->update($wpdb->options, ['option_value' => $name], ['option_name' => 'sgap_ai_model']);
-    wp_cache_delete('sgap_ai_model', 'options');
-    wp_cache_delete('alloptions', 'options');
-};
-update_option('sgap_ai_api_key', 'good-aiml-key');
-// (1) the stored name stays visible as retired, and (4) only offered models are pickable.
-$retire('anthropic/claude-3-5-sonnet');
-sgci_check('model: a stored name that is gone is marked, not hidden',
-    str_contains(SGAP_Setup::field('ai_model'), 'anthropic/claude-3-5-sonnet (not offered any more)'));
-$html = SGAP_Setup::field('ai_model');
-sgci_check('model: dropdown groups by vendor, default first, only offered ids',
-    substr_count($html, '<option') === 4
-    && strpos($html, 'Provider default: anthropic/claude-opus-5.5') < strpos($html, '<optgroup')
-    && str_contains($html, '<optgroup label="anthropic">') && str_contains($html, '<optgroup label="openai">'), $html);
-// (3) the rejected name is retried on the provider default, and the answer says what changed.
-$GLOBALS['sgci_aiml'] = [];
-$answer = SGAP_Chat::reply([], 'Hvordan går det?');
-$asked = array_column($GLOBALS['sgci_aiml'], 'model');
-sgci_check('model: a rejected name is retried on the default and the answer says so',
-    is_array($answer) && $asked === ['anthropic/claude-3-5-sonnet', 'anthropic/claude-opus-5.5']
-    && str_contains($answer['text'], 'did not know the model `anthropic/claude-3-5-sonnet`')
-    && get_option('sgap_ai_model') === 'anthropic/claude-opus-5.5', [$asked, is_array($answer) ? $answer['text'] : $answer]);
-// (2) "Provider default" is stored as the model that is actually used, never as an empty field.
-update_option('sgap_ai_model', '');
-sgci_check('model: Provider default is saved as the model that is used',
-    get_option('sgap_ai_model') === 'anthropic/claude-opus-5.5' && SGAP_AI::model() === 'anthropic/claude-opus-5.5', get_option('sgap_ai_model'));
-update_option('sgap_ai_model', 'anthropic/claude-3-5-sonnet');
-sgci_check('model: a name that is not offered cannot be saved again', get_option('sgap_ai_model') === 'anthropic/claude-opus-5.5', get_option('sgap_ai_model'));
-update_option('sgap_ai_provider', 'anthropic');
-update_option('sgap_ai_api_key', 'wrong-ai-key');
 if (function_exists('wp_get_ability')) {
     $r = wp_get_ability('steamgears-autopilot/check-keys')->execute();
     sgci_check('keycheck: available as Claude tool', is_array($r) && isset($r['publer'], $r['ai']), $r);
@@ -776,15 +550,15 @@ $GLOBALS['sgci_evergreen_http'] = [];
 $GLOBALS['sgci_evergreen_n'] = 0;
 add_filter('pre_http_request', function ($pre, $args, $url) {
     $reply = fn(int $code, $body) => ['headers' => ['content-type' => 'application/json'], 'body' => wp_json_encode($body), 'response' => ['code' => $code, 'message' => 'OK'], 'cookies' => [], 'filename' => null];
-    // Updating the model asks the provider what it offers; answer that before the chat call.
-    if (str_starts_with($url, 'https://api.anthropic.com/v1/models')) {
-        return $reply(200, ['data' => [['id' => 'claude-opus-5-5', 'type' => 'model']]]);
+    // Updating the model asks OpenRouter what it offers; answer that before the chat call.
+    if (str_starts_with($url, 'https://openrouter.ai/api/v1/models')) {
+        return $reply(200, ['data' => [['id' => 'vendor/model']]]);
     }
-    if ($url !== SGAP_AI::ANTHROPIC_URL) {
+    if ($url !== 'https://openrouter.ai/api/v1/chat/completions') {
         return $pre;
     }
     $body = json_decode((string) $args['body'], true);
-    $prompt = (string) ($body['messages'][0]['content'] ?? '');
+    $prompt = (string) ($body['messages'][1]['content'] ?? '');
     $GLOBALS['sgci_evergreen_n']++;
     preg_match('/^Page: (.+?) \([^)]+\)$/m', $prompt, $match);
     $title = $match[1] ?? 'Evergreen page';
@@ -801,15 +575,11 @@ add_filter('pre_http_request', function ($pre, $args, $url) {
         'alt_text' => 'Brass goggles on a workbench'
     ];
     $GLOBALS['sgci_evergreen_http'][] = ['body' => $body, 'prompt' => $prompt, 'answer' => $answer];
-    return $reply(200, ['type' => 'message', 'stop_reason' => 'end_turn', 'content' => [
-        ['type' => 'thinking', 'thinking' => ''],
-        ['type' => 'text', 'text' => wp_json_encode($answer)]
-    ]]);
+    return $reply(200, ['choices' => [['message' => ['role' => 'assistant', 'content' => wp_json_encode($answer)], 'finish_reason' => 'stop']]]);
 }, 10, 3);
 
-update_option('sgap_ai_provider', 'anthropic');
-update_option('sgap_ai_model', 'claude-opus-5-5');
-update_option('sgap_ai_api_key', 'ci-evergreen-key');
+update_option('sgap_ai_model', 'vendor/model');
+update_option('sgap_ai_api_key', 'sk-or-v1-evergreen');
 update_option('sgap_channels', 'facebook, instagram');
 update_option('sgap_evergreen_enabled', 'yes');
 update_option('sgap_evergreen_after_days', 60);
@@ -861,10 +631,10 @@ sgci_check('evergreen: the share is counted and dated on the page', SGAP_Evergre
     && SGAP_Evergreen::shares($ever_b) === 1 && SGAP_Evergreen::last_share($ever_a) > 0 && SGAP_Evergreen::last_share($ever_b) > 0);
 $calls = $GLOBALS['sgci_evergreen_http'];
 sgci_check('evergreen: one structured AI call per share', count($calls) === 2
-    && ($calls[0]['body']['model'] ?? '') === 'claude-opus-5-5'
+    && ($calls[0]['body']['model'] ?? '') === 'vendor/model'
     && ($calls[0]['body']['max_tokens'] ?? 0) === 1200
-    && ($calls[0]['body']['output_config']['effort'] ?? '') === 'low'
-    && ($calls[0]['body']['output_config']['format']['type'] ?? '') === 'json_schema', $calls);
+    && ($calls[0]['body']['response_format']['type'] ?? '') === 'json_object'
+    && !isset($calls[0]['body']['output_config'], $calls[0]['body']['reasoning_effort']), $calls);
 sgci_check('evergreen: the prompt asks for a new angle and forbids invented offers', count($calls) === 2
     && str_contains($calls[0]['prompt'], 'genuinely different angle')
     && str_contains($calls[0]['prompt'], 'do not invent a discount')
