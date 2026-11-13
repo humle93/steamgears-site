@@ -3,38 +3,21 @@
  * Writes social posts for the site's own posts and products with an AI model,
  * once a day from WP-Cron. Posts land under AI Drafts for approval, or go
  * straight to the queue when Full Auto is on. Loaded from steamgears-autopilot.php.
+ *
+ * Since 7.85.0 there is exactly one AI provider: OpenRouter. One OpenAI-compatible
+ * endpoint in front of hundreds of models from many providers, reached with one key.
+ * There is no second provider, no backup and no free-model retry: a failure is reported
+ * as it is instead of being hidden behind another service.
  */
 
 if (!defined('ABSPATH')) exit;
 
 class SGAP_AI {
-    const ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages';
-    const ANTHROPIC_VERSION = '2026-10-21';
-    const DEFAULT_MODEL = 'claude-opus-5-5';
-    /** Models that accept the server-side refusal fallback. */
-    const FALLBACK_MODELS = ['claude-opus-5-5', 'claude-opus-5', 'claude-fable-5-1', 'claude-sonnet-5-5'];
-    const DEFAULT_BASE_URL = 'https://api.aimlapi.com/v1';
-    /** Default model on AIMLAPI (Claude through AIMLAPI's OpenAI-compatible API). */
-    const AIMLAPI_MODEL = 'anthropic/claude-opus-5.5';
     /**
-     * OpenRouter: one OpenAI-compatible endpoint in front of hundreds of models from many
-     * providers. The address is fixed, like AIMLAPI's, so a typo in the base URL cannot point
-     * the key at a different service. There is deliberately no default model: OpenRouter's
-     * catalogue changes week by week, so the model is picked from the live list instead of
-     * being guessed here.
+     * OpenRouter's fixed address. It is a constant, not a setting: a typo in a base URL
+     * cannot point the key at a different service.
      */
     const OPENROUTER_URL = 'https://openrouter.ai/api/v1';
-
-    /**
-     * The backup: its own key and its own model. `ai_api_key` is "one key at a time" for whichever
-     * provider is chosen, so reusing it here would either overwrite the primary's key or send the
-     * wrong credential to OpenRouter. The model has no default for the same reason P1.23 has none —
-     * OpenRouter's catalogue changes, so a guessed slug ages into a 404.
-     */
-    const FALLBACK_KEY = 'openrouter_api_key';
-    const FALLBACK_MODEL = 'openrouter_model';
-    /** Its own catalogue cache, so a backup list and a provider list cannot overwrite each other. */
-    const FALLBACK_CATALOG = 'sgap_ai_catalog_openrouter_backup';
 
     /**
      * A key as it has to look inside an `Authorization` header. A paste from a browser can carry
@@ -53,9 +36,9 @@ class SGAP_AI {
     }
 
     /**
-     * The headers of every OpenRouter call. One function, because the key test and the failover
-     * must send the same request: a test that proves a header the real call never sends proves
-     * nothing, and that is how the two drifted apart before 7.70.1.
+     * The headers of every OpenRouter call. One function, because the key test and the real
+     * request must send the same headers: a test that proves a header the real call never
+     * sends proves nothing.
      */
     public static function openrouter_headers(string $key): array {
         return [
@@ -127,124 +110,43 @@ class SGAP_AI {
         return array_values(array_unique(array_filter($names)));
     }
 
-    /** What the last call did. Set only when the backup answered; reset on every new call. */
-    private static array $fallback = [];
-
     /**
-     * The chosen provider. OpenRouter is the default since 7.76.0 (P10): a site that never saved a
-     * provider starts there, and so does an unknown value. A saved choice — AIMLAPI included — is
-     * kept until the owner switches, so an update never cuts off a working key.
+     * The provider name, kept as one function for the screens and the status tools so the
+     * wording cannot drift. There is only OpenRouter.
      */
     public static function provider(): string {
-        $provider = (string) SGAP_Settings::get('ai_provider', 'openrouter');
-        return in_array($provider, ['anthropic', 'aimlapi', 'openai_compatible', 'openrouter'], true) ? $provider : 'openrouter';
+        return 'openrouter';
     }
 
-    /**
-     * The key that reaches OpenRouter: the main key when OpenRouter is the provider, else the
-     * backup's own key. '' when neither is saved. Used by the images, which have no key of their own
-     * on OpenRouter.
-     */
-    public static function openrouter_key(): string {
-        return self::provider() === 'openrouter' ? self::api_key() : self::fallback_key();
-    }
-
-    /** AIMLAPI and other OpenAI-compatible providers use /chat/completions. */
-    public static function uses_chat_completions(): bool {
-        return self::provider() !== 'anthropic';
-    }
-
-    /** Model from Settings, else the provider's default ('' for a generic OpenAI-compatible API). */
+    /** Model from Settings. Empty means nothing is picked yet — OpenRouter has no default. */
     public static function model(): string {
-        $model = trim((string) SGAP_Settings::get('ai_model'));
-        return $model !== '' ? $model : self::default_model();
+        return trim((string) SGAP_Settings::get('ai_model'));
     }
 
     /**
-     * The model the provider itself recommends: what an empty Settings field means. OpenRouter
-     * has none on purpose — a hardcoded slug ages, and its live catalogue is the source.
-     */
-    public static function default_model(): string {
-        return ['anthropic' => self::DEFAULT_MODEL, 'aimlapi' => self::AIMLAPI_MODEL][self::provider()] ?? '';
-    }
-
-    /**
-     * True when the provider's error is about the model *name* — unknown, retired or not
-     * offered to this key. Network, auth, rate-limit and credit errors are never model
-     * errors, and must be reported as they are instead of being retried.
-     */
-    public static function model_rejected(string $message): bool {
-        $message = strtolower($message);
-        if (strpos($message, 'model') === false) {
-            return false;
-        }
-        foreach ([
-            'not found', 'does not exist', 'not exist', 'unknown model', 'not available', 'unavailable',
-            'not offered', 'no such model', 'invalid model', 'not a valid model', 'model_not_found', 'not supported'
-        ] as $needle) {
-            if (strpos($message, $needle) !== false) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /** The model to retry with when the asked name is rejected — '' when no retry is right. */
-    public static function model_fallback(string $asked, WP_Error $error): string {
-        if ($asked === '' || !in_array(self::provider(), ['aimlapi', 'openai_compatible'], true)) {
-            return '';
-        }
-        $default = self::default_model();
-        if ($default === '' || $default === $asked || !self::model_rejected($error->get_error_message())) {
-            return '';
-        }
-        return $default;
-    }
-
-    /**
-     * Clears a stored model the provider rejected, so the provider default applies from now
-     * on. Only when the stored value is still the rejected one: a value the owner changed
-     * in the meantime is theirs and is left alone.
-     */
-    public static function repair_model(string $asked): bool {
-        $repaired = self::default_model();
-        if ($asked === '' || $repaired === '' || trim((string) SGAP_Settings::get('ai_model')) !== $asked) {
-            return false;
-        }
-        // Store the concrete model, not an empty field: what is used is then visible in Settings.
-        SGAP_Settings::set('ai_model', $repaired);
-        return trim((string) SGAP_Settings::get('ai_model')) === $repaired;
-    }
-
-    /**
-     * The model ids an endpoint lists right now, cached for 12 hours: the Settings dropdown and
-     * the save-time check then cost at most one request per half-day. A site whose provider is
-     * reached through a proxy can replace the list with the `sgap_ai_model_catalog` filter.
-     *
-     * $provider is empty for the configured provider and 'openrouter_backup' for the backup's own
-     * list, which is why the cache name is per provider rather than per service.
+     * The model ids OpenRouter lists right now, cached for 12 hours: the Settings dropdown and
+     * the save-time check then cost at most one request per half-day. A site behind a proxy can
+     * replace the list with the `sgap_ai_model_catalog` filter.
      * @return string[]
      */
-    public static function catalog(bool $fresh = false, string $provider = ''): array {
-        $provider = $provider !== '' ? $provider : self::provider();
-        $supplied = apply_filters('sgap_ai_model_catalog', null, $provider);
+    public static function catalog(bool $fresh = false): array {
+        $supplied = apply_filters('sgap_ai_model_catalog', null);
         if (is_array($supplied)) {
             return self::catalog_ids($supplied);
         }
-        $cache = $provider === 'openrouter_backup' ? self::FALLBACK_CATALOG : 'sgap_ai_catalog_' . $provider;
-        $cached = get_site_transient($cache);
+        $cached = get_site_transient('sgap_ai_catalog_openrouter');
         if (!$fresh && is_array($cached)) {
             return $cached;
         }
-        $ids = self::fetch_catalog($provider);
-        // A failure is cached briefly too, so an unreachable provider never slows the settings page.
-        set_site_transient($cache, $ids, $ids !== [] ? 12 * HOUR_IN_SECONDS : 30 * MINUTE_IN_SECONDS);
+        $ids = self::fetch_catalog();
+        // A failure is cached briefly too, so an unreachable endpoint never slows the settings page.
+        set_site_transient('sgap_ai_catalog_openrouter', $ids, $ids !== [] ? 12 * HOUR_IN_SECONDS : 30 * MINUTE_IN_SECONDS);
         return $ids;
     }
 
     /**
-     * Model ids from a /models answer — AIMLAPI and OpenAI use data[].id, Anthropic data[].id,
-     * and a plain list is accepted too. Deduped and sorted, because AIMLAPI repeats ids.
+     * Model ids from a /models answer — OpenRouter uses data[].id, and a plain list is accepted
+     * too. Deduped and sorted so hundreds of ids stay navigable in one dropdown.
      * @return string[]
      */
     public static function catalog_ids(array $body): array {
@@ -262,27 +164,10 @@ class SGAP_AI {
         return $ids;
     }
 
-    /** @return string[] Empty when the provider cannot be asked (no key yet, or offline). */
-    private static function fetch_catalog(string $provider): array {
-        if ($provider === 'aimlapi') {
-            // AIMLAPI lists its catalogue without a key. The URL is fixed, never ai_base_url.
-            $response = wp_remote_get(self::DEFAULT_BASE_URL . '/models', ['timeout' => 20]);
-        } elseif ($provider === 'openrouter' || $provider === 'openrouter_backup') {
-            // OpenRouter lists its catalogue without a key too, so the backup model can be picked
-            // before the backup key exists — the list is not the credential.
-            $response = wp_remote_get(self::OPENROUTER_URL . '/models', ['timeout' => 20]);
-        } else {
-            $key = self::api_key();
-            if ($key === '') {
-                return [];
-            }
-            $response = $provider === 'anthropic'
-                ? wp_remote_get('https://api.anthropic.com/v1/models?limit=100', [
-                    'timeout' => 20,
-                    'headers' => ['x-api-key' => $key, 'anthropic-version' => self::ANTHROPIC_VERSION]
-                ])
-                : wp_remote_get(self::base_url() . '/models', ['timeout' => 20, 'headers' => ['Authorization' => 'Bearer ' . $key]]);
-        }
+    /** @return string[] Empty when OpenRouter cannot be asked (offline, or a refused answer). */
+    private static function fetch_catalog(): array {
+        // OpenRouter lists its catalogue without a key: the list is not the credential.
+        $response = wp_remote_get(self::OPENROUTER_URL . '/models', ['timeout' => 20]);
         if (is_wp_error($response) || (int) wp_remote_retrieve_response_code($response) !== 200) {
             return [];
         }
@@ -291,149 +176,20 @@ class SGAP_AI {
     }
 
     /**
-     * The primary key, trimmed. A key copied out of a browser can carry a leading space or a line
-     * break, and "Bearer sk-or-…\n" is not a bearer token to any gateway: the answer reads like a
-     * missing header instead of a rejected key (measured 10/11 against OpenRouter).
+     * The key, stripped of invisible characters. A key copied out of a browser can carry a
+     * leading space or a line break, and "Bearer sk-or-…\n" is not a bearer token to any
+     * gateway: the answer reads like a missing header instead of a rejected key.
      */
     public static function api_key(): string {
         return self::bearer((string) SGAP_Settings::get('ai_api_key'));
     }
 
-    /** The OpenRouter backup key, or '' when none is saved. */
-    public static function fallback_key(): string {
-        return self::bearer((string) SGAP_Settings::get(self::FALLBACK_KEY));
-    }
-
-    /** The model the backup asks, or '' when the backup is switched off. */
-    public static function fallback_model(): string {
-        return trim((string) SGAP_Settings::get(self::FALLBACK_MODEL));
-    }
-
-    /**
-     * Ready means a key, a model, a primary that speaks /chat/completions — and a primary that is
-     * not OpenRouter itself, because a backup to the same service is not a backup.
-     */
-    public static function fallback_ready(): bool {
-        return self::uses_chat_completions() && self::provider() !== 'openrouter'
-            && self::fallback_key() !== '' && self::fallback_model() !== '';
-    }
-
-    /**
-     * Only a provider failure may start the backup. A 2xx answer — even an empty or truncated one —
-     * means the provider *did* answer, so calling a second service would pay twice for the same
-     * request. 400/404/422 are our own mistakes and are never retried on another service either.
-     */
-    public static function should_fallback(WP_Error $error): bool {
-        $status = (int) ($error->get_error_data()['status'] ?? 0);
-        if ($status === 0) {
-            return true; // transport: DNS, timeout, TLS, or wp_remote_post refusing the call
-        }
-        return in_array($status, [401, 403, 402, 429], true) || $status >= 500;
-    }
-
-    /** What the last call did: empty unless the backup answered. */
-    public static function last_fallback(): array {
-        return self::$fallback;
-    }
-
-    /** One sentence for the owner — or '' when the primary provider answered. */
-    public static function fallback_note(): string {
-        if (self::$fallback === []) {
-            return '';
-        }
-        return "\n\nThe primary provider failed (" . self::$fallback['reason'] . '), so this answer came from the OpenRouter backup on `'
-            . self::$fallback['model'] . '`. Nothing was switched: the next call tries the primary again.';
-    }
-
-    /**
-     * The one path to /chat/completions. A model name the provider does not know is retried once
-     * on the provider default and Settings is repaired; if that also fails at the provider level,
-     * or any other provider failure occurs, the OpenRouter backup answers instead. Every other
-     * error is returned unchanged, so nothing loops and nothing hides.
-     * @return array|WP_Error
-     */
-    public static function chat_completions(string $key, array $body, int $timeout = 120, string $who = '') {
-        self::$fallback = [];
-        $who = $who !== '' ? $who : self::provider_name();
-        $asked = (string) ($body['model'] ?? '');
-        $decoded = self::post_chat(self::base_url(), $key, $body, $timeout, $who);
-        if (!is_wp_error($decoded)) {
-            return $decoded;
-        }
-        $retry = self::model_fallback($asked, $decoded);
-        if ($retry !== '') {
-            $body['model'] = $retry;
-            $decoded = self::post_chat(self::base_url(), $key, $body, $timeout, $who);
-            if (!is_wp_error($decoded)) {
-                self::repair_model($asked);
-                return $decoded;
-            }
-        }
-        if (!self::fallback_ready() || !self::should_fallback($decoded)) {
-            return $decoded;
-        }
-        return self::post_backup($body, $timeout, $decoded);
-    }
-
-    /** Kept as the name the chat loop and the tests already use. */
-    public static function chat_call(string $key, array $body, int $timeout = 120, string $who = '') {
-        return self::chat_completions($key, $body, $timeout, $who);
-    }
-
-    /** @return array|WP_Error One POST to a /chat/completions endpoint, decoded. */
-    private static function post_chat(string $base, string $key, array $body, int $timeout, string $who) {
-        return self::decode(wp_remote_post($base . '/chat/completions', [
-            'timeout' => $timeout,
-            'headers' => ['Authorization' => 'Bearer ' . self::bearer($key), 'Content-Type' => 'application/json'],
-            'body' => wp_json_encode($body)
-        ]), $who);
-    }
-
-    /**
-     * The backup request: the same body on OpenRouter, with the backup's key and model and without
-     * `reasoning_effort`, which only AIMLAPI knows. Both failures are named in the error, primary
-     * first, so the owner reads what actually happened instead of a single vague message.
-     * @return array|WP_Error
-     */
-    private static function post_backup(array $body, int $timeout, WP_Error $primary) {
-        $model = self::fallback_model();
-        $body['model'] = $model;
-        unset($body['reasoning_effort']);
-        $decoded = self::decode(self::openrouter_post(self::fallback_key(), $body, $timeout), 'OpenRouter backup');
-        $status = (int) ($primary->get_error_data()['status'] ?? 0);
-        if (is_wp_error($decoded)) {
-            return new WP_Error(
-                $primary->get_error_code(),
-                $primary->get_error_message() . ' The OpenRouter backup did not answer either: ' . $decoded->get_error_message(),
-                ['status' => $status, 'backup_status' => (int) ($decoded->get_error_data()['status'] ?? 0)]
-            );
-        }
-        self::$fallback = [
-            'at' => current_time('mysql'),
-            'model' => $model,
-            'status' => $status,
-            'reason' => $primary->get_error_message()
-        ];
-        if (class_exists('SGAP_Diagnostics')) {
-            // The status and the model only: never the key, never the request body.
-            SGAP_Diagnostics::log('ai-fallback', 'The backup answered (' . $model . '): ' . $primary->get_error_message(), ['status' => $status]);
-        }
-        return $decoded;
-    }
-
     public static function base_url(): string {
-        // A provider with its own fixed host ignores the free-text base URL: the key belongs to
-        // that service, so the address cannot be redirected by a typo in Settings.
-        $fixed = ['aimlapi' => self::DEFAULT_BASE_URL, 'openrouter' => self::OPENROUTER_URL][self::provider()] ?? '';
-        if ($fixed !== '') {
-            return $fixed;
-        }
-        $base = trim((string) SGAP_Settings::get('ai_base_url'));
-        return rtrim($base === '' ? self::DEFAULT_BASE_URL : $base, '/');
+        return self::OPENROUTER_URL;
     }
 
     public static function provider_name(): string {
-        return ['anthropic' => 'Anthropic', 'aimlapi' => 'AIMLAPI', 'openrouter' => 'OpenRouter'][self::provider()] ?? self::base_url();
+        return 'OpenRouter';
     }
 
     const SYSTEM = 'You write social media posts for Steamgears (steamgears.eu), a shop and blog for steampunk '
@@ -534,34 +290,13 @@ class SGAP_AI {
         return array_values($posts);
     }
 
-    /** Text of an Anthropic Messages response. @return string|WP_Error */
-    public static function anthropic_text(array $body) {
-        if (($body['stop_reason'] ?? '') === 'refusal') {
-            return new WP_Error('sgap_ai_refusal', 'The model declined to write this post.');
-        }
-        if (($body['stop_reason'] ?? '') === 'max_tokens') {
-            return new WP_Error('sgap_ai_truncated', 'The model response was cut off (max_tokens).');
-        }
-        foreach ((array) ($body['content'] ?? []) as $block) {
-            if (is_array($block) && ($block['type'] ?? '') === 'text') {
-                return (string) $block['text'];
-            }
-        }
-        return new WP_Error('sgap_ai_empty', 'The model returned no text.');
-    }
-
     /** Generates posts for one source page. @return array|WP_Error List of posts (see parse_posts). */
     public static function generate(array $source, array $channels) {
         $key = self::api_key();
         if ($key === '') {
-            return new WP_Error('sgap_ai_key', 'Set an AI API key in Settings.');
+            return new WP_Error('sgap_ai_key', 'Add your OpenRouter key under Settings → Keys.');
         }
-        $prompt = self::prompt($source, $channels);
-        if (self::uses_chat_completions()) {
-            $text = self::openai_compatible($key, $prompt, count($channels));
-        } else {
-            $text = self::anthropic($key, $prompt, $channels);
-        }
+        $text = self::completion($key, self::prompt($source, $channels), count($channels));
         if (is_wp_error($text)) {
             return $text;
         }
@@ -569,46 +304,13 @@ class SGAP_AI {
         return $posts ?: new WP_Error('sgap_ai_parse', 'The model answer contained no usable posts.');
     }
 
-    /** @return string|WP_Error */
-    private static function anthropic(string $key, string $prompt, array $channels) {
-        $model = self::model();
-        $body = [
-            'model' => $model,
-            'max_tokens' => self::token_budget(count($channels)),
-            'system' => self::SYSTEM,
-            'messages' => [['role' => 'user', 'content' => $prompt]],
-            // Short marketing copy: low effort is plenty and keeps cost down.
-            'output_config' => [
-                'effort' => 'low',
-                'format' => ['type' => 'json_schema', 'schema' => self::schema($channels)]
-            ]
-        ];
-        $headers = [
-            'x-api-key' => $key,
-            'anthropic-version' => self::ANTHROPIC_VERSION,
-            'content-type' => 'application/json'
-        ];
-        if (in_array($model, self::FALLBACK_MODELS, true)) {
-            // If a safety classifier declines, let the API retry on a suitable model.
-            $body['fallbacks'] = 'default';
-            $headers['anthropic-beta'] = 'server-side-fallback-2026-07-01';
-        }
-        $response = wp_remote_post(self::ANTHROPIC_URL, ['timeout' => 120, 'headers' => $headers, 'body' => wp_json_encode($body)]);
-        $decoded = self::decode($response, 'Anthropic');
-        return is_wp_error($decoded) ? $decoded : self::anthropic_text($decoded);
-    }
-
-    /** For AIMLAPI, OpenAI or any other /chat/completions endpoint. @return string|WP_Error */
-    private static function openai_compatible(string $key, string $prompt, int $channels = 0) {
+    /** One /chat/completions request that must answer with JSON posts. @return string|WP_Error */
+    private static function completion(string $key, string $prompt, int $channels = 0) {
         $model = self::model();
         if ($model === '') {
-            return new WP_Error('sgap_ai_model', 'Set an AI model in Settings for ' . self::provider_name() . '.');
+            return new WP_Error('sgap_ai_model', 'Pick an OpenRouter model under Settings → AI & images.');
         }
-        $body = self::chat_body($model, $prompt, $channels);
-        $decoded = self::chat_completions($key, $body, 120);
-        if (is_wp_error($decoded) && self::wants_free_retry($model, $decoded)) {
-            $decoded = self::free_retry($key, $body, $decoded);
-        }
+        $decoded = self::chat_completions($key, self::chat_body($model, $prompt, $channels), 120);
         if (is_wp_error($decoded)) {
             return $decoded;
         }
@@ -632,55 +334,9 @@ class SGAP_AI {
         return max(2500, min(8000, 1500 + 700 * $channels));
     }
 
-    /**
-     * Free models on OpenRouter, tried in order when the paid model is refused for want of
-     * credit. Nemotron Ultra (550B) first: it wrote the best free answer in the 12/11 test.
-     * `openrouter/free` is OpenRouter's own router over its free models and is the
-     * last resort. Measured 12/11 from steamgears.eu: both answered with cost 0 while the
-     * paid model was refused ("can only afford 405 tokens"). Filter `sgap_free_models`
-     * changes the list; an empty list switches the retry off.
-     */
-    const FREE_MODELS = ['nvidia/nemotron-3-ultra-550b-a55b:free', 'google/gemma-4-31b-it:free', 'openrouter/free'];
-
-    /** @return string[] */
-    public static function free_models(): array {
-        $list = (array) apply_filters('sgap_free_models', self::FREE_MODELS);
-        return array_slice(array_values(array_filter(array_map('strval', $list), fn($m) => $m !== '')), 0, 3); // OpenRouter: max 3
-    }
-
-    /** A credit refusal on OpenRouter for a model that is not already free. */
-    public static function wants_free_retry(string $model, WP_Error $error): bool {
-        if (self::provider() !== 'openrouter' || !self::free_models()) {
-            return false;
-        }
-        if (str_ends_with($model, ':free') || in_array($model, self::free_models(), true)) {
-            return false;
-        }
-        $status = (int) ($error->get_error_data()['status'] ?? 0);
-        return $status === 402 || (bool) preg_match('/more credits|insufficient credits|can only afford|out of credits/i', $error->get_error_message());
-    }
-
-    /**
-     * One more request with OpenRouter's `models` list (it walks the list itself when a model
-     * is busy or rate-limited). The quality gate still judges the answer like any other.
-     * @return array|WP_Error
-     */
-    public static function free_retry(string $key, array $body, WP_Error $paid) {
-        $free = self::free_models();
-        $body['model'] = $free[0];
-        $body['models'] = $free;
-        unset($body['reasoning_effort']);
-        $decoded = self::chat_completions($key, $body, 120);
-        if (is_wp_error($decoded)) {
-            return new WP_Error('sgap_ai_http', $paid->get_error_message() . ' — the free models failed too: ' . $decoded->get_error_message(), $paid->get_error_data());
-        }
-        self::$fallback = ['reason' => 'no credit for ' . (string) ($paid->get_error_data()['status'] ?? '?'), 'model' => (string) ($decoded['model'] ?? $free[0])];
-        return $decoded;
-    }
-
     /** Request body for /chat/completions. */
     public static function chat_body(string $model, string $prompt, int $channels = 0): array {
-        $body = [
+        return [
             'model' => $model,
             'max_tokens' => self::token_budget($channels),
             'response_format' => ['type' => 'json_object'],
@@ -689,75 +345,56 @@ class SGAP_AI {
                 ['role' => 'user', 'content' => $prompt]
             ]
         ];
-        if (self::provider() === 'aimlapi') {
-            // Claude on AIMLAPI thinks first; short marketing copy needs little, and thinking
-            // that eats the token budget leaves an empty answer.
-            $body['reasoning_effort'] = 'low';
-        }
-        return $body;
     }
 
     /**
-     * One structured request to the configured AI: returns the decoded JSON object.
-     * Anthropic gets a strict json_schema; chat-completions providers get JSON mode
-     * plus the schema in the instructions. Used by the Content Studio.
+     * The one path to OpenRouter. The answer is returned decoded; an error is returned as it
+     * came, with the status it carried — nothing is retried on another service and nothing is
+     * hidden, because there is no second provider to hide behind.
      * @return array|WP_Error
      */
-    public static function json_call(string $system, string $prompt, array $schema, int $max_tokens = 16000, string $effort = 'medium') {
+    public static function chat_completions(string $key, array $body, int $timeout = 120, string $who = 'OpenRouter') {
+        return self::decode(self::openrouter_post($key, $body, $timeout), $who);
+    }
+
+    /** Kept as the name the chat loop and the tests already use. */
+    public static function chat_call(string $key, array $body, int $timeout = 120, string $who = 'OpenRouter') {
+        return self::chat_completions($key, $body, $timeout, $who);
+    }
+
+    /**
+     * One structured request to OpenRouter: JSON mode plus the schema in the instructions.
+     * Used by the Content Studio and the other writers.
+     * @return array|WP_Error
+     */
+    public static function json_call(string $system, string $prompt, array $schema, int $max_tokens = 16000) {
         $key = self::api_key();
         if ($key === '') {
-            return new WP_Error('sgap_ai_key', 'Set an AI API key in Settings → AI content.');
+            return new WP_Error('sgap_ai_key', 'Add your OpenRouter key under Settings → Keys.');
         }
         $model = self::model();
         if ($model === '') {
-            return new WP_Error('sgap_ai_model', 'Set an AI model in Settings for ' . self::provider_name() . '.');
+            return new WP_Error('sgap_ai_model', 'Pick an OpenRouter model under Settings → AI & images.');
         }
         if (function_exists('set_time_limit')) {
             @set_time_limit(300);
         }
-        if (self::uses_chat_completions()) {
-            $body = [
-                'model' => $model,
-                'max_tokens' => $max_tokens,
-                'response_format' => ['type' => 'json_object'],
-                'messages' => [
-                    ['role' => 'system', 'content' => $system . "\n\nAnswer with one JSON object only, matching this JSON schema:\n" . wp_json_encode($schema)],
-                    ['role' => 'user', 'content' => $prompt]
-                ]
-            ];
-            if (self::provider() === 'aimlapi') {
-                $body['reasoning_effort'] = $effort;
-            }
-            $decoded = self::chat_completions($key, $body, 280);
-            if (is_wp_error($decoded)) {
-                return $decoded;
-            }
-            $text = (string) ($decoded['choices'][0]['message']['content'] ?? '');
-            if ($text === '' && ($decoded['choices'][0]['finish_reason'] ?? '') === 'length') {
-                return new WP_Error('sgap_ai_truncated', 'The model response was cut off (max_tokens).');
-            }
-        } else {
-            $body = [
-                'model' => $model,
-                'max_tokens' => $max_tokens,
-                'system' => $system,
-                'messages' => [['role' => 'user', 'content' => $prompt]],
-                'output_config' => ['effort' => $effort, 'format' => ['type' => 'json_schema', 'schema' => $schema]]
-            ];
-            $headers = ['x-api-key' => $key, 'anthropic-version' => self::ANTHROPIC_VERSION, 'content-type' => 'application/json'];
-            if (in_array($model, self::FALLBACK_MODELS, true)) {
-                $body['fallbacks'] = 'default';
-                $headers['anthropic-beta'] = 'server-side-fallback-2026-07-01';
-            }
-            $response = wp_remote_post(self::ANTHROPIC_URL, ['timeout' => 280, 'headers' => $headers, 'body' => wp_json_encode($body)]);
-            $decoded = self::decode($response, 'Anthropic');
-            if (is_wp_error($decoded)) {
-                return $decoded;
-            }
-            $text = self::anthropic_text($decoded);
-            if (is_wp_error($text)) {
-                return $text;
-            }
+        $body = [
+            'model' => $model,
+            'max_tokens' => $max_tokens,
+            'response_format' => ['type' => 'json_object'],
+            'messages' => [
+                ['role' => 'system', 'content' => $system . "\n\nAnswer with one JSON object only, matching this JSON schema:\n" . wp_json_encode($schema)],
+                ['role' => 'user', 'content' => $prompt]
+            ]
+        ];
+        $decoded = self::chat_completions($key, $body, 280);
+        if (is_wp_error($decoded)) {
+            return $decoded;
+        }
+        $text = (string) ($decoded['choices'][0]['message']['content'] ?? '');
+        if ($text === '' && ($decoded['choices'][0]['finish_reason'] ?? '') === 'length') {
+            return new WP_Error('sgap_ai_truncated', 'The model response was cut off (max_tokens).');
         }
         $data = json_decode($text, true);
         if (!is_array($data) && preg_match('/\{.*\}/s', $text, $m)) {
@@ -915,13 +552,6 @@ class SGAP_Generator {
         global $wpdb;
         $report['sources']++;
         $posts = SGAP_AI::generate(self::source($post), $channels);
-        // Written by a free OpenRouter model because the paid one had no credit: counted, so the
-        // run report and the self-check can say so instead of hiding the switch.
-        $used = SGAP_AI::last_fallback();
-        if (!is_wp_error($posts) && str_starts_with((string) ($used['reason'] ?? ''), 'no credit')) {
-            $report['free'] = (int) ($report['free'] ?? 0) + 1;
-            $report['free_model'] = (string) ($used['model'] ?? '');
-        }
         if (is_wp_error($posts)) {
             $report['errors'][] = get_the_title($post) . ': ' . $posts->get_error_message();
             return;

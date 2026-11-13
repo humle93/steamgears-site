@@ -6,7 +6,7 @@ itself reads its updates from the same repository (`plugins/steamgears-autopilot
 
 The whole social autopilot runs inside WordPress (Command Center is retired):
 
-1. **Write** – once a day an AI model (Claude by default) writes one post per
+1. **Write** – once a day the AI model you picked on OpenRouter writes one post per
    channel for 1–2 of the site's posts/products that have not been promoted in
    the last `repost_cooldown_days`.
 2. **Approve** – posts wait under *Steamgears → AI Drafts* (Approve / Reject), or go
@@ -27,7 +27,7 @@ The whole social autopilot runs inside WordPress (Command Center is retired):
 4. **Measure** – every post links via `/go/<id>/`, so clicks (and WooCommerce
    orders) are counted per channel.
 
-Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.84.1.zip` → Activate. On an existing
+Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.85.0.zip` → Activate. On an existing
 install the same zip arrives through the self-updater (see *Updates*), so an upload is only needed for the
 first install or a recovery.
 
@@ -36,19 +36,21 @@ release from 7.65.0 onwards, newest first. The top entry always matches the vers
 header and the zip name, and `python3 tools/patch_notes.py --check` fails the check when a version
 ships without notes.
 
-## OpenRouter and the Command Center login (7.76)
+## OpenRouter only, and the Command Center login (7.85)
 
-**OpenRouter is the recommended AI provider.** A new install starts on OpenRouter, the setup wizard and the
-Keys screen list it first, and AIMLAPI is marked *being phased out*. A saved AIMLAPI choice keeps working —
-an update never cuts off a working key — but every plugin screen then shows a notice. When the OpenRouter
-*backup* already has a key and a model, the notice has one button, **Switch to OpenRouter now**, that makes
-OpenRouter the provider with exactly that key and model (the AIMLAPI key is left alone, so switching back is
-one setting).
+**OpenRouter is the only AI provider.** *Settings → AI* has one key card and one model dropdown; the model
+list comes from OpenRouter's own `/models`, and there is deliberately no default model to fall back on, so
+nothing is generated with a slug the plugin guessed. A key that does not start with `sk-or-` is named as
+*not an OpenRouter key* before a request is spent. AIMLAPI, Anthropic and the custom *OpenAI-compatible*
+option are gone, and so is the backup provider: one key, one model, one path through
+`https://openrouter.ai/api/v1/chat/completions`. A failure is reported with the provider's own words, and
+an old saved provider value in the database is simply ignored.
 
-**Images through OpenRouter.** Set *Settings → AI content → OpenRouter image model* to a model with image
-output, and images (Content Studio, auto-images for Instagram/Pinterest) are made through OpenRouter with the
-OpenRouter key — the main key when OpenRouter is the provider, else the backup key. Without that setting the
-old AIMLAPI path is used as before. OpenRouter has no default image model on purpose: its catalogue changes.
+**No AI image generation.** The Content Studio writes text and the featured image you already set is what
+the social posts use — Instagram and Pinterest reuse `get_the_post_thumbnail_url()`. There is no image key,
+no image model, no `generate-image` tool and no AJAX image task, so a page without a featured image fails
+its Instagram post with a message that names the fix instead of quietly buying a picture. Uploaded media,
+featured images and the media library are untouched by the upgrade.
 
 **Log ind i Command Center — one click.** Command Center 7.27+ (with `CC_PUBLIC_URL` set) sends its address and
 a shared secret to `POST /sgap/v1/cc-link` on every sync. The dashboard button then signs a ticket for the
@@ -61,7 +63,7 @@ in *Settings → General*).
 ## Keys in one place (7.47)
 
 Every credential the plugin uses sits on **one** screen, *Settings → Keys*, one card per service:
-AI text, AI images, Publer, Printful, SerpApi, Bluesky, Mastodon, Telegram, the product-feed secret
+the OpenRouter key, Publer, Printful, SerpApi, Bluesky, Mastodon, Telegram, the product-feed secret
 and the MCP token. Each card says what the key is for, where to get it (a link to the service or to
 your own Mastodon instance), whether it is saved, and whether the last test passed. Nothing else in
 the plugin renders a key field: the AI, Publishing, Shop and MCP tabs carry settings only, and the
@@ -79,53 +81,25 @@ icon, a purpose, its source and a status pill; the tab bar and the save bar are 
 `:focus-visible`, and the layout collapses to one column below 782 px. The plugin still ships its own
 stylesheet — no build step, no `@wordpress/ui` — and picks up the WordPress design tokens where they exist.
 
-## A backup provider, so one dead account cannot stop everything (7.67.1)
+## One provider means one set of headers (7.70.1, single from 7.85)
 
-The primary provider is whatever *AI provider* says — AIMLAPI by default. This is the second one:
-*Settings → Keys → **OpenRouter (backup)*** takes an OpenRouter key **and** a model, and both are
-needed before the backup exists. An empty model means off, on purpose: OpenRouter has no default,
-and a guessed slug only fails on the day it is needed.
-
-It is called **only when the primary provider fails**: a transport error, `401`/`403` (dead or
-revoked key), `402` (no credit), `429` (rate limit) or a `5xx`. A `2xx` answer never starts it, even
-an empty or cut-off one — the provider *did* answer, and a second call would be billed twice. A
-`400`/`404`/`422` is our own bad request and is reported, not retried elsewhere. A model name the
-primary rejects is still retried once on the primary's own default first.
-
-The backup request is the same body on `https://openrouter.ai/api/v1/chat/completions` with the
-backup key, the backup model, and `reasoning_effort` removed (that parameter is AIMLAPI's; OpenRouter
-may refuse a request carrying it). Every surface that speaks `/chat/completions` uses the same path —
-the generator, the Content Studio and the AI Chat — so a failover in one is a failover in all three.
-It is **not** used while OpenRouter is the provider itself: that would be a backup to the same
-service. The Anthropic wire format and AI images are out of scope.
-
-Nothing is silent. A failover writes one row to the error log (`Fejlsøgning`, source `ai-fallback`)
-with the primary's status and the model that answered — never the key and never the request — and the
-AI Chat answer ends with a sentence saying the primary failed and the backup answered. Neither the
-provider nor the model is changed: the next call tries the primary again. *Test connections* tests the
-backup **pair** (that key, that model), because testing it with the primary's model would be testing a
-combination the plugin never sends. As with every key here, it can live in `wp-config.php` as
-`SGAP_OPENROUTER_API_KEY`.
-
-Since 7.69.1 the test also says *which* of the two problems it found. OpenRouter keys start with
-`sk-or-v1-`; a saved value that does not is named as **not an OpenRouter key** (with its length) instead of
-being sent and answered with a 401 about a missing header — that is the answer an AIMLAPI key, a pasted
-`curl` command or a masked value gets, and on 10/11 it read as “the key was rejected” when the truth was
+OpenRouter keys start with `sk-or-v1-`, and a saved value that does not is named as **not an OpenRouter key**
+(with its length) instead of being sent and answered with a 401 about a missing header — that is the answer a
+pasted `curl` command or a masked value gets, and on 10/11 it read as “the key was rejected” when the truth was
 “that is not the key”. If the value does start with `sk-or-` and OpenRouter still reports no Authorization
 header, the message says so and points at a line break in the field or a host/proxy that strips the header.
-Every key is also trimmed before it becomes a header, so a trailing newline from a paste can no longer turn
+Every key is trimmed before it becomes a header, so a trailing newline from a paste can no longer turn
 `Bearer sk-or-…` into something no gateway parses.
 
-**7.70.1 sends the header from one place.** The test and the failover each built their own `Authorization`
-header, so a test could prove a header the real call never sent. `SGAP_AI::openrouter_headers()` is now the
-only builder and `SGAP_AI::openrouter_post()` the only request, used by the key test, the failover and the
-generator. The token is cleaned by `SGAP_AI::bearer()`: whitespace, line breaks and invisible characters
-(U+200B, U+00A0, U+FEFF) are removed, because a header value holding one is dropped by the transport and the
-gateway then answers *Missing Authentication header* — the same answer a wrong key gets. And when OpenRouter
-still reports no header, `SGAP_AI::stripped_by()` runs the site's own `http_request_args` filter on a copy of
-the request: if a plugin removes `Authorization` from outgoing calls, the message names that filter instead of
-sending you to openrouter.ai/keys. Eleven new smoke checks observe the outgoing request itself — the exact
-`Bearer` header, one line, no key in any message — and four of them fail if the cleaning is removed.
+`SGAP_AI::openrouter_headers()` is the only builder and `SGAP_AI::openrouter_post()` the only request, used by
+the key test, the generator, the Content Studio and the AI Chat. The token is cleaned by `SGAP_AI::bearer()`:
+whitespace, line breaks and invisible characters (U+200B, U+00A0, U+FEFF) are removed, because a header value
+holding one is dropped by the transport and the gateway then answers *Missing Authentication header* — the same
+answer a wrong key gets. And when OpenRouter still reports no header, `SGAP_AI::stripped_by()` runs the site's
+own `http_request_args` filter on a copy of the request: if a plugin removes `Authorization` from outgoing
+calls, the message names that filter instead of sending you to openrouter.ai/keys. Smoke checks observe the
+outgoing request itself — the exact `Bearer` header, one line, no key in any message — and four of them fail if
+the cleaning is removed.
 
 ## A module you can switch on: Cirla (7.71)
 
@@ -742,16 +716,16 @@ before it, because the MCP surface can read plugins but cannot install or activa
 1. Bump `Version:` in `steamgears-autopilot.php` and `SGAP_VERSION` — they must agree, CI fails otherwise.
 2. Rebuild the zip from the folder so the name and the contents match:
    `cd plugins && rm -f steamgears-autopilot-*.zip && zip -qr steamgears-autopilot-v<version>.zip steamgears-autopilot`
-3. `php plugins/tests/smoke.php` (1562 checks) and `diff -r` the zipped copy against the source. CI repeats
+3. `php plugins/tests/smoke.php` (1570 checks) and `diff -r` the zipped copy against the source. CI repeats
    both, plus `php -l` on PHP 8.0–8.5 and WordPress 6.4 / 7.1 / latest. The plugin is also exercised inside
    a real WordPress: `bash plugins/tests/integration.sh` (needs `php` with `mysqli`, `wp-cli`, `curl` and a
-   reachable MySQL; 249 checks, including the four model rules, the Anthropic/custom-provider key checks and evergreen recycling) — it installs
+   reachable MySQL; 249 checks, including the model rules, the OpenRouter key checks and evergreen recycling) — it installs
    WordPress, activates the plugin, runs the in-process, admin-tool and automation suites, then hits `/go/`,
    the feeds, the REST routes and uninstall over HTTP. On WordPress 6.4 the same run passes 184 checks;
    the ability groups are skipped because the Abilities API starts at 6.9. The model dropdown is proven
-   against the real catalogue with `curl -s -o /tmp/models.json https://api.aimlapi.com/v1/models` and
-   `SGAP_LIVE_CATALOG=/tmp/models.json php plugins/tests/smoke.php` — every `<option>` must match an id AIMLAPI
-   actually offers.
+   against the real catalogue with `curl -s -o /tmp/models.json https://openrouter.ai/api/v1/models` and
+   `SGAP_LIVE_CATALOG=/tmp/models.json php plugins/tests/smoke.php` — every `<option>` must match an id
+   OpenRouter actually offers.
 4. Commit code, zip, README and `ROADMAP.md` together and push to `main`.
 5. **Click *Plugins → Update*** (or *Dashboard → Updates*). Auto-updates can be switched on in the same
    screen, which makes step 5 happen on its own after the next WP-Cron run.
@@ -786,24 +760,21 @@ description lengths and writes nothing.
    into *Publer workspace id*, save) and then your connected accounts.
 3. *Channels*: e.g. `facebook, instagram, pinterest`. For Pinterest also set the
    board id. Instagram and Pinterest need a featured image on the post.
-4. *AI content*: provider **Anthropic** with a Claude API key (model defaults to
-   `claude-opus-5-5`), **AIMLAPI** (Claude and 300+ models behind one key), **OpenRouter**
-   (one key in front of hundreds of models from many providers — the address is fixed to
-   `https://openrouter.ai/api/v1` and there is no default model, so pick one from the live list),
-   or **Other OpenAI-compatible** with your own address, a key and a model name.
+4. *AI*: the **OpenRouter** key alone (one key in front of hundreds of models from many
+   providers — the address is fixed to `https://openrouter.ai/api/v1` and there is no default
+   model, so pick one from the live list).
 5. *General*: switch **Autopilot** on. Leave **Full auto** off at first and approve
    the drafts by hand until you like the tone.
 6. Use **Generate posts now** / **Publish queue now** on the dashboard to try it
    without waiting for the cron.
 
-**Key test.** Saving a Publer or AI key (or the workspace, channels, provider or
-model) tests it straight away — OpenRouter with a single-token chat call to the chosen model,
-because its `/models` answers without a key and would call every key valid; the result appears at the top of the page and on
-the dashboard (✓/✗), and *Test API keys* repeats it. Publer: key valid, scopes,
+**Key test.** Saving a Publer or OpenRouter key (or the workspace, channels or model)
+tests it straight away — OpenRouter with a single-token chat call to the chosen model,
+because its `/models` answers without a key and would call every key valid; the result appears at the top
+of the page and on the dashboard (✓/✗), and *Test API keys* repeats it. Publer: key valid, scopes,
 workspace (filled in automatically when the key has only one), an account for
-every channel, Pinterest board set. Claude: key valid and model available via the
-Models API (no tokens used). OpenAI-compatible: key valid and model offered by
-`/models`.
+every channel, Pinterest board set. OpenRouter: key valid and model offered by
+`/models` and answerable by `/chat/completions`.
 
 ## Real cron (publishing on time)
 

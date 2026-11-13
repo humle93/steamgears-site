@@ -110,7 +110,7 @@ check('profiles: access all drops the exclusions but keeps the full-access switc
 check('profiles: site_admin persona is a site administrator', str_contains(SGAP_Profiles::prompt(),'site administrator') && str_contains(SGAP_Chat::system_prompt(),'full access'));
 check('profiles: unknown profile is refused', SGAP_Profiles::activate('nope') instanceof WP_Error);
 check('profiles: set-ai-profile switches back to the assistant', (SGAP_AdminTools::set_ai_profile(['profile'=>'assistant'])['profile']??'')==='assistant' && SGAP_Profiles::id()==='assistant');
-check('profiles: the switch is offered in Settings', isset(SGAP_Settings::CHOICE_KEYS['ai_profile']) && in_array('ai_profile', SGAP_Settings::SECTIONS['AI content'], true));
+check('profiles: the switch is offered in Settings', isset(SGAP_Settings::CHOICE_KEYS['ai_profile']) && in_array('ai_profile', SGAP_Settings::SECTIONS['AI'], true));
 unset($GLOBALS['opts']['mwai_options']);
 foreach(['steamgears-autopilot','sgap-settings','sgap-queue','sgap-ai','sgap-campaigns','sgap-etsy','sgap-reports','sgap-fullauto','sgap-merchant','sgap-setup','sgap-studio','sgap-chat','sgap-tools','sgap-log'] as $p){ ob_start(); do_action('page_'.$p); $html=ob_get_clean(); check("page $p renders", strlen($html)>20); }
 // Etsy er manuel import: felterne er væk fra indstillingerne, og siden lover ikke en API der ikke findes.
@@ -127,17 +127,17 @@ $san=$settings['sgap_ai_api_key']['sanitize_callback'];
 check('empty secret keeps old', $san('')==='SECRET123'); check('new secret saved',$san('NEW')==='NEW');
 $_POST['sgap_clear']['ai_api_key']=1; check('clear secret', $san('')===''); unset($_POST['sgap_clear']);
 // Skrivevejene uden om formularen: nøgler må ikke autoloades, og et tomt felt må ikke slette dem.
-$img_before=get_option('sgap_image_api_key','');
-SGAP_Settings::set('image_api_key','IMGSECRET');
-check('secret writes are never autoloaded', ($GLOBALS['autoload']['sgap_image_api_key']??null)===false && get_option('sgap_image_api_key')==='IMGSECRET');
+$img_before=get_option('sgap_serpapi_key','');
+SGAP_Settings::set('serpapi_key','IMGSECRET');
+check('secret writes are never autoloaded', ($GLOBALS['autoload']['sgap_serpapi_key']??null)===false && get_option('sgap_serpapi_key')==='IMGSECRET');
 $cap_before=get_option('sgap_daily_cap'); SGAP_Settings::set('daily_cap',5);
 check('plain settings keep the default autoload', array_key_exists('sgap_daily_cap',$GLOBALS['autoload']) && $GLOBALS['autoload']['sgap_daily_cap']===null);
 SGAP_Settings::set('daily_cap',$cap_before);
-$r=SGAP_AdminTools::update_settings(['settings'=>['image_api_key'=>'']]);
-check('empty secret through update-settings keeps the key', get_option('sgap_image_api_key')==='IMGSECRET' && ($r['changed']['image_api_key']??'')==='kept (the new value was empty)');
-$r=SGAP_AdminTools::update_settings(['settings'=>['image_api_key'=>'IMGSECRET2']]);
-check('new secret through update-settings is saved without autoload', get_option('sgap_image_api_key')==='IMGSECRET2' && ($GLOBALS['autoload']['sgap_image_api_key']??null)===false && ($r['changed']['image_api_key']??'')==='updated');
-SGAP_Settings::set('image_api_key',$img_before);
+$r=SGAP_AdminTools::update_settings(['settings'=>['serpapi_key'=>'']]);
+check('empty secret through update-settings keeps the key', get_option('sgap_serpapi_key')==='IMGSECRET' && ($r['changed']['serpapi_key']??'')==='kept (the new value was empty)');
+$r=SGAP_AdminTools::update_settings(['settings'=>['serpapi_key'=>'IMGSECRET2']]);
+check('new secret through update-settings is saved without autoload', get_option('sgap_serpapi_key')==='IMGSECRET2' && ($GLOBALS['autoload']['sgap_serpapi_key']??null)===false && ($r['changed']['serpapi_key']??'')==='updated');
+SGAP_Settings::set('serpapi_key',$img_before);
 define('SGAP_TELEGRAM_BOT_TOKEN','fromconfig'); check('wp-config constant wins', SGAP_Settings::get('telegram_bot_token')==='fromconfig');
 check('hour clamp', $settings['sgap_quiet_start']['sanitize_callback']('99')===23);
 check('bool sanitize', $settings['sgap_autopilot_enabled']['sanitize_callback']('hack')==='no');
@@ -236,7 +236,7 @@ update_option('sgap_ai_api_key','TOPSECRET');
 $snap=SGAP_REST::snapshot(new WP_REST_Request(['days'=>30,'limit'=>5]));
 check('snapshot: every section present', is_array($snap) && isset($snap['generated_at'],$snap['site'],$snap['status'],$snap['counts'],$snap['results'],$snap['queue'],$snap['drafts'],$snap['settings'],$snap['missing_tables']));
 check('snapshot: reports the installed version', ($snap['version']??'')===SGAP_VERSION);
-check('snapshot: secrets only as set/not set', !str_contains(wp_json_encode($snap),'TOPSECRET') && ($snap['settings']['AI content']['ai_api_key']['value']??'')==='set');
+check('snapshot: secrets only as set/not set', !str_contains(wp_json_encode($snap),'TOPSECRET') && ($snap['settings']['AI']['ai_api_key']['value']??'')==='set');
 check('snapshot: window echoes the requested days', ($snap['window']['days']??0)===30);
 check('snapshot: queue rows expose the duplicate fingerprint', array_key_exists('fingerprint', (array)($snap['queue'][0] ?? ['fingerprint'=>null])) || empty($snap['queue']));
 
@@ -262,33 +262,23 @@ $json='{"posts":[{"channel":"facebook","title":"T","text":"Hello","hashtags":["#
 $posts=SGAP_AI::parse_posts($json,['facebook','instagram']);
 check('ai: keeps one valid post per requested channel', count($posts)===1 && $posts[0]['channel']==='facebook' && $posts[0]['hashtags']==='#steampunk #cosplay');
 check('ai: bad json gives no posts', SGAP_AI::parse_posts('nope',['facebook'])===[]);
-check('ai: anthropic text block found after thinking', SGAP_AI::anthropic_text(['stop_reason'=>'end_turn','content'=>[['type'=>'thinking','thinking'=>''],['type'=>'text','text'=>'{"posts":[]}']]])==='{"posts":[]}');
-check('ai: refusal is an error', SGAP_AI::anthropic_text(['stop_reason'=>'refusal','content'=>[]]) instanceof WP_Error);
-check('ai: truncation is an error', SGAP_AI::anthropic_text(['stop_reason'=>'max_tokens','content'=>[['type'=>'text','text'=>'{']]]) instanceof WP_Error);
 $schema=SGAP_AI::schema(['facebook']);
 check('ai: schema is strict', $schema['additionalProperties']===false && $schema['properties']['posts']['items']['additionalProperties']===false && $schema['properties']['posts']['items']['properties']['channel']['enum']===['facebook']);
-update_option('sgap_ai_provider','aimlapi'); update_option('sgap_ai_model',''); update_option('sgap_ai_base_url','https://example.com/v1');
-check('aimlapi: default model is Claude on AIMLAPI', SGAP_AI::model()==='anthropic/claude-opus-5.5');
-check('aimlapi: always the AIMLAPI endpoint', SGAP_AI::base_url()==='https://api.aimlapi.com/v1' && SGAP_AI::uses_chat_completions());
-$cb=SGAP_AI::chat_body(SGAP_AI::model(),'x');
-check('aimlapi: low reasoning effort and JSON mode', ($cb['reasoning_effort']??'')==='low' && $cb['response_format']['type']==='json_object');
-update_option('sgap_ai_provider','openai_compatible'); update_option('sgap_ai_model','gpt-x');
-check('openai-compatible: own base url and model, no reasoning_effort', SGAP_AI::base_url()==='https://example.com/v1' && SGAP_AI::model()==='gpt-x' && !isset(SGAP_AI::chat_body('gpt-x','x')['reasoning_effort']));
-// OpenRouter som egen provider: fast adresse, intet opdigtet standardmodel, og en nøgletest
-// der beviser nøglen med ét token — OpenRouter svarer /models uden nøgle, så den vej ville
-// kalde enhver nøgle gyldig.
-update_option('sgap_ai_provider','openrouter'); update_option('sgap_ai_model','');
-update_option('sgap_ai_base_url','https://wrong.example/v1'); update_option('sgap_ai_api_key','sk-or-v1-fixture');
-check('openrouter: the provider is accepted and named', SGAP_AI::provider()==='openrouter' && SGAP_AI::provider_name()==='OpenRouter');
-check('openrouter: the address is fixed, so a typed base url cannot redirect the key', SGAP_AI::base_url()==='https://openrouter.ai/api/v1' && SGAP_AI::uses_chat_completions());
-check('openrouter: there is no invented default model', SGAP_AI::default_model()==='' && SGAP_AI::model()==='');
+// 7.85.0: OpenRouter er den eneste udbyder. Fast adresse, ingen opdigtet standardmodel og
+// ingen udbyder-specifikke felter i kroppen.
+update_option('sgap_ai_model',''); update_option('sgap_ai_api_key','sk-or-v1-fixture');
+check('openrouter: the provider is fixed and named', SGAP_AI::provider()==='openrouter' && SGAP_AI::provider_name()==='OpenRouter');
+check('openrouter: the address is fixed, so a typed base url cannot redirect the key', SGAP_AI::base_url()==='https://openrouter.ai/api/v1');
+check('openrouter: there is no invented default model', SGAP_AI::model()==='');
+$cb=SGAP_AI::chat_body('vendor/model','x');
+check('openrouter: the chat body is JSON mode with no provider-specific effort', $cb['response_format']['type']==='json_object' && !isset($cb['reasoning_effort']));
 $GLOBALS['http_calls']=[];
 $json=SGAP_AI::json_call('sys','prompt',['type'=>'object']);
-check('openrouter: without a model the error names the provider and nothing is sent', $json instanceof WP_Error
-    && str_contains($json->get_error_message(),'OpenRouter') && $GLOBALS['http_calls']===[]);
+check('openrouter: without a model the error says so and nothing is sent', $json instanceof WP_Error
+    && str_contains($json->get_error_message(),'OpenRouter model') && $GLOBALS['http_calls']===[]);
 $no_model=SGAP_KeyCheck::check_ai();
 check('openrouter: the key test asks for a model before spending a request', ($no_model['ok']??null)===false
-    && str_contains($no_model['message'],'pick an AI model') && $GLOBALS['http_calls']===[]);
+    && str_contains($no_model['message'],'pick a model') && $GLOBALS['http_calls']===[]);
 update_option('sgap_ai_model','anthropic/claude-sonnet-4.6');
 $GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[sgap_http(401,['error'=>['message'=>'User not found.']])];
 $bad=SGAP_KeyCheck::check_ai();
@@ -305,9 +295,8 @@ $ok=SGAP_KeyCheck::check_ai();
 check('openrouter: a working key passes with one token spent, on its own endpoint', ($ok['ok']??null)===true
     && str_contains($ok['message'],'anthropic/claude-sonnet-4.6') && count($GLOBALS['http_calls'])===1
     && $GLOBALS['http_calls'][0][0]==='https://openrouter.ai/api/v1/chat/completions');
+check('openrouter: there is no backup to test', !method_exists('SGAP_KeyCheck','check_fallback') && !method_exists('SGAP_AI','fallback_key'));
 $GLOBALS['http_queue']=[];
-update_option('sgap_ai_provider','anthropic'); update_option('sgap_ai_model',''); update_option('sgap_ai_base_url','');
-check('anthropic: default model unchanged', SGAP_AI::model()==='claude-opus-5-5' && !SGAP_AI::uses_chat_completions());
 check('ai: JSON inside a ```json fence is parsed', count(SGAP_AI::parse_posts("Here you go:\n```json\n{\"posts\":[{\"channel\":\"facebook\",\"text\":\"Hi\"}]}\n```",['facebook']))===1);
 check('rss: Publer gets a query-string feed URL (page caches skip it)', SGAP_RSS::url('facebook')==='https://steamgears.eu/?sgap_feed=facebook');
 check('rss: newlines become a literal \\n for Publer', SGAP_RSS::description("Line one\r\nLine two\nThree")==='Line one\\nLine two\\nThree');
@@ -824,7 +813,7 @@ check('chat: the log never holds a key', !str_contains((string) wp_json_encode($
 unset($GLOBALS['ability_objects']);
 
 // Chat-loopet: modellen skal kunne kalde et værktøj, få resultatet tilbage og bruge det
-// i næste runde. Begge provider-formater testes, fordi de har hver sin wire-format.
+// i næste runde. Der er ét wire-format: OpenRouters /chat/completions.
 $chat_keep=[]; foreach(['sgap_ai_provider','sgap_ai_model','sgap_ai_api_key'] as $k){ $chat_keep[$k]=$GLOBALS['opts'][$k]??null; }
 $abilities_keep=$GLOBALS['ability_objects']??null;
 $GLOBALS['ability_objects']=['core/analyse'=>new SGAP_Fake_Ability('core/analyse',['category'=>'core','meta'=>['annotations'=>['readonly'=>true]]])];
@@ -838,23 +827,9 @@ $loop=SGAP_Chat::reply([], 'Analysér corsets');
 $first=json_decode((string)($GLOBALS['http_calls'][0][1]['body']??''),true); $second=json_decode((string)($GLOBALS['http_calls'][1][1]['body']??''),true);
 $tool_msg=null; foreach(($second['messages']??[]) as $m){ if(($m['role']??'')==='tool'){ $tool_msg=$m; break; } }
 $tool_result=json_decode((string)($tool_msg['content']??''),true);
-check('chat loop: OpenAI-compatible runs the tool and answers', is_array($loop) && ($loop['text']??'')==='Endeligt svar fra værktøjet' && ($loop['tools']??[])===['analyse'] && count($GLOBALS['http_calls'])===2);
-check('chat loop: OpenAI-compatible sends the tool schema', in_array('analyse',array_column(array_column($first['tools']??[],'function'),'name'),true));
-check('chat loop: OpenAI-compatible returns the tool result under its call id', ($tool_msg['tool_call_id']??'')==='call_1' && ($tool_result['ran']??'')==='core/analyse' && ($tool_result['input']['topic']??'')==='corsets');
-
-$GLOBALS['opts']['sgap_ai_provider']='anthropic'; $GLOBALS['opts']['sgap_ai_model']='claude-opus-5-5'; $GLOBALS['http_calls']=[];
-$GLOBALS['http_queue']=[
- sgap_http(200,['content'=>[['type'=>'text','text'=>'Jeg slår det op.'],['type'=>'tool_use','id'=>'toolu_1','name'=>'analyse','input'=>['topic'=>'corsets']]],'stop_reason'=>'tool_use']),
- sgap_http(200,['content'=>[['type'=>'text','text'=>'Endeligt Anthropic-svar']],'stop_reason'=>'end_turn'])
-];
-$loop=SGAP_Chat::reply([], 'Analysér corsets');
-$first_body=json_decode((string)($GLOBALS['http_calls'][0][1]['body']??''),true);
-$second_body=json_decode((string)($GLOBALS['http_calls'][1][1]['body']??''),true);
-$tool_result=null; foreach(($second_body['messages']??[]) as $m){ foreach((array)($m['content']??[]) as $b){ if(is_array($b) && ($b['type']??'')==='tool_result'){ $tool_result=$b; break 2; } } }
-$tool_json=json_decode((string)($tool_result['content']??''),true);
-check('chat loop: Anthropic runs the tool and answers', is_array($loop) && ($loop['text']??'')==='Endeligt Anthropic-svar' && ($loop['tools']??[])===['analyse'] && count($GLOBALS['http_calls'])===2);
-check('chat loop: Anthropic uses native headers and sends the tool schema', ($GLOBALS['http_calls'][0][1]['headers']['x-api-key']??'')==='KEY' && ($GLOBALS['http_calls'][0][1]['headers']['anthropic-version']??'')===SGAP_AI::ANTHROPIC_VERSION && in_array('analyse',array_column($first_body['tools']??[],'name'),true));
-check('chat loop: Anthropic returns the tool result under its tool_use id', ($tool_result['tool_use_id']??'')==='toolu_1' && ($tool_json['ran']??'')==='core/analyse' && ($tool_json['input']['topic']??'')==='corsets');
+check('chat loop: the tool runs and the answer comes back', is_array($loop) && ($loop['text']??'')==='Endeligt svar fra værktøjet' && ($loop['tools']??[])===['analyse'] && count($GLOBALS['http_calls'])===2);
+check('chat loop: the request carries the tool schema', in_array('analyse',array_column(array_column($first['tools']??[],'function'),'name'),true));
+check('chat loop: the tool result returns under its call id', ($tool_msg['tool_call_id']??'')==='call_1' && ($tool_result['ran']??'')==='core/analyse' && ($tool_result['input']['topic']??'')==='corsets');
 
 foreach($chat_keep as $k=>$v){ if($v===null){ unset($GLOBALS['opts'][$k]); } else { $GLOBALS['opts'][$k]=$v; } }
 if($abilities_keep===null){ unset($GLOBALS['ability_objects']); } else { $GLOBALS['ability_objects']=$abilities_keep; }
@@ -995,96 +970,80 @@ function wp_remote_retrieve_body($r){ return is_array($r)?(string)($r['body']??'
 function wp_remote_retrieve_header($r,$h){ $h=strtolower((string)$h); return is_array($r)&&isset($r['headers'])?(string)($r['headers'][$h]??''):''; }
 function sgap_http($code,$body){ return ['response'=>['code'=>$code],'body'=>is_array($body)?json_encode($body):(string)$body]; }
 
-// 7.38.4 — et gemt modelnavn AIMLAPI ikke kender må ikke lamme chatten: kaldet prøver én gang
-// på standardmodellen, retter indstillingen og fortæller ejeren det. Auth, netværk og rate limit
-// må ikke udløse fallback.
-$ai_keep=[]; foreach(['sgap_ai_provider','sgap_ai_model','sgap_ai_api_key'] as $k){ $ai_keep[$k]=$GLOBALS['opts'][$k]??null; }
-$GLOBALS['opts']['sgap_ai_provider']='aimlapi'; $GLOBALS['opts']['sgap_ai_api_key']='KEY'; $GLOBALS['opts']['sgap_ai_model']='claude-3-5-sonnet';
-check('ai: only a model-name error counts as a model error', SGAP_AI::model_rejected('Model claude-3-5-sonnet not found') && SGAP_AI::model_rejected('The model `x` does not exist or you do not have access to it') && !SGAP_AI::model_rejected('Incorrect API key provided') && !SGAP_AI::model_rejected('Rate limit exceeded for model claude-3-5-sonnet') && !SGAP_AI::model_rejected('offline'));
-$GLOBALS['http_calls']=[];
-$GLOBALS['http_queue']=[
- sgap_http(404,['error'=>['message'=>'Model claude-3-5-sonnet not found']]),
- sgap_http(200,['model'=>'anthropic/claude-opus-5.5','choices'=>[['message'=>['content'=>'Hej fra standardmodellen'],'finish_reason'=>'stop']]])
-];
+// 7.85.0: der er hverken reserve eller model-reparation. En fejl rapporteres som den er,
+// efter præcis ét kald, og det gemte modelnavn røres ikke.
+$ai_keep=[]; foreach(['sgap_ai_model','sgap_ai_api_key'] as $k){ $ai_keep[$k]=$GLOBALS['opts'][$k]??null; }
+$GLOBALS['opts']['sgap_ai_api_key']='sk-or-v1-fixture'; $GLOBALS['opts']['sgap_ai_model']='vendor/gone';
+$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[sgap_http(404,['error'=>['message'=>'Model vendor/gone not found']])];
 $answer=SGAP_Chat::reply([], 'Hej');
-check('chat: a stored model AIMLAPI rejects still answers', is_array($answer) && str_contains((string)($answer['text']??''),'Hej fra standardmodellen'));
-check('chat: the retry runs on the default model, exactly once', count($GLOBALS['http_calls'])===2 && (json_decode((string)($GLOBALS['http_calls'][1][1]['body']??''),true)['model']??'')==='anthropic/claude-opus-5.5');
-check('chat: the rejected model is repaired to the model that answers', get_option('sgap_ai_model','')==='anthropic/claude-opus-5.5' && SGAP_AI::model()==='anthropic/claude-opus-5.5');
-check('chat: the owner is told which model was replaced', str_contains((string)($answer['text']??''),'claude-3-5-sonnet'));
-check('chat: the answer also names the model it now uses', str_contains((string)($answer['text']??''),'anthropic/claude-opus-5.5'));
-$GLOBALS['opts']['sgap_ai_model']='claude-3-5-sonnet'; $GLOBALS['http_calls']=[];
-$GLOBALS['http_queue']=[sgap_http(401,['error'=>['message'=>'Incorrect API key provided']])];
+check('chat: a model error is reported as it is, after one call and with no retry', $answer instanceof WP_Error && str_contains($answer->get_error_message(),'not found') && count($GLOBALS['http_calls'])===1);
+check('chat: the stored model is left alone', get_option('sgap_ai_model')==='vendor/gone' && SGAP_AI::model()==='vendor/gone');
+$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[sgap_http(401,['error'=>['message'=>'Incorrect API key provided']])];
 $answer=SGAP_Chat::reply([], 'Hej');
-check('chat: an auth error fails without a fallback call', $answer instanceof WP_Error && count($GLOBALS['http_calls'])===1 && get_option('sgap_ai_model')==='claude-3-5-sonnet');
+check('chat: an auth error fails without a second call', $answer instanceof WP_Error && count($GLOBALS['http_calls'])===1 && get_option('sgap_ai_model')==='vendor/gone');
 $GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[];
 $answer=SGAP_Chat::reply([], 'Hej');
-check('chat: a network error fails without a fallback call', $answer instanceof WP_Error && count($GLOBALS['http_calls'])===1 && get_option('sgap_ai_model')==='claude-3-5-sonnet');
-$GLOBALS['http_calls']=[];
-$GLOBALS['http_queue']=[sgap_http(429,['error'=>['message'=>'Rate limit exceeded for model claude-3-5-sonnet']])];
+check('chat: a network error fails without a second call', $answer instanceof WP_Error && count($GLOBALS['http_calls'])===1);
+$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[sgap_http(429,['error'=>['message'=>'Rate limit exceeded']])];
 $answer=SGAP_Chat::reply([], 'Hej');
-check('chat: a rate limit error is reported, not retried on another model', $answer instanceof WP_Error && count($GLOBALS['http_calls'])===1 && get_option('sgap_ai_model')==='claude-3-5-sonnet');
+check('chat: a rate limit is reported, not retried on another model', $answer instanceof WP_Error && count($GLOBALS['http_calls'])===1 && get_option('sgap_ai_model')==='vendor/gone');
+check('chat: OpenRouter is the only endpoint ever called', array_values(array_unique(array_column($GLOBALS['http_calls'],0)))===['https://openrouter.ai/api/v1/chat/completions']);
 foreach($ai_keep as $k=>$v){ if($v===null){ unset($GLOBALS['opts'][$k]); } else { $GLOBALS['opts'][$k]=$v; } }
 
-// 7.39.0 — model-dropdown: kun det provideren faktisk udbyder kan vælges, og et gemt navn
-// der er udgået vises som udgået i stedet for at forsvinde.
+// 7.85.0 — model-dropdown: kun det OpenRouter faktisk udbyder kan vælges, og et gemt navn
+// der er udgået vises som udgået i stedet for at forsvinde. Der er ingen standardmodel.
 if (!function_exists('add_settings_error')) { function add_settings_error($setting,$code,$message,$type='error'){ $GLOBALS['settings_errors'][]=[$setting,$code,$message,$type]; } }
 $GLOBALS['settings_errors']=[];
-$GLOBALS['filters']['sgap_ai_model_catalog']=fn($list,$provider)=>['openai/gpt-x','anthropic/claude-opus-5.5','openai/gpt-x','anthropic/claude-sonnet-5.5'];
-$GLOBALS['opts']['sgap_ai_provider']='aimlapi'; $GLOBALS['opts']['sgap_ai_model']='';
-check('models: the catalogue dedupes, sorts and groups by vendor', SGAP_AI::catalog()===['anthropic/claude-opus-5.5','anthropic/claude-sonnet-5.5','openai/gpt-x'] && array_keys(SGAP_Setup::group_models(SGAP_AI::catalog()))===['anthropic','openai']);
+$GLOBALS['filters']['sgap_ai_model_catalog']=fn($list)=>['openai/gpt-x','vendor/a','openai/gpt-x','vendor/b'];
+update_option('sgap_ai_model','');
+check('models: the catalogue dedupes, sorts and groups by vendor', SGAP_AI::catalog()===['openai/gpt-x','vendor/a','vendor/b'] && array_keys(SGAP_Setup::group_models(SGAP_AI::catalog()))===['openai','vendor']);
 $mf=SGAP_Setup::field('ai_model');
-check('models: the field is a grouped dropdown with the default first', str_contains($mf,'<select id="sgap_ai_model"') && str_contains($mf,'<optgroup label="anthropic">') && substr_count($mf,'<option')===4);
-update_option('sgap_ai_model','anthropic/claude-3-5-sonnet');
+check('models: the field is a grouped dropdown with an empty first option', str_contains($mf,'<select id="sgap_ai_model"') && str_contains($mf,'<optgroup label="vendor">') && substr_count($mf,'<option')===4 && str_contains($mf,'>Pick a model</option>'));
+update_option('sgap_ai_model','vendor/gone');
 check('models: a stored model that is gone is shown as retired, not hidden', str_contains(SGAP_Setup::field('ai_model'),'(not offered any more)'));
-check('models: a listed model may be saved', SGAP_Settings::sanitize_model('anthropic/claude-sonnet-5.5')==='anthropic/claude-sonnet-5.5');
-check('models: an unlisted model is refused and the stored one kept', SGAP_Settings::sanitize_model('claude-3-5-sonnet')==='anthropic/claude-3-5-sonnet' && ($GLOBALS['settings_errors'][0][1]??'')==='sgap_model_unknown');
-// Punktet der blev fanget her: "Provider default" må ikke gemmes som et tomt felt.
+check('models: a listed model may be saved', SGAP_Settings::sanitize_model('vendor/a')==='vendor/a');
+check('models: an unlisted model is refused and the stored one kept', SGAP_Settings::sanitize_model('vendor/gone2')==='vendor/gone' && ($GLOBALS['settings_errors'][0][1]??'')==='sgap_model_unknown');
+// OpenRouter har ingen standardmodel: et tomt valg må ikke blive til et opdigtet navn.
 $model_san=$GLOBALS['settings']['sgap_ai_model']['sanitize_callback'] ?? null;
 check('models: the save path is the registered sanitizer', is_callable($model_san));
-$picked_default=$model_san('');
-check('models: Provider default is stored as the model it resolves to', $picked_default==='anthropic/claude-opus-5.5');
-update_option('sgap_ai_model',$picked_default);
-check('models: after saving, the field holds the model and is not empty', get_option('sgap_ai_model')==='anthropic/claude-opus-5.5' && SGAP_AI::model()==='anthropic/claude-opus-5.5');
-check('models: the stored default is the option the dropdown marks as selected', str_contains(SGAP_Setup::field('ai_model'),'<option value="anthropic/claude-opus-5.5" selected'));
-check('models: the retired name cannot be saved back after that', $model_san('claude-3-5-sonnet')==='anthropic/claude-opus-5.5');
-update_option('sgap_ai_model','');
+check('models: an empty choice stays empty, because there is no default', $model_san('')==='' && $model_san('vendor/b')==='vendor/b');
+update_option('sgap_ai_model','vendor/b');
+check('models: the stored model is the option the dropdown marks as selected', str_contains(SGAP_Setup::field('ai_model'),'<option value="vendor/b" selected'));
 ob_start(); do_action('page_sgap-settings'); $settings_html=ob_get_clean();
-check('models: the settings page renders the dropdown', str_contains($settings_html,'id="sgap_ai_model"') && str_contains($settings_html,'<optgroup label="anthropic">'));
+check('models: the settings page renders the dropdown', str_contains($settings_html,'id="sgap_ai_model"') && str_contains($settings_html,'<optgroup label="vendor">'));
 unset($GLOBALS['filters']['sgap_ai_model_catalog']);
-$GLOBALS['opts']['sgap_ai_model']='';
+update_option('sgap_ai_model','');
 check('models: without a catalogue the field is free text again', str_contains(SGAP_Setup::field('ai_model'),'type="text"') && !str_contains(SGAP_Setup::field('ai_model'),'<select'));
 check('models: without a catalogue the typed name is kept', SGAP_Settings::sanitize_model('some/custom')==='some/custom');
 
-// Punkt 4 mod den rigtige verden: kør med SGAP_LIVE_CATALOG=1, så hentes AIMLAPI's eget
-// katalog og hver eneste <option> sammenlignes med de id'er provideren faktisk udbyder.
+// Punkt 4 mod den rigtige verden: kør med SGAP_LIVE_CATALOG=1, så hentes OpenRouters eget
+// katalog (uden nøgle) og hver eneste <option> sammenlignes med de id'er der faktisk udbydes.
 if (($live_src = (string) getenv('SGAP_LIVE_CATALOG')) !== '') {
     if ($live_src !== '1' && is_file($live_src)) {
         // En PHP uden allow_url_fopen kan få kataloget serveret som en fil hentet med curl.
         $raw = (string) file_get_contents($live_src);
     } else {
         $ctx = stream_context_create(['http' => ['timeout' => 25, 'header' => "User-Agent: steamgears-smoke\r\n"]]);
-        $raw = @file_get_contents('https://api.aimlapi.com/v1/models', false, $ctx);
+        $raw = @file_get_contents('https://openrouter.ai/api/v1/models', false, $ctx);
     }
     $live_body = is_string($raw) ? json_decode($raw, true) : null;
     if (is_array($live_body)) {
         $live_ids = SGAP_AI::catalog_ids($live_body);
         $GLOBALS['filters']['sgap_ai_model_catalog'] = fn() => $live_ids;
-        $GLOBALS['opts']['sgap_ai_provider'] = 'aimlapi';
-        $GLOBALS['opts']['sgap_ai_model'] = 'anthropic/claude-opus-5.5';
+        $GLOBALS['opts']['sgap_ai_model'] = 'anthropic/claude-sonnet-4.6';
         $live_html = SGAP_Setup::field('ai_model');
         preg_match_all('/<option value="([^"]*)"/', $live_html, $om);
         $picked = array_values(array_diff($om[1], ['']));
         $expect = $live_ids;
         sort($picked); sort($expect);
-        check('live: AIMLAPI lists a usable catalogue', count($live_ids) > 100);
-        check('live: every dropdown option is a model AIMLAPI offers (and no other)', $picked === $expect && count($om[1]) === count($live_ids) + 1);
-        check('live: Provider default is the first option and names the default model', str_starts_with($live_html, '<select') && str_contains(substr($live_html, 0, strpos($live_html, '</option>') + 9), 'Provider default: anthropic/claude-opus-5.5'));
-        check('live: the default model is one AIMLAPI offers', in_array('anthropic/claude-opus-5.5', $live_ids, true));
-        echo 'LIVE: ' . count($live_ids) . " modeller fra AIMLAPI, alle valgbare i dropdownen\n";
+        check('live: OpenRouter lists a usable catalogue', count($live_ids) > 100);
+        check('live: every dropdown option is a model OpenRouter offers (and no other)', $picked === $expect && count($om[1]) === count($live_ids) + 1);
+        check('live: the dropdown starts with the empty Pick a model option', str_starts_with($live_html, '<select') && str_contains(substr($live_html, 0, strpos($live_html, '</option>') + 9), 'Pick a model'));
         $GLOBALS['opts']['sgap_ai_model'] = '';
         unset($GLOBALS['filters']['sgap_ai_model_catalog']);
+        echo 'LIVE: ' . count($live_ids) . " modeller fra OpenRouter, alle valgbare i dropdownen\n";
     } else {
-        echo "SKIP live: AIMLAPI /models kunne ikke læses\n";
+        echo "SKIP live: OpenRouter /models kunne ikke læses\n";
     }
 }
 
@@ -1271,7 +1230,7 @@ $GLOBALS['opts']['sgap_locale_source']=''; $GLOBALS['opts']['sgap_locales']='da'
 check('locales: an empty source counts as en', SGAP_Locales::source()==='en' && SGAP_Locales::enabled());
 $GLOBALS['opts']['sgap_locale_source']='en'; $GLOBALS['opts']['sgap_locales']='da,sv,de,fr,es,it,pl,nl';
 check('locales: at most six languages per post', count(SGAP_Locales::locales())===6);
-check('locales: the settings page shows both fields with help', isset(SGAP_Settings::HELP['locales']) && in_array('locales', SGAP_Settings::SECTIONS['AI content'], true) && in_array('locale_source', SGAP_Settings::TEXT_KEYS, true));
+check('locales: the settings page shows both fields with help', isset(SGAP_Settings::HELP['locales']) && in_array('locales', SGAP_Settings::SECTIONS['AI'], true) && in_array('locale_source', SGAP_Settings::TEXT_KEYS, true));
 $GLOBALS['opts']['sgap_locales']='da,sv';
 
 // Oversat side: uden en oversættelse laves ingen variant — og fejlen siges højt.
@@ -1299,19 +1258,19 @@ $exp = SGAP_Locales::expand($row_l, 100, fn()=>'not a caption');
 check('locales: a non-caption answer is an error', $exp['items']===[] && str_contains($exp['errors'][0]['error'],'not a caption'));
 
 // AI-stien: alle kald gennem WordPress-HTTP-API'et, så den kan stubbes.
-$GLOBALS['opts']['sgap_ai_provider']='anthropic'; $GLOBALS['opts']['sgap_ai_api_key']=''; $GLOBALS['http_calls']=[];
+$GLOBALS['opts']['sgap_ai_api_key']=''; $GLOBALS['opts']['sgap_ai_model']='vendor/model'; $GLOBALS['http_calls']=[];
 $exp = SGAP_Locales::expand($row_l, 100);
-check('locales: a missing AI key is an error, not a PHP warning', $exp['items']===[] && count($exp['errors'])===2 && str_contains($exp['errors'][0]['error'],'AI API key'));
+check('locales: a missing AI key is an error, not a PHP warning', $exp['items']===[] && count($exp['errors'])===2 && str_contains($exp['errors'][0]['error'],'OpenRouter key'));
 check('locales: no HTTP call without a key', $GLOBALS['http_calls']===[]);
 $GLOBALS['opts']['sgap_ai_api_key']='k'; $GLOBALS['http_calls']=[];
-$GLOBALS['http_queue']=[sgap_http(200,['content'=>[['type'=>'text','text'=>'{"title":"Messingbrille","body":"Se skarp ud."}']]])];
+$GLOBALS['http_queue']=[sgap_http(200,['choices'=>[['message'=>['content'=>'{"title":"Messingbrille","body":"Se skarp ud."}'],'finish_reason'=>'stop']]])];
 $t = SGAP_Locales::ai_translate($row_l,'da');
 check('locales: a translated caption is read from the model answer', is_array($t) && $t['title']==='Messingbrille' && $t['body']==='Se skarp ud.');
 check('locales: the translation is exactly one stubbed HTTP call', count($GLOBALS['http_calls'])===1);
 $GLOBALS['http_queue']=[sgap_http(500,['error'=>['message'=>'upstream is down']]),sgap_http(500,['error'=>['message'=>'upstream is down']])];
 $exp = SGAP_Locales::expand($row_l, 100);
 check('locales: an API error is reported per language', $exp['items']===[] && str_contains($exp['errors'][0]['error'],'upstream is down'));
-$GLOBALS['http_queue']=[sgap_http(200,['content'=>[['type'=>'text','text'=>'not json']]]),sgap_http(200,['content'=>[['type'=>'text','text'=>'not json']]])];
+$GLOBALS['http_queue']=[sgap_http(200,['choices'=>[['message'=>['content'=>'not json'],'finish_reason'=>'stop']]]),sgap_http(200,['choices'=>[['message'=>['content'=>'not json'],'finish_reason'=>'stop']]])];
 $exp = SGAP_Locales::expand($row_l, 100);
 check('locales: a non-JSON model answer is an error', $exp['items']===[] && count($exp['errors'])===2);
 
@@ -1406,7 +1365,8 @@ check('evergreen: unmark removes the mark and the budget', !SGAP_Evergreen::stat
 // AI-stien: variationsprompten går gennem det konfigurerede AI-kald og kan stubbes.
 unset($GLOBALS['filters']['sgap_evergreen_variation']);
 SGAP_Evergreen::mark(502,['max'=>1]); $GLOBALS['opts']['sgap_ai_api_key']='k'; $wpdb->log=[]; $GLOBALS['http_calls']=[];
-$GLOBALS['http_queue']=[sgap_http(200,['content'=>[['type'=>'text','text'=>json_encode(['title'=>'A second look at the corset','text'=>'The fit guide, revisited.','hashtags'=>['#corset'],'alt_text'=>'Corset on a mannequin'])]]])];
+$GLOBALS['opts']['sgap_ai_model']='vendor/model';
+$GLOBALS['http_queue']=[sgap_http(200,['choices'=>[['message'=>['content'=>json_encode(['title'=>'A second look at the corset','text'=>'The fit guide, revisited.','hashtags'=>['#corset'],'alt_text'=>'Corset on a mannequin'])],'finish_reason'=>'stop']]])];
 $ai=SGAP_Evergreen::queue_one(502);
 check('evergreen: the AI variation is one structured call', is_array($ai) && count($GLOBALS['http_calls'])===1);
 check('evergreen: the prompt asks for a new angle and forbids invented offers', str_contains((string)$GLOBALS['http_calls'][0][1]['body'],'genuinely different angle') && str_contains((string)$GLOBALS['http_calls'][0][1]['body'],'do not invent a discount'));
@@ -1559,8 +1519,9 @@ $GLOBALS['rows']=[]; $wpdb->next=null;
 ob_start(); do_action('page_sgap-studio'); $studio53 = ob_get_clean();
 $sw = strpos($studio53,'<h2>Write</h2>'); $sf = strpos($studio53,'<h2>Fix</h2>');
 check('studio 7.54: write and fix are two sections, write first', $sw !== false && $sf !== false && $sw < $sf);
-check('studio 7.54: drafting and images under Write, SEO work under Fix', $sw !== false && $sf !== false
-    && str_contains(substr($studio53,$sw,$sf-$sw),'Write an article or guide') && str_contains(substr($studio53,$sw,$sf-$sw),'AI image')
+check('studio 7.85: drafting and keyword research under Write, SEO work under Fix', $sw !== false && $sf !== false
+    && str_contains(substr($studio53,$sw,$sf-$sw),'Write an article or guide')
+    && !str_contains(substr($studio53,$sw,$sf-$sw),'AI image')
     && str_contains(substr($studio53,$sf),'Optimise SEO of a page') && str_contains(substr($studio53,$sf),'Optimise the whole site'));
 check('studio 7.54: the score card still explains what it measures', str_contains(substr($studio53,$sf),'What the score measures') && str_contains(substr($studio53,$sf),'AEO'));
 check('admin pages 7.54: css carries the panel head and its high-contrast rule', str_contains(SGAP_UI::stylesheet(), '.sgap-panel-head{') && str_contains(SGAP_UI::stylesheet(), '.sgap-panel-head,.sgap .sgap-section-head:after{border-color:CanvasText}'));
@@ -1613,193 +1574,41 @@ check('engagement: a 500 is reported and stores nothing', $failed['updated']===0
 SGAP_Engagement::$transport=null; $GLOBALS['rows']=[];
 
 
-/* ---------------- P1.24: OpenRouter as an automatic backup for AIMLAPI ---------------- */
-// Only a provider failure may start the backup: a 2xx answer — even an empty one — means the
-// provider answered, and a second call would pay twice for the same request. Every call here is
-// stubbed through http_queue, so nothing leaves the machine and no key is real.
-$fb_keep = [];
-foreach (['sgap_ai_provider','sgap_ai_model','sgap_ai_api_key','sgap_openrouter_api_key','sgap_openrouter_model'] as $k) {
-    $fb_keep[$k] = $GLOBALS['opts'][$k] ?? null;
-}
-$fb_log_before = get_option('sgap_error_log', []);
-update_option('sgap_ai_provider','aimlapi');
-update_option('sgap_ai_model','anthropic/claude-opus-5.5');
-update_option('sgap_ai_api_key','PRIMARY-KEY');
-update_option('sgap_openrouter_api_key','sk-or-backup');
-update_option('sgap_openrouter_model','anthropic/claude-sonnet-4.5');
-
-check('fallback: ready only with a key, a model and a primary that is not OpenRouter',
-    SGAP_AI::fallback_ready() && SGAP_AI::fallback_key()==='sk-or-backup' && SGAP_AI::fallback_model()==='anthropic/claude-sonnet-4.5');
-update_option('sgap_openrouter_model','');
-check('fallback: a key without a model is off, not guessed', !SGAP_AI::fallback_ready());
-update_option('sgap_openrouter_model','anthropic/claude-sonnet-4.5');
-$fb_provider = SGAP_AI::provider(); update_option('sgap_ai_provider','openrouter'); update_option('sgap_ai_model','anthropic/claude-sonnet-4.5');
-check('fallback: OpenRouter as the provider never backs up to itself', !SGAP_AI::fallback_ready());
-update_option('sgap_ai_provider','aimlapi'); update_option('sgap_ai_model','anthropic/claude-opus-5.5');
-check('fallback: provider failures count, our own mistakes do not',
-    SGAP_AI::should_fallback(new WP_Error('x','y',['status'=>401]))
-    && SGAP_AI::should_fallback(new WP_Error('x','y',['status'=>403]))
-    && SGAP_AI::should_fallback(new WP_Error('x','y',['status'=>402]))
-    && SGAP_AI::should_fallback(new WP_Error('x','y',['status'=>429]))
-    && SGAP_AI::should_fallback(new WP_Error('x','y',['status'=>503]))
-    && SGAP_AI::should_fallback(new WP_Error('offline','offline'))
-    && !SGAP_AI::should_fallback(new WP_Error('x','y',['status'=>400]))
-    && !SGAP_AI::should_fallback(new WP_Error('x','y',['status'=>422]))
-    && !SGAP_AI::should_fallback(new WP_Error('x','y',['status'=>200])));
-
-// A working primary is never doubled.
+/* ---------------- P1.24 → 7.85.0: there is no backup, only OpenRouter ---------------- */
+// 7.85.0 fjernede reserven og gratis-model-forsøget: OpenRouter er den eneste udbyder, så en
+// fejl rapporteres som den er, efter præcis ét kald. Alt går gennem de stubbede HTTP-kald.
+$fb_keep=[]; foreach(['sgap_ai_model','sgap_ai_api_key'] as $k){ $fb_keep[$k]=$GLOBALS['opts'][$k]??null; }
+update_option('sgap_ai_api_key','sk-or-v1-fixture'); update_option('sgap_ai_model','vendor/model');
+check('no backup: the fallback and free-retry API is gone',
+    !method_exists('SGAP_AI','fallback_ready') && !method_exists('SGAP_AI','fallback_key') && !method_exists('SGAP_AI','fallback_model')
+    && !method_exists('SGAP_AI','should_fallback') && !method_exists('SGAP_AI','free_retry') && !method_exists('SGAP_KeyCheck','check_fallback'));
 $GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[sgap_http(200,['choices'=>[['message'=>['content'=>'{"posts":[]}'],'finish_reason'=>'stop']]])];
 $fb_json=SGAP_AI::json_call('sys','prompt',['type'=>'object']);
-check('fallback: a working primary makes exactly one call and no backup',
-    !is_wp_error($fb_json) && count($GLOBALS['http_calls'])===1 && SGAP_AI::last_fallback()===[] && SGAP_AI::fallback_note()==='');
-
-// 402 — the case that actually happened on the live site: the account ran out of credit.
-$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[
-    sgap_http(402,['error'=>['message'=>'Insufficient credits']]),
-    sgap_http(200,['choices'=>[['message'=>['content'=>'{"posts":[]}'],'finish_reason'=>'stop']]])
-];
-$fb_json=SGAP_AI::json_call('sys','prompt',['type'=>'object'],1200,'low');
-$fb_backup=$GLOBALS['http_calls'][1]??[];
-$fb_sent=json_decode((string)($fb_backup[1]['body']??''),true);
-check('fallback: no credit starts the backup', !is_wp_error($fb_json) && count($GLOBALS['http_calls'])===2
-    && ($fb_backup[0]??'')==='https://openrouter.ai/api/v1/chat/completions');
-check('fallback: the backup sends its own key and its own model',
-    ($fb_backup[1]['headers']['Authorization']??'')==='Bearer sk-or-backup' && ($fb_sent['model']??'')==='anthropic/claude-sonnet-4.5');
-check('fallback: OpenRouter gets no reasoning_effort but the same request',
-    !isset($fb_sent['reasoning_effort']) && isset($fb_sent['messages'][0]['content'],$fb_sent['response_format'])
-    && ($fb_backup[1]['headers']['HTTP-Referer']??'')==='https://steamgears.eu/');
-check('fallback: the result is recorded without the key',
-    (SGAP_AI::last_fallback()['model']??'')==='anthropic/claude-sonnet-4.5'
-    && (SGAP_AI::last_fallback()['status']??0)===402
-    && !str_contains(wp_json_encode(SGAP_AI::last_fallback()),'sk-or-backup'));
-$fb_note=SGAP_AI::fallback_note();
-check('fallback: the owner is told the answer came from the backup',
-    str_contains($fb_note,'OpenRouter backup') && str_contains($fb_note,'anthropic/claude-sonnet-4.5')
-    && str_contains($fb_note,'Insufficient credits') && !str_contains($fb_note,'sk-or-backup'));
-$fb_entries=SGAP_Diagnostics::entries();
-check('fallback: the diagnostics log keeps one row, with the status and no key',
-    ($fb_entries[0]['source']??'')==='ai-fallback' && (int)($fb_entries[0]['context']['status']??0)===402
-    && !str_contains(wp_json_encode($fb_entries[0]),'sk-or-backup'));
-
-foreach ([401,429,503] as $fb_code) {
-    $GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[
-        sgap_http($fb_code,['error'=>['message'=>'HTTP '.$fb_code]]),
-        sgap_http(200,['choices'=>[['message'=>['content'=>'svar'],'finish_reason'=>'stop']]])
-    ];
-    $fb_out=SGAP_AI::chat_call('PRIMARY-KEY',['model'=>'anthropic/claude-opus-5.5','messages'=>[]]);
-    check("fallback: HTTP {$fb_code} starts the backup", !is_wp_error($fb_out) && count($GLOBALS['http_calls'])===2);
-}
-$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[
-    new WP_Error('http_request_failed','cURL error 28: timed out'),
-    sgap_http(200,['choices'=>[['message'=>['content'=>'svar'],'finish_reason'=>'stop']]])
-];
-$fb_out=SGAP_AI::chat_call('PRIMARY-KEY',['model'=>'anthropic/claude-opus-5.5','messages'=>[]]);
-check('fallback: a transport error starts the backup', !is_wp_error($fb_out) && count($GLOBALS['http_calls'])===2);
-
-// A rejected model name is the provider's own advice, not an outage: retry on its default first.
-$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[
-    sgap_http(400,['error'=>['message'=>'Model x/y not found']]),
-    sgap_http(200,['choices'=>[['message'=>['content'=>'svar'],'finish_reason'=>'stop']]])
-];
-$fb_out=SGAP_AI::chat_call('PRIMARY-KEY',['model'=>'x/y','messages'=>[]]);
-check('fallback: a rejected model is retried on the provider default, not backed up',
-    !is_wp_error($fb_out) && count($GLOBALS['http_calls'])===2
-    && (json_decode((string)($GLOBALS['http_calls'][1][1]['body']??''),true)['model']??'')==='anthropic/claude-opus-5.5'
-    && SGAP_AI::last_fallback()===[]);
+check('no backup: a working call is exactly one request to OpenRouter',
+    !is_wp_error($fb_json) && count($GLOBALS['http_calls'])===1 && $GLOBALS['http_calls'][0][0]==='https://openrouter.ai/api/v1/chat/completions');
+$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[sgap_http(402,['error'=>['message'=>'Insufficient credits']])];
+$fb_out=SGAP_AI::json_call('sys','prompt',['type'=>'object'],1200);
+check('no backup: no credit is one call and the provider error itself',
+    is_wp_error($fb_out) && count($GLOBALS['http_calls'])===1 && str_contains($fb_out->get_error_message(),'Insufficient credits')
+    && ($fb_out->get_error_data()['status']??0)===402);
 $GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[sgap_http(400,['error'=>['message'=>'Bad request']])];
-$fb_out=SGAP_AI::chat_call('PRIMARY-KEY',['model'=>'anthropic/claude-opus-5.5','messages'=>[]]);
-check('fallback: a 400 without a model error is reported, not backed up',
-    is_wp_error($fb_out) && count($GLOBALS['http_calls'])===1);
-
-// An empty or cut-off 200 answer is a real answer: no second call.
+$fb_out=SGAP_AI::chat_call('sk-or-v1-fixture',['model'=>'vendor/model','messages'=>[]]);
+check('no backup: a 400 is reported unchanged, after one call', is_wp_error($fb_out) && count($GLOBALS['http_calls'])===1 && str_contains($fb_out->get_error_message(),'Bad request'));
 $GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[sgap_http(200,['choices'=>[['message'=>['content'=>''],'finish_reason'=>'length']]])];
 $fb_gen=SGAP_AI::generate(['title'=>'T','type'=>'post','summary'=>'S'],['facebook']);
-check('fallback: an empty 200 answer is an error, not a reason to call the backup',
-    is_wp_error($fb_gen) && count($GLOBALS['http_calls'])===1);
-
-// Both fail: the error names both providers and keeps the primary's status code.
-$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[
-    sgap_http(402,['error'=>['message'=>'Insufficient credits']]),
-    sgap_http(401,['error'=>['message'=>'No auth credentials found']])
-];
-$fb_out=SGAP_AI::chat_call('PRIMARY-KEY',['model'=>'anthropic/claude-opus-5.5','messages'=>[]]);
-check('fallback: a second failure names both providers and keeps the primary code',
-    is_wp_error($fb_out) && str_contains($fb_out->get_error_message(),'Insufficient credits')
-    && str_contains($fb_out->get_error_message(),'OpenRouter')
-    && ($fb_out->get_error_data()['status']??0)===402);
-check('fallback: nothing is recorded when the backup failed too', SGAP_AI::last_fallback()===[]);
-
-// Without a model the backup is off — one attempt, the original error unchanged.
-update_option('sgap_openrouter_model','');
-$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[sgap_http(402,['error'=>['message'=>'Insufficient credits']])];
-$fb_out=SGAP_AI::chat_call('PRIMARY-KEY',['model'=>'anthropic/claude-opus-5.5','messages'=>[]]);
-check('fallback: switched off is one attempt and the original error',
-    is_wp_error($fb_out) && count($GLOBALS['http_calls'])===1 && !str_contains($fb_out->get_error_message(),'backup'));
-update_option('sgap_openrouter_model','anthropic/claude-sonnet-4.5');
-
-// The key test proves the backup pair, never the primary's model.
-$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[sgap_http(200,['choices'=>[['message'=>['content'=>''],'finish_reason'=>'length']]])];
-$fb_check=SGAP_KeyCheck::check_fallback();
-$fb_call=$GLOBALS['http_calls'][0]??[];
-$fb_body=json_decode((string)($fb_call[1]['body']??''),true);
-check('fallback: the key test asks OpenRouter with the backup key and the backup model',
-    ($fb_check['ok']??null)===true && ($fb_call[0]??'')==='https://openrouter.ai/api/v1/chat/completions'
-    && ($fb_call[1]['headers']['Authorization']??'')==='Bearer sk-or-backup'
-    && ($fb_body['model']??'')==='anthropic/claude-sonnet-4.5');
-check('fallback: the key test says the backup is off when the model is empty',
-    (function () { update_option('sgap_openrouter_model',''); $r=SGAP_KeyCheck::check_fallback();
-        update_option('sgap_openrouter_model','anthropic/claude-sonnet-4.5');
-        return ($r['ok']??null)===false && str_contains($r['message'],'backup is off'); })());
-check('fallback: the key test is silent when no backup key is saved',
-    (function () { $k=get_option('sgap_openrouter_api_key'); update_option('sgap_openrouter_api_key','');
-        $r=SGAP_KeyCheck::check_fallback(); update_option('sgap_openrouter_api_key',$k);
-        return ($r['ok']??null)===null && $GLOBALS['http_calls']!==[]; })());
-
-// Settings, list and save path.
-check('fallback: the key is a secret and the model a plain setting',
-    in_array('openrouter_api_key',SGAP_Settings::SECRET_KEYS,true)
-    && in_array('openrouter_model',SGAP_Settings::TEXT_KEYS,true)
-    && isset(SGAP_Settings::HELP['openrouter_api_key'],SGAP_Settings::HELP['openrouter_model'])
-    && in_array('openrouter_model',SGAP_Settings::SECTIONS['AI content'],true));
-check('fallback: the backup key has its own card, with the model beside it',
-    (SGAP_Keys::PROVIDERS['openrouter_backup']['keys']??[])===['openrouter_api_key']
-    && in_array('openrouter_model',SGAP_Keys::PROVIDERS['openrouter_backup']['extra']??[],true)
-    && in_array('sgap_ai_catalog_openrouter_backup',SGAP_Keys::CACHE_MAP['openrouter_api_key']??[],true));
-$GLOBALS['filters']['sgap_ai_model_catalog']=function($list,$provider){
-    return $provider==='openrouter_backup'
-        ? ['anthropic/claude-sonnet-4.5','openai/gpt-5','anthropic/claude-sonnet-4.5']
-        : ['anthropic/claude-opus-5.5'];
-};
-check('fallback: the model list comes from OpenRouter, not from the chosen provider',
-    SGAP_AI::catalog(false,'openrouter_backup')===['anthropic/claude-sonnet-4.5','openai/gpt-5']
-    && SGAP_AI::catalog()===['anthropic/claude-opus-5.5']);
-$fb_field=SGAP_Setup::backup_model_field('sgap_openrouter_model');
-check('fallback: the field offers "off" first and groups the rest',
-    str_contains($fb_field,'<select id="sgap_openrouter_model"') && str_contains($fb_field,'>Off —')
-    && str_contains($fb_field,'<optgroup label="anthropic">'));
-$fb_san=$GLOBALS['settings']['sgap_openrouter_model']['sanitize_callback']??null;
-check('fallback: the save path keeps empty as off and refuses an unlisted model',
-    is_callable($fb_san) && $fb_san('')==='' && $fb_san('openai/gpt-5')==='openai/gpt-5'
-    && $fb_san('nope/nope')==='anthropic/claude-sonnet-4.5'
-    && ($GLOBALS['settings_errors'][count($GLOBALS['settings_errors'])-1][1]??'')==='sgap_backup_model_unknown');
-unset($GLOBALS['filters']['sgap_ai_model_catalog']);
-ob_start(); do_action('page_sgap-settings'); $fb_html=ob_get_clean();
-check('fallback: the keys tab renders the backup key and its model once each',
-    substr_count($fb_html,'name="sgap_openrouter_api_key"')===1
-    && substr_count($fb_html,'name="sgap_openrouter_model"')===1
-    && str_contains($fb_html,'OpenRouter (backup)'));
-
-// Put the settings back the way the rest of the suite expects them.
+check('no backup: an empty 200 answer is an error, not a reason for another call', is_wp_error($fb_gen) && count($GLOBALS['http_calls'])===1);
+check('no backup: no backup key, model or card is registered',
+    !in_array('openrouter_api_key',SGAP_Settings::SECRET_KEYS,true) && !in_array('openrouter_model',SGAP_Settings::TEXT_KEYS,true)
+    && !isset(SGAP_Settings::HELP['openrouter_api_key'],SGAP_Settings::HELP['openrouter_model'])
+    && !isset(SGAP_Keys::PROVIDERS['openrouter_backup']) && (SGAP_Keys::PROVIDERS['ai']['extra']??[])===['ai_model']
+    && !isset(SGAP_Keys::CACHE_MAP['openrouter_api_key']));
 foreach ($fb_keep as $k=>$v) { if ($v===null) { unset($GLOBALS['opts'][$k]); } else { $GLOBALS['opts'][$k]=$v; } }
-if ($fb_log_before === []) { delete_option('sgap_error_log'); } else { update_option('sgap_error_log',$fb_log_before,false); }
 $GLOBALS['http_queue']=[]; $GLOBALS['http_calls']=[];
-
 
 /* ---------------- P1.25: the key test names the real problem ---------------- */
 // Measured 10/11: OpenRouter answered 401 "Missing Authentication header" for a value that was not
 // an OpenRouter key at all. Both cases are pinned here, so the message can never again say
 // "refused" when the truth is "that is not the key" or "the header never arrived".
-update_option('sgap_ai_provider','openrouter');
 update_option('sgap_ai_api_key',"  sk-or-v1-abcdef\n");
 check('key diagnosis: a pasted key is trimmed before it becomes a header',
     SGAP_AI::api_key()==='sk-or-v1-abcdef' && SGAP_AI::api_key()===trim((string) get_option('sgap_ai_api_key')));
@@ -1820,15 +1629,8 @@ $GLOBALS['http_queue'][]=sgap_http(200,['choices'=>[['message'=>['content'=>'pon
 $kd=SGAP_KeyCheck::check_ai();
 check('key diagnosis: a well-shaped key still proves itself with one token', $kd['ok']===true
     && str_contains($kd['message'],'OpenRouter key works'));
-update_option('sgap_openrouter_api_key','not-a-key-either');
-update_option('sgap_openrouter_model','anthropic/claude-sonnet-4.5');
-$kd=SGAP_KeyCheck::check_fallback();
-check('key diagnosis: the backup key is shape-checked the same way',
-    $kd['ok']===false && str_contains($kd['message'],'not an OpenRouter key'));
-update_option('sgap_ai_provider','aimlapi');
-update_option('sgap_ai_api_key','PRIMARY-KEY');
-update_option('sgap_openrouter_api_key','sk-or-backup');
-
+update_option('sgap_ai_api_key','sk-or-v1-fixture');
+update_option('sgap_ai_model','vendor/model');
 // 7.70.1 — the outgoing request itself, not a sentence about it. `http_calls` holds the arguments
 // the plugin hands to WordPress' HTTP layer, so this is the request that leaves the site. A key
 // is never printed: each check looks at a header or a length, and the message is searched for the
@@ -1942,33 +1744,22 @@ update_option('sgap_last_generate',['at'=>'2026-11-12 06:00:00','sources'=>2,'dr
 $hp=implode("\n",SGAP_Auto::output_problems());
 check('7.80 health: a run that wrote drafts is not flagged, nothing parked', !str_contains($hp,'latest AI run') && !str_contains($hp,'switched off'));
 delete_option('sgap_last_generate'); $GLOBALS['rows']=[]; $wpdb->log=[];
-// --- 7.81.0: gratis OpenRouter-model når kreditten slipper op ---
-update_option('sgap_ai_provider','openrouter'); update_option('sgap_ai_model','anthropic/claude-haiku-5.5'); update_option('sgap_ai_api_key','sk-or-v1-fixture');
-$credit=new WP_Error('sgap_ai_http','OpenRouter: This request requires more credits, or fewer max_tokens. You requested up to 3600 tokens, but can only afford 405.',['status'=>402]);
-check('7.81 free: a credit refusal on a paid model asks for the free retry', SGAP_AI::wants_free_retry('anthropic/claude-haiku-5.5',$credit));
-check('7.81 free: a free model is never retried on itself', !SGAP_AI::wants_free_retry('openrouter/free',$credit) && !SGAP_AI::wants_free_retry('x/y:free',$credit));
-check('7.81 free: other errors (401, 404) do not switch model', !SGAP_AI::wants_free_retry('a/b',new WP_Error('sgap_ai_http','OpenRouter: User not found.',['status'=>401])) && !SGAP_AI::wants_free_retry('a/b',new WP_Error('sgap_ai_http','OpenRouter: No endpoints',['status'=>404])));
-$ok_posts=['choices'=>[['message'=>['content'=>json_encode(['posts'=>[['channel'=>'facebook','title'=>'Brass','text'=>'Brass goggles for every costume.','hashtags'=>['steampunk'],'alt_text'=>'goggles']]])]]],'model'=>'nvidia/nemotron-3-ultra-550b-a55b:free'];
-$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[sgap_http(402,['error'=>['message'=>'This request requires more credits, or fewer max_tokens.']]), sgap_http(200,$ok_posts)];
-$paidbody=SGAP_AI::chat_body('anthropic/claude-haiku-5.5','x',1);
-$got=SGAP_AI::chat_completions('sk-or-v1-fixture',$paidbody,5);
-$got=is_wp_error($got)&&SGAP_AI::wants_free_retry('anthropic/claude-haiku-5.5',$got)?SGAP_AI::free_retry('sk-or-v1-fixture',$paidbody,$got):$got;
-$second=json_decode((string)($GLOBALS['http_calls'][1][1]['body']??'{}'),true);
-check('7.81 free: the retry asks the free list in order and keeps the token budget', is_array($got) && ($second['model']??'')==='nvidia/nemotron-3-ultra-550b-a55b:free' && ($second['models']??[])===SGAP_AI::FREE_MODELS && ($second['max_tokens']??0)===2500);
-check('7.81 free: the switch is recorded with the model that answered', (SGAP_AI::last_fallback()['model']??'')==='nvidia/nemotron-3-ultra-550b-a55b:free' && str_starts_with((string)(SGAP_AI::last_fallback()['reason']??''),'no credit'));
-$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[sgap_http(429,['error'=>['message'=>'Rate limit exceeded: free-models-per-day']])];
-$both=SGAP_AI::free_retry('sk-or-v1-fixture',$paidbody,$credit);
-check('7.81 free: when the free models fail too, both reasons are named', is_wp_error($both) && str_contains($both->get_error_message(),'can only afford 405') && str_contains($both->get_error_message(),'free-models-per-day'));
-$GLOBALS['filters']['sgap_free_models']=fn($v)=>[];
-check('7.81 free: an empty filter list switches the retry off', !SGAP_AI::wants_free_retry('a/b',$credit));
-unset($GLOBALS['filters']['sgap_free_models']);
-update_option('sgap_ai_provider','anthropic');
-check('7.81 free: only on OpenRouter', !SGAP_AI::wants_free_retry('a/b',$credit));
+// --- 7.85.0: gratis-model-forsøget er væk; en kreditfejl rapporteres som den er ---
+update_option('sgap_ai_model','vendor/model'); update_option('sgap_ai_api_key','sk-or-v1-fixture');
+check('7.85 no free retry: the API and the model list are gone',
+    !method_exists('SGAP_AI','wants_free_retry') && !method_exists('SGAP_AI','free_retry') && !method_exists('SGAP_AI','free_models')
+    && !defined('SGAP_AI::FREE_MODELS'));
+$credit_msg='This request requires more credits, or fewer max_tokens. You requested up to 3600 tokens, but can only afford 405.';
+$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[sgap_http(402,['error'=>['message'=>$credit_msg]])];
+$got=SGAP_AI::chat_completions('sk-or-v1-fixture',SGAP_AI::chat_body('vendor/model','x',1),5);
+check('7.85 no free retry: a credit refusal is one call and the provider error itself',
+    is_wp_error($got) && count($GLOBALS['http_calls'])===1 && str_contains($got->get_error_message(),'can only afford 405')
+    && ($got->get_error_data()['status']??0)===402);
 $GLOBALS['opts']['sgap_channels']='facebook,bluesky'; $GLOBALS['rows']=[];
 update_option('sgap_last_generate',['at'=>'2026-11-13 06:00:00','sources'=>2,'drafts'=>4,'queued'=>4,'errors'=>[],'free'=>2,'free_model'=>'nvidia/nemotron-3-ultra-550b-a55b:free']);
-check('7.81 health: pages written by the free model are named', str_contains(implode("\n",SGAP_Auto::output_problems()),'2 pages were written by the free model nvidia/nemotron-3-ultra-550b-a55b:free'));
+check('7.85 health: an old run report can no longer name a free model', !str_contains(implode("\n",SGAP_Auto::output_problems()),'free model'));
 delete_option('sgap_last_generate'); $GLOBALS['http_queue']=[]; $GLOBALS['http_calls']=[];
-update_option('sgap_ai_provider','anthropic'); update_option('sgap_ai_model',''); update_option('sgap_ai_api_key','');
+update_option('sgap_ai_model',''); update_option('sgap_ai_api_key','');
 // --- 7.82.0: prioriteter fra Command Center ---
 if (!function_exists('rest_ensure_response')) { function rest_ensure_response($d){ return new WP_REST_Response($d); } }
 $GLOBALS['postid_for']=['https://steamgears.eu/goggles/'=>501,'https://steamgears.eu/draft/'=>502,'https://steamgears.eu/hat/'=>503];
@@ -2049,12 +1840,11 @@ check('7.83 write_for: editor down = both wait as pending drafts, nothing is que
 update_option('sgap_last_generate',['at'=>'2026-11-13 06:00:00','drafts'=>1,'errors'=>[],'rejected'=>1,'held'=>2]);
 check('7.83 health: rejected and waiting posts are named in the self-check', str_contains(implode("\n",SGAP_Auto::output_problems()),'the editor rejected 1 posts and 2 wait for you'));
 delete_option('sgap_last_generate'); unset($GLOBALS['postmeta'][777]);
-update_option('sgap_ai_provider','anthropic'); update_option('sgap_ai_api_key',''); update_option('sgap_ai_model',''); $GLOBALS['http_queue']=[]; $GLOBALS['http_calls']=[];
-$ed_bk=get_option('sgap_openrouter_api_key'); update_option('sgap_openrouter_api_key','');
-$GLOBALS['filters']['sgap_editor_models']=fn($v)=>['a:free','b:free','c:free','d:free']; $GLOBALS['filters']['sgap_free_models']=fn($v)=>['a:free','b:free','c:free','d:free'];
-check('7.83.1: never more than 3 models in a request (OpenRouter refuses more)', count(SGAP_Editor::models())===3 && count(SGAP_AI::free_models())===3);
-unset($GLOBALS['filters']['sgap_editor_models'],$GLOBALS['filters']['sgap_free_models']);
-check('7.83 editor: off without an OpenRouter key (Anthropic users keep the old flow)', !SGAP_Editor::enabled());
-update_option('sgap_openrouter_api_key',$ed_bk);
+update_option('sgap_ai_api_key',''); update_option('sgap_ai_model',''); $GLOBALS['http_queue']=[]; $GLOBALS['http_calls']=[];
+$GLOBALS['filters']['sgap_editor_models']=fn($v)=>['a:free','b:free','c:free','d:free'];
+check('7.83.1: never more than 3 models in a request (OpenRouter refuses more)', count(SGAP_Editor::models())===3);
+unset($GLOBALS['filters']['sgap_editor_models']);
+check('7.83 editor: off without an OpenRouter key', !SGAP_Editor::enabled());
+update_option('sgap_ai_api_key','sk-or-v1-fixture');
 // P3.2/P3.5-slut
 exit(empty($GLOBALS['fail'])?0:1);

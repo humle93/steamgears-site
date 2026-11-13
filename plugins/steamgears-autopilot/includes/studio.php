@@ -1,198 +1,13 @@
 <?php
 /**
- * Content Studio: SEO-optimised articles, guides and product texts written by the
- * configured AI and saved as WordPress drafts (with Rank Math / Yoast meta, FAQ,
- * internal links and a featured image), AI images through OpenRouter (or AIMLAPI, legacy) saved to the
- * media library, and SEO meta for existing pages. Admin page + abilities (so the
- * AI Chat and Claude over MCP can use them). Loaded from steamgears-autopilot.php.
+ * Content Studio: SEO-optimised articles, guides and product texts written by
+ * OpenRouter and saved as WordPress drafts (with Rank Math / Yoast meta, FAQ and
+ * internal links), keyword research, and SEO meta for existing pages. Admin page +
+ * abilities (so the AI Chat and Claude over MCP can use them). Loaded from
+ * steamgears-autopilot.php.
  */
 
 if (!defined('ABSPATH')) exit;
-
-class SGAP_Images {
-    const ENDPOINT = 'https://api.aimlapi.com/v1/images/generations';
-    const DEFAULT_MODEL = 'bytedance/seedream-5-0-pro';
-
-    /**
-     * Where images are made. OpenRouter when it has a key (main or backup) and an image model —
-     * that is the path since 7.76.0 (P10). Otherwise AIMLAPI as before, so a site keeps its images
-     * until OpenRouter is set up. '' when neither works.
-     */
-    public static function backend(): string {
-        if (SGAP_AI::openrouter_key() !== '' && self::openrouter_model() !== '') {
-            return 'openrouter';
-        }
-        return self::key() !== '' ? 'aimlapi' : '';
-    }
-
-    public static function openrouter_model(): string {
-        return trim((string) SGAP_Settings::get('openrouter_image_model'));
-    }
-
-    /** The model that will draw the next image, for the dashboard and the image metadata. */
-    public static function active_model(): string {
-        return self::backend() === 'openrouter' ? self::openrouter_model() : self::model();
-    }
-
-    /** OpenRouter takes the shape as an aspect ratio; the nearest common one is picked. */
-    public static function aspect_ratio(int $width, int $height): string {
-        $ratio = $height > 0 ? $width / $height : 1;
-        $best = '1:1';
-        $gap = PHP_FLOAT_MAX;
-        foreach (['1:1' => 1, '16:9' => 16 / 9, '9:16' => 9 / 16, '3:2' => 1.5, '2:3' => 2 / 3, '4:3' => 4 / 3, '3:4' => 0.75] as $name => $value) {
-            if (abs($ratio - $value) < $gap) {
-                $gap = abs($ratio - $value);
-                $best = $name;
-            }
-        }
-        return $best;
-    }
-
-    /** Request body for an OpenRouter image model: a chat completion that asks for image output. */
-    public static function openrouter_body(string $model, string $prompt, int $width, int $height): array {
-        return [
-            'model' => $model,
-            'messages' => [['role' => 'user', 'content' => $prompt]],
-            'modalities' => ['image', 'text'],
-            'image_config' => ['aspect_ratio' => self::aspect_ratio($width, $height)]
-        ];
-    }
-
-    /**
-     * The first image in an OpenRouter answer: message.images[].image_url.url, normally a
-     * base64 data URL. @return array{url: string, b64: string}
-     */
-    public static function openrouter_image(array $data): array {
-        $images = $data['choices'][0]['message']['images'] ?? [];
-        $first = is_array($images) ? ($images[0] ?? null) : null;
-        $url = is_array($first) ? (string) ($first['image_url']['url'] ?? $first['url'] ?? '') : '';
-        if (preg_match('#^data:image/[a-z0-9.+-]+;base64,(.+)$#is', $url, $m)) {
-            return ['url' => '', 'b64' => (string) $m[1]];
-        }
-        return ['url' => preg_match('#^https://#i', $url) ? $url : '', 'b64' => ''];
-    }
-
-    /** AIMLAPI key (legacy): the image key if set, else the AI key when the AI provider is AIMLAPI. */
-    public static function key(): string {
-        $key = trim((string) SGAP_Settings::get('image_api_key'));
-        if ($key === '' && SGAP_AI::provider() === 'aimlapi') {
-            $key = SGAP_AI::api_key();
-        }
-        return $key;
-    }
-
-    public static function model(): string {
-        return trim((string) SGAP_Settings::get('image_model')) ?: self::DEFAULT_MODEL;
-    }
-
-    /** Request body for the chosen model (sizes are passed the way each family expects). */
-    public static function body(string $model, string $prompt, int $width, int $height): array {
-        $body = ['model' => $model, 'prompt' => $prompt];
-        if (strpos($model, 'bytedance/') === 0) {
-            // Seedream: both sides 1024–2752.
-            $body['image_size'] = ['width' => max(1024, min(2752, $width)), 'height' => max(1024, min(2752, $height))];
-            $body['watermark'] = false;
-        } elseif (strpos($model, 'flux') !== false || strpos($model, 'blackforestlabs/') === 0) {
-            $body['image_size'] = ['width' => max(256, min(2048, $width)), 'height' => max(256, min(2048, $height))];
-        } else {
-            $body['size'] = $width > $height ? '1536x1024' : ($width < $height ? '1024x1536' : '1024x1024');
-        }
-        return $body;
-    }
-
-    /**
-     * Generates an image and saves it to the media library.
-     * @return array{attachment_id: int, url: string}|WP_Error
-     */
-    public static function create(string $prompt, string $alt = '', int $width = 1600, int $height = 1024, int $parent = 0) {
-        $backend = self::backend();
-        if ($backend === '') {
-            return new WP_Error('sgap_image_key', 'Images need OpenRouter: an OpenRouter key (as provider or as backup) and an image model under Settings → AI content.');
-        }
-        $prompt = trim($prompt);
-        if ($prompt === '') {
-            return new WP_Error('sgap_image_prompt', 'Describe the image.');
-        }
-        if (function_exists('set_time_limit')) {
-            @set_time_limit(300);
-        }
-        if ($backend === 'openrouter') {
-            return self::create_openrouter($prompt, $alt, $width, $height, $parent);
-        }
-        $key = self::key();
-        $model = self::model();
-        $response = wp_remote_post(self::ENDPOINT, [
-            'timeout' => 180,
-            'headers' => ['Authorization' => 'Bearer ' . $key, 'Content-Type' => 'application/json'],
-            'body' => wp_json_encode(self::body($model, $prompt, $width, $height))
-        ]);
-        if (is_wp_error($response)) {
-            return $response;
-        }
-        $code = (int) wp_remote_retrieve_response_code($response);
-        $data = json_decode((string) wp_remote_retrieve_body($response), true);
-        if ($code < 200 || $code >= 300 || !is_array($data)) {
-            $message = is_array($data) ? (string) ($data['error']['message'] ?? $data['message'] ?? '') : '';
-            return new WP_Error('sgap_image_http', "AIMLAPI image ({$model}): " . ($message !== '' ? $message : "HTTP {$code}"));
-        }
-        $first = $data['data'][0] ?? $data['images'][0] ?? null;
-        $url = is_array($first) ? (string) ($first['url'] ?? '') : '';
-        $b64 = is_array($first) ? (string) ($first['b64_json'] ?? '') : '';
-        if ($url === '' && $b64 === '') {
-            return new WP_Error('sgap_image_empty', 'AIMLAPI returned no image.');
-        }
-        return self::save($url, $b64, $prompt, $alt, $parent);
-    }
-
-    /** @return array{attachment_id: int, url: string}|WP_Error */
-    public static function create_openrouter(string $prompt, string $alt, int $width, int $height, int $parent) {
-        $model = self::openrouter_model();
-        $response = SGAP_AI::openrouter_post(SGAP_AI::openrouter_key(), self::openrouter_body($model, $prompt, $width, $height), 180);
-        if (is_wp_error($response)) {
-            return $response;
-        }
-        $code = (int) wp_remote_retrieve_response_code($response);
-        $data = json_decode((string) wp_remote_retrieve_body($response), true);
-        // OpenRouter can answer 200 with an error object when the provider behind the model fails.
-        $message = is_array($data) ? (string) ($data['error']['message'] ?? '') : '';
-        if ($code < 200 || $code >= 300 || !is_array($data) || $message !== '') {
-            return new WP_Error('sgap_image_http', "OpenRouter image ({$model}): " . ($message !== '' ? $message : "HTTP {$code}"));
-        }
-        $image = self::openrouter_image($data);
-        if ($image['url'] === '' && $image['b64'] === '') {
-            return new WP_Error('sgap_image_empty', "OpenRouter returned no image — is {$model} a model with image output?");
-        }
-        return self::save($image['url'], $image['b64'], $prompt, $alt, $parent);
-    }
-
-    /** @return array{attachment_id: int, url: string}|WP_Error */
-    public static function save(string $url, string $b64, string $prompt, string $alt, int $parent) {
-        require_once ABSPATH . 'wp-admin/includes/file.php';
-        require_once ABSPATH . 'wp-admin/includes/media.php';
-        require_once ABSPATH . 'wp-admin/includes/image.php';
-        if ($url !== '') {
-            $tmp = download_url($url, 120);
-            if (is_wp_error($tmp)) {
-                return $tmp;
-            }
-        } else {
-            $tmp = wp_tempnam('sgap-image');
-            file_put_contents($tmp, base64_decode($b64));
-        }
-        $type = function_exists('mime_content_type') ? (string) @mime_content_type($tmp) : '';
-        $ext = ['image/png' => 'png', 'image/webp' => 'webp', 'image/jpeg' => 'jpg'][$type] ?? (preg_match('/\.(png|webp|jpe?g)(\?|$)/i', $url, $m) ? strtolower($m[1]) : 'jpg');
-        $name = sanitize_title(wp_trim_words($alt !== '' ? $alt : $prompt, 8, '')) ?: 'steamgears-ai-image';
-        $file = ['name' => $name . '.' . $ext, 'tmp_name' => $tmp];
-        $id = media_handle_sideload($file, $parent, $alt !== '' ? $alt : wp_trim_words($prompt, 12, ''));
-        if (is_wp_error($id)) {
-            @unlink($tmp);
-            return $id;
-        }
-        update_post_meta($id, '_wp_attachment_image_alt', sanitize_text_field($alt !== '' ? $alt : wp_trim_words($prompt, 16, '')));
-        update_post_meta($id, '_sgap_ai_image', ['model' => self::active_model(), 'prompt' => $prompt]);
-        return ['attachment_id' => (int) $id, 'url' => (string) wp_get_attachment_url($id)];
-    }
-}
 
 class SGAP_Research {
     /**
@@ -204,7 +19,7 @@ class SGAP_Research {
         $keyword = trim($keyword);
         $key = (string) SGAP_Settings::get('serpapi_key');
         if ($key === '') {
-            return new WP_Error('sgap_serpapi_key', 'Add a SerpApi key under Settings → AI & images for keyword research.');
+            return new WP_Error('sgap_serpapi_key', 'Add a SerpApi key under Settings → AI for keyword research.');
         }
         if ($keyword === '') {
             return new WP_Error('sgap_keyword', 'Give a keyword.');
@@ -276,7 +91,7 @@ class SGAP_Studio {
         return [
             'type' => 'object',
             'additionalProperties' => false,
-            'required' => ['title', 'slug', 'meta_title', 'meta_description', 'focus_keyword', 'excerpt', 'content_html', 'faq', 'tags', 'image_prompt', 'image_alt'],
+            'required' => ['title', 'slug', 'meta_title', 'meta_description', 'focus_keyword', 'excerpt', 'content_html', 'faq', 'tags'],
             'properties' => [
                 'title' => $str,
                 'slug' => $str,
@@ -286,9 +101,7 @@ class SGAP_Studio {
                 'excerpt' => $str,
                 'content_html' => $str,
                 'faq' => ['type' => 'array', 'items' => ['type' => 'object', 'additionalProperties' => false, 'required' => ['question', 'answer'], 'properties' => ['question' => $str, 'answer' => $str]]],
-                'tags' => ['type' => 'array', 'items' => $str],
-                'image_prompt' => $str,
-                'image_alt' => $str
+                'tags' => ['type' => 'array', 'items' => $str]
             ]
         ];
     }
@@ -313,7 +126,6 @@ class SGAP_Studio {
             . "- Link 2-4 times naturally to the most relevant pages below (use their exact URLs). Never invent URLs, prices, stock or facts.\n"
             . "- faq: 3-5 real questions people ask, concise answers.\n"
             . "- tags: 3-6 short tags. excerpt: 1-2 sentences.\n"
-            . "- image_prompt: a detailed, photographic description of the ideal featured image (no text in the image, no logos); image_alt: a descriptive alt text with the keyword.\n"
             . "\nPages on the site you may link to:\n" . ($list !== '' ? $list : '(none)')
             // P8: the same measured brief the social writer gets, so a guide is planned on what
             // the shop has measured — not on the catalogue as it looked when this prompt was written.
@@ -369,8 +181,7 @@ class SGAP_Studio {
             'type' => array_key_exists((string) ($args['type'] ?? ''), self::TYPES) ? (string) $args['type'] : 'article',
             'length' => array_key_exists((string) ($args['length'] ?? ''), self::LENGTHS) ? (string) $args['length'] : 'medium',
             'language' => trim(sanitize_text_field((string) ($args['language'] ?? ''))) ?: ((string) SGAP_Settings::get('content_language') ?: 'English'),
-            'notes' => trim(sanitize_textarea_field((string) ($args['notes'] ?? ''))),
-            'image' => !isset($args['image']) || (bool) $args['image']
+            'notes' => trim(sanitize_textarea_field((string) ($args['notes'] ?? '')))
         ];
         if ($a['topic'] === '') {
             return new WP_Error('sgap_topic', 'Give a topic.');
@@ -385,7 +196,7 @@ class SGAP_Studio {
                 $prompt .= SGAP_Research::prompt_block($research);
             }
         }
-        $data = SGAP_AI::json_call($system, $prompt, self::schema(), 20000, 'medium');
+        $data = SGAP_AI::json_call($system, $prompt, self::schema(), 20000);
         if (is_wp_error($data)) {
             return $data;
         }
@@ -426,18 +237,8 @@ class SGAP_Studio {
             'words' => str_word_count(wp_strip_all_tags($content)),
             'seo_meta_saved_for' => $seo,
             'internal_links' => substr_count($content, home_url('/')),
-            'keyword_research' => $research === null ? 'off (no SerpApi key)' : (is_wp_error($research) ? $research->get_error_message() : count($research['questions']) . ' questions, ' . count($research['related']) . ' related searches used'),
-            'image' => null
+            'keyword_research' => $research === null ? 'off (no SerpApi key)' : (is_wp_error($research) ? $research->get_error_message() : count($research['questions']) . ' questions, ' . count($research['related']) . ' related searches used')
         ];
-        if ($a['image'] && trim((string) ($data['image_prompt'] ?? '')) !== '') {
-            $image = SGAP_Images::create((string) $data['image_prompt'], (string) ($data['image_alt'] ?? ''), 1600, 1024, (int) $post_id);
-            if (is_wp_error($image)) {
-                $result['image'] = ['error' => $image->get_error_message()];
-            } else {
-                set_post_thumbnail($post_id, $image['attachment_id']);
-                $result['image'] = $image;
-            }
-        }
         return $result;
     }
 
@@ -468,7 +269,7 @@ class SGAP_Studio {
             'suggestions' => ['type' => 'array', 'items' => ['type' => 'string']]
         ]];
         $prompt = self::optimize_prompt($post);
-        $data = SGAP_AI::json_call(SGAP_AI::SYSTEM . ' You are an expert SEO editor.', $prompt, $schema, 8000, 'low');
+        $data = SGAP_AI::json_call(SGAP_AI::SYSTEM . ' You are an expert SEO editor.', $prompt, $schema, 8000);
         if (is_wp_error($data)) {
             return $data;
         }
@@ -487,36 +288,6 @@ class SGAP_Studio {
         return $out;
     }
 
-    /**
-     * An AI image for a post (featured image), a queued social post or an AI draft, or just for the library.
-     * @return array|WP_Error
-     */
-    public static function image(array $args) {
-        $prompt = trim((string) ($args['prompt'] ?? ''));
-        $post_id = (int) ($args['post_id'] ?? 0);
-        $queue_id = (int) ($args['queue_id'] ?? 0);
-        $shape = (string) ($args['shape'] ?? 'landscape');
-        [$w, $h] = ['square' => [1024, 1024], 'portrait' => [1024, 1536], 'pin' => [1024, 1536]][$shape] ?? [1600, 1024];
-        if ($prompt === '' && $post_id) {
-            $prompt = 'A photographic, atmospheric steampunk scene illustrating: ' . get_the_title($post_id) . '. Brass, copper, leather and warm light; no text, no logos.';
-        }
-        $image = SGAP_Images::create($prompt, sanitize_text_field((string) ($args['alt'] ?? '')), $w, $h, $post_id);
-        if (is_wp_error($image)) {
-            return $image;
-        }
-        if ($post_id && get_post($post_id)) {
-            set_post_thumbnail($post_id, $image['attachment_id']);
-            $image['featured_image_of'] = $post_id;
-        }
-        if ($queue_id) {
-            global $wpdb;
-            $wpdb->update($wpdb->prefix . 'sgap_queue', ['image_url' => $image['url']], ['id' => $queue_id]);
-            $image['queue_post'] = $queue_id;
-        }
-        $image['model'] = SGAP_Images::active_model();
-        return $image;
-    }
-
     /* ---- abilities ---- */
 
     public static function register_abilities(): void {
@@ -525,16 +296,11 @@ class SGAP_Studio {
         }
         $defs = [
             'write-article' => ['Write an SEO article or guide',
-                'Writes an SEO-optimised blog article, step-by-step guide or product description for steamgears.eu and saves it as a DRAFT: title, slug, Rank Math/Yoast meta title + description + focus keyword, headings, internal links to existing pages, FAQ (with FAQ schema), tags and an AI featured image. Takes 1-3 minutes. Returns the edit link.',
+                'Writes an SEO-optimised blog article, step-by-step guide or product description for steamgears.eu and saves it as a DRAFT: title, slug, Rank Math/Yoast meta title + description + focus keyword, headings, internal links to existing pages, FAQ (with FAQ schema) and tags. Takes 1-3 minutes. Returns the edit link.',
                 ['topic' => ['type' => 'string', 'minLength' => 3], 'keyword' => ['type' => 'string'], 'type' => ['type' => 'string', 'enum' => array_keys(self::TYPES), 'default' => 'article'],
                  'length' => ['type' => 'string', 'enum' => array_keys(self::LENGTHS), 'default' => 'medium'], 'language' => ['type' => 'string', 'description' => 'Default: the Content language setting (English).'],
-                 'notes' => ['type' => 'string'], 'image' => ['type' => 'boolean', 'default' => true]],
+                 'notes' => ['type' => 'string']],
                 ['topic'], fn($i) => self::write((array) $i)],
-            'generate-image' => ['Generate an AI image',
-                'Creates an image with the configured image model (OpenRouter, or AIMLAPI on older setups) and saves it to the media library. With post_id it becomes that post\'s featured image (prompt optional then); with queue_id it becomes the image of a queued social post (needed for Instagram/Pinterest).',
-                ['prompt' => ['type' => 'string'], 'alt' => ['type' => 'string'], 'post_id' => ['type' => 'integer', 'minimum' => 1], 'queue_id' => ['type' => 'integer', 'minimum' => 1],
-                 'shape' => ['type' => 'string', 'enum' => ['landscape', 'square', 'portrait', 'pin'], 'default' => 'landscape']],
-                [], fn($i) => self::image((array) $i)],
             'keyword-research' => ['Keyword research (Google)',
                 'Live Google data for a keyword via SerpApi: People also ask questions, related searches and the top-ranking pages. Use before writing to pick the right angle and keyword. Cached for a week.',
                 ['keyword' => ['type' => 'string', 'minLength' => 2]], ['keyword'], fn($i) => SGAP_Research::keyword((string) $i['keyword'])],
@@ -568,9 +334,7 @@ class SGAP_Studio {
         $in = wp_unslash($_POST);
         if ($task === 'write') {
             $r = self::write(['topic' => $in['topic'] ?? '', 'keyword' => $in['keyword'] ?? '', 'type' => $in['type'] ?? '', 'length' => $in['length'] ?? '',
-                'language' => $in['language'] ?? '', 'notes' => $in['notes'] ?? '', 'image' => !empty($in['image'])]);
-        } elseif ($task === 'image') {
-            $r = self::image(['prompt' => $in['prompt'] ?? '', 'shape' => $in['shape'] ?? 'landscape', 'post_id' => absint($in['post_id'] ?? 0)]);
+                'language' => $in['language'] ?? '', 'notes' => $in['notes'] ?? '']);
         } elseif ($task === 'optimize') {
             $r = self::optimize(absint($in['post_id'] ?? 0), true);
         } else {
@@ -580,19 +344,16 @@ class SGAP_Studio {
     }
 
     public static function page(): void {
-        SGAP_Admin::open('Content Studio', 'SEO articles, guides and product texts as drafts, AI images, and SEO fixes for existing pages.');
-        $ai_ok = SGAP_Settings::get('ai_api_key') !== '';
-        $img_ok = SGAP_Images::backend() !== '';
-        echo '<div class="sgap-pills">' . SGAP_UI::pill('Writer: ' . SGAP_AI::provider_name() . ' · ' . (SGAP_AI::model() ?: '?'), $ai_ok ? 'ok' : 'bad')
-            . SGAP_UI::pill('Images: ' . ($img_ok ? SGAP_Images::active_model() : 'needs an OpenRouter image model'), $img_ok ? 'ok' : 'warn')
+        SGAP_Admin::open('Content Studio', 'SEO articles, guides and product texts as drafts, keyword research, and SEO fixes for existing pages.');
+        $ai_ok = SGAP_Settings::get('ai_api_key') !== '' && SGAP_AI::model() !== '';
+        echo '<div class="sgap-pills">' . SGAP_UI::pill('Writer: ' . SGAP_AI::provider_name() . ' · ' . (SGAP_AI::model() ?: 'no model picked'), $ai_ok ? 'ok' : 'bad')
             . SGAP_UI::pill('Keyword research: ' . (SGAP_Settings::get('serpapi_key') !== '' ? 'SerpApi on' : 'off – add a SerpApi key'), SGAP_Settings::get('serpapi_key') !== '' ? 'ok' : 'warn') . '</div>';
         $recent = get_posts(['post_type' => array_values(array_filter(['post', 'page', 'product'], 'post_type_exists')), 'post_status' => ['publish', 'draft'], 'posts_per_page' => 60, 'orderby' => 'modified', 'no_found_rows' => true]);
         $options = '';
         foreach ($recent as $p) {
             $options .= '<option value="' . (int) $p->ID . '">' . esc_html(get_the_title($p) . ' (' . $p->post_type . ($p->post_status === 'draft' ? ', draft' : '') . ')') . '</option>';
         }
-        SGAP_UI::section('Write', 'New content: a draft you edit and publish yourself, and the images that go with it. Nothing is published from here.');
-        echo '<div class="sgap-grid"><div>';
+        SGAP_UI::section('Write', 'New content: a draft you edit and publish yourself. Nothing is published from here.');
         SGAP_UI::card_open('Write an article or guide', 'edit-page');
         echo '<form class="sgap-studio-form" data-task="write">'
             . '<p><label><strong>Topic</strong><br><input name="topic" class="large-text" required placeholder="e.g. How to make steampunk goggles from scrap brass"></label></p>'
@@ -604,18 +365,9 @@ class SGAP_Studio {
         echo '</select></label> <label>Length<br><select name="length"><option value="short">Short (~700 words)</option><option value="medium" selected>Medium (~1300)</option><option value="long">Long (~2200)</option></select></label>'
             . ' <label>Language<br><input name="language" class="small-text" style="width:110px" value="' . esc_attr((string) SGAP_Settings::get('content_language') ?: 'English') . '"></label></p>'
             . '<p><label>Extra instructions <span class="description">(optional)</span><br><textarea name="notes" rows="2" class="large-text" placeholder="Mention our brass goggles product, beginner level, …"></textarea></label></p>'
-            . '<p><label><input type="checkbox" name="image" value="1"' . ($img_ok ? ' checked' : ' disabled') . '> Create an AI featured image</label></p>'
             . '<p><button class="button button-primary"><span class="dashicons dashicons-edit"></span>Write draft</button></p></form>';
         SGAP_UI::card_close();
-        echo '</div><div>';
-        SGAP_UI::card_open('AI image', 'format-image');
-        echo '<form class="sgap-studio-form" data-task="image">'
-            . '<p><label><strong>Describe the image</strong><br><textarea name="prompt" rows="3" class="large-text" placeholder="Close-up of brass steampunk goggles on a leather workbench, warm window light, photographic"></textarea></label></p>'
-            . '<p class="sgap-row"><label>Shape<br><select name="shape"><option value="landscape">Landscape (blog)</option><option value="square">Square (Instagram)</option><option value="pin">Tall (Pinterest)</option></select></label>'
-            . ' <label>Featured image of<br><select name="post_id"><option value="0">– just the media library –</option>' . $options . '</select></label></p>'
-            . '<p><button class="button button-primary"' . ($img_ok ? '' : ' disabled') . '><span class="dashicons dashicons-format-image"></span>Create image</button></p></form>';
-        SGAP_UI::card_close();
-        echo '</div></div><div id="sgap-studio-out"></div>';
+        echo '<div id="sgap-studio-out"></div>';
 
         SGAP_UI::section('Fix', 'Pages you already have: better meta for one of them, or one pass over the whole site.');
         echo '<div class="sgap-grid"><div>';

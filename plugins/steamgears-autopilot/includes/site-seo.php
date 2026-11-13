@@ -419,7 +419,7 @@ class SGAP_Site_SEO {
                 . "meta_description is 140-155 characters with the keyword, a concrete benefit and no clickbait.\n\n"
                 . 'Title: ' . $item['title'] . "\nURL: " . $item['url'] . "\nCurrent meta title: " . ($item['meta_title'] ?: '(none)')
                 . "\nCurrent description: " . ($item['description'] ?: '(none)') . "\nPage text:\n" . $text;
-            $data = SGAP_AI::json_call(SGAP_AI::SYSTEM . ' You are an expert SEO editor for a small Danish POD shop.', $prompt, $schema, 4000, 'low');
+            $data = SGAP_AI::json_call(SGAP_AI::SYSTEM . ' You are an expert SEO editor for a small Danish POD shop.', $prompt, $schema, 4000);
             if (is_wp_error($data)) {
                 $errors[] = '#' . $item['id'] . ': ' . $data->get_error_message();
                 continue;

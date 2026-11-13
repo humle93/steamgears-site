@@ -10,6 +10,43 @@ Noterne er skrevet ud fra commit-historikken og de dokumenter der hører til hve
 
 <!-- patch-notes: baseline 7.65.0 -->
 
+## 7.85.0 — 2026-11-13
+
+**OpenRouter er nu den eneste AI-udbyder, og AI-billedgenerering er væk.**
+
+### Fjernet
+- AIMLAPI, Anthropic og *Other OpenAI-compatible* som valg. `SGAP_AI::provider()` svarer altid
+  `openrouter`, `base_url()` er den faste `https://openrouter.ai/api/v1`, og en gammel gemt
+  `ai_provider`-værdi læses ikke længere.
+- Reserve-udbyderen (egen nøgle, eget model-felt, failover) og gratis-model-forsøget ved kreditfejl.
+  En fejl fra OpenRouter rapporteres med providerens egne ord i stedet for at blive prøvet igen på en
+  anden model.
+- Al AI-billedgenerering: `SGAP_Images`, `image_api_key`, `image_model`, `openrouter_image_model`,
+  `auto_images`, `generate-image`-abilityen, AJAX-billedopgaven og billedfelterne i guiden, opsætningen
+  og Content Studio. `includes/openrouter.php` (flytte-knappen) er slettet.
+- Standardmodel. Der findes ingen gættet slug: et tomt modelvalg er tomt, og nøgletesten beder om et valg.
+
+### Ændret
+- Content Studio skriver tekst. Instagram og Pinterest bruger sidens eksisterende featured image
+  (`get_the_post_thumbnail_url()`); mangler den, fejler opslaget med en besked der navngiver rettelsen.
+  Uploadede medier og featured images røres ikke.
+- Fanen *Settings → AI & images* heder nu *Settings → AI*, og alle henvisninger peger på *Settings → AI*
+  og *Settings → Keys*. Nøglesiden har ét OpenRouter-kort; guiden har ét AI-trin.
+- Selvtjek og RSS-forhåndstjek nævner ikke længere AI-fotos eller en reserve-udbyder.
+- Modelfeltet er stadig en dropdown over OpenRouters live `/models`, med en synlig markering af et navn
+  der ikke længere udbydes, og ingen *Provider default*.
+
+### Målt
+- `plugins/tests/smoke.php`: 1 570 PASS, 0 FAIL (AI- og billedafsnittene er skrevet om til
+  OpenRouter-only, inkl. checks for at reserve-API'et, `SGAP_Images` og `generate-image` er væk).
+- `plugins/tests/cc-login.php`, `keys.php`, `automation.php`, `integration.php` og `admin-tools.php` er
+  opdateret til samme virkelighed (OpenRouter-mocks, featured image i stedet for genereret foto,
+  42 abilities i stedet for 43).
+
+### Ikke målt
+- Intet kald er gået til den rigtige OpenRouter, og intet WordPress er kørt her: der findes ingen nøgle
+  i sandkassen, og integrationstesten kræver MySQL + wp-cli.
+
 ## 7.84.1 — 2026-11-12
 
 **Rettet: et Pinterest-token til at oprette pins skal have begge board-scopes.**

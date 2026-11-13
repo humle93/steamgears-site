@@ -10,7 +10,7 @@ if (!defined('ABSPATH')) exit;
 
 class SGAP_KeyCheck {
     /** Saving any of these settings triggers a check. */
-    const WATCH = ['publer_api_key', 'publer_workspace_id', 'channels', 'ai_api_key', 'ai_provider', 'ai_model', 'ai_base_url', 'printful_api_key', 'printful_store_id', 'openrouter_api_key', 'openrouter_model'];
+    const WATCH = ['publer_api_key', 'publer_workspace_id', 'channels', 'ai_api_key', 'ai_model', 'printful_api_key', 'printful_store_id'];
     const PENDING = 'sgap_keycheck_pending';
     const RESULT = 'sgap_key_status';
 
@@ -36,7 +36,7 @@ class SGAP_KeyCheck {
             return;
         }
         $result = self::run();
-        foreach (['publer' => 'Publer', 'ai' => 'AI', 'printful' => 'Printful', 'fallback' => 'OpenRouter backup'] as $part => $label) {
+        foreach (['publer' => 'Publer', 'ai' => 'OpenRouter', 'printful' => 'Printful'] as $part => $label) {
             $check = $result[$part];
             if ($check['ok'] === null) {
                 continue; // no key saved: nothing to report
@@ -56,7 +56,6 @@ class SGAP_KeyCheck {
             'publer' => self::check_publer(),
             'ai' => self::check_ai(),
             'printful' => self::check_printful(),
-            'fallback' => self::check_fallback(),
             'checked_at' => current_time('mysql')
         ];
         update_option(self::RESULT, $result, false);
@@ -170,69 +169,9 @@ class SGAP_KeyCheck {
     public static function check_ai(): array {
         $key = SGAP_AI::api_key();
         if ($key === '') {
-            return ['ok' => null, 'message' => 'No AI API key saved.'];
+            return ['ok' => null, 'message' => 'No OpenRouter key saved.'];
         }
-        if (SGAP_AI::provider() === 'aimlapi') {
-            return self::check_aimlapi($key);
-        }
-        if (SGAP_AI::provider() === 'openrouter') {
-            return self::check_openrouter($key);
-        }
-        if (SGAP_AI::provider() === 'openai_compatible') {
-            return self::check_openai_compatible($key);
-        }
-        // The Models API validates key and model without generating (no token cost).
-        $model = SGAP_AI::model();
-        $response = wp_remote_get('https://api.anthropic.com/v1/models/' . rawurlencode($model), [
-            'timeout' => 20,
-            'headers' => ['x-api-key' => $key, 'anthropic-version' => SGAP_AI::ANTHROPIC_VERSION]
-        ]);
-        if (is_wp_error($response)) {
-            return ['ok' => false, 'message' => 'Could not reach Anthropic: ' . $response->get_error_message()];
-        }
-        $code = (int) wp_remote_retrieve_response_code($response);
-        if ($code === 200) {
-            return ['ok' => true, 'message' => "Anthropic key works, model {$model} is available."];
-        }
-        if ($code === 401 || $code === 403) {
-            return ['ok' => false, 'message' => 'Anthropic refused the key: it is invalid, revoked or lacks access.'];
-        }
-        if ($code === 404) {
-            return ['ok' => false, 'message' => "Anthropic key works, but the model \"{$model}\" does not exist. Leave AI model empty for " . SGAP_AI::DEFAULT_MODEL . '.'];
-        }
-        return ['ok' => false, 'message' => "Anthropic answered HTTP {$code}; try again later."];
-    }
-
-    /**
-     * AIMLAPI lists its models without a key, so the key is tested with a one-token
-     * chat request to the chosen model (costs a fraction of a cent).
-     */
-    private static function check_aimlapi(string $key): array {
-        $model = SGAP_AI::model();
-        $response = wp_remote_post(SGAP_AI::base_url() . '/chat/completions', [
-            'timeout' => 30,
-            'headers' => ['Authorization' => 'Bearer ' . $key, 'Content-Type' => 'application/json'],
-            'body' => wp_json_encode(['model' => $model, 'max_tokens' => 1, 'messages' => [['role' => 'user', 'content' => 'ping']]])
-        ]);
-        if (is_wp_error($response)) {
-            return ['ok' => false, 'message' => 'Could not reach AIMLAPI: ' . $response->get_error_message()];
-        }
-        $code = (int) wp_remote_retrieve_response_code($response);
-        $body = json_decode((string) wp_remote_retrieve_body($response), true);
-        $detail = is_array($body) ? (string) ($body['error']['message'] ?? $body['message'] ?? '') : '';
-        if ($code >= 200 && $code < 300) {
-            return ['ok' => true, 'message' => "AIMLAPI key works, model {$model} answers."];
-        }
-        if ($code === 401 || $code === 403) {
-            return ['ok' => false, 'message' => 'AIMLAPI refused the key' . ($detail !== '' ? ": {$detail}" : '.')];
-        }
-        if ($code === 402) {
-            return ['ok' => false, 'message' => 'AIMLAPI key works, but the account has no credit left. Top up at aimlapi.com.'];
-        }
-        if ($code === 404 || ($code === 400 && stripos($detail, 'model') !== false)) {
-            return ['ok' => false, 'message' => "AIMLAPI does not offer the model \"{$model}\". Leave AI model empty for " . SGAP_AI::AIMLAPI_MODEL . '.'];
-        }
-        return ['ok' => false, 'message' => "AIMLAPI answered HTTP {$code}" . ($detail !== '' ? ": {$detail}" : '; try again later.')];
+        return self::check_openrouter($key);
     }
 
     /**
@@ -240,23 +179,24 @@ class SGAP_KeyCheck {
      * key is therefore proven with a one-token chat request to the chosen model — and when no
      * model is chosen the answer says that instead of spending a request on a guess.
      */
-    private static function check_openrouter(string $key, string $model = '', string $who = 'OpenRouter'): array {
+    private static function check_openrouter(string $key): array {
+        $who = 'OpenRouter';
         // The same cleaning the real call gets: a header value with a line break or a zero-width
         // character is dropped by the transport, and the gateway then answers "no Authorization".
         $key = SGAP_AI::bearer($key);
-        $model = $model !== '' ? $model : SGAP_AI::model();
+        $model = SGAP_AI::model();
         if ($key === '') {
             return ['ok' => false, 'message' => $who . ': no key saved.'];
         }
-        // Shape before request. OpenRouter keys start with sk-or-. Anything else — the AIMLAPI key,
-        // a pasted curl command, a masked value — comes back as 401 "Missing Authentication header",
+        // Shape before request. OpenRouter keys start with sk-or-. Anything else — a key for another
+        // service, a pasted curl command, a masked value — comes back as 401 "Missing Authentication header",
         // which reads as "your key was rejected" when the truth is "that is not the key".
         if (!str_starts_with($key, 'sk-or-')) {
             $odd = preg_match('/[\s$"\'`]/', $key) === 1 ? ' and it contains a space, a quote or a command character' : '';
             return ['ok' => false, 'message' => $who . ': the saved value is not an OpenRouter key. OpenRouter keys start with sk-or-v1-; this value is ' . strlen($key) . ' characters' . $odd . '. Save the key alone from openrouter.ai/keys.'];
         }
         if ($model === '') {
-            return ['ok' => false, 'message' => $who . ' key saved, but pick an AI model under Settings → AI & images — OpenRouter has no default model.'];
+            return ['ok' => false, 'message' => $who . ' key saved, but pick a model under Settings → AI — OpenRouter has no default model.'];
         }
         $response = SGAP_AI::openrouter_post($key, [
             'model' => $model,
@@ -291,7 +231,7 @@ class SGAP_KeyCheck {
             return ['ok' => false, 'message' => "{$who} key works, but the account has no credit left. Add credits at openrouter.ai/credits."];
         }
         if ($code === 404 || ($code === 400 && stripos($detail, 'model') !== false)) {
-            return ['ok' => false, 'message' => "{$who} does not offer the model \"{$model}\". Pick one from the list under Settings → AI & images."];
+            return ['ok' => false, 'message' => "{$who} does not offer the model \"{$model}\". Pick one from the list under Settings → AI."];
         }
         if ($code === 429) {
             return ['ok' => false, 'message' => "{$who} key works, but it is rate limited right now (HTTP 429); try again in a minute."];
@@ -299,45 +239,4 @@ class SGAP_KeyCheck {
         return ['ok' => false, 'message' => "{$who} answered HTTP {$code}" . ($detail !== '' ? ": {$detail}" : '; try again later.')];
     }
 
-    /**
-     * The backup pair, tested as a pair: the backup key against the backup model. Testing it with
-     * the primary model would be testing a combination the plugin never sends.
-     * @return array{ok: ?bool, message: string} ok is null when no backup key is saved.
-     */
-    public static function check_fallback(): array {
-        $key = SGAP_AI::fallback_key();
-        if ($key === '') {
-            return ['ok' => null, 'message' => 'No OpenRouter backup key saved.'];
-        }
-        $model = SGAP_AI::fallback_model();
-        if ($model === '') {
-            return ['ok' => false, 'message' => 'OpenRouter backup key saved, but no backup model is chosen — the backup is off until one is picked from the list.'];
-        }
-        return self::check_openrouter($key, $model, 'OpenRouter backup');
-    }
-
-    private static function check_openai_compatible(string $key): array {
-        $base = SGAP_AI::base_url();
-        $model = SGAP_AI::model();
-        $response = wp_remote_get($base . '/models', ['timeout' => 20, 'headers' => ['Authorization' => 'Bearer ' . $key]]);
-        if (is_wp_error($response)) {
-            return ['ok' => false, 'message' => "Could not reach {$base}: " . $response->get_error_message()];
-        }
-        $code = (int) wp_remote_retrieve_response_code($response);
-        if ($code === 401 || $code === 403) {
-            return ['ok' => false, 'message' => "{$base} refused the key."];
-        }
-        if ($code !== 200) {
-            return ['ok' => false, 'message' => "{$base}/models answered HTTP {$code}."];
-        }
-        if ($model === '') {
-            return ['ok' => false, 'message' => 'Key works, but set an AI model name in Settings.'];
-        }
-        $body = json_decode((string) wp_remote_retrieve_body($response), true);
-        $ids = array_column((array) ($body['data'] ?? []), 'id');
-        if ($ids && !in_array($model, $ids, true)) {
-            return ['ok' => false, 'message' => "Key works, but the model \"{$model}\" is not offered by {$base}."];
-        }
-        return ['ok' => true, 'message' => "Key works" . ($ids ? ", model {$model} is available." : '.')];
-    }
 }

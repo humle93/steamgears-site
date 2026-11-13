@@ -31,9 +31,9 @@ class SGAP_Editor {
         return array_slice(array_values(array_filter(array_map('strval', (array) apply_filters('sgap_editor_models', self::MODELS)))), 0, self::MAX_MODELS);
     }
 
-    /** On when an OpenRouter key exists (main or backup) and the model list is not emptied by the filter. */
+    /** On when an OpenRouter key exists and the model list is not emptied by the filter. */
     public static function enabled(): bool {
-        return SGAP_AI::openrouter_key() !== '' && self::models() !== [];
+        return SGAP_AI::api_key() !== '' && self::models() !== [];
     }
 
     public static function prompt(array $posts, array $source): string {
@@ -64,7 +64,7 @@ class SGAP_Editor {
         // measured live 12/11); 4 000 leaves room for the answer. Free models cost nothing per token.
         $body = ['model' => $models[0], 'models' => $models, 'max_tokens' => 4000,
             'messages' => [['role' => 'user', 'content' => self::prompt($posts, $source)]]];
-        $response = SGAP_AI::openrouter_post(SGAP_AI::openrouter_key(), $body, 90);
+        $response = SGAP_AI::openrouter_post(SGAP_AI::api_key(), $body, 90);
         $decoded = SGAP_AI::decode($response, 'Editor');
         if (is_wp_error($decoded)) {
             return ['ok' => false, 'error' => $decoded->get_error_message()];

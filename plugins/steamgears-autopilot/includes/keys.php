@@ -2,10 +2,10 @@
 /**
  * The one place keys are pasted.
  *
- * Every secret the plugin uses — AI, images, Publer, Printful, SerpApi, Bluesky, Mastodon,
- * Telegram, the merchant feed and the MCP token — lives on this single screen, one card per
- * service. Nothing else in the plugin renders a key field, so the owner never has to guess
- * which tab a credential was on.
+ * Every secret the plugin uses — the OpenRouter key, Publer, Printful, SerpApi, Bluesky,
+ * Mastodon, Telegram, the merchant feed and the MCP token — lives on this single screen, one
+ * card per service. Nothing else in the plugin renders a key field, so the owner never has to
+ * guess which tab a credential was on.
  *
  * The card layout follows the pattern WordPress itself uses for Settings → Connectors
  * (7.0+): each provider is a card with its name, what it is for, where to get it and its
@@ -24,10 +24,7 @@ class SGAP_Keys {
      * session fetched with the old key would otherwise answer 401 until it expired on its own.
      */
     const CACHE_MAP = [
-        'ai_api_key' => ['sgap_ai_catalog_aimlapi', 'sgap_ai_catalog_anthropic', 'sgap_ai_catalog_openai_compatible', 'sgap_ai_catalog_openrouter'],
-        // Its own catalogue: a backup list and a provider list must not overwrite each other.
-        'openrouter_api_key' => ['sgap_ai_catalog_openrouter_backup'],
-        'image_api_key' => ['sgap_ai_catalog_aimlapi'],
+        'ai_api_key' => ['sgap_ai_catalog_openrouter'],
         'publer_api_key' => ['sgap_publer_accounts'],
         'publer_workspace_id' => ['sgap_publer_accounts'],
         'printful_api_key' => ['sgap_printful_costs'],
@@ -44,39 +41,16 @@ class SGAP_Keys {
      */
     const PROVIDERS = [
         'ai' => [
-            'title' => 'AI text',
+            'title' => 'OpenRouter',
             'icon' => 'superhero-alt',
             'keys' => ['ai_api_key'],
-            'owner' => 'You — your own OpenRouter or Anthropic account (AIMLAPI is being phased out), paid by you.',
-            'why' => 'Without it nothing writes: no posts, no articles, no chat answers and no AI photos.',
-            'body' => 'Writes the posts, the articles and the answers in the chat. An OpenRouter key (recommended) puts hundreds of models from many providers — text and images — behind one bill; an Anthropic key works directly too. A saved AIMLAPI key keeps working until you switch.',
-            'links' => [['OpenRouter', 'https://openrouter.ai/keys'], ['Anthropic', 'https://console.anthropic.com/settings/keys']],
-            'hint' => 'OpenRouter: openrouter.ai/keys, then pick a model under AI & images. Anthropic: console.anthropic.com → API keys.',
+            'extra' => ['ai_model'],
+            'owner' => 'You — your own OpenRouter account, paid by you.',
+            'why' => 'Without it nothing writes: no posts, no articles and no answers in the chat.',
+            'body' => 'One key in front of hundreds of models from many providers, behind one bill. Pick the model in this same card; OpenRouter has no default, so a model is required too.',
+            'links' => [['OpenRouter keys', 'https://openrouter.ai/keys'], ['OpenRouter models', 'https://openrouter.ai/models']],
+            'hint' => 'openrouter.ai/keys → create a key and paste it here, then pick a model from the live list. A free model ends in :free.',
             'test' => 'ai'
-        ],
-        'openrouter_backup' => [
-            'title' => 'OpenRouter (backup)',
-            'icon' => 'shield',
-            'keys' => ['openrouter_api_key'],
-            'extra' => ['openrouter_model'],
-            'owner' => 'You — your own OpenRouter account, with a second key on purpose: the AI text key belongs to whichever provider is chosen, so a rotation of one must never point the backup at the wrong account.',
-            'why' => 'Keeps the autopilot writing when the primary provider runs out of credit, loses its key or is down. Without it a dead primary stops every post, article and chat answer.',
-            'body' => 'Used only when the primary provider fails: transport error, 401/403, no credit (402), rate limit (429) or a 5xx. A 2xx answer — even an empty one — never starts it, so a working primary is never billed twice.',
-            'links' => [['OpenRouter keys', 'https://openrouter.ai/keys']],
-            'hint' => 'openrouter.ai/keys → create a key, paste it here, then pick the backup model in this same card. An empty model means the backup is off, because OpenRouter has no default. While OpenRouter is the provider itself the card is ignored: the backup would be the same service.',
-            'test' => 'openrouter_backup',
-            'optional' => true
-        ],
-        'images' => [
-            'title' => 'AI images',
-            'icon' => 'format-image',
-            'keys' => ['image_api_key'],
-            'owner' => 'You — an AIMLAPI account (legacy). With an OpenRouter image model set under AI & images, images go through OpenRouter and this key is not needed.',
-            'why' => 'Instagram and Pinterest posts need a photo. It exists so image cost can be separated from text cost, not because a second account is required.',
-            'body' => 'Instagram and Pinterest need a photo on every post. Set an OpenRouter image model and images use your OpenRouter key instead; this AIMLAPI key is only the old path.',
-            'links' => [['AIMLAPI', 'https://aimlapi.com/']],
-            'hint' => 'Being phased out: leave it empty once OpenRouter images work.',
-            'optional' => true
         ],
         'publer' => [
             'title' => 'Publer',
@@ -492,7 +466,6 @@ class SGAP_Keys {
             . (isset($result['ai']['message']) ? esc_html('AI: ' . $result['ai']['message']) : '')
             . (isset($result['publer']['message']) ? ' ' . esc_html('Publer: ' . $result['publer']['message']) : '')
             . (isset($result['printful']['message']) ? ' ' . esc_html('Printful: ' . $result['printful']['message']) : '')
-            . (isset($result['fallback']['message']) ? ' ' . esc_html('OpenRouter backup: ' . $result['fallback']['message']) : '')
             . '</span></div>';
         $cfg = ['ajax' => admin_url('admin-ajax.php'), 'nonce' => wp_create_nonce('sgap_setup')];
         // "Test connections" ligger i assets/pages/setup.js sammen med resten af siden.

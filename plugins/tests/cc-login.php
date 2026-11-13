@@ -1,7 +1,7 @@
 <?php
 /**
- * P10 (7.76.0): OpenRouter as the default provider, images through OpenRouter, the
- * "Switch to OpenRouter now" button and the one-click login to Command Center.
+ * P10: OpenRouter as the one AI provider (7.85.0 made it the only one) and the
+ * one-click login to Command Center.
  * Required from smoke.php, so $GLOBALS['opts'], the stubs and check() are already here.
  */
 
@@ -18,84 +18,26 @@ function p10_b64url_decode(string $s): string { return (string) base64_decode(st
 function p10_opts(array $set): void { foreach ($set as $k => $v) { if ($v === null) { unset($GLOBALS['opts']['sgap_' . $k]); } else { $GLOBALS['opts']['sgap_' . $k] = $v; } } }
 $p10_saved = $GLOBALS['opts'];
 
-// ---- OpenRouter is the default, AIMLAPI is kept but marked ----
-p10_opts(['ai_provider' => null]);
-check('p10: OpenRouter is the provider when none is saved', SGAP_AI::provider() === 'openrouter');
-p10_opts(['ai_provider' => 'aimlapi']);
-check('p10: a saved AIMLAPI choice is kept (an update never cuts off a working key)', SGAP_AI::provider() === 'aimlapi');
-p10_opts(['ai_provider' => 'bogus']);
-check('p10: an unknown provider falls back to OpenRouter', SGAP_AI::provider() === 'openrouter');
-$p10_choices = SGAP_Settings::CHOICE_KEYS['ai_provider'];
-check('p10: OpenRouter is first and recommended, AIMLAPI says it is being phased out',
-    array_key_first($p10_choices) === 'openrouter' && str_contains($p10_choices['openrouter'], 'recommended')
-    && str_contains($p10_choices['aimlapi'], 'phased out') && count($p10_choices) === 4);
-check('p10: the OpenRouter image model is a text setting with help, in AI content',
-    in_array('openrouter_image_model', SGAP_Settings::TEXT_KEYS, true) && isset(SGAP_Settings::HELP['openrouter_image_model'])
-    && in_array('openrouter_image_model', SGAP_Settings::SECTIONS['AI content'], true));
+// ---- 7.85.0: OpenRouter is the only provider, and there is no image path ----
+p10_opts(['ai_provider' => 'aimlapi', 'ai_base_url' => 'https://wrong.example/v1']);
+check('p10: the provider is OpenRouter whatever an old saved value says', SGAP_AI::provider() === 'openrouter' && SGAP_AI::provider_name() === 'OpenRouter');
+check('p10: a typed base url cannot redirect the key', SGAP_AI::base_url() === 'https://openrouter.ai/api/v1');
+check('p10: no provider choice is registered any more',
+    !isset(SGAP_Settings::CHOICE_KEYS['ai_provider']) && !in_array('ai_provider', SGAP_Settings::TEXT_KEYS, true)
+    && !in_array('ai_provider', SGAP_Settings::SECTIONS['AI'], true) && !isset(SGAP_Settings::HELP['ai_provider']));
+check('p10: no AI image key, image model or image settings are left',
+    !in_array('image_api_key', SGAP_Settings::SECRET_KEYS, true) && !in_array('image_model', SGAP_Settings::TEXT_KEYS, true)
+    && !in_array('openrouter_image_model', SGAP_Settings::TEXT_KEYS, true) && !class_exists('SGAP_Images')
+    && !in_array('auto_images', SGAP_Settings::BOOL_KEYS, true));
+$p10_studio = file_get_contents(__DIR__ . '/../steamgears-autopilot/includes/studio.php');
+check('p10: the generate-image ability is gone', !str_contains($p10_studio, "'generate-image'") && !str_contains($p10_studio, 'SGAP_Images'));
 $p10_setup = file_get_contents(__DIR__ . '/../steamgears-autopilot/includes/setup.php');
-check('p10: the setup wizard offers OpenRouter first as Recommended',
-    strpos($p10_setup, "foreach (['openrouter' => ['OpenRouter', 'Recommended.") !== false && !str_contains($p10_setup, "'AIMLAPI', 'Recommended."));
-
-// ---- images: OpenRouter when it has a key and a model, else AIMLAPI, else nothing ----
-p10_opts(['ai_provider' => 'aimlapi', 'ai_api_key' => 'aiml-key', 'openrouter_api_key' => '', 'openrouter_image_model' => '', 'image_api_key' => '']);
-check('p10 images: AIMLAPI stays the path until OpenRouter is set up', SGAP_Images::backend() === 'aimlapi');
-p10_opts(['openrouter_api_key' => 'sk-or-backup-1234', 'openrouter_image_model' => 'acme/image-model']);
-check('p10 images: OpenRouter key (backup) + image model = OpenRouter',
-    SGAP_Images::backend() === 'openrouter' && SGAP_AI::openrouter_key() === 'sk-or-backup-1234' && SGAP_Images::active_model() === 'acme/image-model');
-p10_opts(['ai_provider' => 'openrouter', 'ai_api_key' => 'sk-or-main-5678']);
-check('p10 images: with OpenRouter as provider the main key is used', SGAP_AI::openrouter_key() === 'sk-or-main-5678');
-p10_opts(['openrouter_image_model' => '']);
-check('p10 images: an OpenRouter key without an image model is not enough', SGAP_Images::backend() === '');
-$p10_err = SGAP_Images::create('A brass goggle');
-check('p10 images: no backend gives an error that names OpenRouter', $p10_err instanceof WP_Error && str_contains($p10_err->get_error_message(), 'OpenRouter'));
-check('p10 images: aspect ratios snap to the nearest common one',
-    SGAP_Images::aspect_ratio(1600, 1024) === '3:2' && SGAP_Images::aspect_ratio(1000, 1000) === '1:1'
-    && SGAP_Images::aspect_ratio(1080, 1920) === '9:16' && SGAP_Images::aspect_ratio(1920, 1080) === '16:9');
-$p10_body = SGAP_Images::openrouter_body('acme/image-model', 'Brass goggles', 1600, 1024);
-check('p10 images: the request asks for image output with an aspect ratio',
-    $p10_body['modalities'] === ['image', 'text'] && $p10_body['image_config']['aspect_ratio'] === '3:2'
-    && $p10_body['messages'][0]['content'] === 'Brass goggles' && $p10_body['model'] === 'acme/image-model');
-$p10_img = SGAP_Images::openrouter_image(['choices' => [['message' => ['images' => [['type' => 'image_url', 'image_url' => ['url' => 'data:image/png;base64,iVBORw0KGgo=']]]]]]]);
-check('p10 images: a base64 data URL becomes b64', $p10_img === ['url' => '', 'b64' => 'iVBORw0KGgo=']);
-check('p10 images: an https URL is kept, http and nothing are refused',
-    SGAP_Images::openrouter_image(['choices' => [['message' => ['images' => [['image_url' => ['url' => 'https://cdn.example/x.png']]]]]]])['url'] === 'https://cdn.example/x.png'
-    && SGAP_Images::openrouter_image(['choices' => [['message' => ['images' => [['image_url' => ['url' => 'http://cdn.example/x.png']]]]]]]) === ['url' => '', 'b64' => '']
-    && SGAP_Images::openrouter_image(['choices' => [['message' => ['content' => 'no image']]]]) === ['url' => '', 'b64' => '']);
-p10_opts(['openrouter_image_model' => 'acme/image-model']);
-$GLOBALS['http_calls'] = [];
-$GLOBALS['http_queue'] = [sgap_http(200, ['error' => ['message' => 'Provider returned error', 'code' => 502]])];
-$p10_err = SGAP_Images::create('Brass goggles', 'Goggles', 1600, 1024);
-$p10_call = end($GLOBALS['http_calls']);
-check('p10 images: the call goes to OpenRouter chat/completions with the OpenRouter key',
-    is_array($p10_call) && $p10_call[0] === 'https://openrouter.ai/api/v1/chat/completions'
-    && ($p10_call[1]['headers']['Authorization'] ?? '') === 'Bearer sk-or-main-5678'
-    && (json_decode((string) $p10_call[1]['body'], true)['model'] ?? '') === 'acme/image-model');
-check('p10 images: an error object in a 200 answer becomes an error with the message',
-    $p10_err instanceof WP_Error && str_contains($p10_err->get_error_message(), 'Provider returned error'));
-$GLOBALS['http_queue'] = [sgap_http(200, ['choices' => [['message' => ['content' => 'Here is a description instead.']]]])];
-$p10_err = SGAP_Images::create('Brass goggles');
-check('p10 images: a text-only answer says the model may not draw', $p10_err instanceof WP_Error && str_contains($p10_err->get_error_message(), 'image output'));
-
-// ---- "Switch to OpenRouter now" ----
-p10_opts(['ai_provider' => 'aimlapi', 'ai_api_key' => 'aiml-key', 'ai_model' => 'anthropic/claude-opus-5.5', 'openrouter_api_key' => '', 'openrouter_model' => '']);
-check('p10 move: needed while AIMLAPI is the provider, not ready without a backup', SGAP_OpenRouter_Move::needed() && !SGAP_OpenRouter_Move::ready());
-$p10_html = SGAP_OpenRouter_Move::notice_html();
-check('p10 move: without a backup the notice explains the steps, no button', str_contains($p10_html, 'openrouter.ai/keys') && !str_contains($p10_html, 'Switch to OpenRouter now'));
-check('p10 move: apply() refuses without a backup key and model', SGAP_OpenRouter_Move::apply() instanceof WP_Error && SGAP_AI::provider() === 'aimlapi');
-p10_opts(['openrouter_api_key' => 'sk-or-backup-1234', 'openrouter_model' => 'acme/text-model']);
-$p10_html = SGAP_OpenRouter_Move::notice_html();
-check('p10 move: with a backup the notice offers the one-click switch and names the model',
-    str_contains($p10_html, 'Switch to OpenRouter now') && str_contains($p10_html, 'acme/text-model') && str_contains($p10_html, 'sgap_switch_openrouter') && !str_contains($p10_html, 'sk-or-backup'));
-check('p10 move: apply() makes OpenRouter the provider with the backup key and model',
-    SGAP_OpenRouter_Move::apply() === true && SGAP_AI::provider() === 'openrouter'
-    && SGAP_AI::api_key() === 'sk-or-backup-1234' && SGAP_AI::model() === 'acme/text-model');
-check('p10 move: the AIMLAPI key and the backup are left alone, so switching back is one setting',
-    SGAP_AI::fallback_key() === 'sk-or-backup-1234' && !SGAP_OpenRouter_Move::needed() && SGAP_OpenRouter_Move::apply() instanceof WP_Error);
-$GLOBALS['deny_caps'] = ['manage_options'];
-$p10_denied = false;
-try { SGAP_OpenRouter_Move::handle(); } catch (RuntimeException $e) { $p10_denied = true; }
-check('p10 move: only an administrator can click it', $p10_denied);
-unset($GLOBALS['deny_caps']);
+check('p10: the setup wizard offers OpenRouter as the one AI provider',
+    str_contains($p10_setup, 'Connect OpenRouter') && !str_contains($p10_setup, 'settings[ai_provider]'));
+check('p10: the old switch-to-OpenRouter module and its notice are gone',
+    !class_exists('SGAP_OpenRouter_Move') && !is_file(__DIR__ . '/../steamgears-autopilot/includes/openrouter.php'));
+check('p10: the setup wizard no longer offers AIMLAPI or an image model',
+    !str_contains($p10_setup, 'AIMLAPI') && !str_contains($p10_setup, 'image_model') && !str_contains($p10_setup, 'image_api_key'));
 
 // ---- one-click login to Command Center ----
 delete_option(SGAP_CC::LINK);

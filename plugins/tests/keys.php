@@ -138,9 +138,7 @@ unset($GLOBALS['opts']['sgap_serpapi_key']);
 
 // 8. A change clears what was cached from the old value, so a rotation cannot look like a dead key.
 SGAP_Settings::set('ai_api_key', 'AI-KEY-ROTATED');
-check('keys: changing the AI key clears the cached model lists', in_array('sgap_ai_catalog_aimlapi', SGAP_Keys::flushed(), true)
-    && in_array('sgap_ai_catalog_anthropic', SGAP_Keys::flushed(), true)
-    && in_array('sgap_ai_catalog_openai_compatible', SGAP_Keys::flushed(), true));
+check('keys: changing the AI key clears the cached model list', SGAP_Keys::flushed() === ['sgap_ai_catalog_openrouter']);
 SGAP_Settings::set('publer_api_key', 'PUBLER-ROTATED');
 check('keys: changing the Publer key clears the cached account list', SGAP_Keys::flushed() === ['sgap_publer_accounts']);
 ob_start();

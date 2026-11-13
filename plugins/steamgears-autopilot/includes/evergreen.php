@@ -359,7 +359,7 @@ class SGAP_Evergreen {
         $prompt .= "\nTake a genuinely different angle: a new opening sentence, a different benefit, and a call to action that is not a copy of the ones above. "
             . "Keep the same facts — do not invent a discount, a product feature or a deadline. Two to four short sentences, no emoji unless the page calls for it.";
         $system = 'You are a careful social media copywriter for a small print-on-demand shop in steampunk and dark academia style. You never invent offers and never repeat a caption.';
-        $answer = SGAP_AI::json_call($system, $prompt, $schema, 1200, 'low');
+        $answer = SGAP_AI::json_call($system, $prompt, $schema, 1200);
         if (is_wp_error($answer)) {
             return $answer;
         }

@@ -5,8 +5,8 @@
  * - SGAP_Rescue: images hosted on other servers (e.g. a former agency CDN) are copied
  *   into the media library and every reference is rewritten – posts, pages, products,
  *   template parts, custom CSS, post meta. Runs hourly until nothing is left.
- * - SGAP_Auto: AI photo for Instagram/Pinterest posts that have none; new posts and
- *   products are promoted (and get SEO meta) right after publishing; weekly SEO
+ * - SGAP_Auto: a queued post without a photo uses the page's featured image; new posts
+ *   and products are promoted (and get SEO meta) right after publishing; weekly SEO
  *   articles as drafts; a daily self-check; a weekly e-mail report.
  * Loaded from steamgears-autopilot.php.
  */
@@ -309,25 +309,19 @@ class SGAP_Auto {
 
     /* ---- photos for Instagram / Pinterest ---- */
 
-    /** Filter: returns an image URL for a queued post that has none ('' when not possible). */
+    /**
+     * Filter: a queued post that has no photo of its own gets the page's featured image.
+     * '' when the page has none either — nothing is generated, so the queue reports it instead.
+     */
     public static function photo_for_queue_item(string $url, array $row): string {
-        if ($url !== '' || !SGAP_Settings::enabled('auto_images') || SGAP_Images::backend() === '') {
+        if ($url !== '') {
             return $url;
         }
         $post_id = (int) ($row['post_id'] ?? 0);
         if ($post_id && ($thumb = get_the_post_thumbnail_url($post_id, 'large'))) {
             return (string) $thumb;
         }
-        $shape = ($row['channel'] ?? '') === 'pinterest' ? 'pin' : 'square';
-        $subject = trim((string) ($row['title'] ?? '')) ?: get_the_title($post_id);
-        $image = SGAP_Studio::image([
-            'prompt' => "A photographic, atmospheric steampunk image for a social media post about: {$subject}. Brass, copper, leather, warm light; no text, no logos.",
-            'alt' => $subject,
-            'post_id' => $post_id && !has_post_thumbnail($post_id) ? $post_id : 0,
-            'queue_id' => (int) ($row['id'] ?? 0),
-            'shape' => $shape
-        ]);
-        return is_wp_error($image) ? '' : (string) $image['url'];
+        return '';
     }
 
     /* ---- new posts and products ---- */
@@ -384,14 +378,14 @@ class SGAP_Auto {
             SGAP_AI::SYSTEM . ' You plan SEO content for the blog.',
             "Suggest {$per_week} new article or guide topics for steamgears.eu that people search for and the site does not cover yet. "
             . "Prefer seasonal or evergreen searches with buying intent that can link to the shop. Existing titles:\n- " . implode("\n- ", $titles),
-            $schema, 4000, 'low'
+            $schema, 4000
         );
         if (is_wp_error($ideas)) {
             return ['error' => $ideas->get_error_message()];
         }
         $done = [];
         foreach (array_slice((array) ($ideas['topics'] ?? []), 0, $per_week) as $idea) {
-            $r = SGAP_Studio::write(['topic' => $idea['topic'] ?? '', 'keyword' => $idea['keyword'] ?? '', 'type' => $idea['type'] ?? 'article', 'image' => true]);
+            $r = SGAP_Studio::write(['topic' => $idea['topic'] ?? '', 'keyword' => $idea['keyword'] ?? '', 'type' => $idea['type'] ?? 'article']);
             if (!is_wp_error($r) && SGAP_Settings::enabled('auto_publish_articles')) {
                 wp_publish_post($r['post_id']);
                 $r['status'] = 'publish';
@@ -419,11 +413,6 @@ class SGAP_Auto {
             $first = (string) (is_array($last['errors']) ? reset($last['errors']) : $last['errors']);
             $out[] = 'The latest AI run (' . (string) ($last['at'] ?? '?') . ') wrote no drafts: ' . mb_substr($first, 0, 160);
         }
-        if (is_array($last) && (int) ($last['free'] ?? 0) > 0) {
-            $out[] = 'The latest AI run (' . (string) ($last['at'] ?? '?') . ') had no credit for the paid model: '
-                . (int) $last['free'] . ' pages were written by the free model ' . (string) ($last['free_model'] ?? 'openrouter/free')
-                . '. Top up OpenRouter to get the paid model back.';
-        }
         if (is_array($last) && (int) ($last['rejected'] ?? 0) + (int) ($last['held'] ?? 0) > 0) {
             $out[] = 'The latest AI run (' . (string) ($last['at'] ?? '?') . '): the editor rejected ' . (int) ($last['rejected'] ?? 0)
                 . ' posts and ' . (int) ($last['held'] ?? 0) . ' wait for you under AI Drafts because no editor answered.';
@@ -443,10 +432,6 @@ class SGAP_Auto {
         global $wpdb;
         $problems = [];
         $q = $wpdb->prefix . 'sgap_queue';
-        // Posts that failed only for want of a photo get another go once AI photos are on.
-        $retry = SGAP_Settings::enabled('auto_images') && SGAP_Images::backend() !== ''
-            ? (int) $wpdb->query("UPDATE {$q} SET status = 'queued', attempts = 0, error = NULL WHERE status = 'failed' AND error LIKE '%needs a photo%'")
-            : 0;
         $failed = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$q} WHERE status = 'failed'");
         if ($failed > 0) {
             $problems[] = "{$failed} posts failed – see the Queue page for the reason.";
@@ -508,7 +493,7 @@ class SGAP_Auto {
         if ($rescue['given_up'] > 0) {
             $problems[] = "{$rescue['given_up']} images on another server could not be copied.";
         }
-        $result = ['at' => current_time('mysql'), 'problems' => $problems, 'retried' => $retry];
+        $result = ['at' => current_time('mysql'), 'problems' => $problems];
         update_option(self::HEALTH, $result, false);
         if (class_exists('SGAP_Alerts')) {
             SGAP_Alerts::after_health($result);
@@ -650,7 +635,7 @@ add_action('wp_abilities_api_init', function () {
             ['dry_run' => ['type' => 'boolean', 'default' => false], 'limit' => ['type' => 'integer', 'minimum' => 1, 'maximum' => 30, 'default' => 10]],
             fn($i) => !empty($i['dry_run']) ? SGAP_Rescue::status() : SGAP_Rescue::step((int) ($i['limit'] ?? 10)) + SGAP_Rescue::status()],
         'self-check' => ['Run the self-check',
-            'Runs the daily self-check now: feeds answer as RSS, AI key works, autopilot on, drafts piling up, failed posts (photo failures are retried when AI photos are on), images on other servers. Returns the problems found.',
+            'Runs the daily self-check now: feeds answer as RSS, the OpenRouter key works, autopilot on, drafts piling up, failed posts, images on other servers. Returns the problems found.',
             [], fn($i) => SGAP_Auto::health()],
         'write-weekly-articles' => ['Write this week\'s articles now',
             'Plans new SEO topics the site does not cover yet and writes them (Settings → Automation → articles per week; drafts unless auto-publish is on). Takes a few minutes per article.',

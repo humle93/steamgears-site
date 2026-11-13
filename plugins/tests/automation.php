@@ -1,7 +1,7 @@
 <?php
 /**
  * Set-and-forget checks (includes/automation.php), run with: wp eval-file plugins/tests/automation.php
- * External images, AIMLAPI text and images are mocked.
+ * External images and the OpenRouter text call are mocked.
  */
 $fail = 0;
 function ta($name, $ok, $info = null) { global $fail; echo ($ok ? 'PASS ' : 'FAIL ') . $name . ($info !== null ? ' — ' . substr(is_string($info) ? $info : wp_json_encode($info), 0, 260) : '') . "\n"; if (!$ok) $fail = 1; }
@@ -14,16 +14,12 @@ add_filter('pre_http_request', function ($pre, $args, $url) use ($jpg) {
         if (!empty($args['filename'])) file_put_contents($args['filename'], $jpg);
         return $ok(empty($args['filename']) ? $jpg : '', 'image/jpeg');
     }
-    if ($url === 'https://api.aimlapi.com/v1/images/generations') {
-        $GLOBALS['ta_images'] = ($GLOBALS['ta_images'] ?? 0) + 1;
-        return $ok(wp_json_encode(['data' => [['url' => 'https://img.example.test/gen-' . $GLOBALS['ta_images']]]]));
-    }
-    if ($url === 'https://api.aimlapi.com/v1/chat/completions') {
+    if ($url === 'https://openrouter.ai/api/v1/chat/completions') {
         $b = json_decode((string) $args['body'], true);
         $sys = (string) ($b['messages'][0]['content'] ?? '');
         $user = (string) ($b['messages'][1]['content'] ?? '');
         if (str_contains($sys, 'plan SEO content')) $c = ['topics' => [['topic' => 'Steampunk wedding outfits', 'keyword' => 'steampunk wedding', 'type' => 'article']]];
-        elseif (str_contains($sys, 'content_html')) $c = ['title' => 'Steampunk Wedding Outfits', 'slug' => 'steampunk-wedding', 'meta_title' => 'Steampunk Wedding Outfits', 'meta_description' => str_repeat('Brass and lace. ', 9), 'focus_keyword' => 'steampunk wedding', 'excerpt' => 'x', 'content_html' => '<p>Steampunk wedding ideas.</p>', 'faq' => [], 'tags' => ['wedding'], 'image_prompt' => 'wedding', 'image_alt' => 'Steampunk wedding'];
+        elseif (str_contains($sys, 'content_html')) $c = ['title' => 'Steampunk Wedding Outfits', 'slug' => 'steampunk-wedding', 'meta_title' => 'Steampunk Wedding Outfits', 'meta_description' => str_repeat('Brass and lace. ', 9), 'focus_keyword' => 'steampunk wedding', 'excerpt' => 'x', 'content_html' => '<p>Steampunk wedding ideas.</p>', 'faq' => [], 'tags' => ['wedding']];
         elseif (str_contains($sys, 'suggestions')) $c = ['focus_keyword' => 'brass compass', 'meta_title' => 'Brass Compass', 'meta_description' => 'A brass compass for your steampunk costume, hand finished and ready to wear at any convention or party.', 'suggestions' => ['Add photos']];
         else {
             preg_match_all('/^- ([a-z]+):/m', $user, $m);
@@ -34,7 +30,7 @@ add_filter('pre_http_request', function ($pre, $args, $url) use ($jpg) {
     return $pre;
 }, 5, 3);
 wp_set_current_user(1);
-foreach (['autopilot_enabled' => 'yes', 'full_auto_enabled' => 'no', 'ai_provider' => 'aimlapi', 'ai_api_key' => 'k', 'ai_model' => '', 'publish_mode' => 'rss', 'channels' => 'facebook,instagram', 'quiet_start' => 0, 'quiet_end' => 0, 'auto_images' => 'yes', 'auto_seo' => 'yes', 'rescue_hosts' => 'cdn.example.test', 'serpapi_key' => '', 'daily_cap' => 50, 'batch_size' => 20] as $k => $v) update_option("sgap_$k", $v);
+foreach (['autopilot_enabled' => 'yes', 'full_auto_enabled' => 'no', 'ai_api_key' => 'sk-or-v1-fixture', 'ai_model' => 'vendor/model', 'publish_mode' => 'rss', 'channels' => 'facebook,instagram', 'quiet_start' => 0, 'quiet_end' => 0, 'auto_images' => 'yes', 'auto_seo' => 'yes', 'rescue_hosts' => 'cdn.example.test', 'serpapi_key' => '', 'daily_cap' => 50, 'batch_size' => 20] as $k => $v) update_option("sgap_$k", $v);
 global $wpdb;
 
 /* --- image rescue --- */
@@ -58,16 +54,19 @@ SGAP_Rescue::step(10); SGAP_Rescue::step(10);
 $st = SGAP_Rescue::status();
 ta('rescue: gives up on a file after 3 failed tries', $st['given_up'] === 1 && $st['waiting'] === 0, $st);
 
-/* --- AI photo for Instagram --- */
-$q = SGAP_Queue::add(['channel' => 'instagram', 'title' => 'Brass goggles', 'body' => 'Look!', 'destination_url' => home_url('/goggles/')]);
+/* --- a photo on Instagram comes from the page's featured image --- */
+$img_post = wp_insert_post(['post_title' => 'Brass goggles', 'post_status' => 'publish', 'post_content' => 'Goggles.']);
+$upload = wp_upload_bits('brass-goggles.jpg', null, $jpg);
+$att = wp_insert_attachment(['post_mime_type' => 'image/jpeg', 'post_title' => 'brass'], $upload['file'], $img_post);
+set_post_thumbnail($img_post, $att);
+$q = SGAP_Queue::add(['channel' => 'instagram', 'title' => 'Brass goggles', 'body' => 'Look!', 'post_id' => $img_post, 'destination_url' => home_url('/goggles/')]);
 $qid = is_wp_error($q) ? 0 : (int) $q['id'];
 $rel = SGAP_RSS::release();
-ta('photo: Instagram post without a photo is released with an AI photo', $qid && in_array($qid, array_column($rel['sent'], 'id'), true) && str_contains((string) $wpdb->get_var("SELECT image_url FROM {$wpdb->prefix}sgap_queue WHERE id = $qid"), '/wp-content/uploads/'), $rel);
-update_option('sgap_auto_images', 'no');
-$q2 = SGAP_Queue::add(['channel' => 'instagram', 'title' => 'No photo', 'body' => 'x', 'destination_url' => home_url('/nophoto/')]);
+ta('photo: a post without its own photo uses the page featured image', $qid && in_array($qid, array_column($rel['sent'], 'id'), true) && str_contains((string) $wpdb->get_var("SELECT image_url FROM {$wpdb->prefix}sgap_queue WHERE id = $qid"), '/wp-content/uploads/'), $rel);
+$plain = wp_insert_post(['post_title' => 'No featured image', 'post_status' => 'publish', 'post_content' => 'Nothing to show.']);
+$q2 = SGAP_Queue::add(['channel' => 'instagram', 'title' => 'No photo', 'body' => 'x', 'post_id' => $plain, 'destination_url' => home_url('/nophoto/')]);
 $rel = SGAP_RSS::release();
-ta('photo: with AI photos off it fails with a helpful reason', in_array((int) $q2['id'], array_column($rel['failed'], 'id'), true) && str_contains($rel['failed'][0]['error'], 'AI photos'), $rel['failed'] ?? null);
-update_option('sgap_auto_images', 'yes');
+ta('photo: a page without a featured image fails with a reason that names the fix', in_array((int) $q2['id'], array_column($rel['failed'], 'id'), true) && str_contains($rel['failed'][0]['error'], 'needs a photo'), $rel['failed'] ?? null);
 
 /* --- new content gets promoted --- */
 $new = wp_insert_post(['post_title' => 'Brass compass', 'post_content' => 'A compass.', 'post_status' => 'draft']);
@@ -82,13 +81,13 @@ ta('weekly article: off by default', isset(SGAP_Auto::weekly_article()['skipped'
 update_option('sgap_articles_per_week', 1);
 $r = SGAP_Auto::weekly_article();
 $aid = $r['articles'][0]['post_id'] ?? 0;
-ta('weekly article: picks a new topic and writes a draft with an image', $aid && get_post_status($aid) === 'draft' && has_post_thumbnail($aid), $r);
+ta('weekly article: picks a new topic and writes a draft', $aid && get_post_status($aid) === 'draft' && !has_post_thumbnail($aid), $r);
 
 /* --- self-check and report --- */
 $old = SGAP_Queue::add(['channel' => 'pinterest', 'title' => 'Old fail', 'body' => 'x', 'destination_url' => home_url('/oldfail/')]);
 $wpdb->update($wpdb->prefix . 'sgap_queue', ['status' => 'failed', 'attempts' => 3, 'error' => 'Pinterest needs a photo: give the post a featured image.'], ['id' => (int) $old['id']]);
 $h = SGAP_Auto::health();
-ta('self-check: photo failures retried when AI photos are on', $h['retried'] >= 1, $h);
+ta('self-check: photo failures stay failed, nothing is retried automatically', !isset($h['retried']) && (bool) array_filter($h['problems'], fn($p) => str_contains($p, 'posts failed')), $h);
 ta('self-check: reports images that could not be copied', (bool) array_filter($h['problems'], fn($p) => str_contains($p, 'could not be copied')), $h['problems']);
 $mail = null;
 add_filter('pre_wp_mail', function ($null, $atts) use (&$mail) { $mail = $atts; return true; }, 10, 2);

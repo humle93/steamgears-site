@@ -1,7 +1,6 @@
 <?php
 /**
- * AI Chat in wp-admin: talk to the configured AI (AIMLAPI, Anthropic or any
- * OpenAI-compatible API) about the autopilot. The AI can use the plugin's own
+ * AI Chat in wp-admin: talk to OpenRouter about the autopilot. The AI can use the plugin's own
  * abilities as tools (status, drafts, queue, generate, publish, settings, health …),
  * with the logged-in administrator's permissions. History is kept per user.
  * Loaded from steamgears-autopilot.php.
@@ -237,9 +236,9 @@ class SGAP_Chat {
     }
 
     /**
-     * A tool name every provider accepts. AIMLAPI (Gemini) rejects anything that does not
-     * start with a letter or underscore and is not alphanumeric, underscore, dot, colon or
-     * dash — so `core/list posts` or a leading digit must never reach the API.
+     * A tool name OpenRouter accepts. Gemini models behind OpenRouter reject anything that
+     * does not start with a letter or underscore and is not alphanumeric, underscore, dot,
+     * colon or dash — so `core/list posts` or a leading digit must never reach the API.
      */
     public static function safe_name(string $name): string {
         $name = (string) preg_replace('/[^A-Za-z0-9_.:-]+/', '_', trim($name));
@@ -341,7 +340,7 @@ class SGAP_Chat {
 
     /**
      * Which tool sits at the index the provider complained about.
-     * AIMLAPI answers e.g. `tools[0].function_declarations[30].name: Invalid function name.`
+     * A Gemini answer e.g. `tools[0].function_declarations[30].name: Invalid function name.`
      */
     public static function culprit(string $error, array $names): ?array {
         // Gemini's message contains both `tools[0]` and `function_declarations[30]`; the
@@ -421,7 +420,7 @@ class SGAP_Chat {
     public static function reply(array $history, string $message) {
         $key = SGAP_AI::api_key();
         if ($key === '') {
-            return new WP_Error('sgap_ai_key', 'Set an AI API key in Steamgears → Settings → AI content first.');
+            return new WP_Error('sgap_ai_key', 'Add your OpenRouter key under Settings → Keys first.');
         }
         $turns = [];
         foreach (array_slice($history, -20) as $turn) {
@@ -434,12 +433,10 @@ class SGAP_Chat {
         if (function_exists('set_time_limit')) {
             @set_time_limit(300);
         }
-        return SGAP_AI::uses_chat_completions()
-            ? self::loop_chat_completions($key, $turns, $tools)
-            : self::loop_anthropic($key, $turns, $tools);
+        return self::loop_chat_completions($key, $turns, $tools);
     }
 
-    /** AIMLAPI / OpenAI-compatible: /chat/completions with function tools. */
+    /** OpenRouter: /chat/completions with function tools. */
     private static function loop_chat_completions(string $key, array $turns, array $tools) {
         $messages = array_merge([['role' => 'system', 'content' => self::system_prompt()]], $turns);
         $specs = [];
@@ -447,9 +444,7 @@ class SGAP_Chat {
             $specs[] = ['type' => 'function', 'function' => ['name' => $name, 'description' => $description, 'parameters' => $schema]];
         }
         $used = [];
-        $healed = '';
         for ($round = 0; $round < self::MAX_ROUNDS; $round++) {
-            // Read the model every round: a name the provider rejected was repaired on the last call.
             $model = SGAP_AI::model();
             if ($model === '') {
                 return new WP_Error('sgap_ai_model', 'Set an AI model in Settings for the OpenAI-compatible provider.');
@@ -458,15 +453,7 @@ class SGAP_Chat {
             if ($specs) {
                 $body['tools'] = $specs;
             }
-            if (SGAP_AI::provider() === 'aimlapi') {
-                $body['reasoning_effort'] = 'low';
-            }
-            // A stored model the provider does not know is healed inside chat_call: one retry on
-            // the provider default, then the stored value is cleared so it is the last time.
             $decoded = SGAP_AI::chat_call($key, $body, 120);
-            if ($healed === '' && SGAP_AI::model() !== $model) {
-                $healed = $model;
-            }
             $names = array_keys($tools);
             if (is_wp_error($decoded)) {
                 $entry = self::remember_call(SGAP_AI::provider_name(), $model, $round, $names, $decoded->get_error_message());
@@ -482,9 +469,9 @@ class SGAP_Chat {
             if (!$calls) {
                 $text = trim((string) ($msg['content'] ?? ''));
                 if ($text === '' && ($decoded['choices'][0]['finish_reason'] ?? '') === 'length') {
-                    return new WP_Error('sgap_ai_truncated', 'The answer was cut off; try a shorter question.' . self::healed_note($healed));
+                    return new WP_Error('sgap_ai_truncated', 'The answer was cut off; try a shorter question.');
                 }
-                return ['text' => ($text !== '' ? $text : '(no answer)') . self::healed_note($healed), 'tools' => $used];
+                return ['text' => $text !== '' ? $text : '(no answer)', 'tools' => $used];
             }
             $messages[] = ['role' => 'assistant', 'content' => (string) ($msg['content'] ?? ''), 'tool_calls' => array_map(fn($c) => [
                 'id' => (string) ($c['id'] ?? ''), 'type' => 'function',
@@ -496,81 +483,6 @@ class SGAP_Chat {
                 $used[] = $name;
                 $messages[] = ['role' => 'tool', 'tool_call_id' => (string) ($call['id'] ?? ''), 'content' => self::run_tool($name, $args, $tools)];
             }
-        }
-        return ['text' => 'I stopped after ' . self::MAX_ROUNDS . ' tool steps; ask me to continue.' . self::healed_note($healed), 'tools' => $used];
-    }
-
-    /** Says so when a stored model name was rejected and the answer came from the default. */
-    private static function healed_note(string $from): string {
-        if ($from === '') {
-            // Nothing was repaired — but the answer may still have come from the backup, and the
-            // owner must not be told the primary worked when it did not.
-            return SGAP_AI::fallback_note();
-        }
-        return "\n\nAIMLAPI did not know the model `{$from}`, so this answer came from `" . SGAP_AI::model()
-            . '` and Settings has been reset to it — the next command works too.' . SGAP_AI::fallback_note();
-    }
-
-    /** Anthropic Messages API with tool use. */
-    private static function loop_anthropic(string $key, array $turns, array $tools) {
-        $model = SGAP_AI::model();
-        $specs = [];
-        foreach ($tools as $name => [$description, $schema]) {
-            $specs[] = ['name' => $name, 'description' => $description, 'input_schema' => $schema];
-        }
-        $messages = $turns;
-        $used = [];
-        for ($round = 0; $round < self::MAX_ROUNDS; $round++) {
-            $body = [
-                'model' => $model,
-                'max_tokens' => 8000,
-                'system' => self::system_prompt(),
-                'messages' => $messages,
-                'output_config' => ['effort' => 'low']
-            ];
-            if ($specs) {
-                $body['tools'] = $specs;
-            }
-            $response = wp_remote_post(SGAP_AI::ANTHROPIC_URL, [
-                'timeout' => 120,
-                'headers' => ['x-api-key' => $key, 'anthropic-version' => SGAP_AI::ANTHROPIC_VERSION, 'content-type' => 'application/json'],
-                'body' => wp_json_encode($body)
-            ]);
-            $decoded = SGAP_AI::decode($response, 'Anthropic');
-            $names = array_keys($tools);
-            if (is_wp_error($decoded)) {
-                $entry = self::remember_call('Anthropic', $model, $round, $names, $decoded->get_error_message());
-                if ($entry['culprit']) {
-                    return new WP_Error($decoded->get_error_code(), $decoded->get_error_message()
-                        . ' — tool #' . $entry['culprit']['index'] . ' is `' . $entry['culprit']['name'] . '`.');
-                }
-                return $decoded;
-            }
-            self::remember_call('Anthropic', $model, $round, $names);
-            $content = (array) ($decoded['content'] ?? []);
-            if (($decoded['stop_reason'] ?? '') !== 'tool_use') {
-                if (($decoded['stop_reason'] ?? '') === 'refusal') {
-                    return ['text' => 'The model declined to answer that.', 'tools' => $used];
-                }
-                $text = trim(implode("\n", array_map(fn($b) => (string) ($b['text'] ?? ''), array_filter($content, fn($b) => is_array($b) && ($b['type'] ?? '') === 'text'))));
-                return ['text' => $text !== '' ? $text : '(no answer)', 'tools' => $used];
-            }
-            // Send the assistant turn back unchanged (thinking blocks included), then the tool results.
-            // json_decode turned an empty input {} into []; the API needs an object again.
-            foreach ($content as $k => $block) {
-                if (is_array($block) && ($block['type'] ?? '') === 'tool_use' && empty($block['input'])) {
-                    $content[$k]['input'] = new stdClass();
-                }
-            }
-            $messages[] = ['role' => 'assistant', 'content' => $content];
-            $results = [];
-            foreach ($content as $block) {
-                if (is_array($block) && ($block['type'] ?? '') === 'tool_use') {
-                    $used[] = (string) $block['name'];
-                    $results[] = ['type' => 'tool_result', 'tool_use_id' => (string) $block['id'], 'content' => self::run_tool((string) $block['name'], $block['input'] ?? [], $tools)];
-                }
-            }
-            $messages[] = ['role' => 'user', 'content' => $results];
         }
         return ['text' => 'I stopped after ' . self::MAX_ROUNDS . ' tool steps; ask me to continue.', 'tools' => $used];
     }
@@ -710,13 +622,13 @@ class SGAP_Chat {
         SGAP_Admin::open('AI Chat', 'Ask about the autopilot or tell it what to do – it can look things up and act for you.');
         $key_set = SGAP_Settings::get('ai_api_key') !== '';
         if (!$key_set) {
-            echo '<div class="notice notice-warning"><p>Set an AI API key under <a href="' . esc_url(admin_url('admin.php?page=sgap-settings')) . '">Settings → AI content</a> to use the chat.</p></div>';
+            echo '<div class="notice notice-warning"><p>Add your OpenRouter key under <a href="' . esc_url(admin_url('admin.php?page=sgap-settings')) . '">Settings → Keys</a> to use the chat.</p></div>';
         }
         $config = [
             'ajax' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('sgap_chat'),
             'history' => array_map(fn($t) => ['role' => $t['role'], 'content' => $t['content'], 'tools' => $t['tools'] ?? []], self::history()),
-            'model' => SGAP_AI::provider_name() . ' · ' . SGAP_AI::model(),
+            'model' => SGAP_AI::provider_name() . ' · ' . (SGAP_AI::model() ?: 'no model picked'),
             'tools' => count(self::tools()),
             'available' => count(self::available()),
             'signature' => self::tools_signature()

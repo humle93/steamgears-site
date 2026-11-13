@@ -34,6 +34,21 @@ and how long each missing piece takes.
 
 ## 0. Short version
 
+**P12 (7.85.0, 13/11 2026) — kun OpenRouter, ingen billed-AI, ryddet admin-UI, 4,0 d (plan 4,0 d).** Ejeren bad om tre ting: fjern AIMLAPI, gør OpenRouter til den eneste udbyder, og ryd hele pluginets opsætning. Resultatet er ét AI-trin i guiden, ét nøglekort, én model-dropdown uden standardvalg og ingen billedgenerering: Instagram og Pinterest bruger sidens featured image. Reserve-udbyderen og gratis-model-forsøget er også væk, så en fejl rapporteres med OpenRouters egne ord i stedet for at blive forsøgt igen.
+
+| Fil | Ændring | Andel |
+| --- | --- | --- |
+| `includes/generator.php` | omskrevet til OpenRouter-only: `provider()` fast, ingen fallback/free-retry/Anthropic, én vej gennem `chat_completions()` | 25 % |
+| `includes/studio.php` | `SGAP_Images` og hele billed-stien slettet; kun *Write* tilbage | 15 % |
+| `includes/core.php`, `setup.php`, `keys.php`, `keycheck.php`, `chat.php` | ét udbyderkort, ét wizard-trin, `.env`-agtig nøglekontrol, ingen provider-valg eller backup | 15 % |
+| `includes/automation.php`, `rss.php`, `preflight.php`, `editor.php`, `abilities.php` m.fl. | featured image i stedet for genereret foto; selvtjek og tekster uden AI-fotos/backup | 10 % |
+| `assets/pages/studio.js`, `assets/admin.css` | ingen billed-trin eller `.sgap-studio-img` | 5 % |
+| `plugins/tests/smoke.php` + `cc-login.php`, `keys.php`, `automation.php`, `integration.php`, `admin-tools.php` | OpenRouter-mocks, featured-image-forløb, 42 abilities, ingen free-retry/backup-checks | 15 % |
+| `README.md`, `ROADMAP.md`, `CHANGELOG.md`, `docs/plan-openrouter-only-ui-2026-11-11.md` | udbyderafsnittet erstattet, 7.85.0-note, planen med faser og estimat | 10 % |
+| `plugins/steamgears-autopilot-v7.85.0.zip`, `projektstatus.json` | én zip der matcher kilden, P12-række | 5 % |
+
+**Behov, ikke gjort:** intet kald er gået til den rigtige OpenRouter (ingen nøgle i sandkassen), og intet WordPress er kørt her — `integration.php` kræver MySQL + wp-cli. Målt: 1 570 PASS / 0 FAIL i smoke.
+
 **P11 (7.84.0, plan 12/11 2026) — Publer udfases, 0,6 d.** Facebook, Instagram og Pinterest poster direkte, kanal for kanal, mens resten stadig går via RSS til Publer. Publer opsiges først, når hver kanal er målt live (abonnementet fornyes næste måned).
 
 | Fil | Ændring | Andel |
@@ -676,6 +691,7 @@ Platform limits: [Instagram content publishing](https://developers.facebook.com/
 
 ## 9. Change log for this document
 
+- **7.85.0 (13/11) — P12: kun OpenRouter, ingen AI-billedgenerering, ryddet admin-UI.** AIMLAPI, Anthropic, *Other OpenAI-compatible*, reserve-udbyderen og gratis-model-forsøget er fjernet. `SGAP_AI::provider()` svarer altid `openrouter`, adressen er fast, og der findes ingen standardmodel. Content Studio skriver tekst, og Instagram/Pinterest genbruger sidens featured image; `SGAP_Images`, `generate-image`, billednøgler/-modeller og `includes/openrouter.php` er væk. Fanen heder nu *Settings → AI*, nøglesiden har ét kort, og guiden ét AI-trin. 1 570 PASS / 0 FAIL i smoke; `cc-login`, `keys`, `automation`, `integration` og `admin-tools` er opdateret. Ikke målt: et rigtigt OpenRouter-kald og en kørsel mod WordPress.
 - **7.76.0 (11/11) — P10: OpenRouter som standard, billeder via OpenRouter og log ind i Command Center med ét klik.** OpenRouter er standardudbyder (kun når intet er gemt) og står først i guiden og på nøglesiden; AIMLAPI er markeret *udfases*, men et gemt AIMLAPI-valg virker stadig. Ny fil `includes/openrouter.php`: advarsel mens AIMLAPI er valgt, og *Switch to OpenRouter now*, når reservenøgle og -model findes. `SGAP_Images::backend()` laver billeder via OpenRouter (`modalities: image`, data-URL) når nøgle + `openrouter_image_model` findes, ellers AIMLAPI som før. `POST /sgap/v1/cc-link` gemmer Command Centers adresse og fælles nøgle (ikke autoload); knappen laver en HMAC-billet (60 s, `jti`) til `{cc}/cc-sso`. Fund: CC's gamle engangslink sendte til `POST /sgap/v1/login-link`, en rute der aldrig har fandtes. **45 nye checks (1 505 → 1 550 PASS, 0 FAIL)** i `plugins/tests/cc-login.php`. Ikke verificeret: et rigtigt OpenRouter-billedkald og et login mod den kørende Command Center.
 
 - **7.75.0 (11/11) — log-rækkerne siger hvad målet hedder.** `SGAP_Cirla::pending_draft($id)` giver både eksistens og titel i én query, og `draft_exists()` bygger på den; `row_target()` leverer url og titel samlet, så en draft-række læses »Draft #7 · Brass goggles« og seo/social-rækker »SEO check · sidens titel«. Mål der er væk giver hverken link eller titel. Smoke: 1 505 PASS (1 504 → 1 505).

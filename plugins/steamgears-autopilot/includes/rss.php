@@ -80,7 +80,7 @@ class SGAP_RSS {
                 if ($row['image_url'] !== '') {
                     $wpdb->update($wpdb->prefix . 'sgap_queue', ['image_url' => $row['image_url']], ['id' => $id]);
                 } else {
-                    $error = ucfirst($channel) . ' needs a photo: give the post a featured image, or switch on AI photos (Settings → Automation).';
+                    $error = ucfirst($channel) . ' needs a photo: give the post a featured image.';
                 }
             }
             if ($error !== '') {

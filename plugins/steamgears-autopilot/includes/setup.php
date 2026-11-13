@@ -14,15 +14,15 @@ class SGAP_Setup {
     /** Friendly labels for setting keys. */
     const LABELS = [
         'autopilot_enabled' => 'Autopilot', 'full_auto_enabled' => 'Full auto (skip approval)', 'channels' => 'Channels',
-        'posts_per_day' => 'Pages to promote per day', 'ai_provider' => 'AI provider', 'ai_api_key' => 'AI API key', 'ai_model' => 'AI model',
-        'ai_base_url' => 'API base URL', 'openrouter_api_key' => 'OpenRouter backup key', 'openrouter_model' => 'OpenRouter backup model', 'content_language' => 'Article language', 'image_model' => 'Image model', 'image_api_key' => 'AIMLAPI key for images',
+        'posts_per_day' => 'Pages to promote per day', 'ai_api_key' => 'OpenRouter key', 'ai_model' => 'OpenRouter model',
+        'content_language' => 'Article language',
         'serpapi_key' => 'SerpApi key (keyword research)', 'publish_mode' => 'How posts reach Publer', 'publer_api_key' => 'Publer API key',
         'publer_workspace_id' => 'Publer workspace', 'publer_pinterest_board' => 'Pinterest board ID', 'daily_cap' => 'Max posts per day',
         'batch_size' => 'Posts per 15-minute run', 'quiet_start' => 'Quiet from', 'quiet_end' => 'Quiet until', 'labor_rate' => 'Your hourly rate',
         'monthly_budget' => 'Monthly budget', 'target_roi' => 'Target ROI %', 'winner_min_clicks' => 'Winner after clicks', 'loser_min_clicks' => 'Loser after clicks',
         'repost_cooldown_days' => 'Days before a page is promoted again', 'repost_max' => 'Max reposts', 'merchant_feed_secret' => 'Product feed secret',
         'evergreen_enabled' => 'Recycle evergreen pages', 'evergreen_after_days' => 'Days between two shares', 'evergreen_max_shares' => 'Default shares per page', 'evergreen_batch' => 'Pages recycled per day',
-        'auto_images' => 'AI photos for Instagram & Pinterest', 'auto_seo' => 'SEO meta for new posts & products', 'articles_per_week' => 'SEO articles per week',
+        'auto_seo' => 'SEO meta for new posts & products', 'articles_per_week' => 'SEO articles per week',
         'auto_publish_articles' => 'Publish weekly articles automatically', 'weekly_report' => 'Weekly e-mail report', 'rescue_hosts' => 'Copy images from these servers',
         'mcp_client_id' => 'MCP client ID', 'mcp_refresh_token' => 'MCP refresh token',
         'telegram_bot_token' => 'Bot token', 'bluesky_app_password' => 'App password', 'mastodon_token' => 'Access token',
@@ -49,15 +49,15 @@ class SGAP_Setup {
      * key added to the wrong tab later still shows up in exactly one place.
      */
     const TABS = [
-        'keys' => ['Keys', 'lock', ['publer_api_key', 'ai_api_key', 'image_api_key', 'serpapi_key', 'telegram_bot_token', 'merchant_feed_secret', 'bluesky_app_password', 'mastodon_token', 'mcp_refresh_token', 'printful_api_key', 'pinterest_access_token', 'pinterest_refresh_token', 'pinterest_client_secret', 'instagram_access_token', 'facebook_access_token', 'reddit_client_secret', 'reddit_password', 'reddit_refresh_token', 'openrouter_api_key']],
+        'keys' => ['Keys', 'lock', ['publer_api_key', 'ai_api_key', 'serpapi_key', 'telegram_bot_token', 'merchant_feed_secret', 'bluesky_app_password', 'mastodon_token', 'mcp_refresh_token', 'printful_api_key', 'pinterest_access_token', 'pinterest_refresh_token', 'pinterest_client_secret', 'instagram_access_token', 'facebook_access_token', 'reddit_client_secret', 'reddit_password', 'reddit_refresh_token']],
         'basics' => ['Basics', 'admin-home', ['autopilot_enabled', 'full_auto_enabled', 'channels', 'posts_per_day']],
-        'ai' => ['AI & images', 'superhero-alt', ['ai_profile', 'ai_provider', 'ai_model', 'ai_base_url', 'content_language', 'image_model']],
+        'ai' => ['AI', 'superhero-alt', ['ai_profile', 'ai_model', 'content_language']],
         'publishing' => ['Publishing', 'megaphone', ['publish_mode', 'publer_workspace_id', 'publer_pinterest_board', 'pinterest_client_id', 'instagram_user_id', 'instagram_graph_host', 'facebook_page_id', 'facebook_graph_version', 'facebook_direct', 'instagram_direct', 'pinterest_direct', 'pinterest_board_id', 'bluesky_handle', 'mastodon_instance', 'mastodon_limit', 'telegram_chat_id', 'quality_gate', 'banned_words', 'dupe_days']],
         'schedule' => ['Schedule & limits', 'clock', ['quiet_start', 'quiet_end', 'blackout_ranges', 'daily_cap', 'batch_size', 'repost_cooldown_days']],
         'evergreen' => ['Evergreen', 'update', ['evergreen_enabled', 'evergreen_after_days', 'evergreen_max_shares', 'evergreen_batch']],
         'shop' => ['Shop & feeds', 'cart', ['woo_min_margin']],
         'mcp' => ['MCP access', 'admin-links', ['mcp_client_id']],
-        'automation' => ['Automation', 'update-alt', ['auto_images', 'auto_seo', 'articles_per_week', 'auto_publish_articles', 'weekly_report', 'rescue_hosts']],
+        'automation' => ['Automation', 'update-alt', ['auto_seo', 'articles_per_week', 'auto_publish_articles', 'weekly_report', 'rescue_hosts']],
         'advanced' => ['Economics', 'chart-line', ['labor_rate', 'monthly_budget', 'target_roi', 'winner_min_clicks', 'loser_min_clicks', 'repost_max']],
         'forum' => ['Forum & Reddit', 'admin-comments', ['forum_enabled', 'forum_slug', 'forum_topics_per_page', 'forum_intro',
             'reddit_enabled', 'reddit_auto_share', 'reddit_default_sub', 'reddit_radar_subs', 'reddit_keywords',
@@ -70,13 +70,13 @@ class SGAP_Setup {
      */
     const TAB_HINTS = [
         'basics' => 'What the autopilot may do on its own, where it posts, and how many pages it promotes a day.',
-        'ai' => 'Which model writes the posts, the articles and the images, and in which language.',
+        'ai' => 'Which OpenRouter model writes the posts and the articles, how the assistant behaves, and the language it writes in.',
         'publishing' => 'How posts leave the site, which accounts they go to, and what the quality gate refuses.',
         'schedule' => 'When posts are released, how many per day, and the days when nothing goes out at all.',
         'evergreen' => 'Pages worth sharing more than once: how long between two shares, and how many each page gets.',
         'shop' => 'Printful\'s store, the product feed and the margin floor the shop tools may not undercut.',
         'mcp' => 'The client id the site uses when it renews its own MCP token.',
-        'automation' => 'What runs by itself: AI images, SEO meta on new posts, weekly articles and the image rescue.',
+        'automation' => 'What runs by itself: SEO meta on new posts, weekly articles and the image rescue.',
         'advanced' => 'Your hourly rate and the numbers that decide whether a post is a winner, a loser or worth repeating.',
         'forum' => 'A forum for the questions the shop answers in public, and the Reddit account that gives the threads readers.'
     ];
@@ -221,25 +221,22 @@ class SGAP_Setup {
     }
 
     /**
-     * The model dropdown: only what the provider lists right now can be picked, so a retired or
+     * The model dropdown: only what OpenRouter lists right now can be picked, so a retired or
      * guessed model name can no longer be saved. Without a list the field stays free text, so an
-     * unreachable provider never blocks the rest of the form.
+     * unreachable endpoint never blocks the rest of the form.
      */
     public static function model_field(string $name): string {
         $id = 'sgap_ai_model';
         $current = trim((string) SGAP_Settings::get('ai_model'));
-        $default = SGAP_AI::default_model();
         $models = SGAP_AI::catalog();
         if ($models === []) {
             return '<input type="text" id="' . esc_attr($id) . '" name="' . esc_attr($name) . '" value="' . esc_attr($current)
-                . '" class="sgap-text" spellcheck="false" placeholder="' . esc_attr($default !== '' ? $default : 'model id') . '">'
-                . '<p class="sgap-hint">Could not read the model list from ' . esc_html(SGAP_AI::provider_name())
-                . ' right now, so the name is free text. Leave it empty for the default'
-                . ($default !== '' ? ' (' . esc_html($default) . ')' : '') . '.</p>';
+                . '" class="sgap-text" spellcheck="false" placeholder="model id">'
+                . '<p class="sgap-hint">Could not read the model list from OpenRouter right now, so the name is free text. '
+                . 'OpenRouter has no default model, so one has to be picked.</p>';
         }
         $html = '<select id="' . esc_attr($id) . '" name="' . esc_attr($name) . '" class="sgap-model">'
-            . '<option value=""' . selected($current, '', false) . '>'
-            . esc_html($default !== '' ? 'Provider default: ' . $default : 'Provider default') . '</option>';
+            . '<option value=""' . selected($current, '', false) . '>Pick a model</option>';
         if ($current !== '' && !in_array($current, $models, true)) {
             // Never hide what is saved: the owner has to see that it is gone.
             $html .= '<option value="' . esc_attr($current) . '" selected>' . esc_html($current) . ' (not offered any more)</option>';
@@ -251,39 +248,8 @@ class SGAP_Setup {
             }
             $html .= '</optgroup>';
         }
-        return $html . '</select><p class="sgap-hint">' . count($models) . ' model(s) that ' . esc_html(SGAP_AI::provider_name())
-            . ' offers right now. The list is refreshed every 12 hours, so a retired model cannot be picked, and saving checks it again.</p>';
-    }
-
-    /**
-     * The backup model: the same rule as model_field(), except that empty is a real choice here —
-     * it is what switches the backup off. The list comes from OpenRouter itself, never from the
-     * chosen provider, and without a list the field stays free text so the rest of the form works.
-     */
-    public static function backup_model_field(string $name): string {
-        $id = 'sgap_openrouter_model';
-        $current = trim((string) SGAP_Settings::get('openrouter_model'));
-        $models = SGAP_AI::catalog(false, 'openrouter_backup');
-        if ($models === []) {
-            return '<input type="text" id="' . esc_attr($id) . '" name="' . esc_attr($name) . '" value="' . esc_attr($current)
-                . '" class="sgap-text" spellcheck="false" placeholder="model id — empty = no backup">'
-                . '<p class="sgap-hint">Could not read the model list from OpenRouter right now, so the name is free text. Empty = the backup is off.</p>';
-        }
-        $html = '<select id="' . esc_attr($id) . '" name="' . esc_attr($name) . '" class="sgap-model">'
-            . '<option value=""' . selected($current, '', false) . '>Off — the primary provider only</option>';
-        if ($current !== '' && !in_array($current, $models, true)) {
-            // Never hide what is saved: a retired backup model has to be visible to be replaced.
-            $html .= '<option value="' . esc_attr($current) . '" selected>' . esc_html($current) . ' (not offered any more)</option>';
-        }
-        foreach (self::group_models($models) as $vendor => $ids) {
-            $html .= '<optgroup label="' . esc_attr($vendor) . '">';
-            foreach ($ids as $model) {
-                $html .= '<option value="' . esc_attr($model) . '"' . selected($current, $model, false) . '>' . esc_html($model) . '</option>';
-            }
-            $html .= '</optgroup>';
-        }
-        return $html . '</select><p class="sgap-hint">' . count($models) . ' model(s) OpenRouter offers right now. Empty = no backup. '
-            . 'The backup is only called when the primary provider fails, never when it answers.</p>';
+        return $html . '</select><p class="sgap-hint">' . count($models) . ' model(s) OpenRouter offers right now. '
+            . 'The list is refreshed every 12 hours, so a retired model cannot be picked, and saving checks it again.</p>';
     }
 
     /** Model ids by their vendor prefix, so hundreds of ids stay navigable in one dropdown. */
@@ -332,9 +298,6 @@ class SGAP_Setup {
         }
         if ($key === 'ai_model') {
             return self::model_field($name);
-        }
-        if ($key === 'openrouter_model') {
-            return self::backup_model_field($name);
         }
         if (in_array($key, SGAP_Settings::TEXTAREA_KEYS, true)) {
             return '<textarea id="' . esc_attr($id) . '" name="' . esc_attr($name) . '" rows="4" class="sgap-text" spellcheck="false">' . esc_textarea((string) SGAP_Settings::get($key)) . '</textarea>';
@@ -416,22 +379,21 @@ class SGAP_Setup {
         echo '</ol><div class="sgap-wizard-body">';
 
         // 1 AI
-        $provider = SGAP_AI::provider();
-        echo '<form class="sgap-card sgap-step" data-step="ai"><h2>Which AI should write for you?</h2><p class="sgap-sub">The AI writes your social posts, articles and answers in the chat.</p><div class="sgap-choice-row sgap-big">';
-        foreach (['openrouter' => ['OpenRouter', 'Recommended. One key in front of hundreds of models — text and images. Pick the models after saving.'], 'anthropic' => ['Anthropic (Claude)', 'Directly from Anthropic. Text only – images need an OpenRouter key.'], 'openai_compatible' => ['Other', 'OpenAI or any OpenAI-compatible API with your own address.'], 'aimlapi' => ['AIMLAPI', 'Being phased out. A saved AIMLAPI key keeps working until you switch to OpenRouter.']] as $value => [$title, $text]) {
-            echo '<label class="sgap-choice' . ($provider === $value ? ' on' : '') . '"><input type="radio" name="settings[ai_provider]" value="' . esc_attr($value) . '"' . checked($provider, $value, false) . '><span><strong>' . esc_html($title) . '</strong><small>' . esc_html($text) . '</small></span></label>';
-        }
         $ai_saved = trim((string) SGAP_Settings::get('ai_api_key', '')) !== '' || SGAP_Settings::constant_name('ai_api_key');
-        echo '</div>' . ($ai_saved
+        echo '<form class="sgap-card sgap-step" data-step="ai"><h2>Connect OpenRouter</h2>'
+            . '<p class="sgap-sub">OpenRouter is the one AI provider. It writes your social posts, your articles and the answers in the chat.</p>'
+            . '<div class="sgap-choice-row sgap-big"><label class="sgap-choice on"><span><strong>OpenRouter</strong>'
+            . '<small>One key in front of hundreds of models from many providers, on one bill. Pick the model after saving.</small></span></label></div>'
+            . ($ai_saved
                 ? '<div class="sgap-connected">' . SGAP_UI::pill('Key saved', 'ok') . ' <span>Change it under <a href="'
                     . esc_url(admin_url('admin.php?page=sgap-settings#keys')) . '">Settings → Keys</a> — that is the only place keys are pasted.</span></div>'
                 : self::row('ai_api_key', true))
-            . '<details class="sgap-more"><summary>Model and address (optional)</summary>' . self::row('ai_model', true) . self::row('ai_base_url', true) . '</details>'
+            . '<details class="sgap-more"><summary>Model (required)</summary>' . self::row('ai_model', true) . '</details>'
             . '<div class="sgap-test-result">' . (is_array($keys) && isset($keys['ai']) ? SGAP_UI::pill('AI ' . ($keys['ai']['ok'] ? '✓' : '✗'), $keys['ai']['ok'] ? 'ok' : 'bad') . ' <span>' . esc_html($keys['ai']['message']) . '</span>' : '') . '</div>'
             . '<div class="sgap-step-nav"><span></span><button class="button button-primary" data-next>Save, test &amp; continue</button></div></form>';
 
         // 2 Channels
-        echo '<form class="sgap-card sgap-step" data-step="channels" hidden><h2>Where should your posts go?</h2><p class="sgap-sub">Pick the networks you use. Instagram and Pinterest need a photo on each post – the AI can make one.</p>'
+        echo '<form class="sgap-card sgap-step" data-step="channels" hidden><h2>Where should your posts go?</h2><p class="sgap-sub">Pick the networks you use. Instagram and Pinterest need a photo on each post: a queued post without one uses the page\'s featured image.</p>'
             . self::channels_field('settings[channels]')
             . '<div class="sgap-step-nav"><button type="button" class="button" data-back>Back</button><button class="button button-primary" data-next>Continue</button></div></form>';
 
@@ -459,8 +421,8 @@ class SGAP_Setup {
             . '<div class="sgap-step-nav"><button type="button" class="button" data-back>Back</button><button class="button button-primary" data-next>Continue</button></div></form>';
 
         // 5 Extras
-        echo '<form class="sgap-card sgap-step" data-step="extras" hidden><h2>Extras for articles and images</h2><p class="sgap-sub">Optional. Make the Content Studio smarter.</p>'
-            . self::row('serpapi_key', true) . self::row('content_language', true) . self::row('image_model', true) . self::row('image_api_key', true)
+        echo '<form class="sgap-card sgap-step" data-step="extras" hidden><h2>Extras for articles</h2><p class="sgap-sub">Optional. Make the Content Studio smarter.</p>'
+            . self::row('serpapi_key', true) . self::row('content_language', true)
             . '<div class="sgap-step-nav"><button type="button" class="button" data-back>Back</button><button class="button button-primary" data-next>Finish</button></div></form>';
 
         // 6 Done

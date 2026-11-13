@@ -133,7 +133,7 @@
     {
       "id": "plugin",
       "name": "Steamgears Autopilot — plugin",
-      "next": "Tekstgenereringen kører igen (målt 9/11 23:56): provider `openai_compatible` mod Geminis OpenAI-endpoint med model `models/gemini-flash-lite-latest`, nøglen hentet fra WordPress' eget connector-lager, `check-keys` ai_ok=true, en generering gav 20 kladder og `pending_drafts` gik 45 → 65. De 20 første gik i køen (full_auto), de 20 næste venter under AI Drafts. Pinterest er det næste: kanalen bruger WooCommerce-integrationens token og får 401 `Missing: ['boards:read']` (målt 10/11 00:12), og der findes intet `pinterest_client_id` i repo, historik, database eller logs. `tools/pinterest_connect.py` er klar: indsæt appens offentlige App ID i Settings → Keys, kør `--authorize`, godkend board-adgang og kør `--finish '<callback>'`, så veksles koden server-side og `/v5/boards` bekræfter. Ejeren skal samtidig beslutte, om Pinterest for WooCommerce-integrationen skal afbrydes, fordi `token()` altid foretrækker dens token. Derefter P1.5's live-verifikation (0,6 d).",
+      "next": "Alt i P12 er bygget og grøn i smoke (1 570 PASS / 0 FAIL): OpenRouter er den eneste udbyder, AI-billedgenerering og reserve-udbyderen er væk, og admin-UI'et er ryddet (Settings → AI, ét nøglekort, ét wizard-trin). Ejerens tur: læg en OpenRouter-nøgle ind under Settings → Keys, vælg model fra den live liste, og installer plugins/steamgears-autopilot-v7.85.0.zip gennem Plugins → Tilføj nyt (repoet er privat, så selvopdateringen kan ikke hente den). Derefter et rigtigt OpenRouter-kald og ét Instagram-/Pinterest-opslag på en side med featured image.",
       "blocked_by": "Syv led kræver ejeren, alle målt 8/11: (1) **Pinterest-scope** — `token_source` er **`woocommerce`**, og det token svarer **401 `Missing: ['boards:read']`** på `/v5/boards` (målt 10/11 00:12). Vores eget felt har en 40-tegns client secret, men **intet client id**, og `token()` foretrækker integrationen — så et eget token bruges først, når integrationen er afbrudt. Client id'et blev søgt i repo, hele git-historikken, samtalepunkter og backups, `wp_options`/transients/postmeta/usermeta, `wp-config`-konstanter, integrationens nøgler, GitHub-variabler, CI-workflows, tre MCP-klientfiler og agent-loggen: 0 træf (se `docs/library/pinterest-genforbindelse-2026-11-09.md`). Det er offentligt og skal indsættes i Settings → Keys, hvorefter `tools/pinterest_connect.py --authorize` og `--finish '<callback>'` gør resten; (2) **de øvrige kanal-tokens** — Instagram, Bluesky, Mastodon, Telegram og Facebook har intet token (5 af 6 mangler); (3) **AI-kredit** — AI-nøglen er løst uden ejeren: der findes ingen `sk-or-`/`sk-ant-`/`sk-proj-`-nøgle i databasen (0 rækker), AIMLAPI-nøglen autentificerer men svarer 403 »run out of funds«, og i WordPress' connector-lager lå en Google-nøgle (53 tegn, `AQ.`) gemt inde i en curl-kommando — den blev læst med `WP_Secret::reveal()`, testet mod Geminis OpenAI-endpoint (`models/gemini-flash-lite-latest` = 200) og sat som provider, så genereringen kører (målt 9/11 23:56). Tilbage til ejeren: Pinterest `boards:read`, fem kanal-tokens og et eventuelt ønske om OpenRouter i stedet for Gemini; (4) **`sgap_alert_email`** er tom, så fejl registreres men ingen mail sendes; (5) **full auto vs. godkendelse** — `sgap_full_auto_enabled = no` og 40 elementer venter; (6) **distributionsvej** — `publish_mode = rss` og 0 Publer-konti; (7) **P2.1–P2.3** kræver ejerens beslutning om Command Center-retningen. Intet af det må gættes.",
       "modules": [
         {
@@ -406,9 +406,18 @@
           "unit": "d",
           "note": "7.84.0: SGAP_Direct lader RSS- og API-tilstand poste direkte kanaler selv; Instagram (container → status → media_publish) og Pinterest (POST /v5/pins) bygget; Facebook fandtes. Alle slået fra som standard. 19 checks, 1 613 → 1 632 PASS. Guide: docs/library/publer-udfasning-2026-11-12.md (+ PDF). Mangler (0,1 d): ejerens tokens og ét rigtigt opslag pr. kanal før Publer opsiges (fornyes næste måned).",
           "verified": false
+        },
+        {
+          "id": "p12",
+          "name": "P12 — kun OpenRouter, ingen AI-billedgenerering, ryddet admin-UI",
+          "done": 4.0,
+          "total": 4.0,
+          "unit": "d",
+          "verified": false,
+          "note": "7.85.0: AIMLAPI, Anthropic, 'Other OpenAI-compatible', reserve-udbyderen og gratis-model-forsøget er fjernet; SGAP_AI::provider() svarer altid openrouter, adressen er fast, og der findes ingen standardmodel. Al AI-billedgenerering er væk (SGAP_Images, image_api_key, image_model, openrouter_image_model, auto_images, generate-image, AJAX-billedopgaven), og Instagram/Pinterest bruger sidens featured image. Fanen heder nu Settings → AI, nøglesiden har ét OpenRouter-kort, guiden ét AI-trin, og includes/openrouter.php er slettet. 1 570 PASS / 0 FAIL i smoke; cc-login, keys, automation, integration og admin-tools er opdateret (42 abilities). Målt: zip 487 866 bytes, diff -r mod kilden ren. IKKE målt: et rigtigt OpenRouter-kald (ingen nøgle i sandkassen) og en kørsel mod WordPress (integration.php kræver MySQL + wp-cli)."
         }
       ],
-      "total": 33.75,
+      "total": 41.5,
       "verified": true
     },
     {
@@ -2816,6 +2825,15 @@
       "after": 95.0,
       "delta": 0,
       "basis": "2,85 af 3 d (C1 0,35/0,35 · C2 0,2/0,2 · C3 0,4/0,4 · C4 0,25/0,25 · C5 0,2/0,2 · C6 0,8/0,8 · C7 0,45/0,6 · C8 0,2/0,2)"
+    },
+    {
+      "date": "2026-11-13",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "P12 kun OpenRouter, ingen AI-billedgenerering og ryddet admin-UI (4,0 d) lagt til efter ejerens krav 13/11: fjern AIMLAPI, brug kun OpenRouter, ryd hele opsætningen",
+      "before": 99.6,
+      "after": 99.6,
+      "delta": 0,
+      "basis": "41,35 af 41,5 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5 · P3.7 0,6/0,6 · P3.8 0,3/0,3 · P3.9 0,25/0,25 · P1.25 0,15/0,15 · P1.24 0,35/0,35 · P1.23 0,25/0,25 · P6 0,9/0,9 · P7 0,3/0,3 · P8 0,8/0,8 · P9 0,35/0,35 · P9.1 0,3/0,3 · P9.2 0,2/0,2 · P9.3 0,25/0,25 · P9.4 0,2/0,2 · P10 0,5/0,5 · P9.5 0,25/0,25 · P9.6 0,25/0,25 · P9.7 0,15/0,15 · P9.8 0,35/0,4 · P9.9 0,3/0,3 · P11 0,5/0,6 · P12 4/4)"
     }
   ]
 }

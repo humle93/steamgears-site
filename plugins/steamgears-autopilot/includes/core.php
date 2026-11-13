@@ -62,9 +62,7 @@ class SGAP_Install {
         'sgap_telegram_bot_token' => '',
         'sgap_telegram_chat_id' => '',
         'sgap_utm_campaign' => 'steamgears_premium_evergreen',
-        'sgap_ai_provider' => 'anthropic',
         'sgap_publish_mode' => 'rss',
-        'sgap_auto_images' => 'yes',
         'sgap_auto_seo' => 'yes',
         'sgap_auto_publish_articles' => 'no',
         'sgap_weekly_report' => 'yes',
@@ -382,7 +380,7 @@ register_deactivation_hook(SGAP_FILE, ['SGAP_Install', 'deactivate']);
 
 /* ---------------- SETTINGS ---------------- */
 class SGAP_Settings {
-    const BOOL_KEYS = ['autopilot_enabled', 'full_auto_enabled', 'auto_images', 'auto_seo', 'auto_publish_articles', 'weekly_report', 'evergreen_enabled', 'forum_enabled', 'reddit_enabled', 'reddit_auto_share', 'cirla_enabled'];
+    const BOOL_KEYS = ['autopilot_enabled', 'full_auto_enabled', 'auto_seo', 'auto_publish_articles', 'weekly_report', 'evergreen_enabled', 'forum_enabled', 'reddit_enabled', 'reddit_auto_share', 'cirla_enabled'];
     const HOUR_KEYS = ['quiet_start', 'quiet_end'];
     const INT_KEYS = [
         'daily_cap','batch_size','labor_rate','monthly_budget','target_roi',
@@ -392,22 +390,19 @@ class SGAP_Settings {
     ];
     /** Never echoed back to the browser; can be overridden by SGAP_<KEY> constants in wp-config.php. */
     const SECRET_KEYS = [
-        'publer_api_key','ai_api_key','image_api_key','serpapi_key',
+        'publer_api_key','ai_api_key','serpapi_key',
         'telegram_bot_token',
         'merchant_feed_secret','bluesky_app_password','mastodon_token',
         'mcp_refresh_token','printful_api_key',
         'pinterest_access_token','pinterest_refresh_token','pinterest_client_secret',
         'instagram_access_token',
         'facebook_access_token',
-        'reddit_client_secret','reddit_password','reddit_refresh_token',
-        // The backup's own key: ai_api_key belongs to the chosen provider, so sharing it would
-        // either overwrite the primary's key or send the wrong credential to OpenRouter.
-        'openrouter_api_key'
+        'reddit_client_secret','reddit_password','reddit_refresh_token'
     ];
     /** Multi-line text settings, shown as a textarea. */
     const TEXTAREA_KEYS = ['blackout_ranges', 'banned_words', 'forum_intro'];
     const TEXT_KEYS = [
-        'publer_workspace_id','publer_pinterest_board','pinterest_board_id','channels','ai_model','ai_base_url','openrouter_model','image_model','openrouter_image_model','content_language','rescue_hosts',
+        'publer_workspace_id','publer_pinterest_board','pinterest_board_id','channels','ai_model','content_language','rescue_hosts',
         'telegram_chat_id',
         'alert_email','channel_caps',
         'blackout_ranges','banned_words','utm_campaign','bluesky_handle','mastodon_instance',
@@ -419,7 +414,6 @@ class SGAP_Settings {
     /** Settings with a fixed list of values, shown as a select. */
     const CHOICE_KEYS = [
         'publish_mode' => ['rss' => 'RSS feeds (Publer Professional)', 'api' => 'Publer API (Publer Business)'],
-        'ai_provider' => ['openrouter' => 'OpenRouter (recommended: one key, hundreds of models from many providers)', 'anthropic' => 'Anthropic (Claude)', 'openai_compatible' => 'Other OpenAI-compatible API (OpenAI, ...)', 'aimlapi' => 'AIMLAPI (being phased out — switch to OpenRouter)'],
         'cirla_log_level' => ['actions' => 'Every action — time and result', 'errors' => 'Errors only', 'off' => 'Off — no Cirla log entries'],
         'quality_gate' => ['block' => 'Block — keep the post out of the queue until it is fixed', 'warn' => 'Warn — queue it and report what is wrong', 'off' => 'Off — do not check'],
         'instagram_graph_host' => ['graph.instagram.com' => 'Instagram Login (graph.instagram.com) — scopes instagram_business_basic and instagram_business_manage_insights', 'graph.facebook.com' => 'Facebook Login (graph.facebook.com) — scopes instagram_basic and instagram_manage_insights; the token cannot renew itself'],
@@ -435,7 +429,7 @@ class SGAP_Settings {
     const SECTIONS = [
         'General' => ['autopilot_enabled','full_auto_enabled','daily_cap','batch_size','quiet_start','quiet_end','blackout_ranges','quality_gate','banned_words','dupe_days','utm_campaign','command_center_url'],
         'Publer' => ['publish_mode','publer_api_key','publer_workspace_id','publer_pinterest_board','pinterest_client_id','instagram_user_id','instagram_graph_host','facebook_page_id','facebook_access_token','facebook_graph_version','facebook_direct','instagram_direct','pinterest_direct','pinterest_board_id','channels','bluesky_handle','bluesky_app_password','mastodon_instance','mastodon_token','mastodon_limit','telegram_bot_token','telegram_chat_id'],
-        'AI content' => ['ai_profile','ai_provider','ai_api_key','ai_model','ai_base_url','openrouter_model','posts_per_day','content_language','locale_source','locales','openrouter_image_model','image_model','image_api_key','serpapi_key'],
+        'AI' => ['ai_profile','ai_api_key','ai_model','posts_per_day','content_language','locale_source','locales','serpapi_key'],
         'Economics' => ['labor_rate','monthly_budget','target_roi','winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max'],
         'Evergreen' => ['evergreen_enabled','evergreen_after_days','evergreen_max_shares','evergreen_batch'],
         'Alerts and log' => ['alert_mode','alert_email','alert_dry_days','channel_caps','audit_keep_days'],
@@ -476,19 +470,12 @@ class SGAP_Settings {
         'publer_api_key' => 'API mode only. Publer → Settings → Access & Login → API Keys (Business plan). Scopes: posts, media, accounts.',
         'publer_workspace_id' => 'Shown by "Test Publer" on the dashboard once the API key is saved.',
         'publer_pinterest_board' => 'API mode: Pinterest board ID the pins go to. RSS mode: set a default board in Publer instead.',
-        'ai_provider' => 'Where the text comes from. OpenRouter (recommended): openrouter.ai/keys, one key for hundreds of models — pick the model below. Anthropic: console.anthropic.com → API keys. AIMLAPI is being phased out: a saved AIMLAPI choice keeps working until you switch.',
-        'ai_model' => 'Required for OpenRouter (pick it from the live list) and for another OpenAI-compatible API. Empty = claude-opus-5-5 for Anthropic, anthropic/claude-opus-5.5 for AIMLAPI.',
-        'ai_base_url' => 'Other OpenAI-compatible API only, e.g. https://api.openai.com/v1. AIMLAPI and OpenRouter use their own fixed address and ignore this.',
+        'ai_model' => 'Required: OpenRouter has no default model, so pick one from its live list. A slug the list does not offer cannot be saved, so a retired model cannot be picked by mistake.',
         'posts_per_day' => 'How many site posts/products the AI writes social posts for each day.',
         'content_language' => 'Language of articles and guides from the Content Studio. Empty = English.',
-        'openrouter_image_model' => 'Image model on OpenRouter, e.g. one listed under openrouter.ai/models with image output. With this and an OpenRouter key (the main key or the backup key) images are made through OpenRouter, and no AIMLAPI key is needed. Empty = images still use AIMLAPI.',
-        'image_model' => 'AIMLAPI image model (legacy, used only while OpenRouter images are not set up). Empty = bytedance/seedream-5-0-pro (about $0.045 per image). Cheaper: flux/schnell.',
-        'image_api_key' => 'Legacy: an AIMLAPI key for images. Not needed once an OpenRouter image model is set above.',
         'serpapi_key' => 'serpapi.com → Manage API key. Gives the article writer live Google data: People also ask, related searches, top results.',
-        'openrouter_api_key' => 'A second key, for the backup only: openrouter.ai/keys. It is not the AIMLAPI or Anthropic key, so rotating one never points the backup at the wrong account. Used only when the primary provider fails: a transport error, 401/403, no credit (402), rate limit (429) or a 5xx. A 2xx answer never starts it.',
-        'openrouter_model' => 'The model the backup asks, picked from OpenRouter\'s live list. Empty = the backup is off, because OpenRouter has no default model and a guessed slug would only fail on the day it is needed. Ignored while OpenRouter is the provider itself, where the backup would be the same service.',
-        'ai_api_key' => 'OpenRouter: openrouter.ai/keys (recommended). Anthropic: console.anthropic.com → API keys. AIMLAPI (being phased out): aimlapi.com → Dashboard → API Keys. One key at a time: switching provider asks for that provider\'s key.',
-        'channels' => 'Instagram and Pinterest posts need a photo; the Content Studio can create one. Comma-separated. Add bluesky to post there directly, without Publer — it needs the handle and an app password below, and is skipped (through Publer) until both are filled in.',
+        'ai_api_key' => 'openrouter.ai/keys — the one AI key the plugin uses. Paste it under Settings → Keys.',
+        'channels' => 'Comma-separated. Instagram and Pinterest need a photo on every post; a post without one uses the page\'s featured image. Add bluesky to post there directly, without Publer — it needs the handle and an app password below, and is skipped (through Publer) until both are filled in.',
         'bluesky_handle' => 'Your Bluesky handle, e.g. steamgears.bsky.social. The @ is optional. Used together with an app password to post directly; an email address works too but the handle is what readers see.',
         'bluesky_app_password' => 'Bluesky → Settings → Privacy and security → App passwords (not the account password). Stays on this server: it is never shown again after saving, and an empty field keeps the stored value.',
         'mastodon_instance' => 'Address of the server the account lives on, e.g. mastodon.social. There is no central Mastodon, so the token only works on the instance it was created on.',
@@ -515,7 +502,6 @@ class SGAP_Settings {
         'quality_gate' => 'Checked before a post joins the queue: banned words, dead links, a photo without alt text, and a caption that already went out on the same channel. Block: the post is refused with the reason, and you can queue it anyway from the tool that refused it. Warn: it joins the queue and the problems are reported.',
         'banned_words' => 'Words that keep a post out of the queue, one per line or comma-separated. Whole words only, so “sale” does not catch “wholesale”; hashtags count.',
         'repost_cooldown_days' => 'A page is not promoted again within this many days.',
-        'auto_images' => 'Instagram and Pinterest posts without a photo get the page\'s featured image or an AI photo (AIMLAPI, about $0.045 each).',
         'auto_seo' => 'New posts and products without a Rank Math description get a focus keyword, meta title and description from the AI when published.',
         'articles_per_week' => 'The AI picks topics the site does not cover yet and writes this many SEO articles a week. 0 = off.',
         'auto_publish_articles' => 'Off: weekly articles wait as drafts for you. On: they are published straight away.',
@@ -529,7 +515,7 @@ class SGAP_Settings {
         'utm_campaign' => 'The campaign name every link from this site carries as utm_campaign: set it once per campaign (e.g. clockwork_punk_2026_11) and GA4 can tell campaigns apart. A single post can override it with its own campaign. Letters, digits, -            and _ only; empty = steamgears_premium_evergreen. Posts queued before the change keep the value they were queued with.',
         'mcp_client_id' => 'The public client ID from the one-time MCP approval (tools/mcp_oauth.py --start prints it). It is not a secret.',
         'mcp_refresh_token' => 'The refresh token from that approval (tools/mcp_oauth.py --finish saves it in ~/.config/steamgears-mcp/tokens.json). The plugin renews the access token every 30 minutes and writes the rotated refresh token back here, so it must live in the database — a wp-config.php constant cannot be updated by the server. Never shown again after saving; an empty field keeps the stored value.',
-        'printful_api_key' => 'Printful API token (Dashboard → Settings → API). Optional: it lets the shop tools read the real cost price of a sync product instead of asking you to fill in the cost field on every product. Not the same key as AIMLAPI.',
+        'printful_api_key' => 'Printful API token (Dashboard → Settings → API). Optional: it lets the shop tools read the real cost price of a sync product instead of asking you to fill in the cost field on every product. Not the same key as OpenRouter.',
         'printful_store_id' => 'The Printful store id the token belongs to (Dashboard → Stores). Sent as X-PF-Store-Id; empty means the token\'s default store.',
         'woo_min_margin' => 'The margin a price must keep above the cost price, in percent. The shop tools never propose or apply a price below cost × (1 + this), rounded up to .95. 45 % on a cost of 100 refuses anything under 145.95.',
         'forum_enabled' => 'Open or close the forum. Closing it hides the shortcode and stops new threads; existing threads stay readable, because a dead link is worse than a closed door.',
@@ -616,7 +602,6 @@ class SGAP_Settings {
                     // A model the provider does not offer is what broke the chat once: refuse it
                     // at the door, and let the owner pick one from the dropdown instead.
                     $key === 'ai_model' => [__CLASS__, 'sanitize_model'],
-                    $key === 'openrouter_model' => [__CLASS__, 'sanitize_backup_model'],
                     // sanitize_text_field would flatten the newlines that separate the
                     // blackout ranges, leaving only the first range saved.
                     in_array($key, self::TEXTAREA_KEYS, true) => 'sanitize_textarea_field',
@@ -644,65 +629,8 @@ class SGAP_Settings {
                 }
             ]);
         }
-        // ai_model holds the concrete id in use, so a provider switch must not leave the old
-        // provider's id there: it is not offered by the new one, and the first call would fail
-        // before the fallback repaired it. Re-resolve it to the new provider's default instead.
-        add_action('update_option_sgap_ai_provider', [__CLASS__, 'keep_provider_model']);
-        add_action('add_option_sgap_ai_provider', [__CLASS__, 'keep_provider_model']);
-        // The catalogue belongs to the endpoint: keeping a list fetched from the old address
-        // would reject a model the new provider offers for up to 12 hours. The key is left
-        // alone on purpose — an invalid key must not turn an empty list into "accept anything".
-        add_action('update_option_sgap_ai_base_url', [__CLASS__, 'clear_model_catalog']);
-        add_action('add_option_sgap_ai_base_url', [__CLASS__, 'clear_model_catalog']);
     }
 
-    /** Drops the cached model lists so the next read asks the provider that is configured now. */
-    public static function clear_model_catalog(): void {
-        foreach (['anthropic', 'aimlapi', 'openai_compatible'] as $provider) {
-            delete_site_transient('sgap_ai_catalog_' . $provider);
-        }
-    }
-
-    /**
-     * The backup model. Unlike ai_model, empty is a real value here: it means "the backup is off",
-     * so it is stored empty instead of being resolved to a default that does not exist. A name
-     * OpenRouter does not list is refused and the stored one kept, the same rule as ai_model.
-     */
-    public static function sanitize_backup_model($value): string {
-        $value = trim(sanitize_text_field((string) $value));
-        if ($value === '') {
-            return '';
-        }
-        $models = SGAP_AI::catalog(false, 'openrouter_backup');
-        if ($models === [] || in_array($value, $models, true)) {
-            return $value;
-        }
-        $previous = trim((string) get_option('sgap_openrouter_model', ''));
-        if (function_exists('add_settings_error')) {
-            add_settings_error('sgap_openrouter_model', 'sgap_backup_model_unknown', sprintf(
-                'OpenRouter does not offer "%s", so the backup model was left unchanged. Pick one from the list.',
-                $value
-            ));
-        }
-        return $previous;
-    }
-
-    /**
-     * Replaces a stored model the current provider does not offer with that provider's default.
-     * Runs when ai_provider changes, and does nothing while the catalogue cannot be read, so an
-     * unreachable provider never wipes a model that might well be fine.
-     */
-    public static function keep_provider_model(): void {
-        $stored = trim((string) get_option('sgap_ai_model', ''));
-        if ($stored === '') {
-            return;
-        }
-        $models = SGAP_AI::catalog();
-        if ($models === [] || in_array($stored, $models, true)) {
-            return;
-        }
-        update_option('sgap_ai_model', SGAP_AI::default_model());
-    }
     /** 'DA, sv ,da' becomes 'da,sv': no junk, no duplicates, never the source language. */
     public static function sanitize_locales($value): string {
         return implode(',', SGAP_Locales::codes((string) $value));
@@ -714,16 +642,14 @@ class SGAP_Settings {
     }
 
     /**
-     * Only a model the provider actually lists may be stored; empty means "provider default".
-     * When the list cannot be read at all, the typed name is kept, so a provider that is briefly
-     * unreachable never blocks saving the rest of the form.
+     * Only a model OpenRouter actually lists may be stored; empty stays empty, because there is
+     * no default to fall back on. When the list cannot be read at all, the typed name is kept, so
+     * an endpoint that is briefly unreachable never blocks saving the rest of the form.
      */
     public static function sanitize_model($value): string {
         $value = trim(sanitize_text_field((string) $value));
         if ($value === '') {
-            // "Provider default" is stored as the model it resolves to, so the field says what is
-            // actually used instead of depending on a later change of provider or of that default.
-            return SGAP_AI::default_model();
+            return '';
         }
         $models = SGAP_AI::catalog();
         if ($models === [] || in_array($value, $models, true)) {
@@ -1742,8 +1668,7 @@ class SGAP_REST {
                 'bluesky_direct' => SGAP_Bluesky::enabled(),
                 'feeds' => SGAP_RSS::enabled() ? array_map([SGAP_RSS::class, 'url'], SGAP_Publer::channels()) : null,
                 'publer_configured' => SGAP_RSS::enabled() || SGAP_Publer::configured(),
-                'ai_configured' => SGAP_Settings::get('ai_api_key') !== '',
-                'ai_provider' => (string) SGAP_Settings::get('ai_provider', 'anthropic'),
+                'ai_configured' => SGAP_Settings::get('ai_api_key') !== '' && SGAP_AI::model() !== '',
                 'ai_model' => SGAP_AI::model(),
                 'sending_paused_because' => SGAP_Queue::blocked_reason() !== '' ? SGAP_Queue::blocked_message() : null,
                 'can_send_now' => SGAP_Queue::capacity(),

@@ -104,7 +104,7 @@ class SGAP_Locales {
         ];
         $prompt = 'Translate this social post from ' . self::source() . " into {$locale}, keeping the same "
             . "length and shape.\n\nTITLE:\n{$title}\n\nBODY:\n{$body}";
-        $answer = SGAP_AI::json_call(self::SYSTEM, $prompt, $schema, 1200, 'low');
+        $answer = SGAP_AI::json_call(self::SYSTEM, $prompt, $schema, 1200);
         if (is_wp_error($answer)) {
             return $answer;
         }
