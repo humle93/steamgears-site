@@ -1,7 +1,19 @@
-# Batch 4-arbejdsordre — mockups pr. produkt (8/11 2026)
+# Batch 4-arbejdsordre — mockups pr. produkt (8/11 2026, opdateret 13/11)
 
-_Forberedelsen er færdig og målt; selve mockup-billederne kræver stadig ejerens
-Printful-adgang. Ingen af de 24 produkter har 3 eller flere billeder i dag._
+> **Opdateret 13/11 2026 — printvejen er Gelato, ikke Printful.** Det officielle *Gelato Integration for
+> WooCommerce* (v1.3.3) er installeret og aktiveret på sitet, men **forbindelsen er ikke oprettet** (kræver
+> ejerens login under `wp-admin → Gelato → Connect`). Derfor er Gelato-kostpriser, varianter og mockups
+> stadig **ikke målt** — og der påstås intet om dem her. Mallen nedenfor er skrevet til de 24 eksisterende
+> produkter (tøj og småting); plakatserien har sin egen arbejdsordre i
+> [sky-armada-drop-1-2026-11-13.md](sky-armada-drop-1-2026-11-13.md).
+>
+> **Nyt, målt 13/11: plakat-originalerne er for små til tryk.** De 12 råbilleder i Drive er 848–896 ×
+> 1200–1264 px; ved 300 dpi dækker det 7,2–7,6 cm i bredden, hvor 50×70 cm kræver **5906×8268 px**. Der
+> skal 5,6–6,8× opskalering til, plus manuel efterbearbejdning, før et plakatmotiv kan gå i tryk. Det gælder
+> også de billeder der senere bruges som mockups: et råbillede er ikke en trykfil.
+
+_Forberedelsen er færdig og målt; selve billederne kræver stadig ejerens Gelato-forbindelse og enten
+Gelatos mockup-funktion eller ejerens egne fotos. Ingen af de 24 produkter har 3 eller flere billeder i dag._
 
 Denne arbejdsordre er det stykke, der **kan** laves uden adgang: hvilke billeder der mangler, hvad de skal
 hedde, hvilken alt-tekst de skal have, og hvordan man bagefter bekræfter at de er kommet ind. Den erstatter
@@ -46,8 +58,9 @@ Eksempel: *«Airship Armada på t-shirt — detalje af trykket. 100 % bomuld, re
 
 ## 4. Arbejdsrækkefølge (så intet skal gøres to gange)
 
-1. **Kostpris og variant først:** bekræft Printful-variant og kostpris for de 24 produkter, så priserne i
-   S4.3 kan sættes én gang (i dag står butikken i USD, se `valuta-og-priser-2026-11-02.md`).
+1. **Kostpris og variant først:** bekræft variant og kostpris for de 24 produkter **i Gelato** (efter
+   forbindelsen), så priserne kan sættes én gang. Butikken kører DKK (målt 8/11); den gamle USD-tabel i
+   `valuta-og-priser-2026-11-02.md` er historik og må ikke bruges som prisgrundlag.
 2. **Tees og hoodies:** de seks t-shirts og fire hoodies har størst trafik og flest returneringer — tag dem først.
 3. **Art prints:** kun tre billeder pr. produkt, hurtig gevinst.
 4. **Småting:** ni produkter, fire billeder hver; mange kan genbruge samme scene.
@@ -71,9 +84,14 @@ skal være 0, før modulet kan meldes færdigt.
 
 ## 6. Hvad der stadig kræver ejeren
 
-- **Printful-adgang** (kontoen) til at generere mockups i de fem familier — eller 5–8 færdige billeder pr.
-  produkt uploadet direkte.
-- **Valuta og alle priser** (S4.3), fordi mockups og pris hænger sammen i samme produktopsætning.
+- **Gelato-forbindelsen** (`wp-admin → Gelato → Connect`) og koblingen til de eksisterende WooCommerce-
+  produkter. Uden den findes hverken kostpris, variant eller mockup at hente.
+- **Billederne:** enten Gelatos mockup-funktion for de valgte produkter eller 5–8 færdige fotos pr. produkt
+  uploadet til Mediebiblioteket. Råbilleder skal efterbearbejdes og opskaleres, før de kan bruges i tryk.
+- **Valuta og alle priser** er lukket (DKK, målt 8/11); til gengæld mangler **CVR, postnummer og telefon**
+  til GPSR-blokken, se [gpsr-og-tillidsside-2026-11-13.md](gpsr-og-tillidsside-2026-11-13.md).
 - **Ja/nej pr. produkt** til 942, 765, 766 og 767 (S1.2).
 
-Uden de tre kan batch 4 ikke lukkes — men alt forarbejdet er nu gjort, så det er ren udførelse.
+Uden Gelato-forbindelsen og billederne kan batch 4 ikke lukkes — men alt forarbejdet er nu gjort, så det er
+ren udførelse. De gamle Printful-formuleringer længere oppe i dokumentet er historik fra 8/11 og gælder
+ikke længere som printvej.

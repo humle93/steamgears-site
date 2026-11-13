@@ -125,6 +125,7 @@ check "rebrand-apply-selftest"               python3 tools/rebrand_apply.py --se
 # Pinterest-forbindelsen: autorisations-URL, kodeudtræk, PHP-escaping og de PHP-skabeloner der
 # veksler koden server-side testes offline — selve vekslingen kræver ejerens app-id.
 check "pinterest-forbindelse-selftest"       python3 tools/pinterest_connect.py --selftest
+check "poster-attach-selftest"            python3 tools/poster_attach.py --selftest
 check "fejlscan-selftest"                    python3 tools/fejlscan.py --selftest
 check "Patch notes" python3 tools/patch_notes.py --check
 check "fejlscan"                             python3 tools/fejlscan.py

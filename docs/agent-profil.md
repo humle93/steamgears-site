@@ -18,7 +18,7 @@ typisk en voksen, der skal til cosplay, halloween, marked eller et temafest — 
 | --- | --- |
 | Platform | WordPress 7.1.4 + WooCommerce, PHP 8.5.12, hostet hos **Simply** |
 | Repo | Dokumentation, assets, plugin-kilde og status — **ikke** live-koden. Sitet ændres over MCP |
-| Katalog | **24 produkter** målt 8/11 om aftenen: **20 publicerede, 4 kladder, 92 i papirkurven**, **22 billeder i alt** (højst 2 pr. produkt, 0 uden alt-tekst); produceret via **Printful**. Butikken kører **DKK**. Ældre logger nævner Printify-plugin'et, som ikke er leverandøren |
+| Katalog | **24 produkter** målt 8/11 om aftenen: **20 publicerede, 4 kladder, 92 i papirkurven**, **22 billeder i alt** (højst 2 pr. produkt, 0 uden alt-tekst). Printvejen er **Gelato** — det officielle *Gelato Integration for WooCommerce* (v1.3.3) er installeret og aktiveret 13/11, men **ikke forbundet** endnu; ved målingen 8/11 var der ingen POD-connector installeret. Butikken kører **DKK** |
 | Indhold | **29 sider** + 18 guides i guide-stakken; seneste roadmap måler sitemap og live-siderne |
 | Sprog | Engelsk på sitet, **dansk i commits og dokumentation** (tekniske termer på engelsk) |
 | Design | "Dark Clockwork Theatre v3" + **sæsonlag**: `css/sg-season.css` (tokens, header, menu, mobil) printes af `mu-plugins/sga-season.php`, der sætter `data-season` efter måneden. Template part til headeren ligger i [`css/`](../css/) |
@@ -155,8 +155,8 @@ direkte publicering som opt-in. **1 192 smoke-checks, alle grønne** (målt 9/11
 - De oprindelige 39 designs er kortlagt; batch 1–3 (8,5/8,5 t) er udført, og **tildelingen er gennemført 8/11**
   (0,4/0,4 t) gennem Novamira-MCP: 11 publicerede produkter, term-tællinger 5/3/2/1/3, witchy-tarot 0 fordi dens
   tre produkter ligger i papirkurven. Batch 4 mockups står på 0/5 t, forberedelsen er lukket med 0,5/0,5 t.
-- Samlet status er **71,3 % (12,4 af 17,4 t)**. Mockup-generering kræver ejerens Printful-adgang eller færdige
-  billeder; witchy-tarot kræver et ja/nej til at gendanne 567/395/411;
+- Samlet status er **71,3 % (12,4 af 17,4 t)**. Mockup-generering kræver **Gelato-forbindelsen** (plugin
+  aktiveret 13/11, Connect ikke gennemført) og færdige billeder; witchy-tarot kræver et ja/nej til at gendanne 567/395/411;
   GPSR-oplysninger kræver CVR og postadresse. Se `projektstatus.json` og `docs/library/batch-4-arbejdsordre-2026-11-08.md`.
 
 ---
@@ -186,7 +186,7 @@ tools/_deps/bin/php -l plugins/steamgears-autopilot/steamgears-autopilot.php
 ```
 
 **Blokeringer der kræver ejeren:** OAuth-browsergodkendelse i en ny sandkasse; en genforbindelse af Pinterest med
-`boards:read` og P1.5's fem kanalnøgler; Printful-kostpriser/mockups; ja/nej for produkterne 942/765/766/767;
+`boards:read` og P1.5's fem kanalnøgler; Gelato-forbindelse, kostpriser og mockups; ja/nej for produkterne 942/765/766/767;
 alarm-e-mail (`alert_email` er tom); AI-kredit (AIMLAPI-nøglen svarer »out of funds« og 45 kladder venter; OpenRouter er siden 7.67.0 et eget provider-valg, så en OpenRouter-nøgle plus et modelvalg er den anden vej — nøglen er ejerens); de tre
 Stripe-metoder der er slået til men utilgængelige; samt CVR, navn, adresse, telefon, betalingsaftaler og
 forsendelseszoner. GSC Crawl stats → By response kræver ejerens adgang. Se den aktuelle og komplette liste i
