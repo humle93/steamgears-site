@@ -612,3 +612,32 @@ Ingen logget i DB (lav prio / allerede dækket af retailer-cluster-billede).
 1. **REFRESH FØRST: /diy-steampunk-goggles/ + /steampunk-costumes/** — ary er #3 på diy-goggles med kort FAQ-format; vores lange guide er ude af top-10. Opdater (samme URL): rangordnet metodetabel, FAQ-blok, "buy vs build"-afsnit med AE-goggles + sg-buy, frisk datostempel.
 2. **"Steampunk Accessories: The Complete Checklist (With Real Prices)"** — 5. ugentlig gentagelse, nu PRESSERENDE: devilinspired + rivithead + lifeofthepartystore er rykket ind i et ellers rent retailer-cluster; én autoritativ checklist med ægte priser kan snappe hele indholds-slottet. Publiser denne uge.
 3. **"Steampunk Gift Guide (With Shipping Deadlines)"** — MSS's BF-fase udløber i dag og HC har christmas-signaler; gift-budget-intent er clusterets fælles spor. Vores version: Vol 2/3-tees + AE-gear + december 10-shipping-vinkel — live inden MSS skifter fase i morgen.
+## Scan 2026-11-13
+### Frontend-observationer (fetch ~01:00-01:20 UTC, UA SteamgearsSiteBuilder/1.0)
+- **my-steampunk-style.com** — ⚡ BF-PHASE 2 LIVE: countdown endDate skiftet til 2026-11-14T22:59Z (var 12/11) — "Early Black Friday Access" forlænget, 53x Sale price. Blog-index uændret: 21 slugs, nyeste indlæg stadig gift-guiden (06/11). (DB: række logget)
+- **halloweencostumes.com** — PROMO DAEMPER: 58x Sale + 9x Clearance + 4x Christmas (var 117x sale i går). 66 SKU'er i JSON — samme kerne (Machinist/Atomic Ray/CyberSteam goggles, Pocket Watch Necklace, Potion Vial Holster, Filigree Wings). Christmas-signaler fastholdes. (DB: række logget)
+- **steampunkary.com** — answers.json rebuilt 12/11 (n=554, 0 nye FAQ; 7. dag uden ny content, nyeste post 19/10 via WP REST). FAQ-corpus-trikken virker dog: deres welding-goggles-DIW er nu #3 på diy-goggles-SERP. (DB: række logget)
+- **museumreplicas.com** — steampunk-træet = 4 sider p1-p4 (p5 = 404), 74 unikke SKU'er. Samme SKU-sæt som 11/11 (Mad Scientist Lab Coat, Sword Cane-familie, Cybersteam Goggles $19.95, Mark V Diver's Helmet m.fl.). ⚡ NYE i p2-p4 vs. tidligere noteret: Black London Frock Coat, Clockwork Shirt with Cravat, Neo Gothic Pinstripe Shirt w/ Sash, Piccadilly Sash, New Orleans Camisole/Pantaloons, Gransford Velvet Tailcoat and Vest, Onyx Lace Choker, Octopus Spirit Decanter Set, Peplum Overskirt. Massiv sale-overlap (110x Last Chance, 66x On Sale). (DB: række logget)
+- **vintagedancer.com** — Samme split: www = 403 (CF 1000), apex /steampunk/ hub live (162 KB, 22 kategori-URLer, Linksynergy→Etsy-affiliater). /steampunk-costume-guide/ = 404 (dag 21+). (no change)
+- **steampunkhub.uk** — Fuld HTML stabil (events/clubs/map/articles). Articles-sektionen = 6 essays (AI-art, leatherwork, dressmaking, music, starting a group, what-steampunk-means) + evergreen event-guides — ingen nye siden 11/11. (no change)
+- **steampunkoutfits.com** — Uændret: forside = ren shop + 7 blog-slugs (nyeste how-to-dress-steampunk 18/10). WP REST /wp-json/wp/v2/posts = Bad Request (ikke-standard setup). (no change)
+- Observer-status uændret: steampunkjournal.org (parked), brassgoggles.co.uk (TCP-timeout), steampunk.com (federal-tech, ude af rotation), airshipambassador.com (statisk), steampunkfashionguide.com (død 2019).
+
+### SERP top-3 (web_search gl=us, ~01:10)
+- **"steampunk costume guide"**: 1) psylofashion 2) thevou.com 3) gbacg.org. Også steampunkhub.uk (event-guide), thesimplethings, fadmagazine, writerlesleydonaldson, fashionweekonline (NY), museumoftechnology, gritdaily. ⚠️ Steamgears IKKE i top-10 (3. nat i træk).
+- **"diy steampunk goggles"**: 1) amaco 2) programminglibrarian-PDF 3) steampunkary.com/diy-crafts/how-to-make-steampunk-goggles (ary holder #3). Også thewoodlandelf, michellespartyplanit, makezine, visuino, digitaltrends, diyinspired, all3dp. ⚠️ Steamgears IKKE i top-10.
+- **"steampunk accessories"**: 1) shop.vermilion.cc 2) caufields 3) otherworldfashion. Også MSS collection + MSS-listicle, steampunkstyler, darkknightarmoury, lifeofthepartystore, bgfashion. Uændret retailer-cluster — Steamgears IKKE top-30.
+
+### Nye domæner → watchlist
+- fashionweekonline.com — mode-medie, ny i costume guide-SERP (Halloween-outfit-vinkel). Ikke logget i DB (lav prio, one-off artikel).
+
+### Keyword-signaler
+- ⚠️ Vores top-10-slots på costume guide + diy goggles er væk 3. nat i træk. Ary holder #3 på diy-goggles med kort FAQ-format; psylo+thevou (2020/2026-dated fashion-guides) holder costume guide. GSC-verificering + guide-refresh (per 12/11-planen) er stadig dagens første opgave.
+- MSS forlænger BF-fasen til 14/11 — clusteret er nu fuldt i Black Friday/jul-tilstand (MSS countdown + HC christmas-signaler). Gift-budget-intent eskalerer.
+- MR katalog: 74 SKU'er + nye wardrobe-basics (frock coat, cravat-shirt, camisole) = de fylder "complete outfit"-hullet ud over statement-pieces.
+- Accessories-SERP uændret ren retailer-cluster; checklist-format-hullet er stadig åbent.
+
+### 3 indholdsmuligheder for steamgears.eu
+1. **REFRESH FØRST (dag 3): /diy-steampunk-goggles/ + /steampunk-costumes/** — uændret prioritet fra 12/11: ary holder #3 med kort FAQ-format; vores guides er ude af top-10 3. nat i træk. Samme URL, rangordnet metodetabel + FAQ-blok + "buy vs build" + frisk datostempel.
+2. **"Steampunk Accessories: The Complete Checklist (With Real Prices)"** — 6. ugentlig gentagelse, stadig uopfyldt: hele accessories-SERP er kategorisider; eneste indholdsformat er MSS's listicle. Vores checklist med ægte priser + sg-buy er det differentierede svar. Publiser denne uge.
+3. **"Steampunk Gift Guide (With Shipping Deadlines)"** — MSS's BF-fase forlænget til 14/11 + HC christmas-signaler = gift-intent er nu clusterets fælles spor. Vores version: Vol 2/3-tees + AE-gear + december-shipping-vinkel — live inden MSS fase 2 udløber lørdag.
