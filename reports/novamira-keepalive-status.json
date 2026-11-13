@@ -22,5 +22,11 @@
   "trigger": "workflow_dispatch",
   "outcome": "sprunget-over",
   "reason": "NOVAMIRA_REFRESH_TOKEN mangler i repository-secrets"
+ },
+ {
+  "at": "2026-11-13T08:01:57Z",
+  "event": "schedule",
+  "outcome": "startet",
+  "reason": ""
  }
 ]
