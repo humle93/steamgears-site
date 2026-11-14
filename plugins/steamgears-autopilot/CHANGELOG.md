@@ -10,6 +10,33 @@ Noterne er skrevet ud fra commit-historikken og de dokumenter der hører til hve
 
 <!-- patch-notes: baseline 7.65.0 -->
 
+## 7.86.0 — 2026-11-14
+
+**Tilføjet: opslag, som AI-redaktøren ikke nåede at bedømme, bliver spurgt igen hver time i stedet for at vente på et menneske.**
+
+### Tilføjet
+- `SGAP_Editor::rereview()` kører på det timelige `sgap_rescue`-job. Den læser kun kladder med status `pending`
+  og noten *Editor: not checked* eller *Editor: no score* fra de sidste 3 dage (`RETRY_DAYS`), højst 5 sider
+  pr. time (`RETRY_PAGES`, ét redaktørkald pr. side), så en ophobning ikke oversvømmer de gratis modeller.
+- 7/10 eller mere køes i Full auto (uden Full auto forbliver det en kladde), under 7 afvises med grunden, og
+  ny tavshed lader kladden ligge til næste time. Noten får *(asked again)* på.
+- Rækken låses med `UPDATE … AND status = 'pending'`, så en kladde, som et menneske har redigeret eller brugt
+  i mellemtiden, aldrig bliver køet af genbedømmelsen.
+
+### Ændret
+- Selvtjekket siger nu, at tilbageholdte opslag spørges igen hver time i 3 dage, og efter en genbedømmelse
+  hvor mange der stadig mangler svar.
+
+### Målt
+- Live 14/11 kl. 01:21: 6 opslag fra kørslen 13/11 19:47 ventede, fordi ingen gratis model svarede. Et nyt
+  redaktørkald fra sitet svarede på 9,3 s (`nemotron-3.5-super-vl:free`) og var strengt: 7/10 med en note
+  om en påstand, der ikke stod på siden.
+- `plugins/tests/smoke.php`: 1 581 PASS / 0 FAIL (11 nye `7.86`-checks: krog, SQL-filter, ét kald pr. side,
+  kø/afvisning, låsning, tavshed, uden Full auto, loft på 5 sider, uden redaktør og selvtjekkets tekst).
+
+### Ikke målt
+- En rigtig time-kørsel på sitet efter installation.
+
 ## 7.85.1 — 2026-11-13
 
 **Rettet: to fejlbeskeder pegede på den gamle fane — og integrationstesten er nu faktisk kørt mod et rigtigt WordPress.**

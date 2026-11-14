@@ -21,6 +21,17 @@ class SGAP_Editor {
      */
     const MODELS = ['nvidia/nemotron-3-ultra-550b-a55b:free', 'nvidia/nemotron-3.5-super-vl:free', 'openrouter/free'];
     const MAX_MODELS = 3;
+    /** 7.86.0: held drafts are asked again on the hourly job for this many days, then they wait for a person. */
+    const RETRY_DAYS = 3;
+    /** Pages (one editor request each) per hourly run, so a backlog cannot flood the free models. */
+    const RETRY_PAGES = 5;
+    /** Notes that mean "no editor answered" (see verdict()). Only these drafts are asked again. */
+    const HELD_NOTES = ['Editor: not checked%', 'Editor: no score%'];
+    const LAST_RETRY = 'sgap_editor_rereview';
+
+    public static function init(): void {
+        add_action(SGAP_Rescue::CRON, [__CLASS__, 'rereview'], 20);
+    }
 
     public static function min_score(): int {
         return max(0, min(10, (int) apply_filters('sgap_editor_min_score', self::MIN_SCORE)));
@@ -88,6 +99,78 @@ class SGAP_Editor {
             return ['ok' => false, 'error' => 'the editor gave no usable scores'];
         }
         return ['ok' => true, 'by_channel' => $out, 'model' => (string) ($decoded['model'] ?? $models[0])];
+    }
+
+    /**
+     * 7.86.0: asks the editor again about drafts that are pending only because no editor answered.
+     * A score >= MIN_SCORE queues the draft in Full auto (it stays a draft otherwise), a low score
+     * rejects it with the reason, and another silence leaves it pending for the next hour. Drafts a
+     * person has already handled are never touched: only status `pending` with a held note counts, and
+     * campaign drafts are left out (the campaign agent never queues).
+     * @return array{pages:int, approved:int, queued:int, rejected:int, still_held:int, errors:string[]}
+     */
+    public static function rereview(): array {
+        global $wpdb;
+        $out = ['pages' => 0, 'approved' => 0, 'queued' => 0, 'rejected' => 0, 'still_held' => 0, 'errors' => []];
+        if (!self::enabled()) {
+            return $out;
+        }
+        $table = $wpdb->prefix . 'sgap_ai_drafts';
+        $since = gmdate('Y-m-d H:i:s', (int) current_time('timestamp') - self::RETRY_DAYS * DAY_IN_SECONDS);
+        $rows = $wpdb->get_results($wpdb->prepare(
+            "SELECT id, post_id, channel, title, body, hashtags FROM {$table} WHERE status = 'pending' AND created_at >= %s"
+            . " AND (gate_report LIKE %s OR gate_report LIKE %s) AND (campaign IS NULL OR campaign = '')"
+            . " ORDER BY created_at ASC, id ASC LIMIT 100",
+            $since, self::HELD_NOTES[0], self::HELD_NOTES[1]
+        ), ARRAY_A);
+        $by_page = [];
+        foreach ((array) $rows as $row) {
+            $by_page[(int) $row['post_id']][] = $row;
+        }
+        $full_auto = SGAP_Settings::enabled('full_auto_enabled');
+        foreach (array_slice($by_page, 0, self::RETRY_PAGES, true) as $post_id => $drafts) {
+            $post = get_post($post_id);
+            if (!$post instanceof WP_Post) {
+                continue;
+            }
+            $out['pages']++;
+            $posts = array_map(fn($d) => ['channel' => (string) $d['channel'], 'title' => (string) $d['title'], 'text' => (string) $d['body'],
+                'hashtags' => array_values(array_filter(preg_split('/\s+/', (string) $d['hashtags']) ?: []))], $drafts);
+            $review = self::review($posts, SGAP_Generator::source($post));
+            foreach ($drafts as $d) {
+                $verdict = self::verdict($review, (string) $d['channel']);
+                if ($verdict['action'] === 'hold') {
+                    $out['still_held']++;
+                    continue;
+                }
+                // Claim the row: a person may have edited or used it while the editor was thinking.
+                $claimed = $wpdb->query($wpdb->prepare(
+                    "UPDATE {$table} SET gate_report = %s, status = %s WHERE id = %d AND status = 'pending'",
+                    $verdict['note'] . ' (asked again)', $verdict['action'] === 'reject' ? 'rejected' : 'pending', (int) $d['id']
+                ));
+                if (!$claimed) {
+                    continue;
+                }
+                if ($verdict['action'] === 'reject') {
+                    $out['rejected']++;
+                    continue;
+                }
+                $out['approved']++;
+                if ($full_auto) {
+                    $queued = SGAP_Queue::from_draft((int) $d['id']);
+                    if (is_wp_error($queued)) {
+                        $out['errors'][] = $queued->get_error_message();
+                    } else {
+                        $out['queued']++;
+                    }
+                }
+            }
+        }
+        if ($out['pages'] > 0) {
+            update_option(self::LAST_RETRY, ['at' => current_time('mysql')] + $out, false);
+            delete_transient('sgap_dashboard_stats');
+        }
+        return $out;
     }
 
     /**

@@ -415,7 +415,13 @@ class SGAP_Auto {
         }
         if (is_array($last) && (int) ($last['rejected'] ?? 0) + (int) ($last['held'] ?? 0) > 0) {
             $out[] = 'The latest AI run (' . (string) ($last['at'] ?? '?') . '): the editor rejected ' . (int) ($last['rejected'] ?? 0)
-                . ' posts and ' . (int) ($last['held'] ?? 0) . ' wait for you under AI Drafts because no editor answered.';
+                . ' posts and ' . (int) ($last['held'] ?? 0) . ' were held because no editor answered. Held posts are asked again every hour for '
+                . SGAP_Editor::RETRY_DAYS . ' days; after that they wait for you under AI Drafts.';
+        }
+        $retry = get_option(SGAP_Editor::LAST_RETRY);
+        if (is_array($retry) && (int) ($retry['still_held'] ?? 0) > 0) {
+            $out[] = 'Editor asked again (' . (string) ($retry['at'] ?? '?') . '): ' . (int) ($retry['approved'] ?? 0) . ' approved, '
+                . (int) ($retry['rejected'] ?? 0) . ' rejected, ' . (int) $retry['still_held'] . ' still without an answer.';
         }
         $parked = SGAP_Queue::parked();
         if ($parked) {
