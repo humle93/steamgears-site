@@ -48,7 +48,7 @@ class WP_REST_Request implements ArrayAccess{ function __construct(public array 
 function wp_next_scheduled($h){return (int)($GLOBALS['next_scheduled'][$h]??0);} function wp_schedule_event(...$a){$GLOBALS['cron'][]=$a[2];} function flush_rewrite_rules($h=true){$GLOBALS['flushed']=1;} function add_rewrite_rule(...$a){$GLOBALS['rules'][]=$a[0];} function wp_set_option_autoload_values($a){$GLOBALS['noauto']=$a;}
 class W{ public $prefix='wp_'; public $posts='wp_posts'; public $postmeta='wp_postmeta'; public $options='wp_options'; public $comments='wp_comments'; function get_charset_collate(){return '';} public $insert_id=0; public $log=[]; public $next=null; public $row=null;
  function get_var($q){$this->log[]=$q; return is_array($this->next)?array_shift($this->next):$this->next;} function prepare($q,...$a){ if(count($a)==1&&is_array($a[0]))$a=$a[0]; return vsprintf(str_replace(['%s','%d','%f'],["'%s'",'%d','%F'],$q),$a);} function esc_like($s){return $s;}
- function get_results($q,$o=null){$this->log[]=$q;return $GLOBALS['rows']??[];} function get_row($q){$this->log[]=$q;return $this->row ?? null;} function query($q){$this->log[]=$q;return 0;}
+ function get_results($q,$o=null){$this->log[]=$q;return $GLOBALS['rows']??[];} function get_row($q){$this->log[]=$q;return $this->row ?? null;} function query($q){$this->log[]=$q;return $GLOBALS['wpdb_query_ret'] ?? 0;}
  function insert($t,$d){$this->log[]="INSERT $t ".json_encode($d); $this->insert_id=42; return 1;} function update($t,$d,$w){$this->log[]="UPDATE $t ".json_encode($d);return 1;} }
 $wpdb=new W; $wpdb->row=null;
 // ---- P5: forum + Reddit stubs (kept here so the plugin can boot without WordPress) ----
@@ -1838,7 +1838,44 @@ SGAP_Generator::write_for($ed_page,['facebook','instagram'],true,$rep);
 check('7.83 write_for: editor down = both wait as pending drafts, nothing is queued even in Full auto', ($rep['held']??0)===2 && $rep['queued']===0
   && count(array_filter($wpdb->log,fn($l)=>str_contains($l,'sgap_ai_drafts WHERE id')))===0);
 update_option('sgap_last_generate',['at'=>'2026-11-13 06:00:00','drafts'=>1,'errors'=>[],'rejected'=>1,'held'=>2]);
-check('7.83 health: rejected and waiting posts are named in the self-check', str_contains(implode("\n",SGAP_Auto::output_problems()),'the editor rejected 1 posts and 2 wait for you'));
+check('7.83 health: rejected and held posts are named in the self-check, with the hourly retry', str_contains(implode("\n",SGAP_Auto::output_problems()),'the editor rejected 1 posts and 2 were held')
+  && str_contains(implode("\n",SGAP_Auto::output_problems()),'asked again every hour for 3 days'));
+// --- 7.86.0: held drafts are asked again on the hourly job ---
+check('7.86 rereview: hooked onto the hourly rescue job', in_array([SGAP_Editor::class,'rereview'], $GLOBALS['actions'][SGAP_Rescue::CRON] ?? [], true));
+$GLOBALS['post_by_id'][777]=$ed_page; $GLOBALS['opts']['sgap_full_auto_enabled']='yes';
+$held=[['id'=>901,'post_id'=>777,'channel'=>'facebook','title'=>'Brass','body'=>'Brass goggles for your next costume.','hashtags'=>'#steampunk #brass'],
+       ['id'=>902,'post_id'=>777,'channel'=>'instagram','title'=>'Brass','body'=>'Get 50% off today only!','hashtags'=>'']];
+$GLOBALS['rows']=$held; $GLOBALS['wpdb_query_ret']=1; $wpdb->log=[]; $GLOBALS['http_calls']=[];
+$GLOBALS['http_queue']=[$ans([['channel'=>'facebook','score'=>8,'problems'=>[]],['channel'=>'instagram','score'=>2,'problems'=>['invented 50% discount']]])];
+$rr=SGAP_Editor::rereview(); $log=implode("\n",$wpdb->log);
+check('7.86 rereview: only pending, non-campaign drafts with a "no editor answered" note from the last 3 days are read', str_contains($wpdb->log[0],"status = 'pending'")
+  && str_contains($wpdb->log[0],"'Editor: not checked%'") && str_contains($wpdb->log[0],"'Editor: no score%'") && str_contains($wpdb->log[0],'created_at >=') && str_contains($wpdb->log[0],"(campaign IS NULL OR campaign = '')") && str_contains($wpdb->log[0],'LIMIT 100'));
+$sent=json_decode((string)($GLOBALS['http_calls'][0][1]['body']??'{}'),true);
+check('7.86 rereview: one editor request per page, with the stored hashtags as a list', count($GLOBALS['http_calls'])===1 && str_contains((string)($sent['messages'][0]['content']??''),'"#brass"'));
+check('7.86 rereview: 8/10 is queued in Full auto, 2/10 is rejected with the reason, both claimed only while still pending', $rr['pages']===1 && $rr['approved']===1 && $rr['rejected']===1 && $rr['still_held']===0
+  && str_contains($log,"status = 'rejected' WHERE id = 902 AND status = 'pending'") && str_contains($log,'invented 50% discount (asked again)')
+  && str_contains($log,'sgap_ai_drafts WHERE id = 901') && !str_contains($log,'sgap_ai_drafts WHERE id = 902'));
+check('7.86 rereview: the result is kept for the self-check', ($GLOBALS['opts'][SGAP_Editor::LAST_RETRY]['approved']??0)===1);
+$wpdb->log=[]; $GLOBALS['http_queue']=[sgap_http(503,['error'=>['message'=>'busy']])];
+$rr=SGAP_Editor::rereview();
+check('7.86 rereview: another silence changes nothing (they stay pending for the next hour)', $rr['still_held']===2 && $rr['approved']===0
+  && !array_filter($wpdb->log,fn($l)=>str_starts_with($l,'UPDATE')) && !str_contains(implode("\n",$wpdb->log),'WHERE id = 901'));
+check('7.86 health: the self-check says how many still have no answer', str_contains(implode("\n",SGAP_Auto::output_problems()),'2 still without an answer'));
+$GLOBALS['wpdb_query_ret']=0; $wpdb->log=[]; $GLOBALS['http_queue']=[$ans([['channel'=>'facebook','score'=>9,'problems'=>[]],['channel'=>'instagram','score'=>9,'problems'=>[]]])];
+$rr=SGAP_Editor::rereview();
+check('7.86 rereview: a draft a person already handled (claim fails) is never queued', $rr['approved']===0 && str_contains(implode("\n",$wpdb->log),'WHERE id = 901 AND status') && !str_contains(implode("\n",$wpdb->log),'sgap_ai_drafts WHERE id = 901'));
+$GLOBALS['wpdb_query_ret']=1; $GLOBALS['opts']['sgap_full_auto_enabled']='no'; $wpdb->log=[]; $GLOBALS['http_queue']=[$ans([['channel'=>'facebook','score'=>9,'problems'=>[]],['channel'=>'instagram','score'=>9,'problems'=>[]]])];
+$rr=SGAP_Editor::rereview();
+check('7.86 rereview: outside Full auto an approved draft stays a draft (approved, not queued)', $rr['approved']===2 && $rr['queued']===0 && !str_contains(implode("\n",$wpdb->log),'sgap_ai_drafts WHERE id = 90'));
+$many=[]; for($i=1;$i<=7;$i++){ $GLOBALS['post_by_id'][800+$i]=new WP_Post(['ID'=>800+$i,'post_title'=>"P$i",'post_content'=>'x','post_type'=>'post']); $many[]=['id'=>950+$i,'post_id'=>800+$i,'channel'=>'facebook','title'=>'t','body'=>'b','hashtags'=>'']; }
+$GLOBALS['rows']=$many; $GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[];
+$rr=SGAP_Editor::rereview();
+check('7.86 rereview: at most 5 pages per hour, so a backlog cannot flood the free models', $rr['pages']===5 && count($GLOBALS['http_calls'])===5);
+update_option('sgap_ai_api_key',''); $GLOBALS['http_calls']=[];
+check('7.86 rereview: does nothing without an editor', SGAP_Editor::rereview()['pages']===0 && $GLOBALS['http_calls']===[]);
+update_option('sgap_ai_api_key','sk-or-v1-editor');
+$GLOBALS['rows']=[]; unset($GLOBALS['wpdb_query_ret'],$GLOBALS['opts'][SGAP_Editor::LAST_RETRY],$GLOBALS['opts']['sgap_full_auto_enabled']);
+for($i=1;$i<=7;$i++){ unset($GLOBALS['post_by_id'][800+$i]); } unset($GLOBALS['post_by_id'][777]);
 delete_option('sgap_last_generate'); unset($GLOBALS['postmeta'][777]);
 update_option('sgap_ai_api_key',''); update_option('sgap_ai_model',''); $GLOBALS['http_queue']=[]; $GLOBALS['http_calls']=[];
 $GLOBALS['filters']['sgap_editor_models']=fn($v)=>['a:free','b:free','c:free','d:free'];

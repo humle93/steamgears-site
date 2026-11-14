@@ -470,3 +470,13 @@
 - ⚠️ CARRY-OVER (5. dag): **WPCode Lite stadig INAKTIV** — AdSense head-snippet-injektion fortsat muligvis væk; ads.txt OK (pub-8388762344150338). MailPoet fortsat uninstalled (kendt).
 - Ingen 5xx eller redirect-loops.
 - Konklusion: Drift/checkout GRØN. Kun carry-over-afvigelsen (WPCode/AdSense-snippet); ingen ny mail til Henning — 5. dag uden ændring.
+
+## 13/11 2026 07:00 — Daglig drift/checkout-tjek
+
+- Forside + /shop/ 200 (browser-fetch begge OK; forside consent-banner + indhold som sædvanlig, /shop/ produktgrid 41 product-hits). Ingen error-markører.
+- Stripe gateway: enabled=true, **testmode=no (live)** ✅ (via /wc/v3/payment_gateways; live keys til stede). Aktive: stripe (Card), stripe_amazon_pay, stripe_klarna, stripe_link + bacs — uændret.
+- Ordrer seneste 24h: **0 nye, 0 fejlede** (after=12/11 07:00 tom). Seneste reelle ordre stadig #873 (27/10).
+- Plugins (25 total, REST): alle kritiske AKTIVE — WooCommerce 11.2.2, Stripe 11.1.1, Rank Math 1.0.282, W3TC 2.11.0, Complianz 7.5.7 (+ Terms 1.4.1), Site Kit 1.191.0, Ads.txt Manager, WP Mail SMTP, steamgears-autopilot **7.84.1** (minor bump fra 7.78.0). Kanal-plugins aktive: Google for Woo, Pinterest for Woo, TikTok 1.4.3, Novamira, AI Engine + AI-providers, Antispam Bee, Redirection, HTTPS Redirection, Database Cleaner, SeedProd. 2 inaktive: WPCode Lite + Website LLMs.txt. **Ingen nye/ukendte plugins** (antal uændret fra 12/11).
+- ⚠️ CARRY-OVER (6. dag): **WPCode Lite stadig INAKTIV** — AdSense head-snippet-injektion fortsat muligvis væk; ads.txt OK (pub-8388762344150338). MailPoet fortsat uninstalled (kendt).
+- Ingen 5xx eller redirect-loops.
+- Konklusion: Drift/checkout GRØN. Kun carry-over-afvigelsen (WPCode/AdSense-snippet); ingen ny mail til Henning — 6. dag uden ændring. Bemærkning: WAF var strammere i morgendagt (456 på første kald; orders/gateways/plugins krævede 60-120 s pauser mellem kald).
