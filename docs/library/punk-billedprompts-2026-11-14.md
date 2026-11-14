@@ -1,115 +1,77 @@
-# Clockwork + Dieselpunk: ti billedprompts klar, selve billederne mangler en nøgle (14/11 2026)
+# Dieselpunkt + clockwork punk: de seks motiver er lavet lokalt og verificeret (14/11 2026)
 
-**Kort:** Der ligger **ingen** separat prompt- eller beskrivelsesfil for de ti nye punk-plakater i Drive.
-Det nærmeste er de to gældende køreplaner, som beskriver motiverne i produktteksten, samt
-50-plakatkataloget fra 13/11, som kun dækker AIR/ENG/RAIL/NAT/ARC. De ti beskrivelser er derfor
-omsat til ti eksplicitte, engelske billedprompts og lagt i de rigtige tema-mapper. Selve
-billedgenereringen kunne ikke køres: **der findes ingen billed-API-nøgle i miljøet**.
+**Kort:** Beskrivelserne lå ikke i Gemini-mappen, men i **`Steamgears – ChatGPT-prompter (19 motiver)`**
+i billedmappen. De er den autoritative kilde og erstatter de tidligere prompts. Ud fra dem er de seks
+punk-motiver — **D1, D2, D3, C1, C2, C3** — genereret lokalt med SD-Turbo på CPU, fordi hverken Freebuff,
+WaveSpeed, Pollinations eller Sana kunne levere. Alle seks er åbnet og kontrolleret: rigtigt motiv,
+ingen tekst/signatur/vandmærke. Opløsningen er **1024×1536** — nok til udvælgelse, **ikke** til tryk
+(se »Hvad der stadig mangler«).
 
-## Hvad der blev søgt efter (målt 14/11)
+## Kilden: hvad der faktisk ligger i Drive (målt 14/11)
 
-- Drive (begge tilsluttede konti): søgning på motivtitlerne («Valkyrie of the Oil Fields»,
-  «Cathedral of the Eternal Pendulum»), på `SG-CLK`/`SG-DSL` sammen med «poster» og på nye
-  promptdokumenter. Resultat: **kun** de kendte køreplaner (gældende 13/11-udgave, forkastet
-  kladde og 27/10-originalen) samt CSV-importen fra 27/10. Ingen promptfil, ingen nye
-  beskrivelsesdokumenter.
-- `Steamgears_Clockwork_Punk_Design.json` (Drive-ID `1Hop0UPP4fn8BU2KM689g43vfWjkrU85C`) er hentet og
-  læst: det er et **webtema** (farver, typografi, knap- og kortkomponenter), ikke billedprompts.
-- Repoet: AI-billedgenerering blev fjernet fra Autopilot i v7.85.0, og der er ingen
-  billedgenerator at kalde. `PIXAZO_API_KEY`, `GEMINI_API_KEY` og `OPENROUTER_API_KEY` er **ikke sat**.
-- 50-plakatkataloget (13/11) har 50 prompts, men til serierne AIR/ENG/RAIL/NAT/ARC — **0** for CLK/DSL.
+Søgt på tværs af hele drevet: `name contains 'Gemini'` (inkl. skraldespand), `fullText contains 'Gemini'`,
+alle billedfiler ændret siden 1/11, og alt med Clockwork/Dieselpunk/CLK/DSL i navnet.
 
-## Leveret i Drive (nye Google Docs, ikke slettet eller ændret andet)
+| Fil | ID | Type | Størrelse | Indhold |
+| --- | --- | --- | --- | --- |
+| Steamgears – ChatGPT-prompter (19 motiver) | `12OrcA_LaeU3FCmUSIsQz0ig1jmxGGjI_V5EEMyr6nwA` | Google Doc | 8 091 B | **Autoritativ.** 19 motiver: R1–R5, K1–K7, D1–D3, C1–C3 med fuld prompt pr. motiv |
+| LÆS MIG – sådan skal billederne ligge | `1Go_JkhRSgDlGtY-AIwLWvTU3fnRWPYzfg0IBw_UHl9Y` | Google Doc | 4 360 B | Filnavne `sg-[kode]-[kilde]-[bogstav].png`, 2:3/3:4, ≥2 000 px for udvælgelse, ≥4 100 px trykklar, ≥8 300 px ideelt, ingen tekst/vandmærke, rolig nederste femtedel |
+| Gemini (mappe) | `13xXtakV63vzCboeQ08_gttFadHzFAKkx` | Folder | — | **Ét** dokument: `Steamgears_Automations_og_Pipeline_Dokumentation.md` (`1kkHrUox5J1JYUWm0JbfFL3v2NGkmAfiIvFvXcG5dGM0`) — Content/SEO-, Pinterest- og Command Center-pipeline. **Ingen billedbeskrivelser** |
+| Gemini  (mappe, med mellemrum) | `1yjVw-1UNreGlXm4jjW13c9jRJLH0uSv8` | Folder | — | ZIP-arkiver og PHP/plan-dokumenter. Ingen motiver |
+| Arbejdsseddel til Gemini (28/10) | `1h3jbfq1fa2Td0FKUSKgK3T0imgwLWqEom8OnMs1qExw` | Google Doc | 30 302 B | Gammel arbejdsseddel, ikke de nye motiver |
+| Geminibilleder – Steamgears Plan (25/10) | `19bgAtvtToWCTbWO95b-3tstfMufRlYdO` | Markdown | 10 897 B | Ældre 50-plakat-plan |
 
-| Dokument | Mappe | ID |
+Skraldespanden indeholder kun en tom dublet af 25/10-planen (`1Xm_ZUaQYWmptlMTK26Dp94vV6smV6CB_`, 0 B).
+Ingen sidecar-filer, ingen billedmetadata med beskrivelser, ingen CLK/DSL-filer ud over de kendte køreplaner.
+
+## De seks endelige prompts (brugt ordret)
+
+SD-Turbo læser maks. 77 CLIP-tokens, så de fulde dokumentprompts blev komprimeret til motivets kerne
+uden at ændre indholdet. Rækkefølgen er den i dokumentet.
+
+- **D1 – Zeppelin Metropolis:** Art deco metropolis at night, huge riveted diesel zeppelin docked at a skyscraper mooring mast, searchlight beams, rain-slick streets, vintage cars, smoke, gold and black palette, cinematic digital painting.
+- **D2 – The Diesel Aviatrix:** woman aviator in brown leather jacket, flying helmet and goggles standing beside a silver propeller airplane on an airfield at dawn, hangars behind, heroic, oil painting, brush strokes, no text.
+- **D3 – Iron Titan:** Colossal riveted diesel walking machine striding through an industrial harbour at sunset, black smoke, cranes, cargo ships, tiny workers, gunmetal rust and brass, dramatic low angle, cinematic digital painting.
+- **C1 – The Clockmaker's Workshop:** clockwork automaton figure of carved walnut wood and polished brass standing on a workbench in a Renaissance inventor workshop, visible gears and springs, parchment drawings, astrolabes, candlelight, cinematic digital painting, no text.
+- **C2 – The Ornithopter:** Wooden clockwork ornithopter with canvas wings and brass gears flying over a Renaissance hilltop city, terracotta roofs, bell towers and cypress trees, golden hour, cinematic digital painting.
+- **C3 – The Automaton Lady:** Elegant female clockwork automaton, porcelain face, brass joints, deep green velvet Renaissance gown, standing in a cabinet of curiosities among globes and astrolabes, candlelight, cinematic digital painting.
+
+## Vejen der virkede — og de fem der ikke gjorde
+
+| Vej | Resultat | Præcis fejl |
 | --- | --- | --- |
-| Clockwork Fantasy & Gotik - billedprompts til de 5 plakater (14-11-2026) | Clockwork Fantasy & Gotik | `1QxAYh5Fl9c3JwcWLEj2ynpZnzAc3qwbljg-Jksy3Rco` |
-| Dieselpunk - billedprompts til de 5 plakater (14-11-2026) | Dieselpunk | `1D36IZw-FT_AZvF5j5Le8B2lAOWtUFB8Yw5mjDr9Y8V8` |
+| Freebuff eget API | ✗ | `GET /api/v1/paid/models` = **280 chat-modeller, 0 billedmodeller**; `/api/v1/paid/images/generations`, `/api/v1/images/generations`, `/api/v1/free/models`, `/api/v1/paid/media` → **404** |
+| WaveSpeedAI | ✗ | Kræver `WAVESPEED_API_KEY`, som ikke findes i miljø, `.env` eller `.dev.vars` |
+| Pollinations (nøglefri) | ✗ | Første kald **200**, derefter **402 Payment Required** på alle varianter; eneste model er `sana`, output **627×940** med **vandmærke** `pollinations.ai` |
+| Sana Sprint 0.6B (lokal) | ✗ | Loader fint (3,4 s), men 512×768 med 2 steps blev **ikke færdig inden for 280 s** (bf16 og fp32) på 2 CPU-kerner |
+| SD-Turbo (lokal, CPU) | ✓ | 1 step, 512×768, **43–46 s pr. billede**, ingen vandmærke |
 
-Begge dokumenter indeholder fælles tryk-krav (portræt 5:7, 5906×8268 px ved 300 dpi, rolig mørk
-nederste femtedel, ingen tekst/vandmærke/ramme) og én prompt pr. SKU.
+Ingen nøgler fandtes: `WAVESPEED_API_KEY`, `POLLINATIONS_TOKEN`, `OPENAI_API_KEY`, `REPLICATE_API_TOKEN`,
+`GEMINI_API_KEY`, `GOOGLE_API_KEY`, `HF_TOKEN`, `FAL_KEY`, `STABILITY_API_KEY` — alle manglede.
+Derfor lokal generering i en venv (`.venv`, gitignoreret): `torch 2.15.0+cpu`, `diffusers 0.43.0`,
+`stabilityai/sd-turbo`.
 
-## De ti prompts (sammendrag)
+## Filer og verifikation
 
-**Clockwork** — palet: midnight black, antique brass, teal-skygger med svage arcane blue accenter.
+ Tolv rå billeder blev kørt (to seeds pr. motiv) og derefter bedømt ét ad gangen. Seks valgt:
 
-1. **SG-CLK-01 Cathedral of the Eternal Pendulum** — gotisk kirkeskib om natten, kolossal messing-astronomiur
-   og kæmpependul over midtergangen, måneskin gennem et rose-vindue af tandhjul, stearinlys på forgyldte escapementer.
-2. **SG-CLK-02 The Alchemist's Astral Orrery** — stearinlyst gothisk lærdeværelse med roterende messing-orrery,
-   graverede stjernekort i guld, sølv og lapis, glødende aether-flasker og lædergrimoirer.
-3. **SG-CLK-03 Porcelain Automaton Violinist** — porcelæns- og messingautomat med violinen i et månebelyst
-   konservatorium, revnet elfenbensansigt, synlige guld-fjedre og sølv-fingertandhjul.
-4. **SG-CLK-04 Arch-Mage of the Brass Sanctum** — hættet lærdomagiker med runegraveret tandhjulsstav,
-   svævende astrolabier, blå runer og en mekanisk messingravn på arbejdsbordet.
-5. **SG-CLK-05 Gargoyle of the Belltower Gearworks** — bevinget sten- og bronze-gargoyle på et gothisk
-   klokketårn over tågede victorianske tage, glødende ravøjne og det oplyste urskive bagved.
+| Fil | Motiv | Seed | Kontrol |
+| --- | --- | --- | --- |
+| `sg-d1-local-a.png` | Zeppelin Metropolis | 101 | Zeppeliner ved skyskrabermast, våde gader, guld/sort ✓ |
+| `sg-d2-local-a.png` | The Diesel Aviatrix | 103 | Kvinde i læderjakke ved sølvfly ✓ · **bund 5 % beskåret** for at fjerne signatur |
+| `sg-d3-local-a.png` | Iron Titan | 102 | Kolossal dieselmaskine i havn ved solnedgang ✓ |
+| `sg-c1-local-a.png` | Clockmaker's Workshop | 104 | Messingautomat på værksted med ure og astrolabier ✓ |
+| `sg-c2-local-a.png` | The Ornithopter | 101 | Tandhjuls-ornithoptere over renæssanceby ✓ |
+| `sg-c3-local-a.png` | The Automaton Lady | 101 | Porcelænsautomat i grøn fløjl blandt globusser ✓ |
 
-**Dieselpunk** — palet: gunmetal, patineret stål, sodsort og glødende rav med kølige teal-skygger.
+Kontrolleret på alle seks: åbnet visuelt, og de nederste 8 % af hver fil er inspiceret separat —
+**0** forekomster af tekst, tal, logo, signatur eller vandmærke. Format 2:3, **1024×1536 px**, ca. 1,8–2,1 MB.
+Råfiler og seeds ligger i `posters/punk-2026-11-14/raw/`, valgene i `manifest-local.json`.
 
-1. **SG-DSL-01 Iron Sky Squadron** — sværm af tunge to-motorers dieselfly med nittet panser over en
-   industrimetropol i storm, ildudstødning og søgelys gennem røg.
-2. **SG-DSL-02 Trench Walker MK-IV** — kolossal tobenet dieselmekanik med valsestål, dobbelte udstødningsstabler
-   og ravglødende cockpit-visirer i mudret, granatramt landskab.
-3. **SG-DSL-03 Metropolis Noir Detective** — trenchcoat-detektiv i regn under Art Deco-skyskrabere,
-   stålveteran-biler og en fortøjet diesel-zeppelin, neonreflekser i våd asfalt.
-4. **SG-DSL-04 Heavy Foundry Titan** — monumentalt støberi med flydende jern, kæmpe dieselturbiner,
-   nittede portalkraner og arbejdere i silhuet på gangbroerne.
-5. **SG-DSL-05 Valkyrie of the Oil Fields** — kvindelig pilot i læderflyverdragt og svejsebriller ved en
-   bæltekørende dieselrig med krom-V12-udstødninger, olierigge og sort røg bagved.
+## Hvad der stadig mangler
 
-## Batch-kørsel: `tools/punk_poster_gen.py`
-
-De ti prompts står også i repoet, så batchen ikke afhænger af at læse en Google Doc under kørsel.
-Værktøjet bruger WaveSpeedAI (`google/nano-banana-pro/text-to-image`, 4K, `aspect_ratio: 2:3` —
-det nærmeste understøttede format til 5:7) og læser nøglen fra `WAVESPEED_API_KEY`:
-
-```bash
-python3 tools/punk_poster_gen.py --dry-run     # plan, ingen netværk, ingen udgift
-python3 tools/punk_poster_gen.py               # alle ti
-python3 tools/punk_poster_gen.py --only SG-CLK-01 SG-DSL-05
-```
-
-Kontrakten er verificeret mod docs: `POST /api/v3/<model>` giver `data.id`, og
-`GET /api/v3/predictions/<id>/result` giver `data.status` + `data.outputs[]` (midlertidige URL'er,
-så filen hentes i samme kørsel). To fælder er bygget ind: **submit gentages aldrig** (et afbrudt
-svar kan stadig være en betalt prediction), og kun resultat-GET'en bruges til poll med 2 → 10 s
-interval. Output er `<out>/<sku>.png` plus `manifest.json` pr. kørsel; `posters/punk-*/` er
-gitignoreret, fordi originalerne hører i Drive. Værktøjet uploader intet — hverken til Drive
-eller til WooCommerce.
-
-Kørt offline: `--selftest` **68 af 68** kontroller (ti designs, fem CLK/fem DSL, unikke SKU'er,
-portræt 5:7, «no text»/«no watermark»/rolig bund i hver prompt), `--dry-run` viser ti filer og
-80→56 ord pr. prompt, og uden nøgle afslutter værktøjet med kode **2** uden at sende noget.
-Live-kaldet er **ikke** kørt, fordi nøglen mangler.
-
-## Målt 14/11: Freebuff har ingen billedmodel, og den nøglefri vej er lukket
-
-- **Freebuff:** `GET https://freebuff.com/api/v1/paid/models` svarer med **280 modeller**, alle med
-  `capabilities.chat: true`; **0** har billedgenerering. Der findes ingen `/v1/images/generations` at kalde,
-  så »en Freebuff-AI der kan lave billederne« findes ikke — kataloget er tekst/chat.
-- **Gemini-mappen i Drive** (ID `13xXtakV63vzCboeQ08_gttFadHzFAKkx`) indeholder **ét** dokument,
-  `Steamgears_Automations_og_Pipeline_Dokumentation.md`, som beskriver Content/SEO-, Pinterest- og
-  Command Center-pipelinen. Det indeholder **ingen** billedbeskrivelser, så beskrivelserne er fortsat
-  motiverne i de to køreplaner.
-- **Pollinations (nøglefri, FLUX)** gav **1** billede (SG-CLK-01) og derefter `402 Payment Required` på
-  alle varianter (flux, turbo, med og uden `nologo`/`referrer`). Det ene billede er 648×908 px og bærer
-  vandmærket `pollinations.ai` — ikke trykdueligt og ikke i briefen (intet messing-ur/pendul).
-
-Derfor er status stadig **1 af 10** filer, og den ene er en kasseret test. Værktøjet har fået
-`--provider pollinations|wavespeed` (nøglefri standard, WaveSpeedAI når nøglen findes), så resten kan
-køres i ét kald, så snart der er en nøgle.
-
-## Hvorfor billederne ikke blev genereret
-
-- Ingen billedmodel er tilgængelig: ingen nøgle i miljøet, og repoets tidligere OpenRouter-billedvej
-  blev fjernet i v7.85.0. Der er intet sted at sende prompten hen.
-- En nøgle kræver konto og betaling — det er en beslutning, kun ejeren kan tage. Anbefalet vej:
-  **WaveSpeedAI** (én nøgle, REST, mange modeller, `WAVESPEED_API_KEY`). Alternativer: Pixazo.ai og ImagineArt.
-- De rå billeder, der allerede ligger i Drive, er 848–896 × 1200–1264 px. Uanset generator skal
-  output opskaleres **5,6–6,8×** og efterbearbejdes, før 50×70 kan trykkes — og AI-linjen må først
-  sættes pr. design, når det er gjort.
-
-**Næste skridt:** læg `WAVESPEED_API_KEY` i projektets secrets og kør
-`python3 tools/punk_poster_gen.py`. Filnavne bliver `sg-clk-0X.png` / `sg-dsl-0X.png`, og
-originalerne lægges i tema-mapperne i Drive — ikke i Mediebiblioteket og ikke på produkterne,
-før opskalering og efterbearbejdning er verificeret.
+- **Trykopløsning.** Originalerne er 512×768 og er opskaleret 2× til 1024×1536. Det er over grænsen for
+  udvælgelse i butikken, men **under** kravet til 50×70 (5906×8268 px). En dedikeret opskaleringsmodel
+  (eller et større diffusermodel-kør) skal til, før filerne kan sendes til Gelato.
+- De øvrige 13 motiver i dokumentet (R1–R5, K1–K7 og resten) er ikke genereret i dette pas.
+- Push af commit'en er blokeret af tre urelaterede, untracked filer i worktreen (se næste pas).
