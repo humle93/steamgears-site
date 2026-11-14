@@ -82,6 +82,23 @@ portræt 5:7, «no text»/«no watermark»/rolig bund i hver prompt), `--dry-run
 80→56 ord pr. prompt, og uden nøgle afslutter værktøjet med kode **2** uden at sende noget.
 Live-kaldet er **ikke** kørt, fordi nøglen mangler.
 
+## Målt 14/11: Freebuff har ingen billedmodel, og den nøglefri vej er lukket
+
+- **Freebuff:** `GET https://freebuff.com/api/v1/paid/models` svarer med **280 modeller**, alle med
+  `capabilities.chat: true`; **0** har billedgenerering. Der findes ingen `/v1/images/generations` at kalde,
+  så »en Freebuff-AI der kan lave billederne« findes ikke — kataloget er tekst/chat.
+- **Gemini-mappen i Drive** (ID `13xXtakV63vzCboeQ08_gttFadHzFAKkx`) indeholder **ét** dokument,
+  `Steamgears_Automations_og_Pipeline_Dokumentation.md`, som beskriver Content/SEO-, Pinterest- og
+  Command Center-pipelinen. Det indeholder **ingen** billedbeskrivelser, så beskrivelserne er fortsat
+  motiverne i de to køreplaner.
+- **Pollinations (nøglefri, FLUX)** gav **1** billede (SG-CLK-01) og derefter `402 Payment Required` på
+  alle varianter (flux, turbo, med og uden `nologo`/`referrer`). Det ene billede er 648×908 px og bærer
+  vandmærket `pollinations.ai` — ikke trykdueligt og ikke i briefen (intet messing-ur/pendul).
+
+Derfor er status stadig **1 af 10** filer, og den ene er en kasseret test. Værktøjet har fået
+`--provider pollinations|wavespeed` (nøglefri standard, WaveSpeedAI når nøglen findes), så resten kan
+køres i ét kald, så snart der er en nøgle.
+
 ## Hvorfor billederne ikke blev genereret
 
 - Ingen billedmodel er tilgængelig: ingen nøgle i miljøet, og repoets tidligere OpenRouter-billedvej

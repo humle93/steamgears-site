@@ -7,26 +7,37 @@ and does not depend on reading a Google Doc at run time. Layout and print rules
 are the same as the plan's: portrait, calm dark bottom fifth for the title, no
 text, no watermark, no frame.
 
-Provider: WaveSpeedAI, model `google/nano-banana-pro/text-to-image`.
+Two providers:
+
+**`pollinations` (default, keyless).** A single GET returns the image bytes:
+
+    GET https://image.pollinations.ai/prompt/<urlencoded prompt>?width&height&model=flux
+
+This is the only route that works without an account, and it is the one the
+project's Freebuff-adjacent tooling uses for image generation. Freebuff's own
+paid catalog (280 models) is chat-only — no image model — so there is no
+Freebuff endpoint to call.
+
+**`wavespeed` (needs `WAVESPEED_API_KEY`).** Higher quality:
 
     POST https://api.wavespeed.ai/api/v3/<model>        -> data.id
     GET  https://api.wavespeed.ai/api/v3/predictions/<id>/result -> data.outputs[]
 
-The API is asynchronous and bills on submission, so the submit request is
-**never retried**: a dropped connection can still mean a paid prediction. Only
-the idempotent result GET is retried. Generated URLs are temporary, so every
-output is downloaded in the same run.
+The WaveSpeed API is asynchronous and bills on submission, so its submit
+request is **never retried**: a dropped connection can still mean a paid
+prediction. Only the idempotent result GET is retried. Generated URLs are
+temporary, so every output is downloaded in the same run.
 
 Usage:
 
     python3 tools/punk_poster_gen.py --dry-run            # plan + cost-free preview
-    python3 tools/punk_poster_gen.py                     # all ten, needs the key
+    python3 tools/punk_poster_gen.py                     # all ten (pollinations)
+    python3 tools/punk_poster_gen.py --provider wavespeed  # better, needs the key
     python3 tools/punk_poster_gen.py --only SG-CLK-01 SG-CLK-02
     python3 tools/punk_poster_gen.py --selftest           # offline fixtures
 
-The key is read from `WAVESPEED_API_KEY` and is never written to a file or
-printed. Output: `<out>/<sku>.png` plus `<out>/manifest.json`. Nothing is
-uploaded anywhere — Drive and WooCommerce are a later, separate step.
+Output: `<out>/<sku>.png` plus `<out>/manifest.json`. Nothing is uploaded
+anywhere — Drive and WooCommerce are a later, separate step.
 
 Exit: 0 = every requested design generated and saved · 1 = one or more designs
 failed (manifest says which) · 2 = missing key or bad usage.
@@ -40,6 +51,7 @@ import os
 import sys
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from pathlib import Path
 
@@ -50,6 +62,12 @@ MODEL = "google/nano-banana-pro/text-to-image"
 ASPECT = "2:3"          # closest supported ratio to the 5:7 print format
 RESOLUTION = "4k"
 KEY_ENV = "WAVESPEED_API_KEY"
+PROVIDERS = ("pollinations", "wavespeed")
+PROVIDER = "pollinations"
+POLLI_URL = "https://image.pollinations.ai/prompt/{prompt}"
+POLLI_MODEL = "flux"
+WIDTH = 1024            # 5:7 at 1024 px wide -> 1434 px tall
+HEIGHT = 1434
 POLL_START = 2.0        # docs: never poll the same task more often than 2 s
 POLL_MAX = 10.0
 POLL_TIMEOUT = 600.0
@@ -211,20 +229,51 @@ def download(url: str, target: Path) -> int:
 
 # ------------------------------------------------------------------ batch
 
-def run(skus: list[str], key: str, out: Path, model: str, aspect: str, resolution: str) -> int:
+def pollinations_generate(prompt: str, target: Path, width: int, height: int, seed: int) -> tuple[int, Path]:
+    """Fetch one keyless Pollinations image and save it. Returns (bytes written, real path).
+
+    The service answers JPEG, so the extension follows the returned Content-Type
+    instead of the .png name the print pipeline will use later.
+    """
+    query = urllib.parse.urlencode({"width": width, "height": height,
+                                    "model": POLLI_MODEL, "seed": seed, "nologo": "true"})
+    url = POLLI_URL.format(prompt=urllib.parse.quote(prompt, safe="")) + "?" + query
+    with urllib.request.urlopen(url, timeout=180.0) as resp:
+        ctype = resp.headers.get("Content-Type", "")
+        payload = resp.read()
+    if not ctype.startswith("image/"):
+        raise RuntimeError(f"svaret er ikke et billede (Content-Type {ctype or 'ukendt'})")
+    if len(payload) < 10_000:
+        raise RuntimeError(f"mistænkeligt lille billede ({len(payload)} bytes)")
+    suffix = {"image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp"}.get(ctype, target.suffix)
+    target = target.with_suffix(suffix)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    tmp = target.with_suffix(target.suffix + ".part")
+    tmp.write_bytes(payload)
+    os.replace(tmp, target)
+    return len(payload), target
+
+
+def run(skus: list[str], key: str | None, out: Path, provider: str, model: str, aspect: str,
+        resolution: str, width: int = WIDTH, height: int = HEIGHT) -> int:
     manifest: list[dict] = []
     failures = 0
     for index, sku in enumerate(skus, start=1):
         title, prompt = PROMPTS[sku]
         target = out / f"{sku.lower()}.png"
         print(f"[{index}/{len(skus)}] {sku} — {title}", flush=True)
-        entry: dict = {"sku": sku, "title": title, "file": str(target), "model": model,
-                       "aspect_ratio": aspect, "resolution": resolution}
+        entry: dict = {"sku": sku, "title": title, "file": str(target), "provider": provider}
         try:
-            task_id = submit(prompt, key, model, aspect, resolution)
-            entry["task_id"] = task_id
-            outputs = wait_for_outputs(task_id, key)
-            entry["bytes"] = download(outputs[0], target)
+            if provider == "pollinations":
+                entry.update({"model": POLLI_MODEL, "width": width, "height": height,
+                              "seed": 7000 + index})
+                entry["bytes"], entry["file"] = pollinations_generate(prompt, target, width, height, entry["seed"])
+            else:
+                assert key, "nøgle kræves"
+                entry.update({"model": model, "aspect_ratio": aspect, "resolution": resolution})
+                task_id = submit(prompt, key, model, aspect, resolution)
+                entry["task_id"] = task_id
+                entry["bytes"] = download(wait_for_outputs(task_id, key)[0], target)
             entry["status"] = "saved"
             print(f"    gemt: {target.name} ({entry['bytes'] // 1024} KB)", flush=True)
         except Exception as exc:                     # noqa: BLE001 — one failure must not stop the batch
@@ -235,16 +284,22 @@ def run(skus: list[str], key: str, out: Path, model: str, aspect: str, resolutio
         manifest.append(entry)
 
     out.mkdir(parents=True, exist_ok=True)
-    (out / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    (out / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2, default=str) + "\n",
+                                      encoding="utf-8")
     print(f"\n{len(skus) - failures} af {len(skus)} gemt i {out}")
     if failures:
         print("Fejlede: " + ", ".join(e["sku"] for e in manifest if e["status"] == "failed"), file=sys.stderr)
     return 0 if failures == 0 else 1
 
 
-def dry_run(skus: list[str], out: Path, model: str, aspect: str, resolution: str) -> int:
-    print(f"Model: {model} · aspect {aspect} · {resolution} · ud: {out}")
-    print(f"Nøgle: {'sat' if os.environ.get(KEY_ENV) else 'MANGLER (' + KEY_ENV + ')'}\n")
+def dry_run(skus: list[str], out: Path, provider: str, model: str, aspect: str, resolution: str,
+            width: int, height: int) -> int:
+    if provider == "pollinations":
+        print(f"Provider: pollinations ({POLLI_MODEL}) · {width}×{height} px · ud: {out}")
+        print("Nøgle: ikke nødvendig\n")
+    else:
+        print(f"Provider: wavespeed · {model} · aspect {aspect} · {resolution} · ud: {out}")
+        print(f"Nøgle: {'sat' if os.environ.get(KEY_ENV) else 'MANGLER (' + KEY_ENV + ')'}\n")
     for sku in skus:
         title, prompt = PROMPTS[sku]
         words = len(prompt.split())
@@ -272,6 +327,10 @@ def selftest() -> int:
     checks.append(("2:3 understøttet", ASPECT in {"1:1", "3:2", "2:3", "3:4", "4:3", "4:5", "5:4", "9:16", "16:9", "21:9"}))
     checks.append(("4k understøttet", RESOLUTION in {"1k", "2k", "4k"}))
     checks.append(("submit gentages ikke", "retry" not in submit.__doc__.lower()))
+    checks.append(("standardprovider er nøglefri", PROVIDER == "pollinations" and PROVIDER in PROVIDERS))
+    checks.append(("5:7 på 1024 px", abs(HEIGHT / WIDTH - 7 / 5) < 0.01))
+    checks.append(("pollinations-URL", POLLI_URL.startswith("https://image.pollinations.ai/prompt/")))
+    checks.append(("seed pr. design", len({7000 + i for i in range(1, 11)}) == 10))
 
     failed = [name for name, ok in checks if not ok]
     for name, ok in checks:
@@ -284,9 +343,13 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Generér de ti CLK/DSL-plakater i ét batch (WaveSpeedAI).")
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT, help=f"mappe til PNG + manifest (standard {DEFAULT_OUT})")
     parser.add_argument("--only", nargs="+", metavar="SKU", help="begræns til disse SKU'er")
+    parser.add_argument("--provider", choices=PROVIDERS, default=PROVIDER,
+                        help="pollinations (nøglefri, standard) eller wavespeed (kræver nøgle)")
     parser.add_argument("--model", default=MODEL)
     parser.add_argument("--aspect", default=ASPECT)
     parser.add_argument("--resolution", default=RESOLUTION)
+    parser.add_argument("--width", type=int, default=WIDTH, help="bredde i px (pollinations)")
+    parser.add_argument("--height", type=int, default=HEIGHT, help="højde i px (pollinations)")
     parser.add_argument("--dry-run", action="store_true", help="vis plan uden netværk")
     parser.add_argument("--selftest", action="store_true", help="kør offline-fixtures")
     args = parser.parse_args(argv)
@@ -300,13 +363,15 @@ def main(argv: list[str] | None = None) -> int:
         parser.error("ukendt SKU: " + ", ".join(unknown) + " (kendte: " + ", ".join(PROMPTS) + ")")
 
     if args.dry_run:
-        return dry_run(skus, args.out, args.model, args.aspect, args.resolution)
+        return dry_run(skus, args.out, args.provider, args.model, args.aspect, args.resolution,
+                       args.width, args.height)
 
     key = os.environ.get(KEY_ENV)
-    if not key:
+    if args.provider == "wavespeed" and not key:
         print(f"{KEY_ENV} er ikke sat. Sæt den som projekt-secret og kør igen — intet er sendt.", file=sys.stderr)
         return 2
-    return run(skus, key, args.out, args.model, args.aspect, args.resolution)
+    return run(skus, key, args.out, args.provider, args.model, args.aspect, args.resolution,
+               args.width, args.height)
 
 
 if __name__ == "__main__":
