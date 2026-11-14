@@ -33,3 +33,6 @@ artifacts/
 
 # Midlertidige MCP-payloads fra agentsandkassen
 .tmp/
+
+# Genererede plakatoriginaler fra tools/punk_poster_gen.py — de hører i Drive, ikke i git
+posters/punk-*/

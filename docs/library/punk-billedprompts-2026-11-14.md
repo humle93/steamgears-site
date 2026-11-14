@@ -57,6 +57,31 @@ nederste femtedel, ingen tekst/vandmærke/ramme) og én prompt pr. SKU.
 5. **SG-DSL-05 Valkyrie of the Oil Fields** — kvindelig pilot i læderflyverdragt og svejsebriller ved en
    bæltekørende dieselrig med krom-V12-udstødninger, olierigge og sort røg bagved.
 
+## Batch-kørsel: `tools/punk_poster_gen.py`
+
+De ti prompts står også i repoet, så batchen ikke afhænger af at læse en Google Doc under kørsel.
+Værktøjet bruger WaveSpeedAI (`google/nano-banana-pro/text-to-image`, 4K, `aspect_ratio: 2:3` —
+det nærmeste understøttede format til 5:7) og læser nøglen fra `WAVESPEED_API_KEY`:
+
+```bash
+python3 tools/punk_poster_gen.py --dry-run     # plan, ingen netværk, ingen udgift
+python3 tools/punk_poster_gen.py               # alle ti
+python3 tools/punk_poster_gen.py --only SG-CLK-01 SG-DSL-05
+```
+
+Kontrakten er verificeret mod docs: `POST /api/v3/<model>` giver `data.id`, og
+`GET /api/v3/predictions/<id>/result` giver `data.status` + `data.outputs[]` (midlertidige URL'er,
+så filen hentes i samme kørsel). To fælder er bygget ind: **submit gentages aldrig** (et afbrudt
+svar kan stadig være en betalt prediction), og kun resultat-GET'en bruges til poll med 2 → 10 s
+interval. Output er `<out>/<sku>.png` plus `manifest.json` pr. kørsel; `posters/punk-*/` er
+gitignoreret, fordi originalerne hører i Drive. Værktøjet uploader intet — hverken til Drive
+eller til WooCommerce.
+
+Kørt offline: `--selftest` **68 af 68** kontroller (ti designs, fem CLK/fem DSL, unikke SKU'er,
+portræt 5:7, «no text»/«no watermark»/rolig bund i hver prompt), `--dry-run` viser ti filer og
+80→56 ord pr. prompt, og uden nøgle afslutter værktøjet med kode **2** uden at sende noget.
+Live-kaldet er **ikke** kørt, fordi nøglen mangler.
+
 ## Hvorfor billederne ikke blev genereret
 
 - Ingen billedmodel er tilgængelig: ingen nøgle i miljøet, og repoets tidligere OpenRouter-billedvej
@@ -67,6 +92,7 @@ nederste femtedel, ingen tekst/vandmærke/ramme) og én prompt pr. SKU.
   output opskaleres **5,6–6,8×** og efterbearbejdes, før 50×70 kan trykkes — og AI-linjen må først
   sættes pr. design, når det er gjort.
 
-**Næste skridt:** læg `WAVESPEED_API_KEY` i projektets secrets, så køres de ti prompts som et batch,
-filnavne `sg-clk-0X-…png` / `sg-dsl-0X-…png`, og originalerne lægges i tema-mapperne i Drive —
-ikke i Mediebiblioteket og ikke på produkterne, før opskalering og efterbearbejdning er verificeret.
+**Næste skridt:** læg `WAVESPEED_API_KEY` i projektets secrets og kør
+`python3 tools/punk_poster_gen.py`. Filnavne bliver `sg-clk-0X.png` / `sg-dsl-0X.png`, og
+originalerne lægges i tema-mapperne i Drive — ikke i Mediebiblioteket og ikke på produkterne,
+før opskalering og efterbearbejdning er verificeret.
