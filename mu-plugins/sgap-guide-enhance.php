@@ -16,15 +16,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 const SGAP_GUIDE_HOWTO_POSTS = array( 8, 10, 757, 1357, 1359, 1361, 1394 );
 
 /**
- * Guide → publicerede produkter guiden faktisk bruger.
- * Tomme/udeladte poster får ingen callout: der findes intet publiceret produkt at pege på.
+ * Guide → publicerede produkter. Butikken kører kun plakater (ejerbeslutning 15/11 2026),
+ * så callouten viser de tre publicerede prints og lover ikke tøj, goggles eller corsets.
  */
 const SGAP_GUIDE_CALLOUT_PRODUCTS = array(
-	8    => array( 941 ),
-	757  => array( 941 ),
+	8    => array( 965, 966, 967 ),
+	10   => array( 965, 966, 967 ),
+	614  => array( 965, 966, 967 ),
+	757  => array( 965, 966, 967 ),
 	1357 => array( 965, 966, 967 ),
-	1359 => array( 940, 941 ),
-	1361 => array( 940, 941 ),
+	1359 => array( 965, 966, 967 ),
+	1361 => array( 965, 966, 967 ),
+	1394 => array( 965, 966, 967 ),
 );
 
 /**
@@ -257,8 +260,8 @@ function sgap_guide_callout_html( $post_id ) {
 	}
 
 	return '<aside class="sgap-guide-callout" aria-labelledby="sgap-guide-callout-title">'
-		. '<h2 class="sgap-guide-callout__title" id="sgap-guide-callout-title">Gear used in this guide</h2>'
-		. '<p class="sgap-guide-callout__intro">The pieces this guide is built around. Prices in DKK, shipped from Denmark.</p>'
+		. '<h2 class="sgap-guide-callout__title" id="sgap-guide-callout-title">Prints from this world</h2>'
+		. '<p class="sgap-guide-callout__intro">The shop runs on prints. These three share the palette this guide is built around — prices in DKK, shipped from Denmark.</p>'
 		. '<ul class="sgap-guide-callout__grid">' . $items . '</ul>'
 		. '<p class="sgap-guide-callout__more"><a href="' . esc_url( home_url( '/shop/' ) ) . '">See the whole workshop →</a></p>'
 		. '</aside>';
@@ -304,7 +307,7 @@ function sgap_guide_callout_css() {
 		. '.sgap-guide-callout__item{display:flex;flex-direction:column;gap:.35rem;text-align:center;max-width:230px;justify-self:center}'
 		. '.sgap-guide-callout__media img{display:block;width:100%;height:auto;border-radius:.35rem}'
 		. '.sgap-guide-callout__name{font-weight:600;text-decoration:none;line-height:1.3;overflow-wrap:anywhere}'
-		. '.sgap-guide-callout__price{font-variant-numeric:tabular-nums}'
+		. '.sgap-guide-callout__price{font-variant-numeric:tabular-nums;margin-top:auto}'
 		. '.sgap-guide-callout__more{margin:1rem 0 0;font-size:.95rem}'
 		. '@media (max-width:480px){.sgap-guide-callout{padding:1rem}.sgap-guide-callout__grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:.75rem}}'
 		. '</style>' . "\n";
