@@ -130,9 +130,14 @@ Reglen over holdes automatisk, så lidt som muligt afhænger af hukommelse:
   (0 rækkeafvigelser, 0 mangler, 0 rester, RTO under **300 s**), med **3 dages varsel** i `--due` og 15
   offline-fixtures. Det kører **hver nat** i [`tools/natlige-vaern.sh`](tools/natlige-vaern.sh), så fristen tælles
   ned dagligt, og den **1. i hver måned** kører workflowen og skriver trenden i job-summaryen. Øvelsen skriver én
-  række pr. kørsel til `reports/db-drill-history.json`, så RTO og paritet er en serie og ikke ét tal. Kørslen
-  **udfører ikke selv øvelsen**: den kræver MCP-adgang, og keep-alive-kørslen roterer refresh-tokenet, så en ekstra
-  fornyelse ville slå begge kørsler ihjel — selve kørslen er derfor en agenthandling med rapporten committet.
+  række pr. kørsel til `reports/db-drill-history.json`, så RTO og paritet er en serie og ikke ét tal. Siden 15/11 **udfører kørslen også selve øvelsen**, uden om MCP:
+  [`tools/db_drill_ci.py`](tools/db_drill_ci.py) taler med MySQL-klienten over TCP, så keep-alive-kørslens roterende
+  refresh-token ikke er i spil. Den kræver fire repository-secrets (`DB_HOST`, `DB_NAME`, `DB_USER`,
+  `DB_PASSWORD`, og valgfrit variablerne `DB_PORT`/`DB_PREFIX`); mangler de, springes øvelsen over med en
+  `::notice` mens frist-målingen kører videre, og kan runneren ikke nå databasen (værtens fjernadgang er
+  typisk IP-begrænset), skrives det som en `::warning` — ikke som en rød øvelse. Rapporten har MCP-vejens
+  felter, så værnet læser den uændret; `--selftest` dækker konfiguration, my.cnf-escaping, at passwordet
+  aldrig står i en argv, legacy-frasortering, paritet og hele kæden (42 fixtures, offline).
 
 - **Commit-besked-værnet** ([`tools/commit_check.py`](tools/commit_check.py)): reglen i §1 bliver kontrolleret
   maskinelt på tre flader — `--message-file` er **commit-msg-hooken** (`python3 tools/commit_check.py --install`,

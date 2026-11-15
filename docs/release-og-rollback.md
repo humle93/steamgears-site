@@ -143,8 +143,14 @@ Tre ting skal man vide før man bruger den i en krise:
 **31 dage** gammel og grøn (0 afvigelser, 0 mangler, 0 rester, RTO under **300 s**); den kører hver nat i
 `tools/natlige-vaern.sh`, og `.github/workflows/backup-doelse.yml` kører den 1. i måneden med trenden i
 job-summaryen. Øvelsen skriver én række pr. kørsel til `reports/db-drill-history.json`, så RTO og paritet kan
-ses over tid. Selve kørslen er stadig en agenthandling: den kræver MCP-adgang, og keep-alive-kørslen roterer
-refresh-tokenet, så en ekstra fornyelse i CI ville ødelægge adgangen.
+ses over tid. **Siden 15/11 kører øvelsen også af sig selv, uden om MCP.** `tools/db_drill_ci.py` gør samme måling med
+en almindelig MySQL-klient over TCP, og `backup-doelse.yml` kører den 1. i måneden, committer rapporten og
+opdaterer historikken. Den kræver fire repository-secrets — `DB_HOST`, `DB_NAME`, `DB_USER`,
+`DB_PASSWORD` (ønsket: en dedikeret bruger, ikke WordPress-brugeren) — samt at værtens fjernadgang
+tillader runneren; GitHub-hostede runners skifter IP, så enten tillades et bredt vært for netop den bruger,
+eller kørslen flyttes til en runner med fast IP. Er adgangen ikke sat op, siger `--probe` præcis hvad der
+mangler, og jobbet bliver guult, ikke rødt. Hvad der er målt, og hvad der først er målt når secrets
+findes: [`library/backup-doelse-i-ci-2026-11-15.md`](library/backup-doelse-i-ci-2026-11-15.md).
 
 En gendannelse er stadig en beslutning: prefix-bytte ændrer også data (fx `{prefix}user_roles` i `options`),
 så en afspilning beviser at dumpet er komplet — ikke at siden ville virke urørt i produktion.

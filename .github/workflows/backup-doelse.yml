@@ -1,14 +1,20 @@
 name: Månedlig backup-øvelse (S5.8)
 
-# Øvelsen i tools/wp_db_drill.py beviste 9/11 2026 at dumpet kan afspilles: 269 af 269
-# tabeller identiske, RTO 6 s. Et engangstal ældes — derfor holder kørslen her fristen op
-# den 1. i hver måned, før den 31-dages frist løber ud, og skriver trenden i job-summaryen.
+# Øvelsen beviste 9/11 2026 at dumpet kan afspilles: 269 af 269 tabeller identiske, RTO 6 s.
+# Et engangstal ældes — derfor kører øvelsen her den 1. i hver måned, **af sig selv**, og
+# committer sin egen rapport.
 #
-# Kørslen **udfører ikke selv øvelsen**: den kræver en databaseforbindelse gennem
-# Novamira-MCP, og det access-token findes kun i keep-alive-kørslen (som roterer
-# refresh-tokenet — en anden fornyelse her ville slå de to kørsler ihjel). Det daglige
-# værn `backup-øvelse (frist + paritet)` i tools/natlige-vaern.sh er derfor den daglige
-# måling, og denne kørsel er månedens varsel med den præcise kommando i annotationen.
+# Kørslen går uden om MCP: `tools/db_drill_ci.py` taler med MySQL-klienten over TCP, så
+# keep-alive-kørslens roterende refresh-token ikke er i spil. Det kræver fire
+# repository-secrets (Settings → Secrets and variables → Actions):
+#
+#   DB_HOST  DB_NAME  DB_USER  DB_PASSWORD     (og valgfrit DB_PORT, DB_PREFIX)
+#
+# Mangler de, springes selve øvelsen over med en ::notice — den natlige frist-måling og
+# månedens tal-kontrol kører stadig, så en forfalden øvelse bliver rød som før.
+# Kan runneren ikke nå databasen (værtens fjernadgang er typisk IP-begrænset, og
+# GitHub-hostede runners skifter IP), skrives det som en ::warning med hvad ejeren kan
+# gøre — se docs/release-og-rollback.md §3.3.
 #
 # Kør i hånden: Actions → "Månedlig backup-øvelse (S5.8)" → Run workflow.
 
@@ -18,22 +24,23 @@ on:
     - cron: '0 5 1 * *'
   workflow_dispatch:
   push:
-    # Ændres værnens logik, prøves den med det samme i stedet for først til næste måned.
+    # Ændres øvelsen eller værnet, prøves det med det samme i stedet for først til næste måned.
     paths:
       - .github/workflows/backup-doelse.yml
       - tools/db_drill_check.py
+      - tools/db_drill_ci.py
       - tools/wp_db_drill.py
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: backup-doelse
   cancel-in-progress: false
 
 jobs:
-  frist:
-    name: Frist, rækkeparitet og RTO
+  oevelse:
+    name: Øvelse, frist og rækkeparitet
     runs-on: ubuntu-26.04
     steps:
       - name: Checkout repository
@@ -44,11 +51,143 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Offline selftest af værnet
-        run: python3 tools/db_drill_check.py --selftest
+      - name: Offline selftest af øvelsen og værnet
+        run: |
+          python3 tools/db_drill_ci.py --selftest
+          python3 tools/db_drill_check.py --selftest
 
-      - name: Mål fristen og tallene
+      - name: Er der database-oplysninger?
+        id: db
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        run: |
+          if [ -n "${DB_HOST}" ] && [ -n "${DB_NAME}" ] && [ -n "${DB_USER}" ] && [ -n "${DB_PASSWORD}" ]; then
+            echo "have=true" >> "$GITHUB_OUTPUT"
+            echo "Database-oplysninger findes — øvelsen kører."
+          else
+            echo "have=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=Den automatiske øvelse er ikke slået til::Repository-secrets DB_HOST, DB_NAME, DB_USER og DB_PASSWORD mangler, så øvelsen kan ikke køre af sig selv. Fristen måles stadig nedenfor. Læg de fire secrets i Settings → Secrets and variables → Actions (se docs/release-og-rollback.md §3.3)."
+          fi
+
+      - name: Sikr en MySQL-klient
+        if: steps.db.outputs.have == 'true'
+        run: |
+          set -euo pipefail
+          if command -v mysqldump >/dev/null && command -v mysql >/dev/null; then
+            mysqldump --version
+            exit 0
+          fi
+          sudo apt-get update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq mysql-client \
+            || sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq mysql-client-8.0
+          mysqldump --version
+
+      - name: Kan runneren nå databasen?
+        id: naa
+        if: steps.db.outputs.have == 'true'
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_PORT: ${{ vars.DB_PORT }}
+          DB_PREFIX: ${{ vars.DB_PREFIX }}
+        run: |
+          # Et manglende netværk må ikke gøre jobbet rødt uden at sige hvorfor: den natlige
+          # frist-måling nedenfor er stadig den der holder øvelsen op på 31 dage.
+          set +e
+          python3 tools/db_drill_ci.py --probe 2>&1 | tee probe.log
+          kode=${PIPESTATUS[0]}
+          if [ "$kode" -eq 0 ]; then
+            echo "reachable=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "reachable=false" >> "$GITHUB_OUTPUT"
+          {
+            echo ""
+            echo "### Øvelsen kunne ikke køre: databasen blev ikke nået"
+            echo ""
+            echo '```'
+            tail -3 probe.log
+            echo '```'
+            echo ""
+            echo "GitHub-hostede runners skifter IP, så værtens fjernadgang skal tillade"
+            echo "forbindelsen for en dedikeret bruger — eller kørslen flyttes til en runner"
+            echo "med fast IP. Se §3.3 i [docs/release-og-rollback.md](../blob/main/docs/release-og-rollback.md)."
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "::warning title=Backup-øvelsen kunne ikke nå databasen::$(tail -1 probe.log) — se job-summaryen og docs/release-og-rollback.md §3.3."
+          exit 0
+
+      - name: Kør øvelsen
+        id: oevelse
+        if: steps.naa.outputs.reachable == 'true'
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_PORT: ${{ vars.DB_PORT }}
+          DB_PREFIX: ${{ vars.DB_PREFIX }}
+        run: |
+          set -uo pipefail
+          kode=0
+          python3 tools/db_drill_ci.py --ci || kode=$?
+          rapport="reports/db-drill-$(TZ=Europe/Copenhagen date +%F).json"
+          if [ -s "$rapport" ]; then
+            python3 - "$rapport" >> "$GITHUB_STEP_SUMMARY" <<'PY'
+          import json, sys
+
+          d = json.load(open(sys.argv[1], encoding="utf-8"))
+          print("### Øvelsen er kørt af CI\n")
+          print(f"Dump **{d.get('dump_bytes', 0)} bytes** på {d.get('dump_seconds', '?')} s · "
+                f"gendannelse (RTO) **{d.get('rto_seconds', 0)} s** · "
+                f"{d.get('tables_expected', 0)} tabeller\n")
+          print("| Måltal | Målt |\n| --- | --- |")
+          print(f"| Rækkeparitet | {d.get('row_mismatches', 0)} afvigelser, "
+                f"{d.get('missing_tables', 0)} mangler, {d.get('extra_tables', 0)} uventede |")
+          print(f"| Oprydning | {d.get('dropped_tables', 0)} tabeller + "
+                f"{d.get('dropped_views', 0)} visninger, {d.get('left_behind', 0)} tilbage |")
+          print(f"| Dom | {'✓ grøn' if d.get('ok') else '✗ rød'} |")
+          for name, detail in (d.get("errors") or {}).items():
+              print(f"\n**{name}:** `{detail[:300]}`")
+          PY
+          fi
+          if [ "$kode" -ne 0 ]; then
+            echo "::error title=Backup-øvelsen fejlede::Se $rapport — rækkeparitet, RTO eller oprydning holdt ikke. Kør 'python3 tools/db_drill_ci.py --probe' for diagnosen."
+            exit 1
+          fi
+          exit 0
+
+      - name: Commit og push rapporten
+        if: always() && steps.db.outputs.have == 'true' && steps.naa.outputs.reachable == 'true'
+        run: |
+          git config user.name "Steamgears Backup Bot"
+          git config user.email "bot@steamgears.eu"
+          git add reports/db-drill-*.json reports/db-drill-history.json
+          if git diff --staged --quiet; then
+            echo "Ingen ny måling at gemme."
+            exit 0
+          fi
+          # chore(status): er et af commit-værnets undtagne emner — en målt rapport kan
+          # ikke bære §1-procenter.
+          git commit -m "$(printf 'chore(status): backup-øvelse %s kørt af CI\n\nMålt af backup-doelse.yml med MySQL-klienten; ingen procenter.\n\n🤖 Generated with Codebuff\nCo-Authored-By: Codebuff <noreply@codebuff.com>\n' "$(TZ=Europe/Copenhagen date +%F)")"
+          for attempt in 1 2 3; do
+            if git push; then
+              echo "Rapporten er pushet til main."
+              exit 0
+            fi
+            echo "Push afvist (forsøg $attempt) — henter og prøver igen."
+            git pull --rebase --autostash
+          done
+          echo "::error title=Rapporten kunne ikke pushes::Målingen ligger i træet, men push fejlede efter 3 forsøg."
+          exit 1
+
+      - name: Frist, rækkeparitet og RTO
         id: maal
+        if: always()
         run: |
           set -uo pipefail
           python3 tools/db_drill_check.py --strict --json > drill.json
@@ -68,12 +207,12 @@ jobs:
           PY
           cat drill.json
           if [ "$kode" -ne 0 ]; then
-            echo "::error title=Backup-øvelsen er forfalden eller ikke grøn::Kør 'python3 tools/wp_db_drill.py' (kræver Novamira-adgang) og commit reports/db-drill-<dato>.json. Se docs/release-og-rollback.md §3.3."
+            echo "::error title=Backup-øvelsen er forfalden eller ikke grøn::Kør øvelsen igen inden fristen. Kan CI ikke nå databasen, kør 'python3 tools/wp_db_drill.py' (kræver Novamira-adgang) og commit rapporten. Se docs/release-og-rollback.md §3.3."
             exit 1
           fi
           python3 tools/db_drill_check.py --due || kode=$?
           if [ "$kode" -eq 3 ]; then
-            echo "::warning title=Backup-øvelsen forfalder snart::Næste øvelse skal være kørt senest $(python3 -c "import json;print(json.load(open('drill.json',encoding='utf-8'))['next_due'])"). Kør 'python3 tools/wp_db_drill.py' og commit rapporten."
+            echo "::warning title=Backup-øvelsen forfalder snart::Næste øvelse skal være kørt senest $(python3 -c "import json;print(json.load(open('drill.json',encoding='utf-8'))['next_due'])").
           fi
           exit 0
 
@@ -87,7 +226,8 @@ jobs:
             python3 tools/db_drill_check.py | sed -n '/^| Kørsel/,$p'
             echo ""
             echo "Kilden er \`reports/db-drill-history.json\` (én række pr. kørsel) og"
-            echo "\`reports/db-drill-<dato>.json\`. Øvelsen køres med"
+            echo "\`reports/db-drill-<dato>.json\`. Øvelsen køres af CI med"
+            echo "\`python3 tools/db_drill_ci.py --ci\` (MySQL-klient, ingen MCP) eller i hånden med"
             echo "\`python3 tools/wp_db_drill.py\`; hvad den gør, og de tre fælder, står i"
             echo "[docs/release-og-rollback.md](../blob/main/docs/release-og-rollback.md) §3.3."
           } >> "$GITHUB_STEP_SUMMARY"

@@ -115,6 +115,11 @@ check "release-gate (S5.9)"                  python3 tools/test_release.py
 # reports/db-drill-history.json gør RTO og paritet til en serie i stedet for ét tal.
 check "backup-øvelse-selftest"               python3 tools/db_drill_check.py --selftest
 check "backup-øvelse (frist + paritet)"      python3 tools/db_drill_check.py --strict
+# S5.12: samme øvelse kan nu køres af CI uden om MCP. Værnet her er offline: det holder
+# konfigurationslæsningen, my.cnf-escapingen (et password med # eller " må ikke brække
+# filen), at passwordet aldrig står i en argv, legacy-frasorteringen, pariteten og dommen
+# op — kørslen mod databasen kræver de fire DB_*-secrets og kan ikke prøves her.
+check "backup-øvelse-i-ci-selftest"          python3 tools/db_drill_ci.py --selftest
 # Fejlsøgning som fast punkt (P3.6): konsistens på tværs af filer — version mod zip,
 # zip mod kilde, includes, biblioteksindekset, tokens og tests der ikke kan fejle.
 # Om-mærkningen (S4): titler/kollektioner/billedkrav måles udefra — selftesten er offline og fanger
