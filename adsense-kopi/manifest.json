@@ -1,0 +1,412 @@
+{
+ "bygget": "2026-11-15T20:38:50Z",
+ "kilde": "https://steamgears.eu",
+ "indekser": false,
+ "adsense": {
+  "client": "ca-pub-0000000000000000",
+  "slot_top": "0000000001",
+  "slot_bottom": "0000000002"
+ },
+ "sprunget_over": [
+  {
+   "titel": "Opt-out preferences",
+   "original": "https://steamgears.eu/opt-out-preferences/"
+  },
+  {
+   "titel": "Workshop Journal",
+   "original": "https://steamgears.eu/journal/"
+  },
+  {
+   "titel": "My account",
+   "original": "https://steamgears.eu/my-account/"
+  },
+  {
+   "titel": "Checkout",
+   "original": "https://steamgears.eu/checkout/"
+  },
+  {
+   "titel": "Shop Steampunk Posters & Prints",
+   "original": "https://steamgears.eu/shop/"
+  }
+ ],
+ "sider": [
+  {
+   "fil": "returns.html",
+   "titel": "Returns — Start a Return, Refunds & Faulty Items",
+   "original": "https://steamgears.eu/returns/",
+   "gruppe": "side"
+  },
+  {
+   "fil": "shipping.html",
+   "titel": "Shipping — Timelines, Tracking & Split Deliveries",
+   "original": "https://steamgears.eu/shipping/",
+   "gruppe": "side"
+  },
+  {
+   "fil": "inspiration.html",
+   "titel": "Inspiration",
+   "original": "https://steamgears.eu/inspiration/",
+   "gruppe": "side"
+  },
+  {
+   "fil": "weathering.html",
+   "titel": "Weathering Steampunk Props: 5 Techniques That Add 150 Years",
+   "original": "https://steamgears.eu/build/weathering/",
+   "gruppe": "side"
+  },
+  {
+   "fil": "tools-and-materials.html",
+   "titel": "Tools and Materials for Steampunk Builds",
+   "original": "https://steamgears.eu/build/tools-and-materials/",
+   "gruppe": "side"
+  },
+  {
+   "fil": "occasions.html",
+   "titel": "Where to Wear It: Steampunk by Occasion",
+   "original": "https://steamgears.eu/start-here/occasions/",
+   "gruppe": "side"
+  },
+  {
+   "fil": "characters.html",
+   "titel": "Steampunk Characters: Pick Your Archetype",
+   "original": "https://steamgears.eu/start-here/characters/",
+   "gruppe": "side"
+  },
+  {
+   "fil": "glossary.html",
+   "titel": "Steampunk Glossary: The Terms, Explained",
+   "original": "https://steamgears.eu/start-here/glossary/",
+   "gruppe": "side"
+  },
+  {
+   "fil": "build.html",
+   "titel": "Build",
+   "original": "https://steamgears.eu/build/",
+   "gruppe": "side"
+  },
+  {
+   "fil": "start-here.html",
+   "titel": "Start Here",
+   "original": "https://steamgears.eu/start-here/",
+   "gruppe": "side"
+  },
+  {
+   "fil": "right-of-withdrawal.html",
+   "titel": "Right of withdrawal",
+   "original": "https://steamgears.eu/right-of-withdrawal/",
+   "gruppe": "side"
+  },
+  {
+   "fil": "free-starter-kit.html",
+   "titel": "Free Steampunk Starter Kit (PDF)",
+   "original": "https://steamgears.eu/free-starter-kit/",
+   "gruppe": "side"
+  },
+  {
+   "fil": "free-steampunk-thrifting-hacks.html",
+   "titel": "Free Steampunk Thrifting Hacks (PDF)",
+   "original": "https://steamgears.eu/free-steampunk-thrifting-hacks/",
+   "gruppe": "side"
+  },
+  {
+   "fil": "steampunk-halloween.html",
+   "titel": "Steampunk Halloween: Costumes, DIY Ideas & Gear (2026)",
+   "original": "https://steamgears.eu/steampunk-halloween/",
+   "gruppe": "side"
+  },
+  {
+   "fil": "size-guide.html",
+   "titel": "Size Guide",
+   "original": "https://steamgears.eu/size-guide/",
+   "gruppe": "side"
+  },
+  {
+   "fil": "cookie-policy.html",
+   "titel": "Cookie Policy",
+   "original": "https://steamgears.eu/cookie-policy/",
+   "gruppe": "side"
+  },
+  {
+   "fil": "delivery.html",
+   "titel": "Delivery & Shipping",
+   "original": "https://steamgears.eu/delivery/",
+   "gruppe": "side"
+  },
+  {
+   "fil": "terms.html",
+   "titel": "Terms of Sale",
+   "original": "https://steamgears.eu/terms/",
+   "gruppe": "side"
+  },
+  {
+   "fil": "faq.html",
+   "titel": "Frequently Asked Questions",
+   "original": "https://steamgears.eu/faq/",
+   "gruppe": "side"
+  },
+  {
+   "fil": "steampunk-costumes.html",
+   "titel": "Steampunk Costumes: DIY Guides, Ideas & Gear",
+   "original": "https://steamgears.eu/steampunk-costumes/",
+   "gruppe": "side"
+  },
+  {
+   "fil": "home.html",
+   "titel": "Steampunk Posters, Prints & Wall Art",
+   "original": "https://steamgears.eu/",
+   "gruppe": "side"
+  },
+  {
+   "fil": "refund-returns.html",
+   "titel": "Refund and Returns Policy",
+   "original": "https://steamgears.eu/refund_returns/",
+   "gruppe": "side"
+  },
+  {
+   "fil": "privacy-policy.html",
+   "titel": "Privacy Policy",
+   "original": "https://steamgears.eu/privacy-policy/",
+   "gruppe": "side"
+  },
+  {
+   "fil": "contact.html",
+   "titel": "Contact",
+   "original": "https://steamgears.eu/contact/",
+   "gruppe": "side"
+  },
+  {
+   "fil": "about.html",
+   "titel": "About Steamgears",
+   "original": "https://steamgears.eu/about/",
+   "gruppe": "side"
+  },
+  {
+   "fil": "steampunk-cosplay-gallery.html",
+   "titel": "Steampunk Cosplay Gallery",
+   "original": "https://steamgears.eu/steampunk-cosplay-gallery/",
+   "gruppe": "side"
+  },
+  {
+   "fil": "cart.html",
+   "titel": "Cart",
+   "original": "https://steamgears.eu/cart/",
+   "gruppe": "side"
+  },
+  {
+   "fil": "steampunk-home-decor.html",
+   "titel": "Steampunk Home Decor: How to Bring the Style Into Your Home",
+   "original": "https://steamgears.eu/steampunk-home-decor/",
+   "gruppe": "guide"
+  },
+  {
+   "fil": "gallery-wall-ideas.html",
+   "titel": "Gallery Wall Ideas: How to Plan and Hang a Poster Wall",
+   "original": "https://steamgears.eu/gallery-wall-ideas/",
+   "gruppe": "guide"
+  },
+  {
+   "fil": "poster-sizes-guide.html",
+   "titel": "Poster Sizes Explained: 30×40, 50×70 or 70×100 cm?",
+   "original": "https://steamgears.eu/poster-sizes-guide/",
+   "gruppe": "guide"
+  },
+  {
+   "fil": "steampunk-mad-scientist-costume.html",
+   "titel": "Steampunk Mad Scientist Costume: 10 Inventor Ideas to Build",
+   "original": "https://steamgears.eu/steampunk-mad-scientist-costume/",
+   "gruppe": "guide"
+  },
+  {
+   "fil": "steampunk-utility-belt.html",
+   "titel": "Steampunk Utility Belt: Build a Rig with Holsters & Pouches",
+   "original": "https://steamgears.eu/steampunk-utility-belt/",
+   "gruppe": "guide"
+  },
+  {
+   "fil": "steampunk-wall-decor-diy.html",
+   "titel": "DIY Steampunk Wall Decor: Gear Clocks and Copper Pipe Shelves",
+   "original": "https://steamgears.eu/steampunk-wall-decor-diy/",
+   "gruppe": "guide"
+  },
+  {
+   "fil": "steampunk-corset-guide.html",
+   "titel": "Steampunk Corset Guide: Underbust vs Overbust, Fit & Styling",
+   "original": "https://steamgears.eu/steampunk-corset-guide/",
+   "gruppe": "guide"
+  },
+  {
+   "fil": "steampunk-couple-costumes.html",
+   "titel": "Steampunk Couple Costumes: 10 Pairs Ready to Buy (2026)",
+   "original": "https://steamgears.eu/steampunk-couple-costumes/",
+   "gruppe": "guide"
+  },
+  {
+   "fil": "steampunk-outfit-ideas-men.html",
+   "titel": "Steampunk Outfit Ideas for Men: 12 Complete Looks (2026)",
+   "original": "https://steamgears.eu/steampunk-outfit-ideas-men/",
+   "gruppe": "guide"
+  },
+  {
+   "fil": "what-is-dieselpunk.html",
+   "titel": "What Is Dieselpunk? A Guide to the Diesel & Deco Aesthetic",
+   "original": "https://steamgears.eu/what-is-dieselpunk/",
+   "gruppe": "guide"
+  },
+  {
+   "fil": "best-steampunk-books.html",
+   "titel": "The Best Steampunk Books: A Reading Guide for Every Kind of Reader",
+   "original": "https://steamgears.eu/best-steampunk-books/",
+   "gruppe": "guide"
+  },
+  {
+   "fil": "what-is-gaslamp-fantasy.html",
+   "titel": "What Is Gaslamp Fantasy? Victorian Magic, Explained",
+   "original": "https://steamgears.eu/what-is-gaslamp-fantasy/",
+   "gruppe": "guide"
+  },
+  {
+   "fil": "the-last-flight-of-the-meridian-short-story.html",
+   "titel": "The Last Flight of the Meridian: A Dieselpunk Short Story",
+   "original": "https://steamgears.eu/the-last-flight-of-the-meridian-short-story/",
+   "gruppe": "guide"
+  },
+  {
+   "fil": "the-clockwork-seer-short-story.html",
+   "titel": "The Clockwork Seer: A Steampunk Short Story",
+   "original": "https://steamgears.eu/the-clockwork-seer-short-story/",
+   "gruppe": "guide"
+  },
+  {
+   "fil": "the-clockwork-herbarium-short-story.html",
+   "titel": "The Clockwork Herbarium: A Short Story",
+   "original": "https://steamgears.eu/the-clockwork-herbarium-short-story/",
+   "gruppe": "guide"
+  },
+  {
+   "fil": "steampunk-halloween-costume-men.html",
+   "titel": "Steampunk Halloween Costumes for Men: 10 Last-Minute Looks (2026)",
+   "original": "https://steamgears.eu/steampunk-halloween-costume-men/",
+   "gruppe": "guide"
+  },
+  {
+   "fil": "steampunk-costume-for-women.html",
+   "titel": "Steampunk Costume for Women: Complete Look Guide (2026)",
+   "original": "https://steamgears.eu/steampunk-costume-for-women/",
+   "gruppe": "guide"
+  },
+  {
+   "fil": "dieselpunk-costume.html",
+   "titel": "How to Build a Dieselpunk Costume: The Complete DIY Guide (2026)",
+   "original": "https://steamgears.eu/dieselpunk-costume/",
+   "gruppe": "guide"
+  },
+  {
+   "fil": "sustainable-steampunk.html",
+   "titel": "Sustainable Steampunk: Thrift and Upcycle Your Costume",
+   "original": "https://steamgears.eu/sustainable-steampunk/",
+   "gruppe": "guide"
+  },
+  {
+   "fil": "3d-print-steampunk-parts.html",
+   "titel": "3D-Print Steampunk Parts: Gears, Goggle Frames and Props for Beginners",
+   "original": "https://steamgears.eu/3d-print-steampunk-parts/",
+   "gruppe": "guide"
+  },
+  {
+   "fil": "steampunk-gift-guide-2026.html",
+   "titel": "Steampunk Gift Guide 2026: Gifts for Every Kind of Steampunk Fan",
+   "original": "https://steamgears.eu/steampunk-gift-guide-2026/",
+   "gruppe": "guide"
+  },
+  {
+   "fil": "closet-steampunk-outfits.html",
+   "titel": "Closet Steampunk: Steampunk Accessories You Can Wear to Work",
+   "original": "https://steamgears.eu/closet-steampunk-outfits/",
+   "gruppe": "guide"
+  },
+  {
+   "fil": "steampunk-vs-dieselpunk.html",
+   "titel": "Steampunk vs. Dieselpunk: How to Pick Your Look (2026 Guide)",
+   "original": "https://steamgears.eu/steampunk-vs-dieselpunk/",
+   "gruppe": "guide"
+  },
+  {
+   "fil": "steampunk-halloween-costume-women.html",
+   "titel": "Steampunk Halloween Costumes for Women: 12 Last-Minute Looks",
+   "original": "https://steamgears.eu/steampunk-halloween-costume-women/",
+   "gruppe": "guide"
+  },
+  {
+   "fil": "how-to-build-a-steampunk-costume-for-under-100-complete-2027-workshop-plan.html",
+   "titel": "How to Build a Steampunk Costume for Under $100 (Complete 2027 Workshop Plan)",
+   "original": "https://steamgears.eu/how-to-build-a-steampunk-costume-for-under-100-complete-2027-workshop-plan/",
+   "gruppe": "guide"
+  },
+  {
+   "fil": "pirate-cosplay-for-beginners.html",
+   "titel": "Pirate Cosplay for Beginners: Build a Steampunk Pirate Look",
+   "original": "https://steamgears.eu/pirate-cosplay-for-beginners/",
+   "gruppe": "guide"
+  },
+  {
+   "fil": "steampunk-outfit-ideas-for-women.html",
+   "titel": "Steampunk Outfit Ideas for Women: 12 Complete Looks (With Prices)",
+   "original": "https://steamgears.eu/steampunk-outfit-ideas-for-women/",
+   "gruppe": "guide"
+  },
+  {
+   "fil": "casual-steampunk-outfits.html",
+   "titel": "Casual Steampunk Outfits: Wear the Look Every Day",
+   "original": "https://steamgears.eu/casual-steampunk-outfits/",
+   "gruppe": "guide"
+  },
+  {
+   "fil": "diy-vs-buy-steampunk-goggles.html",
+   "titel": "DIY vs. Buy: Steampunk Goggles Compared (2026)",
+   "original": "https://steamgears.eu/diy-vs-buy-steampunk-goggles/",
+   "gruppe": "guide"
+  },
+  {
+   "fil": "curiosities-vol-3-live.html",
+   "titel": "Curiosities Vol. 3 Is Live — 8 New Clockwork Tees",
+   "original": "https://steamgears.eu/curiosities-vol-3-live/",
+   "gruppe": "guide"
+  },
+  {
+   "fil": "steampunk-accessories.html",
+   "titel": "Steampunk Accessories: 25+ Must-Have Pieces (DIY + Where to Find Them)",
+   "original": "https://steamgears.eu/steampunk-accessories/",
+   "gruppe": "guide"
+  },
+  {
+   "fil": "steampunk-cosplay-on-a-budget.html",
+   "titel": "Steampunk Cosplay on a Budget: The $40 Full Outfit Formula",
+   "original": "https://steamgears.eu/steampunk-cosplay-on-a-budget/",
+   "gruppe": "guide"
+  },
+  {
+   "fil": "steampunk-costume-ideas.html",
+   "titel": "30+ Steampunk Costume Ideas: Airship Captains, Inventors & Explorers",
+   "original": "https://steamgears.eu/steampunk-costume-ideas/",
+   "gruppe": "guide"
+  },
+  {
+   "fil": "steampunk-cosplay-for-beginners.html",
+   "titel": "Steampunk Cosplay for Beginners: Your First Outfit, Explained",
+   "original": "https://steamgears.eu/steampunk-cosplay-for-beginners/",
+   "gruppe": "guide"
+  },
+  {
+   "fil": "diy-steampunk-goggles.html",
+   "titel": "DIY Steampunk Goggles: Build Your Own in 30 Minutes",
+   "original": "https://steamgears.eu/diy-steampunk-goggles/",
+   "gruppe": "guide"
+  },
+  {
+   "fil": "how-to-make-a-steampunk-costume.html",
+   "titel": "How to Make a Steampunk Costume in a Weekend (2026)",
+   "original": "https://steamgears.eu/how-to-make-a-steampunk-costume/",
+   "gruppe": "guide"
+  }
+ ]
+}
