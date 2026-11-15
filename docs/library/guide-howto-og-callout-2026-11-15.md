@@ -3,7 +3,7 @@
 **Kort:** Syv DIY-guider har nu **præcis ét** HowTo-JSON-LD, der er udledt af guidens egne synlige
 trin (5–18 trin pr. guide), og **alle otte** har en fast produkt-callout med levende DKK-priser fra
 WooCommerce. Begge dele er målt i den leverede HTML på live-siderne, valideret i schema.orgs validator
-(**0 fejl**) og set i browser ved 1440 og 390 px. **Butikken kører kun plakater** (ejerbeslutning 15/11), så callouten viser de tre publicerede prints, og de 92 links i indholdet der pegede på kladde-produkter er afkoblet.
+(**0 fejl**) og set i browser ved 1440 og 390 px. **Butikken kører kun plakater** (ejerbeslutning 15/11), så callouten viser de tre publicerede prints, og de 94 links i indholdet der pegede på kladde-produkter er afkoblet.
 
 Alt er bygget som én mu-plugin, `mu-plugins/sgap-guide-enhance.php` (11 194 bytes, version 1.0.0), lagt på
 sitet over MCP og committet i repoet.
@@ -73,7 +73,7 @@ publicerede prints (se §6b), og linkene til kladserne er afkoblet i indholdet.
 
 **Det ældre fund, som det også løste:** guidens egne `/go/`-links pegede på de samme kladder og endte i
 **404** (`/go/477/` → `?post_type=product&p=477` → 404, målt på alle fire). Det var 14 forekomster i de
-syv guides og **92 i alt i 16 publicerede indlæg og sider**. Alle er nu afkoblet — anchor-teksten står
+syv guides og **94 i alt i 17 publicerede indlæg og sider**. Alle er nu afkoblet — anchor-teksten står
 tilbage som ren tekst — og målingen efter viser **0 døde `/go/`-mål** på sitet.
 
 ## 4. Fælder der kostede en runde
@@ -100,7 +100,7 @@ tilbage som ren tekst — og målingen efter viser **0 døde `/go/`-mål** på s
 | schema.org-validator | 0 fejl, 0 property-fejl, øvrige typer urørte |
 | Callout-links | 3/3 plakater svarer 200 på alle otte guides |
 | Browser 1440 px og 390 px | 0 overflow, 0 JS-fejl, grid 3 → 2 kolonner |
-| `/go/`-mål i publicerede indlæg og sider | 0 døde (92 links afkoblet) |
+| `/go/`-mål i publicerede indlæg og sider | 0 døde (94 links afkoblet) |
 | Forside, shop, produkt, kurv, kasse | 200 |
 
 ## 6. Hvad der stadig er åbent
@@ -121,11 +121,11 @@ Efter målingen svarede ejeren: **»vi kører kun posters«**. Det ændrede to t
 | --- | --- | --- |
 | Callouten peger nu kun på de tre publicerede plakater (965, 966, 967) | alle otte guides, også 10, 614 og 1394 | 8/8 guides har én callout med samme titel (»Prints from this world«), samme placering og levende DKK-priser |
 | Introduktionen lover ikke længere tøj eller gear | én sætning i pluginnet | »The shop runs on prints. These three share the palette this guide is built around …« |
-| Links til kladde-produkter er afkoblet i indholdet | **92 links i 16 indlæg/sider** (1214, 14, 17, 30, 699, 751, 791, 798, 803, 805, 806, 875, 913, 891, 897, 898) | Anchor-teksten står tilbage som ren tekst; ingen 404 fra et produktlink |
+| Links til kladde-produkter er afkoblet i indholdet | **94 links i 17 indlæg/sider** (8, 1214, 14, 17, 30, 699, 751, 791, 798, 803, 805, 806, 875, 913, 891, 897, 898) | Anchor-teksten står tilbage som ren tekst; ingen 404 fra et produktlink |
 | De fire kladde-produkter (477, 483, 489, 491) forbliver kladder | 0 publicerede goggles/corsets | Ingen vare blev publiceret for at redde et link |
 
-**Målt efter:** **0 døde `/go/`-mål** i alle publicerede indlæg og sider (var 92 forekomster fordelt på 16
-poster, deriblandt de 14 i de syv guides). De resterende `/go/`-mål peger på publicerede varer: 940 (5),
+**Målt efter:** **0 døde `/go/`-mål** i alle publicerede indlæg og sider (var 94 forekomster fordelt på 17
+poster, deriblandt de 16 i de syv guides). De resterende `/go/`-mål peger på publicerede varer: 940 (5),
 941 (3), 954 (4), 557 (8), 1255 (3), 1282 (1), 399 (7), 401 (1), 413 (4), 970 (1), 965 (3), 966 (6), 967 (8).
 
 **Stadig åbent, med vilje:** butikken har fortsat **11 publicerede produkter der ikke er plakater** —
