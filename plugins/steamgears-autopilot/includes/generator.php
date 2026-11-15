@@ -197,11 +197,15 @@ class SGAP_AI {
         . 'never cheesy or pushy. Write in English. Never invent prices, discounts, stock levels or facts that are '
         . 'not in the source. Never put a URL in the text: the link is attached separately.';
 
+    /** 7.87.0: most hashtags kept per channel, matching CHANNEL_RULES (the AI editor scores stuffing down). */
+    const TAG_CAP = ['facebook' => 3, 'instagram' => 5, 'pinterest' => 4, 'linkedin' => 3, 'twitter' => 2,
+        'threads' => 2, 'bluesky' => 2, 'mastodon' => 4, 'telegram' => 0, 'google' => 0];
+
     /** Per-channel guidance appended to the prompt. */
     const CHANNEL_RULES = [
         'facebook' => '1-3 short paragraphs, conversational, end with a question or call to action. 0-3 hashtags.',
-        'instagram' => 'Hook in the first line, 2-4 short lines, emojis welcome. Say "link in bio". 8-15 relevant hashtags.',
-        'pinterest' => 'Title max 100 characters with the main keyword first. Description 2-3 keyword-rich sentences, max 450 characters. 3-6 hashtags.',
+        'instagram' => 'Hook in the first line, 2-4 short lines, emojis welcome. Say "link in bio". 3-5 specific hashtags, no generic filler tags.',
+        'pinterest' => 'Title max 100 characters with the main keyword first. Description 2-3 natural sentences that use the main keyword once, max 450 characters. 2-4 hashtags.',
         'linkedin' => 'Professional but warm, 2-4 short paragraphs, focus on craft and creativity. 0-3 hashtags.',
         'twitter' => 'Max 230 characters including hashtags. One punchy sentence plus 1-2 hashtags.',
         'threads' => 'Max 400 characters, casual. 0-2 hashtags.',
@@ -254,6 +258,7 @@ class SGAP_AI {
             . ($goal !== '' ? "Campaign goal (shapes the angle; do not state it as a new fact or promise anything the page does not say): {$goal}\n" : '')
             . "\n"
             . "Channels and their rules:\n{$rules}\n"
+            . "Give every channel its own opening line and angle: never start two channels with the same sentence or idea.\n"
             . 'Return exactly one item per channel. "title" is a short headline (used as the Pinterest pin title), '
             . '"text" is the post itself without hashtags, "hashtags" are separate (each starting with #), '
             . '"alt_text" describes the page\'s main image for screen readers.'
@@ -275,15 +280,20 @@ class SGAP_AI {
             if (!in_array($channel, $channels, true) || isset($posts[$channel]) || trim((string) ($post['text'] ?? '')) === '') {
                 continue;
             }
-            $hashtags = array_filter(array_map(
+            $hashtags = array_values(array_unique(array_filter(array_map(
                 fn($tag) => '#' . ltrim(preg_replace('/\s+/', '', (string) $tag), '#'),
                 (array) ($post['hashtags'] ?? [])
-            ), fn($tag) => $tag !== '#');
+            ), fn($tag) => $tag !== '#')));
+            // 7.87.0: the AI editor rejected every Instagram post with 15 tags as "hashtag
+            // stuffing" (measured 14/11), so the cap holds even when a model ignores the rule.
+            if (isset(self::TAG_CAP[$channel])) {
+                $hashtags = array_slice($hashtags, 0, self::TAG_CAP[$channel]);
+            }
             $posts[$channel] = [
                 'channel' => $channel,
                 'title' => sanitize_text_field((string) ($post['title'] ?? '')),
                 'text' => sanitize_textarea_field((string) $post['text']),
-                'hashtags' => implode(' ', array_unique($hashtags)),
+                'hashtags' => implode(' ', $hashtags),
                 'alt_text' => sanitize_text_field((string) ($post['alt_text'] ?? ''))
             ];
         }

@@ -19,7 +19,8 @@ class SGAP_Editor {
      * Free text models, in order; OpenRouter walks the list itself when one is busy. OpenRouter
      * refuses more than 3 (measured live 12/11: "'models' array must have 3 items or fewer").
      */
-    const MODELS = ['nvidia/nemotron-3-ultra-550b-a55b:free', 'nvidia/nemotron-3.5-super-vl:free', 'openrouter/free'];
+    // 7.87.0: Super first. Ultra did not answer within 52 s on 14/11, while Super answered in about 20 s.
+    const MODELS = ['nvidia/nemotron-3.5-super-vl:free', 'nvidia/nemotron-3-ultra-550b-a55b:free', 'openrouter/free'];
     const MAX_MODELS = 3;
     /** 7.86.0: held drafts are asked again on the hourly job for this many days, then they wait for a person. */
     const RETRY_DAYS = 3;

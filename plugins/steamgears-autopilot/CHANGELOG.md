@@ -10,6 +10,27 @@ Noterne er skrevet ud fra commit-historikken og de dokumenter der hører til hve
 
 <!-- patch-notes: baseline 7.65.0 -->
 
+## 7.87.0 — 2026-11-15
+
+**Ændret: færre hashtags, en egen åbning pr. kanal og den hurtigste gratis model først hos AI-redaktøren.**
+
+### Ændret
+- Instagram beder om 3-5 konkrete hashtags (før 8-15) og Pinterest om 2-4 (før 3-6), og Pinterest-teksten
+  bruger hovedsøgeordet én gang i stedet for at være "keyword-rich".
+- Prompten kræver en egen åbningslinje og vinkel pr. kanal.
+- `SGAP_AI::parse_posts()` håndhæver loftet (`TAG_CAP`), også når en model ignorerer reglen. Dubletter
+  fjernes før loftet, og Telegram og Google får ingen hashtags.
+- AI-redaktøren spørger Nemotron Super før Nemotron Ultra. Ultra er stadig på listen.
+
+### Målt
+- Live 14/11: genbedømmelsen (7.86.0) afviste 3 af 6 opslag, alle for hashtag-stuffing (15 tags på Instagram)
+  og/eller samme åbning på alle kanaler. Nemotron Ultra svarede ikke inden for 52 s, mens Super svarede på
+  ca. 20 s.
+- `plugins/tests/smoke.php`: 1 584 PASS / 0 FAIL (3 nye `7.87`-checks).
+
+### Ikke målt
+- Om de nye regler giver højere redaktørscorer på sitet. Det viser de næste kørsler.
+
 ## 7.86.0 — 2026-11-14
 
 **Tilføjet: opslag, som AI-redaktøren ikke nåede at bedømme, bliver spurgt igen hver time i stedet for at vente på et menneske.**
