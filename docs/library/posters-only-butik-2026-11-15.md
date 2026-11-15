@@ -79,7 +79,7 @@ Tre små mu-plugins bærer de strukturelle rettelser:
 - `mu-plugins/sgap-shop-h1.php` — butikkens H1 kom fra denne fil, ikke fra sidens titel; teksten er
   skiftet til »Shop Steampunk Posters & Prints« (1.1.0), og filen er nu også i repoet.
 
-## 4. Verifikation (kørt 15/11)
+## 4. Verifikation (kørt 15/11, browser målt efter H1-ændringen på den leverede HTML)
 
 | Check | Resultat |
 | --- | --- |
@@ -91,9 +91,11 @@ Tre små mu-plugins bærer de strukturelle rettelser:
 | Sitemap | 3 produkter + 6 kategorier; ingen kladder |
 | Kurv | plakat lagt i kurv via `?add-to-cart=965`, kurven viser Clockwork Rose |
 | Kasse | 200 med 7 betalingsfelter, 395 kr. i alt |
-| Browser 1440 px | forside, shop, produkt, kurv, kasse: **0 overflow**, 3 produkter i shop |
-| Browser 390 px | samme fem sider: **0 overflow**, 2 kolonner i shop |
-| JS-fejl | ingen fra sitets egen kode; kun tredjepart (GA/GTM, Stripe payment-request, CSP-report om Google-frame) |
+| Browser 1440 px | forside, shop, produkt (965), kurv, kasse: alle **200**; `documentElement.scrollWidth` = **1430** mod `clientWidth` **1430** (viewport 1440, 10 px scrollbar); **0** elementer uden for viewport; **0 JS-fejl** |
+| Browser 390 px | samme fem sider: alle **200**; `scrollWidth` = **380** mod `clientWidth` **380** (viewport 390); **0 overflow**; **0 JS-fejl**. Pinterest-pluginets »(opens in a new window)«-spans ligger i `.screen-reader-text` (`overflow:hidden`) og påvirker ikke bredden |
+| Browser, alle 10 kombinationer | **10 af 10** med `scrollWidth <= clientWidth` = **0 vandret overflow** |
+| JS-fejl | **0 fra sitets egen kode**; kun én tredjeparts-advarsel på kassen ved 1440 px (Stripe/Google Pay: manifestikonet fra `pay.google.com` kunne ikke hentes). Ingen ved 390 px |
+| Kurv → kasse i browser | klik på den synlige »Proceed to Checkout« → `/checkout/`, 1 plakat, **395,00 kr.**, **7** betalingsfelter og »Place Order«-knap |
 | Forside: `<title>` + H1 | »Steampunk Posters, Prints & Wall Art«, 0 forekomster af »Apparel« i synlig tekst |
 | `/shop/`: `<title>` + H1 | »Steampunk Shop: Posters & Prints« / »Shop Steampunk Posters & Prints« |
 | `og:title` + `twitter:title` (forside og shop) | prints-only, ingen »Apparel«/»Tees & Hoodies« |
