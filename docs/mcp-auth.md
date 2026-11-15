@@ -6,7 +6,7 @@ lokal stdio-server uden credential. Tre af HTTP-serverne kræver en credential i
 | Server | Endpoint | Auth i `.mcp.json` | Credential |
 | --- | --- | --- | --- |
 | `steamgears` | `https://steamgears.eu/wp-json/mcp/v1/http` | `Bearer ${MCP_ACCESS_TOKEN}` | OAuth-token fra `tools/mcp_oauth.py` (ligger uden for repoet) |
-| `brygguiden` | `https://brygguiden.dk/wp-json/mcp/novamira` | `Bearer ${BRYGGUIDEN_MCP_TOKEN}` | Eget token fra brygguiden.dk — ikke `MCP_ACCESS_TOKEN`. Ruten er MCP Adapterens server-id og svarer `401` uden token (målt 15/11 2026). Lever 3600 s, og sitet har ingen keepalive endnu, så tokenet skal fornyes manuelt |
+| `brygguiden` | `https://brygguiden.dk/wp-json/mcp/novamira` | `Bearer ${BRYGGUIDEN_MCP_TOKEN}` | Eget token fra brygguiden.dk — ikke `MCP_ACCESS_TOKEN`. Ruten er MCP Adapterens server-id og svarer `401` uden token (målt 15/11 2026). Lever 3600 s — fornyelsen er ikke sat op for dette site, se `brygguiden`-afsnittet |
 | `publer` | `https://mcp.publer.com/` | `Bearer ${PUBLER_API_KEY}` | Publer MCP API key (Business/Enterprise) |
 | `steamgears-profil` | `tools/mcp_project_profile.py` (stdio) | ingen | ingen — læser kun repoet |
 | `simplycom` | `https://mcp.simply.com/v2` | ingen | OAuth i klienten — arver brugerens rettigheder og tilbagekaldes under *Connected apps* |
@@ -325,6 +325,66 @@ python3 tools/live_state.py                 # lokalt: kræver token i ~/.config/
 python3 tools/live_state.py --out /tmp/x    # skriv et andet sted
 python3 tools/test_live_state.py            # 14 offline-fixtures, ingen token
 ```
+
+## brygguiden.dk (`brygguiden`) — de samme flader på et andet site (målt 15/11 2026)
+
+Brygguiden kører **Novamira 1.12.15** på WordPress **7.1.4**, og har derfor de samme flader som steamgears.
+Forskellen der koster en runde er, at de to ruter svarer med **hver sin** 401:
+
+| Rute | Svar uden token | Hvad det betyder |
+| --- | --- | --- |
+| `/wp-json/mcp/novamira-oauth` | `401 rest_oauth_required` | **Novamira-fladen.** OAuth 2.1, kun scope `full_access`, `bearer_methods_supported: ["header"]` |
+| `/wp-json/mcp/novamira` | `401 rest_forbidden` | MCP Adapterens server-id-rute. Almindelig WordPress-REST-beskyttelse — ikke `rest_oauth_required`, og ingen `WWW-Authenticate` i svaret |
+| `/wp-json/mcp/v1/http` | `401 rest_forbidden` | AI Engine-fladen er også installeret (`/mwai/v1` svarer med 89 ruter) |
+| `/wp-json/mcp/mcp-adapter-default-server` | `401 rest_forbidden` | WordPress' egen MCP Adapter |
+| `/wp-json/mcp/zzz-findes-ikke` | `404 rest_no_route` | kontrolmåling: en 401 på de andre ruter er et rigtigt svar, ikke en fælde |
+
+Ruterne under `/wp-json/mcp` er præcis fire, læst fra indekset: `/mcp`, `/mcp/novamira`,
+`/mcp/mcp-adapter-default-server` og `/mcp/novamira-oauth`.
+
+**De to 401'ere betyder ikke det samme.** `rest_oauth_required` lover at et OAuth-token virker;
+`rest_forbidden` gør ikke. `.mcp.json` peger på adapter-ruten med `Authorization: Bearer
+${BRYGGUIDEN_MCP_TOKEN}`, og adapterens credential-vej er WordPress' egen REST-auth, ikke Novamira-tokenet
+(se kildesporet nedenfor). Får Bearer `401` her, er det derfor ikke bevis for at tokenet er forkert — prøv
+Novamira-fladen i stedet.
+
+### Authorization server (målt 15/11 2026)
+
+| | |
+| --- | --- |
+| Resource | `https://brygguiden.dk/wp-json/mcp/novamira-oauth` |
+| Issuer | `https://brygguiden.dk` |
+| Authorize | `https://brygguiden.dk/wp-admin/admin.php?page=novamira-oauth-authorize` |
+| Token / register / revoke / introspect / device | `/wp-json/novamira/v1/oauth/` |
+| Grant types | `authorization_code`, `refresh_token`, `device_code` |
+| PKCE | `S256` |
+| Scope | kun `full_access` |
+
+`GET` på `…/oauth/token` svarer `404 rest_no_route` — token-kaldet er et `POST`, så det er ikke et tegn på fejl.
+`novamira`-afsnittet ovenfor gælder også her: DCR giver ikke device-grant, token-endepunkterne kræver
+form-encoding, og `tools/list` kræver `Mcp-Session-Id` fra `initialize`.
+
+```bash
+export MCP_CONFIG_DIR="$HOME/.config/brygguiden-mcp/novamira"
+export MCP_RESOURCE="https://brygguiden.dk/wp-json/mcp/novamira-oauth"
+export MCP_SCOPE=full_access
+export MCP_REST_URL="$MCP_RESOURCE"
+python3 tools/mcp_oauth.py --start          # link til ejerens browser
+python3 tools/mcp_oauth.py --finish '<hele callback-adressen>'
+python3 tools/mcp_rest.py --check
+```
+
+### Token-levetid og fornyelse
+
+Access-tokenet lever **3600 s**, og refresh-tokenet **roteres** ved hver fornyelse. Det er målt på steamgears
+6/11; brygguiden kører 1.12.15 mod steamgears' 1.12.14, så levetiden er **ikke** målt på dette site — behandl
+den som den samme, indtil den er målt.
+
+Det der ikke er på plads er CI-delen: [`novamira-keepalive.yml`](../.github/workflows/novamira-keepalive.yml)
+er hardcodet til steamgears' endepunkter og secrets, og der findes ingen tilsvarende kørsel for brygguiden.
+Sitets eget `/wp-json/sgap/v1` svarer med 11 ruter, så Autopilot-pluginnet — og dermed den fornyelse der siden
+7.44 ligger i pluginnet — er installeret her; om cron-hooket `sgap_mcp_refresh` faktisk kører på dette site er
+**ikke** verificeret. Indtil det er målt, skal tokenet betragtes som manuelt.
 
 ## Kildesporet: hvad AI Engine og adapteren kan kalde (læst 2/11 2026)
 
