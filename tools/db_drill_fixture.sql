@@ -16,6 +16,7 @@
 
 SET NAMES utf8mb4;
 
+DROP TABLE IF EXISTS fx7c1a9b2e_seq;
 DROP TABLE IF EXISTS fx7c1a9b2e_postmeta;
 DROP TABLE IF EXISTS fx7c1a9b2e_posts;
 DROP TABLE IF EXISTS fx7c1a9b2e_options;
@@ -23,9 +24,12 @@ DROP TABLE IF EXISTS fx7c1a9b2e_users;
 DROP VIEW IF EXISTS fx7c1a9b2e_recent;
 DROP TABLE IF EXISTS clk4219fc96b5_options;
 
--- Hjælpetabel til at generere rækker; midlertidig, så den aldrig kommer i et dump.
-CREATE TEMPORARY TABLE seq (n INT PRIMARY KEY);
-INSERT INTO seq (n) VALUES (0),(1),(2),(3),(4),(5),(6),(7),(8),(9);
+-- Hjælpetabel til at generere rækker. Den kan ikke være TEMPORARY: MySQL svarer
+-- »Can't reopen table: 'a'« (ERROR 1137) når den samme midlertidige tabel bruges to gange
+-- i ét krydsprodukt. Den oprettes derfor som en rigtig tabel og droppes igen til sidst, så
+-- den hverken tælles med i pariteten eller kommer i et dump.
+CREATE TABLE fx7c1a9b2e_seq (n INT PRIMARY KEY);
+INSERT INTO fx7c1a9b2e_seq (n) VALUES (0),(1),(2),(3),(4),(5),(6),(7),(8),(9);
 
 CREATE TABLE fx7c1a9b2e_options (
   option_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -72,7 +76,7 @@ INSERT INTO fx7c1a9b2e_posts (post_title, post_content, post_status)
 SELECT CONCAT('Guide ', n, ' — steampunk i æøå'),
        CONCAT(REPEAT('Indhold med æøå, emoji 🎩 og en reference til fx7c1a9b2e_posts. ', 12), n),
        IF(n % 7 = 0, 'draft', 'publish')
-FROM (SELECT a.n + 10 * b.n + 100 * c.n + 1 AS n FROM seq a, seq b, seq c ORDER BY 1 LIMIT 500) AS tal;
+FROM (SELECT a.n + 10 * b.n + 100 * c.n + 1 AS n FROM fx7c1a9b2e_seq a, fx7c1a9b2e_seq b, fx7c1a9b2e_seq c ORDER BY 1 LIMIT 500) AS tal;
 
 CREATE TABLE fx7c1a9b2e_postmeta (
   meta_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -85,7 +89,7 @@ CREATE TABLE fx7c1a9b2e_postmeta (
 
 INSERT INTO fx7c1a9b2e_postmeta (post_id, meta_key, meta_value)
 SELECT 1 + (n % 500), CONCAT('_sgap_key_', n % 37), REPEAT('værdi 🎩 ', 4)
-FROM (SELECT a.n + 10 * b.n + 100 * c.n + 1000 * d.n + 1 AS n FROM seq a, seq b, seq c, seq d ORDER BY 1 LIMIT 3000) AS tal;
+FROM (SELECT a.n + 10 * b.n + 100 * c.n + 1000 * d.n + 1 AS n FROM fx7c1a9b2e_seq a, fx7c1a9b2e_seq b, fx7c1a9b2e_seq c, fx7c1a9b2e_seq d ORDER BY 1 LIMIT 3000) AS tal;
 
 CREATE TABLE fx7c1a9b2e_users (
   ID BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -127,4 +131,4 @@ INSERT INTO clk4219fc96b5_options (option_name, option_value) VALUES
   ('blogname', 'Forældet installation'),
   ('active_plugins', 'a:0:{}');
 
-DROP TEMPORARY TABLE seq;
+DROP TABLE fx7c1a9b2e_seq;
