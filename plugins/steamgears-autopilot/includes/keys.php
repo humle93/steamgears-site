@@ -2,7 +2,7 @@
 /**
  * The one place keys are pasted.
  *
- * Every secret the plugin uses — the OpenRouter key, Publer, Printful, SerpApi, Bluesky,
+ * Every secret the plugin uses — the OpenRouter key, Publer, SerpApi, Bluesky,
  * Mastodon, Telegram, the merchant feed and the MCP token — lives on this single screen, one
  * card per service. Nothing else in the plugin renders a key field, so the owner never has to
  * guess which tab a credential was on.
@@ -27,8 +27,6 @@ class SGAP_Keys {
         'ai_api_key' => ['sgap_ai_catalog_openrouter'],
         'publer_api_key' => ['sgap_publer_accounts'],
         'publer_workspace_id' => ['sgap_publer_accounts'],
-        'printful_api_key' => ['sgap_printful_costs'],
-        'printful_store_id' => ['sgap_printful_costs'],
         'bluesky_app_password' => ['sgap_bluesky_session']
     ];
     /** Keys written earlier in this request, so the settings hook cannot log the same write twice. */
@@ -62,19 +60,6 @@ class SGAP_Keys {
             'links' => [['Publer', 'https://app.publer.com/']],
             'hint' => 'Publer → Settings → API. Needs Publer Business for direct posting.',
             'test' => 'publer'
-        ],
-        'printful' => [
-            'title' => 'Printful',
-            'icon' => 'cart',
-            'keys' => ['printful_api_key'],
-            'owner' => 'You — the Printful account that owns the store the shop syncs from.',
-            'why' => 'Reads the real cost price of a synced product, so a price can never be proposed below what the product costs you.',
-            'body' => 'Reads the synced variants so every product gets its real cost price, and the shop tools can work out a margin that cannot undercut it.',
-            'links' => [['Printful', 'https://www.printful.com/dashboard/settings/developers']],
-            'hint' => 'Printful → Settings → Developers → API tokens (scopes: View stores, View sync products). Leave the store id empty and it is filled in when the token is tested and belongs to one store.',
-            'extra' => ['printful_store_id'],
-            'test' => 'printful',
-            'optional' => true
         ],
         'search' => [
             'title' => 'SerpApi',
@@ -465,7 +450,6 @@ class SGAP_Keys {
             . '<span class="sgap-key-testout" id="sgap-test-keys-out">'
             . (isset($result['ai']['message']) ? esc_html('AI: ' . $result['ai']['message']) : '')
             . (isset($result['publer']['message']) ? ' ' . esc_html('Publer: ' . $result['publer']['message']) : '')
-            . (isset($result['printful']['message']) ? ' ' . esc_html('Printful: ' . $result['printful']['message']) : '')
             . '</span></div>';
         $cfg = ['ajax' => admin_url('admin-ajax.php'), 'nonce' => wp_create_nonce('sgap_setup')];
         // "Test connections" ligger i assets/pages/setup.js sammen med resten af siden.

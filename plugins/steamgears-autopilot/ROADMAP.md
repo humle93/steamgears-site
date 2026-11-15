@@ -34,6 +34,17 @@ and how long each missing piece takes.
 
 ## 0. Short version
 
+**P15 (7.88.0, 15/11 2026) — Printful ud, Gelato er printvejen, 0,6 d (plan 0,6 d).** Ejeren 15/11: »Printful er ude, ligesom Printify, vi kører kun Gelato«. Sitet og dokumenterne har sagt Gelato siden 13/11 (roadmap S4.7, agent-profilen), men pluginet havde stadig et Printful-nøglekort, en Printful-nøgletest, en kostpris-import fra Printfuls sync-varianter og Printful-tekster i nichebutikken. Nøgletesten bad derfor om et Printful-token, som ingen skal bruge. Gelato-forbindelsen sker i det officielle *Gelato Integration for WooCommerce* (v1.3.3, ikke forbundet endnu), så pluginet skal ikke have en egen Gelato-nøgle. Kostprisen kommer fra produktets eget felt `_sgap_cost`, som før, og aldrig fra et gæt.
+
+| Fil | Ændring | Andel |
+| --- | --- | --- |
+| `includes/mcp-woo.php` | Printful-kosten (`printful_cost`, sync-produkter, indeks, `woo-cost-import`) fjernet; kost = `_sgap_cost` alene, og fejlteksten peger på Gelato-kostprisen i feltet | 25 % |
+| `includes/keycheck.php`, `keys.php`, `core.php`, `setup.php`, `assets/pages/setup.js` | Printful-kort, -test, -felter, -hjælp og -etiketter fjernet; de gemte Printful-indstillinger og prischachen slettes ved opgradering | 25 % |
+| `includes/niche-shop.php`, `includes/mcp-tools.php` | produktion, fragt, størrelsesskema og ejertrin siger Gelato | 10 % |
+| `plugins/tests/smoke.php`, `mcp-woo.php`, `niche-shop.php`, `menu.php`, `integration.php` | Printful-forløb ud; checks for at nøglekort, test, ability og indstillinger er væk og at kosten kun læses fra feltet | 20 % |
+| `README.md`, `ROADMAP.md`, `CHANGELOG.md`, `tools/fejlscan.py`, `tools/deploy/niche_preflight.py`, `docs/plugin-opsaetning-2026-11-14.md` | Printful ud af beskrivelser og ejer-tjeklister | 15 % |
+| `plugins/steamgears-autopilot-v7.88.0.zip`, `projektstatus.json` | én zip der matcher kilden, P15-række | 5 % |
+
 **P12 (7.85.0, 13/11 2026) — kun OpenRouter, ingen billed-AI, ryddet admin-UI, 4,0 d (plan 4,0 d).** Ejeren bad om tre ting: fjern AIMLAPI, gør OpenRouter til den eneste udbyder, og ryd hele pluginets opsætning. Resultatet er ét AI-trin i guiden, ét nøglekort, én model-dropdown uden standardvalg og ingen billedgenerering: Instagram og Pinterest bruger sidens featured image. Reserve-udbyderen og gratis-model-forsøget er også væk, så en fejl rapporteres med OpenRouters egne ord i stedet for at blive forsøgt igen.
 
 | Fil | Ændring | Andel |
@@ -691,6 +702,7 @@ Platform limits: [Instagram content publishing](https://developers.facebook.com/
 
 ## 9. Change log for this document
 
+- **7.88.0 (15/11) — P15: Printful ud, Gelato er printvejen.** Printful-kortet, -nøgletesten, `printful_api_key`/`printful_store_id` og kostpris-importen (`woo-cost-import`) er fjernet, og opgraderingen sletter de gemte indstillinger. Kostprisen kommer kun fra `_sgap_cost` (fx Gelato-prisen). Nichebutikken siger Gelato. 1 563 PASS / 0 FAIL i smoke; nicherne er bygget igen og `--check` er ren. Ikke målt: Gelato-forbindelsen (ejerens Connect, S4.7).
 - **7.85.0 (13/11) — P12: kun OpenRouter, ingen AI-billedgenerering, ryddet admin-UI.** AIMLAPI, Anthropic, *Other OpenAI-compatible*, reserve-udbyderen og gratis-model-forsøget er fjernet. `SGAP_AI::provider()` svarer altid `openrouter`, adressen er fast, og der findes ingen standardmodel. Content Studio skriver tekst, og Instagram/Pinterest genbruger sidens featured image; `SGAP_Images`, `generate-image`, billednøgler/-modeller og `includes/openrouter.php` er væk. Fanen heder nu *Settings → AI*, nøglesiden har ét kort, og guiden ét AI-trin. 1 570 PASS / 0 FAIL i smoke; `cc-login`, `keys`, `automation`, `integration` og `admin-tools` er opdateret. Ikke målt: et rigtigt OpenRouter-kald og en kørsel mod WordPress.
 - **7.76.0 (11/11) — P10: OpenRouter som standard, billeder via OpenRouter og log ind i Command Center med ét klik.** OpenRouter er standardudbyder (kun når intet er gemt) og står først i guiden og på nøglesiden; AIMLAPI er markeret *udfases*, men et gemt AIMLAPI-valg virker stadig. Ny fil `includes/openrouter.php`: advarsel mens AIMLAPI er valgt, og *Switch to OpenRouter now*, når reservenøgle og -model findes. `SGAP_Images::backend()` laver billeder via OpenRouter (`modalities: image`, data-URL) når nøgle + `openrouter_image_model` findes, ellers AIMLAPI som før. `POST /sgap/v1/cc-link` gemmer Command Centers adresse og fælles nøgle (ikke autoload); knappen laver en HMAC-billet (60 s, `jti`) til `{cc}/cc-sso`. Fund: CC's gamle engangslink sendte til `POST /sgap/v1/login-link`, en rute der aldrig har fandtes. **45 nye checks (1 505 → 1 550 PASS, 0 FAIL)** i `plugins/tests/cc-login.php`. Ikke verificeret: et rigtigt OpenRouter-billedkald og et login mod den kørende Command Center.
 

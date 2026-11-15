@@ -46,12 +46,11 @@ kan slås op i `wp_options`, hvis noget skal verificeres:
 
 | | |
 | --- | --- |
-| Målt | sidste generering 7/11 fejlede med **»You've run out of funds«**; 40-45 kladder venter |
-| Handling | [aimlapi.com](https://aimlapi.com/) → Dashboard → **Billing**: fyld op. Nøglen ligger allerede i *Settings → Keys → AI text* (provider `aimlapi`) |
-| Verifikation | *Test the saved keys* på Keys-skærmen svarer OK, og `steamgears-autopilot/check-keys` giver ikke længere »no credit left«. Derefter kører `generate` igen |
+| Målt | sidste generering 7/11 fejlede med **»You've run out of funds«** (dengang AIMLAPI) |
+| Handling | Fra 7.85.0 er **OpenRouter** eneste AI-udbyder: [openrouter.ai](https://openrouter.ai/) → **Credits**: fyld op. Nøglen ligger i *Settings → Keys → OpenRouter* |
+| Verifikation | *Test connections* svarer OK, og `steamgears-autopilot/check-keys` giver ikke en kreditfejl. Derefter kører `generate` igen |
 
-Vil du hellere bruge Anthropic direkte: skift **AI provider** til `anthropic` og indsæt nøglen — men så kan
-pluginnet ikke lave billeder (det kræver AIMLAPI).
+**Rettet 15/11:** afsnittet nævnte AIMLAPI og billeder. Begge er fjernet i 7.85.0; Printful er fjernet i 7.88.0 (Gelato er printvejen).
 
 ## 5. Full auto — en beslutning, ikke en opsætning
 

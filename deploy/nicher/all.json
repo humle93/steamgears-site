@@ -454,9 +454,9 @@
           "step": "annoncekonto med betalingsmetode"
         },
         {
-          "id": "printful",
+          "id": "gelato",
           "owner": true,
-          "step": "Mockups og trykfiler pr. vare"
+          "step": "Gelato: forbind kontoen, mockups og trykfiler pr. vare"
         },
         {
           "id": "publish",
@@ -1042,9 +1042,9 @@
           "step": "annoncekonto med betalingsmetode"
         },
         {
-          "id": "printful",
+          "id": "gelato",
           "owner": true,
-          "step": "Mockups og trykfiler pr. vare"
+          "step": "Gelato: forbind kontoen, mockups og trykfiler pr. vare"
         },
         {
           "id": "publish",
@@ -1605,9 +1605,9 @@
           "step": "annoncekonto med betalingsmetode"
         },
         {
-          "id": "printful",
+          "id": "gelato",
           "owner": true,
-          "step": "Mockups og trykfiler pr. vare"
+          "step": "Gelato: forbind kontoen, mockups og trykfiler pr. vare"
         },
         {
           "id": "publish",
@@ -2155,9 +2155,9 @@
           "step": "annoncekonto med betalingsmetode"
         },
         {
-          "id": "printful",
+          "id": "gelato",
           "owner": true,
-          "step": "Mockups og trykfiler pr. vare"
+          "step": "Gelato: forbind kontoen, mockups og trykfiler pr. vare"
         },
         {
           "id": "publish",

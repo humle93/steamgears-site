@@ -1,6 +1,6 @@
 <?php
 /**
- * 7.60.0: sidemenuen er ryddet og Printful-forbindelsen kan testes. Required fra smoke.php.
+ * 7.60.0: sidemenuen er ryddet (7.88.0: Printful er fjernet). Required fra smoke.php.
  */
 
 // 1. Menuen: fast rækkefølge, grupper, "More" og intet tabt.
@@ -21,24 +21,10 @@ check('menu: the unused group labels are not invented', !in_array('sgap-group-sh
 check('menu: "More" is closed while a main page is open, open on a rare one', !str_contains($arranged[$more][4], 'is-open') && str_contains(SGAP_Menu::arrange($rows, 'sgap-tools')[array_search('sgap-group-more', array_column(SGAP_Menu::arrange($rows, 'sgap-tools'), 2), true)][4], 'is-open'));
 check('menu: AI Drafts is renamed to what it does', $arranged[array_search('sgap-ai', $slugs, true)][0] === 'Drafts to approve');
 
-// 2. Printful: tokenet testes mod /stores, og butiks-id udfyldes selv når der kun er én.
-$pf_keep = [$GLOBALS['opts']['sgap_printful_api_key'] ?? null, $GLOBALS['opts']['sgap_printful_store_id'] ?? null];
-unset($GLOBALS['opts']['sgap_printful_api_key'], $GLOBALS['opts']['sgap_printful_store_id']);
-check('printful: no token → nothing to report', SGAP_KeyCheck::check_printful()['ok'] === null);
-$GLOBALS['opts']['sgap_printful_api_key'] = 'pf-key';
-$answer = fn(int $code, array $body) => fn($pre, $url) => str_ends_with($url, '/stores') ? sgap_http($code, $body) : $pre;
-$GLOBALS['filters']['sgap_woo_printful_response'] = $answer(401, []);
-check('printful: a refused token is reported as invalid', SGAP_KeyCheck::check_printful()['ok'] === false);
-$GLOBALS['filters']['sgap_woo_printful_response'] = $answer(200, ['result' => []]);
-check('printful: a token that sees no store is not "connected"', SGAP_KeyCheck::check_printful()['ok'] === false);
-$GLOBALS['filters']['sgap_woo_printful_response'] = $answer(200, ['result' => [['id' => 77, 'name' => 'Steamgears']]]);
-$r = SGAP_KeyCheck::check_printful();
-check('printful: one store → connected, and the id is saved for you', $r['ok'] === true && ($GLOBALS['opts']['sgap_printful_store_id'] ?? '') === '77' && str_contains($r['message'], 'Steamgears'));
-$GLOBALS['opts']['sgap_printful_store_id'] = '999';
-check('printful: a store id the token cannot see is reported', SGAP_KeyCheck::check_printful()['ok'] === false);
-check('printful: the key test result carries Printful', array_key_exists('printful', SGAP_KeyCheck::run()));
-check('printful: the key card has a test and the store id field', (SGAP_Keys::PROVIDERS['printful']['test'] ?? '') === 'printful' && in_array('printful_store_id', SGAP_Keys::PROVIDERS['printful']['extra'] ?? [], true));
-unset($GLOBALS['filters']['sgap_woo_printful_response']);
-foreach (['sgap_printful_api_key' => $pf_keep[0], 'sgap_printful_store_id' => $pf_keep[1]] as $k => $v) {
-    if ($v === null) { unset($GLOBALS['opts'][$k]); } else { $GLOBALS['opts'][$k] = $v; }
-}
+// 2. 7.88.0: Printful er ude (Gelato er printvejen): ingen nøgletest, intet kort, og de gemte felter slettes.
+check('printful (7.88): the key test no longer checks Printful', !array_key_exists('printful', SGAP_KeyCheck::run()) && !method_exists('SGAP_KeyCheck', 'check_printful')
+    && !in_array('printful_api_key', SGAP_KeyCheck::WATCH, true));
+$GLOBALS['opts']['sgap_printful_api_key'] = 'pf-old'; $GLOBALS['opts']['sgap_printful_store_id'] = '77'; $GLOBALS['opts']['sgap_version'] = '7.87.1';
+SGAP_Install::maybe_upgrade();
+check('printful (7.88): the upgrade deletes the saved Printful token and store id', !isset($GLOBALS['opts']['sgap_printful_api_key']) && !isset($GLOBALS['opts']['sgap_printful_store_id'])
+    && ($GLOBALS['opts']['sgap_version'] ?? '') === SGAP_VERSION);

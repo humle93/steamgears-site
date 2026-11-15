@@ -2,7 +2,7 @@
 /**
  * Smoke-checks for the shop tools (P1.16, 7.45.0).
  *
- * Requiret af smoke.php efter HTTP-stubberne, så Printful-kaldet kan afspilles
+ * Requiret af smoke.php efter HTTP-stubberne
  * fra http_queue. Ingen netværk, ingen rigtig nøgle: det der testes er at en
  * kostpris aldrig opfindes, at gulvet aldrig rundes ned gennem sig selv, og at
  * intet skrives til shoppen uden confirm.
@@ -65,11 +65,10 @@ foreach ([[100, 45], [99.96, 0], [0.5, 0], [1234.56, 120], [7.77, 33]] as [$c, $
 }
 check('woo: no cost and margin combination lands below the margin or off .95', $floor_ok && SGAP_MCP_Woo::floor_price(0, 45) === 0.0);
 check('woo: margin percent is null without a cost', SGAP_MCP_Woo::margin_percent(150, null) === null && SGAP_MCP_Woo::margin_percent(200, 100) === 50.0);
-check('woo: the Printful token is a secret setting', in_array('printful_api_key', SGAP_Settings::SECRET_KEYS, true));
-SGAP_Settings::set('printful_api_key', 'pf-secret');
-check('woo: saving it does not autoload it', ($GLOBALS['autoload']['sgap_printful_api_key'] ?? null) === false);
-unset($GLOBALS['opts']['sgap_printful_api_key']);
-check('woo: the shop fields are on the settings page', in_array('woo_min_margin', SGAP_Setup::TABS['shop'][2], true) && isset(SGAP_Setup::LABELS['printful_store_id']) && isset(SGAP_Settings::SECTIONS['Shop & feeds']));
+check('woo (7.88): Printful is out — no token, store id, label or key card', !in_array('printful_api_key', SGAP_Settings::SECRET_KEYS, true)
+    && !in_array('printful_store_id', SGAP_Settings::TEXT_KEYS, true) && !isset(SGAP_Setup::LABELS['printful_store_id']) && !isset(SGAP_Keys::PROVIDERS['printful']));
+check('woo: the shop fields are on the settings page', in_array('woo_min_margin', SGAP_Setup::TABS['shop'][2], true) && isset(SGAP_Settings::SECTIONS['Shop & feeds'])
+    && SGAP_Settings::SECTIONS['Shop & feeds'] === ['merchant_feed_secret', 'woo_min_margin']);
 
 $GLOBALS['abilities'] = $GLOBALS['abilities'] ?? [];
 $names = ['woo-catalog', 'woo-propose', 'woo-queue', 'woo-apply', 'woo-discard'];
@@ -85,7 +84,7 @@ $GLOBALS['posts_result'] = [new WP_Post(['ID' => 7, 'post_type' => 'product', 'p
 // Den fejl den gamle bro havde: en kostpris der blev gættet ud af prisen selv.
 $refused = SGAP_MCP_Woo::propose(['product_id' => 7, 'price' => 500]);
 check('woo: without a cost the proposal is refused, not guessed', is_wp_error($refused) && ($refused->code) === 'sgap_woo_cost_unknown');
-check('woo: the refusal names both ways to supply a cost', str_contains($refused->get_error_message(), '_sgap_cost') && str_contains($refused->get_error_message(), 'Shop & feeds'));
+check('woo: the refusal names the cost field and where the cost comes from', str_contains($refused->get_error_message(), '_sgap_cost') && str_contains($refused->get_error_message(), 'Gelato'));
 check('woo: a refused proposal leaves the queue empty', SGAP_MCP_Woo::queue()['count'] === 0);
 check('woo: the catalogue reports the missing cost as unknown', SGAP_MCP_Woo::catalog()['products'][0]['cost_source'] === 'unknown');
 
@@ -125,26 +124,23 @@ check('woo: the missing product never reaches a save call', $product->saves === 
 check('woo: discarding removes it without touching the product', SGAP_MCP_Woo::discard(['id' => $queued_gone['id']]) === ['discarded' => true, 'id' => $queued_gone['id']] && SGAP_MCP_Woo::queue()['count'] === 0);
 check('woo: discarding twice is an error', is_wp_error(SGAP_MCP_Woo::discard(['id' => $queued_gone['id']])));
 
-// Printful: uden netværk må kostprisen ikke blive et gæt.
+// 7.88.0: kostprisen kommer kun fra produktets eget felt (fx Gelato-prisen), aldrig fra et gæt.
 $GLOBALS['wc_product_by_id'] = [7 => $product];
-$GLOBALS['opts']['sgap_printful_api_key'] = 'pf-key';
-$GLOBALS['opts']['sgap_printful_store_id'] = '123';
 unset($GLOBALS['postmeta'][7]);
-$GLOBALS['printful_urls'] = [];
-$GLOBALS['filters']['sgap_woo_printful_response'] = function ($pre, $url) {
-    $GLOBALS['printful_urls'][] = $url;
-    return new WP_Error('offline', 'offline');
-};
-$offline = SGAP_MCP_Woo::cost_for($product, 7);
-check('woo: a Printful call that fails leaves the cost unknown', $offline['cost'] === null && str_contains($offline['detail'], 'could not be read') && str_contains($offline['detail'], 'offline'));
-check('woo: the lookup asks the store endpoint with a page size', ($GLOBALS['printful_urls'][0] ?? '') === 'https://api.printful.com/store/products?limit=100&offset=0');
-$GLOBALS['filters']['sgap_woo_printful_response'] = fn($pre, $url) => sgap_http(200, ['result' => [['id' => 9, 'sync_variants' => [['id' => 55, 'external_id' => '7', 'sku' => 'SG-TEE-1', 'retail_price' => '399.00', 'variant' => ['price' => '121.50']]]]]]);
-$from_printful = SGAP_MCP_Woo::cost_for($product, 7);
-check('woo: a Printful sync variant supplies the cost', $from_printful['cost'] === 121.5 && $from_printful['source'] === 'Printful');
-check('woo: the variant is matched on the Woo id, not on the name', str_contains($from_printful['detail'], '55'));
-check('woo: a catalog price without a variant price is not used as cost', SGAP_MCP_Woo::cost_for($product, 7) !== [] );
-unset($GLOBALS['filters']['sgap_woo_printful_response']);
-unset($GLOBALS['opts']['sgap_printful_api_key']);
+$GLOBALS['http_calls'] = [];
+$none = SGAP_MCP_Woo::cost_for($product, 7);
+check('woo (7.88): without a cost field the cost is unknown, and no service is asked', $none['cost'] === null && $none['source'] === 'unknown'
+    && str_contains($none['detail'], '_sgap_cost') && ($GLOBALS['http_calls'] ?? []) === []);
+update_post_meta(7, '_sgap_cost', 64.5);
+update_post_meta(7, '_sgap_cost_source', 'Gelato price 15/11');
+$own = SGAP_MCP_Woo::cost_for($product, 7);
+check('woo (7.88): the cost field is the source, and its note is shown', $own['cost'] === 64.5 && $own['source'] === 'cost field' && $own['detail'] === 'Gelato price 15/11');
+delete_post_meta(7, '_sgap_cost_source');
+$refused = SGAP_MCP_Woo::propose(['product_id' => 7, 'price' => 10]);
+unset($GLOBALS['postmeta'][7]);
+$refused = SGAP_MCP_Woo::propose(['product_id' => 7, 'price' => 500]);
+check('woo (7.88): a proposal without a cost names the cost field and Gelato, not Printful', is_wp_error($refused)
+    && str_contains($refused->get_error_message(), '_sgap_cost') && str_contains($refused->get_error_message(), 'Gelato') && !str_contains($refused->get_error_message(), 'Printful'));
 
 // Kataloget: et produkt uden kostpris skal kunne findes, så det kan rettes.
 unset($GLOBALS['postmeta'][7]);
@@ -159,78 +155,9 @@ update_post_meta(7, '_sgap_cost', 0);
 check('woo: a cost of zero counts as unknown, not as free', SGAP_MCP_Woo::cost_for($product, 7)['cost'] === null);
 
 
-// Kostpris-import (7.46.0): kostprisen hentes fra Printful, aldrig fra shop-prisen,
-// og en pris du selv har skrevet bliver ikke overskrevet uden at du beder om det.
-class SGAP_Fake_Variable extends SGAP_Fake_Product {
-    public $children = [];
-    public function get_children() { return $this->children; }
-}
-$import_keep_meta = $GLOBALS['postmeta'] ?? [];
-$import_keep_key  = $GLOBALS['opts']['sgap_printful_api_key'] ?? null;
-$import_keep_store = $GLOBALS['opts']['sgap_printful_store_id'] ?? null;
-$GLOBALS['postmeta'] = [];
-$GLOBALS['wc_product_by_id'] = [];
-$GLOBALS['posts_result'] = [];
-$import_no_key = SGAP_MCP_Woo::import_costs([]);
-check('import: without a Printful key it refuses and names the setting', is_wp_error($import_no_key) && $import_no_key->code === 'sgap_woo_no_printful' && str_contains($import_no_key->get_error_message(), 'Shop & feeds'));
-
-$GLOBALS['opts']['sgap_printful_api_key'] = 'pf-key';
-$GLOBALS['opts']['sgap_printful_store_id'] = '123';
-$simple    = new SGAP_Fake_Product(7, 'Brass Gear Tee', 200.0, '', 'SG-TEE-1');
-$by_sku    = new SGAP_Fake_Product(9, 'Copper Mug', 90.0, '', 'SG-CUP-1');
-$no_price  = new SGAP_Fake_Product(12, 'Unpriced Poster', 50.0, '', 'SG-POSTER-1');
-$unmatched = new SGAP_Fake_Product(13, 'Own Product', 70.0, '', 'OWN-1');
-$parent    = new SGAP_Fake_Variable(20, 'Variant Tee', 300.0, '', 'SG-VAR');
-$child_a   = new SGAP_Fake_Product(21, 'Variant Tee S', 150.0, '', 'SG-VAR-S');
-$child_b   = new SGAP_Fake_Product(22, 'Variant Tee M', 150.0, '', 'SG-VAR-M');
-$parent->children = [21, 22];
-$GLOBALS['wc_product_by_id'] = [7 => $simple, 9 => $by_sku, 12 => $no_price, 13 => $unmatched, 20 => $parent, 21 => $child_a, 22 => $child_b];
-$GLOBALS['posts_result'] = [];
-foreach ([7, 9, 12, 13, 20] as $pid) {
-    $GLOBALS['posts_result'][] = new WP_Post(['ID' => $pid, 'post_type' => 'product', 'post_status' => 'publish', 'post_title' => 'p' . $pid]);
-}
-$GLOBALS['filters']['sgap_woo_printful_response'] = fn($pre, $url) => sgap_http(200, ['result' => [
-    ['id' => 9, 'sync_variants' => [
-        ['id' => 55, 'external_id' => '7', 'sku' => 'SG-TEE-1', 'variant' => ['price' => '121.50']],
-        ['id' => 56, 'external_id' => '7', 'sku' => 'SG-TEE-1', 'variant' => ['price' => '99.00']]
-    ]],
-    ['id' => 10, 'sync_variants' => [['id' => 57, 'sku' => 'SG-CUP-1', 'variant' => ['price' => '40.00']]]],
-    ['id' => 11, 'sync_variants' => [['id' => 58, 'external_id' => '12', 'variant' => []]]],
-    ['id' => 12, 'sync_variants' => [
-        ['id' => 59, 'external_id' => '21', 'variant' => ['price' => '60.00']],
-        ['id' => 60, 'external_id' => '22', 'variant' => ['price' => '45.50']]
-    ]]
-]]);
-
-$dry = SGAP_MCP_Woo::import_costs([]);
-check('import: a dry run writes nothing', $dry['dry_run'] === true && $dry['stats']['would_write'] >= 1 && (string) get_post_meta(7, '_sgap_cost', true) === '');
-check('import: the plan says which product and how it was matched', $dry['rows'][0]['id'] === 7 && $dry['rows'][0]['via'] === 'Woo id' && $dry['rows'][0]['cost'] === 99.0);
-check('import: several variants of one product give the lowest cost', SGAP_MCP_Woo::printful_index([['sync_variants' => [['external_id' => '7', 'variant' => ['price' => '121.50']], ['external_id' => '7', 'variant' => ['price' => '99.00']]]]])['by_id']['7']['cost'] === 99.0);
-
-$written = SGAP_MCP_Woo::import_costs(['confirm' => true]);
-check('import: confirm writes the cost', $written['stats']['written'] >= 1 && (float) get_post_meta(7, '_sgap_cost', true) === 99.0);
-check('import: the source names the variant it came from', str_contains((string) get_post_meta(7, '_sgap_cost_source', true), 'sync variant 56'));
-check('import: the catalogue now reports a Printful cost', SGAP_MCP_Woo::cost_for($simple, 7)['source'] === 'Printful' && SGAP_MCP_Woo::cost_for($simple, 7)['cost'] === 99.0);
-check('import: a second run changes nothing', SGAP_MCP_Woo::import_costs(['confirm' => true])['stats']['unchanged'] >= 1);
-
-update_post_meta(7, '_sgap_cost', 80);
-delete_post_meta(7, '_sgap_cost_source');
-$kept = SGAP_MCP_Woo::import_costs(['confirm' => true]);
-check('import: the cost you typed yourself wins by default', $kept['stats']['kept_existing'] >= 1 && (float) get_post_meta(7, '_sgap_cost', true) === 80.0);
-$over = SGAP_MCP_Woo::import_costs(['confirm' => true, 'overwrite' => true]);
-check('import: overwrite replaces it when asked', $over['stats']['written'] >= 1 && (float) get_post_meta(7, '_sgap_cost', true) === 99.0);
-
-check('import: a product without an id match is matched on its SKU', (float) get_post_meta(9, '_sgap_cost', true) === 40.0 && str_contains((string) get_post_meta(9, '_sgap_cost_source', true), 'SKU'));
-check('import: a variant without its own price is reported, not guessed', $written['stats']['no_price'] === 1 && (string) get_post_meta(12, '_sgap_cost', true) === '');
-check('import: a product Printful does not know is left alone', $written['stats']['unmatched'] === 1 && (string) get_post_meta(13, '_sgap_cost', true) === '');
-check('import: a variable product gets its cheapest variation', $written['stats']['variations'] === 2 && (float) get_post_meta(21, '_sgap_cost', true) === 60.0 && (float) get_post_meta(20, '_sgap_cost', true) === 45.5);
-check('import: the limit caps how many products are read', SGAP_MCP_Woo::import_costs(['limit' => 1])['stats']['products'] === 1);
-$tool = $GLOBALS['abilities']['steamgears-tools/woo-cost-import'] ?? null;
-check('import: the tool is registered and is not read-only', $tool !== null && ($tool['meta']['annotations']['readonly'] ?? true) === false && ($tool['meta']['annotations']['idempotent'] ?? false) === true);
-unset($GLOBALS['filters']['sgap_woo_printful_response']);
-$GLOBALS['postmeta'] = $import_keep_meta;
-if ($import_keep_key === null) { unset($GLOBALS['opts']['sgap_printful_api_key']); } else { $GLOBALS['opts']['sgap_printful_api_key'] = $import_keep_key; }
-if ($import_keep_store === null) { unset($GLOBALS['opts']['sgap_printful_store_id']); } else { $GLOBALS['opts']['sgap_printful_store_id'] = $import_keep_store; }
+// 7.88.0: kostpris-importen fra Printful er fjernet sammen med Printful.
+check('woo (7.88): the Printful cost import and its tool are gone', !method_exists('SGAP_MCP_Woo', 'import_costs') && !method_exists('SGAP_MCP_Woo', 'printful_cost')
+    && !isset(SGAP_MCP_Woo::definitions()['woo-cost-import']) && !isset($GLOBALS['abilities']['steamgears-tools/woo-cost-import']));
 sgap_woo_reset();
 if ($woo_keep_products === null) { unset($GLOBALS['wc_product_by_id']); } else { $GLOBALS['wc_product_by_id'] = $woo_keep_products; }
 if ($woo_keep_posts === null) { unset($GLOBALS['posts_result']); } else { $GLOBALS['posts_result'] = $woo_keep_posts; }

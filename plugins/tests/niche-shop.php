@@ -43,7 +43,7 @@ check('niche: every product has a price above cost and a margin that clears the 
     }
     return true;
 })($plan));
-check('niche: costs are marked as estimates until Printful is connected', count(array_unique(array_column($plan['products'], 'cost_source'))) === 1 && $plan['products'][0]['cost_source'] === 'estimate');
+check('niche: costs are marked as estimates until the Gelato costs are entered', count(array_unique(array_column($plan['products'], 'cost_source'))) === 1 && $plan['products'][0]['cost_source'] === 'estimate');
 check('niche: every SKU is unique and prefixed', count(array_unique(array_column($plan['products'], 'sku'))) === 10 && str_starts_with($plan['products'][0]['sku'], 'SG-'));
 check('niche: five pages, start-here first', count($plan['pages']) === 5 && $plan['pages'][0]['slug'] === 'start-here');
 check('niche: the owner-only facts are marked, not guessed', $plan['counts']['owner_fields'] > 0 && str_contains($plan['pages'][1]['body'], '[EJER'));
@@ -53,7 +53,7 @@ check('niche: the menu labels become real links, and a label with nowhere to go 
     && array_column($links, 'label') === ['Shop', 'Airship', 'Clockwork', 'Herbarium']
     && count(array_filter($links, fn($l) => str_starts_with($l['url'], 'https://'))) === 4);
 check('niche: a collection without a term yet still links to its archive', $links[1]['url'] === 'https://steamgears.eu/product-category/airship/');
-check('niche: the readiness list is owner-only and names Printful first', ($plan['readiness'][0]['id'] ?? '') === 'printful' && count(array_filter($plan['readiness'], fn($r) => empty($r['owner']))) === 0);
+check('niche: the readiness list is owner-only and names Gelato first', ($plan['readiness'][0]['id'] ?? '') === 'gelato' && count(array_filter($plan['readiness'], fn($r) => empty($r['owner']))) === 0);
 check('niche: schema covers the types the shop page needs', in_array('ItemList', $plan['schema'], true) && in_array('Product', $plan['schema'], true));
 
 // 2. Arketyper: ordene bestemmer hylden, og ukendte nicher får den generiske.

@@ -27,7 +27,7 @@ The whole social autopilot runs inside WordPress (Command Center is retired):
 4. **Measure** – every post links via `/go/<id>/`, so clicks (and WooCommerce
    orders) are counted per channel.
 
-Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.87.1.zip` → Activate. On an existing
+Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.88.0.zip` → Activate. On an existing
 install the same zip arrives through the self-updater (see *Updates*), so an upload is only needed for the
 first install or a recovery.
 
@@ -63,7 +63,7 @@ in *Settings → General*).
 ## Keys in one place (7.47)
 
 Every credential the plugin uses sits on **one** screen, *Settings → Keys*, one card per service:
-the OpenRouter key, Publer, Printful, SerpApi, Bluesky, Mastodon, Telegram, the product-feed secret
+the OpenRouter key, Publer, SerpApi, Bluesky, Mastodon, Telegram, the product-feed secret
 and the MCP token. Each card says what the key is for, where to get it (a link to the service or to
 your own Mastodon instance), whether it is saved, and whether the last test passed. Nothing else in
 the plugin renders a key field: the AI, Publishing, Shop and MCP tabs carry settings only, and the
@@ -313,11 +313,10 @@ access no longer depends on repository secrets or on a loop running in a sandbox
 Approval is still one owner click: `python3 tools/mcp_oauth.py --start` prints the link, `--finish '<code>'`
 saves the pair outside the repo, and the two values are pasted under *Settings → MCP access*.
 
-### Shop tools that cannot underprice themselves (7.45, cost import 7.46)
+### Shop tools that cannot underprice themselves (7.45; Printful removed 7.88)
 
-The WooCommerce/Printful side is no longer a second plugin. Six tools live in the same
-`steamgears-tools` category as everything else, so the site's MCP server exposes them without
-another credential:
+The WooCommerce side is no longer a second plugin. Five tools live in the same `steamgears-tools`
+category as everything else, so the site's MCP server exposes them without another credential:
 
 | Tool | What it does |
 | --- | --- |
@@ -326,30 +325,23 @@ another credential:
 | `woo-queue` | The proposals waiting for approval, with before and after |
 | `woo-apply` | Writes one proposal; dry run unless `confirm` is true |
 | `woo-discard` | Drops a proposal without touching the product |
-| `woo-cost-import` | Writes each product's cost from its Printful sync variant — dry run unless `confirm` is true |
 
-A cost is **never invented**. It is the product's `_sgap_cost` field, or the Printful sync
-variant's own price (matched on the WooCommerce id or SKU, never on the product name); without
-either, the call is refused and names both fixes. The floor is
-`floor(cost × (1 + margin)) + 0.95`, raised by one when that would land *under* the margin, and
-it is recomputed at apply time — so a cost that rose while a proposal was waiting raises the
-price instead of quietly breaking the promise. The tools do not write the copy themselves: the MCP
-client is an assistant already, and *Content Studio* writes product texts for the owner — so
-`woo-propose` takes the text you send and carries the rest over unchanged.
+A cost is **never invented**. It is the product's own `_sgap_cost` field — the real cost, which for
+this shop is the **Gelato** price (Gelato is the print route, connected through the official *Gelato
+Integration for WooCommerce* plugin, not through this one). A note in `_sgap_cost_source` (e.g.
+*Gelato price 15/11*) is shown next to the number. Without a cost the call is refused and says how
+to fix it. The floor is `floor(cost × (1 + margin)) + 0.95`, raised by one when that would land
+*under* the margin, and it is recomputed at apply time — so a cost that rose while a proposal was
+waiting raises the price instead of quietly breaking the promise. The tools do not write the copy
+themselves: the MCP client is an assistant already, and *Content Studio* writes product texts for
+the owner — so `woo-propose` takes the text you send and carries the rest over unchanged.
 
-`woo-cost-import` is how that cost field gets filled. It reads the Printful sync variants
-(paginated, cached for six hours, `fresh` bypasses the cache) and writes each variant's **own
-price** as the product's cost, matched on the WooCommerce id first and the SKU second — never on
-the name. It is a dry run unless `confirm` is true, so the first call only shows the plan. A cost
-you already typed wins: without `overwrite` it is reported as `kept`, and a second run reports
-`unchanged` rather than churning the same number. A variant without its own price is listed as
-`no_price` and left alone; a product Printful does not know is `unmatched` and left alone. A
-variable product gets each variation's cost, and the parent gets the lowest of them. The source is
-stored next to the number (`_sgap_cost_source`, e.g. *Printful import: sync variant 56 (matched on
-Woo id)*), so `woo-catalog` can say where a cost came from instead of pretending it is the owner's.
+Until 7.88 a sixth tool, `woo-cost-import`, filled the cost field from Printful's sync variants.
+Printful (like Printify) is no longer used, so the tool, the Printful key card, its key test and
+the saved Printful token and store id are gone; the upgrade deletes the two settings.
 
-*Settings → Shop & feeds* holds the Printful token (a secret, autoload off), the store id and
-the minimum margin (45 % by default: a cost of 100 refuses anything under 145.95).
+*Settings → Shop & feeds* holds the product-feed secret and the minimum margin (45 % by default: a
+cost of 100 refuses anything under 145.95).
 
 ### IndexNow key
 
@@ -700,14 +692,14 @@ shop skeleton you can publish from:
    drafts, empty terms and menu *that run* created and keeps anything already published — the report
    says which is which. Running the same plan twice writes nothing new; the page says so with the
    date of the first run.
-4. **Honest about the rest.** Every plan ends with the steps only the owner can take: Printful access
+4. **Honest about the rest.** Every plan ends with the steps only the owner can take: the Gelato connection
    (real costs and 5–8 mockups), publishing approval, currency and prices, payment methods,
    CVR/name/address/phone, the EU consent model, shipping zones, and confirming the shop name. The
    page copy marks each owner-only fact with `[EJER: …]` instead of inventing it.
 
 Prices always clear the margin floor in *Settings → Shop & feeds* (`woo_min_margin`); the price is
 the higher of `cost × 2.6` and `SGAP_MCP_Woo::floor_price()`, ending in `,95`. Costs are marked
-`estimate` until Printful is connected, so no number in the plan pretends to be measured.
+`estimate` until the Gelato costs are in each product's cost field, so no number in the plan pretends to be measured.
 
 From Claude or any MCP client: `niche-plan` (read-only), `niche-apply`, `niche-runs` and
 `niche-rollback`. Over REST: `POST /wp-json/sgap/v1/niche` (`niche`, `count`, `margin`, `apply`),
@@ -729,7 +721,7 @@ before it, because the MCP surface can read plugins but cannot install or activa
 1. Bump `Version:` in `steamgears-autopilot.php` and `SGAP_VERSION` — they must agree, CI fails otherwise.
 2. Rebuild the zip from the folder so the name and the contents match:
    `cd plugins && rm -f steamgears-autopilot-*.zip && zip -qr steamgears-autopilot-v<version>.zip steamgears-autopilot`
-3. `php plugins/tests/smoke.php` (1586 checks) and `diff -r` the zipped copy against the source. CI repeats
+3. `php plugins/tests/smoke.php` (1563 checks) and `diff -r` the zipped copy against the source. CI repeats
    both, plus `php -l` on PHP 8.0–8.5 and WordPress 6.4 / 7.1 / latest. The plugin is also exercised inside
    a real WordPress: `bash plugins/tests/integration.sh` (needs `php` with `mysqli`, `wp-cli`, `curl` and a
    reachable MySQL; 254 checks, including the model rules, the OpenRouter key checks and evergreen recycling) — it installs

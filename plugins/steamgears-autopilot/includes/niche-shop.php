@@ -5,7 +5,7 @@
  * The owner types a niche ("steampunk airship", "cottagecore mushroom") and the plugin turns it
  * into a complete shop skeleton: brand suggestions, five collections, a priced product plan across
  * the POD families, page drafts, a menu, the schema types the shop needs, and a readiness list of
- * the steps only the owner (or Printful) can take.
+ * the steps only the owner (or Gelato) can take.
  *
  * Two rules shape the design:
  *
@@ -13,7 +13,7 @@
  *     `_sgap_niche` marker, so a run can always be rolled back and never touches a live product.
  *   * **A plan without a key.** `plan()` is pure PHP and deterministic — same niche, same plan —
  *     so the owner can see the whole shop before a single row is written, and the tests can run it
- *     without WordPress. Printful is used when it is connected (real costs); until then every cost
+ *     without WordPress. Gelato (connected through its own WooCommerce plugin) gives the real costs; until they are in each product's cost field every cost
  *     is marked `estimate` and the readiness list says so.
  *
  * Loaded from steamgears-autopilot.php.
@@ -127,7 +127,7 @@ class SGAP_Niche_Shop {
         ]
     ];
 
-    /** POD families: what the shop sells, with a default cost per unit until Printful is connected. */
+    /** POD families: what the shop sells, with a default cost per unit until the Gelato costs are entered. */
     const FAMILIES = [
         'tee' => ['label' => 'Tee', 'cost' => 12.50, 'blurb' => 'heavyweight cotton, unisex fit', 'sizes' => true],
         'hoodie' => ['label' => 'Hoodie', 'cost' => 27.00, 'blurb' => 'brushed fleece, kangaroo pocket', 'sizes' => true],
@@ -406,7 +406,7 @@ class SGAP_Niche_Shop {
         if (!empty($family_row['sizes'])) {
             $html .= '<li>Fit: unisex, true to size; size guide with centimetres and inches is linked below.</li>';
         }
-        $html .= '<li>Production: print-on-demand, fulfilled by Printful.</li>';
+        $html .= '<li>Production: print-on-demand, fulfilled by Gelato.</li>';
         $html .= '<li>Shipping: [EJER: zones and delivery times] · [EJER: shipping price].</li>';
         $html .= '<li>Returns: 14-day right of withdrawal, [EJER: return address].</li>';
         $html .= '</ul>';
@@ -425,7 +425,7 @@ class SGAP_Niche_Shop {
             'about' => '<p>' . self::h($brand['suggested']) . ' is a small print-on-demand shop for ' . mb_strtolower($title) . '.</p>'
                 . '<p>Every design is printed when it is ordered, so nothing is produced to sit in a warehouse. Tone of voice: ' . self::h(implode(', ', (array) $row['tone'])) . '.</p>'
                 . '<p>[EJER: registered company name, CVR, address and phone — required by Forbrugerombudsmanden and GPSR.]</p>',
-            'shipping-and-returns' => '<p>Orders are printed to order and shipped from the Printful facility closest to you.</p>'
+            'shipping-and-returns' => '<p>Orders are printed to order and shipped from the Gelato production partner closest to you.</p>'
                 . '<ul><li>Processing: [EJER: days].</li><li>Delivery: [EJER: zones and days].</li><li>Shipping cost: [EJER: price per zone, free above X].</li></ul>'
                 . '<h2>Right of withdrawal</h2><p>You have 14 days from delivery. [EJER: return address and who pays return shipping.]</p>'
                 . '<p>Use the withdrawal form on <a href="/right-of-withdrawal/">Right of withdrawal</a>.</p>',
@@ -435,7 +435,7 @@ class SGAP_Niche_Shop {
                 . '<tr><td>M</td><td>[EJER]</td><td>[EJER]</td><td>[EJER]</td><td>[EJER]</td></tr>'
                 . '<tr><td>L</td><td>[EJER]</td><td>[EJER]</td><td>[EJER]</td><td>[EJER]</td></tr>'
                 . '<tr><td>XL</td><td>[EJER]</td><td>[EJER]</td><td>[EJER]</td><td>[EJER]</td></tr></tbody></table>'
-                . '<p>[EJER: table copied from the Printful size chart for the exact blank used.]</p>',
+                . '<p>[EJER: table copied from the Gelato size chart for the exact product used.]</p>',
             'contact' => '<p>Questions about an order, a size or a return?</p>'
                 . '<p>E-mail: [EJER: shop e-mail] · Phone: [EJER: phone] · Address: [EJER: address].</p>'
                 . '<p>We answer within [EJER: hours].</p>'
@@ -456,7 +456,7 @@ class SGAP_Niche_Shop {
     /** What a run cannot do, in the order it blocks a launch. Everything here is the owner's. */
     private static function readiness(): array {
         return [
-            ['id' => 'printful', 'owner' => true, 'step' => 'Connect Printful and map the variants', 'why' => 'Real costs and 5–8 mockups per product. Until then every cost in the plan is an estimate and every product has one image at most.'],
+            ['id' => 'gelato', 'owner' => true, 'step' => 'Connect Gelato (wp-admin → Gelato) and enter each product\'s cost', 'why' => 'Real costs and 5–8 mockups per product. Until then every cost in the plan is an estimate and every product has one image at most.'],
             ['id' => 'publish', 'owner' => true, 'step' => 'Approve the drafts and publish', 'why' => 'The agent creates drafts only; a human decides what goes live.'],
             ['id' => 'currency', 'owner' => true, 'step' => 'Currency and price list', 'why' => 'A currency code alone turns $29.95 into 29,95 kr; prices have to be recalculated.'],
             ['id' => 'payments', 'owner' => true, 'step' => 'Payment methods', 'why' => 'MobilePay, PayPal or Klarna need agreements in the owner\'s name; Stripe is the only one wired today.'],

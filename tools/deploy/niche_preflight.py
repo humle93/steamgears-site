@@ -507,7 +507,7 @@ def build_niche(niche: dict, rules: dict, problems: Problems,
              "step": step.split(":", 1)[1].strip() if ":" in step else step}
             for step in niche["owner_steps"]
         ] + [
-            {"id": "printful", "owner": True, "step": "Mockups og trykfiler pr. vare"},
+            {"id": "gelato", "owner": True, "step": "Gelato: forbind kontoen, mockups og trykfiler pr. vare"},
             {"id": "publish", "owner": True, "step": "Godkend og publicér — agenten skriver kun kladder"},
         ],
     }

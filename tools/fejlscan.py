@@ -51,7 +51,7 @@ TEXT_SUFFIXES = {".md", ".php", ".py", ".json", ".sh", ".yml", ".yaml", ".css", 
 SECRETS = [
     ("github-token", re.compile(r"gh[pousr]_[A-Za-z0-9]{30,}")),
     ("github-pat", re.compile(r"github_pat_[A-Za-z0-9_]{30,}")),
-    # A Printful SKU ("sk-steampunk-unisex-t-shirt") is all lowercase; a real key is not.
+    # A product SKU ("sk-steampunk-unisex-t-shirt", from the old Printful sync) is all lowercase; a real key is not.
     ("openai-key", re.compile(r"(?<![A-Za-z0-9_-])sk-(?:ant-)?(?=[A-Za-z0-9_-]*[A-Z])[A-Za-z0-9_-]{32,}")),
     ("slack-token", re.compile(r"xox[baprs]-[A-Za-z0-9-]{10,}")),
     ("google-key", re.compile(r"AIza[0-9A-Za-z_-]{35}")),

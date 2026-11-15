@@ -337,7 +337,7 @@ class SGAP_MCP_Tools {
 
     /**
      * The full catalogue: the rows above plus the shop tools, which keep their own
-     * class because they talk to WooCommerce and Printful. One registry, one
+     * class because they talk to WooCommerce. One registry, one
      * capability callback, one set of ability metadata.
      */
     private static function all_definitions(): array {

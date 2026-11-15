@@ -433,6 +433,15 @@
           "unit": "d",
           "verified": false,
           "note": "7.87.0: Instagram 3-5 hashtags (før 8-15), Pinterest 2-4 (før 3-6) og søgeordet én gang; prompten kræver en egen åbning pr. kanal; parse_posts håndhæver TAG_CAP pr. kanal; redaktøren spørger Nemotron Super før Ultra. Baggrund: genbedømmelsen 14/11 afviste 3 af 6 opslag for hashtag-stuffing og/eller samme åbning, og Ultra svarede ikke inden for 52 s (Super ca. 20 s). 1 584 PASS / 0 FAIL i smoke (3 nye). IKKE målt: effekten på redaktørscorerne. 7.87.1: prompten nævner ordene fra Banned words (højst 40), fordi et Pinterest-opslag med 8/10 blev stoppet af kvalitetsporten for \"price\" 14/11. 1 586 PASS / 0 FAIL. 7.87.0 er installeret live 15/11 (sha256 matcher, nøgletest frisk uden reservekort)."
+        },
+        {
+          "id": "p15",
+          "name": "P15 — Printful ud, Gelato er printvejen",
+          "done": 0.6,
+          "total": 0.6,
+          "unit": "d",
+          "verified": false,
+          "note": "7.88.0: Printful-kort, -nøgletest, printful_api_key/printful_store_id og kostpris-importen (woo-cost-import, printful_cost, sync-opslag, prischache) fjernet; opgraderingen sletter de gemte indstillinger; kosten kommer kun fra _sgap_cost (fx Gelato-prisen); nichebutik, nicher og docs siger Gelato. Baggrund: ejeren 15/11 'Printful er ude ligesom Printify, vi kører kun Gelato', og nøgletesten bad om et Printful-token. 1 563 PASS / 0 FAIL i smoke (27 Printful-checks erstattet af 8). IKKE målt: Gelato-forbindelsen (S4.7)."
         }
       ],
       "total": 41.5,

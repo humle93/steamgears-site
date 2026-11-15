@@ -80,8 +80,6 @@ class SGAP_Install {
         'sgap_evergreen_max_shares' => 3,
         'sgap_evergreen_batch' => 1,
         'sgap_mcp_client_id' => '',
-        'sgap_printful_api_key' => '',
-        'sgap_printful_store_id' => '',
         'sgap_woo_min_margin' => 45,
         'sgap_forum_enabled' => 'yes',
         'sgap_forum_slug' => 'forum',
@@ -123,6 +121,9 @@ class SGAP_Install {
         delete_option('rewrite_rules'); // drop the /go/ rule; WP rebuilds on next request
     }
 
+    /** Settings of removed integrations, deleted on upgrade (7.88.0: Printful). */
+    const RETIRED_OPTIONS = ['sgap_printful_api_key', 'sgap_printful_store_id'];
+
     /**
      * Runs on every request (cron included, so an update uploaded over an older
      * version gets its new columns before the publisher runs); costs one
@@ -131,6 +132,12 @@ class SGAP_Install {
     public static function maybe_upgrade(): void {
         if (get_option('sgap_version') !== SGAP_VERSION) {
             self::install();
+            // 7.88.0: Printful is out (Gelato is the print route), so its token, store id and the
+            // price cache of the removed cost import are not kept on the site any longer.
+            foreach (self::RETIRED_OPTIONS as $option) {
+                delete_option($option);
+            }
+            delete_transient('sgap_printful_costs');
             // A page cache may still hold a feed stored by an older version: drop it so Publer sees fresh posts.
             if (class_exists('SGAP_RSS')) {
                 foreach (SGAP_Publer::CHANNELS as $channel) {
@@ -393,7 +400,7 @@ class SGAP_Settings {
         'publer_api_key','ai_api_key','serpapi_key',
         'telegram_bot_token',
         'merchant_feed_secret','bluesky_app_password','mastodon_token',
-        'mcp_refresh_token','printful_api_key',
+        'mcp_refresh_token',
         'pinterest_access_token','pinterest_refresh_token','pinterest_client_secret',
         'instagram_access_token',
         'facebook_access_token',
@@ -408,7 +415,7 @@ class SGAP_Settings {
         'blackout_ranges','banned_words','utm_campaign','bluesky_handle','mastodon_instance',
         'pinterest_client_id','instagram_user_id','facebook_page_id',
         'locale_source','locales','command_center_url','mcp_client_id',
-        'printful_store_id','forum_slug','forum_intro','reddit_client_id','reddit_username',
+        'forum_slug','forum_intro','reddit_client_id','reddit_username',
         'reddit_default_sub','reddit_radar_subs','reddit_keywords','cirla_actions'
     ];
     /** Settings with a fixed list of values, shown as a select. */
@@ -433,7 +440,7 @@ class SGAP_Settings {
         'Economics' => ['labor_rate','monthly_budget','target_roi','winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max'],
         'Evergreen' => ['evergreen_enabled','evergreen_after_days','evergreen_max_shares','evergreen_batch'],
         'Alerts and log' => ['alert_mode','alert_email','alert_dry_days','channel_caps','audit_keep_days'],
-        'Shop & feeds' => ['merchant_feed_secret','printful_api_key','printful_store_id','woo_min_margin'],
+        'Shop & feeds' => ['merchant_feed_secret','woo_min_margin'],
         'Cirla' => ['cirla_enabled','cirla_actions','cirla_daily_calls','cirla_log_level'],
         'MCP access' => ['mcp_client_id','mcp_refresh_token'],
         'Forum & Reddit' => ['forum_enabled','forum_slug','forum_topics_per_page','forum_intro',
@@ -515,8 +522,6 @@ class SGAP_Settings {
         'utm_campaign' => 'The campaign name every link from this site carries as utm_campaign: set it once per campaign (e.g. clockwork_punk_2026_11) and GA4 can tell campaigns apart. A single post can override it with its own campaign. Letters, digits, -            and _ only; empty = steamgears_premium_evergreen. Posts queued before the change keep the value they were queued with.',
         'mcp_client_id' => 'The public client ID from the one-time MCP approval (tools/mcp_oauth.py --start prints it). It is not a secret.',
         'mcp_refresh_token' => 'The refresh token from that approval (tools/mcp_oauth.py --finish saves it in ~/.config/steamgears-mcp/tokens.json). The plugin renews the access token every 30 minutes and writes the rotated refresh token back here, so it must live in the database — a wp-config.php constant cannot be updated by the server. Never shown again after saving; an empty field keeps the stored value.',
-        'printful_api_key' => 'Printful API token (Dashboard → Settings → API). Optional: it lets the shop tools read the real cost price of a sync product instead of asking you to fill in the cost field on every product. Not the same key as OpenRouter.',
-        'printful_store_id' => 'The Printful store id the token belongs to (Dashboard → Stores). Sent as X-PF-Store-Id; empty means the token\'s default store.',
         'woo_min_margin' => 'The margin a price must keep above the cost price, in percent. The shop tools never propose or apply a price below cost × (1 + this), rounded up to .95. 45 % on a cost of 100 refuses anything under 145.95.',
         'forum_enabled' => 'Open or close the forum. Closing it hides the shortcode and stops new threads; existing threads stay readable, because a dead link is worse than a closed door.',
         'forum_slug' => 'The address of the forum, e.g. forum gives /forum/. Change it and visit Settings → Permalinks once, or the archive answers 404 until WordPress rebuilds its rules.',
@@ -2123,7 +2128,7 @@ class SGAP_Admin {
         }
         echo '</div>'
             . '<p class="description">Write posts: the AI drafts a post per channel for pages that need one. Send the queue: releases what is approved, now. '
-            . 'Test connections: checks AI, Publer and Printful. Keys live under <a href="' . esc_url(admin_url('admin.php?page=sgap-settings')) . '">Settings &amp; keys</a>.</p>';
+            . 'Test connections: checks AI and Publer. Keys live under <a href="' . esc_url(admin_url('admin.php?page=sgap-settings')) . '">Settings &amp; keys</a>.</p>';
         // Progress bar for "Generate posts now": one request per page, so each step is visible.
         echo '<div id="sgap-progress" class="sgap-progress" style="display:none">'
             . '<progress id="sgap-progress-bar" value="0" max="1"></progress>'
@@ -2196,7 +2201,7 @@ class SGAP_Admin {
             }
         } elseif ($task === 'test_keys') {
             $r = SGAP_KeyCheck::run();
-            $out = 'Publer: ' . $r['publer']['message'] . "\nAI: " . $r['ai']['message'] . "\nPrintful: " . $r['printful']['message'];
+            $out = 'Publer: ' . $r['publer']['message'] . "\nAI: " . $r['ai']['message'];
         } elseif ($task === 'test_publer') {
             $out = self::publer_report();
         } else {

@@ -15,7 +15,7 @@ Dette er den ene kørsel: **syv faser**, hvor hvert trin har et sted at gå hen,
 | ---: | --- | --- | --- |
 | 1 | Post 699 i DKK, EU-fragt, CVR/telefon, betaling | 2–3 t | En live side med USD og en kurv EU-kunder ikke kan bruge koster penge nu |
 | 2 | 292, 296, 295 og side 550 | 3–4 t | Copyen er færdig og målt; den venter kun på indsættelse |
-| 3 | To egne fotos pr. guide + Batch 4-mockups | 6–8 t **eller** et Printful-token | Låser **+28,7 pp** op i rebrand — den største enkeltstående gevinst |
+| 3 | To egne fotos pr. guide + Batch 4-mockups | 6–8 t **eller** Gelato-forbindelsen (Printful er ude fra 15/11) | Låser **+28,7 pp** op i rebrand — den største enkeltstående gevinst |
 | 4 | S5: staging, DMARC/DKIM, backup-politik, branch protection | 1–2 t + Simply-sag | Låser **+40 pp** op i miljø; to af trinnene tager under en time |
 | 5 | Plugin-zip, forumside, Reddit-app, kanal-tokens | 2 t + ventetid | Lukker P5's sidste 3,3 pp |
 | 6 | KABINE E1–E6 | uger | Kræver CVR, leverandør og annoncekonto — ikke en WP-handling |
@@ -696,9 +696,9 @@ Siden er publiceret men står i GSC som *Discovered — currently not indexed*. 
 **Krav til begge fotos:** 1600 px på den lange led, JPEG, under 300 KB, ingen tekst i billedet, og billedet skal vise det produkt der linkes i samme afsnit. **Bevis:** hver af de fem sider har mindst to billeder med alt-tekst, og det fremhævede billede er sat.
 
 
-### 4.2 Batch 4 — 5–8 billeder pr. produkt (eller et Printful-token)
+### 4.2 Batch 4 — 5–8 billeder pr. produkt (eller Gelatos mockups)
 
-**Hvor:** Enten **Printful** (Settings → Keys i pluginnet, så mockups hentes pr. produkt) eller Mediebibliotek. **Målt 8/11:** 22 billeder på 20 publicerede produkter, **0 produkter med 3 eller flere**, 62 billedplaceringer tomme. **Kilde:** `docs/roadmap.md` §4d række E og §4e række Batch 4.
+**Hvor:** Enten **Gelato** (wp-admin → Gelato → Connect, så Gelatos mockups kan bruges; Printful er ude fra 15/11) eller Mediebibliotek. **Målt 8/11:** 22 billeder på 20 publicerede produkter, **0 produkter med 3 eller flere**, 62 billedplaceringer tomme. **Kilde:** `docs/roadmap.md` §4d række E og §4e række Batch 4.
 
 | Krav | Værdi |
 | --- | --- |
@@ -706,7 +706,7 @@ Siden er publiceret men står i GSC som *Discovered — currently not indexed*. 
 | Filnavn | `p<produkt-id>-<nummer>.jpg`, fx `p477-1.jpg` |
 | Alt-tekst | Produktets navn + hvad billedet viser, fx «Copper Pilot Goggles — Vintage Windproof, detalje af brillestel» |
 | Rækkefølge | 1 = produktet alene, 2 = båret, 3 = detalje, 4–8 = variationer |
-| Alternativ | `[EJER: Printful-token]` — så hentes mockups automatisk i stedet |
+| Alternativ | `[EJER: Gelato-forbindelse]` — så kan Gelatos mockups bruges i stedet |
 
 **De 20 produkter der mangler billeder** (id · navn · pris, fra [`priser-live-2026-11-09.md`](library/priser-live-2026-11-09.md)):
 
@@ -934,7 +934,7 @@ Alt nedenfor er data agenten **ikke** må gætte. Ingen af felterne er udfyldt m
 | `[EJER: firmanavn]` | registreret navn (nu »Henning 6«) | Complianz → Organization | ejer |
 | `[EJER: ja/nej]` (flere) | beslutninger: Stripe-metoder, valuta-switcher, repo-offentlighed, plugins, auto/godkendelse, Publer, Command Center, witchy-tarot | de nævnte sider | ejer |
 | `[EJER: aftale + nøgler]` | MobilePay/PayPal | WooCommerce → Betalinger | ejer |
-| `[EJER: Printful-token]` eller 5–8 fotos | mockups | Plugin → Settings → Keys / Mediebibliotek | ejer |
+| `[EJER: Gelato-forbindelse]` eller 5–8 fotos | mockups | wp-admin → Gelato / Mediebibliotek | ejer |
 | `[EJER: staging-adgang]`, `[EJER: selector]`, `[EJER: DKIM-TXT]` | subdomæne, DKIM | Simply | ejer |
 | `[EJER: butikkens adresse]` | DMARC `rua`/`ruf` | Simply → DNS | ejer |
 | `[EJER: Reddit-app-id/secret/brugernavn/adgangskode]` | script-app | Plugin → Settings → Keys | ejer |

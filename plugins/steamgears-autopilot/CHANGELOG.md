@@ -10,6 +10,35 @@ Noterne er skrevet ud fra commit-historikken og de dokumenter der hører til hve
 
 <!-- patch-notes: baseline 7.65.0 -->
 
+## 7.88.0 — 2026-11-15
+
+**Fjernet: Printful. Gelato er printvejen, og pluginet beder ikke længere om et Printful-token.**
+
+### Fjernet
+- Printful-kortet under *Settings → Keys*, Printful-nøgletesten (`SGAP_KeyCheck::check_printful()`) og
+  felterne `printful_api_key` og `printful_store_id` (indstillinger, etiketter, hjælpetekster, *Shop & feeds*).
+- Kostpris-importen fra Printfuls sync-varianter: abilityen `woo-cost-import`, `printful_cost()`,
+  sync-produktopslaget, indekset og prischachen. Kataloget har nu 35 værktøjer (før 36).
+- Ved opgradering slettes de gemte Printful-indstillinger og prischachen fra sitet.
+
+### Ændret
+- Kostprisen kommer kun fra produktets eget felt `_sgap_cost`, fx Gelato-prisen. En note i
+  `_sgap_cost_source` vises ved tallet. Uden kostpris afvises et forslag stadig, og fejlteksten nævner feltet
+  og Gelato.
+- Nichebutikken skriver produktion, fragt og størrelsesskema med Gelato, og første ejertrin er
+  "Connect Gelato (wp-admin → Gelato) and enter each product's cost".
+- *Test connections* tester AI og Publer.
+
+### Målt
+- Live 15/11 svarede nøgletesten "The token works, but it sees no store" for et Printful-token, som ingen
+  skal bruge. Ejeren 15/11: "Printful er ude ligesom Printify, vi kører kun Gelato".
+- `plugins/tests/smoke.php`: 1 563 PASS / 0 FAIL. De 27 Printful-import- og nøgletest-checks er erstattet af
+  8 checks for, at Printful er væk, at kosten kun læses fra feltet, og at opgraderingen sletter indstillingerne.
+  `tools/deploy/niche_preflight.py --check`: 4 nicher, 0 fejl efter `--build`.
+
+### Ikke målt
+- Gelato-forbindelsen selv. Den sker i det officielle Gelato-plugin og er ikke gennemført (S4.7).
+
 ## 7.87.1 — 2026-11-15
 
 **Ændret: skribenten får listen over forbudte ord, så kvalitetsporten ikke skal stoppe opslaget bagefter.**
