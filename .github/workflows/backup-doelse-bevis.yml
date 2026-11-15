@@ -6,11 +6,13 @@ name: Bevis — øvelsen mod en rigtig MySQL (fixture)
 # dump, gendannelse i sgtest_ med RTO, rækkeparitet pr. tabel, oprydning med krav om 0 rester,
 # rapport og historik læst uændret af tools/db_drill_check.py.
 #
-# To ting er med vilje anderledes end produktion:
+# Tre ting er med vilje anderledes end produktion:
 #   * Databasen findes kun inde i jobbet. Rapport og historik skrives til $RUNNER_TEMP og
 #     committes **aldrig**, så reports/db-drill-history.json forbliver produktionsmål.
 #   * Der køres også en **negativ kontrol** (forkert DB_PREFIX), som skal give rød dom —
 #     en grøn måling af ingenting må ikke kunne forekomme.
+#   * Klienten er serverens egen version: findes der ingen brugbar mysqldump på runneren,
+#     kører `mysql` og `mysqldump` i en mysql:8.4-container med samme filsystem og netværk.
 #
 # Produktionsvejen er urørt: backup-doelse.yml læser stadig DB_*-secrets og springer øvelsen
 # over uden dem.
@@ -71,25 +73,58 @@ jobs:
           python3 tools/db_drill_ci.py --selftest
           python3 tools/db_drill_check.py --selftest
 
-      - name: Sikr en MySQL-klient (MySQL, ikke MariaDB)
+      - name: Sikr en MySQL-klient (MySQL 8+, ellers containeren)
         run: |
           set -euo pipefail
-          if command -v mysqldump >/dev/null && mysqldump --version | grep -qi 'Distrib 8'; then
-            mysqldump --version
+          # En MariaDB-klient kan ikke dumpe en MySQL 8.4-server korrekt, og Ubuntu-pakkede
+          # MySQL-klienter skriver »for Linux on x86_64 (Ubuntu)« i stedet for »Distrib 8« —
+          # derfor accepteres både 8.x og 9.x, mens MariaDB afvises.
+          brugbar() {
+            command -v mysqldump >/dev/null 2>&1 || return 1
+            mysqldump --version 2>/dev/null | grep -qi 'mariadb' && return 1
+            mysqldump --version 2>/dev/null | grep -qE 'Ver (8|9)\.' || return 1
+            return 0
+          }
+          echo "før: $(command -v mysqldump 2>/dev/null || echo 'ingen mysqldump') $(mysqldump --version 2>/dev/null || true)"
+          if brugbar; then
+            echo "OK: runnerens klient bruges"
             exit 0
           fi
-          sudo apt-get update -qq
+          sudo apt-get update -qq || true
           for pakke in mysql-client mysql-client-8.4 mysql-client-8.0; do
-            if sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq "$pakke" 2>/dev/null; then
-              echo "installerede $pakke"
-              break
+            echo "prøver apt-pakken $pakke"
+            sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq "$pakke" >/dev/null 2>&1 || true
+            if brugbar; then
+              echo "OK: $pakke gav $(mysqldump --version)"
+              exit 0
             fi
           done
+          # Ingen brugbar klient på runneren: brug serverens egen version, så klient og server
+          # ikke kan blive uenige om syntaksen. Shimmen har en *citeret* heredoc, så den ydre
+          # shell ikke udvider $RUNNER_TEMP eller $@ (målt: »v: unbound variable«, fordi
+          # -v i docker-kommandoen blev læst som en variabel).
+          echo "ingen brugbar MySQL-klient på runneren — bruger klienten fra mysql:8.4"
+          mkdir -p "$RUNNER_TEMP/bin"
+          cat > "$RUNNER_TEMP/bin/mysql" <<'SH'
+          #!/usr/bin/env bash
+          exec docker run --rm -i --network host --entrypoint mysql \
+            -v "$RUNNER_TEMP:$RUNNER_TEMP" -v "$GITHUB_WORKSPACE:$GITHUB_WORKSPACE" \
+            -v /tmp:/tmp \
+            -e HOME=/tmp mysql:8.4 "$@"
+          SH
+          cat > "$RUNNER_TEMP/bin/mysqldump" <<'SH'
+          #!/usr/bin/env bash
+          exec docker run --rm -i --network host --entrypoint mysqldump \
+            -v "$RUNNER_TEMP:$RUNNER_TEMP" -v "$GITHUB_WORKSPACE:$GITHUB_WORKSPACE" \
+            -v /tmp:/tmp \
+            -e HOME=/tmp mysql:8.4 "$@"
+          SH
+          chmod +x "$RUNNER_TEMP/bin/mysql" "$RUNNER_TEMP/bin/mysqldump"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+          export PATH="$RUNNER_TEMP/bin:$PATH"
           mysqldump --version
-          # En MariaDB-klient kan ikke dumpe en MySQL 8.4-server korrekt; det skal fejle her,
-          # ikke som et mystisk tomt dump.
-          mysqldump --version | grep -qi 'Distrib 8' || {
-            echo "::error title=Ingen MySQL-klient::mysqldump er ikke fra MySQL 8 — installer mysql-client i runner-miljøet."
+          brugbar || {
+            echo "::error title=Ingen MySQL-klient::hverken runnerens klient, apt eller mysql:8.4-containeren gav en brugbar mysqldump."
             exit 1
           }
 
@@ -106,10 +141,10 @@ jobs:
               WHERE table_schema=DATABASE() AND table_name LIKE '${DB_PREFIX}%' AND table_type='BASE TABLE';
             SELECT 'visninger under prefix', COUNT(*) FROM information_schema.tables
               WHERE table_schema=DATABASE() AND table_name LIKE '${DB_PREFIX}%' AND table_type='VIEW';
-            SELECT 'rækker i alt', (SELECT COUNT(*) FROM fx7c1a9b2e_options)
+            SELECT 'raekker i alt', (SELECT COUNT(*) FROM fx7c1a9b2e_options)
               + (SELECT COUNT(*) FROM fx7c1a9b2e_posts) + (SELECT COUNT(*) FROM fx7c1a9b2e_postmeta)
               + (SELECT COUNT(*) FROM fx7c1a9b2e_users);
-            SELECT 'forældede rækker', COUNT(*) FROM clk4219fc96b5_options;"
+            SELECT 'foraeldede raekker', COUNT(*) FROM clk4219fc96b5_options;"
 
       - name: Kør øvelsen mod den levende fixture-database
         id: oevelse
@@ -121,7 +156,6 @@ jobs:
           kode=0
           python3 tools/db_drill_ci.py --ci --out "$rapport" --reports "$bevis" || kode=$?
           echo "rapport=$rapport" >> "$GITHUB_OUTPUT"
-          echo "bevis=$bevis" >> "$GITHUB_OUTPUT"
           cat "$rapport"
           if [ "$kode" -ne 0 ]; then
             echo "::error title=Øvelsen fejlede mod fixture-databasen::Se loggen ovenfor — rapporten er skrevet til $rapport."
@@ -151,17 +185,17 @@ jobs:
           fejl = []
           print("| Måltal | Målt | Forventet | |")
           print("| --- | --- | --- | --- |")
-          for navn, (målt, forventet) in krav.items():
-              ok = målt == forventet
-              print(f"| {navn} | `{målt}` | `{forventet}` | {'✓' if ok else '✗'} |")
+          for navn, (maalt, forventet) in krav.items():
+              ok = maalt == forventet
+              print(f"| {navn} | `{maalt}` | `{forventet}` | {'✓' if ok else '✗'} |")
               if not ok:
-                  fejl.append(f"{navn}: målt {målt!r}, forventede {forventet!r}")
+                  fejl.append(f"{navn}: målt {maalt!r}, forventede {forventet!r}")
           ekstra = {
-              "dump > 10 kB": (d.get("dump_bytes", 0) > 10_000),
-              "RTO > 0 s": (d.get("rto_seconds", 0) > 0),
-              "RTO inden for budget": (0 < d.get("rto_seconds", 0) <= 300),
-              "sha256 sat": (isinstance(d.get("dump_sha256"), str) and len(d["dump_sha256"]) == 64),
-              "ingen fejl fra trinnene": (not (d.get("errors") or {})),
+              "dump > 10 kB": d.get("dump_bytes", 0) > 10_000,
+              "RTO > 0 s": d.get("rto_seconds", 0) > 0,
+              "RTO inden for budget": 0 < d.get("rto_seconds", 0) <= 300,
+              "sha256 sat": isinstance(d.get("dump_sha256"), str) and len(d["dump_sha256"]) == 64,
+              "ingen fejl fra trinnene": not (d.get("errors") or {}),
           }
           for navn, ok in ekstra.items():
               print(f"| {navn} | `{'ja' if ok else 'nej'}` | `ja` | {'✓' if ok else '✗'} |")
@@ -228,11 +262,11 @@ jobs:
           set -euo pipefail
           umask 077
           cnf="$RUNNER_TEMP/fixture.cnf"
-          rækker="$(mysql --defaults-extra-file="$cnf" -N -B "$DB_NAME" \
+          raekker="$(mysql --defaults-extra-file="$cnf" -N -B "$DB_NAME" \
             -e "SELECT COUNT(*) FROM clk4219fc96b5_options")"
-          echo "clk4219fc96b5_options har $rækker rækker (forventet 3)"
-          if [ "$rækker" != "3" ]; then
-            echo "::error title=Legacy-tabellen blev rørt::Dumpet skulle have udeladt clk4219fc96b5_options, men den har $rækker rækker."
+          echo "clk4219fc96b5_options har $raekker rækker (forventet 3)"
+          if [ "$raekker" != "3" ]; then
+            echo "::error title=Legacy-tabellen blev rørt::Dumpet skulle have udeladt clk4219fc96b5_options, men den har $raekker rækker."
             exit 1
           fi
 
