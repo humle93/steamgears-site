@@ -1,19 +1,25 @@
 #!/usr/bin/env python3
-"""byg_adsense_kopi.py — statisk kopi af steamgears.eu's indhold, klar til AdSense.
+"""byg_adsense_kopi.py — selvstændig statisk kopi af steamgears.eu, klar til AdSense.
 
 Simplys WAF svarer `454 Checking your browser` på HTML herfra (målt 11/11 2026), så
 kopien kan ikke spejle færdige sider. Den bygges i stedet af REST-indholdet
 (`wp/v2/pages` og `wp/v2/posts`), som svarer 200, og får sit eget lette layout.
 
-Hver side får:
-  * to annoncepladser (top og bund) med `adsbygoogle`,
-  * `rel="canonical"` til den oprindelige URL, så kopien ikke konkurrerer med sitet,
-  * `noindex` medmindre `--indekser` bruges (duplikat-indhold rangordnes ikke),
-  * interne links omskrevet til den lokale fil når målet findes i kopien.
+Kopien er **selvstændig**: alle billeder hentes ind i `media/`, og hver reference
+skrives om ved kilden, så intet peger på en fil der ikke findes:
+
+  * intern URL der findes i kopien  → lokal fil
+  * intern URL der ikke kopieres    → absolut URL til det levende site
+    (fx kurv, kasse, produktkategorier og `/go/<id>/`, som ikke har indhold)
+  * ekstern URL                     → urørt
+  * billede                         → `media/<navn>-<hash>.<ext>`
+
+Hver side får to annoncepladser, `rel="canonical"` til den oprindelige URL og
+`noindex` medmindre `--indekser` bruges (duplikat-indhold skal ikke rangordnes).
 
 Kør:
-    python3 tools/byg_adsense_kopi.py              # skriv adsense-kopi/
-    python3 tools/byg_adsense_kopi.py --check      # kontrollér den byggede kopi
+    python3 tools/byg_adsense_kopi.py              # byg (henter også billeder)
+    python3 tools/byg_adsense_kopi.py --check      # kontrollér hele mappen, ingen netværk
     python3 tools/byg_adsense_kopi.py --indekser   # tillad indeksering
 
 AdSense-id'erne er pladsholdere. Sæt de rigtige som miljøvariabler:
@@ -24,6 +30,7 @@ Intet hemmeligt ligger i repoet; en pub-id er offentlig, men skal være ejerens.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import html
 import json
 import os
@@ -32,11 +39,13 @@ import sys
 import time
 import urllib.error
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "adsense-kopi"
+MEDIA = "media"
 SITE = os.environ.get("SITE_URL") or "https://steamgears.eu"
 API = os.environ.get("SITE_API") or f"{SITE}/wp-json/wp/v2"
 CLIENT = os.environ.get("ADSENSE_CLIENT") or "ca-pub-0000000000000000"
@@ -44,8 +53,20 @@ SLOT_TOP = os.environ.get("ADSENSE_SLOT_TOP") or "0000000001"
 SLOT_BOTTOM = os.environ.get("ADSENSE_SLOT_BOTTOM") or "0000000002"
 UA = "steamgears-adsense-kopi/1.0"
 
-REST_SIDER = ("pages", "posts")
+SITE_HOST = urlsplit(SITE).netloc
+BILLEDE_EXT = {".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg", ".avif", ".ico"}
+FIL_EXT = BILLEDE_EXT | {".css", ".js", ".pdf", ".zip", ".mp4", ".webm"}
+MAGIC = {
+    b"\xff\xd8\xff": "jpeg",
+    b"\x89PNG": "png",
+    b"GIF8": "gif",
+    b"RIFF": "webp",
+    b"<svg": "svg",
+    b"<?xm": "svg",
+}
 
+
+# ---------------------------------------------------------------- REST
 
 def hent(url: str) -> list[dict]:
     """Alle poster fra et REST-endepunkt, 100 pr. side."""
@@ -77,6 +98,129 @@ def ren_tekst(vaerdi: str) -> str:
     return html.unescape(re.sub(r"<[^>]+>", "", vaerdi or "")).strip()
 
 
+def uden_markup(vaerdi: str) -> str:
+    return " ".join(re.sub(r"<[^>]+>", " ", vaerdi or "").split())
+
+
+# ---------------------------------------------------------------- medier
+
+def medie_navn(url: str) -> str:
+    """Stabilt, kollisionsfrit filnavn: læsbar stamme + hash af hele URL'en."""
+    sti = urlsplit(url).path
+    stamme = Path(sti).stem or "fil"
+    stamme = re.sub(r"[^A-Za-z0-9._-]+", "-", stamme).strip("-.")[:60] or "fil"
+    ext = Path(sti).suffix.lower()
+    if ext not in BILLEDE_EXT:
+        ext = ".jpg"
+    return f"{stamme}-{hashlib.sha1(url.encode()).hexdigest()[:10]}{ext}"
+
+
+def hent_medie(url: str) -> tuple[str, bytes | None]:
+    req = urllib.request.Request(url, headers={"User-Agent": UA,
+                                               "Accept": "image/avif,image/webp,image/*,*/*"})
+    try:
+        with urllib.request.urlopen(req, timeout=60) as svar:
+            data = svar.read()
+            ctype = svar.headers.get("Content-Type", "")
+            if not data or (ctype and not ctype.startswith(("image/", "application/octet"))):
+                return url, None
+            return url, data
+    except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError):
+        return url, None
+
+
+def hent_medier(urls: list[str]) -> dict[str, str]:
+    """Hent alle billeder til media/. Eksisterende, ikke-tomme filer genbruges."""
+    (OUT / MEDIA).mkdir(parents=True, exist_ok=True)
+    medier: dict[str, str] = {}
+    mangler: list[str] = []
+    for url in urls:
+        navn = medie_navn(url)
+        fil = OUT / MEDIA / navn
+        if fil.exists() and fil.stat().st_size > 0:
+            medier[url] = f"{MEDIA}/{navn}"
+        else:
+            mangler.append(url)
+
+    if mangler:
+        print(f"Henter {len(mangler)} billeder …")
+        with ThreadPoolExecutor(max_workers=8) as ex:
+            for url, data in ex.map(hent_medie, mangler):
+                navn = medie_navn(url)
+                if data is None:
+                    print(f"  ! kunne ikke hente {url}")
+                    continue
+                (OUT / MEDIA / navn).write_bytes(data)
+                medier[url] = f"{MEDIA}/{navn}"
+    return medier
+
+
+def omskriv_medier(indhold: str, medier: dict[str, str]) -> str:
+    """src, srcset og url(...) i inline-styles peger på de lokale filer."""
+    def en(url: str) -> str:
+        return medier.get(url.strip(), url)
+
+    def src_repl(m: re.Match[str]) -> str:
+        return f'src="{en(m.group(1))}"'
+
+    def srcset_repl(m: re.Match[str]) -> str:
+        dele = []
+        for del_ in m.group(1).split(","):
+            del_ = del_.strip()
+            if not del_:
+                continue
+            stykker = del_.split()
+            stykker[0] = en(stykker[0])
+            dele.append(" ".join(stykker))
+        return 'srcset="' + ", ".join(dele) + '"'
+
+    def css_repl(m: re.Match[str]) -> str:
+        return f"url({en(m.group(2))})"
+
+    indhold = re.sub(r'src="([^"]+)"', src_repl, indhold)
+    indhold = re.sub(r'srcset="([^"]+)"', srcset_repl, indhold)
+    indhold = re.sub(r'url\((["\']?)(https?://[^)"\']+)\1\)', css_repl, indhold)
+    return indhold
+
+
+# ---------------------------------------------------------------- links
+
+def normaliser_sti(sti: str) -> str:
+    return sti if sti.endswith("/") else sti + "/"
+
+
+def omskriv_links(indhold: str, kort: dict[str, str], medier: dict[str, str]) -> str:
+    """Hver href bliver lokal hvis målet er kopieret, ellers absolut til sitet."""
+    def erstat(match: re.Match[str]) -> str:
+        href = match.group(1).strip()
+        if not href or href.startswith(("mailto:", "tel:", "data:", "#")):
+            return match.group(0)
+        if href in medier:
+            return f'href="{medier[href]}"'
+        if href.startswith(("http://", "https://", "//")):
+            dele = urlsplit(href if not href.startswith("//") else "https:" + href)
+            if dele.netloc and dele.netloc != SITE_HOST:
+                return match.group(0)  # eksternt domæne
+            sti = dele.path or "/"
+            hale = (f"?{dele.query}" if dele.query else "") + (f"#{dele.fragment}" if dele.fragment else "")
+        else:
+            sti, _, fragment = href.partition("#")
+            sti, _, query = sti.partition("?")
+            hale = (f"?{query}" if query else "") + (f"#{fragment}" if fragment else "")
+            if not sti.startswith("/"):
+                return match.group(0)  # relativ sti, fx style.css
+        sti = normaliser_sti(sti)
+        if sti in kort:
+            return f'href="{kort[sti]}{hale}"'
+        # Ikke kopieret (kurv, kasse, kategori, /go/<id>/): peg på det levende site,
+        # så kopien aldrig viser et link til en side der ikke findes her.
+        return f'href="{SITE}{sti}{hale}"'
+
+    return re.sub(r'href="([^"]*)"', erstat, indhold)
+
+
+# ---------------------------------------------------------------- skabelon
+
 def filnavn(slug: str, brugt: set[str]) -> str:
     navn = re.sub(r"[^a-z0-9-]+", "-", (slug or "side").lower()).strip("-") or "side"
     kandidat, nr = navn, 2
@@ -84,21 +228,6 @@ def filnavn(slug: str, brugt: set[str]) -> str:
         kandidat, nr = f"{navn}-{nr}", nr + 1
     brugt.add(kandidat)
     return f"{kandidat}.html"
-
-
-def omskriv_links(indhold: str, kort: dict[str, str]) -> str:
-    """Interne links til kendte sider bliver lokale filer; resten står urørt."""
-    def erstat(match: re.Match[str]) -> str:
-        href = match.group(1)
-        sti = urlsplit(href).path if href.startswith("http") else href.split("#")[0].split("?")[0]
-        if not sti or not sti.startswith("/"):
-            return match.group(0)
-        sti = sti if sti.endswith("/") else sti + "/"
-        if sti == "/" and "index" in kort:
-            return 'href="index.html"'
-        return f'href="{kort[sti]}"' if sti in kort else match.group(0)
-
-    return re.sub(r'href="([^"]+)"', erstat, indhold)
 
 
 def annonce(slot: str, etiket: str) -> str:
@@ -180,6 +309,8 @@ footer a{color:var(--daemp)}
 """
 
 
+# ---------------------------------------------------------------- byg
+
 def byg(indekser: bool) -> int:
     OUT.mkdir(parents=True, exist_ok=True)
     kort: dict[str, str] = {}
@@ -189,12 +320,13 @@ def byg(indekser: bool) -> int:
     for rest_typer, gruppe in (("pages", "side"), ("posts", "guide")):
         for post in hent(f"{API}/{rest_typer}"):
             sti = urlsplit(post.get("link") or "").path or "/"
-            sti = sti if sti.endswith("/") else sti + "/"
+            sti = normaliser_sti(sti)
             titel = ren_tekst(post.get("title", {}).get("rendered", "")) or post.get("slug", "side")
             indhold = post.get("content", {}).get("rendered", "")
             # AdSense må ikke stå på sider uden redaktionelt indhold. Kurv, kasse,
-            # min konto og opt-out er funktionssider — de hoppes over, ikke pyntes.
-            if len(" ".join(re.sub(r"<[^>]+>", " ", indhold).split())) < 200:
+            # min konto, shop og opt-out er funktionssider — de hoppes over, og
+            # links til dem peger på det levende site i stedet (se omskriv_links).
+            if len(uden_markup(indhold)) < 200:
                 sprunget.append({"titel": titel, "original": post.get("link") or f"{SITE}{sti}"})
                 continue
             emner.append({
@@ -213,9 +345,25 @@ def byg(indekser: bool) -> int:
         kort[emne["sti"]] = emne["fil"]
     kort.setdefault("/", "index.html")
 
+    # Alle billed-URL'er samles først, så de kan hentes én gang for alle sider.
+    billeder: set[str] = set()
+    for emne in emner:
+        for url in re.findall(r'src="(https?://[^"]+)"', emne["indhold"]):
+            billeder.add(url)
+        for srcset in re.findall(r'srcset="([^"]+)"', emne["indhold"]):
+            for del_ in srcset.split(","):
+                stykker = del_.strip().split()
+                if stykker and stykker[0].startswith("http"):
+                    billeder.add(stykker[0])
+        for url in re.findall(r'url\((["\']?)(https?://[^)"\']+)\1\)', emne["indhold"]):
+            billeder.add(url[1])
+    billeder = {u for u in billeder if SITE_HOST in u}
+    medier = hent_medier(sorted(billeder))
+
     top, bund = annonce(SLOT_TOP, "Annonce"), annonce(SLOT_BOTTOM, "Annonce")
     for emne in emner:
-        indhold = omskriv_links(emne["indhold"], kort)
+        indhold = omskriv_medier(emne["indhold"], medier)
+        indhold = omskriv_links(indhold, kort, medier)
         dato = f'<p class="dato">Updated {emne["dato"]}</p>' if emne["dato"] else ""
         (OUT / emne["fil"]).write_text(skabelon(
             titel=emne["titel"],
@@ -234,14 +382,42 @@ def byg(indekser: bool) -> int:
         "kilde": SITE, "indekser": indekser,
         "adsense": {"client": CLIENT, "slot_top": SLOT_TOP, "slot_bottom": SLOT_BOTTOM},
         "sprunget_over": sprunget,
+        "medier": len(medier),
         "sider": [{"fil": e["fil"], "titel": e["titel"], "original": e["link"], "gruppe": e["gruppe"]}
                   for e in emner],
     }, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
 
     print(f"Byggede {len(emner)} sider + hub i {OUT.relative_to(ROOT)}/ "
-          f"({len(sider)} pages, {len(poster)} posts). "
+          f"({len(sider)} pages, {len(poster)} posts, {len(medier)} billeder). "
           f"Sprang {len(sprunget)} indholdsløse sider over.")
     return 0
+
+
+# ---------------------------------------------------------------- kontrol
+
+def referencer(raw: str) -> list[tuple[str, str]]:
+    """(attribut, værdi) for href, src, srcset og url(...) i dokumentet."""
+    refs: list[tuple[str, str]] = []
+    for vaerdi in re.findall(r'href="([^"]*)"', raw):
+        refs.append(("href", vaerdi))
+    for vaerdi in re.findall(r'src="([^"]*)"', raw):
+        refs.append(("src", vaerdi))
+    for vaerdi in re.findall(r'srcset="([^"]*)"', raw):
+        for del_ in vaerdi.split(","):
+            stykker = del_.strip().split()
+            if stykker:
+                refs.append(("srcset", stykker[0]))
+    for _, url in re.findall(r'url\((["\']?)(https?://[^)"\']+)\1\)', raw):
+        refs.append(("css-url", url))
+    return refs
+
+
+def se_medie(fil: Path) -> str | None:
+    """Fejltekst hvis filen ikke er et billede med kendt signatur."""
+    hoved = fil.read_bytes()[:16]
+    if not any(hoved.startswith(sig) for sig in MAGIC):
+        return f"{fil.name}: ukendt filsignatur"
+    return None
 
 
 def check() -> int:
@@ -251,42 +427,114 @@ def check() -> int:
         print("Ingen kopi at kontrollere — kør uden --check først.")
         return 1
     manifest = json.loads(manifest_fil.read_text(encoding="utf-8"))
-    for post in manifest["sider"]:
-        fil = OUT / post["fil"]
-        if not fil.exists():
-            fejl.append(f"mangler fil: {post['fil']}")
-            continue
+    indekser = bool(manifest.get("indekser"))
+    sider = {s["fil"]: s for s in manifest["sider"]}
+
+    html_filer = sorted(OUT.glob("*.html"))
+    forventet = len(sider) + 1
+    if len(html_filer) != forventet:
+        fejl.append(f"forventede {forventet} html-filer, fandt {len(html_filer)}")
+
+    links_i_alt = 0
+    lokale_links = 0
+    eksterne_links = 0
+    hub_raw = (OUT / "index.html").read_text(encoding="utf-8") if (OUT / "index.html").exists() else ""
+
+    for fil in html_filer:
         raw = fil.read_text(encoding="utf-8")
-        krop = re.search(r"<main>(.*?)</main>", raw, re.S)
-        tekst = re.sub(r"<[^>]+>", " ", krop.group(1) if krop else "")
-        if len(" ".join(tekst.split())) < 200:
-            fejl.append(f"tynd side: {post['fil']}")
-        for markør in ("adsbygoogle", 'rel="canonical"', "pagead2.googlesyndication.com"):
-            if markør not in raw:
-                fejl.append(f"{post['fil']} mangler {markør}")
-        if post["original"] not in raw:
-            fejl.append(f"{post['fil']} mangler canonical til originalen")
+        navn = fil.name
+
+        # 1. Annoncepladser og canonical i hver fil.
+        if raw.count('class="adsbygoogle"') < 2:
+            fejl.append(f"{navn}: mangler annoncepladser (fandt {raw.count('class=\"adsbygoogle\"')})")
+        canonical = re.search(r'<link rel="canonical" href="([^"]+)"', raw)
+        if not canonical:
+            fejl.append(f"{navn}: mangler canonical")
+        elif not canonical.group(1).startswith(SITE):
+            fejl.append(f"{navn}: canonical peger ikke på sitet ({canonical.group(1)})")
+        if navn in sider and canonical and canonical.group(1) != sider[navn]["original"]:
+            fejl.append(f"{navn}: canonical {canonical.group(1)} matcher ikke manifestet")
+        robots = re.search(r'<meta name="robots" content="([^"]+)"', raw)
+        if not robots:
+            fejl.append(f"{navn}: mangler robots-meta")
+        elif not indekser and "noindex" not in robots.group(1):
+            fejl.append(f"{navn}: noindex mangler")
+        if 'rel="stylesheet" href="style.css"' not in raw:
+            fejl.append(f"{navn}: mangler stylesheet")
+
+        # 2. Hver reference skal pege på en fil der findes.
+        for attribut, vaerdi in referencer(raw):
+            links_i_alt += 1
+            vaerdi = vaerdi.strip()
+            if not vaerdi or vaerdi.startswith(("mailto:", "tel:", "data:", "#")):
+                continue
+            if vaerdi.startswith(("http://", "https://", "//")):
+                dele = urlsplit(vaerdi if not vaerdi.startswith("//") else "https:" + vaerdi)
+                if dele.netloc == SITE_HOST:
+                    eksterne_links += 1  # bevidst peget på det levende site
+                    if attribut in {"src", "srcset", "css-url"}:
+                        fejl.append(f"{navn}: {attribut} peger stadig på sitet ({vaerdi})")
+                    continue
+                eksterne_links += 1
+                continue
+            if vaerdi.startswith("/"):
+                fejl.append(f"{navn}: root-relativ {attribut} kan ikke findes i mappen ({vaerdi})")
+                continue
+            sti = vaerdi.split("#")[0].split("?")[0]
+            maal = (fil.parent / sti).resolve()
+            if not maal.exists():
+                fejl.append(f"{navn}: {attribut} → {vaerdi} findes ikke")
+                continue
+            if not str(maal).startswith(str(OUT.resolve())):
+                fejl.append(f"{navn}: {attribut} → {vaerdi} peger ud af mappen")
+                continue
+            lokale_links += 1
+
+        # 3. Hub'en skal linke til alle sider i manifestet.
+        if navn == "index.html":
+            for side in sider.values():
+                if f'href="{side["fil"]}"' not in raw:
+                    fejl.append(f"index.html: mangler link til {side['fil']}")
+
+    # 4. Alle medier: findes, ikke tomme, rigtig signatur.
+    medie_filer = sorted((OUT / MEDIA).glob("*")) if (OUT / MEDIA).exists() else []
+    for fil in medie_filer:
+        if fil.stat().st_size == 0:
+            fejl.append(f"{MEDIA}/{fil.name}: tom fil")
+            continue
+        problem = se_medie(fil)
+        if problem:
+            fejl.append(problem)
+    if not medie_filer:
+        fejl.append("mappen media/ er tom — billederne blev ikke hentet")
+
+    # 5. Faste filer.
     for fil in ("index.html", "style.css", "ads.txt"):
         if not (OUT / fil).exists():
             fejl.append(f"mangler {fil}")
     if (OUT / "ads.txt").exists() and "google.com, pub-" not in (OUT / "ads.txt").read_text():
         fejl.append("ads.txt mangler google.com-linje")
-    html_filer = list(OUT.glob("*.html"))
-    if len(html_filer) != len(manifest["sider"]) + 1:
-        fejl.append(f"forventede {len(manifest['sider']) + 1} html-filer, fandt {len(html_filer)}")
+
     if fejl:
-        print("Kopien er ikke i orden:")
-        for punkt in fejl[:20]:
+        print(f"Kopien er ikke i orden — {len(fejl)} fejl:")
+        for punkt in fejl[:25]:
             print(f"  - {punkt}")
+        if len(fejl) > 25:
+            print(f"  … og {len(fejl) - 25} mere")
         return 1
-    print(f"[OK] {len(html_filer)} html-filer, alle med annonceplads og canonical; "
-          f"ads.txt og style.css på plads.")
+
+    print(f"[OK] {len(html_filer)} html-filer: alle har 2 annoncepladser, canonical og robots; "
+          f"{lokale_links} lokale referencer peger på filer i mappen, "
+          f"{eksterne_links} bevidste links til det levende site; "
+          f"{len(medie_filer)} medier i {MEDIA}/ har gyldig signatur.")
     return 0
 
 
+# ---------------------------------------------------------------- main
+
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Statisk AdSense-kopi af steamgears.eu.")
-    parser.add_argument("--check", action="store_true", help="kontrollér den byggede kopi")
+    parser = argparse.ArgumentParser(description="Selvstændig AdSense-kopi af steamgears.eu.")
+    parser.add_argument("--check", action="store_true", help="kontrollér hele den byggede mappe")
     parser.add_argument("--indekser", action="store_true", help="tillad søgemaskine-indeksering")
     args = parser.parse_args()
     return check() if args.check else byg(args.indekser)

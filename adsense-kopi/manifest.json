@@ -1,5 +1,5 @@
 {
- "bygget": "2026-11-15T20:38:50Z",
+ "bygget": "2026-11-15T21:01:40Z",
  "kilde": "https://steamgears.eu",
  "indekser": false,
  "adsense": {
@@ -29,6 +29,7 @@
    "original": "https://steamgears.eu/shop/"
   }
  ],
+ "medier": 203,
  "sider": [
   {
    "fil": "returns.html",
