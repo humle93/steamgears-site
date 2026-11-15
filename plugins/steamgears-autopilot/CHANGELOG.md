@@ -10,6 +10,19 @@ Noterne er skrevet ud fra commit-historikken og de dokumenter der hører til hve
 
 <!-- patch-notes: baseline 7.65.0 -->
 
+## 7.87.1 — 2026-11-15
+
+**Ændret: skribenten får listen over forbudte ord, så kvalitetsporten ikke skal stoppe opslaget bagefter.**
+
+### Ændret
+- `SGAP_AI::prompt()` nævner ordene fra *Settings → General → Banned words* (højst 40) med en klar instruks
+  om aldrig at bruge dem. Uden forbudte ord kommer linjen ikke med.
+
+### Målt
+- Live 14/11: et Pinterest-opslag fik 8/10 af redaktøren, men blev holdt tilbage af kvalitetsporten, fordi
+  det indeholdt "price" fra listen. Kladden ventede derfor på et menneske.
+- `plugins/tests/smoke.php`: 1 586 PASS / 0 FAIL (2 nye checks).
+
 ## 7.87.0 — 2026-11-15
 
 **Ændret: færre hashtags, en egen åbning pr. kanal og den hurtigste gratis model først hos AI-redaktøren.**

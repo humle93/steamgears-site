@@ -259,6 +259,10 @@ class SGAP_AI {
             . "\n"
             . "Channels and their rules:\n{$rules}\n"
             . "Give every channel its own opening line and angle: never start two channels with the same sentence or idea.\n"
+            // 7.87.0: the quality gate blocks these words after the fact (a draft with "price" waited
+            // on 14/11 although the editor gave it 8/10), so the writer is told about them up front.
+            . (class_exists('SGAP_Quality') && SGAP_Quality::words() ? 'Never use these words (they are blocked on this site): '
+                . implode(', ', array_slice(SGAP_Quality::words(), 0, 40)) . ".\n" : '')
             . 'Return exactly one item per channel. "title" is a short headline (used as the Pinterest pin title), '
             . '"text" is the post itself without hashtags, "hashtags" are separate (each starting with #), '
             . '"alt_text" describes the page\'s main image for screen readers.'

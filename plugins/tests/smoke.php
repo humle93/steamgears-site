@@ -1895,6 +1895,11 @@ check('7.87 tags: Instagram keeps at most 5, Pinterest 4, Telegram none, duplica
 $pp=SGAP_AI::prompt(['title'=>'Goggles','type'=>'product','summary'=>'Brass goggles.'],['facebook','instagram','pinterest']);
 check('7.87 prompt: the channel rules ask for 3-5 Instagram tags and a distinct opening per channel', str_contains($pp,'3-5 specific hashtags') && !str_contains($pp,'8-15')
   && str_contains($pp,'never start two channels with the same sentence or idea'));
+update_option('sgap_banned_words',"Price\nguaranteed, cheap");
+$pb=SGAP_AI::prompt(['title'=>'Goggles','type'=>'product','summary'=>'Brass goggles.'],['facebook']);
+check('7.87 prompt: the banned words are named to the writer, so the quality gate does not have to stop the post', str_contains($pb,'Never use these words (they are blocked on this site): price, guaranteed, cheap.'));
+update_option('sgap_banned_words','');
+check('7.87 prompt: no banned words, no extra line', !str_contains(SGAP_AI::prompt(['title'=>'G','type'=>'product','summary'=>'B'],['facebook']),'Never use these words'));
 check('7.87 editor: Nemotron Super is asked first, Ultra stays in the list', SGAP_Editor::models()[0]==='nvidia/nemotron-3.5-super-vl:free' && in_array('nvidia/nemotron-3-ultra-550b-a55b:free',SGAP_Editor::models(),true));
 // P3.2/P3.5-slut
 exit(empty($GLOBALS['fail'])?0:1);
