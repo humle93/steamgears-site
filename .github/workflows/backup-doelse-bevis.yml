@@ -129,18 +129,48 @@ jobs:
           }
 
       - name: Seed fixturet
+        env:
+          FIXTURE_ROOT_PASSWORD: fixture-root-not-a-secret
         run: |
-          set -euo pipefail
+          set -uo pipefail
           umask 077
           cnf="$RUNNER_TEMP/fixture.cnf"
           printf '[client]\nhost=%s\nport=%s\nuser=%s\npassword="%s"\n' \
             "$DB_HOST" "$DB_PORT" "$DB_USER" "$DB_PASSWORD" > "$cnf"
-          mysql --defaults-extra-file="$cnf" "$DB_NAME" < tools/db_drill_fixture.sql
+          rootcnf="$RUNNER_TEMP/root.cnf"
+          printf '[client]\nhost=%s\nport=%s\nuser=root\npassword="%s"\n' \
+            "$DB_HOST" "$DB_PORT" "$FIXTURE_ROOT_PASSWORD" > "$rootcnf"
+          echo "klient: $(mysql --version)"
+
+          # Triggeren oprettes af fixture-brugeren (så DEFINER matcher den bruger der senere
+          # gendanner), men det kræver at serveren accepterer triggere uden SUPER — ellers
+          # svarer MySQL 1419 når binlog er slået til, som den er i mysql:8.4-billedet.
+          if ! ud=$(mysql --defaults-extra-file="$rootcnf" -N -B \
+                 -e "SET GLOBAL log_bin_trust_function_creators = 1; SELECT @@log_bin_trust_function_creators;" 2>&1); then
+            echo "::error title=Kunne ikke tillade triggere::$(echo "$ud" | tr '\n' ' ' | cut -c1-300)"
+            exit 1
+          fi
+          echo "log_bin_trust_function_creators = $ud"
+
+          if ! ud=$(mysql --defaults-extra-file="$cnf" -N -B -e "SELECT VERSION(), CURRENT_USER()" 2>&1); then
+            echo "::error title=Fixture-brugeren kan ikke logge ind::$(echo "$ud" | tr '\n' ' ' | cut -c1-300)"
+            exit 1
+          fi
+          echo "forbundet som: $ud"
+
+          if ! ud=$(mysql --defaults-extra-file="$cnf" --show-warnings "$DB_NAME" \
+                 < tools/db_drill_fixture.sql 2>&1); then
+            echo "::error title=Seed-scriptet fejlede::$(echo "$ud" | tail -3 | tr '\n' ' ' | cut -c1-500)"
+            exit 1
+          fi
+          [ -n "$ud" ] && echo "$ud"
+
           mysql --defaults-extra-file="$cnf" -N -B "$DB_NAME" -e "
             SELECT 'tabeller under prefix', COUNT(*) FROM information_schema.tables
               WHERE table_schema=DATABASE() AND table_name LIKE '${DB_PREFIX}%' AND table_type='BASE TABLE';
             SELECT 'visninger under prefix', COUNT(*) FROM information_schema.tables
               WHERE table_schema=DATABASE() AND table_name LIKE '${DB_PREFIX}%' AND table_type='VIEW';
+            SELECT 'triggere', COUNT(*) FROM information_schema.triggers WHERE trigger_schema=DATABASE();
             SELECT 'raekker i alt', (SELECT COUNT(*) FROM fx7c1a9b2e_options)
               + (SELECT COUNT(*) FROM fx7c1a9b2e_posts) + (SELECT COUNT(*) FROM fx7c1a9b2e_postmeta)
               + (SELECT COUNT(*) FROM fx7c1a9b2e_users);
