@@ -19,11 +19,19 @@ Værktøjet skelner de to og fejler kun på det ægte. Det læser også Stripes 
 (`capabilities`), så en skygge uden aktiv evne bliver meldt som **WARN** — dér er der
 noget ejeren skal slå til i Stripe Dashboard.
 
+**Baseline:** `tools/payment_methods_baseline.json` husker hvilke metoder der skal være
+aktive, og hvilke gateways der var tændt da baselinen blev skrevet. En metode, der var
+tilgængelig før og nu er væk, giver **WARN** med metodenavn (krævede metoder som `stripe`
+giver **FAIL**). Uden en baseline kan en tavs nedlukning ikke opdages, så en manglende
+baseline er selv et **FAIL**. Baselines opdateres bevidst i hånden — en automatisk
+opdatering ville gøre netop nedlukningen usynlig.
+
 Kør:
 
     python3 tools/payment_methods.py                 # mål det levende site
     python3 tools/payment_methods.py --json          # samme, som JSON
     python3 tools/payment_methods.py --from-file x   # døm et gemt svar offline
+    python3 tools/payment_methods.py --baseline y    # brug en anden baseline (fx i en test)
 
 Exit: 0 = ingen ægte fejl · 1 = en ægte fejl eller manglende måling · 2 = ingen credential.
 Tokenet printes aldrig.
@@ -37,6 +45,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+BASELINE_FILE = ROOT / "tools" / "payment_methods_baseline.json"
 RESOURCE = os.environ.get("NOVAMIRA_RESOURCE") or "https://steamgears.eu/wp-json/mcp/novamira-oauth"
 
 # De metoder §4d C handlede om, med den Stripe-evne der afgør om de kan tilbydes.
@@ -79,6 +88,13 @@ return [
   'checkout_available'=> array_keys(WC()->payment_gateways()->get_available_payment_gateways()),
   'capabilities'      => $caps,
   'gateways'          => $rows,
+  'bacs_configured'   => (function () {
+    $s = get_option('woocommerce_bacs_settings', []);
+    foreach (['iban','account_number','account_details'] as $key) {
+      if (trim((string) ($s[$key] ?? '')) !== '') { return true; }
+    }
+    return false;
+  })(),
 ];
 '''
 
@@ -94,9 +110,23 @@ def is_shadow(gateway: dict, payload: dict) -> bool:
             and str(gateway.get("class", "")).startswith(SHADOW_PREFIX))
 
 
-def judge(payload: dict) -> list[dict]:
+def load_baseline(path: Path | None = None) -> tuple[dict, str]:
+    """Læs baseline-filen. Returnér (data, fejl) — `data` er tom ved fejl."""
+    target = Path(path) if path else BASELINE_FILE
+    try:
+        data = json.loads(target.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:  # noqa: BLE001 — både manglende fil og ugyldig JSON
+        return {}, f"kunne ikke læse {target}: {exc}"
+    if not isinstance(data, dict) or not isinstance(data.get("required"), list) \
+            or not isinstance(data.get("expected"), dict):
+        return {}, f"{target} mangler 'required' (liste) eller 'expected' (objekt)"
+    return data, ""
+
+
+def judge(payload: dict, baseline: dict | None = None, baseline_error: str = "") -> list[dict]:
     """Returnér én række pr. krav. `status` er PASS, WARN eller FAIL."""
     checks: list[dict] = []
+    baseline = baseline if isinstance(baseline, dict) else {}
 
     def add(name: str, status: str, detail) -> None:
         checks.append({"krav": name, "status": status, "maalt": detail})
@@ -115,6 +145,44 @@ def judge(payload: dict) -> list[dict]:
 
     add("kortbetaling er tilgængelig", "PASS" if "stripe" in checkout else "FAIL",
         "stripe" if "stripe" in checkout else "stripe mangler i kassen")
+
+    # Baseline: hvad skal kassen tilbyde, og hvad var tændt sidste gang den blev målt?
+    enabled_ids = [g["id"] for g in enabled]
+    required = [str(x) for x in (baseline.get("required") or [])]
+    expected = baseline.get("expected") or {}
+    if not baseline:
+        add("baseline for betalingsmetoder findes", "FAIL",
+            baseline_error or "ingen baseline — en tavs nedlukning kan ikke opdages")
+    else:
+        missing_required = [m for m in required if m not in checkout]
+        missing_expected = [m for m in expected if m not in checkout]
+        if missing_required:
+            add("kassen opfylder baseline (krævede metoder)", "FAIL",
+                "mangler: " + ", ".join(missing_required))
+        elif missing_expected:
+            detail = "; ".join(
+                f"{m} — {str((expected[m] or {}).get('grund', 'forsvundet fra kassen'))}" for m in missing_expected
+            )
+            add("betalingsmetode forsvundet fra kassen", "WARN", detail)
+        else:
+            add("kassen matcher baseline", "PASS",
+                f"{len(required) + len(expected)} forventede metoder er tilgængelige")
+
+        was_enabled = [str(x) for x in (baseline.get("enabled_gateways") or [])]
+        now_off = [m for m in was_enabled if m not in enabled_ids]
+        if now_off:
+            detail = "; ".join(
+                f"{m}{' — ' + str((expected[m] or {}).get('grund', '')) if m in expected else ''}" for m in now_off
+            )
+            add("tidligere tændt gateway er ikke længere tændt", "WARN", detail)
+        elif was_enabled:
+            add("ingen tidligere tændt gateway er slukket", "PASS", f"{len(was_enabled)} gateway(s) som før")
+
+    if "bacs" in enabled_ids:
+        add("bacs er tændt med bankoplysninger",
+            "PASS" if payload.get("bacs_configured") else "FAIL",
+            "bankoplysninger findes" if payload.get("bacs_configured")
+            else "bacs er enabled, men IBAN/kontonummer er tomme — kunden kan ikke betale")
 
     shadows = [g["id"] for g in enabled if is_shadow(g, payload)]
     if payload.get("ocs"):
@@ -255,7 +323,9 @@ def main(argv: list[str] | None = None) -> int:
             print(f"[FEJL] {exc}")
             return 1
 
-    checks = judge(payload)
+    baseline_path = Path(args[args.index("--baseline") + 1]) if "--baseline" in args else None
+    baseline, baseline_error = load_baseline(baseline_path)
+    checks = judge(payload, baseline, baseline_error)
     if "--json" in args:
         print(json.dumps({"payload": payload, "checks": checks}, ensure_ascii=False, indent=1))
     else:

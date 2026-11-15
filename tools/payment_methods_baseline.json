@@ -1,0 +1,25 @@
+{
+ "opdateret": "2026-11-15",
+ "grundlag": "Målt 12/11 i docs/library/betalingsmetoder-2026-11-12.md (stripe + bacs i kassen, 5 gateways tændt) og 15/11 i docs/library/google-pay-ikon-advarsel-2026-11-15.md (bacs enabled=no, 4 gateways tændt).",
+ "required": [
+  "stripe"
+ ],
+ "expected": {
+  "bacs": {
+   "siden": "2026-11-12",
+   "tilstand": "slået fra 15/11",
+   "grund": "bankfelterne (IBAN/kontonummer) er tomme, så bankoverførsel ikke kan gennemføres; ejeren skal udfylde dem og slå metoden til i WooCommerce → Betalinger"
+  }
+ },
+ "enabled_gateways": [
+  "stripe",
+  "stripe_amazon_pay",
+  "stripe_klarna",
+  "stripe_link",
+  "bacs"
+ ],
+ "last_known_checkout": [
+  "stripe",
+  "bacs"
+ ]
+}
