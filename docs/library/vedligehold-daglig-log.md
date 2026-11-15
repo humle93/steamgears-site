@@ -480,3 +480,14 @@
 - ⚠️ CARRY-OVER (6. dag): **WPCode Lite stadig INAKTIV** — AdSense head-snippet-injektion fortsat muligvis væk; ads.txt OK (pub-8388762344150338). MailPoet fortsat uninstalled (kendt).
 - Ingen 5xx eller redirect-loops.
 - Konklusion: Drift/checkout GRØN. Kun carry-over-afvigelsen (WPCode/AdSense-snippet); ingen ny mail til Henning — 6. dag uden ændring. Bemærkning: WAF var strammere i morgendagt (456 på første kald; orders/gateways/plugins krævede 60-120 s pauser mellem kald).
+
+## 14/11 2026 07:00 — Daglig drift/checkout-tjek
+
+- Forside + /shop/ 200 (browser-fetch begge successfuld; consent-banner + produktgrid som sædvanlig).
+- Stripe gateway: enabled=true, **testmode=no (live)** ✅ (via /wc/v3/payment_gateways). Uændret.
+- Ordrer seneste 24h: **0 nye, 0 fejlede** (after=13/11 07:00 → tom array). Seneste reelle ordre stadig #873 (27/10).
+- Plugins (26 total, REST — antal +1 fra 13/11): alle kritiske AKTIVE — WooCommerce 11.2.2, Stripe 11.1.1, Rank Math 1.0.282, W3TC 2.11.0, Complianz 7.5.7 (+ Terms 1.4.1), Site Kit 1.191.0, Ads.txt Manager, WP Mail SMTP, steamgears-autopilot **7.86.0** (minor bump fra 7.84.1). Kanal-plugins aktive: Google for Woo 3.10.0, Pinterest for Woo 1.6.2, TikTok 1.4.3, Novamira, AI Engine + AI-providers, Antispam Bee, Redirection, HTTPS Redirection, Database Cleaner, SeedProd.
+- 🆕 NYT PLUGIN: **Gelato Integration for WooCommerce 1.3.3 — AKTIV** (tilføjet siden 13/11). Print-on-demand-udbyder; sandsynligvis installeret af Henning i forbindelse med ny POD-linje. Ikke kritisk, men ukendt indtil bekræftet. OBS-område: kun ét gateway-resultat returnerede testmode-felt; øvrige gateways uændrede ift. format.
+- ⚠️ CARRY-OVER (7. dag): **WPCode Lite stadig INAKTIV** — AdSense head-snippet-injektion fortsat muligvis væk; ads.txt OK (pub-8388762344150338). MailPoet fortsat uninstalled (kendt).
+- Ingen 5xx eller redirect-loops.
+- Drift/checkout GRØN. Nyt Gelato-plugin nævnes til Henning ved næste kontakt (sandsynligvis bevidst). WAF: sc_clearance-PoW-challenge (454) på raw curl i morgendagt — krævede flere minutters ventetid før REST-kald slap igennem; iøvrigt samme mønster som tidligere dage.

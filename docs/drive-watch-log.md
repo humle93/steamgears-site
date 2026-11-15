@@ -158,3 +158,55 @@ Ingen sletninger, ingen permissions-ændringer.
 ## 2026-11-13 21:00 UTC — ingen ændringer (token 43780)
 ## 2026-11-13 22:00 — ingen ændringer (token 43780)
 ## 2026-11-14 00:01 — ingen ændringer (token 43780)
+- 2026-11-14 00:00 UTC (run 43780): ingen ændringer.
+## 2026-11-14 01:00 UTC — ingen ændringer (token 43780)
+## 2026-11-14 02:00 (CET) / 03:00 (DK-tid)
+- list_changes med token 43780: ingen ændringer. Token uændret (43780).
+- 2026-11-14 03:00 (kl. 04:00 DK): ingen ændringer.
+## 2026-11-14 04:00 — ingen ændringer (token 43780)
+2026-11-14 05:00 UTC — ingen ændringer (token 43780)
+- 2026-11-14 07:00 CET: ingen ændringer (token 43780).
+
+## 2026-11-14 07:00 — ingen ændringer (token 43780)
+- 2026-11-14 08:00 (UTC) / 09:00 DK: ingen ændringer (token 43780)
+## 2026-11-14 09:25–09:41 UTC (10:25–10:41 DK), token 43780 → 43810
+- 5 ændringer, alle ny/opdateret, ingen sletninger eller permissions:
+  1. "Steamgears — Vektor-Skabelon (SVG) & 300 DPI Print-Pipeline Script" (09:25) — opdateret af Henning
+  2. "Steamgears – ChatGPT-prompter (19 motiver)" (09:38) — ny
+  3. "Dieselpunk - billedprompts til de 5 plakater (14-11-2026)" (09:40) — ny
+  4. "LÆS MIG – sådan skal billederne ligge" (09:40) — ny
+  5. "Clockwork Fantasy & Gotik - billedprompts til de 5 plakater (14-11-2026)" (09:40) — ny
+- Kontekst: viderearbeit med poster-pipeline (Gelato/DKK-køreplaner fra i går); nye billedprompts + filstruktur-README.
+
+## 2026-11-14 10:00
+- Ny mappe: "Steamgears – backup" (oprettet 10:53). Tom — ingen filer i den endnu.
+## 2026-11-14 11:00 CET — ingen ændringer (token 43811)
+## 2026-11-14 12:00 (kørt kl. 14:15)
+Ny/ændret: "Billedprompts – endelige dieselpunk + clockwork punk (14-11-2026)" (Google Doc, 12:12) — afløser de to gamle prompt-dok i tema-mapperne. 6 prompts (D1-D3 dieselpunk, C1-C3 clockwork), kørt lokalt med SD-Turbo (1024×1536). Mangler: opskalering til tryk (50×70 kræver 5906×8268 px) før Gelato; 13 motiver stadig ikke genereret.
+- 2026-11-14 13:00 UTC: ingen ændringer (token 43819)
+2026-11-14 14:29 UTC — ingen ændringer (token 43819 uændret)
+- 2026-11-14 15:00 UTC: ingen ændringer (token 43819 uændret)
+
+## 2026-11-14 16:00 (UTC) — Steamgears Drive-watch
+- Ingen ændringer siden sidst (token 43819, uændret).
+
+## 2026-11-14 18:00
+- Ingen ændringer siden sidst (token 43819, uændret).
+
+## 2026-11-14 17:00 (time)
+- Ny fil: Garrys Mod v14.07.10.rar (uploadet 20:22 UTC)
+- Token: 43819 → 43822
+
+## 2026-11-14 19:00
+Ingen ændringer siden sidst (token 43822 uændret).
+- 2026-11-14 22:00 (DK): ingen ændringer (token 43822 uændret).
+
+
+- Ingen ændringer siden sidst. Token: 43822
+- 2026-11-15 (task run 2026-11-14T20:00Z): ingen ændringer (token 43822 uændret)
+
+## 2026-11-15 01:00 (UTC)
+- Ingen ændringer siden sidst.
+- 2026-11-14 22:00 UTC (23:00 DK): ingen ændringer (token 43822)
+## 2026-11-15 00:00 DK — ingen ændringer (token 43822)
+- 2026-11-15 03:00 CET (02:00 UTC): ingen ændringer (token 43822 uændret)
