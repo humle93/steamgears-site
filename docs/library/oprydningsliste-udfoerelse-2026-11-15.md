@@ -123,3 +123,45 @@ curl -sL 'https://steamgears.eu/wp-json/wp/v2/product?per_page=1' -D- -o /dev/nu
 curl -sL 'https://steamgears.eu/product/astrolabe-planisphere-tee/' | grep -oE '"@type":"[A-Za-z]+"' | sort | uniq -c
 curl -s 'https://steamgears.eu/' | grep -oE 'gtag/js\?id=[A-Za-z0-9-]+'
 ```
+
+---
+
+## 7. Målt med skriveadgang (Novamira, 15/11)
+
+Adgangen kom i stand samme dag gennem Novamiras **device flow**: klient registreret med DCR
+(`/wp-json/novamira/v1/oauth/register`), engangskode fra `/oauth/device`, godkendt af ejeren i wp-admin, og
+tokenet hentet fra `/oauth/token` (3600 s + refresh, gemt i `~/.config/steamgears-novamira/` med mode `600`).
+Fladen svarer `serverInfo: Novamira (OAuth) v1.0.0` og udstiller **172 abilities** — heraf
+`novamira/run-wp-cli`, `novamira/execute-php`, `steamgears-tools/update-post|update-product|upload-media` og
+Rank Maths schema-evner.
+
+To fælder undervejs: en **authorization code** fra authorize-siden udløb, før den blev byttet (brug device-flowet
+til alt der kræver et menneske i browseren), og en klient registreret af `mcp_oauth.py` har kun
+`authorization_code` — device-koden skal anmodes med den klient der blev registreret med
+`grant_types: ["urn:ietf:params:oauth:grant-type:device_code"]`, ellers svarer serveren
+`unauthorized_client`.
+
+### Hvad databasen faktisk indeholder
+
+| Måling | Resultat | Betydning for planen |
+| --- | --- | --- |
+| Produkter pr. status | **14 publish · 79 draft · 0 pending · 92 trash** | Planens »83 i frontend« var de 79 kladder oveni — der er intet at afstemme (§2 lukket) |
+| Produktkategorier | **38 i alt, 16 i brug, 22 tomme** | Planens »37 kategorier« holder næsten; de 22 tomme er thin-content-sider (§6 delvist bekræftet) |
+| Produkt-tags | 33 | — |
+| WooCommerce-webhooks | **12, alle `active`: 6 TikTok (`TBP_WEBHOOK`) + 6 Gelato** | **Ingen Juno-webhooks.** §5's webhook-halvdel er uden objekt |
+| `_webhook_*`-postmeta | 52 rækker = 4 nøgler × 13 — WooCommerces egne webhook-felter | Må **ikke** slettes; det er TikTok- og Gelato-integrationerne |
+| Juno/Azure i postmeta | 135 rækker, alle `_sgap_source_url` (97) og `_sgap_rescue_backup` (25) | Autopilotens egen oprindelses-record for reddede billeder — dokumentation, ikke rester |
+| Juno i options | **0** | Intet at rydde |
+| Juno-scripts i publiceret indhold | **0** | Intet at rydde |
+
+**Konklusion på §5:** opgaven er allerede løst — eller rettere: den var aldrig et problem på dette site. Der er
+ingen Juno-webhooks, ingen Juno-options og ingen Juno-scripts. At »rense« `_webhook_*`-postmeta ville slå
+TikTok- og Gelato-synkroniseringen i stykker.
+
+### Hvad der stadig kræver en ejerbeslutning
+
+§6 er den eneste tilbageværende ændring med reel effekt, og den kan ikke udføres som beskrevet, fordi
+grundlaget er et andet: planen ville sætte »57 t-shirts og hoodies« på kladde, men der er **11 publicerede
+ikke-plakat-produkter** (4 tees, 4 hoodies, 1 phone case, 2 jewelry) og **3 plakater**. En posters-only-
+konsolidering efter planen efterlader en shop med **3 varer**. Det er en forretningsbeslutning, ikke en
+oprydning, og den skal træffes med omsætningstal foran sig.
