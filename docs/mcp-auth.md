@@ -210,9 +210,33 @@ dækker to uger med fornyelse — ikke én arbejdsgang. Fælder målt samme dag:
 | Fælde | Tal | Konsekvens |
 | --- | --- | --- |
 | DCR pr. IP-adresse | **10 i timen** (`DCR_RATE_LIMIT_PER_HOUR`, transient på en time) | et par fejlforsøg brænder vinduet; `--device` svarer `429 rate_limited` indtil timen ruller |
-| Klienter pr. IP-adresse | **10 i alt** (`MAX_CLIENTS_PER_IP`) | ubrugte registreringer fylder, indtil de prunes efter **24 t** (`STALE_UNUSED_CLIENT_TTL`) |
+| Klienter pr. IP-adresse | **10 i alt** (`MAX_CLIENTS_PER_IP`) | ubrugte registreringer fylder pladserne; en administrator kan frigive dem med det samme — se nedenfor — ellers prunes de efter **24 t** (`STALE_UNUSED_CLIENT_TTL`) |
 | Klienter pr. site | 50 aktive (`novamira_oauth_max_clients` kan hæve) | ikke nået på dette site |
 | Ukendt `client_id` | `401 Unknown client_id` | en klient fra en tidligere sandkasse kan ikke genbruges — registrér igen |
+
+#### Frigiv pladserne med det samme: *Reset registration limits*
+
+De ubrugte registreringer kan **ikke** slettes fra **Manage Connections**. Siden har to lister, og ingen af dem
+indeholder dem: *connected apps* viser kun apps med et levende refresh-token (et mislykket forsøg får aldrig
+et), og *manually created client IDs* viser kun de ID'er en administrator selv har oprettet. En klient der aldrig
+nåede en token-udveksling står altså ingen steder — den forsvinder først ved 24-timers-pruning. Det er derfor en
+agent kan stå fast i timevis uden at noget i wp-admin ser galt ud.
+
+Novamira har en knap til præcis dette, og den sidder i den gren af fejlfindingen der handler om registrering:
+
+1. **Novamira → Troubleshoot** (`/wp-admin/admin.php?page=novamira-troubleshoot`).
+2. Vælg symptomet *“Couldn’t register with [connection name]’s sign-in service…”* (`registration`-grenen).
+3. Klik **Reset registration limits**.
+
+Svaret er fx *“Registration limits reset. 7 incomplete registrations were removed.”* — tallet er de pladser der
+blev brændt. `includes/troubleshoot/admin.php` kalder `ClientValidation\reset_registration_limits()` bag
+`check_admin_referer()` og `novamira_current_user_can_manage()`, så det kræver en administrator-session (ikke
+MCP); det er hele pointen, for en agent der er låst ude kan ikke selv åbne døren.
+
+**Rækkefølgen er vigtig.** Knappen siger selv: *“Connect your AI client once now: each further attempt starts
+filling the limits again.”* Klik reset, og kør `--device` **én** gang bagefter — ikke en række forsøg, for hvert
+mislykket registreringsforsøg tæller i det samme vindue. Alternativet er at vente til de ubrugte registreringer
+prunes automatisk efter 24 timer.
 
 ### Fornyelse i pluginnet (7.44)
 

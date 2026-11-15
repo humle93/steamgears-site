@@ -81,13 +81,35 @@ the loopback client, with no redirect_uris and the device-code and refresh_token
 | Grænse | Værdi | Hvor | Virkning |
 | --- | --- | --- | --- |
 | DCR pr. IP | 10 i timen | `DCR_RATE_LIMIT_PER_HOUR`, transient 1 t | `429 rate_limited` i op til en time — et par diagnostiske registreringer brænder vinduet |
-| Klienter pr. IP | 10 i alt | `MAX_CLIENTS_PER_IP` | ubrugte registreringer fylder pladserne |
+| Klienter pr. IP | 10 i alt | `MAX_CLIENTS_PER_IP` | ubrugte registreringer fylder pladserne; en administrator kan frigive dem med det samme |
 | Pruning af ubrugte | 24 t | `STALE_UNUSED_CLIENT_TTL` | en klient der aldrig fik et token forsvinder af sig selv |
 | Klienter pr. site | 50 aktive | `MAX_CLIENTS_PER_SITE` / `novamira_oauth_max_clients` | ikke nået her |
 | Ukendt klient | `401 Unknown client_id` | — | en `client_id` fra en tidligere sandkasse er død; registrér igen |
 
 **Lærdom:** registrér **én** klient pr. flade og gem den; brug `--device` med det samme i stedet for at
 eksperimentere sig frem, når timen er ung.
+
+## 5b. Vejen ud af låsen: *Reset registration limits*
+
+De ubrugte registreringer kan **ikke** slettes fra **Manage Connections**. Siden viser kun apps med et levende
+refresh-token (et mislykket forsøg får aldrig et) og de klient-ID'er en administrator selv har oprettet. En
+klient der aldrig nåede en token-udveksling står altså ingen steder, og forsvinder først ved 24-timers-pruning —
+derfor kan en agent være låst ude, mens wp-admin ser fuldstændig normalt ud.
+
+Novamira har knappen i fejlfindingen:
+
+1. **Novamira → Troubleshoot** (`/wp-admin/admin.php?page=novamira-troubleshoot`).
+2. Vælg symptomet «Couldn’t register with [connection name]’s sign-in service…» (`registration`-grenen).
+3. Klik **Reset registration limits**.
+
+Svaret er fx «Registration limits reset. 7 incomplete registrations were removed.» Tallet er de pladser der
+blev brændt. `includes/troubleshoot/admin.php` kalder `ClientValidation\reset_registration_limits()` bag
+`check_admin_referer()` og `novamira_current_user_can_manage()`, så det kræver en administrator-session — ikke
+MCP. Det er hele pointen: en agent der er låst ude kan ikke selv åbne døren.
+
+**Rækkefølgen er vigtig.** Knappen siger selv «Connect your AI client once now: each further attempt starts
+filling the limits again.» Klik reset, og kør `--device` **én** gang — ikke en række forsøg, for hvert mislykket
+registreringsforsøg tæller i samme vindue.
 
 ## 6. Sådan verificeres det
 
