@@ -1,0 +1,252 @@
+name: Bevis — øvelsen mod en rigtig MySQL (fixture)
+
+# Produktionskørslen (backup-doelse.yml) kræver fire DB_*-secrets og kan derfor ikke bevises
+# af en agent. Denne kørsel beviser **kodevejen** i stedet: en midlertidig MySQL 8.4 som
+# service container, seedet med tools/db_drill_fixture.sql, og hele øvelsen kørt mod den —
+# dump, gendannelse i sgtest_ med RTO, rækkeparitet pr. tabel, oprydning med krav om 0 rester,
+# rapport og historik læst uændret af tools/db_drill_check.py.
+#
+# To ting er med vilje anderledes end produktion:
+#   * Databasen findes kun inde i jobbet. Rapport og historik skrives til $RUNNER_TEMP og
+#     committes **aldrig**, så reports/db-drill-history.json forbliver produktionsmål.
+#   * Der køres også en **negativ kontrol** (forkert DB_PREFIX), som skal give rød dom —
+#     en grøn måling af ingenting må ikke kunne forekomme.
+#
+# Produktionsvejen er urørt: backup-doelse.yml læser stadig DB_*-secrets og springer øvelsen
+# over uden dem.
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/backup-doelse-bevis.yml
+      - tools/db_drill_ci.py
+      - tools/db_drill_check.py
+      - tools/db_drill_fixture.sql
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backup-doelse-bevis
+  cancel-in-progress: false
+
+jobs:
+  bevis:
+    name: Øvelse mod seedet MySQL
+    runs-on: ubuntu-26.04
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: fixture-root-not-a-secret
+          MYSQL_DATABASE: steamgears_fixture
+          MYSQL_USER: drill
+          MYSQL_PASSWORD: fixture-drill-not-a-secret
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=30
+    env:
+      DB_HOST: 127.0.0.1
+      DB_PORT: '3306'
+      DB_NAME: steamgears_fixture
+      DB_USER: drill
+      DB_PASSWORD: fixture-drill-not-a-secret
+      DB_PREFIX: fx7c1a9b2e_
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Offline selftest af øvelsen og værnet
+        run: |
+          python3 tools/db_drill_ci.py --selftest
+          python3 tools/db_drill_check.py --selftest
+
+      - name: Sikr en MySQL-klient (MySQL, ikke MariaDB)
+        run: |
+          set -euo pipefail
+          if command -v mysqldump >/dev/null && mysqldump --version | grep -qi 'Distrib 8'; then
+            mysqldump --version
+            exit 0
+          fi
+          sudo apt-get update -qq
+          for pakke in mysql-client mysql-client-8.4 mysql-client-8.0; do
+            if sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq "$pakke" 2>/dev/null; then
+              echo "installerede $pakke"
+              break
+            fi
+          done
+          mysqldump --version
+          # En MariaDB-klient kan ikke dumpe en MySQL 8.4-server korrekt; det skal fejle her,
+          # ikke som et mystisk tomt dump.
+          mysqldump --version | grep -qi 'Distrib 8' || {
+            echo "::error title=Ingen MySQL-klient::mysqldump er ikke fra MySQL 8 — installer mysql-client i runner-miljøet."
+            exit 1
+          }
+
+      - name: Seed fixturet
+        run: |
+          set -euo pipefail
+          umask 077
+          cnf="$RUNNER_TEMP/fixture.cnf"
+          printf '[client]\nhost=%s\nport=%s\nuser=%s\npassword="%s"\n' \
+            "$DB_HOST" "$DB_PORT" "$DB_USER" "$DB_PASSWORD" > "$cnf"
+          mysql --defaults-extra-file="$cnf" "$DB_NAME" < tools/db_drill_fixture.sql
+          mysql --defaults-extra-file="$cnf" -N -B "$DB_NAME" -e "
+            SELECT 'tabeller under prefix', COUNT(*) FROM information_schema.tables
+              WHERE table_schema=DATABASE() AND table_name LIKE '${DB_PREFIX}%' AND table_type='BASE TABLE';
+            SELECT 'visninger under prefix', COUNT(*) FROM information_schema.tables
+              WHERE table_schema=DATABASE() AND table_name LIKE '${DB_PREFIX}%' AND table_type='VIEW';
+            SELECT 'rækker i alt', (SELECT COUNT(*) FROM fx7c1a9b2e_options)
+              + (SELECT COUNT(*) FROM fx7c1a9b2e_posts) + (SELECT COUNT(*) FROM fx7c1a9b2e_postmeta)
+              + (SELECT COUNT(*) FROM fx7c1a9b2e_users);
+            SELECT 'forældede rækker', COUNT(*) FROM clk4219fc96b5_options;"
+
+      - name: Kør øvelsen mod den levende fixture-database
+        id: oevelse
+        run: |
+          set -uo pipefail
+          bevis="$RUNNER_TEMP/bevis"
+          mkdir -p "$bevis"
+          rapport="$bevis/db-drill-$(date -u +%F).json"
+          kode=0
+          python3 tools/db_drill_ci.py --ci --out "$rapport" --reports "$bevis" || kode=$?
+          echo "rapport=$rapport" >> "$GITHUB_OUTPUT"
+          echo "bevis=$bevis" >> "$GITHUB_OUTPUT"
+          cat "$rapport"
+          if [ "$kode" -ne 0 ]; then
+            echo "::error title=Øvelsen fejlede mod fixture-databasen::Se loggen ovenfor — rapporten er skrevet til $rapport."
+            exit 1
+          fi
+
+      - name: Verificér at målingen er ægte, par, ryddet op og grøn
+        run: |
+          set -euo pipefail
+          python3 - "$RUNNER_TEMP/bevis/db-drill-$(date -u +%F).json" <<'PY'
+          import json, sys
+
+          d = json.load(open(sys.argv[1], encoding="utf-8"))
+          krav = {
+              "tabeller målt": (d.get("tables_expected"), 4),
+              "tabeller gendannet": (d.get("tables_restored"), 4),
+              "rækker målt": (d.get("rows_total"), 3527),
+              "rækkeafvigelser": (d.get("row_mismatches"), 0),
+              "manglende tabeller": (d.get("missing_tables"), 0),
+              "uventede tabeller": (d.get("extra_tables"), 0),
+              "rester efter oprydning": (d.get("left_behind"), 0),
+              "tabeller droppet": (d.get("dropped_tables"), 4),
+              "visninger droppet": (d.get("dropped_views"), 1),
+              "forældede tabeller udeladt": (d.get("legacy_tables_excluded"), 1),
+              "dom": (d.get("ok"), True),
+          }
+          fejl = []
+          print("| Måltal | Målt | Forventet | |")
+          print("| --- | --- | --- | --- |")
+          for navn, (målt, forventet) in krav.items():
+              ok = målt == forventet
+              print(f"| {navn} | `{målt}` | `{forventet}` | {'✓' if ok else '✗'} |")
+              if not ok:
+                  fejl.append(f"{navn}: målt {målt!r}, forventede {forventet!r}")
+          ekstra = {
+              "dump > 10 kB": (d.get("dump_bytes", 0) > 10_000),
+              "RTO > 0 s": (d.get("rto_seconds", 0) > 0),
+              "RTO inden for budget": (0 < d.get("rto_seconds", 0) <= 300),
+              "sha256 sat": (isinstance(d.get("dump_sha256"), str) and len(d["dump_sha256"]) == 64),
+              "ingen fejl fra trinnene": (not (d.get("errors") or {})),
+          }
+          for navn, ok in ekstra.items():
+              print(f"| {navn} | `{'ja' if ok else 'nej'}` | `ja` | {'✓' if ok else '✗'} |")
+              if not ok:
+                  fejl.append(navn)
+          print(f"\nDump **{d.get('dump_bytes')} bytes** på {d.get('dump_seconds')} s · "
+                f"gendannelse (RTO) **{d.get('rto_seconds')} s** · "
+                f"**{d.get('rows_total')} rækker** i {d.get('tables_expected')} tabeller")
+          for f in fejl:
+              print(f"::error title=Beviset holder ikke::{f}")
+          sys.exit(1 if fejl else 0)
+          PY
+
+      - name: Værnet skal dømme rapporten grøn (uændret kode)
+        run: |
+          set -uo pipefail
+          python3 tools/db_drill_check.py --strict --reports "$RUNNER_TEMP/bevis"
+          echo "OK: db_drill_check --strict dømte fixture-rapporten grøn."
+
+      - name: Historikken skal også kunne læses (samme vej som produktion)
+        run: |
+          set -euo pipefail
+          # Flyt historikken væk: så læser værnet dagsrapporten alene — den vej produktionen
+          # bruger når historikken er ny eller væk. Begge veje skal give grøn dom.
+          uden="$RUNNER_TEMP/uden-historik"
+          mkdir -p "$uden"
+          cp "$RUNNER_TEMP/bevis/db-drill-"*.json "$uden/"
+          python3 tools/db_drill_check.py --strict --reports "$uden"
+          echo "OK: dagsrapporten alene giver også en grøn dom."
+
+      - name: Negativ kontrol — forkert prefix skal give rød dom
+        run: |
+          set -uo pipefail
+          negativ="$RUNNER_TEMP/negativ"
+          mkdir -p "$negativ"
+          rapport="$negativ/db-drill-$(date -u +%F).json"
+          kode=0
+          DB_PREFIX="findes_ikke_" python3 tools/db_drill_ci.py --ci \
+            --out "$rapport" --reports "$negativ" || kode=$?
+          if [ "$kode" -eq 0 ]; then
+            echo "::error title=Den negative kontrol bestod::Et forkert DB_PREFIX gav exit 0 — så kan en grøn måling af ingenting forekomme."
+            exit 1
+          fi
+          echo "Øvelsen afviste det forkerte prefix med exit $kode (forventet 1)."
+          python3 - "$rapport" <<'PY'
+          import json, sys
+          d = json.load(open(sys.argv[1], encoding="utf-8"))
+          if d.get("ok") is not False:
+              print("::error title=Den negative kontrol skrev en grøn rapport::ok er ikke false")
+              sys.exit(1)
+          print(f"Rapporten er rød som forventet: {d['errors']}")
+          PY
+          # Og værnet skal sige det samme om den røde rapport.
+          dom=0
+          python3 tools/db_drill_check.py --strict --reports "$negativ" || dom=$?
+          if [ "$dom" -eq 0 ]; then
+            echo "::error title=Værnet godkendte en rød rapport::db_drill_check --strict gav exit 0 på den negative kontrol."
+            exit 1
+          fi
+          echo "OK: db_drill_check --strict dømte den negative kontrol rød (exit $dom)."
+
+      - name: Legacy-tabellen må ikke være rørt
+        run: |
+          set -euo pipefail
+          umask 077
+          cnf="$RUNNER_TEMP/fixture.cnf"
+          rækker="$(mysql --defaults-extra-file="$cnf" -N -B "$DB_NAME" \
+            -e "SELECT COUNT(*) FROM clk4219fc96b5_options")"
+          echo "clk4219fc96b5_options har $rækker rækker (forventet 3)"
+          if [ "$rækker" != "3" ]; then
+            echo "::error title=Legacy-tabellen blev rørt::Dumpet skulle have udeladt clk4219fc96b5_options, men den har $rækker rækker."
+            exit 1
+          fi
+
+      - name: Skriv beviset i job-summaryen
+        if: always()
+        run: |
+          {
+            echo ""
+            echo "### Bevis: øvelsen mod en rigtig MySQL"
+            echo ""
+            echo "Kørt mod en midlertidig \`mysql:8.4\` med \`tools/db_drill_fixture.sql\`"
+            echo "(3 527 rækker, 4 tabeller, 1 visning, 1 trigger og et forældet prefix)."
+            echo "Rapport og historik blev skrevet til \`\$RUNNER_TEMP\` og **ikke** committet —"
+            echo "\`reports/db-drill-history.json\` er fortsat kun produktionsmål."
+            echo ""
+            python3 tools/db_drill_check.py --reports "$RUNNER_TEMP/bevis" || true
+          } >> "$GITHUB_STEP_SUMMARY"

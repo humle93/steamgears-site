@@ -233,7 +233,10 @@ def take_dump(cnf: pathlib.Path, cfg: dict, ignore: list[str], work: pathlib.Pat
         raise DrillError(f"mysqldump findes ikke: {exc}") from exc
     except subprocess.TimeoutExpired as exc:
         raise DrillError("mysqldump timeout efter 1800 s") from exc
-    seconds = int(round(time.time() - started))
+    # Én decimal: en gendannelse på under et halvt sekund må ikke blive rapporteret som
+    # "0 s" — dommen kræver RTO > 0, og et lille fixture beviste at int-afrunding gjorde
+    # en hurtig kørsel rød som om den aldrig var målt.
+    seconds = round(time.time() - started, 1)
     if done.returncode != 0:
         raise DrillError(done.stderr.decode("utf-8", "replace").strip()[:1200]
                          or f"mysqldump afsluttede {done.returncode}")
@@ -252,7 +255,10 @@ def restore(cnf: pathlib.Path, cfg: dict, dump: pathlib.Path) -> dict:
                               capture_output=True, timeout=1800)
     except subprocess.TimeoutExpired as exc:
         raise DrillError("gendannelsen timede ud efter 1800 s") from exc
-    seconds = int(round(time.time() - started))
+    # Én decimal: en gendannelse på under et halvt sekund må ikke blive rapporteret som
+    # "0 s" — dommen kræver RTO > 0, og et lille fixture beviste at int-afrunding gjorde
+    # en hurtig kørsel rød som om den aldrig var målt.
+    seconds = round(time.time() - started, 1)
     if done.returncode != 0:
         raise DrillError(done.stderr.decode("utf-8", "replace").strip()[:1200]
                          or f"mysql afsluttede {done.returncode}")
@@ -306,6 +312,7 @@ def build_report(cfg: dict, measured: dict) -> dict:
         "rto_seconds": st.get("restore_seconds", 0),
         "tables_expected": st.get("tables_expected", 0),
         "tables_restored": st.get("tables_restored", 0),
+        "rows_total": st.get("rows_total", 0),
         "row_mismatches": st.get("row_mismatches", 0),
         "missing_tables": st.get("missing_tables", 0),
         "extra_tables": st.get("extra_tables", 0),
@@ -317,6 +324,7 @@ def build_report(cfg: dict, measured: dict) -> dict:
     report["ok"] = (
         report["dump_bytes"] > 0
         and report["tables_expected"] > 0
+        and report["rows_total"] > 0  # en grøn måling af ingenting findes ikke
         and report["tables_restored"] == report["tables_expected"]
         and report["row_mismatches"] == 0
         and report["missing_tables"] == 0
@@ -359,6 +367,7 @@ def run(cfg: dict, work: pathlib.Path) -> dict:
         measured.update({"parity_seconds": int(round(time.time() - started)),
                          "tables_expected": len(original_counts),
                          "tables_restored": len(scratch_counts),
+                         "rows_total": sum(original_counts.values()),
                          "row_mismatches": verdict["mismatch"],
                          "missing_tables": verdict["missing"],
                          "extra_tables": verdict["extra"]})
@@ -454,7 +463,7 @@ def selftest() -> int:
             "restore_seconds": 6, "parity_seconds": 5, "cleanup_seconds": 2,
             "tables_expected": 269, "tables_restored": 269, "row_mismatches": 0,
             "missing_tables": 0, "extra_tables": 0, "dropped_tables": 269, "dropped_views": 4,
-            "left_behind": 0, "errors": {}}
+            "left_behind": 0, "rows_total": 3335364, "errors": {}}
     report = build_report(config(base)[0], good)
     check("en fuld måling er grøn", report["ok"] is True and report["rto_seconds"] == 6)
     check("rapporten har MCP-vejens felter", {"dato", "dump_bytes", "restore_seconds", "rto_seconds",
@@ -467,6 +476,7 @@ def selftest() -> int:
                          ("tomt dump gør rød", {"dump_bytes": 0}),
                          ("nul tabeller gør rød", {"tables_expected": 0}),
                          ("manglende gendannelse gør rød", {"tables_restored": 0}),
+                         ("nul rækker gør rød", {"rows_total": 0}),
                          ("nul RTO gør rød", {"restore_seconds": 0})):
         check(name, build_report(config(base)[0], dict(good, **change))["ok"] is False)
 
@@ -518,6 +528,10 @@ def selftest() -> int:
     check("kæden tæller to tabeller på begge sider", healthy["tables_expected"] == 2
           and healthy["tables_restored"] == 2)
     check("kæden bruger gendannelsestiden som RTO", healthy["rto_seconds"] == 6)
+    check("kæden summer rækkerne", healthy["rows_total"] == 14)
+    # Sub-sekund RTO: fixturet beviste at int-afrunding gjorde en hurtig kørsel rød
+    hurtig = build_report(config(base)[0], dict(good, restore_seconds=0.4))
+    check("0,4 s RTO er stadig en måling", hurtig["ok"] is True and hurtig["rto_seconds"] == 0.4)
     check("kæden rydder op", healthy["dropped_tables"] == 2 and healthy["left_behind"] == 0)
     check("en afvigelse gør kæden rød", pipeline(scenes["afvigelse"][0], 1)["ok"] is False)
     check("en afvigelse tælles", pipeline(scenes["afvigelse"][0], 1)["row_mismatches"] == 2)
@@ -599,6 +613,7 @@ def main() -> int:
                       "kilde": "ci", "database": cfg["name"], "prefix": cfg["prefix"],
                       "errors": {"oevelse": str(exc)}, "ok": False,
                       "dump_bytes": 0, "tables_expected": 0, "tables_restored": 0,
+                      "rows_total": 0,
                       "row_mismatches": 0, "missing_tables": 0, "extra_tables": 0,
                       "left_behind": 0, "restore_seconds": 0, "rto_seconds": 0}
 
