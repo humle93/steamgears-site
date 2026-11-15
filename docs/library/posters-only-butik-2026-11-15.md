@@ -67,13 +67,17 @@ så den blev kørt igen. Den ligger nu med 0 `/go/`-links.
 | `product_cat-sitemap.xml` | 9 kategorier, heraf 8 tomme | 6 kategorier, alle med varer |
 | Søgning (`?s=hoodie`, `tee`, `poster` …) | — | 0 træf på skjulte produkter |
 | Gaveguiden (804) | 11 links til tee, hoodie, phone case og lommeure | 0; guiden er omskrevet til de tre prints |
+| Forsidens titel og tagline | `<title>` »Steampunk Posters, Prints & Apparel«; tagline »Steampunk posters, prints & apparel« | `<title>` og H1 »Steampunk Posters, Prints & Wall Art«; tagline »Steampunk posters, prints & wall art«; og:title/twitter:title samme tekst |
+| `/shop/` titel, H1 og social | `<title>` »Steampunk Shop: Posters, Prints, Tees & Hoodies«; H1 »Shop Steampunk Gear & Costumes« | `<title>` »Steampunk Shop: Posters & Prints«; H1 »Shop Steampunk Posters & Prints«; og:title/twitter:title samme tekst |
 
-To små mu-plugins bærer de to strukturelle rettelser:
+Tre små mu-plugins bærer de strukturelle rettelser:
 
 - `mu-plugins/sgap-catalog-cleanup.php` — tomme produktkategorier sender **302** til `/shop/` (midlertidig
   redirect, så den forsvinder af sig selv, når en kategori får varer igen).
 - `mu-plugins/sgap-layout-fix.php` — `.wp-block-group.alignfull{max-width:100%}`, fordi temaets
   `alignfull`-sidehoved regner scrollbaren med i `100vw` og gav **1 px** vandret overflow på kurv og kasse.
+- `mu-plugins/sgap-shop-h1.php` — butikkens H1 kom fra denne fil, ikke fra sidens titel; teksten er
+  skiftet til »Shop Steampunk Posters & Prints« (1.1.0), og filen er nu også i repoet.
 
 ## 4. Verifikation (kørt 15/11)
 
@@ -90,7 +94,10 @@ To små mu-plugins bærer de to strukturelle rettelser:
 | Browser 1440 px | forside, shop, produkt, kurv, kasse: **0 overflow**, 3 produkter i shop |
 | Browser 390 px | samme fem sider: **0 overflow**, 2 kolonner i shop |
 | JS-fejl | ingen fra sitets egen kode; kun tredjepart (GA/GTM, Stripe payment-request, CSP-report om Google-frame) |
-| `php -l` | begge nye mu-plugins uden syntaksfejl |
+| Forside: `<title>` + H1 | »Steampunk Posters, Prints & Wall Art«, 0 forekomster af »Apparel« i synlig tekst |
+| `/shop/`: `<title>` + H1 | »Steampunk Shop: Posters & Prints« / »Shop Steampunk Posters & Prints« |
+| `og:title` + `twitter:title` (forside og shop) | prints-only, ingen »Apparel«/»Tees & Hoodies« |
+| `php -l` | alle tre nye/ændrede mu-plugins uden syntaksfejl |
 
 ## 5. Fælder der kostede en runde
 
@@ -106,6 +113,13 @@ To små mu-plugins bærer de to strukturelle rettelser:
    fornyer og roterer refresh-tokenet. Gør det først, når et kald svarer 401 — ikke som fast rutine.
 5. **Et løb med 10 parallelle link-tjek gav falske 503/508** fra Simply. Med `--workers 2` svarede alle
    125 URL'er 200.
+6. **Butikkens H1 stod i en mu-plugin, ikke i sidens titel.** `sgap-shop-h1.php` overskriver
+   `core/query-title` på shop-arkivet; først da filen blev rettet, skiftede H1 — sidens `post_title`
+   blev ændret forgæves. Samme mønster kan gælde andre hardcodede tekster: grep `wp-content` for
+   strengen, før der konkluderes «cache».
+7. **Rank Maths sociale titler (og:title/twitter:title) hænger efter.** De kommer fra
+   `rank_math_facebook_title`/`rank_math_twitter_title` og blev først slået igennem efter endnu en
+   flush-runde; mål dem i HTML'en, ikke i meta.
 
 ## 6. Stadig åbent
 
