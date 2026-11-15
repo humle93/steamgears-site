@@ -120,6 +120,9 @@ check "backup-øvelse (frist + paritet)"      python3 tools/db_drill_check.py --
 # filen), at passwordet aldrig står i en argv, legacy-frasorteringen, pariteten og dommen
 # op — kørslen mod databasen kræver de fire DB_*-secrets og kan ikke prøves her.
 check "backup-øvelse-i-ci-selftest"          python3 tools/db_drill_ci.py --selftest
+# Fundet 15/11: en manglende citation i en ::warning-linje gjorde jobbet rødt med exit 2
+# — men først efter pushet. bash -n fanger den slags på et øjeblik, uden at køre noget.
+check "workflow-shell (bash -n)"             python3 tools/workflow_bash_check.py
 # Fejlsøgning som fast punkt (P3.6): konsistens på tværs af filer — version mod zip,
 # zip mod kilde, includes, biblioteksindekset, tokens og tests der ikke kan fejle.
 # Om-mærkningen (S4): titler/kollektioner/billedkrav måles udefra — selftesten er offline og fanger

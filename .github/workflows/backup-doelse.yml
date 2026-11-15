@@ -212,7 +212,8 @@ jobs:
           fi
           python3 tools/db_drill_check.py --due || kode=$?
           if [ "$kode" -eq 3 ]; then
-            echo "::warning title=Backup-øvelsen forfalder snart::Næste øvelse skal være kørt senest $(python3 -c "import json;print(json.load(open('drill.json',encoding='utf-8'))['next_due'])").
+            naeste="$(python3 -c "import json;print(json.load(open('drill.json',encoding='utf-8'))['next_due'])")"
+            echo "::warning title=Backup-øvelsen forfalder snart::Næste øvelse skal være kørt senest ${naeste}. Kør 'python3 tools/db_drill_ci.py --ci' (eller i hånden tools/wp_db_drill.py) og commit rapporten."
           fi
           exit 0
 
