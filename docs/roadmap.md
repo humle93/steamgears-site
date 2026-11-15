@@ -20,7 +20,7 @@ dependency so there is one place to read the whole plan.
   8.0–8.4 and tests WP 6.4 + latest. Imported item P3.3 is therefore not hygiene any more — it is the one
   change that verifies the code we actually ship to the runtime we actually run.
 - **The store is behind the content pipeline:** measured 8/11 the catalog holds **24 products — 20 published
-  and 4 drafts** (`product-sitemap.xml` lists 20 products plus `/shop/`; 92 duplicates sit in trash). **Målt 15/11 2026: 14 publicerede** (DB: 14 publish · 79 draft · 92 trash) og **38 produktkategorier, hvoraf 16 er i brug** — 24-tallet er 8/11-målingen og står som historik. That
+  and 4 drafts** (`product-sitemap.xml` lists 20 products plus `/shop/`; 92 duplicates sit in trash). **Målt 15/11 2026: 3 publicerede** (DB: 3 publish · 90 draft · 92 trash, efter posters-only-beslutningen) og **38 produktkategorier, hvoraf 6 har varer** — 24-tallet er 8/11-målingen og står som historik. That
   supersedes the 1/11 audit's »23 drafts against 39 published«. See
   `docs/library/indholdsaudit-2026-11-01.md` and `docs/library/batch-4-arbejdsordre-2026-11-08.md`.
 - **The page cache should be re-measured.** The homepage and `/faq/` were serving `mwai-popup-container` and
@@ -65,7 +65,7 @@ published posts have not been crawled link by link. Statements below are limited
 | PHP | 8.5.12 (memory 2048M, max execution 300 s, upload 1 GB) |
 | MySQL | 8.4.11 |
 | Theme | Extendable 2.1.9 |
-| WooCommerce | 11.2.2 (målt 7/11) · **24 produkter: 20 publiceret, 4 kladder** (målt 8/11; 1/11-auditten talte 39) · **15/11: 14 publicerede**, 79 kladder, 92 i papirkurven |
+| WooCommerce | 11.2.2 (målt 7/11) · **24 produkter: 20 publiceret, 4 kladder** (målt 8/11; 1/11-auditten talte 39) · **15/11: 3 publicerede** (posters-only), 90 kladder, 92 i papirkurven |
 | Active plugins | **22 aktive, 2 inaktive** (målt 8/11, S3.4; var 33 af 38 den 2/11) |
 | Caching | W3 Total Cache 2.11.0 + `advanced-cache.php` + `object-cache.php` |
 | SEO | Rank Math 1.0.280, Redirection 5.10.1 |

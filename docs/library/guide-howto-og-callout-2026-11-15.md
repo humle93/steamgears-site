@@ -125,14 +125,13 @@ Efter målingen svarede ejeren: **»vi kører kun posters«**. Det ændrede to t
 | De fire kladde-produkter (477, 483, 489, 491) forbliver kladder | 0 publicerede goggles/corsets | Ingen vare blev publiceret for at redde et link |
 
 **Målt efter:** **0 døde `/go/`-mål** i alle publicerede indlæg og sider (var 94 forekomster fordelt på 17
-poster, deriblandt de 16 i de syv guides). De resterende `/go/`-mål peger på publicerede varer: 940 (5),
-941 (3), 954 (4), 557 (8), 1255 (3), 1282 (1), 399 (7), 401 (1), 413 (4), 970 (1), 965 (3), 966 (6), 967 (8).
+poster, deriblandt de 16 i de syv guides). Senere samme dag blev de elleve ikke-plakater også sat på kladde,
+og de sidste 61 links afkoblet — se [posters-only i hele butikken](posters-only-butik-2026-11-15.md).
 
-**Stadig åbent, med vilje:** butikken har fortsat **11 publicerede produkter der ikke er plakater** —
-T-shirts (557, 954, 1255, 1282), hoodies (399, 401, 413), phone case (970) og de to lommeure (940, 941).
-Skal butikken være tre plakater, er det næste skridt at sætte dem på kladde (§6.1 i oprydningslisten) og
-afkoble de cirka 30 `/go/`-links der så peger på kladder. Det er ikke gjort her: at fjerne elleve varer fra
-en levende butik er en sortsimentsbeslutning, ikke en rettelse.
+**Afsluttet samme dag:** ejeren gav ordre til at butikken kun skal være plakater, så de elleve
+ikke-plakater (T-shirts 557, 954, 1255, 1282; hoodies 399, 401, 403, 413; phone case 970; lommeure 940, 941)
+blev sat på kladde, og de resterende links blev afkoblet. Butikken har nu tre publicerede varer og 0 døde
+`/go/`-mål — detaljerne står i [posters-only i hele butikken](posters-only-butik-2026-11-15.md).
 
 ## 7. Filer
 
