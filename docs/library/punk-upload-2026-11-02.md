@@ -1,5 +1,7 @@
 # Punk — upload klar: 31 filer, to destinationer
 
+> **Forældet.** Trykfilen går til **Gelato**, ikke Printful. Trykkravene (5906×8268 px) gælder stadig; leverandørafsnittet er historik fra 2/11 2026.
+
 Alt der kan forberedes uden billederne er nu forberedt: filnavne, alt-tekster, trykkrav, medie-upload til WordPress og produktkladserne. Det der mangler er filerne — og Printful-delen, som ingen MCP dækker.
 
 Skrevet 2/11 2026. Bygger på [punk-lancering-2026-11-02.md](punk-lancering-2026-11-02.md) (teksterne og mockup-planen) og [mockup-brief-2026-11-01.md](mockup-brief-2026-11-01.md) (billedreglerne).

@@ -1,5 +1,7 @@
 # Mockup-brief — 38 produkter — 1/11 2026
 
+> **Forældet.** Printvejen er **Gelato**, og mockups hentes gennem dens Connect. Trinnene nedenfor er Printfuls brugergrænseflade og gælder ikke længere; de står som historik fra 1/11 2026.
+
 Tjekliste til Printful, produkt for produkt. Hører til [om-maerkning-dark-academia-2026-11-01.md](om-maerkning-dark-academia-2026-11-01.md).
 
 **Status nu:** alle 39 produkter har **1 billede** (plakaterne 2). Målet er 4–5. Det er 38 fysiske produkter × ca. 4 nye billeder ≈ **150 billeder**, men kun ca. 25 unikke opsætninger — resten er samme scene med et andet motiv.

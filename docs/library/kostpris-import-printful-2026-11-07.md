@@ -1,5 +1,7 @@
 # Kostpris fra Printful — hvad der må importeres, og hvad der ikke må
 
+> **Forældet.** Funktionen er **fjernet i plugin 7.88.0** sammen med Printful-nøglen: `woo-cost-import` og kortet under *Settings → Keys* findes ikke længere, og kostprisen sættes nu kun i produktets eget `_sgap_cost`-felt. Dokumentet står som historik over 7.46.0.
+
 7/11 2026, plugin 7.46.0 (P1.17). Skrevet fordi shop-værktøjerne i `steamgears-autopilot`
 (`woo-catalog`, `woo-propose`, `woo-apply`) kun vil regne med én kostpris: produktets eget
 `_sgap_cost`-felt. Det felt var tomt på hele kataloget, så hver eneste prisprofil blev afvist

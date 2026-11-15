@@ -1,5 +1,7 @@
 # Punk-lancering — 6 SKU: produkttekster og mockup-plan
 
+> **Forældet.** Printvejen er **Gelato**, ikke Printful, priserne er DKK, og plakatplanen står i [sky-armada-drop-1-2026-11-13.md](sky-armada-drop-1-2026-11-13.md). Printful-afsnittene her er historik fra 2/11 2026.
+
 Klar-til-publikation for de seks første punk-designs, så de kan gå i butikken i samme øjeblik billederne findes.
 
 Skrevet 2/11 2026. Bygger på [punk-grene-2026-11-02.md](punk-grene-2026-11-02.md) (retningen og de 18), [produkttekster-2026-11-01.md](produkttekster-2026-11-01.md) (syv-parts-strukturen) og [mockup-brief-2026-11-01.md](mockup-brief-2026-11-01.md) (billedreglerne).
