@@ -210,3 +210,47 @@ Ingen ændringer siden sidst (token 43822 uændret).
 - 2026-11-14 22:00 UTC (23:00 DK): ingen ændringer (token 43822)
 ## 2026-11-15 00:00 DK — ingen ændringer (token 43822)
 - 2026-11-15 03:00 CET (02:00 UTC): ingen ændringer (token 43822 uændret)
+## 2026-11-15 03:00 (DK)
+- Ingen ændringer (token 43822 uændret).
+2026-11-15 04:00 UTC — ingen ændringer (token 43822)
+
+## 2026-11-15 06:00 (05:00 UTC)
+66 ændringer 04:23–04:33 UTC — alle egen-genererede: backup-batch (steamgears-backup-2026-11-15 content + 18 media-parts + site-backup-part2 + BACKUP-SUMMARY.md), 5 screenshots (sg-desktop-v2, sg-mobile-v2, sg-mobile-shop5-7) og 40 design-assets (v4: 10 png + 10 mock jpg — owl/bear/fox/submarine/balloon/muse/airship/botanist/ouroboros/cat; v5: 10 jpg + 10 mock jpg — mech-fox/octopus/clockmoth/sparrow/poster-lighthouse/poster-balloon/nouveau/workshop/terrarium/planisphere). Ingen fremmede filer, ingen sletninger, ingen tilladelses-ændringer. Ny token: 43981.
+
+## 2026-11-15 06:00 — 22 nye filer (kl. 05:43)
+- sg-diesel-001..010 (10 jpg): art-deco skyport, locomotive, walking mech scout, female aviator, spy radio operator, female race driver, female V12 mechanic, submarine naval base, Tesla arc engineer, zeppelin air captain
+- sg-clock-001..010 (10 jpg): baroque clockwork stag, clocktower inventor, renaissance ornithopter, cathedral of time, Venetian automaton harpsichord, female guard captain, female fencer w/ brass arm, royal watchmaker phoenix, female royal horologist, wind-up clockwork galleon
+- sg-mix-001..002 (2 jpg): botanist clockwork squirrel, dieselpunk shipyard scout
+- Ingen slettede/rettigheds-ændringer. Link: /wiki/user/previews/batches (billede-forsyning)
+## 2026-11-15 07:00 UTC — ingen ændringer (token 44060)
+2026-11-15 08:00 UTC (09:00 DK) — ingen ændringer (token 44060 uændret)
+2026-11-15 10:02 — ingen ændringer (token 44060 uændret)
+
+## 2026-11-15 10:00 (UTC) — ingen ændringer siden sidst (token 44060).
+## 2026-11-15 12:00 DK — ingen ændringer (token 44060)
+
+## 2026-11-15 12:00 (13:00 DK) — token 44060 → 44088
+5 ændringer 11:07–12:12 UTC:
+- sg-img-a.zip + sg-img-b.zip (nye, 11:07) — zip-arkiver, ikke egen-genereret i denne periode
+- Steamgears-site-latest.tar.gz — opdateret 11:46 (kendt tilbagevendende site-backup)
+- "Steamgears — Arbejdsseddel til Gemini (28/10)" — opdateret 12:11 (multi-agent sync-notat, posters-only)
+- "Steamgears.eu - Oprydnings- og Fejlrettelsesliste (2026-11-15)" — NY/opdateret 12:12 — omfattende oprydningsliste + multi-agent notat (15/11): POSTERS-ONLY-omstilling (max 50 live plakater, alt tøj/gear/Atelier på draft), 37 kategorier → 6 plakat-kategorier, 3 Python-scripts klar (fix_poster_images.py, posters_only_cleanup.py, auto_poster_pipeline.py), UI/tekstretelser (cookie-banner, mobil-header, forside, footer), GA4-dublet (G-3MYLFKY8MY vs G-GE85RJJKD1), HowTo/Product-schema, interne links → plakat-kollektioner.
+Ingen sletninger eller tilladelses-ændringer.
+
+
+
+## 2026-11-15 14:02 UTC — ingen ændringer
+- 2026-11-15 16:00 CET: ingen ændringer (token 44088 uændret)
+
+## 2026-11-15 16:00 UTC
+- Ingen ændringer (token 44088 uændret).
+## 2026-11-15 17:00 UTC (18:00 DK)\n- Ingen ændringer (token 44088 uændret).
+[2026-11-15 18:00] ingen ændringer (token 44088)
+
+## 2026-11-15 19:00
+- Ingen ændringer siden sidst (token 44088 uændret).
+2026-11-15 21:00 CET: ingen ændringer (token 44088 uændret).
+
+2026-11-15 21:00 UTC — token 44088: ingen ændringer.
+- 2026-11-15 22:00 UTC: ingen ændringer (token 44088)
+- 2026-11-16 00:00 (task 23:00 UTC): ingen ændringer (token 44088)
