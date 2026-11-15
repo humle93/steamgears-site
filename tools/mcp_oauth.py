@@ -10,6 +10,15 @@ Kør:
     python3 tools/mcp_oauth.py --start          # registrér klient (én gang) og print godkendelseslink
     python3 tools/mcp_oauth.py --finish <kode>  # byt koden til tokens og gem dem (mode 600)
     python3 tools/mcp_oauth.py --status         # er der et gyldigt token, og hvornår udløber det
+    python3 tools/mcp_oauth.py --device         # RFC 8628: godkend en kort kode i wp-admin (10 min)
+    python3 tools/mcp_oauth.py --device-poll    # vent på godkendelsen og gem tokens
+
+**Authorization code lever kun 60 sekunder på Novamira** (`new DateInterval('PT1M')` i
+`includes/oauth/server-factory.php`, 1.12.x — ikke konfigurerbart). Derfor findes device-flowet:
+`CODE_TTL = 600` s, poll hvert 5. s, og godkendelsen sker på `/wp-admin/admin.php?page=novamira-oauth-device`
+med en kode på otte tegn. Det kræver ingen loopback-listener — netop det der fejler fra en cloud-sandkasse.
+Fælden: DCR registrerer kun device-granten hvis `redirect_uris` er en **tom** liste; sender man en
+redirect-URI med, kvitterer serveren stille med `authorization_code` + `refresh_token`.
 
 Filerne ligger uden for repoet i `~/.config/steamgears-mcp/` (mode 600), så de ikke kan
 committes ved et uheld. Koden i linket lever kun kort — kør `--finish` med det samme.
@@ -42,6 +51,7 @@ TOKEN_FILE = CONFIG_DIR / "tokens.json"
 REDIRECT = os.environ.get("MCP_REDIRECT_URI") or "http://127.0.0.1:8765/callback"
 METADATA_URL = os.environ.get("MCP_METADATA_URL") or "https://steamgears.eu/.well-known/oauth-authorization-server"
 SCOPE = os.environ.get("MCP_SCOPE") or "mcp"
+DEVICE_GRANT = "urn:ietf:params:oauth:grant-type:device_code"
 
 
 def b64url(raw: bytes) -> str:
@@ -264,6 +274,103 @@ def access_token(force_refresh: bool = False) -> str | None:
     return token
 
 
+def device_client(config: dict, meta: dict) -> dict:
+    """Genbrug en device-klient, ellers registrér en — med tom `redirect_uris`.
+
+    Novamiras DCR svarer altid `authorization_code` + `refresh_token`, når der er en redirect-URI
+    med. Kun en klient uden redirect-URI bliver registreret med device-granten.
+    """
+    if config.get("grant") == "device" and config.get("client_id"):
+        return config
+    payload = {
+        "client_name": "steamgears-agent-device",
+        "redirect_uris": [],
+        "grant_types": ["refresh_token", DEVICE_GRANT],
+        "response_types": ["code"],
+        "token_endpoint_auth_method": "none",
+        "scope": SCOPE,
+    }
+    status_code, body = request(meta["registration_endpoint"], payload)
+    if status_code not in (200, 201) or not isinstance(body, dict) or not body.get("client_id"):
+        raise SystemExit(f"device-klient blev afvist (HTTP {status_code}): {str(body)[:200]}")
+    if DEVICE_GRANT not in (body.get("grant_types") or []):
+        raise SystemExit("serveren registrerede klienten uden device-grant — send redirect_uris: []")
+    config = {
+        "client_id": body["client_id"],
+        "redirect_uri": REDIRECT,
+        "token_endpoint": meta["token_endpoint"],
+        "authorize_endpoint": meta["authorization_endpoint"],
+        "grant": "device",
+    }
+    write_private(CLIENT_FILE, config)
+    return config
+
+
+def device_start() -> int:
+    """RFC 8628 §3.1/§3.2 — bed om en device-kode og print koden operatøren skal godkende."""
+    meta = metadata()
+    endpoint = meta.get("device_authorization_endpoint")
+    if not endpoint:
+        print("serveren annoncerer ikke device authorization (RFC 8628)")
+        return 1
+    config = device_client(read_json(CLIENT_FILE), meta)
+    status_code, body = request(endpoint, {"client_id": config["client_id"], "scope": SCOPE}, form=True)
+    if status_code != 200 or not isinstance(body, dict) or not body.get("device_code"):
+        print(f"device-anmodning afvist (HTTP {status_code}): {str(body)[:200]}")
+        return 1
+    config.update({
+        "device_code": body["device_code"],
+        "device_expires_at": int(time.time()) + int(body.get("expires_in") or 0),
+        "device_interval": body.get("interval"),
+    })
+    write_private(CLIENT_FILE, config)
+    minutes = round(int(body.get("expires_in") or 0) / 60, 1)
+    print(f"\nGodkend koden på {body['verification_uri']}")
+    print(f"  KODE: {body['user_code']}")
+    print(f"  gyldig i {minutes} min · poll hvert {body.get('interval')} s")
+    print("Kør derefter --device-poll: den venter til godkendelsen kommer, og gemmer tokens.")
+    return 0
+
+
+def device_poll(wait_seconds: int | None = None) -> int:
+    """Poll token-endepunktet til operatøren har godkendt, koden udløber, eller ventetiden slipper op."""
+    config = read_json(CLIENT_FILE)
+    if not config.get("device_code"):
+        print("intet igangværende device-flow — kør --device først")
+        return 1
+    deadline = config.get("device_expires_at") or (time.time() + 600)
+    if wait_seconds:
+        deadline = min(deadline, time.time() + wait_seconds)
+    interval = int(config.get("device_interval") or 5)
+    while time.time() < deadline:
+        status_code, body = request(
+            config["token_endpoint"],
+            {"grant_type": DEVICE_GRANT, "device_code": config["device_code"],
+             "client_id": config["client_id"]},
+            form=True,
+        )
+        if status_code == 200 and isinstance(body, dict) and body.get("access_token"):
+            save_tokens(body)
+            for key in ("device_code", "device_expires_at", "device_interval"):
+                config.pop(key, None)
+            write_private(CLIENT_FILE, config)
+            print(f"Har nu adgang: token gyldigt i {body.get('expires_in', '?')} s, refresh-token gemt.")
+            return 0
+        error = body.get("error") if isinstance(body, dict) else str(body)[:80]
+        if error == "authorization_pending":
+            time.sleep(interval)
+            continue
+        if error == "slow_down":
+            interval += 5
+            time.sleep(interval)
+            continue
+        description = body.get("error_description", "") if isinstance(body, dict) else ""
+        print(f"device-flowet stoppede: {error} {str(description)[:200]}".strip())
+        return 1
+    print("device-koden udløb uden godkendelse — kør --device for en ny")
+    return 3
+
+
 def status() -> int:
     config, tokens = read_json(CLIENT_FILE), read_json(TOKEN_FILE)
     if not config.get("client_id"):
@@ -295,6 +402,11 @@ def main() -> int:
         return finish(args[1])
     if args[:1] == ["--status"]:
         return status()
+    if args[:1] == ["--device"]:
+        return device_start()
+    if args[:1] == ["--device-poll"]:
+        wait = int(args[1]) if len(args) > 1 and args[1].isdigit() else None
+        return device_poll(wait)
     if args[:1] == ["--refresh"]:
         token = refresh()
         print("fornyet" if token else "kunne ikke forny — kør --start igen")

@@ -144,7 +144,8 @@ OAuth-flowet i `tools/test_mcp_oauth.py` (10 fixtures, lokal authorization serve
 
 ## Novamira (`novamira`) — den anden MCP-flade (målt 6/11 2026)
 
-Sitet kører **Novamira 1.12.14** ved siden af AI Engine. Den har sin egen OAuth-server og sin egen flade:
+Sitet kører **Novamira 1.12.15** ved siden af AI Engine (læst fra `/.well-known/oauth-protected-resource` 15/11 2026;
+1.12.14 var målt 6/11). Den har sin egen OAuth-server og sin egen flade:
 
 | | |
 | --- | --- |
@@ -156,9 +157,11 @@ Sitet kører **Novamira 1.12.14** ved siden af AI Engine. Den har sin egen OAuth
 
 **Tre ting der koster en runde, hvis man ikke ved dem:**
 
-1. **DCR registrerer ikke device-grant.** Metadata annoncerer `urn:ietf:params:oauth:grant-type:device_code`, men
-   en dynamisk registreret klient får kun `authorization_code` + `refresh_token` tilbage, og `/oauth/device`
-   svarer `unauthorized_client`. Brug authorization code + PKCE med redirect `http://127.0.0.1:8765/callback`.
+1. **DCR giver kun device-granten til en klient uden redirect-URI.** Metadata annoncerer
+   `urn:ietf:params:oauth:grant-type:device_code`, men registrerer man med en `redirect_uris`-liste, kvitterer
+   serveren **stille** med `authorization_code` + `refresh_token`, og `/oauth/device` svarer `unauthorized_client`.
+   Send `redirect_uris: []` sammen med device-granten (se levetiderne nedenfor) — så svarer DCR `201` med
+   `['urn:ietf:params:oauth:grant-type:device_code', 'refresh_token']`. Målt 15/11 2026 mod 1.12.15.
 2. **Token-endepunkterne kræver form-encoding.** JSON giver `unsupported_grant_type` — serveren kan ikke læse
    `grant_type` og afviser, før den ser koden. `tools/mcp_oauth.py` sender nu form-data til token-kald og JSON
    til DCR (RFC 6749 §4.1.3).
@@ -177,6 +180,39 @@ python3 tools/mcp_oauth.py --start          # link til ejerens browser
 python3 tools/mcp_oauth.py --finish '<hele callback-adressen>'
 python3 tools/mcp_rest.py --check
 ```
+
+### Levetider: 60 s for en authorization code, 600 s for en device-kode (målt 15/11 2026)
+
+Koden i det almindelige PKCE-flow lever **60 sekunder**. Det er ikke en indstilling, en filterværdi eller en
+metadata-parameter, men en konstant i pluginnet: `includes/oauth/server-factory.php` bygger `AuthCodeGrant` med
+`new DateInterval('PT1M')`. Novamira er AGPL og ligger på GitHub (`use-novamira/novamira`), så værdien er læst i
+kilden, ikke gættet. **Der findes ingen filter eller option for den** — den eneste filter i OAuth-laget er
+`novamira_oauth_max_clients` (antal samtidige klienter). En kode der skal bæres gennem en samtale mellem ejer og
+agent, udløber derfor regelmæssigt: målt 15/11 nåede den fra godkendelse til udveksling at blive afvist med
+`invalid_request` + `hint: Authorization code has expired`.
+
+Den understøttede vej uden om er **RFC 8628 device authorization**: `includes/oauth/endpoints/device.php` sætter
+`CODE_TTL = 600` (ti minutter, RFC-anbefalingen) og `POLL_INTERVAL = 5`. Ejerens trin er så ikke at kopiere en
+lang callback-adresse, men at taste en kode på otte tegn på `/wp-admin/admin.php?page=novamira-oauth-device`, og
+agenten poller selv — ingen loopback-listener, hvilket er præcis det der fejler fra en cloud-sandkasse.
+
+```bash
+export MCP_CONFIG_DIR="$HOME/.config/steamgears-mcp/novamira"
+export MCP_RESOURCE="https://steamgears.eu/wp-json/mcp/novamira-oauth"
+export MCP_SCOPE=full_access
+python3 tools/mcp_oauth.py --device        # registrerer device-klient, printer kode + godkendelsesside
+python3 tools/mcp_oauth.py --device-poll   # venter til godkendelsen kommer og gemmer tokens
+```
+
+Token-levetiderne er de samme i begge flows: access **3600 s**, refresh **14 dage** (`P14D`), så én godkendelse
+dækker to uger med fornyelse — ikke én arbejdsgang. Fælder målt samme dag:
+
+| Fælde | Tal | Konsekvens |
+| --- | --- | --- |
+| DCR pr. IP-adresse | **10 i timen** (`DCR_RATE_LIMIT_PER_HOUR`, transient på en time) | et par fejlforsøg brænder vinduet; `--device` svarer `429 rate_limited` indtil timen ruller |
+| Klienter pr. IP-adresse | **10 i alt** (`MAX_CLIENTS_PER_IP`) | ubrugte registreringer fylder, indtil de prunes efter **24 t** (`STALE_UNUSED_CLIENT_TTL`) |
+| Klienter pr. site | 50 aktive (`novamira_oauth_max_clients` kan hæve) | ikke nået på dette site |
+| Ukendt `client_id` | `401 Unknown client_id` | en klient fra en tidligere sandkasse kan ikke genbruges — registrér igen |
 
 ### Fornyelse i pluginnet (7.44)
 

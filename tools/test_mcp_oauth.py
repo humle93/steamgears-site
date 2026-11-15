@@ -48,8 +48,10 @@ class Handler(BaseHTTPRequestHandler):
                 "authorization_endpoint": f"{self.base}/oauth/authorize",
                 "token_endpoint": f"{self.base}/oauth/token",
                 "registration_endpoint": f"{self.base}/oauth/register",
+                "device_authorization_endpoint": f"{self.base}/oauth/device",
                 "response_types_supported": ["code"],
-                "grant_types_supported": ["authorization_code", "refresh_token"],
+                "grant_types_supported": ["authorization_code", "refresh_token",
+                                          "urn:ietf:params:oauth:grant-type:device_code"],
                 "code_challenge_methods_supported": ["S256"],
                 "scopes_supported": ["mcp"],
             })
@@ -69,7 +71,13 @@ class Handler(BaseHTTPRequestHandler):
         if self.path == "/oauth/register":
             self._json(201, {"client_id": "test-client", "client_name": payload.get("client_name"),
                              "redirect_uris": payload.get("redirect_uris"),
+                             "grant_types": payload.get("grant_types") or ["authorization_code", "refresh_token"],
                              "token_endpoint_auth_method": "none"})
+            return
+        if self.path == "/oauth/device":
+            self._json(200, {"device_code": "dev-1", "user_code": "BCDF-GHJK",
+                             "verification_uri": f"{self.base}/device",
+                             "expires_in": 600, "interval": 5})
             return
         if self.path == "/oauth/token":
             grant = payload.get("grant_type")
@@ -93,6 +101,13 @@ class Handler(BaseHTTPRequestHandler):
                     return
                 STATE["refreshed"] += 1
                 self._json(200, {"access_token": "at-2", "refresh_token": "rt-2",
+                                 "expires_in": 3600, "token_type": "Bearer", "scope": "mcp"})
+                return
+            if grant == "urn:ietf:params:oauth:grant-type:device_code":
+                if payload.get("device_code") != "dev-1":
+                    self._json(400, {"error": "authorization_pending"})
+                    return
+                self._json(200, {"access_token": "at-3", "refresh_token": "rt-3",
                                  "expires_in": 3600, "token_type": "Bearer", "scope": "mcp"})
                 return
             self._json(400, {"error": "unsupported_grant_type"})
@@ -294,6 +309,54 @@ class OAuthTest(unittest.TestCase):
                         "DCR-registrering er JSON")
         mcp_oauth.access_token(force_refresh=True)
         self.assertEqual(STATE["refreshed"], 1)
+
+
+    def test_16_device_flow_godkendes_og_gemmer_tokens(self):
+        # Novamiras authorization code lever kun 60 s; device-koden lever 600 s og kræver ingen
+        # loopback-listener. Klienten skal registreres uden redirect_uris for at få granten.
+        import io
+        from contextlib import redirect_stdout
+
+        buffer = io.StringIO()
+        with redirect_stdout(buffer):
+            self.assertEqual(mcp_oauth.device_start(), 0)
+        output = buffer.getvalue()
+        self.assertIn("KODE: BCDF-GHJK", output)
+        self.assertIn("gyldig i 10.0 min", output)
+        config = json.loads(mcp_oauth.CLIENT_FILE.read_text())
+        self.assertEqual(config["grant"], "device")
+        self.assertEqual(config["redirect_uri"], mcp_oauth.REDIRECT)
+        self.assertTrue(config["device_code"])
+        device_calls = [p for p, _ in STATE["types"] if p == "/oauth/device"]
+        self.assertEqual(device_calls, ["/oauth/device"])
+        self.assertEqual(mcp_oauth.device_poll(5), 0)
+        tokens = json.loads(mcp_oauth.TOKEN_FILE.read_text())
+        self.assertEqual(tokens["access_token"], "at-3")
+        self.assertEqual(tokens["refresh_token"], "rt-3")
+        self.assertNotIn("device_code", json.loads(mcp_oauth.CLIENT_FILE.read_text()))
+
+    def test_17_device_client_genbruges(self):
+        import io
+        from contextlib import redirect_stdout
+
+        buffer = io.StringIO()
+        with redirect_stdout(buffer):
+            mcp_oauth.device_start()
+            first = json.loads(mcp_oauth.CLIENT_FILE.read_text())["client_id"]
+            STATE["types"] = []
+            self.assertEqual(mcp_oauth.device_start(), 0)
+        self.assertEqual(json.loads(mcp_oauth.CLIENT_FILE.read_text())["client_id"], first)
+        self.assertEqual([p for p, _ in STATE["types"] if p == "/oauth/register"], [],
+                         "en gemt device-klient må ikke registreres igen")
+
+    def test_18_device_poll_uden_flow(self):
+        import io
+        from contextlib import redirect_stdout
+
+        buffer = io.StringIO()
+        with redirect_stdout(buffer):
+            self.assertEqual(mcp_oauth.device_poll(1), 1)
+        self.assertIn("--device", buffer.getvalue())
 
 
 if __name__ == "__main__":
