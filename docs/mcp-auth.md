@@ -1,13 +1,15 @@
-# MCP-adgang — steamgears.eu og Publer
+# MCP-adgang — steamgears.eu, brygguiden.dk og Publer
 
-`.mcp.json` har tre servere: to HTTP-servere der kræver hver sin slags credential, og én lokal stdio-server
-uden credential.
+`.mcp.json` har fem servere: fire HTTP-servere — `steamgears`, `brygguiden`, `publer` og `simplycom` — og én
+lokal stdio-server uden credential. Tre af HTTP-serverne kræver en credential i filen; `simplycom` gør ikke.
 
 | Server | Endpoint | Auth i `.mcp.json` | Credential |
 | --- | --- | --- | --- |
 | `steamgears` | `https://steamgears.eu/wp-json/mcp/v1/http` | `Bearer ${MCP_ACCESS_TOKEN}` | OAuth-token fra `tools/mcp_oauth.py` (ligger uden for repoet) |
+| `brygguiden` | `https://brygguiden.dk/wp-json/mcp/novamira` | `Bearer ${BRYGGUIDEN_MCP_TOKEN}` | Eget token fra brygguiden.dk — ikke `MCP_ACCESS_TOKEN`. Ruten er MCP Adapterens server-id og svarer `401` uden token (målt 15/11 2026). Lever 3600 s, og sitet har ingen keepalive endnu, så tokenet skal fornyes manuelt |
 | `publer` | `https://mcp.publer.com/` | `Bearer ${PUBLER_API_KEY}` | Publer MCP API key (Business/Enterprise) |
 | `steamgears-profil` | `tools/mcp_project_profile.py` (stdio) | ingen | ingen — læser kun repoet |
+| `simplycom` | `https://mcp.simply.com/v2` | ingen | OAuth i klienten — arver brugerens rettigheder og tilbagekaldes under *Connected apps* |
 
 **Status 4/11 2026: både læsning og skrivning virker.** OAuth-klienten blev godkendt af ejeren i browseren,
 tokenet lever 3600 s med refresh, og `python3 tools/mcp_rest.py --check` svarer `ok: true` med serveren
