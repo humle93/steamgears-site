@@ -188,7 +188,15 @@ jobs:
           echo "rapport=$rapport" >> "$GITHUB_OUTPUT"
           cat "$rapport"
           if [ "$kode" -ne 0 ]; then
-            echo "::error title=Øvelsen fejlede mod fixture-databasen::Se loggen ovenfor — rapporten er skrevet til $rapport."
+            # Fejlen skal kunne læses i annotationen, ikke kun i loggen: rapportens errors-felt
+            # bærer stderr fra det trin der fejlede.
+            detalje="$(python3 -c '
+          import json, sys
+          d = json.load(open(sys.argv[1], encoding="utf-8"))
+          fejl = d.get("errors") or {}
+          print("; ".join(f"{k}: {v}" for k, v in fejl.items()) or "ingen fejltekst i rapporten")
+          ' "$rapport" 2>/dev/null | tr "\n" " " | cut -c1-600)"
+            echo "::error title=Øvelsen fejlede mod fixture-databasen::$detalje"
             exit 1
           fi
 
