@@ -5,7 +5,7 @@ linket er fundet i HTML'en, og `/go/<id>/` er fulgt for at se hvor det lander. R
 [`guide-links-aeldre-2026-11-03.md`](guide-links-aeldre-2026-11-03.md), som er planen.
 
 Dokumentet skrives af `python3 tools/live_link_report.py --dato "<dato>"`, og
-[`tools/link_plan_check.py`](link_plan_check.py) kræver at hver række planen kalder `indsat` står her
+[`tools/link_plan_check.py`](../../tools/link_plan_check.py) kræver at hver række planen kalder `indsat` står her
 med `ja` — ellers fejler værnene. Målingen skal altså laves om, hvis en side redigeres.
 
 | Guide | Link | Side | Kode | Produkt | Plan |

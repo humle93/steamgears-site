@@ -1,7 +1,7 @@
 # Plugin-audit 12/11 2026 — Steamgears Autopilot 7.76.1
 
 Kilde: [`plugins/steamgears-autopilot`](../../plugins/steamgears-autopilot) · release:
-[`steamgears-autopilot-v7.76.1.zip`](../../plugins/steamgears-autopilot-v7.76.1.zip) ·
+`steamgears-autopilot-v7.76.1.zip` (zip'en blev slettet fra `plugins/` ved 7.88.0 efter én-zip-reglen; den ligger i git-historikken) ·
 roadmap: [`ROADMAP.md`](../../plugins/steamgears-autopilot/ROADMAP.md)
 
 Auditten startede på **7.76.0** og endte i **7.76.1**. Den er en statisk og testbaseret gennemgang:

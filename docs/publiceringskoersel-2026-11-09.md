@@ -1,6 +1,6 @@
 # Publiceringskørsel — alt åbent arbejde, i den rækkefølge det skal udføres
 
-_Sidste kørsel: 9/11 2026. Kilder: copyfilerne i `docs/library/`, priserne i [`priser-live-2026-11-09.md`](priser-live-2026-11-09.md), ejerpunkterne i [`docs/projektstatus.md`](../projektstatus.md) §2 og [`docs/roadmap.md`](../roadmap.md) §4d–§4e._
+_Sidste kørsel: 9/11 2026. Kilder: copyfilerne i `docs/library/`, priserne i [`priser-live-2026-11-09.md`](library/priser-live-2026-11-09.md), ejerpunkterne i [`projektstatus.md`](projektstatus.md) §2 og [`roadmap.md`](roadmap.md) §4d–§4e._
 
 Dette er den ene kørsel: **syv faser**, hvor hvert trin har et sted at gå hen, en konkret værdi at taste, og en kommando der beviser at det virkede. Copyen nedenfor er den **færdige tekst**, ikke en henvisning — blokkene er genereret ud af de filer `tools/guide_check.py` validerer, så de kan ikke være nyere eller ældre end det værn, der kontrollerer dem.
 

@@ -23,7 +23,7 @@ Sidens status og næste skridt står i [`roadmap.md`](roadmap.md) (S2 og S4). De
 | **Produkttekster** | Aldrig Printful-standardtekst. 150–300 ord unik tekst med materialer, pasform og cosplay-anvendelse |
 | **Billeder** | Alt-tekst på alt. Beskriv motivet, ikke filnavnet. 210 billeder verificeret 2/11 |
 | **Intern linking** | Hvert indlæg linker mindst ét produkt via `/go/<id>/` og mindst to guides plus den relevante hub |
-| **Schema** | Product + Offer + ItemAvailability på produkter, HowTo på guides, BreadcrumbList sitebredt. Valuta i schema følger butikkens valuta — **USD i dag**, se S4.3 |
+| **Schema** | Product + Offer + ItemAvailability på produkter, HowTo på guides, BreadcrumbList sitebredt. Valuta i schema følger butikkens valuta — **DKK** (målt 8/11 og igen 15/11 i produktside, JSON-LD, Store API og DB), se S4.3 |
 | **Canonical** | Rank Math sætter canonical = permalink. Afvig aldrig uden grund |
 | **noindex** | Kun cookie- og opt-out-sider samt `digital-downloads`-kategorien |
 
@@ -101,8 +101,12 @@ visninger, goggles pos 8,7 og how-to-make pos 9,3 — de første side-1-position
 impressions på spørgeords-keywords 2–3 uger efter en GEO-runde. GA4-udtrækket genkøres med samme filtre
 (mod `/workspace/tmp/ga4_b1.json`) for at kunne sammenligne.
 
-**Kendt instrumenteringsfejl:** GA4 fyrer **dobbelt** på hvert pageview — `G-0HC9BLQ88R` (GTM Kit) og
-`G-3MYLFKY8MY` (gtag/Site Kit). Alle events tælles dobbelt, indtil den ene fjernes.
+**Instrumenteringen, målt 15/11 2026:** forsiden bærer **to** id'er — `GT-PL9L67B4` (2 forekomster) og
+`AW-18518250875` (3 forekomster, Google Ads). Det er **én** GA4-destination plus Ads, ikke to GA4-properties.
+De tre id'er den tidligere dobbeltfyring blev målt med (`G-0HC9BLQ88R`, `G-3MYLFKY8MY`, `G-GE85RJJKD1`) giver
+**0 træf** i HTML'en nu, så fejlen kan ikke genfindes. Den var reel 7/11 (to `g/collect` pr. pageview) og
+kommer tilbage hvis et af de gamle tags indsættes igen — mål derfor `g/collect` efter enhver ændring i
+GTM/Site Kit, og fjern den ene af to GA4-destinationer hvis der igen står to.
 
 ## 7. Research — hvad der er værd at huske
 
