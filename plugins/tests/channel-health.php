@@ -120,11 +120,11 @@ check('channel-health: Telegram reports no metric instead of a zero',
     $empty['telegram']['state'] === 'no_metric' && $empty['telegram']['types'] === []);
 
 $GLOBALS['rows'] = [
-    ['channel' => 'pinterest', 'event_type' => 'impressions', 'total' => '12', 'rows' => '1', 'last_at' => '2026-11-08 10:00:00'],
-    ['channel' => 'pinterest', 'event_type' => 'click', 'total' => '9', 'rows' => '3', 'last_at' => '2026-11-08 11:00:00'],
-    ['channel' => 'instagram', 'event_type' => 'likes', 'total' => '4', 'rows' => '2', 'last_at' => '2026-11-08 09:00:00'],
-    ['channel' => 'bluesky', 'event_type' => 'likes', 'total' => '7', 'rows' => '1', 'last_at' => '2026-11-08 08:00:00'],
-    ['channel' => 'mastodon', 'event_type' => 'reposts', 'total' => '3', 'rows' => '1', 'last_at' => '2026-11-07 20:00:00'],
+    ['channel' => 'pinterest', 'event_type' => 'impressions', 'total' => '12', 'rows_count' => '1', 'last_at' => '2026-11-08 10:00:00'],
+    ['channel' => 'pinterest', 'event_type' => 'click', 'total' => '9', 'rows_count' => '3', 'last_at' => '2026-11-08 11:00:00'],
+    ['channel' => 'instagram', 'event_type' => 'likes', 'total' => '4', 'rows_count' => '2', 'last_at' => '2026-11-08 09:00:00'],
+    ['channel' => 'bluesky', 'event_type' => 'likes', 'total' => '7', 'rows_count' => '1', 'last_at' => '2026-11-08 08:00:00'],
+    ['channel' => 'mastodon', 'event_type' => 'reposts', 'total' => '3', 'rows_count' => '1', 'last_at' => '2026-11-07 20:00:00'],
 ];
 $wpdb->log = [];
 $measured = SGAP_Channel_Health::analytics();
@@ -135,6 +135,8 @@ check('channel-health: likes are counted per channel, not summed over four platf
     && $measured['mastodon']['counts']['likes'] === 0.0);
 check('channel-health: a measured channel carries its own last timestamp',
     $measured['pinterest']['last_at'] === '2026-11-08 10:00:00' && $measured['bluesky']['state'] === 'measured');
+check('channel-health: no SQL alias is a MySQL 8 reserved word (7.88.1: `AS rows` broke the live query)',
+    !preg_match('/\\bAS\\s+(rows|rank|groups|window|row|over|lead|lag|function|system|cube)\\b/i', implode("\n", $wpdb->log)));
 check('channel-health: the analytics query is windowed, not a full-table scan',
     str_contains(implode("\n", $wpdb->log), 'created_at >='));
 $counted = SGAP_Channel_Health::analytics_summary($measured);

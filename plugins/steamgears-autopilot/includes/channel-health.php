@@ -187,8 +187,9 @@ class SGAP_Channel_Health {
         global $wpdb;
         $days = max(self::MIN_DAYS, min(self::MAX_DAYS, $days));
         $since = wp_date('Y-m-d H:i:s', time() - $days * DAY_IN_SECONDS);
+        // `rows_count`, not `rows`: ROWS is a reserved word in MySQL 8, and the query failed live (7.88.1).
         $rows = $wpdb->get_results($wpdb->prepare(
-            "SELECT channel, event_type, SUM(value) AS total, COUNT(*) AS rows, MAX(created_at) AS last_at
+            "SELECT channel, event_type, SUM(value) AS total, COUNT(*) AS rows_count, MAX(created_at) AS last_at
              FROM {$wpdb->prefix}sgap_events WHERE created_at >= %s GROUP BY channel, event_type",
             $since
         ), ARRAY_A);
@@ -201,7 +202,7 @@ class SGAP_Channel_Health {
             }
             $seen[$channel][$type] = [
                 'total' => (float) ($row['total'] ?? 0),
-                'rows' => (int) ($row['rows'] ?? 0),
+                'rows' => (int) ($row['rows_count'] ?? 0),
                 'last_at' => (string) ($row['last_at'] ?? ''),
             ];
         }

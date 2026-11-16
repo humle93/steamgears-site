@@ -10,6 +10,22 @@ Noterne er skrevet ud fra commit-historikken og de dokumenter der hører til hve
 
 <!-- patch-notes: baseline 7.65.0 -->
 
+## 7.88.1 — 2026-11-16
+
+**Rettet: kanal-sundheden (`channel-health`) gav en fatal fejl på det levende site.**
+
+### Rettet
+- `SGAP_Channel_Health::analytics()` brugte SQL-aliasset `rows`, som er et reserveret ord i MySQL 8.
+  Forespørgslen fejlede, og wpdb kastede `mysqli_num_fields(): Argument #1 ($result) must be of type
+  mysqli_result, false given`. Både abilityen `channel-health` og `/sgap/v1/channel-health` var derfor
+  døde. Aliasset hedder nu `rows_count`, som i Facebook-, Instagram- og engagement-modulerne.
+
+### Målt
+- Fejlen genskabt live over MCP 16/11 kl. 06.57 (7.88.0).
+- Ny smoke-check afviser reserverede ord som SQL-alias i forespørgslen; den fejler mod den gamle kode og
+  består mod den nye. 1 564 PASS / 0 FAIL. Testdataen brugte selv `rows`, og derfor fangede mock'en ikke fejlen.
+- Ikke målt: den rettede forespørgsel mod sitets rigtige database (kræver installation af 7.88.1).
+
 ## 7.88.0 — 2026-11-15
 
 **Fjernet: Printful. Gelato er printvejen, og pluginet beder ikke længere om et Printful-token.**
