@@ -697,6 +697,14 @@ foreach($tools as $n=>$a){
     if(isset($a['input_schema']['properties']) && ($a['input_schema']['additionalProperties']??null)!==false) $bad[]="$n: strict";
 }
 check('tools: every tool is callable and well-formed', $bad===[]);
+// 7.88.2: like WordPress, an ability without an input schema refuses any input that is not null.
+class SGAP_Strict_Ability extends SGAP_Fake_Ability { function execute($x=null){ return $x===null ? ['ran'=>$this->n] : new WP_Error('ability_missing_input_schema','no schema'); } }
+$GLOBALS['ability_objects']['test/no-schema'] = new SGAP_Strict_Ability('test/no-schema');
+$r = SGAP_MCP_Tools::call_ability(['name'=>'test/no-schema']);
+check('tools: call-ability runs a schema-less ability without input (7.88.2)', ($r['ran']??'')==='test/no-schema');
+$r = SGAP_MCP_Tools::call_ability(['name'=>'test/no-schema','input'=>['x'=>1]]);
+check('tools: call-ability still hands real input through', ($r['result'] ?? null) instanceof WP_Error);
+unset($GLOBALS['ability_objects']['test/no-schema']);
 check('tools: destructive tool is flagged', ($tools['steamgears-tools/trash-post']['meta']['annotations']['destructive']??false)===true);
 check('tools: read-only tools are flagged read-only', ($tools['steamgears-tools/site-info']['meta']['annotations']['readonly']??false)===true);
 check('tools: key options are never readable', SGAP_MCP_Tools::is_secret_option('rank_math_indexnow_key') && SGAP_MCP_Tools::is_secret_option('sgap_ai_api_key') && SGAP_MCP_Tools::is_secret_option('woocommerce_api_key'));

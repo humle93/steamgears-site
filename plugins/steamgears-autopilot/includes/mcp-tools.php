@@ -1322,6 +1322,9 @@ class SGAP_MCP_Tools {
         if (!$ability) {
             return new WP_Error('sgap_mcp_not_found', 'No ability named ' . $name . '. Use list-abilities to see them.');
         }
+        // An ability without an input schema refuses any input, even an empty array
+        // ("ability_missing_input_schema"), so no arguments are passed as null (7.88.2).
+        $args = $args === [] ? null : $args;
         if (method_exists($ability, 'check_permissions') && !$ability->check_permissions($args)) {
             return new WP_Error('sgap_mcp_forbidden', 'The ability ' . $name . ' refused the current user.');
         }

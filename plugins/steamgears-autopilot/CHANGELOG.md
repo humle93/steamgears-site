@@ -10,6 +10,21 @@ Noterne er skrevet ud fra commit-historikken og de dokumenter der hører til hve
 
 <!-- patch-notes: baseline 7.65.0 -->
 
+## 7.88.2 — 2026-11-16
+
+**Rettet: `call-ability` kunne ikke køre abilities uden input-skema (fx `cirla-status`).**
+
+### Rettet
+- `SGAP_MCP_Tools::call_ability()` sendte altid et tomt array videre. WordPress afviser ethvert input, der ikke
+  er `null`, til en ability uden input-skema (`ability_missing_input_schema`), så `cirla-status` og lignende
+  svarede med en fejl gennem escape-hatchen. Uden argumenter sendes nu `null`.
+
+### Målt
+- Fejlen genskabt live over MCP 16/11 07.14 (7.88.1). To nye smoke-checks med en ability der opfører sig som
+  WordPress: kald uden input kører, rigtigt input går stadig igennem. 1 566 PASS / 0 FAIL.
+- Samme dag live: Cirla tændt igen (stod slukket), `cirla-social-suggestions` på post 1361 gav tre rigtige
+  AI-forslag via OpenRouter (intet gemt, intet i kø).
+
 ## 7.88.1 — 2026-11-16
 
 **Rettet: kanal-sundheden (`channel-health`) gav en fatal fejl på det levende site.**
