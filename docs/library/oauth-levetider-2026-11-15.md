@@ -107,6 +107,19 @@ blev brændt. `includes/troubleshoot/admin.php` kalder `ClientValidation\reset_r
 `check_admin_referer()` og `novamira_current_user_can_manage()`, så det kræver en administrator-session — ikke
 MCP. Det er hele pointen: en agent der er låst ude kan ikke selv åbne døren.
 
+**Hvad reset ikke klarer.** `reset_registration_limits()` (læst i `includes/oauth/client-validation.php`)
+gør præcis to ting: bumper `novamira_oauth_dcr_epoch`, så timebudgettet er friskt, og sletter rækker med
+`last_used_at IS NULL AND admin_created = 0`. Godkendte klienter bliver stående — også dem hvor selve
+kodeudvekslingen bagefter fejlede, for godkendelsen sætter `last_used_at`. `client_count_for_ip()` tæller
+netop **alle** rækker med samme `registered_by_ip_hash` (SHA-256 af `REMOTE_ADDR`), så de fylder stadig.
+
+Kommer `Too many registered clients from this address` igen efter et reset, er vejen **Manage Connections**:
+*Revoke* kalder `revoke_client_access()` + `ClientRepository::delete_if_unused()`, som sletter rækken, når der
+ikke er et levende refresh-token. Gaten i `includes/oauth/endpoints/register.php` (`registration_refusal()`)
+løber i rækkefølgen `prune_dead_clients()` → timebudget → antal pr. IP → loft for aktive (503), så de to 429'er
+kan skelnes på teksten: *Too many registrations* er timen, *Too many registered clients from this address* er
+rækkerne.
+
 **Rækkefølgen er vigtig.** Knappen siger selv «Connect your AI client once now: each further attempt starts
 filling the limits again.» Klik reset, og kør `--device` **én** gang — ikke en række forsøg, for hvert mislykket
 registreringsforsøg tæller i samme vindue.

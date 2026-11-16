@@ -238,6 +238,26 @@ filling the limits again.”* Klik reset, og kør `--device` **én** gang bageft
 mislykket registreringsforsøg tæller i det samme vindue. Alternativet er at vente til de ubrugte registreringer
 prunes automatisk efter 24 timer.
 
+**Hvad knappen rører — og hvad den ikke rører.** `includes/oauth/client-validation.php` er entydig:
+
+| Handling | Kode | Virkning |
+| --- | --- | --- |
+| Timebudgettet | `rate_limit_epoch()` bumpes (`novamira_oauth_dcr_epoch` + 1) | alle per-IP-tællere på timeglasset dør med det samme; de gamle transients udløber selv |
+| Ventende registreringer | `DELETE … WHERE last_used_at IS NULL AND admin_created = 0` | ubrugte rækker forsvinder — for **alle** IP'er |
+| Godkendte klienter | står urørt | `last_used_at` er sat, så rækken bliver — og den tæller stadig |
+
+`client_count_for_ip()` tæller **alle** rækker med samme `registered_by_ip_hash` (SHA-256 af `REMOTE_ADDR`),
+også godkendte klienter og manuelt oprettede ID'er. `includes/oauth/endpoints/register.php`
+(`registration_refusal()`) kører gaten i denne rækkefølge: `prune_dead_clients()`, timebudgettet
+(*Too many registrations*), antallet pr. IP (*Too many registered clients from this address*) og til sidst
+loftet for aktive forbindelser (*Client cap reached*, 503).
+
+Svarer serveren derfor stadig **“Too many registered clients from this address”** efter et reset, er der ≥10
+rækker tilbage fra adressen — og de er godkendte eller manuelt oprettede, ikke ventende. Dem frigiver man i
+**Novamira → Manage Connections**: *Revoke* kalder `revoke_client_access()` og derefter
+`ClientRepository::delete_if_unused()`, som sletter rækken med det samme, når der ikke er et levende
+refresh-token. *Manually created client IDs* slettes med *Delete* i samme liste.
+
 ### Fornyelse i pluginnet (7.44)
 
 Siden 7.44 holder **sitet selv** Novamira-tokenet i live, så adgangen ikke afhænger af repository-secrets eller
