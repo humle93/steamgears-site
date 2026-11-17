@@ -25,3 +25,8 @@
 3. Fuldfør aktivering og tilføj **steamgears.eu** som site (indsend til godkendelse)
 4. Mens man er inde: tjek Settings → Access & authorization → Users, og bekræft at yofyocikna@gufum.com er væk + ingen andre ukendte brugere
 5. Sig til Juno bagefter → verificering af snippet/ads.txt/kontostatus + opdatering af denne fil
+
+## Opdatering 17/11 2026 (Juno)
+- ROOT CAUSE på manglende snippet: Site Kit's AdSense-module er disconnected (adsense active:false/connected:false via Site Kit REST; GSC+GA4 stadig connected) — derfor stoppede auto-injektionen efter 26/10.
+- FIX 17/11: adsbygoogle.js-snippet (ca-pub-8388762344150338 + ca-host-pub-2644536267352236, Site Kit-format) nu permanent i header template-part extendable//header — verificeret live på forside, /shop/ og gift-guide. WPCode har ingen REST-routes (kun GUI).
+- Restantal Henning-trin: (1) Site Kit → Settings → AdSense → genforbind (ellers dobbelt-injektion hvis begge aktives — så fjerner jeg header-snippet'en igen). (2) adsense.google.com: Genaktivér konto + tilføj steamgears.eu (status uafklaret siden 25/10). Snippet uden aktiv konto = ingen visninger.

@@ -736,3 +736,35 @@ Ingen logget i DB (lav prio / allerede dækket af retailer-cluster-billede).
 1. **"Steampunk Accessories: The Complete Checklist (With Real Prices)"** — 9. ugentlig gentagelse og stadig 0 konkurrent-dækning: accessories-SERP er 100% kategorisider. Vores checklist med ægte USD-priser (Vol 2/3-tees + AE-gear + HC's nye props/spats-kategorier som dækningstjek) + sg-buy er fortsat højest-ROI-hullet. Publiser denne uge.
 2. **Gæsteartikel til steampunkhub.uk: "Where to Buy Steampunk Hats & Goggles in Europe"** — deres Articles Wanted-call tillader bio-link og beder eksplicit om shopping-anbefalinger. 600-800 ord, link til /build/-guides + shop. Lav indsats, stærk UK/EU-authority-link.
 3. **REFRESH med reel ændring: /diy-steampunk-goggles/ + /steampunk-costumes/** — ARY's bulk-dato-trick holder dem #5-7; susandennard (2011) holder #1. Vores refresh skal have NY metodetabel + FAQ + "buy vs build" (ægte indhold, ikke kun datostempel) for at slå både 2011-indhold og dato-manipulation.
+## Scan 2026-11-17
+### Frontend-observationer (fetch ~01:00-01:40 UTC, UA SteamgearsSiteBuilder/1.0)
+- **my-steampunk-style.com** — ⚡ NYT INDLÆG (første på 10 dage): "How to Care for Your Steampunk Pieces? (Without Ruining Them)" pub 16/11 16:44 UTC, forsidepromoteret. Blog-listen = 21+ slugs. 53x Sale, 42 collections (incl. ren-faire-outfits). BF-timeren: endDate 2025-10-02 med isEnabled:false = kampagne-widgeten er deaktiveret/fjernet — fase 2 er definitivt lukket, fase 3 ikke startet. (DB: række logget)
+- **halloweencostumes.com** — vs. fuldt link-udtræk fra 16/11: 2 nye steampunk-relevante produkt-URLs: /industrial-goggles-black-mirror.html + /adult-victorian-black-lace-gloves.html. 159 unikke produkt-URLs i kategorilinks, 7x Clearance + 4x christmas-refs (jul-promo lav). Accessories-dybde vokser fortsat. (DB: række logget)
+- **steampunkary.com** — answers.json rebuilt 16/11 (n=554, 0 nye FAQ = dag 11 uden ny content). ⚡ WP REST viser daglig bulk-modificering fortsætter: steampunk-goggles + gifts-for-her modified 16/11; corsets, clocks, paint-plastic, goggles-DIW, top-hat 15/11; lamps, hats, edible-gears 14/11. Ingen NYE posts siden 19/10 (dag 29). (DB: række logget)
+- **museumreplicas.com** — p1-p3 hentet: 88 unikke SKU-navne, 163 produkt-URLs. Diff vs. 16/11: 3 fjernet (Leather Flying Cap, Onyx Lace Choker, Sheer Black Hourglass Blouse), 0 nye. Last Chance/On Sale uændret. (DB: række logget)
+- **steampunkoutfits.com** — blog = samme 7 slugs (nyeste how-to-dress 18/10). 18x Sale på forsiden, ingen BF/christmas. (no change)
+- **vintagedancer.com** — apex /steampunk/ hub live (162 KB, 31+ kategori-URLs, 7x sale). www stadig 403. (no change)
+- **steampunkhub.uk** — guest-post-call /about/articles-wanted VERIFICERET STADIG ÅBEN (dag 2). Artikler uændret (6 essays). (DB: række logget)
+- Observer-status uændret: steampunkjournal.org (parked), brassgoggles.co.uk (TCP-timeout), steampunk.com (federal-tech), airshipambassador.com (statisk: Books/Art/Music/Events/History/Learning/Fashion/Games-H2'er).
+
+### SERP top-3 (web_search gl=us, ~01:50)
+- **"steampunk costume guide"**: 1) hardnheavy.style (complete outfit guide) 2) thesimplethings 3) steampunksetting.com/steampunk-style-guide. Også ary halloween-costumes, writerlesleydonaldson, gbacg ×2, MSS steampunk-fashion, fadmagazine, sinisterfingers (2011). ⚠️ Steamgears IKKE top-10 (7. nat).
+- **"diy steampunk goggles"**: 1) amaco 2) susandennard (2011) 3) michellespartyplanit (2014). Også upcycledesignlab, rustichorseshoe, ary (#6-7, goggles-DIW + clothing/goggles), instructables, brit.co, thingiverse. Top-3 = gamle tutorials; ingen ny frisk konkurrent. ⚠️ Steamgears IKKE top-20.
+- **"steampunk accessories"**: 1) MSS /collections/steampunk-accessories 2) steampunkstyler 3) darkknightarmoury. Også shop.vermilion, ⚡ MSS-listicle "20 Best Steampunk Accessories" (#5 — MSS har nu 2 slots i top-5), ⚡ medievalcollectibles (tilbage, top-6), caufields, fredeisenleather, maison-steampunk.fr, thebasewarehouse.au. Ren retailer-cluster, STADIG 0 checklist-indhold med priser. ⚠️ Steamgears IKKE top-30.
+
+### Nye domæner → watchlist
+- medievalcollectibles.com — re-enter i accessories top-6 med dedikeret kategori + aktiv Google Shopping-feed (srsltid). Logget i DB.
+- thebasewarehouse.com.au — AU-retailer, 2. nat i accessories top-10. Logget i DB.
+- (thesimplethings.com er kendt fra 691/722 — deltager i costume-SERP rotation, ikke separat logget.)
+
+### Keyword-signaler
+- ⚠️ Top-10-slots på costume guide + diy goggles væk 7. nat i træk. SERP-topperne er enten antique-tutorials (2011/2014) eller friske retailer-guider (hardnheavy 15/09) — ingen ny bevægelse i nat.
+- ⚡ MSS: content-pause BRUDT — care-guide 16/11 + dobbelt-slots i accessories-SERP (kategori #1 + listicle #5). De arbejder aktivt på accessories-intent præcis hvor vores checklist skal stå. BF-widget deaktiveret = fase 2 lukket; BF 27/11 næste vindue.
+- ARY's daglige modified-touch af gamle posts fortsætter (14-16/11) — friskhedsspil uden reel indholdsændring, nu dokumenteret 3 dage i træk.
+- HC fortsætter accessories-dybde (goggles-variant + victorian gloves); jul-promo lav (4x christmas) — BF-dips fortsætter før 27/11.
+- MR: 3 marginale accessories-SKUs fjernet = stille uge, ingen trussel.
+
+### 3 indholdsmuligheder for steamgears.eu
+1. **"Steampunk Accessories: The Complete Checklist (With Real Prices)"** — 10. ugentlig gentagelse og MSS har NETOP bevist formatet (kategori #1 + listicle #5 i samme SERP). Vores checklist med ægte USD-priser + sg-buy + Vol 2/3-tees + AE-gear er fortsat det ubespillede hul. Højeste ROI — publiser denne uge.
+2. **Gæsteartikel til steampunkhub.uk: "Where to Buy Steampunk Hats & Goggles in Europe"** — call verificeret åben dag 2, eksplisit ønsket shopping-anbefalinger, bio-link tilladt. 600-800 ord, link til /build/-guides + shop. Lav indsats, send inden call lukker.
+3. **REFRESH med reel ændring: /diy-steampunk-goggles/ + /steampunk-costumes/** — top-3 på diy-goggles er 2011/2014-tutorials; ary holder #6-7 udelukkende med dato-touch. Vores refresh: rangordnet metodetabel + FAQ-blok + "buy vs build" + frisk datostempel kan tage slots fra 13 år gammelt indhold.

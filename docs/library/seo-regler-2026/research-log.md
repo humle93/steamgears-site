@@ -229,3 +229,57 @@ Top-signaler: 40K 11th ed. launch (Armageddon-box, warhammer-community 26/3), co
 - https://pixis.ai/blog/what-your-buyers-search-for-before-bfcm-on-google-and-in-ai-search/
 
 **Ny i denne uge vs. 11/11:** Core update bekræftet LIVE med officiel dashboard-timestamp + afslutning ~24/11 (bf.Black Friday-vinkel), Seer CTR-tallene (3,3/2,1/0,9%), Victorious Q3 37%-top10-overlap + 97,5% AIO-dækning, EEA-e-mails til site-ejere (4-11/11), Ziff Davis -37% Q3. Ikke gentaget: Zyppy 21% (kun delta: hallo-effekt detalje), UK 3/12-deadline (dækket 11/11).
+
+## 2026-11-16 (uge 47) — Ugentlig SEO-research ⚠️ Gemini utilgængelig (aimlapi-balance udløbet — fallback brugt)
+
+**Metode:** web_search (4 søgninger) → Gemini 3.8 Flash forsøgt → **403 "You've run out of funds"** → Juno-analyse som fallback. Gem baseline for aimlapi: https://aimlapi.com/app/billing/
+
+### (a) Top 3 ændringer i ugen (9-16/11)
+
+1. **Gemini 4 Hydrogen er nu DEFAULT i AI Mode + AI Overviews for ALLE Search-brugere (12/11)** — ikke kun betalende abonnenter. Forbedret query fan-out: flere samtidige del-spørgsmål, bredere vifte af kildelinks, flere billeder/sammenligningstabeller i svarene. Men: mere fan-out ≠ mere trafik (Reddit CEO: AI Mode driver ikke trafik). Det er den største skævvridning af AI-landsbyen denne uge — AEO/fan-out-venligt indhold og -struktur vinder citationer.
+   - https://blog.google/products-and-platforms/products/search/gemini-4-hydrogen-search-upgrade/
+   - https://www.searchenginejournal.com/google-gemini-4-hydrogen-default-ai-mode/597096
+   - https://ppc.land/google-search-gains-gemini-4-hydrogen-for-all-users-not-just-subscribers
+   - https://seroundtable.com/google-november-2026-core-update-42504.html (oversigt)
+
+2. **November 2026 core update stadig i rollout (startet 10/11, til ~24/11 — 3 dage før Black Friday).** Global, alle sprog, ingen detaljer offentliggjort. Dashboard uændret pr. 12/11 → rollout fortsætter. Frys store site-ændringer indtil efter rollout.
+   - https://status.search.google.com/incidents/WLxcJyC6jMWMfryxsKMc
+   - https://ppc.land/googles-core-update-may-run-until-three-days-before-black-friday
+   - https://triaza.com/blog/seo/google-november-2026-core-update/
+
+3. **Side 1-klik falder ~11% år-til-år — produktgrids er den værste synder (−62% CTR-effekt i 2026), men AI-citation betaler sig: +28% CTR hvis citeret, +36% hvis brand nævnt ved navn** (Anicca-studie, 6 sites, GSC + rank-tracking). PAA −28%. Dette er den skarpeste kvantificering endnu af, hvor klikene forsvinder hen for ecommerce.
+   - https://anicca.co.uk/blog/organic-ctr-by-position-in-2026
+
+**Øvrige i ugen (kort):** "Non-incentivized only"-filter i produkt-panel på Shopping/Search/AI Mode (SER) — shoppers kan filtrere incentivized reviews fra. AI Overview-kilde-ikoner flyttet til bunden (test) + definition-searches viser AI Overviews fuldt udfoldet som default. Site reputation policy-dok now klart EEA-opdelt (udenfor EEA: manual actions). Ads i AI Mode: multiturn-ads live i US + udrulles til 10 lande.
+
+### (b) Effekt for steamgears.eu
+
+- **Core update vs. Black Friday:** Rollout slutter ~24/11, Black Friday 27/11. Enhed ranking-forskydninger lige ind i højsæsonen. Med ~90 produkter og engelske US-guides er steamgears.eu eksponeret for globale core-update-volatilitet. Frys struktur-ændringer; små sikre fixes OK.
+- **Produktgrids-tab:** På ecommerce-queries tager produktgrids nu klikene FØR de blå links (−62%). Vores kategori-/produkt-sider skal fremstå i grid'et (feed/merchant-listings) — ikke kun som blå links.
+- **Gemini 4 Hydrogen fan-out:** AEO-vinkel: guidestruktur, der besvarer sub-spørgsmål (hvordan, hvad, hvor meget, DIY vs. buy), matcher fan-out-modellen og øger citation-chancen. Billeder/tabeller i svarene → vores diagram-/sammenligningsindhold kan blive trukket ind.
+- **AI-citation-premien (+28/+36%) er konkret:** Vores guides skal være de kilder, Hydrogen citerer — svare-direct (definitioner, lister, tabeller) højst oppe på siden.
+- **Non-incentivized-filter + review-markup:** Vi har ingen on-site reviews endnu; vi skal IKKE markere incentivized reviews som ikke-incitament. Rigtig vinkel: håndpluk/organiske kunde-citater eller helt undlade review-markup (ingen falsk markup).
+
+### (c) 3-5 konkrete handlinger (denne uge)
+
+1. **Bestil aimlapi-top-up ELLER skift fallback permanent** — Gemini-gatewayen er død på balance. Overvej at skifte research-rutinen til Juno-native analyse + web_search, så kørslen er afhængig af én platform færre. 💰 https://aimlapi.com/app/billing/
+2. **Black Friday-side klar FØR 24/11 (core update-slut):** Rekursiv URL /black-friday/ (ikke med årstal), titel "Steampunk Black Friday 2026 Deals", Offer-markup med priceValidUntil + strikethrough regular price, linket fra forside + menu. Kilde: https://rankfender.com/en/learn/black-friday-seo/ (Google-anbefalinger citeret)
+3. **Product grid-optagelse:** Verificér at alle 90 produkter har fuld Merchant-listing-markup (price, availability, gtin/sku, shippingDetails, returnPolicy) + feed klar — grid'et er nu den primære klik-kilde på ecommerce-SERP. De 5 produkter uden billede skal fikses FØR Black Friday.
+4. **AEO-reformat på top 3-guides:** Sørg for at svaret på hovedspørgsmålet står i første 2-3 afsnit + én sammenligningstabel pr. guide (DIY vs. Buy er oplagt) — det er det format Hydrogen fan-out citerer. Mål: blive citeret i AI Overviews på "steampunk costume ideas"-type queries (+28-36% CTR-premie).
+5. **Ingen strukturelle site-ændringer før ~24/11** — rollout-slut. Efter: GSC sammenligning uge-før/efter (baseline gemt fra 26/10 + 11/11).
+
+### Kilder (samlet)
+- https://status.search.google.com/incidents/WLxcJyC6jMWMfryxsKMc
+- https://blog.google/products-and-platforms/products/search/gemini-4-hydrogen-search-upgrade/
+- https://www.searchenginejournal.com/google-gemini-4-hydrogen-default-ai-mode/597096
+- https://ppc.land/google-search-gains-gemini-4-hydrogen-for-all-users-not-just-subscribers
+- https://seroundtable.com/google-november-2026-core-update-42504.html
+- https://seroundtable.com/google-ai-overview-source-icons-bottom-42519.html
+- https://seroundtable.com/google-ai-mode-multiturn-ads-42478.html
+- https://ppc.land/googles-core-update-may-run-until-three-days-before-black-friday
+- https://anicca.co.uk/blog/organic-ctr-by-position-in-2026
+- https://developers.google.com/search/docs/essentials/spam-policies
+- https://triaza.com/blog/seo/google-november-2026-core-update/
+- https://rankfender.com/en/learn/black-friday-seo/
+
+**Ny i denne uge vs. 11/11:** Gemini 4 Hydrogen som default for ALLE (12/11), Anicca CTR-studiet (produktgrids −62%, AI-citation +28/+36%), non-incentivized-review-filter i Shopping, AI Overview-kilde-ikoner flyttet til bund, definition-AI Overviews udfoldet default, multiturn-ads i AI Mode til 10 lande. Ikke gentaget: core update-basisdækning fra 12/11-rollout-start, EEA-e-mails, Seer CTR-tal.

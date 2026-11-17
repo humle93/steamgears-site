@@ -90,3 +90,28 @@
 - Ordrer 24h: 0 (seneste reelle #873 27/10). ads.txt 200. Sitemap_index 200; produkt-sitemap 15 URLs alle 200.
 - Rapport: /library/Site Checks/2026-11-16.md. Carry-overs: katalog-bekræftelse (10. dag), WPCode inaktiv (9. dag), hub-indexing, bacs/Redirection bekræftelse.
 - WAF: mild i morgendagt (raw curl OK); Juno-app-password virker på wp/v2 + wc/v3.
+
+## 2026-11-17 (tirsdag 09:00-run) — GSC/SEO/links
+
+**1) GSC (fulde uger, byProperty):**
+- Uge 10–16/11: **5 klik / 188 impressions, CTR 2,66%, pos 12,8**
+- Uge 3–9/11: 2 klik / 183 impr, CTR 1,09%, pos 15,4 → **klik +150%, CTR mere end dobelt, pos +2,6** (impressions fladt)
+- Top: /free-starter-kit/ 2 klik pos 2,8 (NY — lead-magnet indexeret og klikker); mad-scientist 2 klik/51 impr pos 8,9; "inventor outfit" 16 impr pos 7,9 (0 klik, CTR-mulighed)
+- how-to-make-a-steampunk-costume: pos stadig ~21 i 3–9/11-ugen og ude af top-15 denne uge — pos-faldet (9→21) holder sig ⚠️
+- **Sitemaps: 0 fejl, 0 warnings.** post-sitemap nu **37 URLs** (var 35) — alle 3 nye 14/11-guides med. Gammel sitemap.xml stadig pending (lav prio).
+- **URL inspection /steampunk-costumes/: STADIG "Discovered - currently not indexed"** (uændret siden 26/10 trods 2 friske interne links fra 15/11) — Henning-trin: Request indexing i GSC.
+
+**2) SEO-tjek:**
+- noindex: cart `noindex, follow` ✅, my-account `noindex, follow` ✅ (checkout 302 → login-flow, normalt).
+- ✅ **LØST: /product-category/* serverer nu `follow, index, max-image-preview:large`** (posters-prints verificeret live) — 10/11-punktet (noindex på kategorier) er lukket. Umiddelbar effekt ses ikke endnu (impr flat), følg op.
+- Nye 14/11-guides (home-decor, gallery-wall-ideas, poster-sizes): alle med håndskrevne titles + meta-desc + index,follow ✅
+
+**3) Broken interne links:**
+- 80 unikke interne links fra de 4 nyeste guider: **alle 200** ✅ (feeds/markdown-varianter ekskluderet).
+- 4 gamle Complete Looks-kategorier (airship-captain m.fl.) **stadig 302→/shop/** — kosmetisk carry-over, venter på Henning-svar om kategorierne skal genskabes.
+
+**Åbne Henning-punkter:**
+1. /steampunk-costumes/: Request indexing i GSC (stadig åben, 3. uge i træk).
+2. Complete Looks-kategorier: genskab eller omdiriger permanent (302 nu).
+3. AdSense-pub-skift, TikTok ttq, Google Ads-tag: uændrede.
+4. Positivt: free-starter-kit klikker (pos 2,8) — lead-magnet-sporet virker.

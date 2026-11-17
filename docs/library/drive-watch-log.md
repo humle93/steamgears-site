@@ -1,1 +1,359 @@
-IyMgMjAyNi0xMS0xMCAwOTowMCDigJQgaW5nZW4gw6ZuZHJpbmdlciAodG9rZW4gNDM1NTIgdcOmbmRyZXQpCi0gMjAyNi0xMS0xMCAxMDowMCBVVEM6IGluZ2VuIMOmbmRyaW5nZXIgKHRva2VuIDQzNTUyIHXDpm5kcmV0KQotIDIwMjYtMTEtMTAgMTE6MDAgVVRDOiAxMCBueWUgZmlsZXIg4oCUIHBvc3Rlci1kZXNpZ25zIHY2LTAx4oCmdjYtMTAgKGNsb2NrLXJhdmVuLCBjbG9jay1qZWxseWZpc2gsIGNsb2NrLXN0YWcsIG5hdXRpbHVzLXBvc3RlciwgYXJtYWRhLXBvc3Rlciwgbm91dmVhdS1sYWR5LCB3aGFsZS1za3ksIGNsb2Nrd29yay1nYXJkZW4sIGNsb2Nrd29yay1leWUsIHNreS1mYWlyKSwgUE5HLCAxMDo0My0xMDo0NSBVVEMuIFRva2VuIDQzNTUy4oaSNDM1NzkuCgojIyAyMDI2LTExLTEwIDEyOjAwICh3YXRjaCBmcmEgdG9rZW4gNDM1NzkpCi0gKipDb21tYW5kIENlbnRlciB2OC40ICYgU0VPIFRyaWFkIFBpcGVsaW5lIC0gS29tcGxldCBLaWxkZWtvZGUgb2cgUm9hZG1hcCoqIChHb29nbGUgRG9jKSDigJQgb3BkYXRlcmV0IDExOjE4Ci0gKipDb21tYW5kX0NlbnRlcl92OC41X0tvbXBsZXRfUGFra2UubWQqKiAoR29vZ2xlIERvYykg4oCUIG55L29wZGF0ZXJldCAxMToyMjoga29tcGxldCB2OC41LWtpbGRla29kZSArIGluc3RhbGxhdGlvbnNzY3JpcHQ7IG55dCBtb2R1bDogU0VPIFRyaWFkIFBpcGVsaW5lIChTZW1ydXNoICsgU3VyZmVyIFNFTyArIFJhbmsgTWF0aCksIEFJIEJvdCBIdWIsIFNRTGl0ZSBXQUwtam9ia8O4LCAxNC1kYWdlcyBiYWNrdXAtcm90YXRpb24sIHNlbHZvcGRhdGVyaW5nL2tvZGUtYXVkaXQuIEdpdEh1YjogSHVtbGU5My9jb21tYW5kLWNlbnRlci4KCiMjIDIwMjYtMTEtMTAgMTM6MDAgKHdhdGNoIGZyYSB0b2tlbiA0MzU5MikKLSBpbmdlbiDDpm5kcmluZ2VyLiBUb2tlbiB1w6ZuZHJldCAoNDM1OTIpLgojIyAyMDI2LTExLTEwIDE0OjAwIOKAlCBpbmdlbiDDpm5kcmluZ2VyICh0b2tlbiA0MzU5MikKLS0tIDIwMjYtMTEtMTAgMTU6MDEgVVRDIHwgdG9rZW4gNDM1OTIgfCBpbmdlbiDDpm5kcmluZ2VyCgojIyAyMDI2LTExLTEwIDE2OjAwCi0gU3RlYW1nZWFycy1zaXRlLWxhdGVzdC50YXIuZ3ogKGFwcGxpY2F0aW9uL2d6aXApIOKAlCBueS9vcGRhdGVyZXQgMTU6MzMgVVRDCgojIyAyMDI2LTExLTEwIDE3OjAwICh0b2tlbiA0MzU5NCDihpIgNDM2MTgpCi0gc3RlYW1nZWFycy1iYWNrY2FzdC1wbGFubmVyLnBocCDigJQgMiBmaWxlciAoMTY6Mjcgb2cgMTY6NDcsIFBIUCkKLSBzZW9fYWdlbnQucHksIHNlb19oYXJ2ZXN0ZXIucHksIHNlb19zb3VyY2VzLnR4dCDigJQgbnllIFB5dGhvbi9TRU8tdsOmcmt0w7hqc2ZpbGVyICgxNjozMSkKLSBNYXBwZXIgKG55ZS9vcGRhdGVyZWRlKTogc3RlYW1nZWFycy1zaXRlLCAuZ2l0aHViLCB3b3JrZmxvd3MsIGJhY2t1cC0yMDI2LTEwLTIzLCBrbm93bGVkZ2VfYmFzZSwgcGx1Z2lucywgcG9zdGVycy1zZW8sIHdvcmRwcmVzcywgbXUtcGx1Z2lucyAoMTY6MzEtMTY6MzIpCi0gQ29tbWFuZF9DZW50ZXJfdjguNV9Lb21wbGV0X1Bha2tlLm1kIOKAlCBHb29nbGUgRG9jcy1kb2t1bWVudCArIFBERi1la3Nwb3J0ICgxNjozMi0xNjozMykKLSAyMDI2LTExLTEwIDE4OjAwIFVUQyAoMTk6MDAgREspOiBpbmdlbiDDpm5kcmluZ2VyICh0b2tlbiA0MzYxOCwgdcOmbmRyZXQpCiMjIDIwMjYtMTEtMTAgMTk6MDAgVVRDCi0gaW5nZW4gw6ZuZHJpbmdlcgoKIyMgMjAyNi0xMS0xMCAyMDowMCBVVEMgLSBpbmdlbiBlbmRyaW5nZXIgKHRva2VuIDQzNjE4KQotIDIwMjYtMTEtMTAgMjE6MDAgVVRDOiBpbmdlbiDDpm5kcmluZ2VyICh0b2tlbiA0MzYxOCkKLSAyMDI2LTExLTEwIDIzOjAwIENFVDogaW5nZW4gw6ZuZHJpbmdlciAodG9rZW4gNDM2MTgpCiMjIDIwMjYtMTEtMTEgMDA6MDAgVVRDICgwMTowMCBESykKLSBpbmdlbiDDpm5kcmluZ2VyICh0b2tlbiA0MzYxOCwgdcOmbmRyZXQpCiMjIDIwMjYtMTEtMTEgMDA6MDAg4oCUIGluZ2VuIMOmbmRyaW5nZXIgKHRva2VuIDQzNjE4KQp7InRzIjoiMjAyNi0xMS0xMVQwMTowMFoiLCJ0b2tlbiI6IjQzNjE4IiwiY2hhbmdlcyI6ImluZ2VuIn0KCiMjIDIwMjYtMTEtMTEgMDI6MDAg4oCUIGluZ2VuIMOmbmRyaW5nZXIgKHRva2VuIDQzNjE4IHXDpm5kcmV0KQojIERyaXZlLXdhdGNoIDIwMjYtMTEtMTEgMDQ6MDEg4oCUIGluZ2VuIMOmbmRyaW5nZXIgc2lkZW4gc2lkc3QKLSAyMDI2LTExLTExIDA0OjAxIFVUQyAoMDU6MDAgREspOiBpbmdlbiDDpm5kcmluZ2VyICh0b2tlbiA0MzYxOCkKIyMgMjAyNi0xMS0xMSAwNTowMCBVVEMg4oCUIGluZ2VuIMOmbmRyaW5nZXIgc2lkZW4gc2lkc3QgKHRva2VuIDQzNjE4KQotIDIwMjYtMTEtMTEgMDY6MDAgVVRDOiBpbmdlbiDDpm5kcmluZ2VyICh0b2tlbiA0MzYxOCkKLSAyMDI2LTExLTExIDA3OjAwIFVUQzogaW5nZW4gw6ZuZHJpbmdlciAodG9rZW4gNDM2MTggdcOmbmRyZXQpCiMjIDIwMjYtMTEtMTEgMDg6MDAgVVRDIOKAlCBpbmdlbiDDpm5kcmluZ2VyICh0b2tlbiA0MzYxOCkKCiMjIDIwMjYtMTEtMTEgMDk6MDAgVVRDCi0gSW5nZW4gw6ZuZHJpbmdlciBzaWRlbiBzaWRzdCAodG9rZW4gNDM2MTggdcOmbmRyZXQpLgotIDIwMjYtMTEtMTEgMTE6MDAgQ0VUOiBpbmdlbiDDpm5kcmluZ2VyICh0b2tlbiA0MzYxOCB1w6ZuZHJldCkKCiMjIDIwMjYtMTEtMTEgMTE6MDAKSW5nZW4gw6ZuZHJpbmdlciAodG9rZW4gNDM2MTggdcOmbmRyZXQpLgoKIyMgMjAyNi0xMS0xMSAxMjowMCAodG9rZW4gNDM2MTgg4oaSIDQzNjIyKQotIE5ZIG1hcHBlOiAiV1AgQXV0by1EZXBsb3llciAtIENvbW1hbmQgQ2VudGVyIE1vZHVsIiAoMTE6NDkpCi0gT1BEQVRFUkVUOiBTdGVhbWdlYXJzLXNpdGUtbGF0ZXN0LnRhci5neiAofjEsMCBNQikg4oCUIG1vZGlmaWVkIDExOjQ5LzExOjUwIChmaWwgb3ByZXR0ZXQgMDcvMTEpCiMjIDIwMjYtMTEtMTEgMTM6MDAgVVRDIOKAlCBpbmdlbiDDpm5kcmluZ2VyICh0b2tlbiA0MzYyMikKCiMjIDIwMjYtMTEtMTEgMTQ6MDAgKGvDuHJzZWwsIMOmbmRyaW5nZXIgc2lkZW4gdG9rZW4gNDM2MjIpCi0gNyBueWUgUE5HLWZpbGVyIGtsLiAxMzo0MOKAkzEzOjQxOiBhY2Mta2l0LCBhY2Mtd2F0Y2gsIGFjYy1nb2dnbGVzLWNoYWluLCBhY2MtYnJhY2VyLXJpdmV0cywgYWNjLWhhdC1nb2dnbGVzLCBhY2MtYmVsdCwgYWNjLWZpbmFsLWxvb2suIFNlciB1ZCBzb20gYWNjZXNzb3JpZXMtYmlsbGVkc2VyaWUgKG11bGlndmlzIHRpbCBndWlkZS9zaG9wLWluZGhvbGQpLiBJbmdlbiDDpm5kcmluZ2VyIGVsbGVyIHNsZXRuaW5nZXIuCi0gMjAyNi0xMS0xMSAxNTowMCBVVEM6IGluZ2VuIMOmbmRyaW5nZXIgKHRva2VuIDQzNjQzKQotIDIwMjYtMTEtMTEgMTY6MDAgVVRDOiBpbmdlbiDDpm5kcmluZ2VyICh0b2tlbiA0MzY0MyB1w6ZuZHJldCkKCi0gMjAyNi0xMS0xMSAxNzowMCBVVEM6IGluZ2VuIMOmbmRyaW5nZXIgKHRva2VuIDQzNjQzIHXDpm5kcmV0KQojIyAyMDI2LTExLTExIDE4OjAwIFVUQyDigJQgaW5nZW4gw6ZuZHJpbmdlciAodG9rZW4gNDM2NDMpCi0gMjAyNi0xMS0xMSAxOTowMCBVVEMgKDIwOjAwIERLKTogaW5nZW4gw6ZuZHJpbmdlciAodG9rZW4gNDM2NDMpCiMjIDIwMjYtMTEtMTEgMjE6MDAg4oCUIGluZ2VuIMOmbmRyaW5nZXIKIyMgMjAyNi0xMS0xMSAyMTowMCDigJQgaW5nZW4gw6ZuZHJpbmdlciAodG9rZW4gNDM2NDMpCjIwMjYtMTEtMTEgMjI6MDAgVVRDICgyMzowMCBESyk6IGluZ2VuIMOmbmRyaW5nZXIuCi0gMjAyNi0xMS0xMiAwMDowMCBDRVQgKDIzOjAwWiBydW4pOiBpbmdlbiDDpm5kcmluZ2VyICh0b2tlbiA0MzY0MyB1w6ZuZHJldCkK
+## 2026-11-10 09:00 — ingen ændringer (token 43552 uændret)
+- 2026-11-10 10:00 UTC: ingen ændringer (token 43552 uændret)
+- 2026-11-10 11:00 UTC: 10 nye filer — poster-designs v6-01…v6-10 (clock-raven, clock-jellyfish, clock-stag, nautilus-poster, armada-poster, nouveau-lady, whale-sky, clockwork-garden, clockwork-eye, sky-fair), PNG, 10:43-10:45 UTC. Token 43552→43579.
+
+## 2026-11-10 12:00 (watch fra token 43579)
+- **Command Center v8.4 & SEO Triad Pipeline - Komplet Kildekode og Roadmap** (Google Doc) — opdateret 11:18
+- **Command_Center_v8.5_Komplet_Pakke.md** (Google Doc) — ny/opdateret 11:22: komplet v8.5-kildekode + installationsscript; nyt modul: SEO Triad Pipeline (Semrush + Surfer SEO + Rank Math), AI Bot Hub, SQLite WAL-jobkø, 14-dages backup-rotation, selvopdatering/kode-audit. GitHub: Humle93/command-center.
+
+## 2026-11-10 13:00 (watch fra token 43592)
+- ingen ændringer. Token uændret (43592).
+## 2026-11-10 14:00 — ingen ændringer (token 43592)
+--- 2026-11-10 15:01 UTC | token 43592 | ingen ændringer
+
+## 2026-11-10 16:00
+- Steamgears-site-latest.tar.gz (application/gzip) — ny/opdateret 15:33 UTC
+
+## 2026-11-10 17:00 (token 43594 → 43618)
+- steamgears-backcast-planner.php — 2 filer (16:27 og 16:47, PHP)
+- seo_agent.py, seo_harvester.py, seo_sources.txt — nye Python/SEO-værktøjsfiler (16:31)
+- Mapper (nye/opdaterede): steamgears-site, .github, workflows, backup-2026-10-23, knowledge_base, plugins, posters-seo, wordpress, mu-plugins (16:31-16:32)
+- Command_Center_v8.5_Komplet_Pakke.md — Google Docs-dokument + PDF-eksport (16:32-16:33)
+- 2026-11-10 18:00 UTC (19:00 DK): ingen ændringer (token 43618, uændret)
+## 2026-11-10 19:00 UTC
+- ingen ændringer
+
+## 2026-11-10 20:00 UTC - ingen endringer (token 43618)
+- 2026-11-10 21:00 UTC: ingen ændringer (token 43618)
+- 2026-11-10 23:00 CET: ingen ændringer (token 43618)
+## 2026-11-11 00:00 UTC (01:00 DK)
+- ingen ændringer (token 43618, uændret)
+## 2026-11-11 00:00 — ingen ændringer (token 43618)
+{"ts":"2026-11-11T01:00Z","token":"43618","changes":"ingen"}
+
+## 2026-11-11 02:00 — ingen ændringer (token 43618 uændret)
+# Drive-watch 2026-11-11 04:01 — ingen ændringer siden sidst
+- 2026-11-11 04:01 UTC (05:00 DK): ingen ændringer (token 43618)
+## 2026-11-11 05:00 UTC — ingen ændringer siden sidst (token 43618)
+- 2026-11-11 06:00 UTC: ingen ændringer (token 43618)
+- 2026-11-11 07:00 UTC: ingen ændringer (token 43618 uændret)
+## 2026-11-11 08:00 UTC — ingen ændringer (token 43618)
+
+## 2026-11-11 09:00 UTC
+- Ingen ændringer siden sidst (token 43618 uændret).
+- 2026-11-11 11:00 CET: ingen ændringer (token 43618 uændret)
+
+## 2026-11-11 11:00
+Ingen ændringer (token 43618 uændret).
+
+## 2026-11-11 12:00 (token 43618 → 43622)
+- NY mappe: "WP Auto-Deployer - Command Center Modul" (11:49)
+- OPDATERET: Steamgears-site-latest.tar.gz (~1,0 MB) — modified 11:49/11:50 (fil oprettet 07/11)
+## 2026-11-11 13:00 UTC — ingen ændringer (token 43622)
+
+## 2026-11-11 14:00 (kørsel, ændringer siden token 43622)
+- 7 nye PNG-filer kl. 13:40–13:41: acc-kit, acc-watch, acc-goggles-chain, acc-bracer-rivets, acc-hat-goggles, acc-belt, acc-final-look. Ser ud som accessories-billedserie (muligvis til guide/shop-indhold). Ingen ændringer eller sletninger.
+- 2026-11-11 15:00 UTC: ingen ændringer (token 43643)
+- 2026-11-11 16:00 UTC: ingen ændringer (token 43643 uændret)
+
+- 2026-11-11 17:00 UTC: ingen ændringer (token 43643 uændret)
+## 2026-11-11 18:00 UTC — ingen ændringer (token 43643)
+- 2026-11-11 19:00 UTC (20:00 DK): ingen ændringer (token 43643)
+## 2026-11-11 21:00 — ingen ændringer
+## 2026-11-11 21:00 — ingen ændringer (token 43643)
+2026-11-11 22:00 UTC (23:00 DK): ingen ændringer.
+- 2026-11-12 00:00 CET (23:00Z run): ingen ændringer (token 43643 uændret)
+
+## 2026-11-12 (00:00 UTC-kørsel)
+- Ingen ændringer siden sidst. Token uændret: 43643.
+2026-11-12 01:01 UTC — ingen ændringer (token 43643 uændret)
+## 2026-11-12 02:00 — ingen ændringer
+2026-11-12T03:02Z - ingen ændringer (token 43643)
+## 2026-11-12 04:00 UTC — ingen ændringer (token 43643)
+## 2026-11-12 05:00 UTC (06:00 DK)
+- Ingen ændringer siden sidst (token 43643 uændret).
+
+## 2026-11-12 06:00
+Ingen ændringer siden sidst. Token 43643 → 43644.
+## 2026-11-12 07:00 — ingen ændringer (token 43644)
+
+## 2026-11-12 08:00 - ingen aendringer siden sidst (token 43644)
+2026-11-12 09:00 — ingen ændringer (token 43644 uændret)
+## 2026-11-12 10:00 UTC — ingen ændringer (token 43644)
+2026-11-12 11:00 UTC — ingen ændringer (token 43644)
+
+## 2026-11-12 12:00 — ingen ændringer siden sidst (token 43644 uændret)
+## 2026-11-12 13:00
+- Ingen ændringer (token 43644 uændret).
+- 2026-11-12 14:00 UTC: ingen ændringer (token 43644 uændret)
+
+## 2026-11-12 16:00 (DK) - ingen aendringer (token 43644)
+
+## 2026-11-12 16:15 (DK) - 3 aendringer (token 43644 -> 43662)
+- Ny mappe: databroker (15:15)
+- Nyt/Opdateret doc: Data Broker Research, Metoder, Roadmap & GitHub Deploy (Bygge & Anlaeg) (15:17)
+- NYT: samme doc V2 (15:31) - B2B data broker blueprint: bygge-/anlaegs-/udbudsovervaagning DK, API'er (CVR, TED, Udbud.dk), FastAPI-kode + Debian VPS deploy
+
+## 2026-11-12 17:00 UTC
+- "LMC R17 (8.4).zip" — ny fil (16:42)
+2026-11-12 19:00 DK: ingen ændringer (token 43664)
+
+## 2026-11-12 19:00 UTC — ingen ændringer
+- 2026-11-12 21:00 CET: ingen ændringer (token 43664)
+
+## 2026-11-12 22:00 CET (21:00 UTC)
+- Ingen ændringer siden sidst.
+
+## 2026-11-12 23:00 DK (22:00 UTC)
+Ingen ændringer (token 43664).
+
+## 2026-11-13 00:00 DK
+Ingen ændringer (token 43664).
+## 2026-11-13 00:00 UTC (kørsel)
+- Ingen ændringer siden sidst (token 43664 uændret).
+## 2026-11-13 01:00 (UTC) — token 43664 → 43664, ingen ændringer.
+## 2026-11-13 02:00 UTC — ingen ændringer (token 43664)
+## 2026-11-13 03:00 UTC
+- ingen ændringer siden sidst (token 43664 uændret)
+## 2026-11-13 04:00 UTC — ingen ændringer
+- 2026-11-13 06:00 (05:00 UTC): ingen ændringer (token 43664 uændret)
+
+## 2026-11-13 06:00 — ingen ændringer (token 43664)
+- 2026-11-13 07:00 UTC (08:00 DK): ingen ændringer (token 43664).
+2026-11-13 08:00 UTC — ingen ændringer (token 43664)
+2026-11-13 09:00 UTC: ingen ændringer (token 43664)
+2026-11-13 10:00 UTC — token 43664: ingen ændringer
+## 2026-11-13 11:00 — ingen ændringer (token 43664)
+## 2026-11-13 12:00 UTC (13:00 DK)
+- Ingen ændringer (token 43664 uændret).
+
+- 2026-11-13 15:00 CET: ingen ændringer (token 43664)
+
+## 2026-11-13 15:00 (UTC-watch, token 43664 → 43740)
+- Ny mappe: "Posters - 50 Designs Print & Vektor Pakke" (14:44)
+- Nyt doc: "Steamgears — Vektor-Skabelon (SVG) & 300 DPI Print-Pipeline Script" (14:48)
+- Nyt doc: "Steamgears — 50 Poster Designs, Produktbeskrivelser & Prompts" (14:48)
+- Ny mappe: "Råbilleder - Steamgears Posters (Genereret Batch)" (14:50) + 13 råbilleder (sg-air/sg-nat/sg-eng, JPEG)
+- Nyt sheet: "Steamgears_50_Posters_WooCommerce_Print_Import" (14:51)
+- Nyt doc: "Steamgears — Samlet Masterkatalog 50 Posters Print & Vektor" (14:53)
+Ingen sletninger, ingen permissions-ændringer.
+
+## 2026-11-13 16:00 UTC (17:00 DK), token 43740 → 43752
+- 12 nye/ændrede JPEG-filer i "Råbilleder - Steamgears Posters" (14:50 UTC): sg-air-001..008 (aurora helm, celestial dome, navigator dome, sky-boarding, captain chart table, crows nest bridge, storm plank leap, sky harbor dawn, armada victorian city), sg-eng-011 (chief engineer valve), sg-nat-031 (strix mechanica owl), sg-nat-032 (cor horologium heart). Ingen sletninger eller permissions-ændringer.
+2026-11-13 17:00 UTC: ingen ændringer (token 43752 uændret).
+## 2026-11-13 18:00 UTC — Drive-watch
+- Ingen ændringer (token 43752 uændret)
+
+## 2026-11-13 19:00 (DK) — token 43752→43780
+- 7 ændringer 18:34–18:41, alle nye Docs (køreplaner):
+  - Solarpunk – WooCommerce SEO & Pinterest Køreplan (NY, Printify/€-udgave)
+  - Clockwork Fantasy & Gotik – Køreplan FORÆLDET 27-10 (omdøbt/kopi)
+  - Dieselpunk – Køreplan FORÆLDET 27-10 (omdøbt/kopi)
+  - Dieselpunk – kladde 13-11, forkastet (NY)
+  - Clockwork Fantasy & Gotik – kladde 13-11, forkastet (NY)
+  - Clockwork Fantasy & Gotik – Gelato + DKK, gældende 13-11 (NY; 5 plakater, 30×42/50×70/70×100, DKK, Gelato ikke forbundet endnu)
+  - Dieselpunk – Gelato + DKK, gældende 13-11 (NY)
+- Ingen sletninger eller tilladelses-ændringer.
+2026-11-13 20:00 UTC | Kørsel: ingen ændringer (token 43780)
+## 2026-11-13 21:00 UTC — ingen ændringer (token 43780)
+## 2026-11-13 22:00 — ingen ændringer (token 43780)
+## 2026-11-14 00:01 — ingen ændringer (token 43780)
+- 2026-11-14 00:00 UTC (run 43780): ingen ændringer.
+## 2026-11-14 01:00 UTC — ingen ændringer (token 43780)
+## 2026-11-14 02:00 (CET) / 03:00 (DK-tid)
+- list_changes med token 43780: ingen ændringer. Token uændret (43780).
+- 2026-11-14 03:00 (kl. 04:00 DK): ingen ændringer.
+## 2026-11-14 04:00 — ingen ændringer (token 43780)
+2026-11-14 05:00 UTC — ingen ændringer (token 43780)
+- 2026-11-14 07:00 CET: ingen ændringer (token 43780).
+
+## 2026-11-14 07:00 — ingen ændringer (token 43780)
+- 2026-11-14 08:00 (UTC) / 09:00 DK: ingen ændringer (token 43780)
+## 2026-11-14 09:25–09:41 UTC (10:25–10:41 DK), token 43780 → 43810
+- 5 ændringer, alle ny/opdateret, ingen sletninger eller permissions:
+  1. "Steamgears — Vektor-Skabelon (SVG) & 300 DPI Print-Pipeline Script" (09:25) — opdateret af Henning
+  2. "Steamgears – ChatGPT-prompter (19 motiver)" (09:38) — ny
+  3. "Dieselpunk - billedprompts til de 5 plakater (14-11-2026)" (09:40) — ny
+  4. "LÆS MIG – sådan skal billederne ligge" (09:40) — ny
+  5. "Clockwork Fantasy & Gotik - billedprompts til de 5 plakater (14-11-2026)" (09:40) — ny
+- Kontekst: viderearbeit med poster-pipeline (Gelato/DKK-køreplaner fra i går); nye billedprompts + filstruktur-README.
+
+## 2026-11-14 10:00
+- Ny mappe: "Steamgears – backup" (oprettet 10:53). Tom — ingen filer i den endnu.
+## 2026-11-14 11:00 CET — ingen ændringer (token 43811)
+## 2026-11-14 12:00 (kørt kl. 14:15)
+Ny/ændret: "Billedprompts – endelige dieselpunk + clockwork punk (14-11-2026)" (Google Doc, 12:12) — afløser de to gamle prompt-dok i tema-mapperne. 6 prompts (D1-D3 dieselpunk, C1-C3 clockwork), kørt lokalt med SD-Turbo (1024×1536). Mangler: opskalering til tryk (50×70 kræver 5906×8268 px) før Gelato; 13 motiver stadig ikke genereret.
+- 2026-11-14 13:00 UTC: ingen ændringer (token 43819)
+2026-11-14 14:29 UTC — ingen ændringer (token 43819 uændret)
+- 2026-11-14 15:00 UTC: ingen ændringer (token 43819 uændret)
+
+## 2026-11-14 16:00 (UTC) — Steamgears Drive-watch
+- Ingen ændringer siden sidst (token 43819, uændret).
+
+## 2026-11-14 18:00
+- Ingen ændringer siden sidst (token 43819, uændret).
+
+## 2026-11-14 17:00 (time)
+- Ny fil: Garrys Mod v14.07.10.rar (uploadet 20:22 UTC)
+- Token: 43819 → 43822
+
+## 2026-11-14 19:00
+Ingen ændringer siden sidst (token 43822 uændret).
+- 2026-11-14 22:00 (DK): ingen ændringer (token 43822 uændret).
+
+
+- Ingen ændringer siden sidst. Token: 43822
+- 2026-11-15 (task run 2026-11-14T20:00Z): ingen ændringer (token 43822 uændret)
+
+## 2026-11-15 01:00 (UTC)
+- Ingen ændringer siden sidst.
+- 2026-11-14 22:00 UTC (23:00 DK): ingen ændringer (token 43822)
+## 2026-11-15 00:00 DK — ingen ændringer (token 43822)
+- 2026-11-15 03:00 CET (02:00 UTC): ingen ændringer (token 43822 uændret)
+## 2026-11-15 03:00 (DK)
+- Ingen ændringer (token 43822 uændret).
+2026-11-15 04:00 UTC — ingen ændringer (token 43822)
+
+## 2026-11-15 06:00 (05:00 UTC)
+66 ændringer 04:23–04:33 UTC — alle egen-genererede: backup-batch (steamgears-backup-2026-11-15 content + 18 media-parts + site-backup-part2 + BACKUP-SUMMARY.md), 5 screenshots (sg-desktop-v2, sg-mobile-v2, sg-mobile-shop5-7) og 40 design-assets (v4: 10 png + 10 mock jpg — owl/bear/fox/submarine/balloon/muse/airship/botanist/ouroboros/cat; v5: 10 jpg + 10 mock jpg — mech-fox/octopus/clockmoth/sparrow/poster-lighthouse/poster-balloon/nouveau/workshop/terrarium/planisphere). Ingen fremmede filer, ingen sletninger, ingen tilladelses-ændringer. Ny token: 43981.
+
+## 2026-11-15 06:00 — 22 nye filer (kl. 05:43)
+- sg-diesel-001..010 (10 jpg): art-deco skyport, locomotive, walking mech scout, female aviator, spy radio operator, female race driver, female V12 mechanic, submarine naval base, Tesla arc engineer, zeppelin air captain
+- sg-clock-001..010 (10 jpg): baroque clockwork stag, clocktower inventor, renaissance ornithopter, cathedral of time, Venetian automaton harpsichord, female guard captain, female fencer w/ brass arm, royal watchmaker phoenix, female royal horologist, wind-up clockwork galleon
+- sg-mix-001..002 (2 jpg): botanist clockwork squirrel, dieselpunk shipyard scout
+- Ingen slettede/rettigheds-ændringer. Link: /wiki/user/previews/batches (billede-forsyning)
+## 2026-11-15 07:00 UTC — ingen ændringer (token 44060)
+2026-11-15 08:00 UTC (09:00 DK) — ingen ændringer (token 44060 uændret)
+2026-11-15 10:02 — ingen ændringer (token 44060 uændret)
+
+## 2026-11-15 10:00 (UTC) — ingen ændringer siden sidst (token 44060).
+## 2026-11-15 12:00 DK — ingen ændringer (token 44060)
+
+## 2026-11-15 12:00 (13:00 DK) — token 44060 → 44088
+5 ændringer 11:07–12:12 UTC:
+- sg-img-a.zip + sg-img-b.zip (nye, 11:07) — zip-arkiver, ikke egen-genereret i denne periode
+- Steamgears-site-latest.tar.gz — opdateret 11:46 (kendt tilbagevendende site-backup)
+- "Steamgears — Arbejdsseddel til Gemini (28/10)" — opdateret 12:11 (multi-agent sync-notat, posters-only)
+- "Steamgears.eu - Oprydnings- og Fejlrettelsesliste (2026-11-15)" — NY/opdateret 12:12 — omfattende oprydningsliste + multi-agent notat (15/11): POSTERS-ONLY-omstilling (max 50 live plakater, alt tøj/gear/Atelier på draft), 37 kategorier → 6 plakat-kategorier, 3 Python-scripts klar (fix_poster_images.py, posters_only_cleanup.py, auto_poster_pipeline.py), UI/tekstretelser (cookie-banner, mobil-header, forside, footer), GA4-dublet (G-3MYLFKY8MY vs G-GE85RJJKD1), HowTo/Product-schema, interne links → plakat-kollektioner.
+Ingen sletninger eller tilladelses-ændringer.
+
+
+
+## 2026-11-15 14:02 UTC — ingen ændringer
+- 2026-11-15 16:00 CET: ingen ændringer (token 44088 uændret)
+
+## 2026-11-15 16:00 UTC
+- Ingen ændringer (token 44088 uændret).
+## 2026-11-15 17:00 UTC (18:00 DK)
+- Ingen ændringer (token 44088 uændret).
+[2026-11-15 18:00] ingen ændringer (token 44088)
+
+## 2026-11-15 19:00
+- Ingen ændringer siden sidst (token 44088 uændret).
+2026-11-15 21:00 CET: ingen ændringer (token 44088 uændret).
+
+2026-11-15 21:00 UTC — token 44088: ingen ændringer.
+- 2026-11-15 22:00 UTC: ingen ændringer (token 44088)
+- 2026-11-16 00:00 (task 23:00 UTC): ingen ændringer (token 44088)
+
+## 2026-11-16 00:00 (hourly run)
+- ingen ændringer
+- 2026-11-16 01:00 UTC: ingen ændringer (token 44088 uændret)
+## 2026-11-16 02:00 UTC (03:00 DK) — ingen ændringer (token 44088)
+- 2026-11-16 03:00 UTC / 04:00 DK: ingen ændringer (token 44088)
+2026-11-16 05:00 DK: ingen ændringer
+## 2026-11-16 05:00 UTC — Drive-watch
+- Ingen ændringer siden sidst (token 44088 uændret).
+## 2026-11-16 06:00 (token 44088 → 44111)
+- 05:27 Command_Center_Dashboard_v8.html, v8_1, v8_2 (nye) — dashboard-versioner
+- 05:33 steamgears-catalog-mappe + steamgears-catalog.zip (nye)
+- 05:43 Projektstyring-mappe (ny) med Projektstyring Masterplan (Docs, 05:47) — 3-faset plan: rclone/Drive-sync, GitHub-repo (humle93/projektstyring), dashboard med web backend + Android app
+
+2026-11-16 07:00 UTC — ingen ændringer (token 44111)
+- 2026-11-16 09:00 (DK): ingen ændringer (token 44111)
+
+## 2026-11-16 09:00 UTC — ingen ændringer (token 44111 uændret)
+- : ingen ændringer (token 44111)
+2026-11-16 10:00 UTC: ingen ændringer (token 44111)
+
+## 2026-11-16 12:00 (CET)
+- Ingen ændringer siden sidst (token 44111 uændret).
+
+## 2026-11-16 12:00 UTC (token 44111 → 44122)
+- 11:47 projektstyring-kildekode.zip (ny) + projektstyring.bundle (ny) — kildekode-arkiv og bundle til Projektstyring-projektet
+- 11:52 Projektstyring Masterplan (Docs) opdateret — samme 3-faser (rclone/Drive, GitHub humle93/projektstyring, dashboard+Android app)
+- 11:52 Projektstyring-mappe (ændret metadata/rettigheder)
+- 2026-11-16 13:00 UTC: ingen ændringer (token 44122 uændret)
+## 2026-11-16 14:00 DK — ingen ændringer siden sidst (token 44122)
+## 2026-11-16 15:02' UTC — ingen ændringer (token 44122)
+- 2026-11-16 17:00 CET: ingen ændringer (token 44122 uændret)
+- 2026-11-16 17:00 UTC (18:00 DK): ingen ændringer (token 44122 uændret)
+- 2026-11-16 18:00 UTC: ingen ændringer (token 44122 uændret)
+
+## 2026-11-16 19:00 UTC (token 44122 → 44140)
+- 18:07 Projektstyring Masterplan (Docs) opdateret
+- 18:11 projektstyring-kildekode.zip (opdateret/ny version)
+- 18:13 projektstyring.bundle (opdateret)
+- 18:17 AIMLAPI_APIkey_badb337b (Docs, NY) — API-key dokument
+- 18:17 WooCommerce Advanced MCP Bridge - Printful Edition (.docx + Docs, NYE) — WP-plugin kode: autonom produktoptimering m. Printful, margin-beskyttelse, godkendelseskø
+- 18:17-18:18 Command_Center_v8.5_Komplet_Pakke (.md + .pdf, NYE) — v8.5 kildekode inkl. SEO Triad Pipeline (Semrush+Surfer+Rank Math), WAL-jobkø, backup-rotation
+- 18:18 Command Center v8.4 & SEO Triad Pipeline - Komplet Kildekode og Roadmap (Docs, NY)
+- 18:18 Mapper: "WP Auto-Deployer - Command Center Modul" (NY), "steamgears-site" (NY)
+- 18:59 Steamgears-site-latest.tar.gz (opdateret, 42.8 MB site-backup)
+
+## 2026-11-16 21:00 (DK)
+- Token 44140 → 49417. ~450 ændringer 19:02–20:03 UTC, alle nye (ingen slettede/tilladelses-ændringer).
+- Ny mappe Github_Backups: fuld mirror af Projektstyring-repo (sync.sh, README/ROADMAP, projektstyring.bundle + kildekode.zip, Android-appfiler, .git-internals, WP REST-backups som posts/products/media json).
+- Google Docs: "Projektstyring Masterplan" (3 faser: rclone+Drive, GitHub repo/CI, projektstyrings-dashboard m. web+Android) og "Command Center v8.4 & SEO Triad Pipeline - Komplet Kildekode og Roadmap"; også Command_Center_v8.5 PDF.
+- agent-brief.md (målt 10/11): 20 produkter, DKK 165–1000, 9 kategorier, 33 indlæg, 32 sider.
+- Niche-spor: nicher.json + lejebolig/kabine/søvn/sensorisk (json+csv+md), shopify-eksporter, niche-scripts (seo_agent.py, niche_scanner m.fl.), kaffeguiden-artikelserie (12 md).
+- Masser af md+pdf-versionspar fra /workspace/library og poster-generering (poster-sg-air-*, poster-clock-*, runde-2 SVG/PNG), plugin-kilde (steamgears-autopilot v7.1.0 + v7.88.2 zip), mange medie-billeder.
+- Vurdering: ser ud som bevidst rclone/backup-sync af Projektstyring + Steamgears-arbejdsområder, ikke unormal aktivitet.
+
+## 2026-11-16 21:00 (token 49417 → 49823)
+226 ændringer, 0 slettede. Stort upload af poster-runde 2 materiale (kl. 20:03–20:07):
+- ~19 poster-mockups (poster-clock/diesel/mix/air JPEG) + oversigt-runde2.jpg + oversigt-realistisk.jpg
+- r2-61-urvaerkshjertet.svg/png + render.js (plakat-rendering)
+- README.md "Runde 2 – realistiske plakater (15. november 2026)": 19 valgte plakater i 5 serier (Diesel Age, Clockwork Court, Airship Chronicles m.fl.), trykpipeline via print_pipeline.py (Real-ESRGAN opskalering, 50×70 PDF til Gelato), 3 fravalgt (ophavsret/WWII-uniform/Empire State-lignende tårn)
+- Ny mappe: brygguiden.dk (20:12)
+- Google Docs: "Command Center v7.42 PRO – Teknisk Analyse og Udviklingsplan (P0–P3)" (2 versioner 20:12/20:14) — repo-analyse af humle93/command-center, samlet 7,5/10, P0=sikkerhed (SSRF, kryptering), P1=staging-miljø, P2=økonomidashboard, P3=Niche Opportunity Engine
+- Kode-repo-uploads (20:17–20:20): command-center/niche_scanner/deployer-projekter (Python: niche_engine, orchestrator, seeder, social_crawler, llm_client), socialpilot-android repo (Gradle/Kotlin/Java: MainActivity, AppUpdateManager), Command_Center_Dashboard_v8_2.html, Projektstyring-mappe
+
+## 2026-11-16 22:00 (token 49823 → 49831)
+- **Opdateret:** "Command Center v7.42 PRO - Teknisk analyse og udviklingsplan" (Google Doc, ændret 21:43 UTC) — 1 ændring i alt.
+
+## 2026-11-16 23:00 UTC (token 49831 → 49949)
+41 ændringer 22:24–22:45 UTC, alle nye, 0 slettede, 0 tilladelses-ændringer. Fuld rescan bekræftede de nyeste 20 filer matcher.
+- Ny mappestruktur: brygguiden/ med undermapper kaffeguiden/, indhold/, import/, theme/, setup/ — spejling af git-repo humle93/brygguiden.dk (commit 71a4ce0, "Forbedr responsivitet og tilgængelighed i temaet", 16/11).
+- 34 repo-filer: WP-setup-scripts (01-grundindstillinger, 02-plugins, 03-tema, 04-kladder, 05-forside, 07-lancering, 08-udgiv, kontrol.sh, rapport.sh), barne-tema "kaffeguiden" (style.css, functions.php), 15 kaffe-artikler (guider-siden, forside, AeroPress, pour over, espresso, stempelkande, mokkakande, afkalkning, kværn-rens, cold brew, kaffebønner, kaffekværn, affiliate, privatliv) + sider.csv + byg-wxr.py + verify-fase4.py.
+- README.md: gendannelsesguide — 34 filer MD5-verificeret byte for byte mod arbejdstræet; artikler er klar med meta-titel/beskrivelse/fokus-søgeord.
+- Vurdering: bevidst backup/spejling af kaffeguiden-projektet (niche-spor fra 21:00-run), ikke unormal aktivitet.
+## 2026-11-17 00:00 UTC (timely run) — ingen ændringer
+- 2026-11-17 01:00 UTC: ingen ændringer (token 49949)
+2026-11-17 02:00 UTC (03:00 DK): ingen ændringer
+2026-11-17 03:00 UTC (04:00 DK): ingen ændringer (token 49949)
+## 2026-11-17 05:00 CET — ingen ændringer
+## 2026-11-17 05:00 UTC (06:00 DK) — ingen ændringer (token 49949)
+- 2026-11-17 06:00 UTC: ingen ændringer (token 49949)
+- 2026-11-17 07:00 UTC: ingen ændringer (token 49949)
+2026-11-17 08:00 UTC — ingen ændringer (token 49949 uændret)
+
+
+Ingen ændringer siden sidst (token 49949 uændret).
+## 2026-11-17 10:00 UTC — ingen ændringer (token 49949)
+- 2026-11-17 12:00 CET: ingen ændringer (token 49949)
+- 2026-11-17 12:00 UTC: ingen ændringer (token 49949 uændret)
+- 17/11 13:00 UTC — ingen ændringer (token 49949)
+## 2026-11-17 14:00 (UTC) — ingen ændringer (token 49949)
+2026-11-17 15:00 UTC: ingen ændringer
+- 2026-11-17 16:00 UTC (token 49949): ingen ændringer
+## 2026-11-17 17:00 — Steamgears-site-latest.tar.gz opdateret (16:56 UTC) — site-backup uploadet til Drive. Token → 49954.
+## 2026-11-17 18:00 UTC — ingen ændringer (token 49954)
+- 2026-11-17 19:00 UTC: ingen ændringer (token 49954)
+2026-11-17 20:00 UTC: token 49954 — ingen ændringer.
+## 2026-11-17 22:00 DK-tid — ingen ændringer
+## 2026-11-17 22:00 — token 49954 → 49963
+- Nye mapper: .tmp, mcp-results (temp/agent-artefakter)
+- 3 mcp-adapter result-filer (kaffe___mcp-adapter-*, JSON): discover-abilities x2 + execute-ability (21:53-22:01)
+- Ingen dokumenter/indholdsfilberøringer.
+2026-11-17 23:00 UTC — ingen ændringer (token 49963)

@@ -98,3 +98,15 @@ Kørt iht. plan (geo-baseline-ga4-2026-10-26.md). Fuld tabel + forbehold: **geo-
 **Site-niveau:** ~100 impr/uge samlet i GSC for alle queries; POST 70 impr/2 klik vs PRE 81 impr/0 klik (by query+page). Ingen trend.
 
 **Konklusion:** 2,5 uger efter GEO-batchen er der INGEN målbar impressions-stigning på spørgsmåls-keywords for de 18 guider — volumen er for lille (site ~100 impr/uge i GSC; de fleste GEO-sider har n=0) og signalet domineres af sæson (Halloween-queries udløb 31/10). Eneste målbar positive bevægelse: "what accessories…"-query konsolideret på /steampunk-accessories/ med pos 50→39. N=for-lille til konklusion; re-check 16/11 sammen med GA4-måling #2, herefter 4-ugers-tjek ca. 23/11 med længere vindue (14 dage) og AI-referral-tjek i GA4 (perplexity/gemini) som ledende indikator.
+
+## 16/11 2026 — GA4 post-GEO-måling #2 (2/11–15/11) + GSC
+
+Fuld tabel + forbehold: **geo-postcheck-2-ga4-2026-11-16.md**. Rå outputs: /workspace/tmp/geo1116/. Kort:
+
+- **KRITISK dataforbehold: GA4-tracking ser ud til at være død efter 6/11** — 0 sessions 7/11–15/11 (3 queries bekræfter; daglig liste slutter 6/11 = 13 sess). Vinduet er reelt 2/11–6/11 (5 dage). Kræver tjek af GTM/GA4 realtid på sitet.
+- Guide-sessions: 1 (baseline 32, #1: 10) — /diy-steampunk-goggles 2/11 fra Pinterest
+- Shop-visits fra guides: 0 (baseline 3, #1: 0) · cart-events fra guides: 0 (alle vinduer)
+- Sitewide 2/11–6/11: 150 sessions; ingen add_to_cart/view_cart/begin_checkout/purchase-events; 1 ads_conversion_Kurv_1
+- AI-referral 2/11–15/11: **0** (baseline 7, #1: 1 gemini)
+- GSC 2/11–13/11: 386 impr/6 klik sitewide; kun 2 spørgsmåls-queries; diy-goggles 24 impr pos 8.5 og diy-vs-buy 8 impr pos 7.6 er de stærkeste GEO-guide-positioner; budget/women/pirate/halloween/under-100 = 0 impr
+- Konklusion uændret: n=for-lille + tracking-hul → GEO-effekt umålelig. Næste: 4-ugers-tjek ca. 23/11 med 14-dages vindue + FØRST GA4-tracking-reparation.

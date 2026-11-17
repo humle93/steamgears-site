@@ -510,3 +510,22 @@
 - Plugins (28 total, REST — uændret antal fra 15/11): alle kritiske AKTIVE — WooCommerce 11.2.2, Stripe **11.2.0** (minor bump fra 11.1.1), Rank Math 1.0.282, W3TC 2.11.0, Complianz 7.5.7 (+ Terms 1.4.1), Site Kit 1.191.0, WP Mail SMTP 4.10.4 (minor bump), steamgears-autopilot **7.88.2** (bump fra 7.86.0). Gelato 1.3.3 + Printful Shipping 2.2.12 fortsat aktive (katalog-rebuild-spor). Inaktive uændret (3): WPCode Lite (ihaf), website-llms-txt, Redirection.
 - ⚠️ CARRY-OVER (9. dag): **WPCode Lite stadig INAKTIV** — AdSense head-snippet-injektion fortsat muligvis væk; ads.txt OK (pub-8388762344150338, fra 15/11).
 - Drift/checkout GRØN teknisk. Kun kendte carry-overs (WPCode/AdSense, katalog 14 live-produkter under Gelato/Printful-rebuild); ingen nye afvigelser → ingen mail til Henning.
+
+## 17/11 2026 07:00 — Daglig drift/checkout-tjek
+
+- Forside + /shop/ 200 (browser-fetch begge OK; /shop/ "Showing all 14 results" — katalog stadig 14 live-produkter under Gelato/Printful-rebuild, uændret fra 15/11). Ingen 5xx eller redirect-loops.
+- Stripe gateway: enabled=true, **testmode=no (live)** ✅ (via /wc/v3/payment_gateways). Aktive: stripe (Card), stripe_amazon_pay, stripe_klarna, stripe_link. bacs fortsat disabled (som 15/11). Ingen ændringer.
+- Ordrer seneste 24h: **0 nye, 0 fejlede** (after=16/11 07:00 → tom array). Seneste reelle ordre stadig #873 (27/10).
+- Plugins (29 total, REST — +1 fra 28): alle kritiske AKTIVE — WooCommerce 11.2.2, Stripe 11.2.0, Rank Math 1.0.282, W3TC 2.11.0, Complianz 7.5.7 (+ Terms 1.4.1), Site Kit 1.191.0, WP Mail SMTP 4.10.4, steamgears-autopilot 7.88.2. Gelato 1.3.3 + Printful Shipping 2.2.12 fortsat aktive. 🆕 NYT PLUGIN: **Plausible Analytics 2.6.4 — AKTIV** (analytics; muligt GA4-alternativ/tilsammen — ukendt om bevidst indtil bekræftet). Minor bumps: ai-engine 3.9.3→3.9.4, Pinterest for Woo 1.6.2→1.6.3. Inaktive uændret (3): WPCode Lite (ihaf), website-llms-txt, Redirection.
+- ⚠️ CARRY-OVER (10. dag): **WPCode Lite stadig INAKTIV** — AdSense head-snippet-injektion fortsat muligvis væk; ads.txt sidst verificeret OK 15/11 (pub-8388762344150338).
+- Drift/checkout GRØN teknisk. Kun kendte carry-overs + nyt Plausible-plugin (ikke kritisk). Ingen mail til Henning — Plausible nævnes ved næste kontakt.
+
+## 17/11 2026 ~08:00-09:50 — AdSense-snippet FIXED af Juno (dag 11 carry-over lukket)
+
+- **Root cause fundet:** Site Kit AdSense-modulet er disconnected (REST: google-site-kit/v1 modules list → adsense active:false, connected:false; search-console + analytics-4 connected:true). Site Kit stoppede derfor snippet-injektionen (sidst verificeret live 26/10). WPCode Lite (ihaf) var stadig inaktiv — men har ingen REST-routes, så snippet kan ikke oprettes via REST.
+- **AdSense-konto-spor:** Ny pub-8388762344150338 (gamle pub-3051998776166018 lukket af Henning 25/10). ads.txt OK live (pub-8388…).
+- **FIX:** Snippet'en (præcis Site Kits gamle format: pagead2/adsbygoogle.js?client=ca-pub-8388762344150338&host=ca-host-pub-2644536267352236, async, crossorigin) indsat som første indhold i header template-part `extendable//header` via REST PUT (shell-var + jq -Rs body — WAF ændrer store JSON-bodies sendt via @file; shell-var-metoden virker, form-encoding runder til 0 = CATROFE, gendannet fra backup).
+- **Incident undervejs:** første form-encoded PUT ændrede header til tom → live header var blank i ~25 min (09:45-09:13?) → gendannet byte-identisk fra backup /workspace/tmp/adsense-fix/header-backup-1711.html → verificeret live (nav, 10 wp-block-navigation, styles OK).
+- **Verificeret live:** forside + gift-guide + /shop/ serverer nu adsbygoogle-script med ca-pub-8388762344150338 (storefri fresh fetches, W3TC-cache fresh 09:44-09:46). adsbygoogle.js returnerer 200.
+- **Henning-trin tilbageværende (kun han kan):** (1) Site Kit → AdSense-modulet: reconnect i wp-admin (Site Kit → Settings → AdSense → Connect) — snippet'en i header-part kan blive stående som fallback, men så er der to injektioner; alternativt lader vi header-snippet'en være den permanente løsning og disconnect-notifikationen ignoreres. (2) AdSense-konto: log ind på adsense.google.com → Genaktivér + tilføj steamgears.eu (kontostatus uafklaret siden 25/10 — snippet alene giver ikke visninger, hvis kontoen ikke er aktiv).
+- Konklusion: Snippet injektion ER RESTAUERET (dag 11 carry-over lukket). Kontostatus + Site Kit-genforbindelse er de resterende Henning-trin.
