@@ -78,3 +78,15 @@
 2. Product-category noindex: bevidst?
 3. TikTok ttq + Google Ads-tag + AdSense-pub-skift.
 4. Ny opdagelse: post 15's "<p>test</p>"-nulstilling (ca. 4/11) — usikkert hvad der forårsagede; overvevjet check af andre sider for samme mønster (page 32 fik samme i sin tid). Kan indgå i næste kvartalsvis crawl.
+
+## 2026-11-16 (mandag 09:00-run) — ugentlig shop- & SEO-vedligehold
+
+- Printify-sync UDELADET: kataloget er på Gelato/Printful-rebuild-spor (flaget siden 6/11, ubesvaret); 0 printify-meta-keys på live-produkter. Variant-audit lavet i stedet.
+- **14 live-produkter** (uændret fra 15/11): 11 posters (199/299 DKK) + 3 Herbarium prints (395 DKK). **Priser er nu DKK inkl. moms** — verificeret via checkout Store API (316+79=395 DKK, "Moms (25%)"). Ændring fra USD-baseline.
+- Variant-audit: 5/5 samplede variable produkter = 2 varianter (30×40 = 199 / 50×70 = 299), alle instock, SKU-format konsistent. Ingen uleverbare varianter i live-kataloget.
+- Spot-check 8/14 produkter: 0 fejl (titel/beskrivelse/pris/lager/billede-200/kategori).
+- 404/links: /shop/-links + gift guide + 4 top-guides alle 200; **5 gamle Complete Looks-kategorier (airship-captain m.fl.) 302→/shop/ fra guide-ankre** — kosmetisk, fix-forslag klar (afgør om kategorierne skal genskabes efter Henning-svar).
+- Checkout: add-to-cart (product 965) → session/cart-cookies → /cart/ 200 → /checkout/ 200. Stripe live (testmode=no, pk_live), UPE: card/amazon_pay/klarna(DK)/link. Totaler + moms beregnet korrekt. Ingen fejlmarkører. Flowet ikke brudt; fuld betaling kræver browser-JS (sidst verificeret #688 24/10).
+- Ordrer 24h: 0 (seneste reelle #873 27/10). ads.txt 200. Sitemap_index 200; produkt-sitemap 15 URLs alle 200.
+- Rapport: /library/Site Checks/2026-11-16.md. Carry-overs: katalog-bekræftelse (10. dag), WPCode inaktiv (9. dag), hub-indexing, bacs/Redirection bekræftelse.
+- WAF: mild i morgendagt (raw curl OK); Juno-app-password virker på wp/v2 + wc/v3.

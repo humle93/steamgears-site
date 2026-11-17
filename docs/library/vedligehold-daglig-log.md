@@ -501,3 +501,12 @@
 - Plugins (28 total, REST — +2 fra 26): alle kritiske AKTIVE — WooCommerce 11.2.2, Stripe 11.1.1, Rank Math 1.0.282, W3TC 2.11.0, Complianz 7.5.7 (+ Terms 1.4.1), Site Kit 1.191.0, Ads.txt Manager, WP Mail SMTP 4.10.3, steamgears-autopilot 7.86.0, Gelato 1.3.3 (fra i går). 🆕 NYT: **Printful Shipping for WooCommerce 2.2.12** (aktiv). 🆕/ændret: **UpdraftPlus 1.26.14 nu aktiv** (backup — var ikke i tidligere aktive-lister) + **ai/ai 1.5.0** (ny AI-plugin-slug foruden ai-engine 3.9.3). **ÆNDRING: Redirection 5.10.1 er nu INAKTIV** (var aktiv i går). Inaktive (3): WPCode Lite (ihaf), website-llms-txt, Redirection. "coming-soon 6.20.12" = SeedProd (samme plugin, ny slug-visning) — ikke nyt.
 - ⚠️ CARRY-OVER (8. dag): **WPCode Lite stadig INAKTIV** — AdSense head-snippet-injektion fortsat muligvis væk; ads.txt OK (verificeret live i dag: pub-8388762344150338).
 - Drift/checkout GRØN teknisk (frontend, Stripe live, ingen 5xx), men **katalog-drift flagges til Henning**: 74→14 produkter + bacs slukket + Redirection deaktiveret — formentlig bevidst rebuild (Gelato/Printful), men skal bekræftes inden evt. replikation/rollback.
+
+## 16/11 2026 07:00 — Daglig drift/checkout-tjek
+
+- Forside + /shop/ 200 (raw curl OK begge, ingen WAF-blok i morgendagt). Ingen 5xx eller redirect-loops.
+- Stripe gateway: enabled=true, **testmode=no (live)** ✅ (via /wc/v3/payment_gateways; live pk_ til stede). Aktive: stripe (Card), stripe_amazon_pay, stripe_klarna, stripe_link. bacs fortsat disabled (som 15/11).
+- Ordrer seneste 24h: **0 nye, 0 fejlede** (after=15/11 07:00 → tom array). Seneste reelle ordre stadig #873 (27/10).
+- Plugins (28 total, REST — uændret antal fra 15/11): alle kritiske AKTIVE — WooCommerce 11.2.2, Stripe **11.2.0** (minor bump fra 11.1.1), Rank Math 1.0.282, W3TC 2.11.0, Complianz 7.5.7 (+ Terms 1.4.1), Site Kit 1.191.0, WP Mail SMTP 4.10.4 (minor bump), steamgears-autopilot **7.88.2** (bump fra 7.86.0). Gelato 1.3.3 + Printful Shipping 2.2.12 fortsat aktive (katalog-rebuild-spor). Inaktive uændret (3): WPCode Lite (ihaf), website-llms-txt, Redirection.
+- ⚠️ CARRY-OVER (9. dag): **WPCode Lite stadig INAKTIV** — AdSense head-snippet-injektion fortsat muligvis væk; ads.txt OK (pub-8388762344150338, fra 15/11).
+- Drift/checkout GRØN teknisk. Kun kendte carry-overs (WPCode/AdSense, katalog 14 live-produkter under Gelato/Printful-rebuild); ingen nye afvigelser → ingen mail til Henning.
