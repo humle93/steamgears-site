@@ -358,6 +358,8 @@
 .sgap .sgap-rail li.past .sgap-num,.sgap .sgap-steps li.done .sgap-dot{background:#1a7f37;border-color:#1a7f37}
 .sgap .sgap-dot{border-color:#b08d57}
 .sgap .sgap-attn{border:var(--hair);border-left:4px solid #b08d57;border-radius:var(--r-md);background:var(--surface)}
+.sgap .sgap-attn-actions{display:flex;flex:1 1 100%;flex-wrap:wrap;gap:6px;margin-left:calc(11px + 8px)}
+.sgap .sgap-attn-actions .button{margin:0;min-height:30px;line-height:28px}
 .sgap .sgap-metric,.sgap .sgap-connected{border:var(--hair);border-radius:var(--r-md);background:var(--surface)}
 .sgap .sgap-key-icon{background:#14110e;color:#d8b87a;border-radius:var(--r-md)}
 .sgap .sgap-keycard--saved{border-left:3px solid #1a7f37}.sgap .sgap-keycard--constant{border-left:3px solid #b08d57}

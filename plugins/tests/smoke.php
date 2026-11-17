@@ -1499,6 +1499,27 @@ check('dashboard 7.52: channel numbers and engagement share one section', $chan 
     && $chan < strpos($dash,'Engagement · last 30 days') && strpos($dash,'Engagement · last 30 days') < $sys);
 check('dashboard 7.52: the updater moved under System', $sys < strpos($dash,'Plugin update'));
 check('dashboard 7.52: a healthy dashboard says so in one line instead of scattered pills', str_contains($dash,'sgap-attn is-ok') && str_contains($dash,'All clear'));
+// P16 — each live dashboard warning offers its matching admin destination, never stale actions.
+$attention = new ReflectionMethod(SGAP_Admin::class, 'attention_strip');
+$render_attention = static function (array $tiles = [], string $blocked = '', $ai_ok = null) use ($attention): string {
+    ob_start();
+    $attention->invoke(null, $tiles, $blocked, $ai_ok);
+    return ob_get_clean();
+};
+$GLOBALS['opts'][SGAP_Auto::HEALTH] = ['problems' => ['A check failed']];
+$attn = $render_attention([], '', false);
+check('dashboard P16: failed AI test links directly to Settings → Keys', str_contains($attn, 'href="/wp-admin/admin.php?page=sgap-settings#keys"') && str_contains($attn, 'Fix AI key'));
+check('dashboard P16: self-check problems link to troubleshooting', str_contains($attn, 'href="/wp-admin/admin.php?page=sgap-diagnostics"') && str_contains($attn, 'Open troubleshooting'));
+$attn = $render_attention(['pending' => 2]);
+check('dashboard P16: pending drafts link to Drafts to approve', str_contains($attn, 'href="/wp-admin/admin.php?page=sgap-ai"') && str_contains($attn, 'Review drafts'));
+foreach (['autopilot_disabled', 'quiet_hours', 'daily_cap_reached', 'blackout'] as $reason) {
+    $attn = $render_attention([], $reason);
+    check('dashboard P16: ' . $reason . ' links to Setup → Schedule', str_contains($attn, 'href="/wp-admin/admin.php?page=sgap-setup#step-schedule"') && str_contains($attn, 'Review schedule'));
+}
+$GLOBALS['opts'][SGAP_Auto::HEALTH] = ['problems' => []];
+$attn = $render_attention();
+check('dashboard P16: all-clear has no irrelevant action links', str_contains($attn, 'All clear') && !str_contains($attn, 'sgap-attn-actions') && !str_contains($attn, 'class="button'));
+check('dashboard P16: css provides a compact wrapping action row', str_contains(SGAP_UI::stylesheet(), '.sgap-attn-actions{display:flex;') && str_contains(SGAP_UI::stylesheet(), 'flex-wrap:wrap;gap:6px'));
 ob_start(); do_action('page_sgap-settings'); $set53 = ob_get_clean();
 check('settings 7.54: every tab but Keys opens with a heading and a hint', substr_count($set53,'class="sgap-panel-head"') === count(SGAP_Setup::TABS) - 1);
 check('settings 7.54: the hints cover exactly those tabs, in tab order', array_keys(SGAP_Setup::TAB_HINTS) === array_values(array_diff(array_keys(SGAP_Setup::TABS), ['keys'])));

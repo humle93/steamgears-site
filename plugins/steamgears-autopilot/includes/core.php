@@ -2060,10 +2060,10 @@ class SGAP_Admin {
         $problems = is_array($health) ? (array) ($health['problems'] ?? []) : [];
         $items = [];
         if ($ai_ok === false) {
-            $items[] = ['AI key failed its last test', 'bad'];
+            $items[] = ['AI key failed its last test', 'bad', 'Fix AI key', admin_url('admin.php?page=sgap-settings#keys')];
         }
         if ($problems !== []) {
-            $items[] = [count($problems) . (count($problems) === 1 ? ' problem' : ' problems') . ' in the self-check', 'warn'];
+            $items[] = [count($problems) . (count($problems) === 1 ? ' problem' : ' problems') . ' in the self-check', 'warn', 'Open troubleshooting', admin_url('admin.php?page=sgap-diagnostics')];
         }
         $words = [
             'autopilot_disabled' => 'Autopilot is off — nothing new is written',
@@ -2072,15 +2072,22 @@ class SGAP_Admin {
             'blackout' => 'Blackout — queued posts moved to the next free day'
         ];
         if (isset($words[$blocked])) {
-            $items[] = [$words[$blocked], $blocked === 'autopilot_disabled' ? 'bad' : 'brass'];
+            $items[] = [$words[$blocked], $blocked === 'autopilot_disabled' ? 'bad' : 'brass', 'Review schedule', admin_url('admin.php?page=sgap-setup#step-schedule')];
         }
         if ((int) ($tiles['pending'] ?? 0) > 0) {
-            $items[] = [$tiles['pending'] . ' draft' . ((int) $tiles['pending'] === 1 ? '' : 's') . ' waiting for you', 'brass'];
+            $items[] = [$tiles['pending'] . ' draft' . ((int) $tiles['pending'] === 1 ? '' : 's') . ' waiting for you', 'brass', 'Review drafts', admin_url('admin.php?page=sgap-ai')];
         }
 
         echo '<div class="sgap-attn' . ($items === [] ? ' is-ok' : '') . '"><strong>' . ($items === [] ? 'Status' : 'Needs you') . '</strong>';
         foreach ($items as [$text, $kind]) {
             echo SGAP_UI::pill($text, $kind);
+        }
+        if ($items !== []) {
+            echo '<div class="sgap-attn-actions">';
+            foreach ($items as [, , $label, $url]) {
+                echo '<a class="button button-small" href="' . esc_url($url) . '">' . esc_html($label) . '</a>';
+            }
+            echo '</div>';
         }
         if ($items === []) {
             echo SGAP_UI::pill('All clear — the autopilot runs on its own', 'ok');

@@ -10,6 +10,19 @@ Noterne er skrevet ud fra commit-historikken og de dokumenter der hører til hve
 
 <!-- patch-notes: baseline 7.65.0 -->
 
+## 7.89.0 — 2026-11-17
+
+**Tilføjet: dashboardets advarsler viser nu det næste konkrete skridt.**
+
+### Tilføjet
+- En fejlet AI-nøgletest linker til *Settings → Keys*, og self-check-problemer linker til *Fejlsøgning*.
+- Ventende kladder linker til *Drafts to approve*. Alle fire publiceringsblokeringer (autopilot slået fra, quiet hours, dagligt loft og blackout) linker til *Setup → Schedule*.
+- Handlingslinks vises kun ved den relevante advarsel; *All clear* forbliver uden ekstra knapper. Handlingsrækken kan ombrydes på smalle skærme.
+
+### Målt
+- `plugins/tests/smoke.php`: alle checks grønne, inkl. otte nye destinations-/tilstandschecks for P16.
+- PHP-lint, `tools/patch_notes.py --check` og `tools/fejlscan.py` bestod. Den samlede natlige suite havde én urelateret fejl i `guide-copy` (tre døde `/go/`-links).
+
 ## 7.88.2 — 2026-11-16
 
 **Rettet: `call-ability` kunne ikke køre abilities uden input-skema (fx `cirla-status`).**

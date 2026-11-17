@@ -45,6 +45,16 @@ and how long each missing piece takes.
 | `README.md`, `ROADMAP.md`, `CHANGELOG.md`, `tools/fejlscan.py`, `tools/deploy/niche_preflight.py`, `docs/plugin-opsaetning-2026-11-14.md` | Printful ud af beskrivelser og ejer-tjeklister | 15 % |
 | `plugins/steamgears-autopilot-v7.88.0.zip`, `projektstatus.json` | én zip der matcher kilden, P15-række | 5 % |
 
+**P16 (7.89.0, 16/11 2026) — handlingsrettede dashboardadvarsler, 0,15 d (gennemført).** Statuslinjen »Needs you« fortæller i dag hvad der kræver handling, men ikke hvor man løser det. Hver advarsel får en konkret genvej til den rigtige side: AI-test → Settings → Keys, self-check → Fejlsøgning, ventende kladder → Drafts to approve, og publiceringsblokering → Setup/Schedule. Knapper vises kun når deres tilstand gør dem relevante; links er rigtige admin-sider eller eksisterende wizard-ankre.
+
+| Fil | Ændring | Andel |
+| --- | --- | --- |
+| `includes/core.php`, `assets/admin.css` | kompakt handlingsrække i »Needs you«, navngivne genveje, tydeligt fokus og mobil-wrap; ingen ændring af statusregler | 45 % |
+| `plugins/tests/smoke.php` | fixturebaserede links for AI-fejl, self-check, kladder og fire blokeringer; all-clear uden overflødige knapper | 35 % |
+| `CHANGELOG.md`, plugin-header, `projektstatus.json`, zip | version 7.89.0, patch note, byte-identisk pakke og statusverifikation | 20 % |
+
+**Fremdrift:** 100 % (0,15/0,15 d): advarselslinks, otte regressionstjek, versionsnote 7.89.0, PHP-lint, patch-note-/fejlscan-værn og kildeidentisk zip er gennemført. Den samlede natlige suite har én urelateret eksisterende fejl i `guide-copy` (døde `/go/`-links); release-preflight kan først være ren efter commit på `main`.
+
 **P12 (7.85.0, 13/11 2026) — kun OpenRouter, ingen billed-AI, ryddet admin-UI, 4,0 d (plan 4,0 d).** Ejeren bad om tre ting: fjern AIMLAPI, gør OpenRouter til den eneste udbyder, og ryd hele pluginets opsætning. Resultatet er ét AI-trin i guiden, ét nøglekort, én model-dropdown uden standardvalg og ingen billedgenerering: Instagram og Pinterest bruger sidens featured image. Reserve-udbyderen og gratis-model-forsøget er også væk, så en fejl rapporteres med OpenRouters egne ord i stedet for at blive forsøgt igen.
 
 | Fil | Ændring | Andel |
@@ -306,6 +316,7 @@ books the rows in the modules below, and the sum is the number the percentage is
 | `P0.7c` | 0,25 | P0.7c |
 | `P1` | 14,45 | P1.1–P1.18 (15,05 d i rækkerne − 0,6 d ejer-blokeret live-verifikation) |
 | `P1.19`–`P1.25` | 1,95 | P1.19 0,25 · P1.20 0,25 · P1.21 0,25 · P1.22 0,50 · P1.23 0,25 · P1.24 0,35 · P1.25 0,10 |
+| `P16` | 0,15 | handlingsrettede dashboardadvarsler |
 | `P2` | 4,75 | P2.1–P2.5 |
 | `P2.6` | 1,50 | P2.6 (eget modul, ikke inde i `P2`) |
 | `P3` | 2,00 | P3.1–P3.6 |
