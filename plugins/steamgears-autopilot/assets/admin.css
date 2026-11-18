@@ -401,3 +401,29 @@
 .sgap .sgap-chat-log{max-height:none}
 }
 @media (prefers-reduced-motion:reduce){.sgap *,.sgap *::before,.sgap *::after{animation:none!important;transition:none!important}}
+
+/* Publishing workspace: consistent navigation and quieter, easier-to-scan surfaces. */
+.sgap{max-width:1280px;--workspace-border:#ded8ce;--workspace-muted:#5b6066;--workspace-ink:#242321;--workspace-accent:#72512b}
+.sgap .sgap-head{background:#27231f;border:1px solid #3b342c;box-shadow:none;border-radius:10px;padding:18px 20px;margin:8px 0 12px}
+.sgap .sgap-head h1{color:#fff;font-size:22px;text-shadow:none;letter-spacing:0}
+.sgap .sgap-head p{color:#eee5d7;line-height:1.5}
+.sgap .sgap-logo{display:grid;place-items:center;width:42px;height:42px;flex:none;border-radius:9px;background:#f0e5d1;color:#5f492c;font-size:22px;line-height:1;animation:none}
+.sgap .sgap-nav{display:flex;flex-wrap:wrap;gap:4px;margin:0 0 20px;padding:4px;border-bottom:1px solid var(--workspace-border)}
+.sgap .sgap-nav a{display:inline-flex;align-items:center;min-height:40px;padding:0 13px;border-radius:7px;color:var(--workspace-muted);font-weight:600;text-decoration:none}
+.sgap .sgap-nav a:hover{background:#f2eee7;color:var(--workspace-ink)}
+.sgap .sgap-nav a[aria-current=page]{background:#e9dfd0;color:#382b1c}
+.sgap .sgap-nav a:focus-visible{outline:2px solid #72512b;outline-offset:2px;box-shadow:none}
+.sgap .sgap-card,.sgap .sgap-keycard,.sgap .sgap-stat,.sgap .sgap-draft,.sgap .sgap-toolcard{border-color:var(--workspace-border);box-shadow:0 1px 2px rgba(20,20,20,.05);animation:none;translate:none}
+.sgap .sgap-card:hover,.sgap .sgap-keycard:hover,.sgap .sgap-stat:hover,.sgap .sgap-toolcard:hover{transform:none;box-shadow:0 1px 4px rgba(20,20,20,.09)}
+.sgap .sgap-card>h2,.sgap .sgap-section-head h2{letter-spacing:0;text-transform:none;color:var(--workspace-ink)}
+.sgap .sgap-section-head:after{background:var(--workspace-border)}
+.sgap .sgap-chan{min-width:0;gap:7px}
+.sgap .sgap-chan .dashicons{font-size:17px;width:17px;height:17px;color:var(--workspace-accent)}
+.sgap .sgap-status-note{display:block;margin-top:4px;max-width:19em;color:var(--workspace-muted);line-height:1.4}
+@media(max-width:782px){.sgap .sgap-nav{gap:2px}.sgap .sgap-nav a{padding:0 10px}.sgap .sgap-head{align-items:flex-start}.sgap .sgap-grid,.sgap .sgap-drafts{grid-template-columns:minmax(0,1fr)}}
+.sgap .sgap-head::after{display:none}
+/* Status messages must wrap inside a narrow admin viewport. */
+.sgap .sgap-attn .sgap-pill{max-width:100%;min-width:0;box-sizing:border-box;white-space:normal;overflow-wrap:anywhere}
+.sgap .sgap-inline{flex-wrap:wrap;align-items:end}
+.sgap .sgap-inline label{max-width:100%}
+@media(max-width:480px){.sgap .sgap-inline{align-items:stretch}.sgap .sgap-inline label{flex:1 1 130px}.sgap .sgap-inline input[type=date]{max-width:100%;box-sizing:border-box}}

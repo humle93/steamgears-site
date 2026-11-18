@@ -45,3 +45,12 @@ check('queue page: a deleted source is still named by its id', str_contains($htm
 
 $GLOBALS['rows'] = [];
 $wpdb->next = null;
+
+// RSS means handed to a feed, while a direct/API receipt is still published.
+$rss = SGAP_UI::queue_status('published', 'rss');
+$direct = SGAP_UI::queue_status('published', 'platform-123');
+check('queue page: RSS status says delivery is not confirmed', str_contains($rss, 'Released to RSS') && str_contains($rss, 'not confirmed'));
+check('queue page: direct publication is not described as RSS', str_contains($direct, 'published') && !str_contains($direct, 'Released to RSS'));
+$nav = SGAP_UI::navigation('sgap-queue');
+check('workspace navigation: links to the publishing workflow', str_contains($nav, 'page=sgap-ai') && str_contains($nav, 'page=sgap-queue') && str_contains($nav, 'page=sgap-reports'));
+check('workspace navigation: current page is identified once', substr_count($nav, 'aria-current="page"') === 1 && str_contains($nav, 'aria-current="page">Queue'));

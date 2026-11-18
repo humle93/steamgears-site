@@ -10,6 +10,25 @@ Noterne er skrevet ud fra commit-historikken og de dokumenter der hører til hve
 
 <!-- patch-notes: baseline 7.65.0 -->
 
+## 7.90.0 — 2026-11-18
+
+**Ændret: enklere navigation og tydeligere status; rettet fejl i kø og administration.**
+
+### Ændret
+- Genveje forbinder overblik, kladder, kø, resultater og indstillinger. Menuer, ikoner og layout er ryddet op, og smalle skærme er understøttet.
+- RSS-opslag vises som frigivet til feedet, ikke som bekræftet offentliggjort på en social platform.
+- Indstillingsfaner kan bruges med tastatur og viser korrekt valgt tilstand for hjælpeteknologi.
+
+### Rettet
+- To samtidige publiceringsprocesser kan ikke længere begge overtage samme køpost.
+- En mislykket plugininstallation kan rapportere fejlen uden en PHP-fatal, når WordPress returnerer en streng.
+- Overblik og indstillinger kaster ikke længere JavaScript-fejl, når valgfrie elementer mangler.
+
+### Målt
+- 1.581 smoke-checks og integrationstest med WordPress 7.1.5 og MariaDB bestod.
+- 19 administrationssider åbnet i Chromium ved 1440 og 320 pixels. Faner og opsætningsguide er prøvet interaktivt.
+- Eksterne publicerings- og AI-tjenester er ikke ende-til-ende-testet i denne version.
+
 ## 7.89.0 — 2026-11-17
 
 **Tilføjet: dashboardets advarsler viser nu det næste konkrete skridt.**

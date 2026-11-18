@@ -32,6 +32,12 @@ and how long each missing piece takes.
 
 ---
 
+## P17 — gennemgang, driftssikkerhed og navigation (17/11/2026)
+
+Status 18/11: navigation, ikoner, responsivt layout, køstatus, kapløb i køen, fejlrapportering ved plugininstallation og to JavaScript-fejl er rettet i 7.90.0. WordPress/MariaDB-integration, 1.581 smoke-checks samt åbning af 19 sider på desktop og mobil er gennemført. Interaktive faner og guide er prøvet. Gennemgangen er ikke afsluttet: eksterne tjenesters reelle publicering og øvrige integrationer er ikke alle verificeret ende til ende.
+
+Plan for dette arbejdspas: 4 developer-dage, fordelt på kortlægning og baseline 15 %, kø og publicering 25 %, navigation og brugerflade 25 %, SEO 15 %, tests og release 20 %. 100 % kræver også verificering af de tilgængelige integrationer. Filstrukturen er pluginets hovedfil og `uninstall.php`, alle filer under `includes/`, `modules/` og `assets/`, dokumenterne i pluginmappen samt `plugins/tests/`; eksisterende filer bevares medmindre gennemgangen viser andet. Eksterne kanaler kan kun verificeres med gyldig adgang.
+
 ## 0. Short version
 
 **P15 (7.88.0, 15/11 2026) — Printful ud, Gelato er printvejen, 0,6 d (plan 0,6 d).** Ejeren 15/11: »Printful er ude, ligesom Printify, vi kører kun Gelato«. Sitet og dokumenterne har sagt Gelato siden 13/11 (roadmap S4.7, agent-profilen), men pluginet havde stadig et Printful-nøglekort, en Printful-nøgletest, en kostpris-import fra Printfuls sync-varianter og Printful-tekster i nichebutikken. Nøgletesten bad derfor om et Printful-token, som ingen skal bruge. Gelato-forbindelsen sker i det officielle *Gelato Integration for WooCommerce* (v1.3.3, ikke forbundet endnu), så pluginet skal ikke have en egen Gelato-nøgle. Kostprisen kommer fra produktets eget felt `_sgap_cost`, som før, og aldrig fra et gæt.

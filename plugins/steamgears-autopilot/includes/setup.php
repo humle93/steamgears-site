@@ -326,14 +326,14 @@ class SGAP_Setup {
         echo '<div class="sgap-tabs" role="tablist">';
         $first = true;
         foreach (self::TABS as $id => [$label, $icon]) {
-            echo '<button type="button" role="tab" class="sgap-tab' . ($first ? ' on' : '') . '" data-tab="' . esc_attr($id) . '"><span class="dashicons dashicons-' . esc_attr($icon) . '"></span>' . esc_html($label) . '</button>';
+            echo '<button type="button" role="tab" id="sgap-tab-' . esc_attr($id) . '" aria-controls="sgap-panel-' . esc_attr($id) . '" aria-selected="' . ($first ? 'true' : 'false') . '" tabindex="' . ($first ? '0' : '-1') . '" class="sgap-tab' . ($first ? ' on' : '') . '" data-tab="' . esc_attr($id) . '"><span class="dashicons dashicons-' . esc_attr($icon) . '" aria-hidden="true"></span>' . esc_html($label) . '</button>';
             $first = false;
         }
         echo '<a class="sgap-tab sgap-tab-link" href="' . esc_url(admin_url('admin.php?page=sgap-setup')) . '"><span class="dashicons dashicons-welcome-learn-more"></span>Setup guide</a></div>';
         $first = true;
         foreach (self::TABS as $id => $tab) {
             $keys = (array) $tab[2];
-            echo '<div class="sgap-card sgap-panel' . ($id === 'keys' ? ' sgap-panel--keys' : '') . '" data-panel="' . esc_attr($id) . '"' . ($first ? '' : ' hidden') . '>';
+            echo '<div role="tabpanel" id="sgap-panel-' . esc_attr($id) . '" aria-labelledby="sgap-tab-' . esc_attr($id) . '" class="sgap-card sgap-panel' . ($id === 'keys' ? ' sgap-panel--keys' : '') . '" data-panel="' . esc_attr($id) . '"' . ($first ? '' : ' hidden') . '>';
             if ($id === 'keys') {
                 SGAP_Keys::panel();
             } else {

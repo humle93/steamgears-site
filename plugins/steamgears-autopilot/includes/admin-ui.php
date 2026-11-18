@@ -7,12 +7,12 @@
 if (!defined('ABSPATH')) exit;
 
 class SGAP_UI {
+    // Dashicons does not have consistent logos for all supported networks.
     const ICONS = [
-        'facebook' => 'facebook-alt', 'instagram' => 'instagram', 'pinterest' => 'pinterest', 'linkedin' => 'linkedin',
-        'twitter' => 'twitter', 'threads' => 'format-status', 'bluesky' => 'cloud', 'mastodon' => 'admin-comments',
-        'telegram' => 'email-alt', 'google' => 'google'
+        'facebook' => 'share', 'instagram' => 'share', 'pinterest' => 'share',
+        'linkedin' => 'share', 'twitter' => 'share', 'threads' => 'share',
+        'bluesky' => 'share', 'mastodon' => 'share', 'telegram' => 'share', 'google' => 'share'
     ];
-
     private static $enqueued = false;
 
     /**
@@ -55,8 +55,8 @@ class SGAP_UI {
     }
 
     public static function channel(string $channel): string {
-        $icon = self::ICONS[$channel] ?? 'share';
-        return '<span class="sgap-chan"><span class="dashicons dashicons-' . esc_attr($icon) . '"></span>' . esc_html($channel) . '</span>';
+        // One familiar sharing icon avoids presenting unrelated symbols as brand logos.
+        return '<span class="sgap-chan"><span class="dashicons dashicons-share" aria-hidden="true"></span>' . esc_html($channel) . '</span>';
     }
 
     /**
@@ -76,6 +76,33 @@ class SGAP_UI {
     public static function status_pill(string $status): string {
         $kinds = ['published' => 'ok', 'failed' => 'bad', 'sending' => 'warn', 'queued' => 'brass', 'reminded' => 'brass', 'pending' => 'brass', 'approved' => 'ok', 'rejected' => 'bad', 'used' => 'ok'];
         return self::pill($status, $kinds[$status] ?? '');
+    }
+
+    /** Shortcuts follow the publishing workflow; each link keeps its original admin URL. */
+    public static function navigation(string $current): string {
+        $pages = [
+            'steamgears-autopilot' => 'Overview',
+            'sgap-ai' => 'Drafts',
+            'sgap-queue' => 'Queue',
+            'sgap-reports' => 'Results',
+            'sgap-settings' => 'Settings'
+        ];
+        $html = '<nav class="sgap-nav" aria-label="Steamgears shortcuts">';
+        foreach ($pages as $slug => $label) {
+            $active = $current === $slug;
+            $html .= '<a href="' . esc_url(admin_url('admin.php?page=' . $slug)) . '"'
+                . ($active ? ' aria-current="page"' : '') . '>' . esc_html($label) . '</a>';
+        }
+        return $html . '</nav>';
+    }
+
+    /** RSS release is a handoff, not confirmation that the network posted it. */
+    public static function queue_status(string $status, string $external_id): string {
+        if ($status === 'published' && $external_id === 'rss') {
+            return self::pill('Released to RSS', 'brass')
+                . '<small class="sgap-status-note">Delivery is not confirmed by this feed</small>';
+        }
+        return self::status_pill($status);
     }
 
     /** A dashboard group. One question per heading; the cards below it answer that question. */

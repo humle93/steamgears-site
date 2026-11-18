@@ -16,7 +16,7 @@ check('menu: nothing is lost, only labels are added', count(array_diff(array_col
 check('menu: Setup keeps its badge', str_contains((string) $arranged[array_search('sgap-setup', $slugs, true)][0], 'awaiting-mod'));
 check('menu: pages are grouped Create → Publish → Configure', array_search('sgap-chat', $slugs, true) < array_search('sgap-queue', $slugs, true) && array_search('sgap-queue', $slugs, true) < array_search('sgap-settings', $slugs, true));
 $more = array_search('sgap-group-more', $slugs, true);
-check('menu: rare and unknown pages sit after "More"', $more !== false && array_search('sgap-tools', $slugs, true) > $more && array_search('sgap-ny', $slugs, true) > $more && array_search('sgap-log', $slugs, true) > $more);
+check('menu: publishing history is visible with results; rare and unknown pages sit after More', $more !== false && array_search('sgap-log', $slugs, true) < $more && array_search('sgap-tools', $slugs, true) > $more && array_search('sgap-ny', $slugs, true) > $more);
 check('menu: the unused group labels are not invented', !in_array('sgap-group-shop', $slugs, true));
 check('menu: "More" is closed while a main page is open, open on a rare one', !str_contains($arranged[$more][4], 'is-open') && str_contains(SGAP_Menu::arrange($rows, 'sgap-tools')[array_search('sgap-group-more', array_column(SGAP_Menu::arrange($rows, 'sgap-tools'), 2), true)][4], 'is-open'));
 check('menu: AI Drafts is renamed to what it does', $arranged[array_search('sgap-ai', $slugs, true)][0] === 'Drafts to approve');

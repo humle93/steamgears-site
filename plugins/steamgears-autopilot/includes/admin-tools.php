@@ -396,7 +396,14 @@ class SGAP_AdminTools {
         $action = (string) $input['action'];
         $plugin = trim((string) $input['plugin']);
         $skin = new WP_Ajax_Upgrader_Skin();
-        $errors = fn($result) => is_wp_error($result) ? $result->get_error_message() : implode(' ', $skin->get_error_messages());
+        $errors = static function ($result) use ($skin): string {
+            if (is_wp_error($result)) {
+                return $result->get_error_message();
+            }
+            // WP_Ajax_Upgrader_Skin returns a formatted string, not an array.
+            $messages = $skin->get_error_messages();
+            return is_array($messages) ? implode(' ', $messages) : (string) $messages;
+        };
 
         if ($action === 'install') {
             $slug = sanitize_key(strtok($plugin, '/'));

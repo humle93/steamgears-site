@@ -1190,11 +1190,19 @@ class SGAP_Queue {
              ORDER BY scheduled_at ASC, id ASC LIMIT %d",
             current_time('mysql'), $limit
         ), ARRAY_A);
-        if ($items) {
-            $ids = implode(',', array_map('intval', array_column($items, 'id')));
-            $wpdb->query('UPDATE ' . self::table() . " SET status = 'sending', attempts = attempts + 1 WHERE id IN ({$ids})");
+        // The selection can overlap another publisher. Only return rows whose conditional
+        // update we actually won; the other worker must never send the same item.
+        $claimed = [];
+        foreach ((array) $items as $item) {
+            $won = $wpdb->query($wpdb->prepare(
+                'UPDATE ' . self::table() . " SET status = 'sending', attempts = attempts + 1 WHERE id = %d AND status = 'queued'",
+                (int) $item['id']
+            ));
+            if ($won === 1) {
+                $claimed[] = $item;
+            }
         }
-        return $items;
+        return $claimed;
     }
 
     /**
@@ -1902,7 +1910,7 @@ class SGAP_Admin {
             'manage_options',
             'steamgears-autopilot',
             [__CLASS__, 'dashboard'],
-            'dashicons-superhero',
+            'dashicons-share',
             58
         );
         foreach (self::PAGES as [$title, $slug, $method]) {
@@ -1924,8 +1932,10 @@ class SGAP_Admin {
 
     public static function open(string $title, string $subtitle = ''): void {
         SGAP_UI::css();
-        echo '<div class="wrap sgap"><div class="sgap-head"><span class="sgap-logo" aria-hidden="true">⚙</span><div><h1>' . esc_html($title) . '</h1>'
+        echo '<div class="wrap sgap"><div class="sgap-head"><span class="sgap-logo dashicons dashicons-share" aria-hidden="true"></span><div><h1>' . esc_html($title) . '</h1>'
             . ($subtitle !== '' ? '<p>' . esc_html($subtitle) . '</p>' : '') . '</div></div><hr class="wp-header-end" style="display:none">';
+        $current = isset($_GET['page']) ? sanitize_key(wp_unslash($_GET['page'])) : 'steamgears-autopilot'; // phpcs:ignore WordPress.Security.NonceVerification
+        echo SGAP_UI::navigation($current);
         // Result of the last button press, shown at the top where it is seen without scrolling.
         $result = get_transient('sgap_run_result_' . get_current_user_id());
         if (is_string($result) && $result !== '') {
@@ -1950,7 +1960,7 @@ class SGAP_Admin {
 
     public static function dashboard(): void {
         global $wpdb;
-        self::open('Steamgears Autopilot', 'Social media on autopilot: AI writes, Publer posts, every click is counted.');
+        self::open('Steamgears Autopilot', 'Create, review and publish social posts, then follow their measured results.');
         $stats = get_transient('sgap_dashboard_stats');
         if (!is_array($stats) || !isset($stats['tiles'])) {
             $q = $wpdb->prefix . 'sgap_queue';
@@ -2006,7 +2016,7 @@ class SGAP_Admin {
         echo '<div class="sgap-stats">'
             . SGAP_UI::stat('Drafts to review', $t['pending'], admin_url('admin.php?page=sgap-ai'))
             . SGAP_UI::stat('Waiting in queue', $t['queued'], admin_url('admin.php?page=sgap-queue'))
-            . SGAP_UI::stat('Published · 30 days', $t['published'])
+            . SGAP_UI::stat('Released / published · 30 days', $t['published'])
             . SGAP_UI::stat('Clicks · 30 days', $t['clicks'])
             . SGAP_UI::stat('Orders · 30 days', $t['orders'] . ($t['revenue'] > 0 ? ' · ' . number_format_i18n($t['revenue'], 0) : ''))
             . '</div>';
@@ -2030,6 +2040,7 @@ class SGAP_Admin {
         echo '<div class="sgap-grid"><div>';
         SGAP_UI::card_open('Last 30 days per channel', 'chart-bar');
         self::render_rows($stats['channels'], ['channel', 'published', 'clicks', 'orders', 'revenue']);
+        echo '<p class="description">RSS releases count as published here; posting by Publer is not confirmed by the feed.</p>';
         SGAP_UI::card_close();
         SGAP_Engagement::dashboard_card();
         SGAP_Pinterest::dashboard_card();
@@ -2318,7 +2329,7 @@ class SGAP_Admin {
         $rows = self::table_exists($table)
             // P2.5: the language and the row this one was translated from travel with it,
             // so the owner can see which entries are translations instead of guessing.
-            ? $wpdb->get_results("SELECT q.id, q.channel, q.title, q.status, q.remind, q.attempts, q.scheduled_at, q.published_at, q.error,
+            ? $wpdb->get_results("SELECT q.id, q.channel, q.title, q.status, q.external_id, q.remind, q.attempts, q.scheduled_at, q.published_at, q.error,
                     q.locale, q.source_id, s.title AS source_title
                 FROM {$table} q LEFT JOIN {$table} s ON s.id = q.source_id ORDER BY q.id DESC LIMIT 50")
             : [];
@@ -2347,7 +2358,7 @@ class SGAP_Admin {
             echo '<p class="description">Nothing is waiting. The next post queued shows up here.</p>';
         }
 
-        SGAP_UI::section('Done', 'Published and failed rows among the last 50 queue entries — the same list the publish log describes in detail.');
+        SGAP_UI::section('Completed or failed', 'RSS entries are released to a feed; delivery by Publer is not confirmed here.');
         if ($finished) {
             self::queue_table($finished);
         } else {
@@ -2358,12 +2369,12 @@ class SGAP_Admin {
 
     /** One queue table. Every action is a small form, so the buttons work without JavaScript. */
     private static function queue_table(array $rows): void {
-        echo '<div class="sgap-card sgap-qgroup"><div class="sgap-scroll"><table class="widefat striped sgap-qtable"><thead><tr><th>#</th><th>Channel</th><th>Title</th><th>Language</th><th>Source</th><th>Status</th><th>Scheduled</th><th>Published</th><th>Tracking link</th><th></th></tr></thead><tbody>';
+        echo '<div class="sgap-card sgap-qgroup"><div class="sgap-scroll"><table class="widefat striped sgap-qtable"><thead><tr><th>#</th><th>Channel</th><th>Title</th><th>Language</th><th>Source</th><th>Status</th><th>Scheduled</th><th>Released / published</th><th>Tracking link</th><th></th></tr></thead><tbody>';
         foreach ($rows as $r) {
             echo '<tr id="sgap-q-' . absint($r->id) . '"><td data-label="#">' . esc_html($r->id) . '</td><td data-label="Channel">' . SGAP_UI::channel($r->channel) . '</td><td class="sgap-qtitle" data-label="Title">' . esc_html($r->title)
                 . ($r->error ? '<br><small style="color:#b32d2e">' . esc_html($r->error) . '</small>' : '') . '</td><td data-label="Language">' . self::language_cell($r) . '</td><td data-label="Source">' . self::source_cell($r) . '</td><td data-label="Status">'
-                . SGAP_UI::status_pill((string) $r->status) . (!empty($r->remind) ? ' <small title="The autopilot leaves this one to you">reminder</small>' : '') . ($r->attempts > 1 ? ' <small>' . esc_html($r->attempts . ' tries') . '</small>' : '') . '</td><td data-label="Scheduled">'
-                . esc_html($r->scheduled_at ? mysql2date('j M H:i', $r->scheduled_at) : '–') . '</td><td data-label="Published">'
+                . SGAP_UI::queue_status((string) $r->status, (string) ($r->external_id ?? '')) . (!empty($r->remind) ? ' <small title="The autopilot leaves this one to you">reminder</small>' : '') . ($r->attempts > 1 ? ' <small>' . esc_html($r->attempts . ' tries') . '</small>' : '') . '</td><td data-label="Scheduled">'
+                . esc_html($r->scheduled_at ? mysql2date('j M H:i', $r->scheduled_at) : '–') . '</td><td data-label="Released / published">'
                 . esc_html($r->published_at ? mysql2date('j M H:i', $r->published_at) : '–') . '</td><td data-label="Link"><code>' . esc_html(wp_parse_url(SGAP_Tracking::url((int) $r->id), PHP_URL_PATH)) . '</code></td><td data-label="">'
                 . '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '" class="sgap-actions" style="flex-wrap:nowrap">'
                 . '<input type="hidden" name="action" value="sgap_queue_action">'

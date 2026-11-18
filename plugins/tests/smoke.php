@@ -48,7 +48,7 @@ class WP_REST_Request implements ArrayAccess{ function __construct(public array 
 function wp_next_scheduled($h){return (int)($GLOBALS['next_scheduled'][$h]??0);} function wp_schedule_event(...$a){$GLOBALS['cron'][]=$a[2];} function flush_rewrite_rules($h=true){$GLOBALS['flushed']=1;} function add_rewrite_rule(...$a){$GLOBALS['rules'][]=$a[0];} function wp_set_option_autoload_values($a){$GLOBALS['noauto']=$a;}
 class W{ public $prefix='wp_'; public $posts='wp_posts'; public $postmeta='wp_postmeta'; public $options='wp_options'; public $comments='wp_comments'; function get_charset_collate(){return '';} public $insert_id=0; public $log=[]; public $next=null; public $row=null;
  function get_var($q){$this->log[]=$q; return is_array($this->next)?array_shift($this->next):$this->next;} function prepare($q,...$a){ if(count($a)==1&&is_array($a[0]))$a=$a[0]; return vsprintf(str_replace(['%s','%d','%f'],["'%s'",'%d','%F'],$q),$a);} function esc_like($s){return $s;}
- function get_results($q,$o=null){$this->log[]=$q;return $GLOBALS['rows']??[];} function get_row($q){$this->log[]=$q;return $this->row ?? null;} function query($q){$this->log[]=$q;return $GLOBALS['wpdb_query_ret'] ?? 0;}
+ function get_results($q,$o=null){$this->log[]=$q;return $GLOBALS['rows']??[];} function get_row($q){$this->log[]=$q;return $this->row ?? null;} function query($q){$this->log[]=$q;return isset($GLOBALS['wpdb_query_callback']) ? ($GLOBALS['wpdb_query_callback'])($q) : ($GLOBALS['wpdb_query_ret'] ?? 0);}
  function insert($t,$d){$this->log[]="INSERT $t ".json_encode($d); $this->insert_id=42; return 1;} function update($t,$d,$w){$this->log[]="UPDATE $t ".json_encode($d);return 1;} }
 $wpdb=new W; $wpdb->row=null;
 // ---- P5: forum + Reddit stubs (kept here so the plugin can boot without WordPress) ----
@@ -379,10 +379,17 @@ update_option('sgap_channel_caps','pinterest=2'); $GLOBALS['rows']=[['channel'=>
 check('ceiling: a channel under its cap is not full', SGAP_Queue::full_channels()===[]);
 update_option('sgap_channel_caps',''); $GLOBALS['rows']=[['channel'=>'pinterest','n'=>9]];
 check('ceiling: without channel_caps nothing is ever full', SGAP_Queue::full_channels()===[]);
-update_option('sgap_channel_caps','pinterest=2'); $GLOBALS['rows']=[['channel'=>'pinterest','n'=>2]];
+update_option('sgap_channel_caps','pinterest=2'); $GLOBALS['rows']=[['id'=>1,'channel'=>'pinterest','n'=>2]];
 $wpdb->log=[]; SGAP_Queue::claim(5);
 check('ceiling: claim skips a full channel in the query', implode(' ',$wpdb->log) !== '' && str_contains(implode(' ',$wpdb->log),'NOT IN'));
 update_option('sgap_channel_caps',''); $GLOBALS['rows']=[]; $wpdb->log=[];
+// Concurrent workers may select the same rows, but only the winner may send them.
+$GLOBALS['rows'] = [['id'=>41], ['id'=>42]];
+$GLOBALS['wpdb_query_callback'] = fn($q) => str_contains($q, 'id = 41') ? 1 : 0;
+$claimed = SGAP_Queue::claim(2, 'facebook');
+check('queue: only rows won by the conditional claim are returned', array_column($claimed, 'id') === [41]);
+check('queue: claim requires the row still be queued', str_contains(end($wpdb->log), "status = 'queued'"));
+unset($GLOBALS['wpdb_query_callback']); $GLOBALS['rows'] = [];
 // --- Retry with backoff (P0.3) ---
 check('backoff: 5, 15, 45 minutes by attempt', SGAP_Queue::retry_delay_minutes(1)===5 && SGAP_Queue::retry_delay_minutes(2)===15 && SGAP_Queue::retry_delay_minutes(3)===45);
 check('backoff: clamped at both ends', SGAP_Queue::retry_delay_minutes(0)===5 && SGAP_Queue::retry_delay_minutes(99)===45);
@@ -1532,7 +1539,7 @@ $GLOBALS['rows']=[
     (object)['id'=>902,'channel'=>'bluesky','title'=>'Done one','status'=>'published','remind'=>0,'attempts'=>1,'scheduled_at'=>'2026-11-07 09:00:00','published_at'=>'2026-11-07 09:01:00','error'=>null],
 ];
 ob_start(); do_action('page_sgap-queue'); $queue53 = ob_get_clean();
-$qw = strpos($queue53,'<h2>Waiting</h2>'); $qd = strpos($queue53,'<h2>Done</h2>');
+$qw = strpos($queue53,'<h2>Waiting</h2>'); $qd = strpos($queue53,'<h2>Completed or failed</h2>');
 check('queue 7.54: waiting and done are two sections, waiting first', $qw !== false && $qd !== false && $qw < $qd);
 check('queue 7.54: a queued row sits under Waiting, a published row under Done', $qw !== false && $qd !== false
     && str_contains(substr($queue53,$qw,$qd-$qw),'>901</td>') && !str_contains(substr($queue53,$qw,$qd-$qw),'>902</td>')

@@ -96,6 +96,21 @@ $r = run('error-log', ['lines' => 20, 'contains' => 'sgap-tools-test']); t('erro
 $r = run('purge-cache'); t('purge-cache', in_array('WordPress object cache', $r['purged'], true), $r);
 $r = run('site-health'); t('site-health', !empty($r['wordpress']) && isset($r['wp_cron']['autopilot_events']['sgap_publish_tick']), $r['wp_cron'] ?? $r);
 $r = run('list-plugins'); t('list-plugins shows active state', in_array('steamgears-autopilot/steamgears-autopilot.php', array_column(array_filter($r['plugins'], fn($p) => $p['active']), 'file'), true), $r['count']);
+// Simulate a download failure after the directory lookup succeeds. The upgrader skin
+// returns a string here; the ability must return WP_Error instead of throwing TypeError.
+$api_failure = static function ($result, $action, $args) {
+    return ($action === 'plugin_information' && ($args->slug ?? '') === 'sgap-ci-failure')
+        ? (object) ['name' => 'CI failure', 'version' => '1', 'download_link' => 'https://sgap-ci.invalid/plugin.zip'] : $result;
+};
+$download_failure = static function ($result, $args, $url) {
+    return $url === 'https://sgap-ci.invalid/plugin.zip' ? new WP_Error('sgap_ci_download', 'Simulated download failure') : $result;
+};
+add_filter('plugins_api', $api_failure, 10, 3);
+add_filter('pre_http_request', $download_failure, 10, 3);
+$r = run('manage-plugin', ['action' => 'install', 'plugin' => 'sgap-ci-failure']);
+t('failed plugin download returns a useful error instead of throwing', is_wp_error($r) && str_contains($r->get_error_message(), 'Simulated download failure'), is_wp_error($r) ? $r->get_error_message() : $r);
+remove_filter('plugins_api', $api_failure, 10);
+remove_filter('pre_http_request', $download_failure, 10);
 $r = run('manage-plugin', ['action' => 'install', 'plugin' => 'hello-dolly', 'activate' => true]); t('install + activate from wordpress.org', !is_wp_error($r) && ($r['active'] ?? false) === true, is_wp_error($r) ? $r->get_error_message() : $r);
 $r = run('manage-plugin', ['action' => 'deactivate', 'plugin' => 'hello-dolly']); t('deactivate by slug', !is_wp_error($r) && ($r['active'] ?? true) === false, is_wp_error($r) ? $r->get_error_message() : $r);
 $r = run('manage-plugin', ['action' => 'activate', 'plugin' => 'hello-dolly/hello.php']); t('activate by file', !is_wp_error($r) && ($r['active'] ?? false) === true, is_wp_error($r) ? $r->get_error_message() : $r);

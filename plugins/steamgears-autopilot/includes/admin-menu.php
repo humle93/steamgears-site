@@ -16,13 +16,13 @@ class SGAP_Menu {
     const GROUPS = [
         '' => ['steamgears-autopilot' => 'Overview', 'sgap-setup' => ''],
         'Create' => ['sgap-chat' => 'AI Chat', 'sgap-cirla' => 'Cirla', 'sgap-studio' => 'Content Studio', 'sgap-ai' => 'Drafts to approve'],
-        'Publish' => ['sgap-queue' => 'Queue', 'sgap-campaigns' => 'Campaigns', 'sgap-evergreen' => 'Evergreen', 'sgap-fullauto' => 'Full Auto', 'sgap-forum' => 'Forum & Reddit'],
+        'Publish' => ['sgap-campaigns' => 'Campaigns', 'sgap-queue' => 'Publishing queue', 'sgap-evergreen' => 'Evergreen', 'sgap-fullauto' => 'Full Auto', 'sgap-forum' => 'Forum & Reddit'],
         'Shop' => ['sgap-niche' => 'Niche shop', 'sgap-merchant' => 'Shop & feeds', 'sgap-etsy' => 'Etsy'],
-        'Insight' => ['sgap-reports' => 'Reports'],
+        'Results & health' => ['sgap-reports' => 'Reports', 'sgap-log' => 'Publishing history', 'sgap-diagnostics' => 'Troubleshooting'],
         'Configure' => ['sgap-settings' => 'Settings & keys']
     ];
     /** Rarely used: collapsed behind "More" unless one of them is the open page. */
-    const MORE = ['sgap-facebook' => 'Facebook', 'sgap-log' => 'Publish log', 'sgap-tools' => 'Tools', 'sgap-diagnostics' => 'Troubleshooting'];
+    const MORE = ['sgap-facebook' => 'Facebook', 'sgap-tools' => 'Tools'];
 
     public static function init(): void {
         add_action('admin_menu', [__CLASS__, 'tidy'], 999);

@@ -1,1 +1,25 @@
-document.addEventListener("DOMContentLoaded",function(){var m=document.querySelector("#adminmenu .wp-submenu li.sgap-menu-more");if(!m)return;var ul=m.parentNode;ul.classList.add("sgap-menu-js");if(m.classList.contains("is-open"))ul.classList.add("sgap-more-open");m.querySelector("a").addEventListener("click",function(e){e.preventDefault();m.classList.toggle("is-open",ul.classList.toggle("sgap-more-open"));});});
+document.addEventListener("DOMContentLoaded", function () {
+    var more = document.querySelector("#adminmenu .wp-submenu li.sgap-menu-more");
+    if (!more) return;
+    var menu = more.parentNode;
+    var toggle = more.querySelector("a");
+    if (!toggle) return;
+    menu.classList.add("sgap-menu-js");
+    toggle.setAttribute("role", "button");
+    function setOpen(open) {
+        menu.classList.toggle("sgap-more-open", open);
+        more.classList.toggle("is-open", open);
+        toggle.setAttribute("aria-expanded", String(open));
+    }
+    setOpen(more.classList.contains("is-open"));
+    toggle.addEventListener("click", function (event) {
+        event.preventDefault();
+        setOpen(!menu.classList.contains("sgap-more-open"));
+    });
+    toggle.addEventListener("keydown", function (event) {
+        if (event.key === " ") {
+            event.preventDefault();
+            toggle.click();
+        }
+    });
+});
