@@ -694,3 +694,19 @@ fejler ellers). Fund der kræver ejeren — et manglende token, en manglende bes
   Telegram `ok:false`, Task Scheduler) først ses ved en rigtig kørsel.
 - **Tredjeparts-kode.** Temaet, WooCommerce og de øvrige plugins er ikke læst igennem; fejlen i
   `robots.php` blev fundet fordi den slog sitet ud, ikke fordi noget værn ledte efter den.
+
+## 11. GSC-vækstplan — baseline 17/11 2026
+
+S0–S4 er stadig afsluttet og målt; denne nye vækstplan er et separat opfølgningsspor baseret på Search
+Console-perioden **18/10–14/11 2026**. GSC målte **20 klik og 789 visninger** mod 1 klik og 9 visninger i
+forrige periode. Det er ny baseline fra lavt udgangspunkt, ikke en færdig optimering. Den fulde evidens,
+landingsside-mapping, tekniske fund og måleplan står i
+[`docs/library/gsc-seo-growth-plan-2026-11-17.md`](library/gsc-seo-growth-plan-2026-11-17.md) (+ PDF).
+
+**Næste agentestimat: 1,20 developer-dage**, fordelt på schema-verifikation (0,20 d), tre målrettede
+indholdsopdateringer (0,60 d), query-/sideafklaring og intern linking (0,15 d), CrUX/alt-/responstidskontrol
+(0,15 d) og en opfølgende GSC-måling (0,10 d). Det er endnu ikke udført og ligger uden for de afsluttede
+S0–S4-procenter. Alle sidetitler, schema og links skal måles før og efter på live-sitet.
+
+Porteføljeregel: efter posters-only-skiftet 15/11 bevares kostume- og DIY-sider som nyttigt informationsindhold,
+men de linker kun til plakater hvor sammenhængen er reel. Ingen side skal love produkter, som ikke er aktive.

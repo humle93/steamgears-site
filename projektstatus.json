@@ -810,6 +810,25 @@
           "verified": true
         }
       ]
+    },
+    {
+      "id": "gscseo",
+      "name": "Steamgears.eu — GSC SEO-strategi",
+      "note": "GSC-milepæl 20 klik · strategi og rapport færdig 17/11/2026",
+      "next": "Implementér prioriteringerne i docs/library/gsc-seo-growth-plan-2026-11-17.md (estimat 1,20 d), og mål Search Console igen efter 28 dage. Denne pakke ændrer ikke live WordPress.",
+      "blocked_by": null,
+      "modules": [
+        {
+          "id": "plan",
+          "name": "GSC-baseline, strategi og dokumentation",
+          "done": 0.5,
+          "total": 0.5,
+          "unit": "d",
+          "verified": true,
+          "note": "Verificeret GSC-baseline og query/landingsside-mapping; prioriteret plan; Markdown-rapport og visuelt gennemgået PDF; indekseret i roadmap, SEO-dokumentation og bibliotek. Implementeringen på live-sitet er ikke udført."
+        }
+      ],
+      "verified": true
     }
   ],
   "history": [
@@ -3239,6 +3258,15 @@
       "after": 98.3,
       "delta": 0,
       "basis": "2,95 af 3 d (C1 0,35/0,35 · C2 0,2/0,2 · C3 0,4/0,4 · C4 0,25/0,25 · C5 0,2/0,2 · C6 0,8/0,8 · C7 0,55/0,6 · C8 0,2/0,2)"
+    },
+    {
+      "date": "2026-11-17",
+      "project": "Steamgears.eu — GSC SEO-strategi",
+      "module": "baseline",
+      "before": null,
+      "after": 100.0,
+      "delta": null,
+      "basis": "0,5 af 0,5 d"
     }
   ]
 }

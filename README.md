@@ -16,6 +16,7 @@ design/CSS, backup-data, dokumentation og status.
 | [`design.md`](design.md) | **Den visuelle identitet** — typografi, farver, komponenter og det lag `css/sg-design-system.css` lægger på siden (§14) |
 | [`docs/seo.md`](docs/seo.md) | SEO-regler, GEO-skabelon og måling |
 | [`docs/library/seo-audit-2026-11-02.md`](docs/library/seo-audit-2026-11-02.md) | **Bred SEO-audit 2/11** — score 56,5/100, 21 fund med bevis, roadmap og tid til 100 % (PDF i `reports/seo-audit-2026-11-02.pdf`) |
+| [`docs/library/gsc-seo-growth-plan-2026-11-17.md`](docs/library/gsc-seo-growth-plan-2026-11-17.md) | **GSC-baseret SEO-vækstplan 17/11** — 20-klik-baseline, query→landingsside-mapping, verificerede on-page-fund og prioriteret 1,20 d-plan; PDF i `reports/` |
 | [`docs/projektstatus.md`](docs/projektstatus.md) | Daglig procentstatus pr. projekt, beregnet af `projektstatus.py` |
 | [`docs/samtalepunkter.md`](docs/samtalepunkter.md) | Samtalens vigtigste punkter — beslutninger, fund og næste skridt, opdateret ved ~95 % context af `tools/samtalepunkter.py` |
 | [`AGENTS.md`](AGENTS.md) | Arbejdsregler: hvert pass melder % før → efter med grundlag, og §7 dækker plugin-arbejdet |

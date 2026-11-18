@@ -136,3 +136,7 @@ GTM/Site Kit, og fjern den ene af to GA4-destinationer hvis der igen står to.
 - [Google Search Status Dashboard](https://status.search.google.com/) · [Universal Cart](https://blog.google/products-and-platforms/products/shopping/universal-cart-launch/)
 - Høstede kilder ligger i [`knowledge_base/`](../knowledge_base/) — de læses automatisk af `seo_agent.py`
   sammen med dette dokument.
+
+## 10. Seneste GSC-baseline og strategi
+
+GSC Wizards 20-klik-milepæl er analyseret i [`library/gsc-seo-growth-plan-2026-11-17.md`](library/gsc-seo-growth-plan-2026-11-17.md) (+ PDF), og prioriteringen står i [`roadmap.md`](roadmap.md) §11. Vinduet er 18/10–14/11 2026, før posters-only-skiftet 15/11. Brug den som dateret baseline; den er ikke bevis for, at anbefalingerne er implementeret. Næste GSC-sammenligning skal dække én fuld, afklaret 28-dagesperiode efter eventuelle ændringer.
