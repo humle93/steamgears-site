@@ -307,7 +307,7 @@ class SGAP_Gelato {
         if (self::standalone_active()) {
             echo '<div class="notice notice-warning"><p>The stand-alone plugin <strong>Steamgears Gelato-videresendelse</strong> is still active, so it sends the orders and this page does nothing. Deactivate it under Plugins; the key and mode carry over.</p></div>';
         }
-        SGAP_Admin::card_open('Settings', 'admin-generic');
+        SGAP_UI::card_open('Settings', 'admin-generic');
         echo '<p><strong>Do not connect the same 19 products in Gelato\'s own app</strong>, or they are printed twice.</p>';
         echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '">';
         wp_nonce_field('sgap_gelato_save');
@@ -320,9 +320,9 @@ class SGAP_Gelato {
         echo '</td></tr><tr><th>Shipping</th><td><select name="shipment"><option value="normal"' . selected($s['shipment'], 'normal', false) . '>Normal</option><option value="express"' . selected($s['shipment'], 'express', false) . '>Express</option></select></td></tr></table>';
         submit_button('Save');
         echo '</form>';
-        SGAP_Admin::card_close();
+        SGAP_UI::card_close();
 
-        SGAP_Admin::card_open('Print files', 'media-document');
+        SGAP_UI::card_open('Print files', 'media-document');
         echo '<table class="widefat striped"><thead><tr><th>SKU</th><th>30×40</th><th>50×70</th></tr></thead><tbody>';
         foreach (array_keys(self::FILES) as $base) {
             echo '<tr><td>' . esc_html($base) . '</td>';
@@ -332,9 +332,9 @@ class SGAP_Gelato {
             echo '</tr>';
         }
         echo '</tbody></table>';
-        SGAP_Admin::card_close();
+        SGAP_UI::card_close();
 
-        SGAP_Admin::card_open('Latest sends', 'backup');
+        SGAP_UI::card_open('Latest sends', 'backup');
         $log = array_reverse((array) get_option(self::LOG, []));
         if ($log === []) {
             echo '<p class="sgap-hint">Nothing sent yet.</p>';
@@ -345,7 +345,7 @@ class SGAP_Gelato {
             }
             echo '</tbody></table>';
         }
-        SGAP_Admin::card_close();
+        SGAP_UI::card_close();
         SGAP_Admin::close();
     }
 }

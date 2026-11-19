@@ -1950,5 +1950,13 @@ check('7.91 gelato: off by default', SGAP_Gelato::settings()['mode']==='off' && 
 check('7.91 gelato: the order action is offered', (SGAP_Gelato::order_action([]))['sggf_send']==='Send posters to Gelato');
 check('7.91 gelato: hooked on paid orders and listed under Shop', !empty($GLOBALS['actions']['woocommerce_order_status_processing']) && isset(SGAP_Menu::GROUPS['Shop']['sgap-gelato']));
 check('7.91 gelato: the stand-alone plugin is not active in the test', !SGAP_Gelato::standalone_active());
+if (!function_exists('wp_upload_dir')) { function wp_upload_dir(){ return ['basedir'=>sys_get_temp_dir().'/sgap-uploads','baseurl'=>'https://steamgears.eu/wp-content/uploads']; } }
+if (!function_exists('trailingslashit')) { function trailingslashit($s){ return rtrim((string)$s,'/').'/'; } }
+$GLOBALS['opts']['sggf_print_dir']='sg-print-test';
+ob_start(); $gerr=''; try { SGAP_Gelato::page(); } catch (Throwable $e) { $gerr=$e->getMessage(); } $ghtml=ob_get_clean();
+check('7.91.1 gelato: the settings page renders without errors and lists all 19 posters', $gerr==='' && substr_count($ghtml,'<td>SG-')===19 && str_contains($ghtml,'Gelato API key'));
+check('7.91.1 gelato: a missing print file is shown as missing', substr_count($ghtml,'<strong>missing</strong>')===38);
+check('7.91 gelato: the print-file URL uses the hidden folder', SGAP_Gelato::file_url('SG-CC-01','5070')==='https://steamgears.eu/wp-content/uploads/sg-print-test/steamgears-clockwork-court-clock-001-baroque-clockwork-stag-50x70.pdf');
+unset($GLOBALS['opts']['sggf_print_dir']);
 // P3.2/P3.5-slut
 exit(empty($GLOBALS['fail'])?0:1);

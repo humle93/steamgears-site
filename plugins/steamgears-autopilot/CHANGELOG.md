@@ -10,6 +10,16 @@ Noterne er skrevet ud fra commit-historikken og de dokumenter der hører til hve
 
 <!-- patch-notes: baseline 7.65.0 -->
 
+## 7.91.1 — 2026-11-19
+
+**Rettet: siden *Gelato print orders* gav en PHP-fejl.**
+
+### Rettet
+- Siden brugte `SGAP_Admin::card_open()`, som ikke findes; kortene hedder `SGAP_UI::card_open()`/`card_close()`. Fundet live lige efter opdateringen til 7.91.0. Selve videresendelsen af ordrer var ikke berørt.
+
+### Målt
+- 1.594 smoke-checks bestod. Tre nye viser siden og tjekker de 19 plakater, markeringen af manglende trykfiler og trykfilens adresse; det første fejler på 7.91.0.
+
 ## 7.91.0 — 2026-11-19
 
 **Tilføjet: Gelato-tryk af de 19 plakater direkte fra betalte ordrer.**
