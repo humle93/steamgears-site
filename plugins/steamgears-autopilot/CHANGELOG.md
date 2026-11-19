@@ -10,6 +10,23 @@ Noterne er skrevet ud fra commit-historikken og de dokumenter der hører til hve
 
 <!-- patch-notes: baseline 7.65.0 -->
 
+## 7.91.0 — 2026-11-19
+
+**Tilføjet: Gelato-tryk af de 19 plakater direkte fra betalte ordrer.**
+
+### Tilføjet
+- Nyt modul *Gelato print orders* (`includes/gelato.php`, menu *Shop*). Betalte ordrer med variant-SKU `SG-DA|SG-CC|SG-AC-NN-3040|5070` sendes til Gelatos ordre-API (`POST /v4/orders`, 200 g mat, `flat_product_pf_300x400-mm…`/`500x700-mm…`) med trykfilen fra `uploads/<sggf_print_dir>/`. Andre varer røres ikke, og ingen produkter skal kobles i Gelatos egen app.
+- Tilstand *Off* (standard), *Draft* (kladdeordre i Gelato, godkendes dér) og *Live*. Én Gelato-ordre pr. WooCommerce-ordre (option-lås + `_sggf_gelato_order_id`). Timeout, 429 og 5xx prøves igen efter 15 og 30 minutter; 4xx bliver en ordrenote. Ordrehandlingen *Send posters to Gelato* sender manuelt.
+- Flyttet ind fra det selvstændige plugin `sg-gelato-forward` 1.0.0. Option- og meta-nøglerne er de samme (`sggf_*`), så nøgle, tilstand og trykfilmappe følger med. Mens det gamle plugin er aktivt, sender modulet intet og siger det på siden.
+
+### Rettet
+- En manglende indstilling gav tom tilstand i stedet for *Off* (også rettet i kildekoden til det selvstændige plugin).
+
+### Målt
+- 1.591 smoke-checks bestod, heraf 10 nye for Gelato (SKU-genkendelse, filnavne, produkter, genforsøg, standardtilstand, ordrehandling, menu).
+- Samme JSON som modulet bygger, blev sendt som kladde til Gelato 19/11: HTTP 200, Gelato hentede begge trykfiler (samme bytestørrelse), og kladden er slettet igen.
+- En rigtig betalt ordre gennem WooCommerce er ikke ende-til-ende-testet.
+
 ## 7.90.0 — 2026-11-18
 
 **Ændret: enklere navigation og tydeligere status; rettet fejl i kø og administration.**

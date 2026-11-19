@@ -1937,5 +1937,18 @@ check('7.87 prompt: the banned words are named to the writer, so the quality gat
 update_option('sgap_banned_words','');
 check('7.87 prompt: no banned words, no extra line', !str_contains(SGAP_AI::prompt(['title'=>'G','type'=>'product','summary'=>'B'],['facebook']),'Never use these words'));
 check('7.87 editor: Nemotron Super is asked first, Ultra stays in the list', SGAP_Editor::models()[0]==='nvidia/nemotron-3.5-super-vl:free' && in_array('nvidia/nemotron-3-ultra-550b-a55b:free',SGAP_Editor::models(),true));
+// 7.91 — Gelato print orders (moved in from sg-gelato-forward 1.0.0)
+check('7.91 gelato: a poster variant SKU names the poster and size', SGAP_Gelato::parse_sku('SG-CC-01-5070')===['sku'=>'SG-CC-01-5070','base'=>'SG-CC-01','size'=>'5070'] && SGAP_Gelato::parse_sku('SG-AC-12-3040')['size']==='3040');
+check('7.91 gelato: other SKUs, unknown posters and other sizes are left alone', SGAP_Gelato::parse_sku('SG-CC-01')===null && SGAP_Gelato::parse_sku('SG-AIR-010-1')===null && SGAP_Gelato::parse_sku('SG-CC-99-5070')===null && SGAP_Gelato::parse_sku('SG-CC-01-7010')===null && SGAP_Gelato::parse_sku('xSG-CC-01-5070')===null);
+check('7.91 gelato: all 19 posters have a print file name per size', count(SGAP_Gelato::FILES)===19 && SGAP_Gelato::file_name('SG-DA-01','3040')==='steamgears-diesel-age-diesel-003-female-aviator-airship-30x40.pdf' && SGAP_Gelato::file_name('SG-AC-12','5070')==='steamgears-airship-chronicles-clock-003-renaissance-ornithopter-50x70.pdf');
+check('7.91 gelato: 30x40 and 50x70 map to the 200 gsm matte Gelato products', str_contains(SGAP_Gelato::PRODUCTS['3040'],'300x400-mm_pt_200-gsm-uncoated') && str_contains(SGAP_Gelato::PRODUCTS['5070'],'500x700-mm_pt_200-gsm-uncoated'));
+check('7.91 gelato: only timeouts, 429 and 5xx are retried', SGAP_Gelato::temporary(0) && SGAP_Gelato::temporary(429) && SGAP_Gelato::temporary(503) && !SGAP_Gelato::temporary(400) && !SGAP_Gelato::temporary(401) && !SGAP_Gelato::temporary(201));
+$GLOBALS['opts']['sggf_settings']=['api_key'=>'k','mode'=>'bogus','shipment'=>'drone'];
+check('7.91 gelato: an unknown mode is Off and an unknown shipping method is Normal', SGAP_Gelato::settings()['mode']==='off' && SGAP_Gelato::settings()['shipment']==='normal');
+unset($GLOBALS['opts']['sggf_settings']);
+check('7.91 gelato: off by default', SGAP_Gelato::settings()['mode']==='off' && SGAP_Gelato::settings()['api_key']==='');
+check('7.91 gelato: the order action is offered', (SGAP_Gelato::order_action([]))['sggf_send']==='Send posters to Gelato');
+check('7.91 gelato: hooked on paid orders and listed under Shop', !empty($GLOBALS['actions']['woocommerce_order_status_processing']) && isset(SGAP_Menu::GROUPS['Shop']['sgap-gelato']));
+check('7.91 gelato: the stand-alone plugin is not active in the test', !SGAP_Gelato::standalone_active());
 // P3.2/P3.5-slut
 exit(empty($GLOBALS['fail'])?0:1);

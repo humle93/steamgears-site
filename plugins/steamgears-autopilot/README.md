@@ -706,6 +706,24 @@ From Claude or any MCP client: `niche-plan` (read-only), `niche-apply`, `niche-r
 `POST /sgap/v1/niche/rollback` (`plan_key`, `dry`) and `GET /sgap/v1/niche/runs`. All of them need
 `manage_options`.
 
+## Gelato print orders (7.91)
+
+Paid orders for the 19 Steamgears posters go straight to Gelato's order API with their print file, so no product
+has to be connected in Gelato's own app. *Steamgears → Gelato print orders* holds the Gelato API key, the mode and
+the shipping method, and shows whether all 38 print files exist and the latest sends.
+
+| Mode | What happens on a paid order |
+| --- | --- |
+| Off (default) | Nothing is sent |
+| Draft | A draft order is created in Gelato and approved there |
+| Live | The order goes to print right away |
+
+- Only order lines whose variant SKU is `SG-DA|SG-CC|SG-AC-NN-3040|5070` are sent; other products are left alone.
+- Products: 200 gsm matte (`flat_product_pf_300x400-mm…`, `…500x700-mm…`). Files: `uploads/<sggf_print_dir>/steamgears-<series>-<motif>-<30x40|50x70>.pdf`.
+- One Gelato order per WooCommerce order. Timeouts, 429 and 5xx are retried after 15 and 30 minutes; a 4xx becomes an order note. The order action *Send posters to Gelato* sends by hand.
+- **Do not connect the same 19 products in Gelato's own app**, or they are printed twice.
+- Moved in from the stand-alone plugin `sg-gelato-forward`; the `sggf_*` keys are unchanged. While that plugin is active, this module sends nothing.
+
 ## Updates
 
 From 7.6 the plugin updates itself from GitHub (`humle93/steamgears-site`, branch `main`):

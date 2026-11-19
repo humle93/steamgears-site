@@ -451,6 +451,15 @@
           "unit": "d",
           "verified": false,
           "note": "7.89.0 P16: Needs you-genveje for AI-test → Settings → Keys, self-check → Fejlsøgning, ventende kladder → Drafts to approve og alle fire publiceringsblokeringer → Setup/Schedule; handlingsrækken wrap'er responsivt og vises kun ved advarsler. Otte nye smoke-checks dækker links og all-clear. PHP-lint, smoke, patch_notes.py --check, fejlscan.py og kildezip-paritet bestod. Samlet natlig suite: 46/47; guide-copy fandt eksisterende døde /go/-links."
+        },
+        {
+          "id": "p17",
+          "name": "P17 — Gelato-tryk direkte fra betalte ordrer",
+          "done": 0.3,
+          "total": 0.3,
+          "unit": "d",
+          "verified": false,
+          "note": "7.91.0: modulet SGAP_Gelato (includes/gelato.php, menu Shop) sender betalte ordrer med variant-SKU SG-DA|SG-CC|SG-AC-NN-3040|5070 til Gelatos POST /v4/orders (200 g mat) med trykfilen fra uploads/<sggf_print_dir>/; Off/Draft/Live, én Gelato-ordre pr. ordre, 3 forsøg ved 5xx/429/timeout. Flyttet ind fra det selvstændige plugin sg-gelato-forward 1.0.0 (sggf_*-nøgler uændrede). 1 591 PASS / 0 FAIL i smoke (10 nye). Kladdeordre sendt til Gelato 19/11: HTTP 200, begge filer hentet, kladden slettet. IKKE målt: en rigtig betalt ordre gennem WooCommerce."
         }
       ],
       "total": 41.5,
@@ -3465,6 +3474,15 @@
       "after": 100.0,
       "delta": 0,
       "basis": "0,5 af 0,5 d"
+    },
+    {
+      "date": "2026-11-19",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "daglig måling",
+      "before": 99.6,
+      "after": 99.7,
+      "delta": 0.1,
+      "basis": "42,85 af 43 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5 · P3.7 0,6/0,6 · P3.8 0,3/0,3 · P3.9 0,25/0,25 · P1.25 0,15/0,15 · P1.24 0,35/0,35 · P1.23 0,25/0,25 · P6 0,9/0,9 · P7 0,3/0,3 · P8 0,8/0,8 · P9 0,35/0,35 · P9.1 0,3/0,3 · P9.2 0,2/0,2 · P9.3 0,25/0,25 · P9.4 0,2/0,2 · P10 0,5/0,5 · P9.5 0,25/0,25 · P9.6 0,25/0,25 · P9.7 0,15/0,15 · P9.8 0,35/0,4 · P9.9 0,3/0,3 · P11 0,5/0,6 · P12 4/4 · P13 0,25/0,25 · P14 0,2/0,2 · P15 0,6/0,6 · P16 0,15/0,15 · P17 0,3/0,3)"
     }
   ]
 }

@@ -2,7 +2,7 @@
 /**
 * Plugin Name: Steamgears Autopilot
 * Description: Premium multichannel growth autopilot for Steamgears.eu.
-* Version: 7.90.0
+* Version: 7.91.0
 * Requires at least: 6.4
 * Requires PHP: 8.0
 * Author: Steamgears.eu
@@ -26,7 +26,7 @@ if (defined('SGAP_VERSION')) {
     return;
 }
 
-define('SGAP_VERSION', '7.90.0');
+define('SGAP_VERSION', '7.91.0');
 define('SGAP_FILE', __FILE__);
 define('SGAP_PATH', __DIR__ . '/');
 
@@ -80,6 +80,7 @@ require_once __DIR__ . '/includes/priorities.php';
 require_once __DIR__ . '/includes/editor.php';
 require_once __DIR__ . '/includes/direct.php';
 require_once __DIR__ . '/includes/niche-shop.php';
+require_once __DIR__ . '/includes/gelato.php';
 require_once __DIR__ . '/includes/admin-menu.php';
 
 // Cirla is a module of its own (docs/library/cirla-teknisk-dokumentation-2026-11-06.md §9.3):
@@ -121,6 +122,7 @@ SGAP_Forum::init();
 SGAP_Reddit::init();
 SGAP_MCP_Tools::init();
 SGAP_Niche_Shop::init();
+SGAP_Gelato::init();
 SGAP_MCP_Key::init();
 SGAP_MCP_Auth::init();
 SGAP_Menu::init();

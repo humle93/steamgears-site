@@ -17,7 +17,7 @@ class SGAP_Menu {
         '' => ['steamgears-autopilot' => 'Overview', 'sgap-setup' => ''],
         'Create' => ['sgap-chat' => 'AI Chat', 'sgap-cirla' => 'Cirla', 'sgap-studio' => 'Content Studio', 'sgap-ai' => 'Drafts to approve'],
         'Publish' => ['sgap-campaigns' => 'Campaigns', 'sgap-queue' => 'Publishing queue', 'sgap-evergreen' => 'Evergreen', 'sgap-fullauto' => 'Full Auto', 'sgap-forum' => 'Forum & Reddit'],
-        'Shop' => ['sgap-niche' => 'Niche shop', 'sgap-merchant' => 'Shop & feeds', 'sgap-etsy' => 'Etsy'],
+        'Shop' => ['sgap-niche' => 'Niche shop', 'sgap-merchant' => 'Shop & feeds', 'sgap-gelato' => 'Gelato print orders', 'sgap-etsy' => 'Etsy'],
         'Results & health' => ['sgap-reports' => 'Reports', 'sgap-log' => 'Publishing history', 'sgap-diagnostics' => 'Troubleshooting'],
         'Configure' => ['sgap-settings' => 'Settings & keys']
     ];
