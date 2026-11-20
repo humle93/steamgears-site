@@ -27,7 +27,7 @@ The whole social autopilot runs inside WordPress (Command Center is retired):
 4. **Measure** – every post links via `/go/<id>/`, so clicks (and WooCommerce
    orders) are counted per channel.
 
-Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.90.0.zip` → Activate. On an existing
+Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.91.2.zip` → Activate. On an existing
 install the same zip arrives through the self-updater (see *Updates*), so an upload is only needed for the
 first install or a recovery.
 
@@ -720,7 +720,7 @@ the shipping method, and shows whether all 38 print files exist and the latest s
 
 - Only order lines whose variant SKU is `SG-DA|SG-CC|SG-AC-NN-3040|5070` are sent; other products are left alone.
 - Products: 200 gsm matte (`flat_product_pf_300x400-mm…`, `…500x700-mm…`). Files: `uploads/<sggf_print_dir>/steamgears-<series>-<motif>-<30x40|50x70>.pdf`.
-- One Gelato order per WooCommerce order. Timeouts, 429 and 5xx are retried after 15 and 30 minutes; a 4xx becomes an order note. The order action *Send posters to Gelato* sends by hand.
+- One Gelato order per WooCommerce order. Rate limits (429) are retried after 15 and 30 minutes while the order remains paid. An uncertain response (including a timeout, 5xx or a success without an order ID) pauses all resends. Check Gelato for the order reference; only if no order exists, use the order action *Gelato: confirmed no order exists — allow resend*, then *Send posters to Gelato*. A 4xx is recorded in an order note.
 - **Do not connect the same 19 products in Gelato's own app**, or they are printed twice.
 - Moved in from the stand-alone plugin `sg-gelato-forward`; the `sggf_*` keys are unchanged. While that plugin is active, this module sends nothing.
 

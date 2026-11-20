@@ -113,6 +113,12 @@ check "REST: app password works" "$(curl -s -o /dev/null -w '%{http_code}' -u "a
 check "REST: anonymous rejected" "$(curl -s -o /dev/null -w '%{http_code}' "$URL/wp-json/sgap/v1/stats")" "401"
 check "frontend still renders" "$(curl -s -o /dev/null -w '%{http_code}' "$URL/")" "200"
 
+if [ "${TEST_WOOCOMMERCE:-0}" = "1" ]; then
+    echo "== Gelato order flow with local WooCommerce and simulated HTTP"
+    wpc plugin install woocommerce --activate --quiet
+    run_eval "Gelato WooCommerce order flow" "$ROOT/plugins/tests/gelato-woocommerce.php"
+fi
+
 echo "== PHP notices from the plugin"
 LOG="$WP_DIR/wp-content/debug.log"
 if [ -f "$LOG" ] && grep -i 'steamgears-autopilot' "$LOG"; then

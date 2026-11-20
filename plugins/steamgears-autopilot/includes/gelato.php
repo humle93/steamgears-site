@@ -6,7 +6,8 @@
  *
  * Off by default. "Draft" creates draft orders in Gelato that are approved there; "Live"
  * sends them to print. One Gelato order per WooCommerce order: an option lock plus order
- * meta stop a second send, 5xx/429/timeouts are retried twice, 4xx becomes an order note.
+ * meta stop a second send. Rate limits are retried; uncertain results require checking Gelato
+ * before another send, since a timeout or server error can follow a successful order creation.
  *
  * Moved in from the stand-alone plugin sg-gelato-forward 1.0.0 (19/11 2026). The option and
  * meta keys are unchanged (sggf_*), so the saved key, mode and print-file folder carry over.
@@ -23,6 +24,7 @@ class SGAP_Gelato {
     const API = 'https://order.gelatoapis.com/v4/orders';
     const META_ID = '_sggf_gelato_order_id';
     const META_ATTEMPTS = '_sggf_attempts';
+    const META_UNCERTAIN = '_sggf_order_unconfirmed';
     const RETRY_HOOK = 'sggf_retry';
     const MAX_ATTEMPTS = 3;
     const PAGE = 'sgap-gelato';
@@ -62,6 +64,7 @@ class SGAP_Gelato {
         add_action(self::RETRY_HOOK, [__CLASS__, 'retry'], 10, 1);
         add_filter('woocommerce_order_actions', [__CLASS__, 'order_action']);
         add_action('woocommerce_order_action_sggf_send', [__CLASS__, 'manual_send']);
+        add_action('woocommerce_order_action_sggf_confirm_absent', [__CLASS__, 'confirm_absent']);
         add_action('admin_menu', [__CLASS__, 'menu']);
         add_action('admin_post_sgap_gelato_save', [__CLASS__, 'save']);
     }
@@ -184,7 +187,31 @@ class SGAP_Gelato {
     public static function order_action($actions) {
         $actions = (array) $actions;
         $actions['sggf_send'] = 'Send posters to Gelato';
+        $actions['sggf_confirm_absent'] = 'Gelato: confirmed no order exists — allow resend';
         return $actions;
+    }
+
+    /** The operator must first check Gelato for this order reference. Never sends an order. */
+    public static function confirm_absent($order): void {
+        if (!$order instanceof WC_Order || !$order->get_meta(self::META_UNCERTAIN)) {
+            return;
+        }
+        if ($order->get_meta(self::META_ID)) {
+            $order->add_order_note('Gelato: a Gelato order ID is already stored, so the order cannot be marked absent.');
+            return;
+        }
+        $lock = 'sggf_lock_' . $order->get_id();
+        $started = (int) get_option($lock, 0);
+        if ($started && $started > time() - 300) {
+            $order->add_order_note('Gelato: a send may still be running. Wait five minutes and check Gelato before allowing a resend.');
+            return;
+        }
+        if ($started) {
+            delete_option($lock);
+        }
+        $order->delete_meta_data(self::META_UNCERTAIN);
+        $order->save();
+        $order->add_order_note('Gelato: operator confirmed no order exists in Gelato. A new send is now permitted.');
     }
 
     public static function forward(int $orderId, bool $manual): void {
@@ -196,7 +223,13 @@ class SGAP_Gelato {
             return;
         }
         $settings = self::settings();
-        if (($settings['mode'] === 'off' && !$manual) || $order->get_meta(self::META_ID)) {
+        if ($order->get_meta(self::META_UNCERTAIN)) {
+            if ($manual) {
+                $order->add_order_note('Gelato: resend blocked because the previous result is unknown. Check Gelato first and, only if no order exists, confirm that with the Gelato order action.');
+            }
+            return;
+        }
+        if (($settings['mode'] === 'off' && !$manual) || (!$manual && !$order->is_paid()) || $order->get_meta(self::META_ID)) {
             return;
         }
         $orderType = $settings['mode'] === 'live' ? 'order' : 'draft';
@@ -226,6 +259,18 @@ class SGAP_Gelato {
             return;
         }
         try {
+            // Another request may have completed after our first read but before this lock.
+            $order = wc_get_order($orderId);
+            if (!$order instanceof WC_Order) {
+                return;
+            }
+            $order->read_meta_data(true);
+            if ($order->get_meta(self::META_ID) || $order->get_meta(self::META_UNCERTAIN) || (!$manual && !$order->is_paid())) {
+                return;
+            }
+            // Persist before the network call: a process crash also leaves the outcome uncertain.
+            $order->update_meta_data(self::META_UNCERTAIN, 'yes');
+            $order->save();
             $response = wp_remote_post(self::API, [
                 'timeout' => 30,
                 'headers' => ['Content-Type' => 'application/json', 'X-API-KEY' => $settings['api_key']],
@@ -238,6 +283,7 @@ class SGAP_Gelato {
             if ($code >= 200 && $code < 300 && is_array($json) && !empty($json['id'])) {
                 $order->update_meta_data(self::META_ID, (string) $json['id']);
                 $order->update_meta_data('_sggf_gelato_type', $orderType);
+                $order->delete_meta_data(self::META_UNCERTAIN);
                 $order->save();
                 $order->add_order_note(sprintf(
                     'Gelato: %d poster line(s) sent as %s. Gelato order %s.%s',
@@ -250,11 +296,17 @@ class SGAP_Gelato {
                 return;
             }
 
+            $uncertain = $code === 0 || $code === 408 || $code === 409 || $code >= 500 || $code < 400;
+            if (!$uncertain) {
+                $order->delete_meta_data(self::META_UNCERTAIN);
+            }
             $attempts = (int) $order->get_meta(self::META_ATTEMPTS) + 1;
             $order->update_meta_data(self::META_ATTEMPTS, $attempts);
             $order->save();
             $short = mb_substr(is_array($json) && isset($json['message']) ? (string) $json['message'] : $body, 0, 300);
-            if (self::temporary($code) && $attempts < self::MAX_ATTEMPTS) {
+            if ($uncertain) {
+                $order->add_order_note(sprintf('Gelato response was uncertain (HTTP %d). No resend will occur. Check Gelato for order reference %s; only if it does not exist, use the order action "Gelato: confirmed no order exists — allow resend".', $code, $payload['orderReferenceId']));
+            } elseif (self::temporary($code) && $attempts < self::MAX_ATTEMPTS) {
                 wp_schedule_single_event(time() + 15 * MINUTE_IN_SECONDS * $attempts, self::RETRY_HOOK, [$orderId]);
                 $order->add_order_note(sprintf('Gelato answered %d (attempt %d of %d), trying again in %d min.: %s', $code, $attempts, self::MAX_ATTEMPTS, 15 * $attempts, $short));
             } else {
@@ -266,9 +318,9 @@ class SGAP_Gelato {
         }
     }
 
-    /** Worth another try: no answer, rate limit or a server error. Pure. */
+    /** A rate-limit response refused this request; unknown outcomes must not be retried. */
     public static function temporary(int $code): bool {
-        return $code === 0 || $code === 429 || $code >= 500;
+        return $code === 429;
     }
 
     private static function log(int $orderId, string $state, string $text): void {

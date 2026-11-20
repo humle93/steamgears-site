@@ -33,6 +33,8 @@ jobs:
         run: find plugins -name '*.php' -print0 | xargs -0 -n1 php -l
       - name: Smoke test with stubbed WordPress
         run: php plugins/tests/smoke.php
+      - name: Gelato order safety with simulated WooCommerce and HTTP
+        run: php plugins/tests/gelato-order.php
 
   zip:
     name: Zip matches source
@@ -97,4 +99,5 @@ jobs:
           DB_USER: root
           DB_PASS: root
           DB_NAME: wordpress
+          TEST_WOOCOMMERCE: ${{ matrix.wp == 'latest' && '1' || '0' }}
         run: bash plugins/tests/integration.sh

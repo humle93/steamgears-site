@@ -10,6 +10,18 @@ Noterne er skrevet ud fra commit-historikken og de dokumenter der hører til hve
 
 <!-- patch-notes: baseline 7.65.0 -->
 
+## 7.91.2 — 2026-11-20
+
+**Rettet: sikrere Gelato-ordrer ved samtidige kald og usikre svar.**
+
+### Rettet
+- Efter låsen kontrolleres betalingsstatus igen, og gemte Gelato-data genlæses, så et andet kald ikke sender en allerede oprettet ordre igen. Automatiske genforsøg sender ikke længere annullerede eller ubetalte ordrer.
+- Ved timeout, serverfejl eller andet ukendt svar standses genafsendelse; ordrehandlingen tillader først genåbning efter kontrol i Gelato. Kun rate-limit-svar prøves automatisk igen. En aktiv lås kan ikke genåbnes.
+- Testpakken kører et isoleret ordreflow med simuleret WooCommerce og HTTP, uden at oprette rigtige ordrer.
+
+### Målt
+- 1.594 smoke-checks og 15 isolerede ordrechecks bestod lokalt på PHP 8.0 og 8.3. Et lokalt WordPress 7.1.5/WooCommerce 11.3-forløb bestod med simulerede Gelato-svar. Ingen rigtig betalt ordre eller produktion er testet.
+
 ## 7.91.1 — 2026-11-19
 
 **Rettet: siden *Gelato print orders* gav en PHP-fejl.**

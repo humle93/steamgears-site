@@ -34,6 +34,8 @@ and how long each missing piece takes.
 
 ## P17 — gennemgang, driftssikkerhed og navigation (17/11/2026)
 
+**P17.1 — Gelato-ordresikkerhed (20/11/2026, plan 0,5 d):** Kortlægning og API-kontrakt 20 %, samtidige og annullerede ordrer 25 %, usikre svar og sikker genåbning 25 %, tests i isoleret miljø 20 %, dokumentation og pakke 10 %. Filer: `includes/gelato.php`, pluginets hovedfil, `README.md`, `CHANGELOG.md` og `ROADMAP.md`, testfiler under `plugins/tests/` og plugin-CI. Ingen rigtige ordrer oprettes i testen. Funktionens nuværende tilstand på sitet er Off; API-nøglen er ikke gemt. Status: rettelserne og isolerede ordretests er skrevet. Live WooCommerce-ordre og providerens produktion er ikke testet; modulet står Off på sitet.
+
 Status 18/11: navigation, ikoner, responsivt layout, køstatus, kapløb i køen, fejlrapportering ved plugininstallation og to JavaScript-fejl er rettet i 7.90.0. WordPress/MariaDB-integration, 1.581 smoke-checks samt åbning af 19 sider på desktop og mobil er gennemført. Interaktive faner og guide er prøvet. Gennemgangen er ikke afsluttet: eksterne tjenesters reelle publicering og øvrige integrationer er ikke alle verificeret ende til ende.
 
 Plan for dette arbejdspas: 4 developer-dage, fordelt på kortlægning og baseline 15 %, kø og publicering 25 %, navigation og brugerflade 25 %, SEO 15 %, tests og release 20 %. 100 % kræver også verificering af de tilgængelige integrationer. Filstrukturen er pluginets hovedfil og `uninstall.php`, alle filer under `includes/`, `modules/` og `assets/`, dokumenterne i pluginmappen samt `plugins/tests/`; eksisterende filer bevares medmindre gennemgangen viser andet. Eksterne kanaler kan kun verificeres med gyldig adgang.
