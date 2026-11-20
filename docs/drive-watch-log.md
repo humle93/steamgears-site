@@ -357,3 +357,121 @@ Ingen ændringer siden sidst (token 49949 uændret).
 - 3 mcp-adapter result-filer (kaffe___mcp-adapter-*, JSON): discover-abilities x2 + execute-ability (21:53-22:01)
 - Ingen dokumenter/indholdsfilberøringer.
 2026-11-17 23:00 UTC — ingen ændringer (token 49963)
+
+## 2026-11-18 00:05 (token 49963 → 50726)
+- **Passive indkomst-sider 8 nye nicher** (23:12-23:14): PDF + 2 Google Docs-versioner — Henning-dokument med analyse af 8 danske affiliate-nicher (hjemmetræning, have/drivhus, indeklima m.fl.). Nye.
+- **plakater-14-audit-2026-11-17** (23:30): .md + .pdf — komplet audit af alle 14 plakater på steamgears.eu; 6 fejl fundet og rettet (collections-redirect, kurv-tekstfarve, mobil-kurv, 3 gamle prints fik 2 størrelser, kategorititler, Amazon Pay 500). 95 links crawlet, 0 døde. Nye.
+- **steamgears-autopilot-projektet** (23:26-23:38): stor batch — sgap-catalog-cleanup.php, steamgears-autopilot.php, projektstatus.json/md, ROADMAP.md, CHANGELOG.md, v7.88.2/v7.89.0 zips, Command Center Python-moduler (01_config…20_basepath), HTML-sider (cockpit, seo, publisher m.fl.), SKILL.md, AGENTS.md/CLAUDE.md, screenshots (cc-*.png), git-internals. Ligner upload af Command Center v8-kodebase.
+- Øvrigt: adsense-setup.md, drive-watch-log.md, vedligehold-logs, research-log, competitors.md, seo-regler-2026 — opdateret (menor drive-sink af Juno-arbejde).
+- 2 slettede: ingen. Tilladelses-ændringer: ingen.
+
+## 2026-11-18 01:00 (UTC)
+- Ny/ændret: "Passive indkomst-sider 8 nye nicher" (Google Docs) — 00:14. Nicheanalyse: 8 nicherrangeret (hjemmetræning, have/drivhus, indeklima top 3; KD ≤ 11 for top-3); forslag: validér affiliate-programmer (Partner-Ads/Adtraction) før domænekøb, manuel SERP-stikprøve, tidsestimater, indholdsmængde pr. niche.
+- 2026-11-18 03:00 CET: ingen ændringer (token 50729)
+- 2026-11-18 03:00 UTC: ingen ændringer (token 50729)
+2026-11-18 04:00 UTC — ingen ændringer (token 50729)
+- 2026-11-18 05:03 UTC: ingen ændringer (token 50729)
+18/11 2026 06:00 UTC — ingen ændringer
+
+## 2026-11-18 07:00 UTC (kl. 08:00 DK)
+- Ingen ændringer siden sidst (token 50729).
+- 2026-11-18 09:00: ingen ændringer (token 50729)
+- 2026-11-18 10:00 CET: ingen ændringer siden sidst (token 50729 uændret).
+- 2026-11-18 10:00 UTC: ingen ændringer (token 50729 uændret).
+## 2026-11-18 11:00 DK — ingen ændringer (token 50729)
+
+## 2026-11-18 12:00 UTC
+- Ingen ændringer (token 50729 uændret).
+
+## 2026-11-18 13:00 (token 50729→50749)
+- 7 nye filer (12:30): beginner-materials.jpg, beginner-step-1.jpg … beginner-step-6.jpg (JPEG) — ser ud til at være foto-materiale til Beginner Steampunk-guiden.
+- Ingen sletninger eller tilladelses-ændringer.
+
+## 2026-11-18 14:00 — Drive-watch
+- Ingen ændringer siden sidst (token 50749 uændret).
+## 2026-11-18 15:00 — ingen ændringer (token 50749 uændret)
+## 2026-11-18 16:00 UTC (kl. 17:00 DK): ingen ændringer (token 50749 uændret)
+## 2026-11-18 17:00 UTC — ingen ændringer (token 50749)
+- 2026-11-18 19:00 DK: ingen ændringer (token 50749)
+## 2026-11-18 19:00 UTC — ingen ændringer (token 50749 uændret)
+- 2026-11-18 21:00 CET: ingen ændringer (token 50749)
+
+## 2026-11-18 21:00 CET
+- Nyt folder "Projektstyring" (20:08 UTC)
+- Ny fil "Command_Center_Dashboard_v8_2.html" i/ved samme folder (20:08 UTC) — HTML, uploades samme minut → ser ud som Henning-uploaded dashboard-fil
+
+## 2026-11-18 22:00
+- pSEO-Command-Center mappe NY (21:33) https://drive.google.com/drive/folders/1HPE51nYQQl2YBPJhTT6LTnEgh7z_iYJv
+- pseo_module.py NY (21:33) — FastAPI-pSEO-modul: mass-generator af artikler til steamgears.eu + warpstorm.online via aimlapi, SQLite-jobkø
+- dashboard_pseo_tab NY (21:37) — Google Doc med dashboard-tab UI til pSEO-generator
+- keywords_template.csv NY (21:38) — keyword/subtopic-template til CSV-upload
+## 2026-11-19 00:00 (kørsel 23:00 UTC 18/11): ingen ændringer (token 50766)
+2026-11-19 00:00 UTC: ingen ændringer (token 50766)
+- 2026-11-19 01:00 UTC: ingen ændringer (token 50766)
+## 2026-11-19 02:00 UTC
+- Ingen ændringer (token 50766 uændret)
+- 2026-11-19 03:00 UTC: ingen ændringer (token 50766 uændret)
+## 2026-11-19 04:00 — ingen ændringer (token 50766)
+- 2026-11-19 05:00 UTC: ingen ændringer (token 50766)
+## 2026-11-19 06:00 UTC — ingen ændringer
+
+## 2026-11-19 07:00 UTC
+- ingen ændringer (token 50766 uændret)
+- 2026-11-19 08:00 UTC: ingen ændringer
+2026-11-19 09:00 UTC — ingen ændringer (token 50766)
+## 2026-11-19 10:00 — ingen ændringer
+2026-11-19 11:00 UTC — ingen ændringer (token 50766 uændret)
+- 2026-11-19 12:00 UTC: ingen ændringer (token 50766)
+## 2026-11-19 13:00 — ingen ændringer (token 50766)
+2026-11-19 14:00 UTC — ingen ændringer (token 50766)
+- 2026-11-19 16:00 DK-tid: ingen ændringer (token 50766)
+
+## 2026-11-19 16:00 UTC
+- Ingen ændringer siden sidst (token 50766).
+## 2026-11-19 17:00 DK / 18:00 UTC — ingen ændringer (token 50766)
+
+## 2026-11-19 18:00
+- Ingen ændringer.
+2026-11-19 19:00 UTC (20:00 DK): ingen ændringer (token 50766 uændret)
+
+## 2026-11-19 20:00 UTC (21:00 DK)
+- ingen ændringer
+- 2026-11-19 21:00 UTC: ingen ændringer (token 50766 uændret)
+- 2026-11-19 23:00: ingen ændringer
+- 2026-11-20 00:00 (DK): ingen ændringer (token 50766, uændret)
+2026-11-20 00:00 UTC (timeslot): ingen ændringer (token 50766 uændret)
+
+## 2026-11-20 01:00 UTC
+- Ingen ændringer siden sidst (token 50766 → 50768).
+- 2026-11-20 02:00 UTC: ingen ændringer (token 50768)
+## 2026-11-20 03:00 UTC — ingen ændringer
+
+
+
+- Kørt med token 50768 → ingen ændringer (token uændret).
+## 2026-11-20 05:00 UTC — ingen ændringer siden sidst (token 50768)
+2026-11-20 06:00 UTC | ingen ændringer
+## 2026-11-20 07:00 — ingen ændringer siden sidst (token 50768)
+- 2026-11-20 08:00 UTC: ingen ændringer (token 50768)
+2026-11-20 09:00 UTC: ingen ændringer (token 50768)
+2026-11-20 10:00 UTC: ingen ændringer (token 50768)
+## 2026-11-20 11:00 UTC — ingen ændringer (token 50768)
+## 2026-11-20 12:00 UTC — Drive-watch: ingen ændringer (token 50768 uændret)
+2026-11-20 13:00 UTC — ingen ændringer (token 50768)
+## 2026-11-20 14:00 UTC — ingen ændringer (token 50768 uændret)
+
+## 2026-11-20 15:00 — ingen ændringer (token 50768)
+
+## 2026-11-20 16:00 — ingen ændringer siden sidst (token 50768)
+
+## 2026-11-20 17:00 UTC
+Ingen ændringer (token 50768 uændret).
+2026-11-20 18:00 UTC 19:00 run: ingen ændringer (token 50768 uændret)
+## 2026-11-20 19:00 UTC (token 50768)
+- ingen ændringer
+
+2026-11-20 21:00 CET: ingen ændringer (token 50768)
+- 2026-11-20 22:00 CET: ingen ændringer (token 50768 uændret).
+
+## 2026-11-20 23:00 (DK)
+Ingen ændringer (token 50768).

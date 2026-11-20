@@ -67,7 +67,7 @@ Top-signaler: 40K 11th ed. launch (Armageddon-box, warhammer-community 26/3), co
 - Kvalitet: alle enkeltvist inspiceret; 10 re-gens/edits pga. pseudo-tekst (diesel 02/03/05/06, atompunk 06+08, solar 03+12, cyber 03/05/06/10/12, west 03/05/09/12). Cyberpunk-skilte er abstrakte geometriske glød-symboler (ulæselige med vilje).
 - Generering: Juno indbygget billedmodel (Gemini image) — IKKE fal (balance tom) og IKKE aimlapi (mangler image-endpoint fra CLI; scripts blokerer netværk). Henning spurgte om aimlapi til billeder — svar givet: indbygget model er vejen.
 - Canvas-arkitektur: "Posters & Wall Art — Gift Guide Mockups 2026" (id 7b09a4c9) med art-masters, art-masters-genres + 12 mockup-asset-sider (2 størrelser × 6 linjer). SKU'er forudbestilt SG-POSTER-GG/DG/AT/SL/CY/WW-001..012, $29.95/$39.95.
-- Næste: upscale til print-res → Printful-varianter → CSV → Gift Guide-artikel med sg-buy CTA'er før Black Friday.
+- Næste: upscale til print-res → Printify-varianter → CSV → Gift Guide-artikel med sg-buy CTA'er før Black Friday.
 
 ## 2026-11-02 (uge 45) — Ugentlig SEO-research ✅
 
@@ -133,3 +133,197 @@ Top-signaler: 40K 11th ed. launch (Armageddon-box, warhammer-community 26/3), co
 - https://support.google.com/merchants/answer/6098512?hl=en
 
 **Kørsel:** web_search (4 søgninger) → Gemini 3.8 Flash via aimlapi (max_tokens 9000 pga. reasoning-tokens; 2. kald gav komplet svar, finish=stop) — Gemini fungerede, ingen fallback. Ny i denne uge vs. uge 45: effort/originality-kravet inkl. metadata, overhængende core update (96,8%-estimat), AIO-dækningstal for kommercielle/e-commerce-queries + Kaiser causal-studie. AIPREF/UGC-spam fra uge 45 ikke gentaget.
+
+## 2026-11-09 (uge 46, 2. kørsel) — Ugentlig SEO-research ⚠️ Gemini utilgængelig
+
+**Kørsel:** web_search (5 søgninger) → ai_ml_api/gemini-3-8-flash fejlede med **403: "You've run out of funds"** (aimlapi-balance er tom — https://aimlapi.com/app/billing/). **Gemini utilgængelig → Juno fallback-analyse** (markeret som fallback if. opgave-SOP).
+
+**Top 3 ændringer i denne uge (3/11–9/11):**
+
+1. **AI Overviews ≈ 80% af søgninger + Google udvider synlig link/attributions-visning.** Seroundtables november-rapport: AIO viser nu links oftere og mere fremtrædende, artikel-carousels, mere kontekst. Digiday: Preferred Sources er vokset 7x i år; page-level grounding controls (opt-out) kommer 3/3-2027; UK click-data til udgivere senest 3/12-2026.
+   - Kilder: https://www.seroundtable.com/november-2026-google-webmaster-report-42431.html | https://digiday.com/media/as-publishers-await-click-data-googles-ai-visibility-push-complicates-the-opt-out-decision/
+
+2. **Ziff Davis citation-to-click data (6/11): ~10x flere AI-visninger end klik, organisk -37% i Q3.** Eksternt eksperiment (Zyppy): AI search CTR ≈ 0,9% (0,7–1,1%), men AI search stod for 23% af site'ets samlede search-klik (halo-effekt). Google mangler fortsat AI click-reporting i GSC inden UK-deadline.
+   - Kilder: https://www.aipublisher.ai/2026/11/07/audit-citation-to-click-gap/ | https://signal.zyppy.com/p/we-opted-out-of-google-ai-search | https://www.searchenginejournal.com/google-ai-click-reporting-uk-deadline/595663/
+
+3. **Volatilitet uden navngiven update; core update ventes inden udgangen af november.** Google: ingen update 27/10–3/11 (dashboard), men Semrush Sensor/RankRanger/MozCast rapporterer skarpe udsving fra start af november, især på queries der trækker AIO — citation-cards skifter mellem autoritative domæner og niche-kilder. SEJ-model: 96,8% sandsynlighed for core update inden 30/11. Seneste bekræftede: sept. 2026 spam update (24/9–8/10), maj 2026 core.
+   - Kilder: https://www.redefineyourmarketing.com/blog/google-algorithm-update-running-list | https://www.searchprex.com/resources/news/google-november-2026-search-ranking-volatility | https://tonconsultant.ca/en/seo-news-week-of-november-9-2026/ | https://www.seoforjournalism.com/p/google-updates-october-news-ai-overviews
+
+**Øvrigt relevant:**
+- GSC performance: unormalt klik-spring omkring 31/10 for nogle sites (mulig bug/bot-trafik — tjek egne GSC-tal mod det, før det tolkes som ægte vækst).
+- Google opdaterede "Crawled - Currently Not Indexed"-dokumentation (3/11).
+- 404: Illyes — "fixing a 404 is entirely optional"; redirect kun til ægte erstatning, aldrig blindt til forside.
+
+**Effekt for steamgears.eu (fallback-analyse, Juno):**
+- US kommercielle steampunk-queries vil næsten sikkert trække AIO (48% af kommercielle queries). Med ~0,9% AI-CTR er klik-pressure reelt — men Zyppy-data viser halo-effekten: synlighed i AI kan Drive samlet brand-search. Mål: bliv citéret (structured data, førstehånds-indhold) frem for at jagte den samme top-10.
+- Novembers citation-card-fluctuation betyder, at niche-domæner (som steamgears.eu) faktisk kan vinde citationer i perioder — revisér/berig de 2-3 stærkeste guides i disse uger.
+- Forfatterskabs-advarslen er kritisk: ingen fiktive forfatterprofiler/AI-headshots på guides. Ægte signatur (Henning/Steamgears Workshop) + "how we tested"-dokumentation.
+- GSC klik-spring (31/10): validér med GA4 før konklusioner i månedens rapport.
+
+**3 konkrete handlinger denne uge:**
+1. **Forfatterskabs-audit:** Verificér at ALLE guides har ægte byline + about/credential-signal — ingen AI-fabrikerede profiler (Google: deception = low-quality signal). Kilde: https://searchengineland.com/google-warns-against-using-fake-author-information-on-your-content-493701
+2. **AI-citation berigelse af top-guides:** Tilføj førstehånds-evidence (fotos af egne builds, målinger, "what broke") til de 2-3 vigtigste guides — non-commodity content per Googles AI-optimization guide. Kilder: https://developers.google.com/search/docs/fundamentals/ai-optimization-guide | https://developers.google.com/search/docs/specialty/ecommerce/write-high-quality-reviews
+3. **Pandasentation til core update:** Da core update ventes inden udgangen af november: tjek at produkt-schema/feed-kvalitet (Merchant/structured data) er ren på tværs af de ~77-90 produkter, så shoppen er AI-læsbar før update. Kilde: https://www.yotpo.com/blog/ecommerce-ai-overviews-seo/
+
+**Kilder (samlet):**
+- https://www.seroundtable.com/november-2026-google-webmaster-report-42431.html
+- https://digiday.com/media/as-publishers-await-click-data-googles-ai-visibility-push-complicates-the-opt-out-decision/
+- https://www.aipublisher.ai/2026/11/07/audit-citation-to-click-gap/
+- https://signal.zyppy.com/p/we-opted-out-of-google-ai-search
+- https://www.searchenginejournal.com/google-ai-click-reporting-uk-deadline/595663/
+- https://www.redefineyourmarketing.com/blog/google-algorithm-update-running-list
+- https://www.searchprex.com/resources/news/google-november-2026-search-ranking-volatility
+- https://tonconsultant.ca/en/seo-news-week-of-november-9-2026/
+- https://www.seoforjournalism.com/p/google-updates-october-news-ai-overviews
+- https://developers.google.com/search/docs/fundamentals/ai-optimization-guide
+- https://developers.google.com/search/docs/specialty/ecommerce/write-high-quality-reviews
+- https://www.yotpo.com/blog/ecommerce-ai-overviews-seo/
+
+**Ny i denne uge vs. uge 45/46 (1. kørsel):** 80% AIO-dækningstal, Ziff Davis ~10x impression:click-forhold + -37% Q3, Zyppy 0,9% AI-CTR + 23% halo-effekt, UK click-data deadline 3/12-2026, page-level grounding controls 3/3-2027, Preferred Sources 7x, GSC klik-spring-bug, Illyes 404-afklaring. Ikke gentaget fra tidligere uger: fake-authorship, EOT/SA, Merchant Product Reviews API (dækket i 5/11-sektionen).
+
+## 11/11 — Guide-illustration: steampunk-accessories (post 30)
+- 7 nye billeder genereret via `image create` (photorealistic, varmt brass-lys, ingen tekst): materials flat-lay + steps 1-6 (watch chain, can-lid goggles, bracer-riveter, hat+goggles, belt, færdig look).
+- QA via image read: OK (1408x768, fotorealistiske, ingen brand/tekst).
+- JPG kopieret til CDN guides/accessories/ (begge kopier af mappen). CDN-deploy var træg (v101-106, deadlock + async) — verified 200 på alle 7 kl. ~12:45.
+- Figurer indsat i post 30 (WP REST PUT via Juno Basic auth). OBS: WP omdøbte filer til uploads/2026/11/accessories-step-N-1.jpg (navnekollision auto-suffix) — uploaded som WP-media, ikke CDN-embed. Verificeret 200 på alle 7 uploads + live HTML viser alle 7 figurer (kl. ~13:45).
+- 7 original-PNG'er uploadet til Drive "02 Images & Media" (1aUhfZ1izbGJGye27ofDad1YmZrO7eyeS).
+- Lektie: WP media-uploader suffikser ved navnekollision; CDN-embed-metoden (goggles/budget) undgår dette — brug CDN-src i figurer, ikke WP-media upload, når filnavne kan kollidere.
+
+## 12/11 — November 2026 core update live + AI-klik-tal + ecommerce-schema (post 31)
+
+**Gemini-status:** Fallback brugt — aimlapi (google/gemini-3-8-flash) returnerede 403 "out of funds" (https://aimlapi.com/app/billing/). Juno analyserede selv.
+
+**Top 3 ændringer i Googles regler (sidste 7 dage):**
+1. **November 2026 core update startet 10/11** (10:06 PT, globalt, alle sprog). Tredje core update i 2026. Rollout op til 2 uger (est. slut ~24/11) — afsluttes præcis inden Black Friday 27/11. Ingen ny specifik guidance; Google: "regular update designed to better surface relevant, satisfying content". Analysér først en uge efter afslutning (~1/12).
+2. **AI Overviews' klik-impact nu kvantificeret:** Zyppy-eksperiment (opt-out 28 dage): AI-funktioner = ~21-23% af sitets klik, ~10% af impressions men ~2x CTR. Seer (53 brands, 5,47 mio. queries): CTR 3,3% uden AIO / 2,1% citeret / 0,9% ikke-citeret. Victorious Q3: 37% af AIO-citationer kommer fra top-10 organisk (kun 13-18% for ChatGPT/Perplexity) — ranking er stadig filteret; AIO på 97,5% af category-købssøgninger (op fra 72,8% i Q2).
+3. **Site reputation/parasite SEO: EEA-manual actions afskaffet** (i kraft 30/8, ejere e-mailet 4-6/11) efter Europakommissionen-press. Uden for EEA uændret. Spam-policies gælder også for generative AI-svar. NB: Nyhed 6/11, men bekræftet/e-mailet i denne uge.
+
+**Effekt for steamgears.eu:**
+- Core update rammer midt i forberedelserne til Black Friday; shop + guides kan volatilisere 10-24/11. Ingen ny guidance = ingen panik-ændringer; vent med GSC-vurdering til ~1/12.
+- AIO-tallene bekræfter: at BLIVE CITERET er forskellen på 2,1% og 0,9% CTR (2,3x). Med 97,5% AIO-dækning på category-købssøgninger er steampunk costume/goggles-guides i spillet — og ranking er den billigste vej ind.
+- EEA-ændringen påvirker ikke os direkte (ingen parasite-opsætning), menDK/EEA-trafik er nu beskyttet mod den slags konkurrent-taktik.
+- Ecommerce-schema: review-markup-reglerne (8/9) + AI-læsbarhed (gtin/sku, price, availability, shippingDetails, hasMerchantReturnPolicy i Product markup) er direkte actionables på vores ~77 produkter.
+
+**3-5 konkrete handlinger:**
+1. **Frys store site-ændringer 10-24/11** (core update-rolldout) — kun småt vedligehold. Tjek Command Center daily check for drift.
+2. **Merchant Center/produkt-feed tjek FØR Black Friday (27/11):** price/availability-match mellem feed og landingsside, 5 produkter uden billede (fra 27/10-audit) skal fikses — AI shopping-svar og free listings læser samme data. Kilde: https://rctrl.com/blog/ecommerce-seo-audit
+3. **Review-markup-audit:** Verificér at alle Product-sider har korrekt Review/aggregateRating-markup (forfatter + itemReviewed + rating) ELLER ingen markup — forkert markup mister stjerner. Kilder: https://rctrl.com/blog/ecommerce-seo-audit | https://blog.trendlyai.com/optimize-product-pages-for-chatgpt
+4. **Forbered GSC-analysen:** gem baseline-ugens query_stats nu (ugen før opdateringen) til sammenligning efter ~1/12 — kilde: https://status.search.google.com/incidents/WLxcJyC6jMWMfryxsKMc
+5. **Brand-søgnings-tjek:** Google viser nu AI Overview i stedet for knowledge panel ved brand-søgninger (desktop, spottet 31/10) — søg "steamgears" på desktop og tjek om vores brand-resumé er korrekt. Kilde: https://ecommerce.thisisnovos.com/p/thrive-ecom-news-06-nov-2026
+
+**Kilder (samlet):**
+- https://status.search.google.com/incidents/WLxcJyC6jMWMfryxsKMc
+- https://searchengineland.com/google-november-2026-core-update-rolling-out-now-501348
+- https://www.searchenginejournal.com/google-november-2026-core-update/596614
+- https://ppc.land/googles-core-update-shifts-rankings-for-up-to-2-weeks-before-black-friday
+- https://www.searchenginejournal.com/googles-ai-features-sent-one-site-an-estimated-21-of-its-clicks/596267/
+- https://digitalinfluence.com/news/commerce-sites-judge-ai-search-on-partial-data-as-googles-click-deadline
+- https://ppc.land/ai-overviews-cut-a-french-sites-daily-clicks-from-750-to-400-gabe-finds
+- https://www.linkbaits.com/news/victorious-ai-overviews-organic-rankings-q3
+- https://serpmentor.com/seo/news/site-reputation-abuse-eea
+- https://saaslinkbuilding.com/blog/google-site-reputation-eea-manual-actions/
+- https://developers.google.com/search/blog/2026/08/update-site-reputation-policy
+- https://rctrl.com/blog/ecommerce-seo-audit
+- https://blog.trendlyai.com/optimize-product-pages-for-chatgpt
+- https://ecommerce.thisisnovos.com/p/thrive-ecom-news-06-nov-2026
+- https://pixis.ai/blog/what-your-buyers-search-for-before-bfcm-on-google-and-in-ai-search/
+
+**Ny i denne uge vs. 11/11:** Core update bekræftet LIVE med officiel dashboard-timestamp + afslutning ~24/11 (bf.Black Friday-vinkel), Seer CTR-tallene (3,3/2,1/0,9%), Victorious Q3 37%-top10-overlap + 97,5% AIO-dækning, EEA-e-mails til site-ejere (4-11/11), Ziff Davis -37% Q3. Ikke gentaget: Zyppy 21% (kun delta: hallo-effekt detalje), UK 3/12-deadline (dækket 11/11).
+
+## 2026-11-16 (uge 47) — Ugentlig SEO-research ⚠️ Gemini utilgængelig (aimlapi-balance udløbet — fallback brugt)
+
+**Metode:** web_search (4 søgninger) → Gemini 3.8 Flash forsøgt → **403 "You've run out of funds"** → Juno-analyse som fallback. Gem baseline for aimlapi: https://aimlapi.com/app/billing/
+
+### (a) Top 3 ændringer i ugen (9-16/11)
+
+1. **Gemini 4 Hydrogen er nu DEFAULT i AI Mode + AI Overviews for ALLE Search-brugere (12/11)** — ikke kun betalende abonnenter. Forbedret query fan-out: flere samtidige del-spørgsmål, bredere vifte af kildelinks, flere billeder/sammenligningstabeller i svarene. Men: mere fan-out ≠ mere trafik (Reddit CEO: AI Mode driver ikke trafik). Det er den største skævvridning af AI-landsbyen denne uge — AEO/fan-out-venligt indhold og -struktur vinder citationer.
+   - https://blog.google/products-and-platforms/products/search/gemini-4-hydrogen-search-upgrade/
+   - https://www.searchenginejournal.com/google-gemini-4-hydrogen-default-ai-mode/597096
+   - https://ppc.land/google-search-gains-gemini-4-hydrogen-for-all-users-not-just-subscribers
+   - https://seroundtable.com/google-november-2026-core-update-42504.html (oversigt)
+
+2. **November 2026 core update stadig i rollout (startet 10/11, til ~24/11 — 3 dage før Black Friday).** Global, alle sprog, ingen detaljer offentliggjort. Dashboard uændret pr. 12/11 → rollout fortsætter. Frys store site-ændringer indtil efter rollout.
+   - https://status.search.google.com/incidents/WLxcJyC6jMWMfryxsKMc
+   - https://ppc.land/googles-core-update-may-run-until-three-days-before-black-friday
+   - https://triaza.com/blog/seo/google-november-2026-core-update/
+
+3. **Side 1-klik falder ~11% år-til-år — produktgrids er den værste synder (−62% CTR-effekt i 2026), men AI-citation betaler sig: +28% CTR hvis citeret, +36% hvis brand nævnt ved navn** (Anicca-studie, 6 sites, GSC + rank-tracking). PAA −28%. Dette er den skarpeste kvantificering endnu af, hvor klikene forsvinder hen for ecommerce.
+   - https://anicca.co.uk/blog/organic-ctr-by-position-in-2026
+
+**Øvrige i ugen (kort):** "Non-incentivized only"-filter i produkt-panel på Shopping/Search/AI Mode (SER) — shoppers kan filtrere incentivized reviews fra. AI Overview-kilde-ikoner flyttet til bunden (test) + definition-searches viser AI Overviews fuldt udfoldet som default. Site reputation policy-dok now klart EEA-opdelt (udenfor EEA: manual actions). Ads i AI Mode: multiturn-ads live i US + udrulles til 10 lande.
+
+### (b) Effekt for steamgears.eu
+
+- **Core update vs. Black Friday:** Rollout slutter ~24/11, Black Friday 27/11. Enhed ranking-forskydninger lige ind i højsæsonen. Med ~90 produkter og engelske US-guides er steamgears.eu eksponeret for globale core-update-volatilitet. Frys struktur-ændringer; små sikre fixes OK.
+- **Produktgrids-tab:** På ecommerce-queries tager produktgrids nu klikene FØR de blå links (−62%). Vores kategori-/produkt-sider skal fremstå i grid'et (feed/merchant-listings) — ikke kun som blå links.
+- **Gemini 4 Hydrogen fan-out:** AEO-vinkel: guidestruktur, der besvarer sub-spørgsmål (hvordan, hvad, hvor meget, DIY vs. buy), matcher fan-out-modellen og øger citation-chancen. Billeder/tabeller i svarene → vores diagram-/sammenligningsindhold kan blive trukket ind.
+- **AI-citation-premien (+28/+36%) er konkret:** Vores guides skal være de kilder, Hydrogen citerer — svare-direct (definitioner, lister, tabeller) højst oppe på siden.
+- **Non-incentivized-filter + review-markup:** Vi har ingen on-site reviews endnu; vi skal IKKE markere incentivized reviews som ikke-incitament. Rigtig vinkel: håndpluk/organiske kunde-citater eller helt undlade review-markup (ingen falsk markup).
+
+### (c) 3-5 konkrete handlinger (denne uge)
+
+1. **Bestil aimlapi-top-up ELLER skift fallback permanent** — Gemini-gatewayen er død på balance. Overvej at skifte research-rutinen til Juno-native analyse + web_search, så kørslen er afhængig af én platform færre. 💰 https://aimlapi.com/app/billing/
+2. **Black Friday-side klar FØR 24/11 (core update-slut):** Rekursiv URL /black-friday/ (ikke med årstal), titel "Steampunk Black Friday 2026 Deals", Offer-markup med priceValidUntil + strikethrough regular price, linket fra forside + menu. Kilde: https://rankfender.com/en/learn/black-friday-seo/ (Google-anbefalinger citeret)
+3. **Product grid-optagelse:** Verificér at alle 90 produkter har fuld Merchant-listing-markup (price, availability, gtin/sku, shippingDetails, returnPolicy) + feed klar — grid'et er nu den primære klik-kilde på ecommerce-SERP. De 5 produkter uden billede skal fikses FØR Black Friday.
+4. **AEO-reformat på top 3-guides:** Sørg for at svaret på hovedspørgsmålet står i første 2-3 afsnit + én sammenligningstabel pr. guide (DIY vs. Buy er oplagt) — det er det format Hydrogen fan-out citerer. Mål: blive citeret i AI Overviews på "steampunk costume ideas"-type queries (+28-36% CTR-premie).
+5. **Ingen strukturelle site-ændringer før ~24/11** — rollout-slut. Efter: GSC sammenligning uge-før/efter (baseline gemt fra 26/10 + 11/11).
+
+### Kilder (samlet)
+- https://status.search.google.com/incidents/WLxcJyC6jMWMfryxsKMc
+- https://blog.google/products-and-platforms/products/search/gemini-4-hydrogen-search-upgrade/
+- https://www.searchenginejournal.com/google-gemini-4-hydrogen-default-ai-mode/597096
+- https://ppc.land/google-search-gains-gemini-4-hydrogen-for-all-users-not-just-subscribers
+- https://seroundtable.com/google-november-2026-core-update-42504.html
+- https://seroundtable.com/google-ai-overview-source-icons-bottom-42519.html
+- https://seroundtable.com/google-ai-mode-multiturn-ads-42478.html
+- https://ppc.land/googles-core-update-may-run-until-three-days-before-black-friday
+- https://anicca.co.uk/blog/organic-ctr-by-position-in-2026
+- https://developers.google.com/search/docs/essentials/spam-policies
+- https://triaza.com/blog/seo/google-november-2026-core-update/
+- https://rankfender.com/en/learn/black-friday-seo/
+
+**Ny i denne uge vs. 11/11:** Gemini 4 Hydrogen som default for ALLE (12/11), Anicca CTR-studiet (produktgrids −62%, AI-citation +28/+36%), non-incentivized-review-filter i Shopping, AI Overview-kilde-ikoner flyttet til bund, definition-AI Overviews udfoldet default, multiturn-ads i AI Mode til 10 lande. Ikke gentaget: core update-basisdækning fra 12/11-rollout-start, EEA-e-mails, Seer CTR-tal.
+
+## 2026-11-19 (uge 48) — Ugentlig SEO-research ⚠️ Gemini utilgængelig (aimlapi-balance STADIG udløbt — 403 "run out of funds", anden uge i træk — fallback brugt)
+
+**Metode:** web_search (5 søgninger: algorithm update, AI search/ecommerce, product reviews, spam policy, AI Mode nyheder — qdr:w/qdr:d) → Gemini 3.8 Flash forsøgt → **403 "You've run out of funds"** → Juno-analyse som fallback. Top-up: https://aimlapi.com/app/billing/
+
+### (a) Top 3 ændringer i ugen (13-19/11)
+
+1. **November 2026 core update — hoved-impact dateret til 13/11, GSC er eneste troværdige kilde.** Glenn Gabe: "surges and drops starting 11/13". Rollout afsluttes ca. 24/11 (3 dage før Black Friday 27/11). Tracking-værktøjer er upålidelige ("poisoned"/filtreret) + GSC performance-rapport har været laggy — brug KUN GSC til at vurdere om steamgears.eu er ramt. Sites med masser af AI-genereret indhold drops hårdt.
+   - https://www.seroundtable.com/google-november-2026-core-update-42504.html
+   - https://seroundtable.com/google-november-2026-core-update-week-two-42524.html
+
+2. **AI Mode er nu et full shopping-lag:** Shopping ads + sponsored text ads vises SAMLET i bunden af AI Mode (18/11), samme layout som almindelig SERP. Google promoterer aktivt Gemini 4 Hydrogen via "Search just got an upgrade"-popup (16/11). AI Mode temporary threads (uden historik/personalisering) rullet globalt ud 17-18/11.
+   - https://searchenginewatch.com/google-ai-mode-now-shows-shopping-ads-and-sponsored-ads-together-at-the-bottom/
+
+3. **Reviews er nu direkte AI-input + hårdt reguleret:** Google AI Mode Shopping henter reviews fra Shopping Graph; ChatGPT "may consider" reviews ved produktudvælgelse. Regler: AggregateRating skal matche synlige ratings, reviewCount ≠ ratingCount, ingen ratings fra andre sites, incentivized reviews skal discloses (FTC). Merchant Center Product ratings add-on kræver min. 50 reviews. AI Overviews/AI Mode deler kun 13% af kilderne indbyrdes og kun 7% med ChatGPT — SEO-topposition garanterer IKKE AI-citation; 37% af citerede domæner mangler i almindelig SERP.
+   - https://www.vincentschmalbach.com/how-to-use-genuine-product-reviews-on-store-pages/
+   - https://clarmix.com/blog/ai-overview-in-europe-what-impact-on-seo-and-ppc-for-ecommerce
+
+**Øvrige i ugen (kort):** Google opdaterede 26/10 user-generated spam-guiden (noindex på ny-bruger-indhold, ugc-nofollow, moderation, Akismet, GSC-overvågning) — relevant for WP-kommentarer + My Account-registrering. Merchant listings/feed er fortsat vejen ind i AI Mode-shopping.
+
+### (b) Effekt for steamgears.eu
+
+- **Core update ≈ slut nu (24/11):** Tid til at tjekke GSC uge 46 vs. 47 for ranking-forskydninger på top-guides + kategorisider FØR Black Friday 27/11. Hvis ramt: ingen panik-ændringer, brug GSC-data.
+- **AI Mode-shopping-ads:** Merchant Center-feed + produktdata-kvalitet er nu også synlighedsfaktor i AI Mode (ikke kun almindelig Shopping). Vores 90 produkter skal have fuld markup (price, availability, gtin/sku, shippingDetails, returnPolicy) — de 5 produkter uden billede er fortsat en akilleshæl før BF.
+- **Reviews-kløften:** Vi har 0 on-site reviews. Min. 50 reviews til Product ratings add-on er langt væk, men organisk indsamling (post-purchase e-mail via MailPoet/WooCommerce) bør startes NU for at have tal før Q1 2027. Ingen markup før der er ægte reviews — falsk AggregateRating = manual action-risiko.
+- **AEO-fan-out (fra sidste uge, stadig gældende):** Guides skal besvare sub-spørgsmål direkte med tabeller — citation-premien (+28/+36% CTR) står.
+
+### (c) 3-5 konkrete handlinger (denne uge)
+
+1. **GSC core-update-tjek:** Sammenlign uge 46 (før 13/11) vs. uge 47 på top 20 queries/sider. Notér eventuelle drops før 24/11. 💡 `google_search_console search_analytics_query`
+2. **Black Friday /black-friday/-side live senest 24/11** (hvis ikke allerede bygget — tjek status): Offer-markup med priceValidUntil, link fra forside + menu. Kilde: https://rankfender.com/en/learn/black-friday-seo/
+3. **Fiks de 5 produkter uden billede + verificér Merchant-listing-markup på alle 90 produkter** — produktgrids/AI Mode-shopping er den primære synlighedskanal nu.
+4. **Start ægte review-indsamling:** WooCommerce post-purchase review-e-mail til eksisterende kunder (MailPoet) — mål: første 10-20 ægte reviews i november/december. Markup først når der er ægte data.
+5. **Bestil aimlapi-top-up** — Gemini-gatewayen har været død på balance 2 uger i træk. 💰 https://aimlapi.com/app/billing/
+
+### Kilder (samlet)
+- https://www.seroundtable.com/google-november-2026-core-update-42504.html
+- https://seroundtable.com/google-november-2026-core-update-week-two-42524.html
+- https://searchenginewatch.com/google-ai-mode-now-shows-shopping-ads-and-sponsored-ads-together-at-the-bottom/
+- https://www.vincentschmalbach.com/how-to-use-genuine-product-reviews-on-store-pages/
+- https://clarmix.com/blog/ai-overview-in-europe-what-impact-on-seo-and-ppc-for-ecommerce
+- https://developers.google.com/search/updates
+
+**Ny i denne uge vs. 16/11:** Core update hoved-impact dateret 13/11 + GSC-som-eneste-kilde-afklaring (Gabe), Shopping ads + text ads samlet i AI Mode (18/11), temporary threads (17-18/11), reviews-som-AI-input-afklaring (ChatGPT + Shopping Graph), 13%/7%/37% kilde-overlap-tal fra Converteo-studiet. Ikke gentaget: Gemini 4 Hydrogen default-nyheden, Anicca CTR-studiet, non-incentivized-filter.
