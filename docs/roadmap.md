@@ -1,6 +1,6 @@
 # Steamgears site — optimisation roadmap
 
-_Last audited: 2026-11-08 · production: WordPress **7.1.4**, PHP **8.5.12**, MySQL 8.4.11, WooCommerce **11.2.2**, **22 active plugins** (afstemt 8/11 mod S3.4 og §2b) · **versionstjek 15/11 2026:** repo **7.88.0** (Gelato er eneste printvej), **14 publicerede produkter** — tallene i §0, §2 og §2b er målt 8/11 og står som historik · companion to [`plugins/steamgears-autopilot/ROADMAP.md`](../plugins/steamgears-autopilot/ROADMAP.md), which is imported in §5._
+_Last audited: 2026-11-08 · production: WordPress **7.1.4**, PHP **8.5.12**, MySQL 8.4.11, WooCommerce **11.2.2**, **22 active plugins** (afstemt 8/11 mod S3.4 og §2b) · **versionstjek 20/11 2026:** repo-plugin **7.91.1** (Gelato er eneste printvej), live-versionen er ikke genmålt siden 9/11 (**7.65.5**), **14 publicerede produkter** målt 15/11 — live- og produkttallene i §0, §2 og §2b er daterede snapshots; repo-versionen ovenfor er kontrolleret 20/11 · companion to [`plugins/steamgears-autopilot/ROADMAP.md`](../plugins/steamgears-autopilot/ROADMAP.md), which is imported in §5._
 
 This is the roadmap for **steamgears.eu itself** — structure, content, store and hygiene. The plugin has its
 own roadmap; this document tracks what the site needs, and §5 pulls every plugin item in with its site-side
