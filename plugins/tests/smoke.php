@@ -1508,6 +1508,10 @@ check('dashboard 7.52: the updater moved under System', $sys < strpos($dash,'Plu
 check('dashboard 7.52: a healthy dashboard says so in one line instead of scattered pills', str_contains($dash,'sgap-attn is-ok') && str_contains($dash,'All clear'));
 // P16 — each live dashboard warning offers its matching admin destination, never stale actions.
 $attention = new ReflectionMethod(SGAP_Admin::class, 'attention_strip');
+// PHP 8.0 still requires private methods to be explicitly made accessible.
+if (PHP_VERSION_ID < 80100) {
+    $attention->setAccessible(true);
+}
 $render_attention = static function (array $tiles = [], string $blocked = '', $ai_ok = null) use ($attention): string {
     ob_start();
     $attention->invoke(null, $tiles, $blocked, $ai_ok);
