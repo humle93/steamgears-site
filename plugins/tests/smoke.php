@@ -1509,6 +1509,7 @@ check('dashboard 7.52: a healthy dashboard says so in one line instead of scatte
 // P16 — each live dashboard warning offers its matching admin destination, never stale actions.
 $attention = new ReflectionMethod(SGAP_Admin::class, 'attention_strip');
 $attention->setAccessible(true);
+// PHP 8.0 requires explicit accessibility for this private-method smoke check.
 $render_attention = static function (array $tiles = [], string $blocked = '', $ai_ok = null) use ($attention): string {
     ob_start();
     $attention->invoke(null, $tiles, $blocked, $ai_ok);
