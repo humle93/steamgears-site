@@ -1758,6 +1758,7 @@ require __DIR__.'/coach.php';
 require __DIR__.'/cirla.php';
 require __DIR__.'/cirla-admin.php';
 require __DIR__.'/cc-login.php';
+require __DIR__.'/site-pair.php';
 // --- 7.80.0: slukkede kanaler venter, token-loft pr. kanal, selvtjek ved tom AI-kørsel ---
 $GLOBALS['opts']['sgap_channels']='facebook,bluesky'; update_option('sgap_channel_caps',''); $GLOBALS['rows']=[]; $wpdb->log=[];
 SGAP_Queue::claim(5); $q=implode("\n",$wpdb->log);

@@ -363,7 +363,7 @@ class SGAP_Studio {
             echo '<option value="' . esc_attr($k) . '">' . esc_html(ucfirst($k)) . '</option>';
         }
         echo '</select></label> <label>Length<br><select name="length"><option value="short">Short (~700 words)</option><option value="medium" selected>Medium (~1300)</option><option value="long">Long (~2200)</option></select></label>'
-            . ' <label>Language<br><input name="language" class="small-text" style="width:110px" value="' . esc_attrSGAP_Site::language() . '"></label></p>'
+            . ' <label>Language<br><input name="language" class="small-text" style="width:110px" value="' . esc_attr(SGAP_Site::language()) . '"></label></p>'
             . '<p><label>Extra instructions <span class="description">(optional)</span><br><textarea name="notes" rows="2" class="large-text" placeholder="Mention our brass goggles product, beginner level, …"></textarea></label></p>'
             . '<p><button class="button button-primary"><span class="dashicons dashicons-edit"></span>Write draft</button></p></form>';
         SGAP_UI::card_close();

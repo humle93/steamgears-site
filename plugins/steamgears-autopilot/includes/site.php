@@ -88,7 +88,7 @@ class SGAP_Site {
         if ($own !== '') {
             return $own;
         }
-        return self::language_of_locale((string) get_locale());
+        return self::language_of_locale(function_exists('get_locale') ? (string) get_locale() : 'en_US');
     }
 
     public static function language_of_locale(string $locale): string {
