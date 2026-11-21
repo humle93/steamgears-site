@@ -832,3 +832,33 @@ Ingen logget i DB (lav prio / allerede dækket af retailer-cluster-billede).
 1. **"Steampunk Accessories: The Complete Checklist (With Real Prices)"** — 12. ugentlig gentagelse, fortsat uopfyldt. ARY's halloween-costume-format (pris-tiers: $27-37 thrift / $373 mid / $800+) viser pristabel-format vinder slots; copy det til accessories med Vores USD-katalog + sg-buy. Højeste ROI — publisér denne uge.
 2. **Gæsteartikel til steampunkhub.uk: "Where to Buy Steampunk Hats & Goggles in Europe"** — call åben dag 4, shopping-anchor stadig ubespillet. 600-800 ord, link til /build/-guides + shop. Send inden call lukker.
 3. **REFRESH med reel ændring: /diy-steampunk-goggles/** — ary #4 på DIY med tabel-format; susandennard (2011) + amaco holder top-3. Vores refresh: rangordnet metodetabel + FAQ + "buy vs build" + kort video-embed (@hotsteampunk723) — reel format-variation slår dato-touch.
+
+## Scan 2026-11-21
+### Frontend-observationer (fetch ~01:00-01:20 UTC, UA SteamgearsSiteBuilder/1.0)
+- **halloweencostumes.com** — ⚡ NYT: dedikeret sub-kategoritræ live: /steampunk-goggles.html (200, 12 goggle-SKUs), /steampunk-hats.html, /steampunk-masks.html — steampunk-funnel udvidet fra 2 til 5 kategorier. Kernesortiment uændret; jul-promo stadig lav (4x christmas, 119x sale). Baseline opdateret: /library/competitor-watch/hc-product-urls-2026-11-21.txt (366 URLs). (DB: række 1356)
+- **museumreplicas.com** — ⚡ FØRSTE BF-signal: /black-friday/ banner "Black Friday Sale | 20% OFF Sitewide | Use code: FRIDAY26" på steampunk-kategorisiden. Kerne uændret (Cybersteam Goggles flagskib), 216x gift-refs + "gifts under $30/$50"-tags. 110x Last Chance + 66x On Sale. (DB: række 1357)
+- **my-steampunk-style.com** — ⚡ 2. ny blogpost efter pause: "Gift Ideas for Someone Who Loves Steampunk" (pub 06/11, synlig i atom nu; seneste care-guide 16/11). BF-widget stadig isEnabled:false 4 dage før BF. Forside: 161x sale, 0x christmas/BF. (DB: række 1358)
+- **steampunkary.com** — Dag 33 uden ny pub (240 posts, nyeste 19/10). Bulk-modificering dækker nu 8+ posts pr. nat: goggles + gifts-for-him + diy-craft-ideas + corsets + clocks + aviator modified 20/11. Goggles-guiden = dagligt touched kampområde. (DB: række 1359)
+- **hardnheavy.style** — ⚡ Jul-signal eskalerer: 11x christmas (op fra 7x) + NYT blogindlæg "goth-christmas-outfit-what-to-wear-to-the-family-dinner-without-caving" = første nye post siden 20/08. 86x sale, 0x BF. (DB: række 1360)
+- **steampunkhub.uk** — Guest-post-call /about/articles-wanted stadig live (dag 6); samme 6 essays; shopping-anchor fortsat ubespillet. (DB: række 1361)
+- **steampunkoutfits.com / vintagedancer.com** — Begge uændret: outfits samme slugs (nyeste 19/10, 19x sale); VD apex hub live 162 KB, 7x sale, ingen BF/jul-signal. (DB: række 1362)
+- Observer-status uændret: steampunkjournal.org (parked), brassgoggles.co.uk (TCP-timeout), steampunk.com (ude af rotation), airshipambassador.com (statisk).
+
+### SERP top-3 (web_search gl=us, ~01:30)
+- **"steampunk costume guide"**: 1) hardnheavy.style complete-outfit-guide 2) thesimplethings (2021) 3) writerlesleydonaldson (2014). Også ary halloween-costumes + ary steampunk-clothing (begge), MSS steampunk-fashion, gbacg ×2, sinisterfingers (2011), fadmagazine. ⚠️ Steamgears IKKE top-10.
+- **"diy steampunk goggles"**: 1) instructables (sci-fi-from-trash) 2) amaco 3) rustichorseshoe. Også all3dp, instructables ×2, michellespartyplanit (2014), upcycledesignlab, epbot (2011 — NY i top-10), steampunk.wonderhowto, thingiverse. Top-10 = 100% tutorials fra 2009-2016. ⚠️ Steamgears IKKE top-20.
+- **"steampunk accessories"**: 1) steampunkstyler 2) MSS collection 3) darkknightarmoury. Også maison-steampunk.fr, shop.vermilion, thebasewarehouse.au, caufields, medievalcollectibles, halloween.com, MSS listicle ("The 20 Best Steampunk Accessories"). Ren retailer-cluster, checklist-hullet med ægte priser stadig åbent (13. uge). ⚠️ Steamgears IKKE top-30.
+
+### Nye domæner → watchlist (1 logget i DB, række 1363)
+- epbot.com — DIY maker-blog, 2011 goggles-tutorial ind i top-10 rotation (bekræfter "gammel-tutorial"-muren)
+
+### Keyword-signaler
+- ⚡ BF-lancering: MR er FØRST med sitewide-kode (FRIDAY26, 20% off) 6 dage før BF; MSS' BF-widget er stadig slukket. Gift-signaler eksploderer (MR 216x gift-refs; MSS gift-guide 06/11; HNH jul-11x).
+- ⚡ ARY's daglige bulk-modified rammer nu 8+ posts pr. nat med goggles + gifts som kerne — freshness-spil intensiveres før jul.
+- HNH kombinerer jul-kampagne + frisk content ("goth christmas outfit") — jul-outfit-intent begynder at få konkurrentdækning.
+- Accessories-SERP: 13. uge i træk 100% kategorisider/listicles, 0 checklist-indhold med ægte priser.
+
+### 3 indholdsmuligheder for steamgears.eu
+1. **"Steampunk Gifts Under $50 (With Real Prices)"** — MSS har gift-guide (06/11), MR positionerer "gifts under $30/$50", men INGEN har en pris-tabel-gift-checklist. Vores USD-katalog + sg-shoprow = direkte match. Publisér før BF 27/11. (Checklist-hullet #13, nu i gift-forklædning — højeste ROI.)
+2. **Gæsteartikel til steampunkhub.uk: "Where to Buy Steampunk Hats & Goggles in Europe"** — call live dag 6, anchor fortsat ubespillet. SEND inden næste scan.
+3. **Dedikeret kategoriside "Steampunk Goggles" i shoppen** — HC har nu /steampunk-goggles.html med 12 SKUs; vores produktkategorier er tynde. Byg kommerciel landingsside (guide-blok + sg-buy + schema) og indeksér via GSC. Kombinér med planlagt /diy-steampunk-goggles/-refresh (video-embed) — internt link-netværk goggles-guide ↔ kategoriside.
