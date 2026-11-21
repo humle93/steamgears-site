@@ -24,7 +24,7 @@ class SGAP_Research {
         if ($keyword === '') {
             return new WP_Error('sgap_keyword', 'Give a keyword.');
         }
-        $danish = stripos((string) SGAP_Settings::get('content_language'), 'dan') === 0;
+        $danish = stripos(SGAP_Site::language(), 'dan') === 0;
         $cache = 'sgap_serp_' . md5(strtolower($keyword) . ($danish ? '|da' : '|en'));
         $cached = get_transient($cache);
         if (is_array($cached)) {
@@ -109,7 +109,7 @@ class SGAP_Studio {
     public static function prompt(array $a, array $links): string {
         $words = self::LENGTHS[$a['length']] ?? 1300;
         $list = implode("\n", array_map(fn($l) => "- {$l['title']} ({$l['type']}): {$l['url']}", $links));
-        return "Write a {$a['type']} for steamgears.eu.\n"
+        return "Write a {$a['type']} for " . SGAP_Site::intro() . ".\n"
             . 'Type: ' . (self::TYPES[$a['type']] ?? $a['type']) . "\n"
             . "Topic: {$a['topic']}\n"
             . ($a['keyword'] !== '' ? "Focus keyword: {$a['keyword']}\n" : "Choose the best focus keyword (what people actually search for).\n")
@@ -180,13 +180,13 @@ class SGAP_Studio {
             'keyword' => trim(sanitize_text_field((string) ($args['keyword'] ?? ''))),
             'type' => array_key_exists((string) ($args['type'] ?? ''), self::TYPES) ? (string) $args['type'] : 'article',
             'length' => array_key_exists((string) ($args['length'] ?? ''), self::LENGTHS) ? (string) $args['length'] : 'medium',
-            'language' => trim(sanitize_text_field((string) ($args['language'] ?? ''))) ?: ((string) SGAP_Settings::get('content_language') ?: 'English'),
+            'language' => trim(sanitize_text_field((string) ($args['language'] ?? ''))) ?: SGAP_Site::language(),
             'notes' => trim(sanitize_textarea_field((string) ($args['notes'] ?? '')))
         ];
         if ($a['topic'] === '') {
             return new WP_Error('sgap_topic', 'Give a topic.');
         }
-        $system = SGAP_AI::SYSTEM . ' You are also an expert SEO copywriter: helpful, original, specific content that answers search intent (E-E-A-T), never keyword stuffing.';
+        $system = SGAP_AI::system() . ' You are also an expert SEO copywriter: helpful, original, specific content that answers search intent (E-E-A-T), never keyword stuffing.';
         $system = str_replace('Write in English. ', '', $system);
         $prompt = self::prompt($a, self::link_targets());
         $research = null;
@@ -248,7 +248,7 @@ class SGAP_Studio {
      */
     public static function optimize_prompt($post): string {
         $text = wp_trim_words(wp_strip_all_tags(strip_shortcodes((string) $post->post_content)), 900, '…');
-        return "Improve the SEO of this {$post->post_type} on steamgears.eu. Keep the language of the page.\n"
+        return "Improve the SEO of this {$post->post_type} on " . SGAP_Site::label() . ". Keep the language of the page.\n"
             . "Return: focus_keyword (what people search for), meta_title (max 60 characters, keyword first), meta_description (140-155 characters, keyword, reason to click), "
             . "and 3-6 concrete suggestions to improve the content itself (headings, missing sections, internal links, images, alt texts).\n\n"
             . 'Title: ' . get_the_title($post) . "\nURL: " . get_permalink((int) $post->ID) . "\nCurrent text:\n" . $text
@@ -269,7 +269,7 @@ class SGAP_Studio {
             'suggestions' => ['type' => 'array', 'items' => ['type' => 'string']]
         ]];
         $prompt = self::optimize_prompt($post);
-        $data = SGAP_AI::json_call(SGAP_AI::SYSTEM . ' You are an expert SEO editor.', $prompt, $schema, 8000);
+        $data = SGAP_AI::json_call(SGAP_AI::system() . ' You are an expert SEO editor.', $prompt, $schema, 8000);
         if (is_wp_error($data)) {
             return $data;
         }
@@ -296,7 +296,7 @@ class SGAP_Studio {
         }
         $defs = [
             'write-article' => ['Write an SEO article or guide',
-                'Writes an SEO-optimised blog article, step-by-step guide or product description for steamgears.eu and saves it as a DRAFT: title, slug, Rank Math/Yoast meta title + description + focus keyword, headings, internal links to existing pages, FAQ (with FAQ schema) and tags. Takes 1-3 minutes. Returns the edit link.',
+                'Writes an SEO-optimised blog article, step-by-step guide or product description for this site and saves it as a DRAFT: title, slug, Rank Math/Yoast meta title + description + focus keyword, headings, internal links to existing pages, FAQ (with FAQ schema) and tags. Takes 1-3 minutes. Returns the edit link.',
                 ['topic' => ['type' => 'string', 'minLength' => 3], 'keyword' => ['type' => 'string'], 'type' => ['type' => 'string', 'enum' => array_keys(self::TYPES), 'default' => 'article'],
                  'length' => ['type' => 'string', 'enum' => array_keys(self::LENGTHS), 'default' => 'medium'], 'language' => ['type' => 'string', 'description' => 'Default: the Content language setting (English).'],
                  'notes' => ['type' => 'string']],
@@ -356,14 +356,14 @@ class SGAP_Studio {
         SGAP_UI::section('Write', 'New content: a draft you edit and publish yourself. Nothing is published from here.');
         SGAP_UI::card_open('Write an article or guide', 'edit-page');
         echo '<form class="sgap-studio-form" data-task="write">'
-            . '<p><label><strong>Topic</strong><br><input name="topic" class="large-text" required placeholder="e.g. How to make steampunk goggles from scrap brass"></label></p>'
-            . '<p><label><strong>Focus keyword</strong> <span class="description">(optional – the AI picks one if empty)</span><br><input name="keyword" class="regular-text" placeholder="steampunk goggles"></label></p>'
+            . '<p><label><strong>Topic</strong><br><input name="topic" class="large-text" required placeholder="e.g. a question your readers search for"></label></p>'
+            . '<p><label><strong>Focus keyword</strong> <span class="description">(optional – the AI picks one if empty)</span><br><input name="keyword" class="regular-text" placeholder="focus keyword"></label></p>'
             . '<p class="sgap-row"><label>Type<br><select name="type">';
         foreach (self::TYPES as $k => $label) {
             echo '<option value="' . esc_attr($k) . '">' . esc_html(ucfirst($k)) . '</option>';
         }
         echo '</select></label> <label>Length<br><select name="length"><option value="short">Short (~700 words)</option><option value="medium" selected>Medium (~1300)</option><option value="long">Long (~2200)</option></select></label>'
-            . ' <label>Language<br><input name="language" class="small-text" style="width:110px" value="' . esc_attr((string) SGAP_Settings::get('content_language') ?: 'English') . '"></label></p>'
+            . ' <label>Language<br><input name="language" class="small-text" style="width:110px" value="' . esc_attrSGAP_Site::language() . '"></label></p>'
             . '<p><label>Extra instructions <span class="description">(optional)</span><br><textarea name="notes" rows="2" class="large-text" placeholder="Mention our brass goggles product, beginner level, …"></textarea></label></p>'
             . '<p><button class="button button-primary"><span class="dashicons dashicons-edit"></span>Write draft</button></p></form>';
         SGAP_UI::card_close();

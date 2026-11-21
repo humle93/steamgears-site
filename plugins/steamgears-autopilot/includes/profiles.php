@@ -47,7 +47,7 @@ class SGAP_Profiles {
             'access' => 'all',
             'boost' => ['steamgears-autopilot', 'steamgears-tools', 'ops', 'content', 'commerce'],
             'extra' => [],
-            'prompt' => 'You are also the site administrator of steamgears.eu: WordPress, WooCommerce, Rank Math and the page cache. '
+            'prompt' => 'You are also the site administrator of this WordPress site: WordPress, WooCommerce when it is installed, the SEO plugin and the page cache. '
                 . 'Diagnose before you change, use the narrowest tool that does the job, and read a value back after writing it. '
                 . 'Name the undo path before anything is deleted or deactivated.',
             'note' => 'You have full access on this site: the tools can change posts, products, options, plugin settings, plugins and cron, '

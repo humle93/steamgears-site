@@ -81,6 +81,7 @@ class SGAP_Install {
         'sgap_evergreen_batch' => 1,
         'sgap_mcp_client_id' => '',
         'sgap_woo_min_margin' => 45,
+        'sgap_cc_login_in' => 'yes',
         'sgap_forum_enabled' => 'yes',
         'sgap_forum_slug' => 'forum',
         'sgap_forum_topics_per_page' => 20,
@@ -387,7 +388,7 @@ register_deactivation_hook(SGAP_FILE, ['SGAP_Install', 'deactivate']);
 
 /* ---------------- SETTINGS ---------------- */
 class SGAP_Settings {
-    const BOOL_KEYS = ['autopilot_enabled', 'full_auto_enabled', 'auto_seo', 'auto_publish_articles', 'weekly_report', 'evergreen_enabled', 'forum_enabled', 'reddit_enabled', 'reddit_auto_share', 'cirla_enabled'];
+    const BOOL_KEYS = ['autopilot_enabled', 'full_auto_enabled', 'auto_seo', 'auto_publish_articles', 'weekly_report', 'evergreen_enabled', 'forum_enabled', 'reddit_enabled', 'reddit_auto_share', 'cirla_enabled', 'cc_login_in'];
     const HOUR_KEYS = ['quiet_start', 'quiet_end'];
     const INT_KEYS = [
         'daily_cap','batch_size','labor_rate','monthly_budget','target_roi',
@@ -414,7 +415,7 @@ class SGAP_Settings {
         'alert_email','channel_caps',
         'blackout_ranges','banned_words','utm_campaign','bluesky_handle','mastodon_instance',
         'pinterest_client_id','instagram_user_id','facebook_page_id',
-        'locale_source','locales','command_center_url','mcp_client_id',
+        'locale_source','locales','command_center_url','mcp_client_id','site_about','site_voice',
         'forum_slug','forum_intro','reddit_client_id','reddit_username',
         'reddit_default_sub','reddit_radar_subs','reddit_keywords','cirla_actions'
     ];
@@ -434,9 +435,9 @@ class SGAP_Settings {
 
     /** Shown in the settings page. Keys not listed here stay registered for older data but are unused. */
     const SECTIONS = [
-        'General' => ['autopilot_enabled','full_auto_enabled','daily_cap','batch_size','quiet_start','quiet_end','blackout_ranges','quality_gate','banned_words','dupe_days','utm_campaign','command_center_url'],
+        'General' => ['autopilot_enabled','full_auto_enabled','daily_cap','batch_size','quiet_start','quiet_end','blackout_ranges','quality_gate','banned_words','dupe_days','utm_campaign','command_center_url','cc_login_in'],
         'Publer' => ['publish_mode','publer_api_key','publer_workspace_id','publer_pinterest_board','pinterest_client_id','instagram_user_id','instagram_graph_host','facebook_page_id','facebook_access_token','facebook_graph_version','facebook_direct','instagram_direct','pinterest_direct','pinterest_board_id','channels','bluesky_handle','bluesky_app_password','mastodon_instance','mastodon_token','mastodon_limit','telegram_bot_token','telegram_chat_id'],
-        'AI' => ['ai_profile','ai_api_key','ai_model','posts_per_day','content_language','locale_source','locales','serpapi_key'],
+        'AI' => ['ai_profile','ai_api_key','ai_model','posts_per_day','site_about','site_voice','content_language','locale_source','locales','serpapi_key'],
         'Economics' => ['labor_rate','monthly_budget','target_roi','winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max'],
         'Evergreen' => ['evergreen_enabled','evergreen_after_days','evergreen_max_shares','evergreen_batch'],
         'Alerts and log' => ['alert_mode','alert_email','alert_dry_days','channel_caps','audit_keep_days'],
@@ -479,7 +480,7 @@ class SGAP_Settings {
         'publer_pinterest_board' => 'API mode: Pinterest board ID the pins go to. RSS mode: set a default board in Publer instead.',
         'ai_model' => 'Required: OpenRouter has no default model, so pick one from its live list. A slug the list does not offer cannot be saved, so a retired model cannot be picked by mistake.',
         'posts_per_day' => 'How many site posts/products the AI writes social posts for each day.',
-        'content_language' => 'Language of articles and guides from the Content Studio. Empty = English.',
+        'content_language' => 'Language of AI posts, articles and guides. Empty = the WordPress site language (da_DK = Danish).',
         'serpapi_key' => 'serpapi.com → Manage API key. Gives the article writer live Google data: People also ask, related searches, top results.',
         'ai_api_key' => 'openrouter.ai/keys — the one AI key the plugin uses. Paste it under Settings → Keys.',
         'channels' => 'Comma-separated. Instagram and Pinterest need a photo on every post; a post without one uses the page\'s featured image. Add bluesky to post there directly, without Publer — it needs the handle and an app password below, and is skipped (through Publer) until both are filled in.',
@@ -531,6 +532,9 @@ class SGAP_Settings {
         'reddit_auto_share' => 'On: a published thread long enough for a discussion is queued as a link post to its board\'s subreddit. Off: nothing leaves the site until you press Queue on the forum page.',
         'reddit_default_sub' => 'The subreddit used when a board has no mapping of its own. A board can override it with the term meta key reddit_sub.',
         'reddit_radar_subs' => 'Up to five subreddits the radar reads, comma-separated, e.g. steampunk,cosplay. Reading needs only the app id and secret.',
+        'cc_login_in' => 'On: Command Center can log its users in to wp-admin with a signed one-time link (only administrators with the same e-mail). Off: the button in Command Center is refused here.',
+        'site_about' => 'One line on what this site is, used in every AI prompt, e.g. "a Danish guide to coffee at home: brewing methods, equipment and troubleshooting". Empty: the site tagline (on steamgears.eu the old steampunk text).',
+        'site_voice' => 'The tone of voice for AI text, e.g. "friendly, knowledgeable and practical". Empty: a neutral default (on steamgears.eu the old Victorian voice).',
         'reddit_keywords' => 'Words that make a Reddit thread worth answering, comma-separated. Matched in the title and the body, case-insensitive.',
         'reddit_daily_cap' => 'Most link posts to Reddit per day, across all threads. Two is already a lot for a shop account.',
         'reddit_min_words' => 'A thread shorter than this is not queued automatically: a link post to a two-line thread is a downvote waiting to happen.',
@@ -1694,6 +1698,7 @@ class SGAP_REST {
                 'last_self_check' => is_array($health) ? $health : null,
                 'cron_lag_minutes' => SGAP_Auto::cron_lag(),
                 'command_center' => SGAP_CC::status(),
+                'site' => SGAP_Site::info(),
                 'cc_priorities' => class_exists('SGAP_Priorities') ? SGAP_Priorities::status() : null,
                 'last_generation' => get_option('sgap_last_generate') ?: null,
                 'last_promote_new' => get_option('sgap_last_promote_new') ?: null,
@@ -2117,15 +2122,17 @@ class SGAP_Admin {
     private static function cc_card(): void {
         $line = SGAP_CC::line();
         $button = SGAP_CC::dashboard_button();
-        if ($line === '' && $button === '') {
-            return; // never connected and no address set: no card, no noise
+        // 7.92.0: the link-code button is always there, so a new site can be connected from here.
+        $pair = class_exists('SGAP_CC_Pair') ? SGAP_CC_Pair::dashboard_button() : '';
+        if ($line === '' && $button === '' && $pair === '') {
+            return;
         }
         SGAP_UI::card_open('Command Center', 'admin-site-alt3');
         echo '<p class="description" style="margin-top:0">The self-hosted dashboard reads <code>/snapshot</code> and sends drafts here. Nothing on this site calls it.</p>';
         if ($line !== '') {
             echo '<p>' . $line . '</p>';
         }
-        echo $button;
+        echo $button . $pair;
         SGAP_UI::card_close();
     }
 

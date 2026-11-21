@@ -10,6 +10,22 @@ Noterne er skrevet ud fra commit-historikken og de dokumenter der hører til hve
 
 <!-- patch-notes: baseline 7.65.0 -->
 
+## 7.92.0 — 2026-11-21
+
+**Tilføjet: pluginnet læser selv hvilket site det er installeret på, parring med Command Center via linkkode og login fra Command Center til wp-admin.**
+
+### Tilføjet
+- `SGAP_Site` (`includes/site.php`): navn, domæne, sprog (fra WordPress-sproget, fx `da_DK` = Danish), om WooCommerce findes, og to nye indstillinger under AI: *What the site is about* (`site_about`) og *Tone of voice* (`site_voice`). Snapshot'et har en ny `site`-blok.
+- Linkkode (`includes/cc-pair.php`): knappen *Forbind Command Center (linkkode)* på dashboardet laver en engangskode (15 min, 60 bit, kun hash gemt) og én streng at kopiere (`sgap1.…`), der også bærer sitets adresse. Command Center kalder `POST /sgap/v1/pair` på netop den adresse og får en applikationsadgangskode til administratoren, der lavede koden. Fem forkerte koder sletter koden; kun https (http på localhost).
+- Login fra Command Center: en signeret engangsbillet (samme delte nøgle som `/cc-link`, `aud: wp`, højst 120 s, jti én gang, sitets adresse i billetten) til `admin-post.php?action=sgap_cc_in` logger administratoren med samme e-mail ind i wp-admin. Ingen konto oprettes. Slås fra med *Login from Command Center* (`cc_login_in`).
+
+### Ændret
+- Alle AI-prompts (sociale opslag, oversættelse, AI-redaktør, evergreen, Content Studio, SEO-meta, emneforslag, chat, admin-profilen) bruger `SGAP_Site` i stedet for fast »steamgears.eu, a steampunk shop« og »Write in English«. På steamgears.eu er standardteksterne de gamle, så intet ændrer sig dér.
+- *Article language* tom betyder nu sitets WordPress-sprog i stedet for engelsk.
+
+### Målt
+- Syntakstjek og smoke-checks er ikke kørt i sandkassen (ingen PHP). Se commit og udrulning til brygguiden.dk.
+
 ## 7.91.2 — 2026-11-20
 
 **Rettet: sikrere Gelato-ordrer ved samtidige kald og usikre svar.**

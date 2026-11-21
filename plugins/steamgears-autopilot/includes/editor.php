@@ -54,7 +54,7 @@ class SGAP_Editor {
             $items[] = ['channel' => (string) ($p['channel'] ?? ''), 'title' => (string) ($p['title'] ?? ''),
                 'text' => (string) ($p['text'] ?? ''), 'hashtags' => array_values((array) ($p['hashtags'] ?? []))];
         }
-        return "You are a strict social media editor for steamgears.eu, a steampunk shop. Score each post 0-10.\n"
+        return "You are a strict social media editor for " . SGAP_Site::intro() . ". Score each post 0-10.\n"
             . "Deduct hard for: facts, prices, discounts, shipping promises or guarantees that are NOT in the page below; "
             . "generic AI filler and cliches (\"elevate\", \"unlock\", \"in today's world\", \"delve\"); repeating the same "
             . "opening across channels; broken or mixed language; hashtag or keyword stuffing; wrong tone for the channel; "
