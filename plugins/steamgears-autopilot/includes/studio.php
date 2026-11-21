@@ -187,7 +187,8 @@ class SGAP_Studio {
             return new WP_Error('sgap_topic', 'Give a topic.');
         }
         $system = SGAP_AI::system() . ' You are also an expert SEO copywriter: helpful, original, specific content that answers search intent (E-E-A-T), never keyword stuffing.';
-        $system = str_replace('Write in English. ', '', $system);
+        // The article's own language (in the prompt) wins over the social-post language in system().
+        $system = str_replace('Write in ' . SGAP_Site::language() . '. ', '', $system);
         $prompt = self::prompt($a, self::link_targets());
         $research = null;
         if (SGAP_Settings::get('serpapi_key') !== '') {
