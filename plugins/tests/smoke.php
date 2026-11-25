@@ -1962,5 +1962,46 @@ check('7.91.1 gelato: the settings page renders without errors and lists all 19 
 check('7.91.1 gelato: a missing print file is shown as missing', substr_count($ghtml,'<strong>missing</strong>')===38);
 check('7.91 gelato: the print-file URL uses the hidden folder', SGAP_Gelato::file_url('SG-CC-01','5070')==='https://steamgears.eu/wp-content/uploads/sg-print-test/steamgears-clockwork-court-clock-001-baroque-clockwork-stag-50x70.pdf');
 unset($GLOBALS['opts']['sggf_print_dir']);
+// --- 7.92.0: artikel-søgeord fra Command Center ---
+delete_option('sgap_cc_keywords'); delete_option('sgap_cc_keywords_used');
+$ks=SGAP_Keywords::save([
+  ['id'=>11,'keyword'=>'  steampunk  wedding   outfits ','type'=>'guide','title'=>'Steampunk wedding: 7 outfits','related'=>['steampunk wedding dress','Steampunk wedding outfits','',str_repeat('x',200)],'score'=>3.456],
+  ['id'=>12,'keyword'=>'<b>brass goggles</b>','type'=>'poster'],
+  ['id'=>13,'keyword'=>'Steampunk Wedding Outfits'],
+  ['id'=>0,'keyword'=>'no id'],
+  ['id'=>14,'keyword'=>''],
+  ['id'=>11,'keyword'=>'again'],
+  'garbage']);
+check('7.92 keywords: valid phrases are saved, the rest skipped with a reason', $ks['saved']===2
+  && array_column($ks['skipped'],'reason')===['duplicate','missing id or keyword','missing id or keyword','duplicate']);
+$ki=SGAP_Keywords::items();
+check('7.92 keywords: fields are cleaned (spaces, tags, unknown type, related list without the phrase itself)', $ki[0]['keyword']==='steampunk wedding outfits'
+  && $ki[0]['type']==='guide' && $ki[1]['keyword']==='brass goggles' && $ki[1]['type']==='article' && $ki[0]['score']===3.46
+  && $ki[0]['related'][0]==='steampunk wedding dress' && count($ki[0]['related'])===2 && mb_strlen($ki[0]['related'][1])===80);
+check('7.92 keywords: next() keeps Command Center order and the count', array_column(SGAP_Keywords::next(1),'id')===[11] && array_column(SGAP_Keywords::next(5),'id')===[11,12] && SGAP_Keywords::next(0)===[]);
+SGAP_Keywords::record($ki[0], ['post_id'=>901,'status'=>'draft']);
+check('7.92 keywords: a written phrase is not offered again and is reported back', array_column(SGAP_Keywords::next(5),'id')===[12]
+  && SGAP_Keywords::written()[0]['id']===11 && SGAP_Keywords::written()[0]['post_id']===901);
+foreach ([1,2] as $_) SGAP_Keywords::record($ki[1], new WP_Error('sgap_ai','no credit'));
+check('7.92 keywords: a failed phrase is retried until it has failed 3 times', array_column(SGAP_Keywords::next(5),'id')===[12] && count(SGAP_Keywords::written())===1);
+SGAP_Keywords::record($ki[1], new WP_Error('sgap_ai','no credit'));
+check('7.92 keywords: after 3 failures it waits, and status counts it as failed', SGAP_Keywords::next(5)===[] && SGAP_Keywords::status()['failed']===1 && SGAP_Keywords::status()['written']===1);
+update_option('sgap_articles_per_week',0); update_option('sgap_autopilot_enabled','yes');
+check('7.92 keywords: writing is false while articles_per_week is 0', SGAP_Keywords::status()['writing']===false);
+update_option('sgap_articles_per_week',2);
+check('7.92 keywords: writing is true with articles per week and the autopilot on', SGAP_Keywords::writing()===true && SGAP_Keywords::status()['articles_per_week']===2);
+update_option('sgap_cc_keywords',['at'=>time()-15*86400,'items'=>$ki]);
+check('7.92 keywords: a list older than 14 days is ignored', SGAP_Keywords::items()===[] && SGAP_Keywords::next(5)===[]);
+$kb=SGAP_Keywords::rest_save(new WP_REST_Request(['items'=>'x']));
+check('7.92 rest: a body without items is a 400', $kb instanceof WP_Error && ($kb->get_error_data()['status']??0)===400);
+$kr=SGAP_Keywords::rest_save(new WP_REST_Request(['items'=>[['id'=>21,'keyword'=>'clockwork lamp']]]));
+check('7.92 rest: saving answers with counts, what was written and status', $kr instanceof WP_REST_Response && $kr->data['saved']===1
+  && $kr->data['written'][0]['post_id']===901 && $kr->data['status']['active']===1 && $kr->data['status']['waiting']===1 && $kr->data['status']['writing']===true);
+$GLOBALS['routes']=[]; SGAP_Keywords::routes();
+check('7.92 routes: /keywords is registered', in_array('/keywords',$GLOBALS['routes'][SGAP_REST::NS]??[],true));
+$ks_src=file_get_contents(__DIR__.'/../steamgears-autopilot/includes/automation.php');
+check('7.92 weekly article: the AI topic prompt names the site itself, not a fixed steamgears.eu', !str_contains($ks_src,'topics for steamgears.eu') && str_contains($ks_src,'topics for {$site}'));
+check('7.92 snapshot: the keyword status is in /snapshot', str_contains(file_get_contents(__DIR__.'/../steamgears-autopilot/includes/core.php'),"'cc_keywords' => class_exists('SGAP_Keywords') ? SGAP_Keywords::status()"));
+delete_option('sgap_cc_keywords'); delete_option('sgap_cc_keywords_used'); update_option('sgap_articles_per_week',0);
 // P3.2/P3.5-slut
 exit(empty($GLOBALS['fail'])?0:1);
