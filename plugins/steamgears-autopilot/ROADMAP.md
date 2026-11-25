@@ -32,6 +32,38 @@ and how long each missing piece takes.
 
 ---
 
+## P18 — artikler fra Command Centers søgeord på alle sites (25/11/2026, 7.92.0)
+
+**Mål:** pluginnets ugentlige artikel skriver ud fra de søgeord, Command Center har fundet til netop dette site (indholdsfoderet), i stedet for at AI'en selv finder på emner til en fast "steamgears.eu". Gælder steamgears.eu, warpstorm.online og brygguiden.dk. Modparten er Command Center 7.62.0, som sender listen (`POST /sgap/v1/keywords`) hver morgen kl. 05:05 med hvert projekts egne WordPress-nøgler. Retningen er stadig Command Center → site.
+
+**Plan: 0,4 developer-dage**, fordelt på:
+
+| Trin | Andel | Kumuleret |
+| --- | --- | --- |
+| Kontrakt med Command Center (felter, loft 30, levetid 14 dage, `written` + `status.writing` i svaret) | 15 % | 15 % |
+| `SGAP_Keywords`: rute, validering, `next`/`record`/`written`/`status` | 30 % | 45 % |
+| `weekly_article()`: CC-søgeord først, AI fylder op, sitets eget domæne i prompten | 20 % | 65 % |
+| `/snapshot` (`status.cc_keywords`), versionsbump, CHANGELOG, README | 15 % | 80 % |
+| Tests (smoke + `automation.php`), zip, projektstatus | 20 % | 100 % |
+
+Ikke med i estimatet (som ved P17): installation på de tre sites og ét rigtigt kald fra Command Center. Det er ejerens skridt, og modulet står med `verified: false`, til det er målt.
+
+**Filstruktur (ændret/ny):**
+
+```
+plugins/steamgears-autopilot/
+├── steamgears-autopilot.php      version 7.92.0 + require includes/keywords.php
+├── includes/keywords.php         NY: SGAP_Keywords (REST /keywords GET+POST, liste, brugte, status)
+├── includes/automation.php       SGAP_Auto::weekly_article() + article_result()
+├── includes/core.php             /snapshot: status.cc_keywords
+├── CHANGELOG.md, README.md, ROADMAP.md
+plugins/tests/smoke.php           14 checks (7.92)
+plugins/tests/automation.php      forløb: CC-søgeord først, planlæggeren ikke kaldt
+plugins/steamgears-autopilot-v7.92.0.zip   (erstatter v7.91.2)
+```
+
+**Status [100 % af estimatet — kode, tests og pakke færdige, ikke verificeret live]:** alle fem trin er udført (projektstatus P18: 0,4 af 0,4 d, `verified: false`). Smoke 1 608 PASS / 0 FAIL. Venter på ejeren: 7.92.0 installeres på sitesene, `articles per week` sættes over 0, og Command Center opdateres til 7.62.0.
+
 ## P17 — gennemgang, driftssikkerhed og navigation (17/11/2026)
 
 **P17.1 — Gelato-ordresikkerhed (20/11/2026, plan 0,5 d):** Kortlægning og API-kontrakt 20 %, samtidige og annullerede ordrer 25 %, usikre svar og sikker genåbning 25 %, tests i isoleret miljø 20 %, dokumentation og pakke 10 %. Filer: `includes/gelato.php`, pluginets hovedfil, `README.md`, `CHANGELOG.md` og `ROADMAP.md`, testfiler under `plugins/tests/` og plugin-CI. Ingen rigtige ordrer oprettes i testen. Funktionens nuværende tilstand på sitet er Off; API-nøglen er ikke gemt. Status: rettelserne og isolerede ordretests er skrevet. Live WooCommerce-ordre og providerens produktion er ikke testet; modulet står Off på sitet.

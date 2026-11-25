@@ -85,6 +85,20 @@ update_option('sgap_articles_per_week', 1);
 $r = SGAP_Auto::weekly_article();
 $aid = $r['articles'][0]['post_id'] ?? 0;
 ta('weekly article: picks a new topic and writes a draft', $aid && get_post_status($aid) === 'draft' && !has_post_thumbnail($aid), $r);
+ta('weekly article: without Command Center keywords the topic comes from the AI', ($r['articles'][0]['source'] ?? '') === 'ai', $r);
+// 7.92: Command Center's keyword comes first; the AI planner is not asked when the list covers the week.
+$planner_calls = 0;
+add_filter('pre_http_request', function ($pre, $args, $url) use (&$planner_calls) {
+    if ($url === 'https://openrouter.ai/api/v1/chat/completions' && str_contains((string) $args['body'], 'plan SEO content')) $planner_calls++;
+    return $pre;
+}, 1, 3);
+SGAP_Keywords::save([['id' => 77, 'keyword' => 'steampunk wedding', 'type' => 'guide', 'title' => 'Steampunk wedding guide', 'related' => ['steampunk wedding dress']]]);
+$r = SGAP_Auto::weekly_article();
+$cid = $r['articles'][0]['post_id'] ?? 0;
+ta('weekly article: writes Command Center\'s keyword first, as a draft', $cid && get_post_status($cid) === 'draft' && ($r['articles'][0]['source'] ?? '') === 'command-center' && count($r['articles']) === 1, $r);
+ta('weekly article: the AI topic planner is not asked when Command Center filled the week', $planner_calls === 0, $planner_calls);
+ta('weekly article: the keyword is reported back to Command Center and not offered again', (SGAP_Keywords::written()[0]['post_id'] ?? 0) === $cid && SGAP_Keywords::next(5) === [], SGAP_Keywords::written());
+delete_option(SGAP_Keywords::OPTION); delete_option(SGAP_Keywords::USED_OPTION);
 
 /* --- self-check and report --- */
 $old = SGAP_Queue::add(['channel' => 'pinterest', 'title' => 'Old fail', 'body' => 'x', 'destination_url' => home_url('/oldfail/')]);

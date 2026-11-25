@@ -369,31 +369,55 @@ class SGAP_Auto {
         if ($per_week < 1 || !SGAP_Settings::enabled('autopilot_enabled')) {
             return ['skipped' => 'articles_per_week is 0 or the autopilot is off'];
         }
-        $titles = array_map(fn($p) => get_the_title($p), get_posts(['post_type' => 'post', 'post_status' => ['publish', 'draft', 'future'], 'posts_per_page' => 80, 'no_found_rows' => true]));
-        $schema = ['type' => 'object', 'additionalProperties' => false, 'required' => ['topics'], 'properties' => ['topics' => ['type' => 'array', 'items' => [
-            'type' => 'object', 'additionalProperties' => false, 'required' => ['topic', 'keyword', 'type'],
-            'properties' => ['topic' => ['type' => 'string'], 'keyword' => ['type' => 'string'], 'type' => ['type' => 'string', 'enum' => array_keys(SGAP_Studio::TYPES)]]
-        ]]]];
-        $ideas = SGAP_AI::json_call(
-            SGAP_AI::SYSTEM . ' You plan SEO content for the blog.',
-            "Suggest {$per_week} new article or guide topics for steamgears.eu that people search for and the site does not cover yet. "
-            . "Prefer seasonal or evergreen searches with buying intent that can link to the shop. Existing titles:\n- " . implode("\n- ", $titles),
-            $schema, 4000
-        );
-        if (is_wp_error($ideas)) {
-            return ['error' => $ideas->get_error_message()];
-        }
         $done = [];
-        foreach (array_slice((array) ($ideas['topics'] ?? []), 0, $per_week) as $idea) {
-            $r = SGAP_Studio::write(['topic' => $idea['topic'] ?? '', 'keyword' => $idea['keyword'] ?? '', 'type' => $idea['type'] ?? 'article']);
-            if (!is_wp_error($r) && SGAP_Settings::enabled('auto_publish_articles')) {
-                wp_publish_post($r['post_id']);
-                $r['status'] = 'publish';
+        // 7.92: Command Center's measured search phrases for this site come first.
+        $from_cc = class_exists('SGAP_Keywords') ? SGAP_Keywords::next($per_week) : [];
+        foreach ($from_cc as $item) {
+            $notes = $item['related'] ? 'Related searches on the same topic, answer them inside this article: ' . implode('; ', $item['related']) . '.' : '';
+            $topic = $item['title'] !== '' ? $item['title'] : $item['keyword'];
+            $r = SGAP_Studio::write(['topic' => $topic, 'keyword' => $item['keyword'], 'type' => $item['type'], 'notes' => $notes]);
+            $done[] = self::article_result($topic, $r, 'command-center');
+            SGAP_Keywords::record($item, $r);
+        }
+        $missing = $per_week - count($from_cc);
+        if ($missing > 0) {
+            $site = preg_replace('/^www\./', '', (string) (wp_parse_url(home_url(), PHP_URL_HOST) ?: get_bloginfo('name')));
+            $titles = array_map(fn($p) => get_the_title($p), get_posts(['post_type' => 'post', 'post_status' => ['publish', 'draft', 'future'], 'posts_per_page' => 80, 'no_found_rows' => true]));
+            $schema = ['type' => 'object', 'additionalProperties' => false, 'required' => ['topics'], 'properties' => ['topics' => ['type' => 'array', 'items' => [
+                'type' => 'object', 'additionalProperties' => false, 'required' => ['topic', 'keyword', 'type'],
+                'properties' => ['topic' => ['type' => 'string'], 'keyword' => ['type' => 'string'], 'type' => ['type' => 'string', 'enum' => array_keys(SGAP_Studio::TYPES)]]
+            ]]]];
+            $ideas = SGAP_AI::json_call(
+                SGAP_AI::SYSTEM . ' You plan SEO content for the blog.',
+                "Suggest {$missing} new article or guide topics for {$site} that people search for and the site does not cover yet. "
+                . "Prefer seasonal or evergreen searches with buying intent that can link to the shop. Existing titles:\n- " . implode("\n- ", $titles),
+                $schema, 4000
+            );
+            if (is_wp_error($ideas)) {
+                if (!$done) {
+                    return ['error' => $ideas->get_error_message()];
+                }
+                $done[] = ['topic' => '(AI topic ideas)', 'error' => $ideas->get_error_message(), 'source' => 'ai'];
+            } else {
+                foreach (array_slice((array) ($ideas['topics'] ?? []), 0, $missing) as $idea) {
+                    $r = SGAP_Studio::write(['topic' => $idea['topic'] ?? '', 'keyword' => $idea['keyword'] ?? '', 'type' => $idea['type'] ?? 'article']);
+                    $done[] = self::article_result((string) ($idea['topic'] ?? ''), $r, 'ai');
+                }
             }
-            $done[] = is_wp_error($r) ? ['topic' => $idea['topic'] ?? '', 'error' => $r->get_error_message()] : ['topic' => $idea['topic'], 'post_id' => $r['post_id'], 'status' => $r['status']];
         }
         update_option('sgap_last_articles', ['at' => current_time('mysql'), 'articles' => $done], false);
         return ['articles' => $done];
+    }
+
+    /** Publishes when auto-publish is on and shapes one line of the run report. */
+    private static function article_result(string $topic, &$r, string $source): array {
+        if (!is_wp_error($r) && SGAP_Settings::enabled('auto_publish_articles')) {
+            wp_publish_post($r['post_id']);
+            $r['status'] = 'publish';
+        }
+        return is_wp_error($r)
+            ? ['topic' => $topic, 'error' => $r->get_error_message(), 'source' => $source]
+            : ['topic' => $topic, 'post_id' => $r['post_id'], 'status' => $r['status'], 'source' => $source];
     }
 
     /* ---- self-check and report ---- */

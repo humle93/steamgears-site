@@ -10,6 +10,19 @@ Noterne er skrevet ud fra commit-historikken og de dokumenter der hører til hve
 
 <!-- patch-notes: baseline 7.65.0 -->
 
+## 7.92.0 — 2026-11-25
+
+**Tilføjet: artikler skrives ud fra Command Centers søgeord.**
+
+### Tilføjet
+- `POST /sgap/v1/keywords` (og `GET`) tager imod sitets artikel- og guide-søgeord fra Command Centers indholdsfoder (højst 30, listen erstattes ved hvert kald og ignoreres efter 14 dage). Svaret fortæller, hvilke søgeord der allerede er blevet til indlæg (`written`), og om pluginnet selv skriver artikler (`status.writing`).
+- Den ugentlige artikel tager Command Centers søgeord først (planlagt titel, artikel/guide og relaterede søgninger går med til Studio-skribenten) og fylder kun op med AI-idéer, når listen er tom. Et søgeord der fejler 3 gange, prøves ikke igen.
+- `/snapshot` har `status.cc_keywords` (modtaget, aktive, venter, skrevet, fejlet). Målt med 14 nye checks i `plugins/tests/smoke.php` og et forløb i `plugins/tests/automation.php`.
+
+### Ændret
+- AI-idéerne nævner sitets eget domæne i stedet for den faste tekst "steamgears.eu", så samme plugin kan køre på flere sites.
+- `articles_per_week`, kladde/udgiv og kvalitetsgaten er uændrede: står `articles_per_week` på 0, skrives der intet.
+
 ## 7.91.2 — 2026-11-20
 
 **Rettet: sikrere Gelato-ordrer ved samtidige kald og usikre svar.**

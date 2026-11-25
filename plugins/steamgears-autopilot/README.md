@@ -27,7 +27,7 @@ The whole social autopilot runs inside WordPress (Command Center is retired):
 4. **Measure** – every post links via `/go/<id>/`, so clicks (and WooCommerce
    orders) are counted per channel.
 
-Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.91.2.zip` → Activate. On an existing
+Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.92.0.zip` → Activate. On an existing
 install the same zip arrives through the self-updater (see *Updates*), so an upload is only needed for the
 first install or a recovery.
 
@@ -670,6 +670,23 @@ Nothing on the site calls Command Center.
 - The **Command Center URL** setting (General) adds a "Log ind i Command Center" button to the dashboard. It opens
   the dashboard in a new tab. Leave it empty to hide the button. The plugin does not call Command Center; the link is only a shortcut.
 
+### Article keywords from Command Center (7.92)
+
+Command Center scans every site for new search phrases (its content feed) and sends the waiting article and
+guide phrases here with `POST /keywords` once a day, still one way. The weekly article job
+(*Settings → Automation → articles per week*) writes from that list **first**, in Command Center's order,
+and only asks the AI for its own topics to fill the rest of the week.
+
+- Each phrase carries Command Center's id, `article` or `guide`, an optional planned title and up to 8
+  related searches, which the Studio writer answers inside the same article. At most 30, the list replaces the
+  previous one, and a list older than 14 days is ignored.
+- The answer lists what became a post (`written`: id, post id, status) and `status.writing`. Command Center only
+  hands the phrases over (so it does not write the same article itself) when `writing` is true, i.e. articles
+  per week is above 0 and the autopilot is on.
+- A phrase that fails 3 times is not tried again. `/snapshot` shows `status.cc_keywords` (received, active,
+  waiting, written, failed).
+- The same plugin runs on several sites: the AI topic prompt names the site's own domain.
+
 ## One niche, one shop (7.64)
 
 *Steamgears → Shop → Niche shop* answers one question: **what is the shop about?** Type a niche
@@ -869,6 +886,7 @@ add posts or read the numbers.
 | POST | `/drafts` | Add an AI draft for approval in WP (fields as the `sgap_ai_drafts` table). |
 | GET | `/drafts?status=approved` | Drafts approved in WP, ready to queue. |
 | POST | `/drafts/<id>/status` | `pending` / `approved` / `rejected` / `used`. |
+| GET/POST | `/keywords` | Article and guide phrases from Command Center (7.92). POST `{"items": [{"id", "keyword", "type": "article"/"guide", "title", "related": [], "score"}]}` replaces the list; the answer has `saved`, `skipped`, `written` and `status`. |
 | GET | `/stats?days=30` | Events per channel, learning table, queue status counts. |
 | GET | `/snapshot?days=30&limit=100` | Everything in one read-only call, for an outside dashboard (Command Center): queue, drafts, results per channel and per day, conversions, learning, suppression, reposts, Etsy orders, settings (secrets only as set/not set) and health. |
 | GET/POST | `/suppression` | List, or block/reduce a channel+angle+type+format combination (Full Auto skips blocked ones). |
