@@ -76,8 +76,8 @@ class SGAP_Editor {
         // measured live 12/11); 4 000 leaves room for the answer. Free models cost nothing per token.
         $body = ['model' => $models[0], 'models' => $models, 'max_tokens' => 4000,
             'messages' => [['role' => 'user', 'content' => self::prompt($posts, $source)]]];
-        $response = SGAP_AI::openrouter_post(SGAP_AI::api_key(), $body, 90);
-        $decoded = SGAP_AI::decode($response, 'Editor');
+        // 7.92.1: same path as the writer, so a short balance gets the one lower-max_tokens retry too.
+        $decoded = SGAP_AI::chat_completions(SGAP_AI::api_key(), $body, 90, 'Editor');
         if (is_wp_error($decoded)) {
             return ['ok' => false, 'error' => $decoded->get_error_message()];
         }
