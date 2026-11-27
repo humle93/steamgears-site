@@ -965,7 +965,7 @@ class SGAP_Pinterest {
     /** True when this module, not Publer, posts the pinterest channel. Opt-in, needs a board. */
     public static function handles(string $channel): bool {
         return $channel === 'pinterest' && self::configured() && self::board_id() !== ''
-            && SGAP_Settings::get('pinterest_direct', 'no') === 'yes';
+            && (SGAP_Direct::only_mode() || SGAP_Settings::get('pinterest_direct', 'no') === 'yes');
     }
 
     /**

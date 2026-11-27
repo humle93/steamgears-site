@@ -420,7 +420,7 @@ class SGAP_Settings {
     ];
     /** Settings with a fixed list of values, shown as a select. */
     const CHOICE_KEYS = [
-        'publish_mode' => ['rss' => 'RSS feeds (Publer Professional)', 'api' => 'Publer API (Publer Business)'],
+        'publish_mode' => ['rss' => 'RSS feeds (Publer)', 'api' => 'Publer API', 'direct' => 'Direct — publish from this site'],
         'cirla_log_level' => ['actions' => 'Every action — time and result', 'errors' => 'Errors only', 'off' => 'Off — no Cirla log entries'],
         'quality_gate' => ['block' => 'Block — keep the post out of the queue until it is fixed', 'warn' => 'Warn — queue it and report what is wrong', 'off' => 'Off — do not check'],
         'instagram_graph_host' => ['graph.instagram.com' => 'Instagram Login (graph.instagram.com) — scopes instagram_business_basic and instagram_business_manage_insights', 'graph.facebook.com' => 'Facebook Login (graph.facebook.com) — scopes instagram_basic and instagram_manage_insights; the token cannot renew itself'],
@@ -473,7 +473,7 @@ class SGAP_Settings {
         'locales' => 'Comma-separated languages, e.g. da,sv,de. A queued post also queues one translated caption per language, linking to that language\'s version of the page (WPML or Polylang). Languages without a translated page are reported, not posted. Needs an AI API key.',
         'autopilot_enabled' => 'Master switch: generate posts daily and publish the queue via Publer.',
         'full_auto_enabled' => 'On: AI posts go straight to the queue. Off: they wait under AI Drafts for your approval.',
-        'publish_mode' => 'RSS: posts are released into one feed per channel; in Publer add each feed (Explore → RSS Feeds) and set it to Auto-post. API: posts are sent straight to Publer (needs a Business plan API key).',
+        'publish_mode' => 'Direct: send to connected social accounts without Publer. Posts for unconnected or unsupported channels wait in the queue. RSS and Publer API keep the existing Publer workflows.',
         'publer_api_key' => 'API mode only. Publer → Settings → Access & Login → API Keys (Business plan). Scopes: posts, media, accounts.',
         'publer_workspace_id' => 'Shown by "Test Publer" on the dashboard once the API key is saved.',
         'publer_pinterest_board' => 'API mode: Pinterest board ID the pins go to. RSS mode: set a default board in Publer instead.',
@@ -1162,7 +1162,7 @@ class SGAP_Queue {
     }
 
     /** Takes the next due items and marks them 'sending' so nobody else picks them up. */
-    public static function claim(int $limit, string $channel = ''): array {
+    public static function claim(int $limit, string $channel = '', ?array $allowed_channels = null): array {
         global $wpdb;
         if ($limit <= 0) {
             return [];
@@ -1179,9 +1179,12 @@ class SGAP_Queue {
             // A post for a channel that is switched off waits in the queue. Releasing it
             // would mark it "published" in a feed nobody reads. Reminders are mail, so
             // they still go out.
-            $enabled = class_exists('SGAP_Publer') ? SGAP_Publer::channels() : [];
+            $enabled = $allowed_channels !== null ? array_values(array_intersect(SGAP_Publer::channels(), $allowed_channels)) : (class_exists('SGAP_Publer') ? SGAP_Publer::channels() : []);
             if ($enabled) {
                 $where .= $wpdb->prepare(' AND (remind = 1 OR channel IN (' . implode(',', array_fill(0, count($enabled), '%s')) . '))', $enabled);
+            } elseif ($allowed_channels !== null) {
+                // No direct account is ready: keep its posts queued, but reminders still work.
+                $where .= ' AND remind = 1';
             }
         }
         $items = $wpdb->get_results($wpdb->prepare(
@@ -1203,6 +1206,15 @@ class SGAP_Queue {
             }
         }
         return $claimed;
+    }
+
+    /** Return a claim when its connection changed before sending, without spending an attempt. */
+    public static function release_claim(int $id): void {
+        global $wpdb;
+        $wpdb->query($wpdb->prepare(
+            'UPDATE ' . self::table() . " SET status = 'queued', attempts = IF(attempts > 0, attempts - 1, 0) WHERE id = %d AND status = 'sending' AND external_id = ''",
+            $id
+        ));
     }
 
     /**
@@ -1273,7 +1285,7 @@ class SGAP_Queue {
         return $steps[max(0, min(count($steps) - 1, $attempts - 1))];
     }
 
-    public static function mark(int $id, string $outcome, string $error = ''): ?string {
+    public static function mark(int $id, string $outcome, string $error = '', bool $allow_retry = true): ?string {
         global $wpdb;
         $item = $wpdb->get_row($wpdb->prepare('SELECT channel, angle, attempts FROM ' . self::table() . ' WHERE id = %d', $id));
         if (!$item) {
@@ -1285,7 +1297,7 @@ class SGAP_Queue {
             // P1.2: the owner has been mailed and will post it by hand. Terminal, never a failure.
             $data = ['status' => 'reminded', 'error' => null, 'external_id' => ''];
         } else {
-            $retry = (int) $item->attempts < self::MAX_ATTEMPTS;
+            $retry = $allow_retry && (int) $item->attempts < self::MAX_ATTEMPTS;
             $data = [
                 'status' => $retry ? 'queued' : 'failed',
                 'error' => sanitize_textarea_field($error),
@@ -1676,8 +1688,9 @@ class SGAP_REST {
             'status' => [
                 'autopilot' => SGAP_Settings::enabled('autopilot_enabled'),
                 'full_auto' => SGAP_Settings::enabled('full_auto_enabled'),
-                'publish_mode' => SGAP_RSS::enabled() ? 'rss' : 'api',
+                'publish_mode' => (string) SGAP_Settings::get('publish_mode', 'rss'),
                 'channels' => SGAP_Publer::channels(),
+                'direct_connections' => SGAP_Direct::connection_status(),
                 'bluesky_direct' => SGAP_Bluesky::enabled(),
                 'feeds' => SGAP_RSS::enabled() ? array_map([SGAP_RSS::class, 'url'], SGAP_Publer::channels()) : null,
                 'publer_configured' => SGAP_RSS::enabled() || SGAP_Publer::configured(),
@@ -2000,7 +2013,7 @@ class SGAP_Admin {
         echo '<div class="sgap-pills">'
             . SGAP_UI::pill('Autopilot ' . (SGAP_Settings::enabled('autopilot_enabled') ? 'on' : 'off'), SGAP_Settings::enabled('autopilot_enabled') ? 'ok' : 'bad')
             . SGAP_UI::pill('Full auto ' . (SGAP_Settings::enabled('full_auto_enabled') ? 'on' : 'off – you approve'), 'brass')
-            . SGAP_UI::pill(SGAP_RSS::enabled() ? 'Publer via RSS' : 'Publer API', 'brass')
+            . SGAP_UI::pill(SGAP_Direct::only_mode() ? 'Direct publishing' : (SGAP_RSS::enabled() ? 'Publer via RSS' : 'Publer API'), 'brass')
             . SGAP_UI::pill('AI: ' . SGAP_AI::provider_name() . ($ai_ok === null ? ' (untested)' : ($ai_ok ? ' ✓' : ' ✗')), $ai_ok === null ? 'warn' : ($ai_ok ? 'ok' : 'bad'))
             . ($blocked === 'quiet_hours' ? SGAP_UI::pill('Quiet hours until ' . sprintf('%02d:00', (int) SGAP_Settings::get('quiet_end', 7)), 'warn') : '')
             . ($blocked === 'daily_cap_reached' ? SGAP_UI::pill('Daily limit reached', 'warn') : '')
@@ -2167,6 +2180,10 @@ class SGAP_Admin {
     }
 
     private static function feeds_panel(): void {
+        if (SGAP_Direct::only_mode()) {
+            echo SGAP_Direct::connections_panel();
+            return;
+        }
         if (!SGAP_RSS::enabled()) {
             return;
         }

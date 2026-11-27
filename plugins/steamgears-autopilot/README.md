@@ -11,23 +11,14 @@ The whole social autopilot runs inside WordPress (Command Center is retired):
    the last `repost_cooldown_days`.
 2. **Approve** – posts wait under *Steamgears → AI Drafts* (Approve / Reject), or go
    straight to the queue when **Full auto** is on.
-3. **Publish** – every 15 minutes the next due posts (quiet hours, daily cap and
-   batch size apply) go to **Publer**, which posts to the connected Facebook,
-   Instagram, Pinterest, LinkedIn, X, Threads, Bluesky, Mastodon, Telegram and
-   Google Business accounts. Two modes (*Settings → Publer → Publish mode*):
-   - **RSS feeds** (default, works on Publer **Professional**): posts are released
-     into one feed per channel, `https://steamgears.eu/?sgap_feed=<channel>`. In
-     Publer add each feed once (*Explore → RSS Feeds*), open its *Settings*, choose
-     **Auto-post**, tick "use link title/description as caption", pick *photo* for
-     Instagram/Pinterest/Google and *link* for the others, and select the account.
-     Pinterest needs a default board in Publer. The dashboard lists the feed URLs.
-   - **API** (Publer **Business**): posts are sent straight to Publer and the
-     plugin records whether each one was published; failures are retried up to 3
-     times with the reason shown on the Queue page.
+3. **Publish** – every 15 minutes due posts follow the selected method in *Settings → Publishing*:
+   - **Direct** sends Facebook, Instagram, Pinterest, Bluesky, Mastodon and Telegram posts from WordPress without Publer. Add each platform's account ID, token and required publishing permissions under *Settings → Publishing* and *Settings → Keys*. Pinterest also needs its destination board ID; Instagram needs a publicly accessible JPEG and a professional account. Saving account details does not verify platform permissions. LinkedIn, X, Threads and Google Business are not available in direct mode: their posts remain queued.
+   - **RSS** and **Publer API** keep the existing Publer workflows. Before switching, stop the corresponding Publer automations to avoid posting twice. Existing feed entries and previously submitted Publer jobs remain separate.
+   - In direct mode, posts wait without spending attempts while their account is not configured. A lost response or server error can mean a post was already published, so the queue stops that post for review instead of sending it again automatically. Check the platform before retrying.
 4. **Measure** – every post links via `/go/<id>/`, so clicks (and WooCommerce
    orders) are counted per channel.
 
-Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.92.1.zip` → Activate. On an existing
+Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.93.0.zip` → Activate. On an existing
 install the same zip arrives through the self-updater (see *Updates*), so an upload is only needed for the
 first install or a recovery.
 

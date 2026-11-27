@@ -32,6 +32,12 @@ and how long each missing piece takes.
 
 ---
 
+## P20 — direkte publicering uden Publer (27/11/2026)
+
+**Mål:** en særskilt direkte publiceringstilstand med Facebook, Instagram, Pinterest, Bluesky, Mastodon og Telegram via deres eksisterende adaptere. Kladder til kanaler uden forbindelse bliver i køen; en direkte tilstand må aldrig falde tilbage til Publer eller RSS. Den eksisterende tilstand og allerede frigivne opslag bevares indtil ejeren skifter, og der sendes ingen live-testopslag.
+
+**Plan: 1,0 developer-dag:** kortlægning og konto-/tilladelsestjek 15 %, routing og køsikkerhed 30 %, indstillinger og tydelig forbindelsesstatus 25 %, automatiske og lokale WordPress-tests 20 %, dokumentation, version og pakke 10 %. Filer: `includes/direct.php`, `core.php`, `rss.php`, `publer.php`, `setup.php`, `facebook.php`, `instagram.php`, `pinterest.php`, `preflight.php`, `keycheck.php`, `automation.php`, `plugins/tests/direct.php`, relevante integrationstests, `README.md`, `CHANGELOG.md`, `ROADMAP.md`, hovedfil og én versioneret zip. Kanalkonti kræver platformenes egne nøgler og tilladelser; koden kan ikke udstede dem. Koden og lokale tests er gennemført; faktisk publicering kræver tilsluttede konti og er ikke liveverificeret.
+
 ## P19 — genforsøg med lavere max_tokens ved kreditloft (27/11/2026, 7.92.1)
 
 **Fund (live 27/11 via `steamgears-autopilot_status`):** seneste generering (26/11 19:44) skrev 0 kladder. Alle 4 sider fejlede med OpenRouter-svaret *"You requested up to 3600 tokens, but can only afford 3015"*. Tre kanaler giver `token_budget(3) = 3600`, men tre korte opslag fylder langt under 3000 tokens, så kaldet kunne være lykkedes.

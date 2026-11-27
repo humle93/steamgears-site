@@ -169,10 +169,13 @@ class SGAP_Preflight {
             $problems[] = self::problem('no_photo', 'image_url',
                 ucfirst($channel) . ' needs a photo: give the post a featured image.');
         }
-        if ($channel === 'pinterest' && (string) SGAP_Settings::get('publer_pinterest_board') === ''
-            && !(SGAP_Settings::get('pinterest_direct', 'no') === 'yes' && trim((string) SGAP_Settings::get('pinterest_board_id', '')) !== '')) {
-            $problems[] = self::problem('no_board', 'publer_pinterest_board',
-                'Pinterest needs a board: set "Publer pinterest board" in Settings.');
+        if ($channel === 'pinterest') {
+            $direct = SGAP_Direct::only_mode() || SGAP_Direct::handler('pinterest') !== '';
+            $board = $direct ? trim((string) SGAP_Settings::get('pinterest_board_id', '')) : trim((string) SGAP_Settings::get('publer_pinterest_board', ''));
+            if ($board === '') {
+                $problems[] = self::problem('no_board', $direct ? 'pinterest_board_id' : 'publer_pinterest_board',
+                    $direct ? 'Pinterest needs a board: set "Pinterest board ID" in Publishing settings.' : 'Pinterest needs a board: set "Publer pinterest board" in Settings.');
+            }
         }
         if ($channel === 'instagram' && $image !== '') {
             $info = self::image_info($image);

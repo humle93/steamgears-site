@@ -123,7 +123,7 @@ class SGAP_Facebook {
 
     /** True when this module, not Publer, should post a row on this channel. */
     public static function handles(string $channel): bool {
-        return $channel === 'facebook' && self::configured() && SGAP_Settings::get('facebook_direct', 'no') === 'yes';
+        return $channel === 'facebook' && self::configured() && (SGAP_Direct::only_mode() || SGAP_Settings::get('facebook_direct', 'no') === 'yes');
     }
 
     /* ------------------------------------------------------------------ *
