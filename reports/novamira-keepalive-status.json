@@ -106,5 +106,11 @@
   "event": "schedule",
   "outcome": "startet",
   "reason": ""
+ },
+ {
+  "at": "2026-11-27T09:42:38Z",
+  "event": "schedule",
+  "outcome": "startet",
+  "reason": ""
  }
 ]
