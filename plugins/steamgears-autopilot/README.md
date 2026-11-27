@@ -27,7 +27,7 @@ The whole social autopilot runs inside WordPress (Command Center is retired):
 4. **Measure** – every post links via `/go/<id>/`, so clicks (and WooCommerce
    orders) are counted per channel.
 
-Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.92.1.zip` → Activate. On an existing
+Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.92.2.zip` → Activate. On an existing
 install the same zip arrives through the self-updater (see *Updates*), so an upload is only needed for the
 first install or a recovery.
 
@@ -683,8 +683,11 @@ and only asks the AI for its own topics to fill the rest of the week.
 - The answer lists what became a post (`written`: id, post id, status) and `status.writing`. Command Center only
   hands the phrases over (so it does not write the same article itself) when `writing` is true, i.e. articles
   per week is above 0 and the autopilot is on.
+- A phrase the site already covers is not written again (7.92.2): a post, page or product with the same Rank Math
+  focus keyword, title (the phrase or the planned title) or slug, also scheduled posts and drafts. It is reported
+  under `written` with that post's id and status `exists`, so Command Center marks it done as well.
 - A phrase that fails 3 times is not tried again. `/snapshot` shows `status.cc_keywords` (received, active,
-  waiting, written, failed).
+  waiting, written, existing, failed).
 - The same plugin runs on several sites: the AI topic prompt names the site's own domain.
 
 ## One niche, one shop (7.64)

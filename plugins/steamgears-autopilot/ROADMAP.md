@@ -32,6 +32,25 @@ and how long each missing piece takes.
 
 ---
 
+## P20 — ingen dublet af søgeord, sitet allerede har dækket (27/11/2026, 7.92.2)
+
+**Fund (27/11):** 20 artikler blev planlagt direkte på brygguiden.dk (post 280–299, én om dagen til 17/12). Command Centers indholdsplan (`deploy/feed.seed.json`, 26 emner) har nogle af de samme emner. Når Command Center bliver forbundet, ville pluginnet skrive dem en gang til.
+
+**Mål:** et søgeord fra Command Center, som sitet allerede har et indlæg, en side eller et produkt om (fokussøgeord, titel eller slug, også planlagte og kladder), skrives ikke. Det meldes tilbage som `written` med det eksisterende indlægs id og status `exists`, så Command Center stopper med at tilbyde det og ikke selv skriver det.
+
+**Plan: 0,15 developer-dage**, fordelt på:
+
+| Trin | Andel | Kumuleret |
+| --- | --- | --- |
+| `SGAP_Keywords::existing_post()` (én forespørgsel, cache pr. kørsel) og spring over i `next()` | 40 % | 40 % |
+| `status.existing` | 5 % | 45 % |
+| Smoke-checks + nyt trin i `automation.php` | 30 % | 75 % |
+| Versionsbump, CHANGELOG, README, zip, projektstatus | 25 % | 100 % |
+
+**Filstruktur (ændret):** `steamgears-autopilot.php` (7.92.2), `includes/keywords.php`, `CHANGELOG.md`, `README.md`, `ROADMAP.md`, `plugins/tests/smoke.php`, `plugins/tests/automation.php`, `plugins/steamgears-autopilot-v7.92.2.zip` (erstatter v7.92.1).
+
+**Status:** se projektstatus (P20). Ikke verificeret live: kræver at 7.92.2 installeres på sitene og at Command Center sender en liste.
+
 ## P19 — genforsøg med lavere max_tokens ved kreditloft (27/11/2026, 7.92.1)
 
 **Fund (live 27/11 via `steamgears-autopilot_status`):** seneste generering (26/11 19:44) skrev 0 kladder. Alle 4 sider fejlede med OpenRouter-svaret *"You requested up to 3600 tokens, but can only afford 3015"*. Tre kanaler giver `token_budget(3) = 3600`, men tre korte opslag fylder langt under 3000 tokens, så kaldet kunne være lykkedes.

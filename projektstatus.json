@@ -478,6 +478,15 @@
           "unit": "d",
           "verified": false,
           "note": "7.92.1: SGAP_AI::chat_completions() prøver én gang igen med 97 % af OpenRouters 'can only afford N', når det er mindst 1 000 tokens og 60 % af det ønskede (live 26/11: 3 600 ønsket, 3 015 råd til, 4 sider gav 0 kladder). Editoren bruger samme vej. 8 nye smoke-checks, 1 616 PASS / 0 FAIL. IKKE målt: installeret på steamgears.eu og en rigtig generering med lav saldo."
+        },
+        {
+          "id": "p20",
+          "name": "P20 — ingen dublet af søgeord, sitet allerede har dækket",
+          "done": 0.15,
+          "total": 0.15,
+          "unit": "d",
+          "verified": false,
+          "note": "7.92.2: SGAP_Keywords::existing_post() finder et indlæg, en side eller et produkt (udgivet, planlagt, kladde, afventende, privat) med samme Rank Math-fokussøgeord, titel eller slug; next() springer søgeordet over og gemmer det som 'exists' med post-id, så Command Center får det under written og markerer det som lavet. status.existing er nyt. 8 nye smoke-checks, 1 624 PASS / 0 FAIL; nyt trin i plugins/tests/automation.php (kører i WordPress-CI). IKKE målt: installeret på sitene og et rigtigt kald fra Command Center."
         }
       ],
       "total": 41.5,

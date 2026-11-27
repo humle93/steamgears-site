@@ -10,6 +10,10 @@
  *
  * Only WHICH topics get written comes from Command Center: articles_per_week, drafts versus
  * auto-publish and the Studio writer are unchanged.
+ *
+ * 7.92.2: a phrase the site already has a post for (same Rank Math focus keyword, title or slug,
+ * also scheduled posts and drafts) is not written again. It is recorded with that post's id and
+ * the status "exists", so Command Center gets it back under "written" and stops offering it too.
  */
 if (!defined('ABSPATH')) {
     exit;
@@ -24,6 +28,11 @@ class SGAP_Keywords {
     /** A phrase that failed this many times is not tried again until Command Center resends it fresh. */
     const MAX_FAILS = 3;
     const TYPES = ['article', 'guide'];
+    /** Content that counts as "already on the site". */
+    const EXISTING_TYPES = ['post', 'page', 'product'];
+    const EXISTING_STATUSES = ['publish', 'future', 'draft', 'pending', 'private'];
+    /** keyword => post id, per request: status() and next() ask for the same phrases. */
+    private static $existing = [];
 
     public static function init(): void {
         add_action('rest_api_init', [__CLASS__, 'routes']);
@@ -105,7 +114,39 @@ class SGAP_Keywords {
         return is_array($used) ? $used : [];
     }
 
-    /** The next $n phrases to write, in Command Center's order: not written yet and not failed too often. */
+    /**
+     * The id of a post, page or product that already covers this phrase, or 0. A match is the
+     * Rank Math focus keyword (the first one, when several are comma separated), the title (the
+     * phrase or Command Center's planned title) or the slug of the phrase. Trashed posts do not count.
+     */
+    public static function existing_post(array $item): int {
+        global $wpdb;
+        $kw = mb_strtolower(trim((string) ($item['keyword'] ?? '')));
+        if ($kw === '' || !is_object($wpdb)) {
+            return 0;
+        }
+        $title = mb_strtolower(trim((string) ($item['title'] ?? '')));
+        $key = $kw . '|' . $title;
+        if (array_key_exists($key, self::$existing)) {
+            return self::$existing[$key];
+        }
+        $types = implode(',', array_fill(0, count(self::EXISTING_TYPES), '%s'));
+        $statuses = implode(',', array_fill(0, count(self::EXISTING_STATUSES), '%s'));
+        $sql = "SELECT p.ID FROM {$wpdb->posts} p LEFT JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'rank_math_focus_keyword'"
+             . " WHERE p.post_type IN ($types) AND p.post_status IN ($statuses)"
+             . " AND (LOWER(TRIM(m.meta_value)) = %s OR LOWER(m.meta_value) LIKE %s OR LOWER(p.post_title) = %s OR LOWER(p.post_title) = %s OR p.post_name = %s)"
+             . " ORDER BY p.ID ASC LIMIT 1";
+        $args = array_merge(self::EXISTING_TYPES, self::EXISTING_STATUSES,
+                            [$kw, $wpdb->esc_like($kw) . ',%', $kw, $title !== '' ? $title : $kw, sanitize_title($kw)]);
+        return self::$existing[$key] = (int) $wpdb->get_var($wpdb->prepare($sql, $args));
+    }
+
+    /** Forget the per-request lookups (after a post was written, and in tests). */
+    public static function reset_existing(): void {
+        self::$existing = [];
+    }
+
+    /** The next $n phrases to write, in Command Center's order: not written yet, not on the site already and not failed too often. */
     public static function next(int $n): array {
         if ($n < 1) {
             return [];
@@ -115,6 +156,12 @@ class SGAP_Keywords {
         foreach (self::items() as $item) {
             $u = $used[(int) $item['id']] ?? null;
             if (is_array($u) && ((int) ($u['post_id'] ?? 0) > 0 || (int) ($u['fails'] ?? 0) >= self::MAX_FAILS)) {
+                continue;
+            }
+            $existing = self::existing_post($item);
+            if ($existing > 0) {
+                self::record($item, ['post_id' => $existing, 'status' => 'exists']);
+                $used = self::used();
                 continue;
             }
             $out[] = $item;
@@ -140,6 +187,7 @@ class SGAP_Keywords {
         } else {
             $used[$id] = ['keyword' => (string) ($item['keyword'] ?? ''), 'post_id' => (int) ($result['post_id'] ?? 0),
                           'status' => (string) ($result['status'] ?? 'draft'), 'at' => time()];
+            self::reset_existing();
         }
         // Keep the newest 200: enough for months of articles, small enough for one option row.
         if (count($used) > 200) {
@@ -170,17 +218,22 @@ class SGAP_Keywords {
     public static function status(): array {
         $stored = get_option(self::OPTION);
         $at = is_array($stored) ? (int) ($stored['at'] ?? 0) : 0;
-        $failed = 0;
+        $waiting = count(self::next(self::MAX_ITEMS));
+        $failed = $existing = 0;
         foreach (self::used() as $u) {
             if (is_array($u) && (int) ($u['post_id'] ?? 0) === 0 && (int) ($u['fails'] ?? 0) > 0) {
                 $failed++;
+            }
+            if (is_array($u) && ($u['status'] ?? '') === 'exists') {
+                $existing++;
             }
         }
         return [
             'received_at' => $at > 0 ? wp_date('Y-m-d H:i:s', $at) : null,
             'active' => count(self::items()),
-            'waiting' => count(self::next(self::MAX_ITEMS)),
+            'waiting' => $waiting,
             'written' => count(self::written()),
+            'existing' => $existing,
             'failed' => $failed,
             'writing' => self::writing(),
             'articles_per_week' => (int) SGAP_Settings::get('articles_per_week', 0)
