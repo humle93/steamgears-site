@@ -2003,5 +2003,28 @@ $ks_src=file_get_contents(__DIR__.'/../steamgears-autopilot/includes/automation.
 check('7.92 weekly article: the AI topic prompt names the site itself, not a fixed steamgears.eu', !str_contains($ks_src,'topics for steamgears.eu') && str_contains($ks_src,'topics for {$site}'));
 check('7.92 snapshot: the keyword status is in /snapshot', str_contains(file_get_contents(__DIR__.'/../steamgears-autopilot/includes/core.php'),"'cc_keywords' => class_exists('SGAP_Keywords') ? SGAP_Keywords::status()"));
 delete_option('sgap_cc_keywords'); delete_option('sgap_cc_keywords_used'); update_option('sgap_articles_per_week',0);
+// --- 7.92.1: ét genforsøg med lavere max_tokens, når OpenRouter siger hvad der er råd til ---
+$live_msg='This request requires more credits, or fewer max_tokens. You requested up to 3600 tokens, but can only afford 3015. To increase, visit https://openrouter.ai/workspaces/default/keys/x and adjust the key\'s monthly limit';
+$err=fn($m)=>new WP_Error('sgap_ai_http','OpenRouter: '.$m,['status'=>402]);
+check('7.92.1 afford: the live refusal (3600 asked, 3015 affordable) gives a retry at 97 %', SGAP_AI::affordable_tokens($err($live_msg),3600)===2924);
+check('7.92.1 afford: too little (405 of 2500) is no retry', SGAP_AI::affordable_tokens($err('You requested up to 2500 tokens, but can only afford 405.'),2500)===0);
+check('7.92.1 afford: under 60 % of what was asked is no retry (an article at 16000)', SGAP_AI::affordable_tokens($err('can only afford 3015'),16000)===0);
+check('7.92.1 afford: under 1000 tokens is no retry even when the share is high', SGAP_AI::affordable_tokens($err('can only afford 1000'),1100)===0);
+check('7.92.1 afford: other errors, a success and an unknown request size are no retry',
+    SGAP_AI::affordable_tokens($err('Insufficient credits'),3600)===0 && SGAP_AI::affordable_tokens(['choices'=>[]],3600)===0
+    && SGAP_AI::affordable_tokens($err($live_msg),0)===0 && SGAP_AI::affordable_tokens($err('can only afford 5000'),3600)===0);
+$ok_posts=['choices'=>[['message'=>['content'=>'{"posts":[{"channel":"facebook","text":"Brass and steam."}]}']]]];
+$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[sgap_http(402,['error'=>['message'=>$live_msg]]), sgap_http(200,$ok_posts)];
+$got=SGAP_AI::chat_completions('sk-or-v1-fixture',SGAP_AI::chat_body('vendor/model','x',3),5);
+$mt=fn($i)=>(int)(json_decode((string)($GLOBALS['http_calls'][$i][1]['body']??'{}'),true)['max_tokens']??0);
+check('7.92.1 retry: the refused call is sent once more with the affordable max_tokens and its answer is used',
+    !is_wp_error($got) && count($GLOBALS['http_calls'])===2 && $mt(0)===3600 && $mt(1)===2924
+    && str_contains((string)$got['choices'][0]['message']['content'],'Brass and steam.'));
+$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[sgap_http(402,['error'=>['message'=>$live_msg]]), sgap_http(402,['error'=>['message'=>'You requested up to 2924 tokens, but can only afford 2000.']])];
+$got=SGAP_AI::chat_completions('sk-or-v1-fixture',SGAP_AI::chat_body('vendor/model','x',3),5);
+check('7.92.1 retry: a second refusal is reported as it came, never a third call',
+    is_wp_error($got) && count($GLOBALS['http_calls'])===2 && str_contains($got->get_error_message(),'can only afford 2000') && ($got->get_error_data()['status']??0)===402);
+check('7.92.1 editor: the quality editor uses the same retrying path', str_contains(file_get_contents(__DIR__.'/../steamgears-autopilot/includes/editor.php'),"SGAP_AI::chat_completions(SGAP_AI::api_key(), \$body, 90, 'Editor')"));
+$GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[];
 // P3.2/P3.5-slut
 exit(empty($GLOBALS['fail'])?0:1);

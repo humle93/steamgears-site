@@ -368,7 +368,40 @@ class SGAP_AI {
      * @return array|WP_Error
      */
     public static function chat_completions(string $key, array $body, int $timeout = 120, string $who = 'OpenRouter') {
-        return self::decode(self::openrouter_post($key, $body, $timeout), $who);
+        $decoded = self::decode(self::openrouter_post($key, $body, $timeout), $who);
+        // 7.92.1: OpenRouter reserves credit for the whole max_tokens and, when the balance is
+        // short, says how many it can afford (measured 26/11: 3600 asked, 3015 affordable, 4 pages
+        // lost although three short posts fit in far less). One retry at that number; never a loop.
+        $afford = self::affordable_tokens($decoded, (int) ($body['max_tokens'] ?? 0));
+        if ($afford > 0) {
+            $body['max_tokens'] = $afford;
+            $decoded = self::decode(self::openrouter_post($key, $body, $timeout), $who);
+        }
+        return $decoded;
+    }
+
+    /** Smallest retry that is still worth a call, in tokens and as a share of what was asked. */
+    const RETRY_MIN_TOKENS = 1000;
+    const RETRY_MIN_SHARE = 0.6;
+
+    /**
+     * The max_tokens a retry may ask for, or 0 when there should be no retry: the error must be
+     * OpenRouter's "can only afford N", and N must be below what was asked, at least 1 000 and at
+     * least 60 % of it. 97 % of N is used, so a balance that moved a little does not refuse again.
+     * @param array|WP_Error $decoded
+     */
+    public static function affordable_tokens($decoded, int $requested): int {
+        if (!is_wp_error($decoded) || $requested <= 0) {
+            return 0;
+        }
+        if (!preg_match('/can only afford (\d+)/i', $decoded->get_error_message(), $m)) {
+            return 0;
+        }
+        $afford = (int) floor(((int) $m[1]) * 0.97);
+        if ($afford >= $requested || $afford < self::RETRY_MIN_TOKENS || $afford < (int) ceil($requested * self::RETRY_MIN_SHARE)) {
+            return 0;
+        }
+        return $afford;
     }
 
     /** Kept as the name the chat loop and the tests already use. */

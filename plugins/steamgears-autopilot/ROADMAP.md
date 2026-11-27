@@ -32,6 +32,25 @@ and how long each missing piece takes.
 
 ---
 
+## P19 — genforsøg med lavere max_tokens ved kreditloft (27/11/2026, 7.92.1)
+
+**Fund (live 27/11 via `steamgears-autopilot_status`):** seneste generering (26/11 19:44) skrev 0 kladder. Alle 4 sider fejlede med OpenRouter-svaret *"You requested up to 3600 tokens, but can only afford 3015"*. Tre kanaler giver `token_budget(3) = 3600`, men tre korte opslag fylder langt under 3000 tokens, så kaldet kunne være lykkedes.
+
+**Mål:** når OpenRouter afviser et kald alene på grund af `max_tokens` og selv oplyser, hvad der er råd til, prøves kaldet **én** gang igen med det tal (97 %, så en lille saldoændring ikke rammer igen). Kun når tallet er mindst 1 000 og mindst 60 % af det ønskede. Ellers rapporteres fejlen som før. En for lille saldo bliver ikke skjult: et afskåret svar giver stadig `sgap_ai_truncated`.
+
+**Plan: 0,15 developer-dage**, fordelt på:
+
+| Trin | Andel | Kumuleret |
+| --- | --- | --- |
+| `SGAP_AI::affordable_tokens()` + ét genforsøg i `chat_completions()` | 35 % | 35 % |
+| Editoren (`SGAP_Editor::review()`) går gennem samme vej | 10 % | 45 % |
+| Smoke-checks (genforsøg, for lille tal, ingen loop, editor) | 30 % | 75 % |
+| Versionsbump, CHANGELOG, README, zip, projektstatus | 25 % | 100 % |
+
+**Filstruktur (ændret):** `steamgears-autopilot.php` (7.92.1), `includes/generator.php`, `includes/editor.php`, `CHANGELOG.md`, `README.md`, `ROADMAP.md`, `plugins/tests/smoke.php`, `plugins/steamgears-autopilot-v7.92.1.zip` (erstatter v7.92.0).
+
+**Status:** se projektstatus (P19). Ikke verificeret live: kræver at 7.92.1 installeres på sitet og en ny generering kører.
+
 ## P18 — artikler fra Command Centers søgeord på alle sites (25/11/2026, 7.92.0)
 
 **Mål:** pluginnets ugentlige artikel skriver ud fra de søgeord, Command Center har fundet til netop dette site (indholdsfoderet), i stedet for at AI'en selv finder på emner til en fast "steamgears.eu". Gælder steamgears.eu, warpstorm.online og brygguiden.dk. Modparten er Command Center 7.62.0, som sender listen (`POST /sgap/v1/keywords`) hver morgen kl. 05:05 med hvert projekts egne WordPress-nøgler. Retningen er stadig Command Center → site.
