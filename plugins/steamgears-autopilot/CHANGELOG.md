@@ -10,6 +10,17 @@ Noterne er skrevet ud fra commit-historikken og de dokumenter der hører til hve
 
 <!-- patch-notes: baseline 7.65.0 -->
 
+## 7.92.1 — 2026-11-27
+
+**Rettet: et kald der kun afvises på max_tokens prøves én gang igen med det beløb, der er råd til.**
+
+### Rettet
+- Når OpenRouter svarer *"You requested up to N tokens, but can only afford M"*, sendes samme kald én gang til med `max_tokens` = 97 % af M — kun når det er mindst 1 000 tokens og mindst 60 % af det ønskede. Ellers står fejlen som før, og der kommer aldrig et tredje kald. Målt live 26/11: generering med 3 kanaler bad om 3 600 tokens, kontoen havde råd til 3 015, og alle 4 sider gav 0 kladder.
+- Kvalitetseditoren (`SGAP_Editor::review()`) går nu gennem samme `SGAP_AI::chat_completions()`, så den får samme genforsøg.
+
+### Uændret
+- En for lav saldo skjules ikke: et svar der bliver skåret af, giver stadig `sgap_ai_truncated`, og en artikel (16 000 tokens) prøves ikke igen med 3 000. Målt med 8 nye checks i `plugins/tests/smoke.php` (1 616 PASS / 0 FAIL).
+
 ## 7.92.0 — 2026-11-25
 
 **Tilføjet: artikler skrives ud fra Command Centers søgeord.**
