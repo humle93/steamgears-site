@@ -148,10 +148,16 @@ class SGAP_Pinterest {
 
     /** True when either this plugin or the connected WooCommerce integration can refresh. */
     public static function refreshable(): bool {
+        if (SGAP_Settings::get('pinterest_token_source', 'auto') === 'own') {
+            return self::own_refreshable();
+        }
         return self::woocommerce_token() !== '' || self::own_refreshable();
     }
 
     public static function configured(): bool {
+        if (SGAP_Settings::get('pinterest_token_source', 'auto') === 'own') {
+            return self::saved_token() !== '' || self::own_refreshable();
+        }
         return self::saved_token() !== '' || self::woocommerce_token() !== '' || self::own_refreshable();
     }
 
@@ -188,14 +194,15 @@ class SGAP_Pinterest {
     /**
      * Where token() takes its token from — a name, never a value.
      *
-     * The integration wins whenever it is connected: it is an OAuth token the integration
-     * renews by itself, while a pasted token is a snapshot that expires without warning.
-     * Picking by "has our own been refused yet?" looked right but was not stable — a single
-     * working call clears the refusal, and the dead token came back on the next request.
+     * Automatic mode keeps the integration first; an explicit choice lets an independently
+     * authorised Steamgears app supply the publishing permissions WooCommerce does not have.
      */
     public static function token_source(): string {
         if (self::access_constant() !== '') {
             return 'constant';
+        }
+        if (SGAP_Settings::get('pinterest_token_source', 'auto') === 'own') {
+            return self::saved_token() !== '' || self::own_refreshable() ? 'settings' : '';
         }
         if (self::woocommerce_token() !== '') {
             return 'woocommerce';
@@ -236,12 +243,10 @@ class SGAP_Pinterest {
         if (self::access_constant() !== '') {
             return self::saved_token(); // Constant wins over anything stored; it cannot be rotated.
         }
-        // The Pinterest for WooCommerce integration renews its own OAuth token, so it is the
-        // better credential whenever it is connected — see token_source() for why this is not
-        // decided by the refusal flag.
-        $integration = self::woocommerce_token();
-        if ($integration !== '') {
-            return $integration;
+        // In automatic mode WooCommerce renews its own token; in explicit own mode never
+        // silently fall back to a different account or a token with different permissions.
+        if (self::token_source() === 'woocommerce') {
+            return self::woocommerce_token();
         }
         $cached = self::saved_token();
         $expires = (int) get_option(self::EXPIRES, 0);
@@ -768,10 +773,10 @@ class SGAP_Pinterest {
     /** Everything an operator or an MCP client needs to judge the connection. */
     public static function status(): array {
         $state = self::state();
-        $cached = (string) get_option(self::ACCESS, '');
         $settings_token = self::saved_token();
         $integration_token = self::woocommerce_token();
         $source = self::token_source();
+        $selected_access = $source === 'woocommerce' ? $integration_token : ($source === 'settings' || $source === 'constant' ? $settings_token : '');
         $expires = (int) get_option(self::EXPIRES, 0);
         if ($source === 'woocommerce') {
             // Read only the integration's non-secret expiry metadata. Never return or log its ciphertext.
@@ -800,7 +805,7 @@ class SGAP_Pinterest {
         } elseif ($missing) {
             $problem = 'Missing ' . implode(' and ', $missing) . ', so Pinterest analytics cannot run.';
         } elseif ($source === 'settings' && !self::own_refreshable()) {
-            $problem = 'The saved access token cannot renew itself; add app credentials and a refresh token, or connect Pinterest for WooCommerce.';
+            $problem = 'The saved access token cannot renew itself; add app credentials and a refresh token, or choose the WooCommerce connection in automatic mode.';
         } elseif ($source === 'woocommerce' && $expires > 0 && $expires < time()) {
             $problem = 'The Pinterest for WooCommerce access token has expired; reconnect that integration.';
         } elseif ($source !== 'woocommerce' && $refresh_expires > 0 && $refresh_expires < time()) {
@@ -814,11 +819,11 @@ class SGAP_Pinterest {
             'configured' => self::configured(),
             'refreshable' => self::refreshable(),
             'client_id_saved' => self::client_id() !== '',
-            'access_token_saved' => $integration_token !== '' || $cached !== '' || $settings_token !== '',
+            'access_token_saved' => $selected_access !== '',
             'token_source' => $source,
             'refresh_token_saved' => self::refresh_token() !== '' || $source === 'woocommerce',
             'token_from_constant' => self::constant_locked() !== '' ? self::constant_locked() : null,
-            'token_valid' => ($integration_token !== '' || $cached !== '' || $settings_token !== '')
+            'token_valid' => $selected_access !== ''
                 && ($expires === 0 || $expires > time()) && !$refused,
             'expires_at' => $expires > 0 ? wp_date('Y-m-d H:i:s', $expires) : null,
             'refresh_expires_at' => $refresh_expires > 0 ? wp_date('Y-m-d H:i:s', $refresh_expires) : null,

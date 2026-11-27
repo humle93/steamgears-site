@@ -63,6 +63,7 @@ class SGAP_Install {
         'sgap_telegram_chat_id' => '',
         'sgap_utm_campaign' => 'steamgears_premium_evergreen',
         'sgap_publish_mode' => 'rss',
+        'sgap_pinterest_token_source' => 'auto',
         'sgap_auto_seo' => 'yes',
         'sgap_auto_publish_articles' => 'no',
         'sgap_weekly_report' => 'yes',
@@ -428,6 +429,7 @@ class SGAP_Settings {
         'facebook_direct' => ['no' => 'No — keep publishing through Publer, read the page only', 'yes' => 'Yes — publish to the page directly with the Graph API'],
         'instagram_direct' => ['no' => 'No — keep publishing through Publer, read the account only', 'yes' => 'Yes — publish to Instagram directly (content publishing)'],
         'pinterest_direct' => ['no' => 'No — keep publishing through Publer, read pins only', 'yes' => 'Yes — create pins directly with the Pinterest API'],
+        'pinterest_token_source' => ['auto' => 'Automatic — use the WooCommerce connection when available', 'own' => 'Steamgears token — use the token saved under Keys'],
         'alert_mode' => ['immediate' => 'Immediate — one mail per failed post, plus one when the queue runs dry', 'daily' => 'Daily digest — one mail a day from the self-check', 'off' => 'Off — the dashboard still shows the problems'],
         'ai_profile' => ['assistant' => 'Autopilot assistant — drafts, queue and results', 'site_admin' => 'Site administration — full access, everything on the site', 'wp_seo_expert' => 'WordPress SEO expert — content and SEO, no ops']
     ];
@@ -435,7 +437,7 @@ class SGAP_Settings {
     /** Shown in the settings page. Keys not listed here stay registered for older data but are unused. */
     const SECTIONS = [
         'General' => ['autopilot_enabled','full_auto_enabled','daily_cap','batch_size','quiet_start','quiet_end','blackout_ranges','quality_gate','banned_words','dupe_days','utm_campaign','command_center_url'],
-        'Publer' => ['publish_mode','publer_api_key','publer_workspace_id','publer_pinterest_board','pinterest_client_id','instagram_user_id','instagram_graph_host','facebook_page_id','facebook_access_token','facebook_graph_version','facebook_direct','instagram_direct','pinterest_direct','pinterest_board_id','channels','bluesky_handle','bluesky_app_password','mastodon_instance','mastodon_token','mastodon_limit','telegram_bot_token','telegram_chat_id'],
+        'Publer' => ['publish_mode','publer_api_key','publer_workspace_id','publer_pinterest_board','pinterest_client_id','instagram_user_id','instagram_graph_host','facebook_page_id','facebook_access_token','facebook_graph_version','facebook_direct','instagram_direct','pinterest_direct','pinterest_board_id','pinterest_token_source','channels','bluesky_handle','bluesky_app_password','mastodon_instance','mastodon_token','mastodon_limit','telegram_bot_token','telegram_chat_id'],
         'AI' => ['ai_profile','ai_api_key','ai_model','posts_per_day','content_language','locale_source','locales','serpapi_key'],
         'Economics' => ['labor_rate','monthly_budget','target_roi','winner_min_clicks','loser_min_clicks','repost_cooldown_days','repost_max'],
         'Evergreen' => ['evergreen_enabled','evergreen_after_days','evergreen_max_shares','evergreen_batch'],
@@ -496,6 +498,7 @@ class SGAP_Settings {
         'instagram_direct' => 'Off by default, like Facebook: connecting the account to read its numbers must not move publishing out of Publer by itself. On: queue posts on the instagram channel are published directly. The token needs instagram_business_content_publish, and the image must be a public JPEG.',
         'pinterest_direct' => 'Off by default. On (with a board id): queue posts on the pinterest channel become pins created directly. The token needs pins:write, boards:read and boards:write.',
         'pinterest_board_id' => 'The numeric id of the Pinterest board pins are created on (GET /v5/boards lists them). Not the same as Publer\'s board setting.',
+        'pinterest_token_source' => 'Automatic keeps the existing WooCommerce connection first. Choose Steamgears token after saving a Pinterest token with publishing permissions under Keys. A token set in wp-config.php always takes precedence.',
         'facebook_direct' => 'Off by default on purpose: the page can be connected just to be read, and a key must not move publishing out of Publer on its own. On: queue posts on the facebook channel go straight to the page.',
         'pinterest_client_id' => 'The App ID of your Pinterest developer app (developers.pinterest.com → My apps). Not a secret — it is sent with the secret to renew the access token. Analytics need the boards:read and pins:read scopes, and only work for pins the token account owns.',
         'mastodon_limit' => 'Characters the instance accepts in one post. 500 is what every server allows; raise it only when the instance documents a higher limit. The tracking link is always kept whole.',

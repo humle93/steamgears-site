@@ -32,6 +32,10 @@ and how long each missing piece takes.
 
 ---
 
+## P21 — vælg Pinterest-forbindelse (27/11/2026)
+
+**Mål:** gøre det muligt at vælge pluginets eget Pinterest-token til direkte opslag, selv om WooCommerce er forbundet. Standardvalget bevarer den eksisterende prioritet og rører ikke nogen konto. Plan 0,25 developer-dage: kildevalg og fornyelse 40 %, indstillinger og hjælpetekst 20 %, tests 25 %, dokumentation og pakke 15 %. Filer: `includes/pinterest.php`, `includes/core.php`, `includes/setup.php`, `plugins/tests/pinterest.php`, hovedfil, README, CHANGELOG, ROADMAP og én versioneret zip. Rigtige tilladelser kræver Pinterest-ejerens godkendelse. Kildevalget og lokale tests er gennemført; browsergodkendelse og et nyt token mangler.
+
 ## P20 — direkte publicering uden Publer (27/11/2026)
 
 **Mål:** en særskilt direkte publiceringstilstand med Facebook, Instagram, Pinterest, Bluesky, Mastodon og Telegram via deres eksisterende adaptere. Kladder til kanaler uden forbindelse bliver i køen; en direkte tilstand må aldrig falde tilbage til Publer eller RSS. Den eksisterende tilstand og allerede frigivne opslag bevares indtil ejeren skifter, og der sendes ingen live-testopslag.

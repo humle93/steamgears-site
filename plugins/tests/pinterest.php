@@ -176,8 +176,26 @@ if (!class_exists('Pinterest_For_Woocommerce')) {
 unset($GLOBALS['opts']['sgap_pinterest_refused'], $GLOBALS['opts']['sgap_pinterest_scope']);
 Pinterest_For_Woocommerce::$token = 'pina_from_woocommerce';
 $GLOBALS['opts']['sgap_pinterest_access_token'] = 'pina_ours';
+$source_field = SGAP_Setup::field('pinterest_token_source');
+check('pinterest source: settings offer automatic and own connection', str_contains($source_field, 'value="auto"') && str_contains($source_field, 'value="own"'));
 check('pinterest: the renewed integration token wins over a pasted one',
     SGAP_Pinterest::token_source() === 'woocommerce' && SGAP_Pinterest::token() === 'pina_from_woocommerce');
+$GLOBALS['opts']['sgap_pinterest_token_source'] = 'own';
+$GLOBALS['opts']['sgap_pinterest_access_expires'] = 0;
+check('pinterest source: an explicitly selected Steamgears token wins while WooCommerce stays connected',
+    SGAP_Pinterest::token_source() === 'settings' && SGAP_Pinterest::token() === 'pina_ours');
+$GLOBALS['opts']['sgap_pinterest_access_token'] = '';
+unset($GLOBALS['opts']['sgap_pinterest_refresh_token'], $GLOBALS['opts']['sgap_pinterest_client_secret']);
+check('pinterest source: missing own credentials do not silently fall back to WooCommerce',
+    SGAP_Pinterest::token_source() === '' && SGAP_Pinterest::token() === '' && !SGAP_Pinterest::configured() && !SGAP_Pinterest::refreshable());
+$own_status = SGAP_Pinterest::status();
+check('pinterest source: an unrelated WooCommerce token is not reported as the selected token',
+    !$own_status['access_token_saved'] && !$own_status['token_valid'] && $own_status['token_source'] === '');
+$GLOBALS['opts']['sgap_pinterest_access_token'] = 'pina_ours';
+$GLOBALS['opts']['sgap_pinterest_token_source'] = 'auto';
+check('pinterest source: automatic mode restores the integration-first behavior',
+    SGAP_Pinterest::token_source() === 'woocommerce' && SGAP_Pinterest::token() === 'pina_from_woocommerce');
+unset($GLOBALS['opts']['sgap_pinterest_token_source']);
 $GLOBALS['opts']['sgap_pinterest_refused'] = ['at' => '2026-11-08 16:56:41', 'code' => 401];
 check('pinterest: the choice does not depend on the refusal flag',
     SGAP_Pinterest::token_source() === 'woocommerce' && SGAP_Pinterest::token() === 'pina_from_woocommerce')

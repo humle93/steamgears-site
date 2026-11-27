@@ -10,6 +10,17 @@ Noterne er skrevet ud fra commit-historikken og de dokumenter der hører til hve
 
 <!-- patch-notes: baseline 7.65.0 -->
 
+## 7.93.1 — 2026-11-27
+
+**Rettet: et selvstændigt Pinterest-token kan nu bruges sammen med WooCommerce-forbindelsen.**
+
+### Rettet
+- Nyt valg *Pinterest connection to use*: standarden bevarer WooCommerce-forbindelsen først; vælg *Steamgears token* for at bruge pluginets eget token med publiceringstilladelser. Et token i wp-config.php har fortsat forrang.
+- Vælges pluginets eget token, falder det ikke lydløst tilbage til en anden konto. Status og automatisk fornyelse følger den valgte kilde.
+
+### Målt
+- 1.632 smoke-checks bestod på PHP 8.0 og 8.3, inklusive kildevalg og manglende token. Et rigtigt Pinterest-token med de nødvendige tilladelser er endnu ikke tilgængeligt til live-test.
+
 ## 7.93.0 — 2026-11-27
 
 **Tilføjet: direkte publicering fra WordPress uden Publer.**
