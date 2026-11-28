@@ -51,7 +51,7 @@ and how long each missing piece takes.
 
 **Næste:** CC-siden: felt *Forbind med kode* i Nicher → Netværk og Moduler → Projekter, som opretter projektet med de udstedte nøgler.
 
-**Status:** se projektstatus (P24). Ikke verificeret live.
+**Status:** 0,25 af 0,3 d (83 %): koden og testene er færdige; 0,05 d live-verifikation (installeret på et site + et rigtigt kald fra CC) udestår. Ikke verificeret live.
 
 ## P23 — AI-adgang til ChatGPT (og andre AI'er) med én godkendelse (28/11/2026, 7.94.0)
 
