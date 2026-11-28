@@ -20,7 +20,7 @@ class SGAP_Abilities {
         if (function_exists('wp_register_ability_category')) {
             wp_register_ability_category(self::CATEGORY, [
                 'label' => 'Steamgears Autopilot',
-                'description' => 'Social media autopilot for steamgears.eu: AI drafts, publishing queue via Publer, results.'
+                'description' => 'Social media autopilot for this site: AI drafts, publishing queue via Publer, results.'
             ]);
         }
     }

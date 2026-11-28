@@ -18,7 +18,7 @@ The whole social autopilot runs inside WordPress (Command Center is retired):
 4. **Measure** – every post links via `/go/<id>/`, so clicks (and WooCommerce
    orders) are counted per channel.
 
-Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.94.0.zip` → Activate. On an existing
+Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.95.0.zip` → Activate. On an existing
 install the same zip arrives through the self-updater (see *Updates*), so an upload is only needed for the
 first install or a recovery.
 
@@ -680,6 +680,10 @@ and only asks the AI for its own topics to fill the rest of the week.
 - A phrase that fails 3 times is not tried again. `/snapshot` shows `status.cc_keywords` (received, active,
   waiting, written, existing, failed).
 - The same plugin runs on several sites: the AI topic prompt names the site's own domain.
+
+### New sites: connection code for Command Center (7.95)
+
+Install the plugin on a plain WordPress, press **Forbind Command Center (linkkode)** on the dashboard and copy the `sgap1.…` string into Command Center (Nicher → Netværk → *Forbind med kode*). Command Center calls `POST /sgap/v1/pair` once and gets its own application password; the code lasts 15 minutes, works once and burns after five wrong tries. The plugin reads the site's own name, domain, language and shop status (`SGAP_Site`), so AI prompts no longer assume steamgears.eu; set *What the site is about* and *Tone of voice* under AI to steer them.
 
 ### AI access for ChatGPT (7.94)
 

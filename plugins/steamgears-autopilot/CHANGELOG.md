@@ -10,6 +10,24 @@ Noterne er skrevet ud fra commit-historikken og de dokumenter der hører til hve
 
 <!-- patch-notes: baseline 7.65.0 -->
 
+## 7.95.0 — 2026-11-28
+
+**Tilføjet: nye sites forbindes til Command Center med én kode, og pluginnet ved selv, hvilket site det er installeret på.**
+
+Bygget 21/11 på branchen `p18-flere-sites` (som 7.92.0, et nummer `main` siden brugte til søgeord) og aldrig flettet. Nu lagt oven på 7.94.0.
+
+### Tilføjet
+- Forbindelseskode (`includes/cc-pair.php`): knappen *Forbind Command Center (linkkode)* på dashboardet laver en engangskode (15 min, 60 bit, kun hash gemt) og én streng at kopiere (`sgap1.…`), der også bærer sitets adresse. Command Center kalder `POST /sgap/v1/pair` på netop den adresse og får én gang en applikationsadgangskode til administratoren, der lavede koden. Fem forkerte koder sletter koden; kun https (http på localhost).
+- Login fra Command Center til wp-admin: en signeret engangsbillet (samme delte nøgle som `/cc-link`, `aud: wp`, højst 120 s, jti én gang) til `admin-post.php?action=sgap_cc_in` logger administratoren med samme e-mail ind. Ingen konto oprettes. Slås fra med *Login from Command Center* (`cc_login_in`).
+- `SGAP_Site` (`includes/site.php`): navn, domæne, sprog (fra WordPress-sproget), om WooCommerce findes, og to nye indstillinger under AI: *What the site is about* (`site_about`) og *Tone of voice* (`site_voice`). Snapshot'et har en `site`-blok.
+
+### Ændret
+- Alle AI-prompts (sociale opslag, oversættelse, AI-redaktør, evergreen, Content Studio, SEO-meta, emneforslag i ugens artikler, chat, admin-profilen) bruger `SGAP_Site` i stedet for fast »steamgears.eu, a steampunk shop« og »Write in English«. På steamgears.eu er standardteksterne de gamle, så intet ændrer sig dér.
+- *Article language* tom betyder sitets WordPress-sprog i stedet for engelsk.
+
+### Målt
+- `php -l` på alle plugin-filer uden fejl; `plugins/tests/smoke.php` 1 694 PASS / 0 FAIL (heraf de nye site- og parrings-checks i `site-pair.php`). Ikke målt: parring mod et rigtigt nyt site fra Command Center (bygges i CC v7.73).
+
 ## 7.94.0 — 2026-11-28
 
 **Tilføjet: AI-adgang. ChatGPT (eller Claude/Gemini) får sit eget login til sitet, og du godkender kun én gang.**

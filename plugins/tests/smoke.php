@@ -1758,6 +1758,7 @@ require __DIR__.'/coach.php';
 require __DIR__.'/cirla.php';
 require __DIR__.'/cirla-admin.php';
 require __DIR__.'/cc-login.php';
+require __DIR__.'/site-pair.php';
 // --- 7.80.0: slukkede kanaler venter, token-loft pr. kanal, selvtjek ved tom AI-kørsel ---
 $GLOBALS['opts']['sgap_channels']='facebook,bluesky'; update_option('sgap_channel_caps',''); $GLOBALS['rows']=[]; $wpdb->log=[];
 SGAP_Queue::claim(5); $q=implode("\n",$wpdb->log);
@@ -2000,7 +2001,7 @@ check('7.92 rest: saving answers with counts, what was written and status', $kr 
 $GLOBALS['routes']=[]; SGAP_Keywords::routes();
 check('7.92 routes: /keywords is registered', in_array('/keywords',$GLOBALS['routes'][SGAP_REST::NS]??[],true));
 $ks_src=file_get_contents(__DIR__.'/../steamgears-autopilot/includes/automation.php');
-check('7.92 weekly article: the AI topic prompt names the site itself, not a fixed steamgears.eu', !str_contains($ks_src,'topics for steamgears.eu') && str_contains($ks_src,'topics for {$site}'));
+check('7.92 weekly article: the AI topic prompt names the site itself, not a fixed steamgears.eu', !str_contains($ks_src,'topics for steamgears.eu') && str_contains($ks_src,'topics for " . SGAP_Site::intro()'));
 check('7.92 snapshot: the keyword status is in /snapshot', str_contains(file_get_contents(__DIR__.'/../steamgears-autopilot/includes/core.php'),"'cc_keywords' => class_exists('SGAP_Keywords') ? SGAP_Keywords::status()"));
 // --- 7.93.2: søgeord, sitet allerede har et indlæg om, skrives ikke igen ---
 delete_option('sgap_cc_keywords'); delete_option('sgap_cc_keywords_used'); SGAP_Keywords::reset_existing(); $wpdb->log=[];

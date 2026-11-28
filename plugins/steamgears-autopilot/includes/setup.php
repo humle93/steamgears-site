@@ -15,7 +15,7 @@ class SGAP_Setup {
     const LABELS = [
         'autopilot_enabled' => 'Autopilot', 'full_auto_enabled' => 'Full auto (skip approval)', 'channels' => 'Channels',
         'posts_per_day' => 'Pages to promote per day', 'ai_api_key' => 'OpenRouter key', 'ai_model' => 'OpenRouter model',
-        'content_language' => 'Article language',
+        'content_language' => 'Article language (empty: the site language)', 'site_about' => 'What the site is about', 'cc_login_in' => 'Login from Command Center', 'site_voice' => 'Tone of voice',
         'serpapi_key' => 'SerpApi key (keyword research)', 'publish_mode' => 'Publishing method', 'publer_api_key' => 'Publer API key',
         'publer_workspace_id' => 'Publer workspace', 'publer_pinterest_board' => 'Pinterest board ID', 'daily_cap' => 'Max posts per day',
         'batch_size' => 'Posts per 15-minute run', 'quiet_start' => 'Quiet from', 'quiet_end' => 'Quiet until', 'labor_rate' => 'Your hourly rate',
@@ -51,7 +51,7 @@ class SGAP_Setup {
     const TABS = [
         'keys' => ['Keys', 'lock', ['publer_api_key', 'ai_api_key', 'serpapi_key', 'telegram_bot_token', 'merchant_feed_secret', 'bluesky_app_password', 'mastodon_token', 'mcp_refresh_token', 'pinterest_access_token', 'pinterest_refresh_token', 'pinterest_client_secret', 'instagram_access_token', 'facebook_access_token', 'reddit_client_secret', 'reddit_password', 'reddit_refresh_token']],
         'basics' => ['Basics', 'admin-home', ['autopilot_enabled', 'full_auto_enabled', 'channels', 'posts_per_day']],
-        'ai' => ['AI', 'superhero-alt', ['ai_profile', 'ai_model', 'content_language']],
+        'ai' => ['AI', 'superhero-alt', ['ai_profile', 'ai_model', 'site_about', 'site_voice', 'content_language']],
         'publishing' => ['Publishing', 'megaphone', ['publish_mode', 'publer_workspace_id', 'publer_pinterest_board', 'pinterest_client_id', 'instagram_user_id', 'instagram_graph_host', 'facebook_page_id', 'facebook_graph_version', 'facebook_direct', 'instagram_direct', 'pinterest_direct', 'pinterest_board_id', 'pinterest_token_source', 'bluesky_handle', 'mastodon_instance', 'mastodon_limit', 'telegram_chat_id', 'quality_gate', 'banned_words', 'dupe_days']],
         'schedule' => ['Schedule & limits', 'clock', ['quiet_start', 'quiet_end', 'blackout_ranges', 'daily_cap', 'batch_size', 'repost_cooldown_days']],
         'evergreen' => ['Evergreen', 'update', ['evergreen_enabled', 'evergreen_after_days', 'evergreen_max_shares', 'evergreen_batch']],

@@ -414,12 +414,12 @@ class SGAP_Site_SEO {
                 continue;
             }
             $text = wp_trim_words(self::text_of((string) $post->post_content), 700, '…');
-            $prompt = "Write the missing SEO meta for this {$item['type']} on steamgears.eu. Language: {$language}. Do not change the page text.\n"
+            $prompt = "Write the missing SEO meta for this {$item['type']} on " . SGAP_Site::label() . ". Language: {$language}. Do not change the page text.\n"
                 . "Rules: focus_keyword is what a customer actually searches for; meta_title is 30-60 characters with the keyword first; "
                 . "meta_description is 140-155 characters with the keyword, a concrete benefit and no clickbait.\n\n"
                 . 'Title: ' . $item['title'] . "\nURL: " . $item['url'] . "\nCurrent meta title: " . ($item['meta_title'] ?: '(none)')
                 . "\nCurrent description: " . ($item['description'] ?: '(none)') . "\nPage text:\n" . $text;
-            $data = SGAP_AI::json_call(SGAP_AI::SYSTEM . ' You are an expert SEO editor for a small Danish POD shop.', $prompt, $schema, 4000);
+            $data = SGAP_AI::json_call(SGAP_AI::system() . ' You are an expert SEO editor for ' . SGAP_Site::intro() . '.', $prompt, $schema, 4000);
             if (is_wp_error($data)) {
                 $errors[] = '#' . $item['id'] . ': ' . $data->get_error_message();
                 continue;

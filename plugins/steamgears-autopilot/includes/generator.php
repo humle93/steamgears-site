@@ -192,10 +192,12 @@ class SGAP_AI {
         return 'OpenRouter';
     }
 
-    const SYSTEM = 'You write social media posts for Steamgears (steamgears.eu), a shop and blog for steampunk '
-        . 'costumes, accessories and DIY guides. Voice: enthusiastic, knowledgeable, a touch of Victorian flair, '
-        . 'never cheesy or pushy. Write in English. Never invent prices, discounts, stock levels or facts that are '
-        . 'not in the source. Never put a URL in the text: the link is attached separately.';
+    /** 7.92.0: the site comes from SGAP_Site (name, about, voice, language), so other sites get their own wording. */
+    public static function system(): string {
+        return 'You write social media posts for ' . SGAP_Site::intro() . '. Voice: ' . SGAP_Site::voice() . '. '
+            . 'Write in ' . SGAP_Site::language() . '. Never invent prices, discounts, stock levels or facts that are '
+            . 'not in the source. Never put a URL in the text: the link is attached separately.';
+    }
 
     /** 7.87.0: most hashtags kept per channel, matching CHANNEL_RULES (the AI editor scores stuffing down). */
     const TAG_CAP = ['facebook' => 3, 'instagram' => 5, 'pinterest' => 4, 'linkedin' => 3, 'twitter' => 2,
@@ -250,7 +252,7 @@ class SGAP_AI {
         // angle only — the SYSTEM rule against inventing facts still applies to it.
         $goal = trim((string) ($source['campaign_goal'] ?? ''));
         $keyword = trim((string) ($source['keyword'] ?? ''));
-        return "Write one post per channel for this page on steamgears.eu.\n\n"
+        return "Write one post per channel for this page on " . SGAP_Site::domain() . ".\n\n"
             . "Title: {$source['title']}\n"
             . "Type: {$source['type']}\n"
             . "Summary: {$source['summary']}\n"
@@ -355,7 +357,7 @@ class SGAP_AI {
             'max_tokens' => self::token_budget($channels),
             'response_format' => ['type' => 'json_object'],
             'messages' => [
-                ['role' => 'system', 'content' => self::SYSTEM . ' Answer with JSON only: {"posts": [{"channel", "title", "text", "hashtags": [], "alt_text"}]}.'],
+                ['role' => 'system', 'content' => self::system() . ' Answer with JSON only: {"posts": [{"channel", "title", "text", "hashtags": [], "alt_text"}]}.'],
                 ['role' => 'user', 'content' => $prompt]
             ]
         ];

@@ -385,8 +385,7 @@ class SGAP_Chat {
     /* ---- conversation ---- */
 
     public static function system_prompt(): string {
-        return 'You are the assistant inside the Steamgears Autopilot WordPress plugin on steamgears.eu, a shop and blog for steampunk '
-            . 'costumes, accessories and DIY guides. You help the site owner run the social media autopilot: the AI writes drafts for site '
+        return 'You are the assistant inside the Steamgears Autopilot WordPress plugin on ' . SGAP_Site::intro() . '. You help the site owner run the social media autopilot: the AI writes drafts for site '
             . 'pages, the owner approves them, approved posts go into a queue and are released every 15 minutes (quiet hours and a daily cap apply) '
             . 'to per-channel RSS feeds that Publer auto-posts from (or straight to Publer on its API plan); clicks and orders are tracked per channel. '
             . 'Use the tools to look things up and to act instead of guessing. ' . self::profile_prompt()

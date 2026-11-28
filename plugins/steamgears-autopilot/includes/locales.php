@@ -17,10 +17,12 @@ class SGAP_Locales {
     /** A language tag: "da" or "pt_br". */
     const PATTERN = '/^[a-z]{2}(_[a-z]{2})?$/';
 
-    const SYSTEM = 'You translate social media posts for Steamgears (steamgears.eu). Keep the voice, '
-        . 'the hashtags, the emoji, the prices, the product names and every number from the source exactly '
-        . 'as they are. Never add or remove a fact, never invent a price or a discount, and never put a URL '
-        . 'in the text: the link is attached separately.';
+    public static function system(): string {
+        return 'You translate social media posts for ' . SGAP_Site::label() . '. Keep the voice, '
+            . 'the hashtags, the emoji, the prices, the product names and every number from the source exactly '
+            . 'as they are. Never add or remove a fact, never invent a price or a discount, and never put a URL '
+            . 'in the text: the link is attached separately.';
+    }
 
     /** The language the source posts are written in. */
     public static function source(): string {
@@ -104,7 +106,7 @@ class SGAP_Locales {
         ];
         $prompt = 'Translate this social post from ' . self::source() . " into {$locale}, keeping the same "
             . "length and shape.\n\nTITLE:\n{$title}\n\nBODY:\n{$body}";
-        $answer = SGAP_AI::json_call(self::SYSTEM, $prompt, $schema, 1200);
+        $answer = SGAP_AI::json_call(self::system(), $prompt, $schema, 1200);
         if (is_wp_error($answer)) {
             return $answer;
         }

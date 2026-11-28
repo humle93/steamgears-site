@@ -381,16 +381,15 @@ class SGAP_Auto {
         }
         $missing = $per_week - count($from_cc);
         if ($missing > 0) {
-            $site = preg_replace('/^www\./', '', (string) (wp_parse_url(home_url(), PHP_URL_HOST) ?: get_bloginfo('name')));
             $titles = array_map(fn($p) => get_the_title($p), get_posts(['post_type' => 'post', 'post_status' => ['publish', 'draft', 'future'], 'posts_per_page' => 80, 'no_found_rows' => true]));
             $schema = ['type' => 'object', 'additionalProperties' => false, 'required' => ['topics'], 'properties' => ['topics' => ['type' => 'array', 'items' => [
                 'type' => 'object', 'additionalProperties' => false, 'required' => ['topic', 'keyword', 'type'],
                 'properties' => ['topic' => ['type' => 'string'], 'keyword' => ['type' => 'string'], 'type' => ['type' => 'string', 'enum' => array_keys(SGAP_Studio::TYPES)]]
             ]]]];
             $ideas = SGAP_AI::json_call(
-                SGAP_AI::SYSTEM . ' You plan SEO content for the blog.',
-                "Suggest {$missing} new article or guide topics for {$site} that people search for and the site does not cover yet. "
-                . "Prefer seasonal or evergreen searches with buying intent that can link to the shop. Existing titles:\n- " . implode("\n- ", $titles),
+                SGAP_AI::system() . ' You plan SEO content for the blog.',
+                "Suggest {$missing} new article or guide topics for " . SGAP_Site::intro() . " that people search for and the site does not cover yet. Write the topics in " . SGAP_Site::language() . ". "
+                . "Prefer seasonal or evergreen searches with buying intent" . (SGAP_Site::is_shop() ? " that can link to the shop" : "") . ". Existing titles:\n- " . implode("\n- ", $titles),
                 $schema, 4000
             );
             if (is_wp_error($ideas)) {
