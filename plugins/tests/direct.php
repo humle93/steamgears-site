@@ -94,7 +94,7 @@ SGAP_Direct::finish(['id' => 502, 'channel' => 'pinterest'], 'SGAP_Pinterest', n
 $log = implode("\n", $wpdb->log);
 check('p11 finish: a success stores the platform id and is published at once; a failure gets the queue backoff',
     ($rep['sent'][0]['job_id'] ?? '') === 'm-1' && ($rep['sent'][0]['direct'] ?? '') === 'instagram'
-    && str_contains($log, '"external_id":"m-1"') && ($rep['failed'][0]['error'] ?? '') === 'Pinterest answered HTTP 500');
+    && str_contains($log, '"external_id":"m-1"') && str_contains(($rep['failed'][0]['error'] ?? ''), 'check the social account'));
 
 // --- RSS mode: direct channels skip the feed --------------------------------------------------
 $rss_src = (string) file_get_contents(__DIR__ . '/../steamgears-autopilot/includes/rss.php');
@@ -109,6 +109,35 @@ check('p11 rss: feed health marks direct channels as direct, not as empty feeds'
 check('p11 split: instagram (and pinterest when its token is valid) are direct, facebook still Publer', in_array('instagram', SGAP_Direct::split()['direct'], true)
     && in_array('facebook', SGAP_Direct::split()['publer'], true) && !SGAP_Direct::publer_free());
 
+// Direct-only mode uses configured accounts without the old per-channel Publer switches.
+$GLOBALS['opts']['sgap_publish_mode'] = 'direct';
+check('direct-only: mode is a valid saved choice and retains the old RSS fallback', isset(SGAP_Settings::CHOICE_KEYS['publish_mode']['direct']) && array_key_first(SGAP_Settings::CHOICE_KEYS['publish_mode']) === 'rss');
+$GLOBALS['opts']['sgap_instagram_direct'] = 'no';
+$GLOBALS['opts']['sgap_pinterest_direct'] = 'no';
+check('direct-only: RSS is off and a configured Instagram account is selected directly', !SGAP_RSS::enabled() && SGAP_Instagram::handles('instagram'));
+check('direct-only: a configured Pinterest board is accepted without the old switch', SGAP_Pinterest::handles('pinterest') && !array_filter(SGAP_Preflight::problems('pinterest', ['title'=>'x','body'=>'x','image_url'=>'https://steamgears.eu/p.jpg']), fn($p) => $p['code'] === 'no_board'));
+SGAP_Settings::set('pinterest_board_id', '');
+$GLOBALS['opts']['sgap_publer_pinterest_board'] = 'publer-board';
+check('direct-only: a Publer board does not masquerade as a direct board', !SGAP_Pinterest::handles('pinterest') && (bool) array_filter(SGAP_Preflight::problems('pinterest', ['title'=>'x','body'=>'x','image_url'=>'https://steamgears.eu/p.jpg']), fn($p) => $p['code'] === 'no_board'));
+$status = SGAP_Direct::connection_status();
+check('direct-only: missing details and unverified permissions are explained', str_contains($status['pinterest']['message'], 'board') && str_contains($status['instagram']['message'], 'not been verified'));
+$wpdb->log = []; $GLOBALS['rows'] = [];
+SGAP_Queue::claim(3, '', ['instagram']);
+$sql = implode("\n", $wpdb->log);
+check('direct-only: the claim is limited to ready channels and reminders', str_contains($sql, 'remind = 1 OR channel IN') && str_contains($sql, 'instagram'));
+$wpdb->log = [];
+SGAP_Queue::claim(3, '', []);
+check('direct-only: no ready accounts means only reminders can be claimed', str_contains(implode("\n", $wpdb->log), 'AND remind = 1'));
+$panel = SGAP_Direct::connections_panel();
+check('direct-only: setup connects tokens to account settings and warns before switching', str_contains($panel, 'page=sgap-settings#keys') && str_contains($panel, 'page=sgap-settings#publishing') && str_contains($panel, 'stop any Publer automations'));
+$wpdb->log = []; SGAP_Queue::release_claim(333);
+check('direct-only: a changed connection returns the unattempted row to the queue', str_contains(implode("\n", $wpdb->log), "IF(attempts > 0, attempts - 1, 0)") && str_contains(implode("\n", $wpdb->log), "external_id = ''"));
+check('direct-only: no Publer key check is needed', SGAP_KeyCheck::check_publer()['ok'] === null && str_contains(SGAP_KeyCheck::check_publer()['message'], 'Direct'));
+$GLOBALS['dx_calls'] = [];
+$GLOBALS['dx_queue'] = [[200, ['id'=>'still-processing']], [200, ['status_code'=>'IN_PROGRESS']], [200, ['status_code'=>'IN_PROGRESS']], [200, ['status_code'=>'IN_PROGRESS']], [200, ['status_code'=>'IN_PROGRESS']]];
+$pending = SGAP_Instagram::publish(['id'=>306,'channel'=>'instagram','title'=>'x','body'=>'x','image_url'=>'https://steamgears.eu/g.jpg']);
+check('direct-only: Instagram never sends media_publish before the container is ready', is_wp_error($pending) && $pending->get_error_code() === 'sgap_instagram_not_ready' && count($GLOBALS['dx_calls']) === 5 && !array_filter($GLOBALS['dx_calls'], fn($call) => str_contains($call['url'], '/media_publish')));
+$GLOBALS['opts']['sgap_publish_mode'] = 'rss';
 // clean up
 foreach (['instagram_direct', 'pinterest_direct', 'pinterest_board_id', 'instagram_user_id', 'instagram_access_token', 'pinterest_access_token', 'pinterest_access_expires'] as $k) {
     unset($GLOBALS['opts']['sgap_' . $k]);

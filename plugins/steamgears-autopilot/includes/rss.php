@@ -23,7 +23,7 @@ class SGAP_RSS {
     }
 
     public static function enabled(): bool {
-        return SGAP_Settings::get('publish_mode', 'rss') !== 'api';
+        return !in_array(SGAP_Settings::get('publish_mode', 'rss'), ['api', 'direct'], true);
     }
 
     public static function add_rewrite_rule(): void {

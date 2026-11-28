@@ -278,18 +278,21 @@ class SGAP_Publer {
         if (SGAP_RSS::enabled()) {
             return SGAP_RSS::release() + ['shifted' => $shifted];
         }
-        $report = ['configured' => self::configured(), 'followed_up' => [], 'sent' => [], 'failed' => [], 'reminded' => [], 'blocked' => '', 'shifted' => $shifted];
+        $direct_only = SGAP_Direct::only_mode();
+        $split = SGAP_Direct::split();
+        $report = ['mode' => $direct_only ? 'direct' : 'api', 'configured' => $direct_only ? $split['direct'] !== [] : self::configured(), 'waiting_for_connection' => $direct_only ? $split['publer'] : [], 'followed_up' => [], 'sent' => [], 'failed' => [], 'reminded' => [], 'blocked' => '', 'shifted' => $shifted];
         // P11: without a Publer key the loop still runs when channels are posted directly.
-        if (!$report['configured'] && SGAP_Direct::split()['direct'] === []) {
+        if (!$direct_only && !$report['configured'] && $split['direct'] === []) {
             return $report;
         }
-        $report['followed_up'] = $report['configured'] ? self::follow_up() : [];
+        // An old Publer job may still need its final receipt after a switch to direct mode.
+        $report['followed_up'] = self::configured() ? self::follow_up() : [];
         $report['blocked'] = SGAP_Queue::blocked_reason();
         if ($report['blocked'] !== '') {
             return $report;
         }
         global $wpdb;
-        foreach (SGAP_Queue::claim(SGAP_Queue::capacity()) as $row) {
+        foreach (SGAP_Queue::claim(SGAP_Queue::capacity(), '', $direct_only ? $split['direct'] : null) as $row) {
             // P1.2: flagged items are mailed to the owner instead of being sent. No API call,
             // no retries, no failure alert — the item is the owner's now.
             if (!empty($row['remind'])) {
@@ -304,6 +307,12 @@ class SGAP_Publer {
             $class = SGAP_Direct::handler((string) $row['channel']);
             if ($class !== '') {
                 SGAP_Direct::finish($row, $class, SGAP_Direct::publish($class, $row), $report);
+                continue;
+            }
+            if ($direct_only) {
+                // Connection changed since selection: leave the row for a later run.
+                SGAP_Queue::release_claim((int) $row['id']);
+                $report['waiting_for_connection'][] = (string) $row['channel'];
                 continue;
             }
             if (!$report['configured']) {

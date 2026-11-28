@@ -517,6 +517,44 @@ if (function_exists('wp_get_ability')) {
 }
 remove_all_filters('pre_http_request');
 
+/* --- Direct-only publishing: no Publer fallback, real queue and simulated platform --- */
+update_option('sgap_publish_mode', 'direct');
+update_option('sgap_autopilot_enabled', 'yes');
+update_option('sgap_quiet_start', 0); update_option('sgap_quiet_end', 0);
+update_option('sgap_daily_cap', 100); update_option('sgap_batch_size', 10);
+update_option('sgap_channels', 'telegram,linkedin');
+update_option('sgap_telegram_bot_token', 'ci-token'); update_option('sgap_telegram_chat_id', 'ci-chat');
+$GLOBALS['sgci_direct_requests'] = []; $GLOBALS['sgci_direct_fail'] = false;
+$direct_http = function ($pre, $args, $url) {
+    $GLOBALS['sgci_direct_requests'][] = $url;
+    if ($GLOBALS['sgci_direct_fail'] === 'timeout') return new WP_Error('http_request_failed', 'simulated timeout');
+    if ($GLOBALS['sgci_direct_fail'] === 'rate') return ['headers'=>[], 'body'=>wp_json_encode(['ok'=>false,'description'=>'rate limit','error_code'=>429]), 'response'=>['code'=>429,'message'=>'Too Many Requests'], 'cookies'=>[], 'filename'=>null];
+    return ['headers'=>['content-type'=>'application/json'], 'body'=>wp_json_encode(['ok'=>true,'result'=>['message_id'=>501]]), 'response'=>['code'=>200,'message'=>'OK'], 'cookies'=>[], 'filename'=>null];
+};
+add_filter('pre_http_request', $direct_http, 10, 3);
+$make_direct_row = function ($channel, $title) use ($wpdb) {
+    $wpdb->insert($wpdb->prefix . 'sgap_queue', ['channel'=>$channel,'title'=>$title,'destination_url'=>home_url('/direct-test/'),'body'=>'A test caption','status'=>'queued','attempts'=>0]);
+    return (int) $wpdb->insert_id;
+};
+$direct_id = $make_direct_row('telegram', 'CI direct');
+$waiting_id = $make_direct_row('linkedin', 'CI unavailable');
+$direct_report = SGAP_Publer::tick();
+$direct_row = $wpdb->get_row($wpdb->prepare("SELECT status,external_id FROM {$wpdb->prefix}sgap_queue WHERE id=%d", $direct_id));
+$waiting_row = $wpdb->get_row($wpdb->prepare("SELECT status,attempts FROM {$wpdb->prefix}sgap_queue WHERE id=%d", $waiting_id));
+sgci_check('direct-only: configured channel publishes directly', $direct_row && $direct_row->status === 'published' && $direct_row->external_id === 'telegram:501', $direct_report);
+sgci_check('direct-only: unsupported channel remains queued without an attempt', $waiting_row && $waiting_row->status === 'queued' && (int) $waiting_row->attempts === 0 && in_array('linkedin', $direct_report['waiting_for_connection'], true), $direct_report);
+sgci_check('direct-only: no Publer publish request', !array_filter($GLOBALS['sgci_direct_requests'], fn($u) => str_contains($u, 'app.publer.com/api/v1/posts/schedule/publish')), $GLOBALS['sgci_direct_requests']);
+$GLOBALS['sgci_direct_fail'] = 'timeout';
+$uncertain_id = $make_direct_row('telegram', 'CI uncertain'); SGAP_Publer::tick();
+$uncertain_row = $wpdb->get_row($wpdb->prepare("SELECT status,error FROM {$wpdb->prefix}sgap_queue WHERE id=%d", $uncertain_id));
+sgci_check('direct-only: unknown platform outcome is not automatically retried', $uncertain_row && $uncertain_row->status === 'failed' && str_contains((string) $uncertain_row->error, 'check the social account'), $uncertain_row);
+$GLOBALS['sgci_direct_fail'] = 'rate';
+$rate_id = $make_direct_row('telegram', 'CI rate limit'); SGAP_Publer::tick();
+$rate_row = $wpdb->get_row($wpdb->prepare("SELECT status,attempts FROM {$wpdb->prefix}sgap_queue WHERE id=%d", $rate_id));
+sgci_check('direct-only: a definite rate-limit response is retried with backoff', $rate_row && $rate_row->status === 'queued' && (int) $rate_row->attempts === 1, $rate_row);
+foreach ([$direct_id, $waiting_id, $uncertain_id, $rate_id] as $test_id) $wpdb->delete($wpdb->prefix . 'sgap_queue', ['id'=>$test_id]);
+remove_filter('pre_http_request', $direct_http, 10);
+
 /* --- RSS mode for Publer Professional --- */
 update_option('sgap_publish_mode', 'rss');
 update_option('sgap_autopilot_enabled', 'yes');

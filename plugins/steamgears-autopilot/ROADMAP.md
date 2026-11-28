@@ -32,7 +32,7 @@ and how long each missing piece takes.
 
 ---
 
-## P20 — ingen dublet af søgeord, sitet allerede har dækket (27/11/2026, 7.92.2)
+## P22 — ingen dublet af søgeord, sitet allerede har dækket (28/11/2026, 7.93.2)
 
 **Fund (27/11):** 20 artikler blev planlagt direkte på brygguiden.dk (post 280–299, én om dagen til 17/12). Command Centers indholdsplan (`deploy/feed.seed.json`, 26 emner) har nogle af de samme emner. Når Command Center bliver forbundet, ville pluginnet skrive dem en gang til.
 
@@ -47,9 +47,19 @@ and how long each missing piece takes.
 | Smoke-checks + nyt trin i `automation.php` | 30 % | 75 % |
 | Versionsbump, CHANGELOG, README, zip, projektstatus | 25 % | 100 % |
 
-**Filstruktur (ændret):** `steamgears-autopilot.php` (7.92.2), `includes/keywords.php`, `CHANGELOG.md`, `README.md`, `ROADMAP.md`, `plugins/tests/smoke.php`, `plugins/tests/automation.php`, `plugins/steamgears-autopilot-v7.92.2.zip` (erstatter v7.92.1).
+**Filstruktur (ændret):** `steamgears-autopilot.php` (7.93.2), `includes/keywords.php`, `CHANGELOG.md`, `README.md`, `ROADMAP.md`, `plugins/tests/smoke.php`, `plugins/tests/automation.php`, `plugins/steamgears-autopilot-v7.93.2.zip` (erstatter v7.93.1).
 
-**Status:** se projektstatus (P20). Ikke verificeret live: kræver at 7.92.2 installeres på sitene og at Command Center sender en liste.
+**Status:** se projektstatus (P22). Ikke verificeret live: kræver at 7.93.2 installeres på sitene og at Command Center sender en liste.
+
+## P21 — vælg Pinterest-forbindelse (27/11/2026)
+
+**Mål:** gøre det muligt at vælge pluginets eget Pinterest-token til direkte opslag, selv om WooCommerce er forbundet. Standardvalget bevarer den eksisterende prioritet og rører ikke nogen konto. Plan 0,25 developer-dage: kildevalg og fornyelse 40 %, indstillinger og hjælpetekst 20 %, tests 25 %, dokumentation og pakke 15 %. Filer: `includes/pinterest.php`, `includes/core.php`, `includes/setup.php`, `plugins/tests/pinterest.php`, hovedfil, README, CHANGELOG, ROADMAP og én versioneret zip. Rigtige tilladelser kræver Pinterest-ejerens godkendelse. Kildevalget og lokale tests er gennemført; browsergodkendelse og et nyt token mangler.
+
+## P20 — direkte publicering uden Publer (27/11/2026)
+
+**Mål:** en særskilt direkte publiceringstilstand med Facebook, Instagram, Pinterest, Bluesky, Mastodon og Telegram via deres eksisterende adaptere. Kladder til kanaler uden forbindelse bliver i køen; en direkte tilstand må aldrig falde tilbage til Publer eller RSS. Den eksisterende tilstand og allerede frigivne opslag bevares indtil ejeren skifter, og der sendes ingen live-testopslag.
+
+**Plan: 1,0 developer-dag:** kortlægning og konto-/tilladelsestjek 15 %, routing og køsikkerhed 30 %, indstillinger og tydelig forbindelsesstatus 25 %, automatiske og lokale WordPress-tests 20 %, dokumentation, version og pakke 10 %. Filer: `includes/direct.php`, `core.php`, `rss.php`, `publer.php`, `setup.php`, `facebook.php`, `instagram.php`, `pinterest.php`, `preflight.php`, `keycheck.php`, `automation.php`, `plugins/tests/direct.php`, relevante integrationstests, `README.md`, `CHANGELOG.md`, `ROADMAP.md`, hovedfil og én versioneret zip. Kanalkonti kræver platformenes egne nøgler og tilladelser; koden kan ikke udstede dem. Koden og lokale tests er gennemført; faktisk publicering kræver tilsluttede konti og er ikke liveverificeret.
 
 ## P19 — genforsøg med lavere max_tokens ved kreditloft (27/11/2026, 7.92.1)
 

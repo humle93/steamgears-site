@@ -11,7 +11,7 @@
  * Only WHICH topics get written comes from Command Center: articles_per_week, drafts versus
  * auto-publish and the Studio writer are unchanged.
  *
- * 7.92.2: a phrase the site already has a post for (same Rank Math focus keyword, title or slug,
+ * 7.93.2: a phrase the site already has a post for (same Rank Math focus keyword, title or slug,
  * also scheduled posts and drafts) is not written again. It is recorded with that post's id and
  * the status "exists", so Command Center gets it back under "written" and stops offering it too.
  */

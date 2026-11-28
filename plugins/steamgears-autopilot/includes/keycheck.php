@@ -65,6 +65,9 @@ class SGAP_KeyCheck {
 
     /** @return array{ok: ?bool, message: string} ok is null when no key is saved. */
     public static function check_publer(): array {
+        if (SGAP_Direct::only_mode()) {
+            return ['ok' => null, 'message' => 'Direct mode: no Publer connection is required.'];
+        }
         if (SGAP_RSS::enabled()) {
             return ['ok' => null, 'message' => 'RSS mode: no Publer API key needed. Add the feeds shown on the dashboard in Publer.'];
         }

@@ -92,7 +92,7 @@ add_filter('pre_http_request', function ($pre, $args, $url) use (&$planner_calls
     if ($url === 'https://openrouter.ai/api/v1/chat/completions' && str_contains((string) $args['body'], 'plan SEO content')) $planner_calls++;
     return $pre;
 }, 1, 3);
-// 7.92.2: the AI draft above already covers "steampunk wedding", so that phrase from Command Center is skipped.
+// 7.93.2: the AI draft above already covers "steampunk wedding", so that phrase from Command Center is skipped.
 update_post_meta($aid, 'rank_math_focus_keyword', 'steampunk wedding');
 SGAP_Keywords::reset_existing();
 SGAP_Keywords::save([['id' => 78, 'keyword' => 'Steampunk Wedding', 'type' => 'article'],
@@ -103,7 +103,7 @@ ta('weekly article: writes Command Center\'s keyword first, as a draft', $cid &&
 ta('weekly article: the AI topic planner is not asked when Command Center filled the week', $planner_calls === 0, $planner_calls);
 $kw_written = array_column(SGAP_Keywords::written(), null, 'id');
 ta('weekly article: the keyword is reported back to Command Center and not offered again', ($kw_written[77]['post_id'] ?? 0) === $cid && SGAP_Keywords::next(5) === [], SGAP_Keywords::written());
-ta('7.92.2 weekly article: a phrase the site already has a post for is not written again, it is reported with that post', ($kw_written[78]['post_id'] ?? 0) === $aid && ($kw_written[78]['status'] ?? '') === 'exists' && $cid !== $aid, SGAP_Keywords::written());
+ta('7.93.2 weekly article: a phrase the site already has a post for is not written again, it is reported with that post', ($kw_written[78]['post_id'] ?? 0) === $aid && ($kw_written[78]['status'] ?? '') === 'exists' && $cid !== $aid, SGAP_Keywords::written());
 delete_option(SGAP_Keywords::OPTION); delete_option(SGAP_Keywords::USED_OPTION);
 
 /* --- self-check and report --- */

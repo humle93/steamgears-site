@@ -474,6 +474,12 @@ class SGAP_Auto {
                 }
             }
         }
+        if (SGAP_Direct::only_mode()) {
+            $waiting = SGAP_Direct::split()['publer'];
+            if ($waiting) {
+                $problems[] = 'Direct publishing needs account details or support for: ' . implode(', ', $waiting) . '. Their posts stay in the queue.';
+            }
+        }
         if (SGAP_Settings::get('ai_api_key') === '') {
             $problems[] = 'No AI key: nothing new is written.';
         } elseif ((int) wp_date('N') === 1) {

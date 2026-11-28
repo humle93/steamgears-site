@@ -2002,27 +2002,27 @@ check('7.92 routes: /keywords is registered', in_array('/keywords',$GLOBALS['rou
 $ks_src=file_get_contents(__DIR__.'/../steamgears-autopilot/includes/automation.php');
 check('7.92 weekly article: the AI topic prompt names the site itself, not a fixed steamgears.eu', !str_contains($ks_src,'topics for steamgears.eu') && str_contains($ks_src,'topics for {$site}'));
 check('7.92 snapshot: the keyword status is in /snapshot', str_contains(file_get_contents(__DIR__.'/../steamgears-autopilot/includes/core.php'),"'cc_keywords' => class_exists('SGAP_Keywords') ? SGAP_Keywords::status()"));
-// --- 7.92.2: søgeord, sitet allerede har et indlæg om, skrives ikke igen ---
+// --- 7.93.2: søgeord, sitet allerede har et indlæg om, skrives ikke igen ---
 delete_option('sgap_cc_keywords'); delete_option('sgap_cc_keywords_used'); SGAP_Keywords::reset_existing(); $wpdb->log=[];
 SGAP_Keywords::save([['id'=>31,'keyword'=>'Espresso tonic','title'=>'Espresso tonic: summer drink'],['id'=>32,'keyword'=>'chemex guide']]);
 $wpdb->next=[277,0];
 $kn=SGAP_Keywords::next(5);
-check('7.92.2 existing: a phrase the site already has a post for is skipped, the other is still offered', array_column($kn,'id')===[32]);
+check('7.93.2 existing: a phrase the site already has a post for is skipped, the other is still offered', array_column($kn,'id')===[32]);
 $kw2=array_column(SGAP_Keywords::written(),null,'id');
-check('7.92.2 existing: it is recorded with that post id as "exists" and reported back to Command Center', ($kw2[31]['post_id']??0)===277 && ($kw2[31]['status']??'')==='exists' && !isset($kw2[32]));
+check('7.93.2 existing: it is recorded with that post id as "exists" and reported back to Command Center', ($kw2[31]['post_id']??0)===277 && ($kw2[31]['status']??'')==='exists' && !isset($kw2[32]));
 $kq=(string)($wpdb->log[0]??'');
-check('7.92.2 existing: the lookup matches focus keyword (also first of a list), title, planned title and slug',
+check('7.93.2 existing: the lookup matches focus keyword (also first of a list), title, planned title and slug',
   str_contains($kq,"meta_key = 'rank_math_focus_keyword'") && str_contains($kq,"= 'espresso tonic'") && str_contains($kq,"LIKE 'espresso tonic,%'")
   && str_contains($kq,"'espresso tonic: summer drink'") && str_contains($kq,"post_name = 'espresso-tonic'"));
-check('7.92.2 existing: posts, pages and products count, also scheduled and drafts, but not the trash',
+check('7.93.2 existing: posts, pages and products count, also scheduled and drafts, but not the trash',
   str_contains($kq,"'post','page','product'") && str_contains($kq,"'future'") && str_contains($kq,"'draft'") && !str_contains($kq,'trash'));
 $wpdb->next=999; $kn_log=count($wpdb->log);
-check('7.92.2 existing: the lookups are reused within a request (no new query, same answer)', array_column(SGAP_Keywords::next(5),'id')===[32] && count($wpdb->log)===$kn_log);
-check('7.92.2 status: counts existing posts separately and they are not waiting', SGAP_Keywords::status()['existing']===1 && SGAP_Keywords::status()['waiting']===1);
+check('7.93.2 existing: the lookups are reused within a request (no new query, same answer)', array_column(SGAP_Keywords::next(5),'id')===[32] && count($wpdb->log)===$kn_log);
+check('7.93.2 status: counts existing posts separately and they are not waiting', SGAP_Keywords::status()['existing']===1 && SGAP_Keywords::status()['waiting']===1);
 SGAP_Keywords::reset_existing(); $wpdb->next=null;
-check('7.92.2 existing: an empty phrase is never looked up', SGAP_Keywords::existing_post(['keyword'=>'  '])===0 && count($wpdb->log)===$kn_log);
+check('7.93.2 existing: an empty phrase is never looked up', SGAP_Keywords::existing_post(['keyword'=>'  '])===0 && count($wpdb->log)===$kn_log);
 SGAP_Keywords::record(['id'=>32,'keyword'=>'chemex guide'],['post_id'=>905,'status'=>'draft']);
-check('7.92.2 existing: a newly written post clears the lookups', (fn()=>self::$existing)->call(new SGAP_Keywords)===[]);
+check('7.93.2 existing: a newly written post clears the lookups', (fn()=>self::$existing)->call(new SGAP_Keywords)===[]);
 delete_option('sgap_cc_keywords'); delete_option('sgap_cc_keywords_used'); update_option('sgap_articles_per_week',0);
 // --- 7.92.1: ét genforsøg med lavere max_tokens, når OpenRouter siger hvad der er råd til ---
 $live_msg='This request requires more credits, or fewer max_tokens. You requested up to 3600 tokens, but can only afford 3015. To increase, visit https://openrouter.ai/workspaces/default/keys/x and adjust the key\'s monthly limit';

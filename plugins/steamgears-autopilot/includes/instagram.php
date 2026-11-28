@@ -760,7 +760,7 @@ class SGAP_Instagram {
 
     /** True when this module, not Publer, posts the instagram channel. Opt-in, like Facebook. */
     public static function handles(string $channel): bool {
-        return $channel === 'instagram' && self::configured() && SGAP_Settings::get('instagram_direct', 'no') === 'yes';
+        return $channel === 'instagram' && self::configured() && (SGAP_Direct::only_mode() || SGAP_Settings::get('instagram_direct', 'no') === 'yes');
     }
 
     /**
@@ -792,10 +792,12 @@ class SGAP_Instagram {
         if ($creation === '') {
             return new WP_Error('sgap_instagram', 'Instagram created no media container.');
         }
+        $ready = false;
         for ($i = 0; $i < self::PUBLISH_POLLS; $i++) {
             [$status] = self::call('/' . rawurlencode($creation), ['fields' => 'status_code'], $token);
             $code = is_wp_error($status) ? '' : (string) ($status['status_code'] ?? '');
             if ($code === 'FINISHED') {
+                $ready = true;
                 break;
             }
             if ($code === 'ERROR' || $code === 'EXPIRED') {
@@ -804,6 +806,9 @@ class SGAP_Instagram {
             if ($i < self::PUBLISH_POLLS - 1 && self::$poll_wait > 0) {
                 sleep(self::$poll_wait);
             }
+        }
+        if (!$ready) {
+            return new WP_Error('sgap_instagram_not_ready', 'Instagram has not finished processing the image. No publish request was sent; try again later.', ['status' => 425]);
         }
         $done = self::post_form($user . '/media_publish', ['creation_id' => $creation], $token);
         if (is_wp_error($done)) {

@@ -16,7 +16,7 @@ class SGAP_Setup {
         'autopilot_enabled' => 'Autopilot', 'full_auto_enabled' => 'Full auto (skip approval)', 'channels' => 'Channels',
         'posts_per_day' => 'Pages to promote per day', 'ai_api_key' => 'OpenRouter key', 'ai_model' => 'OpenRouter model',
         'content_language' => 'Article language',
-        'serpapi_key' => 'SerpApi key (keyword research)', 'publish_mode' => 'How posts reach Publer', 'publer_api_key' => 'Publer API key',
+        'serpapi_key' => 'SerpApi key (keyword research)', 'publish_mode' => 'Publishing method', 'publer_api_key' => 'Publer API key',
         'publer_workspace_id' => 'Publer workspace', 'publer_pinterest_board' => 'Pinterest board ID', 'daily_cap' => 'Max posts per day',
         'batch_size' => 'Posts per 15-minute run', 'quiet_start' => 'Quiet from', 'quiet_end' => 'Quiet until', 'labor_rate' => 'Your hourly rate',
         'monthly_budget' => 'Monthly budget', 'target_roi' => 'Target ROI %', 'winner_min_clicks' => 'Winner after clicks', 'loser_min_clicks' => 'Loser after clicks',
@@ -27,7 +27,7 @@ class SGAP_Setup {
         'mcp_client_id' => 'MCP client ID', 'mcp_refresh_token' => 'MCP refresh token',
         'telegram_bot_token' => 'Bot token', 'bluesky_app_password' => 'App password', 'mastodon_token' => 'Access token',
         'woo_min_margin' => 'Minimum margin %',
-        'pinterest_client_id' => 'Pinterest App ID', 'pinterest_client_secret' => 'Pinterest app secret',
+        'pinterest_client_id' => 'Pinterest App ID', 'pinterest_client_secret' => 'Pinterest app secret', 'pinterest_token_source' => 'Pinterest connection to use',
         'pinterest_access_token' => 'Pinterest access token', 'pinterest_refresh_token' => 'Pinterest refresh token',
         'instagram_user_id' => 'Instagram account ID', 'instagram_graph_host' => 'Graph host',
         'instagram_access_token' => 'Instagram access token',
@@ -52,7 +52,7 @@ class SGAP_Setup {
         'keys' => ['Keys', 'lock', ['publer_api_key', 'ai_api_key', 'serpapi_key', 'telegram_bot_token', 'merchant_feed_secret', 'bluesky_app_password', 'mastodon_token', 'mcp_refresh_token', 'pinterest_access_token', 'pinterest_refresh_token', 'pinterest_client_secret', 'instagram_access_token', 'facebook_access_token', 'reddit_client_secret', 'reddit_password', 'reddit_refresh_token']],
         'basics' => ['Basics', 'admin-home', ['autopilot_enabled', 'full_auto_enabled', 'channels', 'posts_per_day']],
         'ai' => ['AI', 'superhero-alt', ['ai_profile', 'ai_model', 'content_language']],
-        'publishing' => ['Publishing', 'megaphone', ['publish_mode', 'publer_workspace_id', 'publer_pinterest_board', 'pinterest_client_id', 'instagram_user_id', 'instagram_graph_host', 'facebook_page_id', 'facebook_graph_version', 'facebook_direct', 'instagram_direct', 'pinterest_direct', 'pinterest_board_id', 'bluesky_handle', 'mastodon_instance', 'mastodon_limit', 'telegram_chat_id', 'quality_gate', 'banned_words', 'dupe_days']],
+        'publishing' => ['Publishing', 'megaphone', ['publish_mode', 'publer_workspace_id', 'publer_pinterest_board', 'pinterest_client_id', 'instagram_user_id', 'instagram_graph_host', 'facebook_page_id', 'facebook_graph_version', 'facebook_direct', 'instagram_direct', 'pinterest_direct', 'pinterest_board_id', 'pinterest_token_source', 'bluesky_handle', 'mastodon_instance', 'mastodon_limit', 'telegram_chat_id', 'quality_gate', 'banned_words', 'dupe_days']],
         'schedule' => ['Schedule & limits', 'clock', ['quiet_start', 'quiet_end', 'blackout_ranges', 'daily_cap', 'batch_size', 'repost_cooldown_days']],
         'evergreen' => ['Evergreen', 'update', ['evergreen_enabled', 'evergreen_after_days', 'evergreen_max_shares', 'evergreen_batch']],
         'shop' => ['Shop & feeds', 'cart', ['woo_min_margin']],
@@ -110,14 +110,15 @@ class SGAP_Setup {
         $ai_ok = is_array($keys) && !empty($keys['ai']['ok']);
         $channels = SGAP_Publer::channels();
         $state = self::state();
-        $feeds_ok = SGAP_RSS::enabled() ? ($channels && !array_diff($channels, (array) $state['feeds_done'])) : SGAP_Publer::configured();
+        $direct = SGAP_Direct::only_mode();
+        $feeds_ok = $direct ? SGAP_Direct::publer_free() : (SGAP_RSS::enabled() ? ($channels && !array_diff($channels, (array) $state['feeds_done'])) : SGAP_Publer::configured());
         $drafts = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}sgap_ai_drafts");
         $published = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}sgap_queue WHERE status = 'published'");
         $setup = admin_url('admin.php?page=sgap-setup');
         return [
             'ai' => [$ai_ok, 'Connect the AI', 'Add your OpenRouter key, pick a model and test it.', $setup . '#step-ai'],
             'channels' => [(bool) $channels, 'Choose your channels', 'Where should posts go?', $setup . '#step-channels'],
-            'publer' => [$feeds_ok, SGAP_RSS::enabled() ? 'Add the feeds in Publer' : 'Connect Publer', SGAP_RSS::enabled() ? 'One RSS feed per channel, set to Auto-post.' : 'Publer API key and workspace.', $setup . '#step-publer'],
+            'publer' => [$feeds_ok, $direct ? 'Add social account details' : (SGAP_RSS::enabled() ? 'Add the feeds in Publer' : 'Connect Publer'), $direct ? 'Add an account and publishing permissions for every selected channel.' : (SGAP_RSS::enabled() ? 'One RSS feed per channel, set to Auto-post.' : 'Publer API key and workspace.'), $setup . '#step-publer'],
             'autopilot' => [SGAP_Settings::enabled('autopilot_enabled'), 'Switch the autopilot on', 'Daily writing and publishing.', $setup . '#step-schedule'],
             'drafts' => [$drafts > 0, 'Generate your first posts', 'Let the AI write drafts for your pages.', admin_url('admin.php?page=steamgears-autopilot')],
             'published' => [$published > 0, 'Approve and publish one', 'Approve a draft and release the queue.', admin_url('admin.php?page=sgap-ai')]
@@ -341,6 +342,9 @@ class SGAP_Setup {
                 echo '<div class="sgap-panel-head"><h2><span class="dashicons dashicons-' . esc_attr($tab[1]) . '"></span>' . esc_html($tab[0]) . '</h2>'
                     . (isset(self::TAB_HINTS[$id]) ? '<p class="sgap-section-hint">' . esc_html(self::TAB_HINTS[$id]) . '</p>' : '') . '</div>';
                 // A secret belongs on the keys tab and nowhere else, even if it is listed here by mistake.
+                if ($id === 'publishing') {
+                    echo SGAP_Direct::connections_panel();
+                }
                 foreach (array_diff($keys, SGAP_Settings::SECRET_KEYS) as $key) {
                     echo self::row($key);
                 }
@@ -366,7 +370,7 @@ class SGAP_Setup {
         $steps = [
             'ai' => ['Connect the AI', 'superhero-alt'],
             'channels' => ['Channels', 'share'],
-            'publer' => ['Publer', 'megaphone'],
+            'publer' => ['Publishing', 'megaphone'],
             'schedule' => ['Schedule', 'clock'],
             'extras' => ['Extras', 'admin-plugins'],
             'done' => ['Done', 'yes-alt']
@@ -397,9 +401,10 @@ class SGAP_Setup {
             . self::channels_field('settings[channels]')
             . '<div class="sgap-step-nav"><button type="button" class="button" data-back>Back</button><button class="button button-primary" data-next>Continue</button></div></form>';
 
-        // 3 Publer
-        $mode = SGAP_RSS::enabled() ? 'rss' : 'api';
-        echo '<form class="sgap-card sgap-step" data-step="publer" hidden><h2>How do posts reach Publer?</h2><div class="sgap-choice-row sgap-big">'
+        // 3 Publishing: existing sites keep their current method until it is changed.
+        $mode = (string) SGAP_Settings::get('publish_mode', 'rss');
+        echo '<form class="sgap-card sgap-step" data-step="publer" hidden><h2>How should posts be published?</h2><div class="sgap-choice-row sgap-big">'
+            . '<label class="sgap-choice' . ($mode === 'direct' ? ' on' : '') . '"><input type="radio" name="settings[publish_mode]" value="direct"' . checked($mode, 'direct', false) . '><span><strong>Direct from this site</strong><small>Connect each account; its posts stay in the queue until account details are saved.</small></span></label>'
             . '<label class="sgap-choice' . ($mode === 'rss' ? ' on' : '') . '"><input type="radio" name="settings[publish_mode]" value="rss"' . checked($mode, 'rss', false) . '><span><strong>RSS feeds</strong><small>Publer Professional. One feed per channel that Publer auto-posts from.</small></span></label>'
             . '<label class="sgap-choice' . ($mode === 'api' ? ' on' : '') . '"><input type="radio" name="settings[publish_mode]" value="api"' . checked($mode, 'api', false) . '><span><strong>Publer API</strong><small>Publer Business. Posts are sent straight to Publer.</small></span></label></div>'
             . '<div class="sgap-mode" data-mode="rss"><ol class="sgap-howto"><li>Open Publer → <em>Explore → RSS Feeds → Add feed</em>.</li><li>Paste a feed below, open its <em>Settings</em>, turn on <strong>Auto-post</strong> and pick the account.</li><li>Tick it here when done.</li></ol><div class="sgap-feedlist">';
@@ -411,6 +416,7 @@ class SGAP_Setup {
         }
         echo '</div><p><a class="button" href="https://app.publer.com/" target="_blank" rel="noopener"><span class="dashicons dashicons-external"></span>Open Publer</a></p></div>'
             . '<div class="sgap-mode" data-mode="api" hidden>' . self::row('publer_api_key', true) . self::row('publer_workspace_id', true) . self::row('publer_pinterest_board', true) . '</div>'
+            . '<div class="sgap-mode" data-mode="direct" hidden>' . SGAP_Direct::connections_panel() . '</div>'
             . '<div class="sgap-step-nav"><button type="button" class="button" data-back>Back</button><button class="button button-primary" data-next>Continue</button></div></form>';
 
         // 4 Schedule

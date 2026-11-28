@@ -10,7 +10,7 @@ Noterne er skrevet ud fra commit-historikken og de dokumenter der hører til hve
 
 <!-- patch-notes: baseline 7.65.0 -->
 
-## 7.92.2 — 2026-11-27
+## 7.93.2 — 2026-11-28
 
 **Rettet: et søgeord fra Command Center, som sitet allerede har et indlæg om, skrives ikke igen.**
 
@@ -21,6 +21,33 @@ Noterne er skrevet ud fra commit-historikken og de dokumenter der hører til hve
 
 ### Uændret
 - Rækkefølgen, levetiden på 14 dage, de 3 forsøg og `articles_per_week` er som før. Opslagene genbruges inden for samme kørsel og nulstilles, når et nyt indlæg er skrevet. Målt med 8 nye checks i `plugins/tests/smoke.php` (1 624 PASS / 0 FAIL) og et nyt trin i `plugins/tests/automation.php` (kører i WordPress-CI).
+
+## 7.93.1 — 2026-11-27
+
+**Rettet: et selvstændigt Pinterest-token kan nu bruges sammen med WooCommerce-forbindelsen.**
+
+### Rettet
+- Nyt valg *Pinterest connection to use*: standarden bevarer WooCommerce-forbindelsen først; vælg *Steamgears token* for at bruge pluginets eget token med publiceringstilladelser. Et token i wp-config.php har fortsat forrang.
+- Vælges pluginets eget token, falder det ikke lydløst tilbage til en anden konto. Status og automatisk fornyelse følger den valgte kilde.
+
+### Målt
+- 1.632 smoke-checks bestod på PHP 8.0 og 8.3, inklusive kildevalg og manglende token. Et rigtigt Pinterest-token med de nødvendige tilladelser er endnu ikke tilgængeligt til live-test.
+
+## 7.93.0 — 2026-11-27
+
+**Tilføjet: direkte publicering fra WordPress uden Publer.**
+
+### Tilføjet
+- Ny tilstand *Direct* og en forbindelsesoversigt i opsætningen og på dashboardet. Facebook, Instagram, Pinterest, Bluesky, Mastodon og Telegram bruger pluginets egne adaptere; manglende konti og ikke-understøttede kanaler bliver i køen uden at bruge forsøg.
+- Gemte kontooplysninger vises ikke som verificerede tilladelser. Eksisterende RSS- og Publer-indstillinger ændres ikke automatisk; skift først, når kontiene er forbundet, og Publer-automatikken er stoppet.
+
+### Rettet
+- Et tabt eller usikkert svar fra en social platform stopper opslaget til kontrol i stedet for automatisk at risikere et dobbeltopslag. En eksplicit afvisning, som rate-limit, kan stadig prøves igen.
+- Instagram beder ikke længere om publicering, før billedcontaineren er færdigbehandlet. Direkte Pinterest bruger sit eget board-id i kontrollen.
+
+### Målt
+- 1.627 smoke-checks lokalt på PHP 8.0 og 8.3, samt køtest i lokal WordPress/MariaDB med simulerede platformssvar. Indstillinger og opsætning er prøvet i Chromium på 320 og 1440 pixels.
+- Livepublicering er ikke prøvet: sitets Facebook- og Instagram-konti mangler direkte adgang, og Pinterest mangler board-adgang og board-id.
 
 ## 7.92.1 — 2026-11-27
 
