@@ -496,6 +496,15 @@
           "unit": "d",
           "verified": false,
           "note": "7.94.0: SGAP_AI_Access (includes/ai-access.php): side AI access opretter ai-<client> (redaktør/forfatter, aldrig admin) + applikationsadgangskode vist én gang med Basic-nøgle; ingen wp-admin-login (login-formular afvist, login-cookie ignoreret, kan ikke rette egen bruger), ingen unfiltered_html/indstillinger/plugins/brugere; nyt indhold kun kladder uden udgivelsesret; log over REST-kald; luk med ét klik. GET /sgap/v1/openapi til ChatGPT Actions, alle handlinger x-openai-isConsequential=false (Always allow). 20 nye smoke-checks, 1 660 PASS / 0 FAIL; forløb i automation.php (WordPress-CI). IKKE målt: installeret på sitene og en rigtig Custom GPT."
+        },
+        {
+          "id": "p24",
+          "name": "P24 — forbind Command Center med linkkode (nye sites via pluginnet, trin 1)",
+          "done": 0.25,
+          "total": 0.3,
+          "unit": "d",
+          "verified": false,
+          "note": "7.95.0: SGAP_CC_Pair (includes/cc-pair.php), porteret fra den ikke-flettede branch p18-flere-sites uden login-fra-CC-delen og uden SGAP_Site. Knappen Forbind Command Center (linkkode) står altid på Command Center-kortet (også på et site der aldrig har været forbundet) og laver en engangskode (15 min, 60 bit, kun sha256 gemt) vist som sgap1.<base64url({u,c})>. POST /sgap/v1/pair {code, cc_url, cc_version} brænder koden og udsteder én applikationsadgangskode 'Command Center' til administratoren, der lavede koden, og svarer med site, rest, user, app_password, plugin_version og info {domain, name, locale, woocommerce}. 5 forkerte koder brænder koden; kun https (localhost undtaget); sitet kalder aldrig CC. 22 nye smoke-checks (plugins/tests/cc-pair.php), 1 682 PASS / 0 FAIL; Codex: https kræves på selve /pair-kaldet, koden forbruges atomisk (delete_option, 409 ved tabt kapløb), og en brugt kodes hash huskes (sgap_cc_pair_used). Rest 0,05 d = live-verifikation. IKKE målt: installeret på et site og et rigtigt kald fra CC (CC-siden er trin 2 i CC-roadmappen)."
         }
       ],
       "total": 41.5,
@@ -4410,6 +4419,16 @@
       "after": 100.0,
       "delta": 0,
       "basis": "0,5 af 0,5 d"
+    },
+    {
+      "date": "2026-11-28",
+      "project": "Steamgears Autopilot — plugin",
+      "module": "P24 (linkkode til Command Center) tilføjet med 0,3 d, hvoraf 0,05 d live-verifikation endnu ikke er lavet",
+      "before": 99.7,
+      "after": 99.6,
+      "delta": -0.1,
+      "basis": "44,3 af 44,5 d (P0 4,65/4,65 · P1 14,45/14,45 · P2 4,75/4,75 · P3 2/2 · P0.7 1/1 · P0.7c 0,25/0,25 · P1.19 0,25/0,25 · P1.20 0,25/0,25 · P1.21 0,25/0,25 · P1.22 0,5/0,5 · P2.6 1,5/1,5 · P3.7 0,6/0,6 · P3.8 0,3/0,3 · P3.9 0,25/0,25 · P1.25 0,15/0,15 · P1.24 0,35/0,35 · P1.23 0,25/0,25 · P6 0,9/0,9 · P7 0,3/0,3 · P8 0,8/0,8 · P9 0,35/0,35 · P9.1 0,3/0,3 · P9.2 0,2/0,2 · P9.3 0,25/0,25 · P9.4 0,2/0,2 · P10 0,5/0,5 · P9.5 0,25/0,25 · P9.6 0,25/0,25 · P9.7 0,15/0,15 · P9.8 0,35/0,4 · P9.9 0,3/0,3 · P11 0,5/0,6 · P12 4/4 · P13 0,25/0,25 · P14 0,2/0,2 · P15 0,6/0,6 · P16 0,15/0,15 · P17 0,3/0,3 · P18 0,4/0,4 · P19 0,15/0,15 · P22 0,15/0,15 · P23 0,5/0,5 · P24 0,25/0,3)",
+      "scope_change": true
     }
   ]
 }

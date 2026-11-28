@@ -10,6 +10,21 @@ Noterne er skrevet ud fra commit-historikken og de dokumenter der hører til hve
 
 <!-- patch-notes: baseline 7.65.0 -->
 
+## 7.95.0 — 2026-11-28
+
+**Tilføjet: forbind Command Center med en linkkode, så et nyt site kan kobles på uden at kopiere kodeord.**
+
+### Tilføjet
+- Knappen *Forbind Command Center (linkkode)* på Command Center-kortet under System. Den står der altid, også på et nyt site, der aldrig har været forbundet. Den laver en engangskode (15 minutter, 60 tilfældige bit, kun en sha256-hash gemmes) og viser én streng til at kopiere: `sgap1.<base64url({"u": sitets adresse, "c": koden})>`.
+- `POST /sgap/v1/pair {code, cc_url, cc_version}`: den rigtige kode brændes og giver én applikationsadgangskode med navnet *Command Center* til den administrator, der lavede koden. Svaret har `site`, `rest`, `user`, `app_password`, `plugin_version` og `info` (`domain`, `name`, `locale`, `woocommerce`), så Command Center kan oprette projektet selv. Command Centers adresse gemmes, hvis den er https.
+- Første trin i planen *nye sites udrulles via pluginnet* (Command Center-roadmappen 28/11). Porteret fra den ikke-flettede branch `p18-flere-sites` uden dens login-fra-CC-del og uden `SGAP_Site`.
+
+### Sikkerhed
+- `/pair` afviser et kald over almindelig http (403), før koden røres, så applikationsadgangskoden aldrig sendes ukrypteret. Koden forbruges med ét `delete_option()`: taber et samtidigt kald kapløbet, får det 409 og intet kodeord, og en brugt kodes hash huskes, så et samtidigt forkert-kode-kald ikke kan skrive den tilbage. Fem forkerte koder brænder koden; en udløbet kode fjernes (410); koden virker én gang (404 bagefter). Kun administratorer kan lave en kode, og kun når applikationsadgangskoder er slået til og sitet kører https (localhost undtaget). Sitet kalder aldrig Command Center.
+
+### Målt
+- 22 nye smoke-checks i `plugins/tests/cc-pair.php`, `php plugins/tests/smoke.php` 1 682 PASS / 0 FAIL, `php -l` på de ændrede filer. **Ikke målt:** installeret på et site og et rigtigt kald fra Command Center (CC-siden er næste trin).
+
 ## 7.94.0 — 2026-11-28
 
 **Tilføjet: AI-adgang. ChatGPT (eller Claude/Gemini) får sit eget login til sitet, og du godkender kun én gang.**
