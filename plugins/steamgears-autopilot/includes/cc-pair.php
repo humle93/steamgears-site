@@ -78,6 +78,15 @@ class SGAP_CC_Pair {
             || in_array($host, ['localhost', '127.0.0.1'], true);
     }
 
+    /** The current request came in over https (or to localhost while developing). */
+    public static function request_secure(): bool {
+        if (function_exists('is_ssl') && is_ssl()) {
+            return true;
+        }
+        $host = strtolower((string) wp_parse_url(home_url('/'), PHP_URL_HOST));
+        return in_array($host, ['localhost', '127.0.0.1'], true);
+    }
+
     /** What Command Center needs to name the new project. Small on purpose: no keys, no settings. */
     public static function site_info(): array {
         $locale = function_exists('get_locale') ? (string) get_locale() : '';
@@ -132,6 +141,10 @@ class SGAP_CC_Pair {
 
     /** POST /pair {code, cc_url, cc_version}. */
     public static function rest_pair(WP_REST_Request $request) {
+        // The answer carries an application password: refuse a plain-http exchange before the code is touched.
+        if (!self::request_secure()) {
+            return new WP_Error('sgap_pair', 'Pairing only works over https.', ['status' => 403]);
+        }
         return self::pair(
             (string) $request->get_param('code'),
             (string) $request->get_param('cc_url'),
@@ -158,8 +171,11 @@ class SGAP_CC_Pair {
             update_option(self::CODE, $stored, false);
             return new WP_Error('sgap_pair', 'Wrong link code.', ['status' => 403]);
         }
-        // Burn the code before anything else, so two calls with the same code cannot both succeed.
-        delete_option(self::CODE);
+        // Burn the code before anything else. delete_option() is one DELETE and returns false when another
+        // request removed the row first, so only one of two concurrent calls with the same code goes on.
+        if (!delete_option(self::CODE)) {
+            return new WP_Error('sgap_pair', 'The link code has already been used. Make a new one.', ['status' => 409]);
+        }
         $user = get_userdata((int) ($stored['user'] ?? 0));
         if (!$user || !user_can($user, 'manage_options')) {
             return new WP_Error('sgap_pair', 'The administrator who made the code no longer exists.', ['status' => 409]);

@@ -10,6 +10,9 @@ if (!function_exists('user_can')) {
 if (!function_exists('wp_is_application_passwords_available_for_user')) {
     function wp_is_application_passwords_available_for_user($u) { return empty($GLOBALS['p20_no_app_passwords']); }
 }
+if (!function_exists('is_ssl')) {
+    function is_ssl() { return empty($GLOBALS['p24_insecure']); }
+}
 if (!function_exists('get_userdata')) {
     function get_userdata($id) { return $GLOBALS['cirla_test_user'] ?? false; }
 }
@@ -71,8 +74,28 @@ $GLOBALS['p20_no_app_passwords'] = true;
 check('7.95 pair: no code when application passwords are switched off', SGAP_CC_Pair::make($p20_user, 4000) instanceof WP_Error);
 unset($GLOBALS['p20_no_app_passwords']);
 $p20_src = file_get_contents(__DIR__ . '/../steamgears-autopilot/includes/cc-pair.php');
-check('7.95 pair: the code is deleted before the application password is made',
-    strpos($p20_src, 'delete_option(self::CODE);' . "\n" . '        $user = get_userdata') !== false);
+check('7.95 pair: the code is claimed with delete_option() before the application password is made, and a lost claim stops',
+    preg_match('/if \(!delete_option\(self::CODE\)\) \{\s+return new WP_Error\([^;]+409/s', $p20_src) === 1
+    && strpos($p20_src, 'if (!delete_option(self::CODE))') < strpos($p20_src, 'create_new_application_password'));
+// Codex P2: a second request that lost the race (the row is already gone when it deletes) gets no password.
+$p20_made = SGAP_CC_Pair::make($p20_user);
+$p20_race = $p20_made['code'];
+$GLOBALS['p20_app_made'] = [];
+// Simulate: this request read the stored code, then another request deleted it before our delete.
+$p20_stored = get_option(SGAP_CC_Pair::CODE);
+delete_option(SGAP_CC_Pair::CODE);
+check('7.95 pair: delete_option() reports a row that is already gone as false (what the claim relies on)', delete_option(SGAP_CC_Pair::CODE) === false);
+update_option(SGAP_CC_Pair::CODE, $p20_stored);
+// Codex P1: the exchange itself must arrive over https.
+$GLOBALS['p24_insecure'] = true;
+$p20_req = new WP_REST_Request(['code' => $p20_race]);
+$p20_plain = SGAP_CC_Pair::rest_pair($p20_req);
+check('7.95 pair: /pair over plain http is refused before the code is used, and no password is made',
+    $p20_plain instanceof WP_Error && ($p20_plain->data['status'] ?? 0) === 403 && is_array(get_option(SGAP_CC_Pair::CODE)) && $GLOBALS['p20_app_made'] === []);
+unset($GLOBALS['p24_insecure']);
+$p20_tls = SGAP_CC_Pair::rest_pair(new WP_REST_Request(['code' => $p20_race]));
+check('7.95 pair: the same call over https works', is_array($p20_tls) && !empty($p20_tls['app_password']));
+delete_option(SGAP_CC_Pair::CODE);
 check('7.95 pair: the site never calls Command Center (no outgoing request in the module)',
     !preg_match('/wp_remote_|wp_safe_remote_|curl_/', $p20_src));
 $p20_core = file_get_contents(__DIR__ . '/../steamgears-autopilot/includes/core.php');
