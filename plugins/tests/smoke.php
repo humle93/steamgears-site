@@ -20,7 +20,7 @@ function get_transient($k){return $GLOBALS['transients'][$k]??false;} function s
 function site_url($p=''){return 'https://steamgears.eu/'.$p;} function admin_url($p=''){return '/wp-admin/'.$p;} function rest_url($p=''){return '/wp-json/'.$p;} function home_url($p=''){return 'https://steamgears.eu'.$p;}
 function get_bloginfo($k=''){return 'Steamgears';} function wp_timezone_string(){return 'UTC';} function get_the_title($id){ if(is_object($id)){return (string)($id->post_title!==''?$id->post_title:'Post '.($id->ID??0));} $p=$GLOBALS['post_by_id'][(int)$id]??null; return $p? (string)$p->post_title : 'Post '.$id; } function get_permalink($id){return 'https://steamgears.eu/?p='.$id;} function has_post_thumbnail($id){return false;} function get_post_type($id){return (string)($GLOBALS['post_type_by_id'][(int)$id]??'post');} function pll_get_post($id,$locale=''){return (int)($GLOBALS['pll_map'][$locale]??0);}
 function get_posts($a=[]){ $r=$GLOBALS['posts_result']??[]; return array_slice($r,0,(int)($a['numberposts']??(count($r)?:1))); } function post_type_exists($t){return in_array($t,['post','page'],true);} function get_post($id){return $GLOBALS['post_by_id'][(int)$id]??null;}
-function update_post_meta($id,$k,$v){ $GLOBALS['postmeta'][(int)$id][$k]=$v; return true; } function delete_post_meta($id,$k){ unset($GLOBALS['postmeta'][(int)$id][$k]); return true; } function get_the_post_thumbnail_url($id,$s=''){ return $GLOBALS['thumb'][(int)$id]??''; } function add_meta_box(...$a){ $GLOBALS['metaboxes'][]=$a; } function wp_is_post_revision($id){ return false; } function wp_verify_nonce($n,$a=''){ return true; } function has_excerpt($p){ return is_object($p) && !empty($p->post_excerpt); } function strip_shortcodes($t){ return (string)$t; } function wp_trim_words($t,$n=55,$more='…'){ $w=preg_split('/\s+/',trim((string)$t)); return implode(' ',array_slice($w,0,$n)).(count($w)>$n?$more:''); } function get_user_meta($u,$k,$s=false){return '';} function update_user_meta($u,$k,$v){return true;} function get_edit_post_link($id,$c=''){return '/edit/'.$id;} function get_preview_post_link($id){return '/preview/'.$id;}
+function update_post_meta($id,$k,$v){ $GLOBALS['postmeta'][(int)$id][$k]=$v; return true; } function delete_post_meta($id,$k){ unset($GLOBALS['postmeta'][(int)$id][$k]); return true; } function get_the_post_thumbnail_url($id,$s=''){ return $GLOBALS['thumb'][(int)$id]??''; } function add_meta_box(...$a){ $GLOBALS['metaboxes'][]=$a; } function wp_is_post_revision($id){ return false; } function wp_verify_nonce($n,$a=''){ return true; } function has_excerpt($p){ return is_object($p) && !empty($p->post_excerpt); } function strip_shortcodes($t){ return (string)$t; } function wp_trim_words($t,$n=55,$more='…'){ $w=preg_split('/\s+/',trim((string)$t)); return implode(' ',array_slice($w,0,$n)).(count($w)>$n?$more:''); } function get_user_meta($u,$k,$s=false){return $GLOBALS['usermeta'][(int)$u][$k]??'';} function update_user_meta($u,$k,$v){return true;} function get_edit_post_link($id,$c=''){return '/edit/'.$id;} function get_preview_post_link($id){return '/preview/'.$id;}
 function wp_nonce_field(...$a){return '';} function wp_create_nonce($a=''){return 'n';} function selected($a,$b,$e){return $a===$b?' selected':'';} function checked($a,$b=true,$e=true){return $a===$b?' checked':'';}
 function sanitize_text_field($s){return trim(strip_tags((string)$s));} function sanitize_textarea_field($s){return trim(strip_tags((string)$s));}
 function sanitize_key($s){return preg_replace('/[^a-z0-9_\-]/','',strtolower((string)$s));} function absint($v){return abs((int)$v);}
@@ -2047,5 +2047,36 @@ check('7.92.1 retry: a second refusal is reported as it came, never a third call
     is_wp_error($got) && count($GLOBALS['http_calls'])===2 && str_contains($got->get_error_message(),'can only afford 2000') && ($got->get_error_data()['status']??0)===402);
 check('7.92.1 editor: the quality editor uses the same retrying path', str_contains(file_get_contents(__DIR__.'/../steamgears-autopilot/includes/editor.php'),"SGAP_AI::chat_completions(SGAP_AI::api_key(), \$body, 90, 'Editor')"));
 $GLOBALS['http_calls']=[]; $GLOBALS['http_queue']=[];
+// --- 7.94.0: AI-adgang (ChatGPT) ---
+if (!class_exists('WP_User')) { class WP_User { public $ID=0; public $roles=[]; function __construct($id=0){ $this->ID=(int)$id; } } }
+$GLOBALS['usermeta'][901]['sgap_ai_client']='chatgpt';
+$GLOBALS['actions_before_ai']=$GLOBALS['actions'];
+check('7.94 ai: the module hooks login, drafts, caps, log, routes and the menu',
+  isset($GLOBALS['actions']['wp_authenticate_user'],$GLOBALS['actions']['wp_insert_post_data'],$GLOBALS['actions']['user_has_cap'],$GLOBALS['actions']['rest_request_after_callbacks'],$GLOBALS['actions']['admin_post_sgap_ai_access_create'],$GLOBALS['actions']['admin_post_sgap_ai_access_revoke']));
+check('7.94 ai: roles are editor and author only, never administrator', array_keys(SGAP_AI_Access::ROLES)===['editor','author'] && !isset(SGAP_AI_Access::ROLES['administrator']));
+check('7.94 ai: the user name is ai-<client> and the Basic key is base64 of login:password',
+  SGAP_AI_Access::login_for('chatgpt')==='ai-chatgpt' && SGAP_AI_Access::basic_key('ai-chatgpt','abcd efgh')===base64_encode('ai-chatgpt:abcd efgh'));
+$ds=fn($st,$old,$type='post')=>SGAP_AI_Access::draft_status(['post_status'=>$st,'post_type'=>$type],$old)['post_status'];
+check('7.94 ai drafts: a new post that asks to be published or scheduled becomes a draft', $ds('publish','')==='draft' && $ds('future','')==='draft' && $ds('private','draft')==='draft' && $ds('publish','draft','page')==='draft');
+check('7.94 ai drafts: drafts and pending stay, a live post stays live when edited, other post types are untouched',
+  $ds('draft','')==='draft' && $ds('pending','')==='pending' && $ds('publish','publish')==='publish' && $ds('future','future')==='future' && $ds('publish','','attachment')==='publish');
+$ac=SGAP_AI_Access::strip_caps(['edit_posts'=>true,'publish_posts'=>true,'unfiltered_html'=>true,'manage_options'=>true,'install_plugins'=>true,'edit_users'=>true,'upload_files'=>true]);
+check('7.94 ai caps: no raw HTML, settings, plugins or users, but posts and uploads stay', !isset($ac['unfiltered_html'],$ac['manage_options'],$ac['install_plugins'],$ac['edit_users']) && !empty($ac['edit_posts']) && !empty($ac['publish_posts']) && !empty($ac['upload_files']));
+$u901=new WP_User(901); $u902=new WP_User(902);
+check('7.94 ai caps: only AI users are limited', !isset(SGAP_AI_Access::limit_caps(['unfiltered_html'=>true],[],[],$u901)['unfiltered_html']) && !empty(SGAP_AI_Access::limit_caps(['unfiltered_html'=>true],[],[],$u902)['unfiltered_html']));
+check('7.94 ai login: an AI user is refused at the login form, anyone else passes', SGAP_AI_Access::block_password_login($u901,'x') instanceof WP_Error && SGAP_AI_Access::block_password_login($u902,'x')===$u902);
+$lg=[]; foreach (range(1,205) as $i) $lg=SGAP_AI_Access::append_log($lg,['at'=>$i]);
+check('7.94 ai log: keeps the newest 200 calls', count($lg)===200 && $lg[0]['at']===6 && end($lg)['at']===205);
+$oa=SGAP_AI_Access::openapi('https://brygguiden.dk/wp-json','Brygguiden');
+$ops=[]; foreach ($oa['paths'] as $path=>$methods) foreach ($methods as $m=>$o) $ops[$o['operationId']]=$o;
+check('7.94 openapi: server, Basic auth and the post/page/term operations', $oa['servers'][0]['url']==='https://brygguiden.dk/wp-json' && $oa['components']['securitySchemes']['basicAuth']['scheme']==='basic'
+  && array_keys($ops)===['listPosts','createPost','getPost','updatePost','listPages','getPage','updatePage','listCategories','listTags'] && $oa['openapi']==='3.1.0');
+check('7.94 openapi: every operation is marked not consequential, so ChatGPT asks once', count(array_filter($ops,fn($o)=>($o['x-openai-isConsequential']??null)===false))===count($ops));
+check('7.94 openapi: the content schema carries the Rank Math fields and the site name', isset($oa['components']['schemas']['Content']['properties']['meta']['properties']['rank_math_focus_keyword']) && str_starts_with($oa['info']['title'],'Brygguiden'));
+check('7.94 openapi: no delete operation is offered', !str_contains(json_encode($oa),'"delete"'));
+$GLOBALS['routes']=[]; SGAP_AI_Access::routes();
+check('7.94 routes: /openapi is registered', in_array('/openapi',$GLOBALS['routes'][SGAP_REST::NS]??[],true));
+check('7.94 ai: the module is loaded by the plugin', str_contains(file_get_contents(__DIR__.'/../steamgears-autopilot/steamgears-autopilot.php'),"require_once __DIR__ . '/includes/ai-access.php';"));
+unset($GLOBALS['usermeta'][901]);
 // P3.2/P3.5-slut
 exit(empty($GLOBALS['fail'])?0:1);

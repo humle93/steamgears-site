@@ -137,5 +137,35 @@ if (function_exists('wp_get_ability')) {
     $r = wp_get_ability('steamgears-autopilot/rescue-images')->execute(['dry_run' => true]);
     ta('rescue-images and self-check available as tools', is_array($r) && isset($r['external_files']) && wp_get_ability('steamgears-autopilot/self-check'));
 }
+/* --- 7.94.0: AI access for ChatGPT --- */
+wp_set_current_user(1);
+$acc = SGAP_AI_Access::create('chatgpt', 'editor', false);
+$ai = is_array($acc) ? (int) $acc['user_id'] : 0;
+ta('ai access: creates ai-chatgpt as editor with one application password', $ai > 0 && get_userdata($ai)->user_login === 'ai-chatgpt' && in_array('editor', get_userdata($ai)->roles, true)
+   && count(WP_Application_Passwords::get_user_application_passwords($ai)) === 1, is_wp_error($acc) ? $acc->get_error_message() : null);
+$again = SGAP_AI_Access::create('chatgpt', 'author', false);
+ta('ai access: a new key replaces the old one and the role follows the choice', is_array($again) && (int) $again['user_id'] === $ai && $again['password'] !== $acc['password']
+   && count(WP_Application_Passwords::get_user_application_passwords($ai)) === 1 && get_userdata($ai)->roles === ['author']);
+ta('ai access: the key authenticates as the AI user (REST)', (function () use ($again, $ai) { add_filter('wp_is_application_passwords_available', '__return_true'); add_filter('application_password_is_api_request', '__return_true'); $u = wp_authenticate_application_password(null, 'ai-chatgpt', $again['password']); return $u instanceof WP_User && (int) $u->ID === $ai; })());
+ta('ai access: the AI user cannot sign in at the login form', is_wp_error(wp_authenticate_username_password(null, 'ai-chatgpt', 'whatever')) && is_wp_error(apply_filters('wp_authenticate_user', get_userdata($ai), 'x')));
+$admin_named = wp_insert_user(['user_login' => 'ai-gemini', 'user_pass' => wp_generate_password(), 'user_email' => 'gemini-owner@example.test', 'role' => 'subscriber']);
+ta('ai access: an existing non-AI user with the same name is never taken over', is_wp_error(SGAP_AI_Access::create('gemini', 'editor', false)) && get_userdata($admin_named)->roles === ['subscriber']);
+SGAP_AI_Access::create('chatgpt', 'editor', false);
+wp_set_current_user($ai);
+ta('ai access: no unfiltered_html, settings or plugins even as editor', current_user_can('edit_others_posts') && !current_user_can('unfiltered_html') && !current_user_can('manage_options') && !current_user_can('install_plugins'));
+$np = wp_insert_post(['post_title' => 'AI wants this live', 'post_status' => 'publish', 'post_content' => '<p>Hi</p><script>alert(1)</script>']);
+ta('ai access: a new post it publishes is saved as a draft, without the script', get_post_status($np) === 'draft' && !str_contains(get_post_field('post_content', $np), '<script'));
+wp_set_current_user(1); $live = wp_insert_post(['post_title' => 'Live already', 'post_status' => 'publish', 'post_content' => 'x']); wp_set_current_user($ai);
+wp_update_post(['ID' => $live, 'post_content' => 'edited by AI']);
+ta('ai access: a live post it edits stays live', get_post_status($live) === 'publish' && get_post_field('post_content', $live) === 'edited by AI');
+$req = new WP_REST_Request('GET', '/wp/v2/posts'); $req->set_param('context', 'edit'); rest_do_request($req);
+$last = SGAP_AI_Access::log(); $last = end($last);
+ta('ai access: its REST calls are logged', is_array($last) && $last['client'] === 'chatgpt' && $last['method'] === 'GET' && $last['route'] === '/wp/v2/posts' && (int) $last['status'] === 200, $last);
+wp_set_current_user(1);
+$oa = rest_do_request(new WP_REST_Request('GET', '/sgap/v1/openapi'));
+ta('ai access: the OpenAPI schema is served for ChatGPT', $oa->get_status() === 200 && ($oa->get_data()['paths']['/wp/v2/posts']['post']['operationId'] ?? '') === 'createPost');
+ta('ai access: closing it deletes the key and the role', SGAP_AI_Access::revoke($ai) === true && WP_Application_Passwords::get_user_application_passwords($ai) === [] && get_userdata($ai)->roles === []);
+ta('ai access: closing a normal user is refused', is_wp_error(SGAP_AI_Access::revoke(1)));
+wp_delete_post($np, true); wp_delete_post($live, true); delete_option(SGAP_AI_Access::LOG);
 if ($fail) { WP_CLI::error('automation: some checks failed'); }
 WP_CLI::line('automation: all checks passed');

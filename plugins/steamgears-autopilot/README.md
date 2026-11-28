@@ -18,7 +18,7 @@ The whole social autopilot runs inside WordPress (Command Center is retired):
 4. **Measure** – every post links via `/go/<id>/`, so clicks (and WooCommerce
    orders) are counted per channel.
 
-Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.93.2.zip` → Activate. On an existing
+Install: Plugins → Add New → Upload → `../steamgears-autopilot-v7.94.0.zip` → Activate. On an existing
 install the same zip arrives through the self-updater (see *Updates*), so an upload is only needed for the
 first install or a recovery.
 
@@ -680,6 +680,21 @@ and only asks the AI for its own topics to fill the rest of the week.
 - A phrase that fails 3 times is not tried again. `/snapshot` shows `status.cc_keywords` (received, active,
   waiting, written, existing, failed).
 - The same plugin runs on several sites: the AI topic prompt names the site's own domain.
+
+### AI access for ChatGPT (7.94)
+
+*Steamgears Autopilot → AI access* gives an AI client its own login instead of yours. Pick the AI (ChatGPT, Claude,
+Gemini), the role (editor or author, never administrator) and whether it may publish. The plugin creates the user
+`ai-<client>` and an application password, shown once together with the ready *Basic* key for ChatGPT.
+
+- Connect ChatGPT: *Explore GPTs → Create → Configure → Actions*, import `/wp-json/sgap/v1/openapi`, authentication
+  *API key → Basic* with the key from the page. Every operation is marked not consequential, so ChatGPT asks once
+  (*Always allow*). There is no delete operation.
+- The site enforces the limits: no wp-admin login, no `unfiltered_html`, settings, plugins, themes or users whatever
+  the role; without publishing rights new content becomes a draft (live posts can still be edited). Rank Math's title,
+  description and focus keyword are writable through the posts REST API for users who can edit posts.
+- Every REST call by an AI user is logged (newest 200). *Close access* deletes the key and removes the role; a new key
+  replaces the old one.
 
 ## One niche, one shop (7.64)
 
