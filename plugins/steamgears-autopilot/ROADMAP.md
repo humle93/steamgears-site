@@ -32,6 +32,25 @@ and how long each missing piece takes.
 
 ---
 
+## P22 — ingen dublet af søgeord, sitet allerede har dækket (28/11/2026, 7.93.2)
+
+**Fund (27/11):** 20 artikler blev planlagt direkte på brygguiden.dk (post 280–299, én om dagen til 17/12). Command Centers indholdsplan (`deploy/feed.seed.json`, 26 emner) har nogle af de samme emner. Når Command Center bliver forbundet, ville pluginnet skrive dem en gang til.
+
+**Mål:** et søgeord fra Command Center, som sitet allerede har et indlæg, en side eller et produkt om (fokussøgeord, titel eller slug, også planlagte og kladder), skrives ikke. Det meldes tilbage som `written` med det eksisterende indlægs id og status `exists`, så Command Center stopper med at tilbyde det og ikke selv skriver det.
+
+**Plan: 0,15 developer-dage**, fordelt på:
+
+| Trin | Andel | Kumuleret |
+| --- | --- | --- |
+| `SGAP_Keywords::existing_post()` (én forespørgsel, cache pr. kørsel) og spring over i `next()` | 40 % | 40 % |
+| `status.existing` | 5 % | 45 % |
+| Smoke-checks + nyt trin i `automation.php` | 30 % | 75 % |
+| Versionsbump, CHANGELOG, README, zip, projektstatus | 25 % | 100 % |
+
+**Filstruktur (ændret):** `steamgears-autopilot.php` (7.93.2), `includes/keywords.php`, `CHANGELOG.md`, `README.md`, `ROADMAP.md`, `plugins/tests/smoke.php`, `plugins/tests/automation.php`, `plugins/steamgears-autopilot-v7.93.2.zip` (erstatter v7.93.1).
+
+**Status:** se projektstatus (P22). Ikke verificeret live: kræver at 7.93.2 installeres på sitene og at Command Center sender en liste.
+
 ## P21 — vælg Pinterest-forbindelse (27/11/2026)
 
 **Mål:** gøre det muligt at vælge pluginets eget Pinterest-token til direkte opslag, selv om WooCommerce er forbundet. Standardvalget bevarer den eksisterende prioritet og rører ikke nogen konto. Plan 0,25 developer-dage: kildevalg og fornyelse 40 %, indstillinger og hjælpetekst 20 %, tests 25 %, dokumentation og pakke 15 %. Filer: `includes/pinterest.php`, `includes/core.php`, `includes/setup.php`, `plugins/tests/pinterest.php`, hovedfil, README, CHANGELOG, ROADMAP og én versioneret zip. Rigtige tilladelser kræver Pinterest-ejerens godkendelse. Kildevalget og lokale tests er gennemført; browsergodkendelse og et nyt token mangler.

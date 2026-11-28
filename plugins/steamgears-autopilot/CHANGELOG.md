@@ -10,6 +10,18 @@ Noterne er skrevet ud fra commit-historikken og de dokumenter der hører til hve
 
 <!-- patch-notes: baseline 7.65.0 -->
 
+## 7.93.2 — 2026-11-28
+
+**Rettet: et søgeord fra Command Center, som sitet allerede har et indlæg om, skrives ikke igen.**
+
+### Rettet
+- Før den ugentlige artikel skriver et søgeord fra Command Center, ser `SGAP_Keywords::existing_post()` efter et indlæg, en side eller et produkt, der allerede dækker det: samme Rank Math-fokussøgeord (også det første af flere), samme titel (søgeordet eller Command Centers planlagte titel) eller samme slug. Udgivne, planlagte, kladder, afventende og private tæller; papirkurven gør ikke. Baggrund: 20 artikler blev planlagt direkte på brygguiden.dk 27/11, og Command Centers indholdsplan har nogle af de samme emner.
+- Et søgeord med et eksisterende indlæg gemmes med indlæggets id og status `exists` og står under `written` i svaret til Command Center, så Command Center markerer det som lavet og heller ikke selv skriver det.
+- `status` (og `/snapshot` → `cc_keywords`) har det nye tal `existing`.
+
+### Uændret
+- Rækkefølgen, levetiden på 14 dage, de 3 forsøg og `articles_per_week` er som før. Opslagene genbruges inden for samme kørsel og nulstilles, når et nyt indlæg er skrevet. Målt med 8 nye checks i `plugins/tests/smoke.php` (1 624 PASS / 0 FAIL) og et nyt trin i `plugins/tests/automation.php` (kører i WordPress-CI).
+
 ## 7.93.1 — 2026-11-27
 
 **Rettet: et selvstændigt Pinterest-token kan nu bruges sammen med WooCommerce-forbindelsen.**
