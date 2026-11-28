@@ -51,7 +51,7 @@ Kører dagligt kl. 04:10 og gør fire ting, alle idempotente:
 Alt skrives til optionen `sgap_queue_hygiene` med tal for hver kørsel, så effekten kan læses uden at
 læse koden.
 
-### 2.2 `sgap-cron-kicker.php` (mu-plugin, 8,3 KB)
+### 2.2 `sgap-cron-kicker.php` (mu-plugin, 8,3 KB; 1.4.0 fra 28/11, se 2.3.0b)
 
 To veje til at få cron til at køre igen uden at røre `wp-config.php`:
 
@@ -104,6 +104,26 @@ wp_next_scheduled('sgap_cron_tick') = 2026-11-08T14:20:32+00:00
 Altså: den site-planlagte ur slog af sig selv, kørte otte forfaldne opgaver og satte næste
 kørsel. Historikken havde på det tidspunkt 12 poster fordelt på `shutdown` (10), `tick` (1) og
 `wp-schedule` (1).
+
+### 2.3.0b Kicker 1.4.0 — én kørsel pr. forekomst (28/11 2026)
+
+**Fundet live 28/11** (fejlloggen, kun læsning): `Cron reschedule event error for hook: sgap_reddit_tick,
+Error code: could_not_set` flere gange i timen (også `sgap_cirla_daily`), samt `Cannot modify header
+information - headers already sent by … sgap-cron-kicker.php:144`.
+
+**Årsag:** `run_due()` lagde den næste forekomst af en gentagen opgave, men fjernede aldrig den gamle (core's
+`_wp_cron()` gør begge dele). Den gamle stod derfor stadig som forfalden: næste kicker-pas kørte opgaven igen,
+og når `wp-cron.php` kom til, var næste forekomst allerede lagt, så cron-arrayet ikke ændrede sig og
+`update_option` gav `could_not_set`. Kicker'en tog heller ikke core's `doing_cron`-lås og kunne køre samtidig med
+`wp-cron.php`. Headerfejlen kom fra `tick`: svaret sendes tidligt, og bagefter prøvede REST-serveren at sende
+status og headere igen.
+
+**Rettet i 1.4.0:** som `_wp_cron()` (genplanlæg, fjern så den gamle, kør), en forekomst der ikke længere står i
+cron-arrayet (taget af en anden kørsel) springes over og tælles som `taken_elsewhere`, `doing_cron` respekteres og
+tages (en udløbet lås overtages, og kun vores egen slippes), og `tick` afslutter requesten efter et tidligt svar.
+**Test:** `wordpress/tests/test-cron-kicker.php` (13 prøver, i `tools/natlige-vaern.sh`); på 1.3.0 fejler 11 af
+dem, herunder genskabelsen af `could_not_set`. **Ikke installeret:** mu-plugins kommer ikke med pluginnets zip —
+filen skal lægges i `wp-content/mu-plugins/` af ejeren.
 
 ### 2.3.1 Den faktiske GitHub-kørsel
 

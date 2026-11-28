@@ -102,6 +102,9 @@ check "anmeldelsesmail"                      "$PHP_BIN" wordpress/tests/test-rev
 # S5.3–S5.6: hardningen retter seks ting der alle er usynlige når de fejler — en header
 # der ikke sendes, giver ingen fejlkode. Testen kræver derfor hver regel for sig, offline.
 check "hardning (S5)"                        "$PHP_BIN" wordpress/tests/test-hardening.php
+# S3.6: cron-kicker 1.4.0 — en gentagen opgave må kun køre én gang pr. forekomst og ikke
+# samtidig med wp-cron.php (live 28/11: »could_not_set« for sgap_reddit_tick hver time).
+check "cron-kicker"                          "$PHP_BIN" wordpress/tests/test-cron-kicker.php
 # S5.10: hardningen ligger på sitet fra 9/11, så den udefra målte tilstand holdes op hver nat.
 # Testen ovenfor beviser at reglerne er kodet rigtigt; denne måling beviser at de også når
 # klienten gennem W3TCs sidecache — det var netop der de tre headere forsvandt.
