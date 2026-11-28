@@ -95,6 +95,12 @@ check('7.95 pair: /pair over plain http is refused before the code is used, and 
 unset($GLOBALS['p24_insecure']);
 $p20_tls = SGAP_CC_Pair::rest_pair(new WP_REST_Request(['code' => $p20_race]));
 check('7.95 pair: the same call over https works', is_array($p20_tls) && !empty($p20_tls['app_password']));
+// Codex P2 (stale write): a wrong-code call that read the row before the redemption writes it back afterwards.
+update_option(SGAP_CC_Pair::CODE, ['hash' => $p20_stored['hash'], 'user' => 7, 'exp' => time() + 600, 'tries' => 1]);
+$GLOBALS['p20_app_made'] = [];
+$p20_revived = SGAP_CC_Pair::pair($p20_race);
+check('7.95 pair: a redeemed code written back by a stale wrong-code call is refused (409) and gives no password',
+    $p20_revived instanceof WP_Error && ($p20_revived->data['status'] ?? 0) === 409 && $GLOBALS['p20_app_made'] === [] && get_option(SGAP_CC_Pair::CODE) === false);
 delete_option(SGAP_CC_Pair::CODE);
 check('7.95 pair: the site never calls Command Center (no outgoing request in the module)',
     !preg_match('/wp_remote_|wp_safe_remote_|curl_/', $p20_src));

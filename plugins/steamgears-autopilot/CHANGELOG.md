@@ -20,10 +20,10 @@ Noterne er skrevet ud fra commit-historikken og de dokumenter der hører til hve
 - Første trin i planen *nye sites udrulles via pluginnet* (Command Center-roadmappen 28/11). Porteret fra den ikke-flettede branch `p18-flere-sites` uden dens login-fra-CC-del og uden `SGAP_Site`.
 
 ### Sikkerhed
-- `/pair` afviser et kald over almindelig http (403), før koden røres, så applikationsadgangskoden aldrig sendes ukrypteret. Koden forbruges med ét `delete_option()`: taber et samtidigt kald kapløbet, får det 409 og intet kodeord. Fem forkerte koder brænder koden; en udløbet kode fjernes (410); koden virker én gang (404 bagefter). Kun administratorer kan lave en kode, og kun når applikationsadgangskoder er slået til og sitet kører https (localhost undtaget). Sitet kalder aldrig Command Center.
+- `/pair` afviser et kald over almindelig http (403), før koden røres, så applikationsadgangskoden aldrig sendes ukrypteret. Koden forbruges med ét `delete_option()`: taber et samtidigt kald kapløbet, får det 409 og intet kodeord, og en brugt kodes hash huskes, så et samtidigt forkert-kode-kald ikke kan skrive den tilbage. Fem forkerte koder brænder koden; en udløbet kode fjernes (410); koden virker én gang (404 bagefter). Kun administratorer kan lave en kode, og kun når applikationsadgangskoder er slået til og sitet kører https (localhost undtaget). Sitet kalder aldrig Command Center.
 
 ### Målt
-- 21 nye smoke-checks i `plugins/tests/cc-pair.php`, `php plugins/tests/smoke.php` 1 681 PASS / 0 FAIL, `php -l` på de ændrede filer. **Ikke målt:** installeret på et site og et rigtigt kald fra Command Center (CC-siden er næste trin).
+- 22 nye smoke-checks i `plugins/tests/cc-pair.php`, `php plugins/tests/smoke.php` 1 682 PASS / 0 FAIL, `php -l` på de ændrede filer. **Ikke målt:** installeret på et site og et rigtigt kald fra Command Center (CC-siden er næste trin).
 
 ## 7.94.0 — 2026-11-28
 

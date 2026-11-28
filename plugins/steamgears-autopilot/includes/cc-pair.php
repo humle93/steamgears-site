@@ -27,6 +27,8 @@ if (!defined('ABSPATH')) {
 
 class SGAP_CC_Pair {
     const CODE = 'sgap_cc_pair_code';
+    /** Hash of the last redeemed code, so a stale write from a concurrent wrong-code call cannot bring it back. */
+    const USED = 'sgap_cc_pair_used';
     const MAKE_ACTION = 'sgap_cc_pair_make';
     const TTL = 15 * MINUTE_IN_SECONDS;
     const MAX_TRIES = 5;
@@ -158,6 +160,10 @@ class SGAP_CC_Pair {
         if (!is_array($stored) || empty($stored['hash'])) {
             return new WP_Error('sgap_pair', 'No link code is waiting. Make a new one on the plugin dashboard.', ['status' => 404]);
         }
+        if (hash_equals((string) get_option(self::USED, ''), (string) $stored['hash'])) {
+            delete_option(self::CODE);
+            return new WP_Error('sgap_pair', 'The link code has already been used. Make a new one.', ['status' => 409]);
+        }
         if ($now > (int) ($stored['exp'] ?? 0)) {
             delete_option(self::CODE);
             return new WP_Error('sgap_pair', 'The link code has expired. Make a new one.', ['status' => 410]);
@@ -176,6 +182,7 @@ class SGAP_CC_Pair {
         if (!delete_option(self::CODE)) {
             return new WP_Error('sgap_pair', 'The link code has already been used. Make a new one.', ['status' => 409]);
         }
+        update_option(self::USED, (string) $stored['hash'], false);
         $user = get_userdata((int) ($stored['user'] ?? 0));
         if (!$user || !user_can($user, 'manage_options')) {
             return new WP_Error('sgap_pair', 'The administrator who made the code no longer exists.', ['status' => 409]);
