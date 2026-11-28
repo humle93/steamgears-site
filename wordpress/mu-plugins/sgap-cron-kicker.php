@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Steamgears cron kicker
  * Description: Kører forfaldne cron-opgaver på et almindeligt sidevisning, når webhotellet har slået WP-Cron fra (DISABLE_WP_CRON) og der ikke er sat et server-cron. Svaret sendes til brugeren først, så kørslen ikke koster ventetid.
- * Version: 1.3.0
+ * Version: 1.4.0
  */
 
 if (!defined('ABSPATH')) {
@@ -37,6 +37,12 @@ final class SGAP_Cron_Kicker
 
     /** Værn mod at run_due kalder sig selv gennem en planlagt hook. */
     private static bool $busy = false;
+
+    /** Sat når send_early() har sendt svaret, så tick() ikke lader REST-serveren sende headere igen. */
+    private static bool $sent = false;
+
+    /** Samme værdi som core's WP_CRON_LOCK_TIMEOUT (60 s), hvis konstanten ikke findes. */
+    private const CRON_LOCK_TIMEOUT = 60;
 
     public static function boot(): void
     {
@@ -119,7 +125,13 @@ final class SGAP_Cron_Kicker
         update_option(self::OPTION, $result, false);
         self::record($result);
 
-        // Svaret er allerede sendt ovenfor; dette er kun til typesystemet.
+        // Svaret er allerede sendt. Returnerer vi et WP_REST_Response, prøver REST-serveren at
+        // sende status og headere igen og skriver »headers already sent« i fejlloggen (målt
+        // 28/11: hver tick). Derfor afsluttes requesten her; shutdown-hooks kører stadig.
+        if (self::$sent && !(defined('SGAP_KICKER_NO_EXIT') && SGAP_KICKER_NO_EXIT)) {
+            exit;
+        }
+
         return new WP_REST_Response(array_merge(['ok' => true], $result), 200);
     }
 
@@ -142,6 +154,7 @@ final class SGAP_Cron_Kicker
         nocache_headers();
         header('Content-Type: application/json; charset=utf-8');
         echo wp_json_encode($payload);
+        self::$sent = true;
 
         if (function_exists('fastcgi_finish_request')) {
             fastcgi_finish_request();
@@ -290,6 +303,14 @@ final class SGAP_Cron_Kicker
             return ['at' => gmdate('c'), 'seconds' => 0, 'ran' => [], 'due_before' => 0];
         }
 
+        // wp-cron.php (og core's spawn) bruger transienten `doing_cron` som lås. Kører den
+        // allerede, venter kicker'en — ellers kører begge den samme forekomst, og den ene får
+        // »Cron reschedule event error … could_not_set« (målt 28/11 i fejlloggen, hver time).
+        $lockKey = self::take_cron_lock();
+        if ($lockKey === null) {
+            return ['at' => gmdate('c'), 'seconds' => 0, 'ran' => [], 'due_before' => self::count_due($jobs), 'skipped' => 'wp-cron'];
+        }
+
         self::$busy = true;
 
         if (function_exists('fastcgi_finish_request')) {
@@ -303,6 +324,7 @@ final class SGAP_Cron_Kicker
 
         $started = microtime(true);
         $ran = [];
+        $taken = 0;
 
         foreach ($jobs as $timestamp => $hooks) {
             if ((float) $timestamp > microtime(true)) {
@@ -310,19 +332,28 @@ final class SGAP_Cron_Kicker
             }
 
             foreach ((array) $hooks as $hook => $items) {
-                foreach ((array) $items as $item) {
+                foreach ((array) $items as $key => $item) {
                     $args = isset($item['args']) && is_array($item['args']) ? $item['args'] : [];
                     $schedule = $item['schedule'] ?? false;
 
+                    // Listen er et øjebliksbillede. Har en anden kørsel taget forekomsten siden,
+                    // står den ikke i cron-arrayet længere, og så må den ikke køre igen.
+                    if (!self::still_scheduled((int) $timestamp, (string) $hook, (string) $key)) {
+                        $taken++;
+                        continue;
+                    }
+
+                    // Som _wp_cron(): først den næste forekomst, så fjernes denne. Før 1.4.0 blev
+                    // den gamle forekomst aldrig fjernet for gentagne opgaver, så den stod som
+                    // forfalden og kørte igen ved næste pas (og igen i wp-cron.php).
                     if ($schedule) {
                         try {
                             wp_reschedule_event((int) $timestamp, (string) $schedule, (string) $hook, $args, true);
                         } catch (Throwable $e) {
                             // En opgave der ikke kan flyttes må ikke stoppe resten.
                         }
-                    } else {
-                        wp_unschedule_event((int) $timestamp, (string) $hook, $args);
                     }
+                    wp_unschedule_event((int) $timestamp, (string) $hook, $args, true);
 
                     try {
                         do_action_ref_array((string) $hook, $args);
@@ -339,13 +370,53 @@ final class SGAP_Cron_Kicker
         }
 
         self::$busy = false;
+        self::release_cron_lock($lockKey);
 
-        return [
+        $report = [
             'at' => gmdate('c'),
             'seconds' => round(microtime(true) - $started, 2),
             'ran' => $ran,
             'due_before' => self::count_due($jobs),
         ];
+        if ($taken > 0) {
+            $report['taken_elsewhere'] = $taken;
+        }
+
+        return $report;
+    }
+
+    /**
+     * Tager core's cron-lås, hvis ingen anden kørsel har den (eller den er ældre end
+     * WP_CRON_LOCK_TIMEOUT). Returnerer nøglen, eller null når en anden kører.
+     */
+    private static function take_cron_lock(): ?string
+    {
+        $timeout = defined('WP_CRON_LOCK_TIMEOUT') ? (int) WP_CRON_LOCK_TIMEOUT : self::CRON_LOCK_TIMEOUT;
+        $now = microtime(true);
+        $held = get_transient('doing_cron');
+        if ($held && (float) $held + $timeout > $now) {
+            return null;
+        }
+
+        $key = sprintf('%.22F', $now);
+        set_transient('doing_cron', $key);
+
+        return $key;
+    }
+
+    /** Slipper kun låsen, hvis den stadig er vores (wp-cron.php kan have overtaget en udløbet lås). */
+    private static function release_cron_lock(string $key): void
+    {
+        if ((string) get_transient('doing_cron') === $key) {
+            delete_transient('doing_cron');
+        }
+    }
+
+    private static function still_scheduled(int $timestamp, string $hook, string $key): bool
+    {
+        $crons = (array) _get_cron_array();
+
+        return isset($crons[$timestamp][$hook][$key]);
     }
 
     /**
