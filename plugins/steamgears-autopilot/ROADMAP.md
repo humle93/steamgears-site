@@ -32,6 +32,27 @@ and how long each missing piece takes.
 
 ---
 
+## P24 — forbind Command Center med linkkode (28/11/2026, 7.95.0)
+
+**Mål:** trin 1 i Command Centers plan *nye sites udrulles via pluginnet*: ejeren installerer én-klik-WordPress hos et webhotel, uploader pluginnet og kopierer én kode til Command Center. Command Center får sine WordPress-nøgler uden at nogen taster et kodeord.
+
+**Plan: 0,3 developer-dage**, fordelt på:
+
+| Trin | Andel | Kumuleret |
+| --- | --- | --- |
+| `SGAP_CC_Pair` porteret fra `p18-flere-sites` (kode, `/pair`, applikationsadgangskode) uden `SGAP_Site` og login-fra-CC | 45 % | 45 % |
+| Knappen altid synlig på Command Center-kortet | 10 % | 55 % |
+| 18 smoke-checks | 30 % | 85 % |
+| Versionsbump, CHANGELOG, README, zip, projektstatus | 15 % | 100 % |
+
+**Filstruktur:** ny `includes/cc-pair.php` og `plugins/tests/cc-pair.php`; ændret `steamgears-autopilot.php` (7.95.0), `includes/core.php` (kortet), `plugins/tests/smoke.php`, `CHANGELOG.md`, `README.md`, `ROADMAP.md`, `plugins/steamgears-autopilot-v7.95.0.zip` (erstatter v7.94.0).
+
+**Bevidst ikke med:** login fra Command Center til wp-admin (`sgap_cc_in` på `p18-flere-sites`) og `SGAP_Site` (sitets egen beskrivelse i AI-prompterne). De kan porteres senere som egne punkter. Branchen `p18-flere-sites` er ikke slettet.
+
+**Næste:** CC-siden: felt *Forbind med kode* i Nicher → Netværk og Moduler → Projekter, som opretter projektet med de udstedte nøgler.
+
+**Status:** se projektstatus (P24). Ikke verificeret live.
+
 ## P23 — AI-adgang til ChatGPT (og andre AI'er) med én godkendelse (28/11/2026, 7.94.0)
 
 **Mål:** ejeren giver ChatGPT adgang til sitet fra én side i pluginnet (*Steamgears Autopilot → AI-adgang*), uden at dele sit eget login. Hver AI får sin egen WordPress-bruger med en rolle, ejeren vælger (forfatter, redaktør, aldrig administrator), og en applikationsadgangskode, der vises én gang. Ejeren kan lukke adgangen med ét klik. ChatGPT forbindes som en Custom GPT med *Actions* ud fra et OpenAPI-skema, som pluginnet selv udgiver, og alle handlinger i skemaet er markeret, så ChatGPT kun spørger én gang (*Always allow*). Sikkerheden ligger på sitet i stedet for i godkendelsen pr. handling: rollen, at nyt indhold kun bliver kladder (medmindre ejeren slår udgivelse til), at AI-brugeren ikke kan logge ind i wp-admin, og en log over hvert kald.

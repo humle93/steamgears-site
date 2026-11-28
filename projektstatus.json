@@ -496,6 +496,15 @@
           "unit": "d",
           "verified": false,
           "note": "7.94.0: SGAP_AI_Access (includes/ai-access.php): side AI access opretter ai-<client> (redaktør/forfatter, aldrig admin) + applikationsadgangskode vist én gang med Basic-nøgle; ingen wp-admin-login (login-formular afvist, login-cookie ignoreret, kan ikke rette egen bruger), ingen unfiltered_html/indstillinger/plugins/brugere; nyt indhold kun kladder uden udgivelsesret; log over REST-kald; luk med ét klik. GET /sgap/v1/openapi til ChatGPT Actions, alle handlinger x-openai-isConsequential=false (Always allow). 20 nye smoke-checks, 1 660 PASS / 0 FAIL; forløb i automation.php (WordPress-CI). IKKE målt: installeret på sitene og en rigtig Custom GPT."
+        },
+        {
+          "id": "p24",
+          "name": "P24 — forbind Command Center med linkkode (nye sites via pluginnet, trin 1)",
+          "done": 0.3,
+          "total": 0.3,
+          "unit": "d",
+          "verified": false,
+          "note": "7.95.0: SGAP_CC_Pair (includes/cc-pair.php), porteret fra den ikke-flettede branch p18-flere-sites uden login-fra-CC-delen og uden SGAP_Site. Knappen Forbind Command Center (linkkode) står altid på Command Center-kortet (også på et site der aldrig har været forbundet) og laver en engangskode (15 min, 60 bit, kun sha256 gemt) vist som sgap1.<base64url({u,c})>. POST /sgap/v1/pair {code, cc_url, cc_version} brænder koden og udsteder én applikationsadgangskode 'Command Center' til administratoren, der lavede koden, og svarer med site, rest, user, app_password, plugin_version og info {domain, name, locale, woocommerce}. 5 forkerte koder brænder koden; kun https (localhost undtaget); sitet kalder aldrig CC. 18 nye smoke-checks (plugins/tests/cc-pair.php), 1 678 PASS / 0 FAIL. IKKE målt: installeret på et site og et rigtigt kald fra CC (CC-siden er trin 2 i CC-roadmappen)."
         }
       ],
       "total": 41.5,
