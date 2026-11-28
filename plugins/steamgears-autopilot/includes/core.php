@@ -2134,8 +2134,10 @@ class SGAP_Admin {
     private static function cc_card(): void {
         $line = SGAP_CC::line();
         $button = SGAP_CC::dashboard_button();
-        if ($line === '' && $button === '') {
-            return; // never connected and no address set: no card, no noise
+        // 7.95: the link-code button is always there, so a fresh site can be connected.
+        $pair = class_exists('SGAP_CC_Pair') ? SGAP_CC_Pair::dashboard_button() : '';
+        if ($line === '' && $button === '' && $pair === '') {
+            return; // not an administrator: no card, no noise
         }
         SGAP_UI::card_open('Command Center', 'admin-site-alt3');
         echo '<p class="description" style="margin-top:0">The self-hosted dashboard reads <code>/snapshot</code> and sends drafts here. Nothing on this site calls it.</p>';
@@ -2143,6 +2145,7 @@ class SGAP_Admin {
             echo '<p>' . $line . '</p>';
         }
         echo $button;
+        echo $pair;
         SGAP_UI::card_close();
     }
 
