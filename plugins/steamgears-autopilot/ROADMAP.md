@@ -32,6 +32,27 @@ and how long each missing piece takes.
 
 ---
 
+## P23 — AI-adgang til ChatGPT (og andre AI'er) med én godkendelse (28/11/2026, 7.94.0)
+
+**Mål:** ejeren giver ChatGPT adgang til sitet fra én side i pluginnet (*Steamgears Autopilot → AI-adgang*), uden at dele sit eget login. Hver AI får sin egen WordPress-bruger med en rolle, ejeren vælger (forfatter, redaktør, aldrig administrator), og en applikationsadgangskode, der vises én gang. Ejeren kan lukke adgangen med ét klik. ChatGPT forbindes som en Custom GPT med *Actions* ud fra et OpenAPI-skema, som pluginnet selv udgiver, og alle handlinger i skemaet er markeret, så ChatGPT kun spørger én gang (*Always allow*). Sikkerheden ligger på sitet i stedet for i godkendelsen pr. handling: rollen, at nyt indhold kun bliver kladder (medmindre ejeren slår udgivelse til), at AI-brugeren ikke kan logge ind i wp-admin, og en log over hvert kald.
+
+**Plan: 0,5 developer-dage**, fordelt på:
+
+| Trin | Andel | Kumuleret |
+| --- | --- | --- |
+| `SGAP_AI_Access`: opret/luk adgang (bruger, rolle, applikationsadgangskode), ingen wp-admin-login | 25 % | 25 % |
+| Kun kladder for nyt indhold, Rank Math-felter i REST, log over kald | 20 % | 45 % |
+| OpenAPI-skema (`GET /sgap/v1/openapi`) til ChatGPT Actions | 15 % | 60 % |
+| Admin-side med vejledning til ChatGPT | 10 % | 70 % |
+| Smoke-checks + forløb i `automation.php` | 20 % | 90 % |
+| Versionsbump, CHANGELOG, README, zip, projektstatus | 10 % | 100 % |
+
+**Filstruktur:** ny `includes/ai-access.php`; ændret `steamgears-autopilot.php` (7.94.0), `CHANGELOG.md`, `README.md`, `ROADMAP.md`, `plugins/tests/smoke.php`, `plugins/tests/automation.php`, `plugins/steamgears-autopilot-v7.94.0.zip` (erstatter v7.93.2).
+
+**Bevidst ikke med:** godkendelserne i Claude-appen og Novamiras godkendelsesgrænse. Dem ændrer ejeren selv; et plugin skal ikke slå en anden AI-klients sikkerhedsspørgsmål fra.
+
+**Status:** se projektstatus (P23). Ikke verificeret live: kræver at 7.94.0 installeres og en Custom GPT forbindes.
+
 ## P22 — ingen dublet af søgeord, sitet allerede har dækket (28/11/2026, 7.93.2)
 
 **Fund (27/11):** 20 artikler blev planlagt direkte på brygguiden.dk (post 280–299, én om dagen til 17/12). Command Centers indholdsplan (`deploy/feed.seed.json`, 26 emner) har nogle af de samme emner. Når Command Center bliver forbundet, ville pluginnet skrive dem en gang til.

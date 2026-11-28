@@ -487,6 +487,15 @@
           "unit": "d",
           "verified": false,
           "note": "7.93.2: SGAP_Keywords::existing_post() finder et indlæg, en side eller et produkt (udgivet, planlagt, kladde, afventende, privat) med samme Rank Math-fokussøgeord, titel eller slug; next() springer søgeordet over og gemmer det som 'exists' med post-id, så Command Center får det under written og markerer det som lavet. status.existing er nyt. 8 nye smoke-checks, 1 624 PASS / 0 FAIL; nyt trin i plugins/tests/automation.php (kører i WordPress-CI). IKKE målt: installeret på sitene og et rigtigt kald fra Command Center."
+        },
+        {
+          "id": "p23",
+          "name": "P23 — AI-adgang til ChatGPT med én godkendelse",
+          "done": 0.5,
+          "total": 0.5,
+          "unit": "d",
+          "verified": false,
+          "note": "7.94.0: SGAP_AI_Access (includes/ai-access.php): side AI access opretter ai-<client> (redaktør/forfatter, aldrig admin) + applikationsadgangskode vist én gang med Basic-nøgle; ingen wp-admin-login (login-formular afvist, login-cookie ignoreret, kan ikke rette egen bruger), ingen unfiltered_html/indstillinger/plugins/brugere; nyt indhold kun kladder uden udgivelsesret; log over REST-kald; luk med ét klik. GET /sgap/v1/openapi til ChatGPT Actions, alle handlinger x-openai-isConsequential=false (Always allow). 20 nye smoke-checks, 1 660 PASS / 0 FAIL; forløb i automation.php (WordPress-CI). IKKE målt: installeret på sitene og en rigtig Custom GPT."
         }
       ],
       "total": 41.5,
