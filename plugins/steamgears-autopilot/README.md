@@ -690,7 +690,8 @@ Gemini), the role (editor or author, never administrator) and whether it may pub
 - Connect ChatGPT: *Explore GPTs → Create → Configure → Actions*, import `/wp-json/sgap/v1/openapi`, authentication
   *API key → Basic* with the key from the page. Every operation is marked not consequential, so ChatGPT asks once
   (*Always allow*). There is no delete operation.
-- The site enforces the limits: no wp-admin login, no `unfiltered_html`, settings, plugins, themes or users whatever
+- The site enforces the limits: no wp-admin login (the login form refuses it, a login cookie for it is ignored, and it
+  cannot edit its own user), no `unfiltered_html`, settings, plugins, themes or users whatever
   the role; without publishing rights new content becomes a draft (live posts can still be edited). Rank Math's title,
   description and focus keyword are writable through the posts REST API for users who can edit posts.
 - Every REST call by an AI user is logged (newest 200). *Close access* deletes the key and removes the role; a new key

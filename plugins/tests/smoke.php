@@ -2077,6 +2077,14 @@ check('7.94 openapi: no delete operation is offered', !str_contains(json_encode(
 $GLOBALS['routes']=[]; SGAP_AI_Access::routes();
 check('7.94 routes: /openapi is registered', in_array('/openapi',$GLOBALS['routes'][SGAP_REST::NS]??[],true));
 check('7.94 ai: the module is loaded by the plugin', str_contains(file_get_contents(__DIR__.'/../steamgears-autopilot/steamgears-autopilot.php'),"require_once __DIR__ . '/includes/ai-access.php';"));
+check('7.94 ai cookie: an AI user is only signed in by its application password, never by a cookie', SGAP_AI_Access::only_app_password(901)===false && SGAP_AI_Access::only_app_password(902)===902 && SGAP_AI_Access::only_app_password(0)===0);
+SGAP_AI_Access::note_app_password($u901);
+check('7.94 ai cookie: after the application password authenticated it, the AI user is signed in', SGAP_AI_Access::only_app_password(901)===901);
+check('7.94 ai self-edit: an AI user cannot edit, delete or promote any user, itself included', SGAP_AI_Access::no_self_edit([],'edit_user',901,[901])===['do_not_allow'] && SGAP_AI_Access::no_self_edit(['promote_users'],'promote_user',901,[2])===['do_not_allow']
+  && SGAP_AI_Access::no_self_edit([],'edit_user',902,[902])===[] && SGAP_AI_Access::no_self_edit(['edit_posts'],'edit_post',901,[5])===['edit_posts']);
+$sd=SGAP_AI_Access::strip_seo(['id'=>5,'meta'=>['rank_math_focus_keyword'=>'secret','rank_math_title'=>'t','rank_math_description'=>'d','other'=>1]]);
+check('7.94 ai seo: the SEO fields are removed from the answer for someone who cannot edit, other meta stays', $sd['meta']===['other'=>1] && $sd['id']===5 && SGAP_AI_Access::strip_seo(['id'=>1])===['id'=>1]);
+check('7.94 ai seo: the fields are registered on init, not only for a known REST user', isset($GLOBALS['actions']['init']) && in_array([SGAP_AI_Access::class,'register_seo_meta'],$GLOBALS['actions']['init'],true) && isset($GLOBALS['actions']['rest_prepare_post'],$GLOBALS['actions']['determine_current_user'],$GLOBALS['actions']['map_meta_cap']));
 unset($GLOBALS['usermeta'][901]);
 // P3.2/P3.5-slut
 exit(empty($GLOBALS['fail'])?0:1);

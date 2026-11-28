@@ -161,6 +161,16 @@ ta('ai access: a live post it edits stays live', get_post_status($live) === 'pub
 $req = new WP_REST_Request('GET', '/wp/v2/posts'); $req->set_param('context', 'edit'); rest_do_request($req);
 $last = SGAP_AI_Access::log(); $last = end($last);
 ta('ai access: its REST calls are logged', is_array($last) && $last['client'] === 'chatgpt' && $last['method'] === 'GET' && $last['route'] === '/wp/v2/posts' && (int) $last['status'] === 200, $last);
+$me = new WP_REST_Request('POST', '/wp/v2/users/me'); $me->set_param('password', 'NewPass-for-cookie-123');
+ta('ai access: it cannot give itself a new password (no login cookie that way)', rest_do_request($me)->get_status() >= 400 && wp_check_password('NewPass-for-cookie-123', get_userdata($ai)->user_pass, $ai) === false);
+$up = new WP_REST_Request('POST', '/wp/v2/posts/' . $np); $up->set_param('meta', ['rank_math_focus_keyword' => 'ai focus', 'rank_math_description' => 'ai desc']);
+rest_do_request($up);
+ta('ai access: it can set the Rank Math fields on its draft through REST', get_post_meta($np, 'rank_math_focus_keyword', true) === 'ai focus' && get_post_meta($np, 'rank_math_description', true) === 'ai desc');
+Closure::bind(function () { self::$app_user = 0; }, null, SGAP_AI_Access::class)(); // a new request: nothing authenticated by key yet
+ta('ai access: a cookie for the AI user is ignored, only its application password signs it in', apply_filters('determine_current_user', $ai) === false);
+wp_set_current_user(0); wp_set_current_user(1); wp_update_post(['ID' => $np, 'post_status' => 'publish']); wp_set_current_user(0);
+$pub = rest_do_request(new WP_REST_Request('GET', '/wp/v2/posts/' . $np));
+ta('ai access: anonymous visitors do not see the focus keyword', $pub->get_status() === 200 && !isset($pub->get_data()['meta']['rank_math_focus_keyword']), $pub->get_data()['meta'] ?? null);
 wp_set_current_user(1);
 $oa = rest_do_request(new WP_REST_Request('GET', '/sgap/v1/openapi'));
 ta('ai access: the OpenAPI schema is served for ChatGPT', $oa->get_status() === 200 && ($oa->get_data()['paths']['/wp/v2/posts']['post']['operationId'] ?? '') === 'createPost');

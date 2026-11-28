@@ -17,15 +17,15 @@ Noterne er skrevet ud fra commit-historikken og de dokumenter der hører til hve
 ### Tilføjet
 - Ny side *Steamgears Autopilot → AI access*: vælg AI, rolle (redaktør eller forfatter, aldrig administrator) og om den må udgive. Pluginnet opretter brugeren `ai-chatgpt` (osv.) og en applikationsadgangskode, der vises én gang sammen med den færdige *Basic*-nøgle til ChatGPT. En ny nøgle erstatter den gamle, og *Close access* sletter nøglen og fjerner rollen med ét klik.
 - `GET /sgap/v1/openapi`: et OpenAPI 3.1-skema til ChatGPT Actions (læs og skriv indlæg og sider, kategorier og tags, Rank Math-titel, -beskrivelse og -fokussøgeord). Alle handlinger er markeret `x-openai-isConsequential: false`, så ChatGPT tilbyder *Always allow* i stedet for at spørge før hvert kald. Der er ingen slette-handling.
-- Rank Maths tre SEO-felter kan læses og skrives i posts-REST'et af brugere, der kan redigere indlæg (ikke af anonyme besøgende).
+- Rank Maths tre SEO-felter kan læses og skrives i posts-REST'et af brugere, der kan redigere indlægget; for alle andre fjernes de fra svaret, så anonyme besøgende ikke ser fokussøgeordene.
 
 ### Sikkerhed (håndhævet af sitet)
-- AI-brugeren kan ikke logge ind i wp-admin, og har aldrig `unfiltered_html`, indstillinger, plugins, temaer eller brugere, uanset rolle. Et script i indholdet bliver derfor renset væk.
+- AI-brugeren kan ikke logge ind i wp-admin: login-formularen afviser den, en login-cookie for den ignoreres (den logges kun ind med sin applikationsadgangskode), og den kan ikke rette sin egen bruger (ny adgangskode, e-mail eller rolle via `/wp/v2/users/me`). En ny nøgle og *Close access* afslutter også dens sessioner. Den har aldrig `unfiltered_html`, indstillinger, plugins, temaer eller brugere, uanset rolle. Et script i indholdet bliver derfor renset væk.
 - Uden udgivelsesret bliver nyt indhold kladder (også *planlagt* og *privat*). Indlæg, der allerede er live, kan stadig rettes og forbliver live.
 - En eksisterende bruger med samme navn, som ikke er en AI-bruger, bliver aldrig overtaget. Hvert REST-kald logges (de nyeste 200) og vises på siden.
 
 ### Målt
-- 15 nye smoke-checks (1 655 PASS / 0 FAIL) og et forløb i `plugins/tests/automation.php` mod rigtig WordPress (oprettelse, ny nøgle, login, rettigheder, kladder, log, skema, lukning). En rigtig Custom GPT er ikke forbundet.
+- 20 nye smoke-checks (1 660 PASS / 0 FAIL) og et forløb i `plugins/tests/automation.php` mod rigtig WordPress (oprettelse, ny nøgle, login, rettigheder, kladder, log, skema, lukning). En rigtig Custom GPT er ikke forbundet.
 
 ## 7.93.2 — 2026-11-28
 

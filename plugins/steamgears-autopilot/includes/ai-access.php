@@ -8,8 +8,9 @@
  *   - its own WordPress user (ai-chatgpt, ai-claude, ...) with a role the owner picks: editor or
  *     author, never administrator, so plugins, users, settings and code stay out of reach;
  *   - one application password, shown once. Creating a new key deletes the old one;
- *   - no wp-admin login: the user's normal password is random and refused at the login form, so
- *     the key only works through the REST API;
+ *   - no wp-admin login: the user's normal password is random and refused at the login form, a
+ *     login cookie for it is ignored (it is only signed in by its application password), and it
+ *     cannot edit its own user (no new password, e-mail or role through /wp/v2/users/me);
  *   - new content as drafts only, unless the owner allows publishing for that client;
  *   - no raw HTML/scripts (unfiltered_html), users, plugins, themes or settings, even as editor;
  *   - a log of every REST call it makes (the newest 200).
@@ -51,8 +52,13 @@ class SGAP_AI_Access {
         add_action('admin_post_sgap_ai_access_create', [__CLASS__, 'handle_create']);
         add_action('admin_post_sgap_ai_access_revoke', [__CLASS__, 'handle_revoke']);
         add_action('rest_api_init', [__CLASS__, 'routes']);
-        add_action('rest_api_init', [__CLASS__, 'register_seo_meta'], 5);
+        add_action('init', [__CLASS__, 'register_seo_meta'], 20);
+        add_filter('rest_prepare_post', [__CLASS__, 'hide_seo_meta'], 10, 3);
+        add_filter('rest_prepare_page', [__CLASS__, 'hide_seo_meta'], 10, 3);
         add_filter('wp_authenticate_user', [__CLASS__, 'block_password_login'], 30, 2);
+        add_action('application_password_did_authenticate', [__CLASS__, 'note_app_password'], 10, 1);
+        add_filter('determine_current_user', [__CLASS__, 'only_app_password'], 99);
+        add_filter('map_meta_cap', [__CLASS__, 'no_self_edit'], 10, 4);
         add_filter('wp_insert_post_data', [__CLASS__, 'drafts_only'], 20, 2);
         add_filter('rest_request_after_callbacks', [__CLASS__, 'log_request'], 99, 3);
         add_filter('user_has_cap', [__CLASS__, 'limit_caps'], 99, 4);
@@ -135,6 +141,7 @@ class SGAP_AI_Access {
         update_user_meta($uid, self::META_CREATED, time());
         delete_user_meta($uid, self::META_REVOKED);
         WP_Application_Passwords::delete_all_application_passwords($uid);
+        self::end_sessions($uid);
         $made = WP_Application_Passwords::create_new_application_password($uid, ['name' => 'Steamgears AI access — ' . $label]);
         if (is_wp_error($made)) {
             return $made;
@@ -152,8 +159,15 @@ class SGAP_AI_Access {
             WP_Application_Passwords::delete_all_application_passwords($user_id);
         }
         (new WP_User($user_id))->set_role('');
+        self::end_sessions($user_id);
         update_user_meta($user_id, self::META_REVOKED, time());
         return true;
+    }
+
+    private static function end_sessions(int $user_id): void {
+        if (class_exists('WP_Session_Tokens')) {
+            WP_Session_Tokens::get_instance($user_id)->destroy_all();
+        }
     }
 
     /** The AI users for the page: who, role, publishing, key and last use. */
@@ -181,6 +195,36 @@ class SGAP_AI_Access {
             ];
         }
         return $out;
+    }
+
+    /** The user id that this request authenticated with an application password (0 = none). */
+    private static $app_user = 0;
+
+    public static function note_app_password($user): void {
+        if ($user instanceof WP_User) {
+            self::$app_user = (int) $user->ID;
+        }
+    }
+
+    /**
+     * An AI user is only signed in by its application password. A login cookie for it (for example
+     * one WordPress sets after a password change) is ignored, so it never reaches wp-admin and a
+     * new key really replaces the old access.
+     */
+    public static function only_app_password($user_id) {
+        $uid = (int) $user_id;
+        if ($uid > 0 && self::is_client($uid) && self::$app_user !== $uid) {
+            return false;
+        }
+        return $user_id;
+    }
+
+    /** An AI user cannot edit, delete or promote any user, itself included (WordPress lets users edit themselves). */
+    public static function no_self_edit($caps, $cap, $user_id, $args) {
+        if (in_array($cap, ['edit_user', 'delete_user', 'promote_user', 'remove_user'], true) && self::is_client((int) $user_id)) {
+            return ['do_not_allow'];
+        }
+        return $caps;
     }
 
     /** The AI user cannot sign in at wp-login.php: its key only works through the REST API. */
@@ -242,11 +286,12 @@ class SGAP_AI_Access {
 
     /**
      * Rank Math's title, description and focus keyword in the posts REST API, so an AI client can
-     * set them on its drafts. Only registered for a user who can edit posts: anonymous visitors do
-     * not see the focus keywords.
+     * set them on its drafts. Registered for everyone (the REST user is not known yet when routes
+     * are built); writing needs edit_post, and hide_seo_meta() removes them from the answer for
+     * anyone who cannot edit the post, so anonymous visitors do not see the focus keywords.
      */
     public static function register_seo_meta(): void {
-        if (!function_exists('register_post_meta') || !current_user_can('edit_posts')) {
+        if (!function_exists('register_post_meta')) {
             return;
         }
         foreach (['post', 'page'] as $type) {
@@ -262,6 +307,26 @@ class SGAP_AI_Access {
                 ]);
             }
         }
+    }
+
+    /** Removes the SEO fields from a REST answer for someone who cannot edit the post. Pure on the array. */
+    public static function strip_seo(array $data): array {
+        if (isset($data['meta']) && is_array($data['meta'])) {
+            foreach (self::SEO_META as $key) {
+                unset($data['meta'][$key]);
+            }
+        }
+        return $data;
+    }
+
+    public static function hide_seo_meta($response, $post, $request) {
+        if (is_object($response) && method_exists($response, 'get_data') && is_object($post) && !current_user_can('edit_post', (int) $post->ID)) {
+            $data = $response->get_data();
+            if (is_array($data)) {
+                $response->set_data(self::strip_seo($data));
+            }
+        }
+        return $response;
     }
 
     public static function routes(): void {
